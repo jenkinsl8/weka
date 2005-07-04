@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.32.2.1 $
  */
 public class Attribute implements Copyable, Serializable {
 

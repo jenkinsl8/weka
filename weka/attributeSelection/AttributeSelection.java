@@ -33,7 +33,9 @@ import java.beans.PropertyDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
+import java.beans.Beans;
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /** 
  * Attribute selection class. Takes the name of a search class and
@@ -79,7 +81,7 @@ import java.lang.reflect.Method;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.37 $
+ * @version  $Revision: 1.35.2.1 $
  */
 public class AttributeSelection implements Serializable {
 

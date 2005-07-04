@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.44.2.1 $
  */
 public final class Utils {
 

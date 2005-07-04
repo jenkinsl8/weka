@@ -65,7 +65,7 @@ import weka.core.*;
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class Discretize extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {

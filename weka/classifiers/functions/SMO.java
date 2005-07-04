@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.55 $ */
+ * @version $Revision: 1.53.2.2 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**

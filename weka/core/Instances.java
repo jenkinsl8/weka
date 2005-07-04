@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $ 
+ * @version $Revision: 1.58.2.2 $ 
  */
 public class Instances implements Serializable {
  

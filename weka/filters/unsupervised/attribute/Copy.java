@@ -45,7 +45,7 @@ import weka.core.*;
  * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Copy extends Filter implements UnsupervisedFilter,
 					    StreamableFilter, OptionHandler {
@@ -259,10 +259,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
   /**
    * Set whether selected columns should be removed or kept. If true the 
    * selected columns are kept and unselected columns are copied. If false
-   * selected columns are copied and unselected columns are kept. <br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
+   * selected columns are copied and unselected columns are kept.
    *
    * @param invert the new invert setting
    */
@@ -300,10 +297,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @param rangeList a string representing the list of attributes.  Since
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
-   * eg: first-3,5,6-last<br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
+   * eg: first-3,5,6-last
    * @exception Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
@@ -316,10 +310,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    *
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
-   * from 0.<br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
+   * from 0.
    * @exception Exception if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {

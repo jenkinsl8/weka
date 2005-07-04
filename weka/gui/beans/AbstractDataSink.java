@@ -29,13 +29,12 @@ import javax.swing.SwingConstants;
 import java.util.Vector;
 import java.awt.*;
 import java.io.Serializable;
-import java.beans.EventSetDescriptor;
 
 /**
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -123,18 +122,6 @@ public abstract class AbstractDataSink extends JPanel
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultDataSink.gif",
 		       BeanVisual.ICON_PATH+"DefaultDataSink_animated.gif");
-  }
-
-  /**
-   * Returns true if, at this time, 
-   * the object will accept a connection according to the supplied
-   * EventSetDescriptor
-   *
-   * @param esd the EventSetDescriptor
-   * @return true if the object will accept a connection
-   */
-  public boolean connectionAllowed(EventSetDescriptor esd) {
-    return connectionAllowed(esd.getName());
   }
 
   /**

@@ -51,7 +51,7 @@ import weka.classifiers.rules.ZeroR;
  * Add the prediction and target columns to the result file for each fold.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {

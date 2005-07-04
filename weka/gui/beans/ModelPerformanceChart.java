@@ -45,7 +45,7 @@ import java.beans.beancontext.*;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class ModelPerformanceChart extends JPanel
   implements ThresholdDataListener, VisualizableErrorListener, 
@@ -94,9 +94,9 @@ public class ModelPerformanceChart extends JPanel
   protected void appearanceDesign() {
     removeAll();
     m_visual = new BeanVisual("ModelPerformanceChart", 
-			      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
+			      BeanVisual.ICON_PATH+"DefaultDataVisualizer.gif",
 			      BeanVisual.ICON_PATH
-			      +"ModelPerformanceChart_animated.gif");
+			      +"DefaultDataVisualizer_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }

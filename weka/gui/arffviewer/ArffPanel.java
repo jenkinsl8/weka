@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffPanel 
@@ -80,7 +80,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   private JMenuItem             menuItemSetMissingValues;
   private JMenuItem             menuItemReplaceValues;
   private JMenuItem             menuItemRenameAttribute;
-  private JMenuItem             menuItemAttributeAsClass;
   private JMenuItem             menuItemDeleteAttribute;
   private JMenuItem             menuItemDeleteAttributes;
   private JMenuItem             menuItemSortInstances;
@@ -170,9 +169,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     menuItemRenameAttribute = new JMenuItem("Rename attribute...");
     menuItemRenameAttribute.addActionListener(this);
     popupHeader.add(menuItemRenameAttribute);
-    menuItemAttributeAsClass = new JMenuItem("Attribute as class");
-    menuItemAttributeAsClass.addActionListener(this);
-    popupHeader.add(menuItemAttributeAsClass);
     menuItemDeleteAttribute = new JMenuItem("Delete attribute");
     menuItemDeleteAttribute.addActionListener(this);
     popupHeader.add(menuItemDeleteAttribute);
@@ -584,7 +580,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       return;
     
     model = (ArffTableSorter) tableArff.getModel();
-
+    
     // really an attribute column?
     if (model.getAttributeAt(currentCol) == null)
       return;
@@ -646,28 +642,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   }
   
   /**
-   * sets the current attribute as class attribute, i.e. it moves it to the end
-   * of the attributes
-   */
-  public void attributeAsClass() {
-    ArffTableSorter   model;
-    
-    // no column selected?
-    if (currentCol == -1)
-      return;
-    
-    model   = (ArffTableSorter) tableArff.getModel();
-
-    // really an attribute column?
-    if (model.getAttributeAt(currentCol) == null)
-      return;
-    
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    model.attributeAsClassAt(currentCol);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-  
-  /**
    * renames the current attribute
    */
   public void renameAttribute() {
@@ -677,7 +651,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     // no column selected?
     if (currentCol == -1)
       return;
-    
+
     model   = (ArffTableSorter) tableArff.getModel();
 
     // really an attribute column?
@@ -784,8 +758,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       setValues(menuItemReplaceValues);
     else if (o == menuItemRenameAttribute)
       renameAttribute();
-    else if (o == menuItemAttributeAsClass)
-      attributeAsClass();
     else if (o == menuItemDeleteAttribute)
       deleteAttribute();
     else if (o == menuItemDeleteAttributes)

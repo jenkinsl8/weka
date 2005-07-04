@@ -29,7 +29,6 @@ import weka.gui.explorer.Explorer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.arffviewer.ArffViewer;
 
 import java.awt.Panel;
 import java.awt.Button;
@@ -43,7 +42,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -59,7 +57,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.14.2.8 $
  */
 public class GUIChooser extends JFrame {
 
@@ -75,15 +73,6 @@ public class GUIChooser extends JFrame {
   /** Click to open the KnowledgeFlow */
   protected Button m_KnowledgeFlowBut = new Button("KnowledgeFlow");
 
-  /** Click to open the ArffViewer */
-  protected Button m_ArffViewerBut = new Button("ArffViewer");
-
-  /** keeps track of the opened ArffViewer instancs */
-  protected Vector m_ArffViewers = new Vector();
-
-  /** Click to open the LogWindow */
-  protected Button m_LogWindowBut = new Button("Log");
-
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
 
@@ -95,9 +84,6 @@ public class GUIChooser extends JFrame {
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
-
-  /** The frame of the LogWindow */
-  protected static LogWindow m_LogWindow = new LogWindow();
 
   /** The weka image */
   Image m_weka = Toolkit.getDefaultToolkit().
@@ -117,13 +103,11 @@ public class GUIChooser extends JFrame {
     this.getContentPane().setLayout(new BorderLayout());
     JPanel wbuts = new JPanel();
     wbuts.setBorder(BorderFactory.createTitledBorder("GUI"));
-    wbuts.setLayout(new GridLayout(3, 2));
+    wbuts.setLayout(new GridLayout(2, 2));
     wbuts.add(m_SimpleBut);
     wbuts.add(m_ExplorerBut);
     wbuts.add(m_ExperimenterBut);
     wbuts.add(m_KnowledgeFlowBut);
-    wbuts.add(m_ArffViewerBut);
-    wbuts.add(m_LogWindowBut);
     this.getContentPane().add(wbuts, BorderLayout.SOUTH);
     
     JPanel wekaPan = new JPanel();
@@ -252,20 +236,6 @@ public class GUIChooser extends JFrame {
       }
     });
 
-    m_ArffViewerBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        ArffViewer av = new ArffViewer();
-        av.setVisible(true);
-        m_ArffViewers.add(av);
-      }
-    });
-
-    m_LogWindowBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_LogWindow.setVisible(true);
-      }
-    });
-
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent w) {
 	dispose();
@@ -322,7 +292,7 @@ public class GUIChooser extends JFrame {
               this.sleep(4000);
               
               System.gc();
-              
+
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 m_chooser.dispose();
@@ -342,14 +312,6 @@ public class GUIChooser extends JFrame {
                   m_chooser.m_SimpleCLI.dispose();
                   m_chooser.m_SimpleCLI = null;
                 }
-                if (m_chooser.m_ArffViewers.size() > 0) {
-                  for (int i = 0; i < m_chooser.m_ArffViewers.size(); i++) {
-                    ArffViewer av = (ArffViewer) 
-                                        m_chooser.m_ArffViewers.get(i);
-                    av.dispose();
-                  }
-                  m_chooser.m_ArffViewers.clear();
-                }
                 m_chooser = null;
                 System.gc();
 
@@ -357,14 +319,12 @@ public class GUIChooser extends JFrame {
                 m_Memory.stopThreads();
 
                 // display error
-                m_chooser.m_LogWindow.setVisible(true);
-                m_chooser.m_LogWindow.toFront();
                 System.err.println("\ndisplayed message:");
                 m_Memory.showOutOfMemory();
                 System.err.println("\nexiting...");
                 System.exit(-1);
               }
-            } 
+            }
             catch(InterruptedException ex) { 
               ex.printStackTrace(); 
             }

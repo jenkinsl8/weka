@@ -22,12 +22,15 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
  * Abstract unsupervised attribute evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public abstract class UnsupervisedAttributeEvaluator
   extends AttributeEvaluator{

@@ -68,7 +68,7 @@ import weka.experiment.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.3.2.1 $ */
 public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
       
     /** Vector of classifiers that make up the committee/ensemble. */

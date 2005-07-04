@@ -29,7 +29,7 @@ import weka.core.Utils;
  * Simple symbolic probability estimator based on symbol counts.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class DiscreteEstimator implements Estimator {
 
@@ -141,25 +141,22 @@ public class DiscreteEstimator implements Estimator {
    */
   public String toString() {
     
-    StringBuffer result = new StringBuffer("Discrete Estimator. Counts = ");
+    String result = "Discrete Estimator. Counts = ";
     if (m_SumOfCounts > 1) {
       for(int i = 0; i < m_Counts.length; i++) {
-        result.append(" ").append(Utils.doubleToString(m_Counts[i], 2));
+	result += " " + Utils.doubleToString(m_Counts[i], 2);
       }
-      result.append("  (Total = " ).append(Utils.doubleToString(m_SumOfCounts, 2));
-      result.append(")\n"); 
+      result += "  (Total = " + Utils.doubleToString(m_SumOfCounts, 2)
+	+ ")\n"; 
     } else {
       for(int i = 0; i < m_Counts.length; i++) {
-        result.append(" ").append(m_Counts[i]);
+	result += " " + m_Counts[i];
       }
-      result.append("  (Total = ").append(m_SumOfCounts).append(")\n"); 
+      result += "  (Total = " + m_SumOfCounts + ")\n"; 
     }
-    return result.toString();
+    return result;
   }
 
-  
-  
-  
   /**
    * Main method for testing this class.
    *

@@ -52,7 +52,7 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.23.2.1 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 

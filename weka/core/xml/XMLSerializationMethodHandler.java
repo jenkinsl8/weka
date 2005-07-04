@@ -16,8 +16,7 @@
 
 /*
  * XMLSerializationMethodHandler.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
- *
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
@@ -39,7 +38,7 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 public class XMLSerializationMethodHandler {
    /** for storing read methods */

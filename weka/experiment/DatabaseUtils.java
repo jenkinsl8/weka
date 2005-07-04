@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.18.2.2 $
  */
 public class DatabaseUtils implements Serializable {
 

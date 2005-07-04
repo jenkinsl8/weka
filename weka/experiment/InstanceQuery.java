@@ -47,7 +47,7 @@ import weka.core.*;
  * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -115,7 +115,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    */
   public void setOptions (String[] options)
     throws Exception {
-
+    
     String      tmpStr;
     
     setSparseData(Utils.getFlag('S',options));

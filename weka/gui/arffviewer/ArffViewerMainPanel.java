@@ -62,7 +62,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -101,7 +101,6 @@ public class ArffViewerMainPanel
   protected JMenuItem             menuEditDeleteAttribute;
   protected JMenuItem             menuEditDeleteAttributes;
   protected JMenuItem             menuEditRenameAttribute;
-  protected JMenuItem             menuEditAttributeAsClass;
   protected JMenuItem             menuEditDeleteInstance;
   protected JMenuItem             menuEditDeleteInstances;
   protected JMenuItem             menuEditSortInstances;
@@ -197,8 +196,6 @@ public class ArffViewerMainPanel
     menuEditClearSearch.addActionListener(this);
     menuEditRenameAttribute = new JMenuItem("Rename attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditRenameAttribute.addActionListener(this);
-    menuEditAttributeAsClass = new JMenuItem("Attribute as class", ComponentHelper.getImageIcon("empty.gif"));
-    menuEditAttributeAsClass.addActionListener(this);
     menuEditDeleteAttribute = new JMenuItem("Delete attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttribute.addActionListener(this);
     menuEditDeleteAttributes = new JMenuItem("Delete attributes", ComponentHelper.getImageIcon("empty.gif"));
@@ -217,7 +214,6 @@ public class ArffViewerMainPanel
     menuEdit.add(menuEditClearSearch);
     menuEdit.addSeparator();
     menuEdit.add(menuEditRenameAttribute);
-    menuEdit.add(menuEditAttributeAsClass);
     menuEdit.add(menuEditDeleteAttribute);
     menuEdit.add(menuEditDeleteAttributes);
     menuEdit.addSeparator();
@@ -343,7 +339,6 @@ public class ArffViewerMainPanel
     menuEditCopy.setEnabled(fileOpen);
     menuEditSearch.setEnabled(fileOpen);
     menuEditClearSearch.setEnabled(fileOpen);
-    menuEditAttributeAsClass.setEnabled(fileOpen);
     menuEditRenameAttribute.setEnabled(fileOpen);
     menuEditDeleteAttribute.setEnabled(fileOpen);
     menuEditDeleteAttributes.setEnabled(fileOpen);
@@ -753,17 +748,6 @@ public class ArffViewerMainPanel
   }
   
   /**
-   * sets the current selected Attribute as class attribute, i.e. it moves it
-   * to the end of the attributes
-   */
-  public void attributeAsClass() {
-    if (!isPanelSelected())
-      return;
-    
-    getCurrentPanel().attributeAsClass();
-  }
-  
-  /**
    * deletes the current selected Attribute or several chosen ones
    */
   public void deleteAttribute(boolean multiple) {
@@ -916,8 +900,6 @@ public class ArffViewerMainPanel
       deleteAttribute(true);
     else if (o == menuEditRenameAttribute)
       renameAttribute();
-    else if (o == menuEditAttributeAsClass)
-      attributeAsClass();
     else if (o == menuEditDeleteInstance)
       deleteInstance(false);
     else if (o == menuEditDeleteInstances)

@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.supervised.attribute.Discretize;
@@ -37,7 +38,7 @@ import  weka.filters.Filter;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15 $
  */
 public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator

@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 

@@ -57,7 +57,7 @@ import java.util.Vector;
  * @see StringCompare
  * @author <a href="mailto:daniel@satlive.org">Daniel Le Berre</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.4 $
  */
 public class RTSI {
   /** whether to output some debug information */

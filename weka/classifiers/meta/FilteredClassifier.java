@@ -52,7 +52,7 @@ import weka.core.Drawable;
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.20.2.1 $
  */
 public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 

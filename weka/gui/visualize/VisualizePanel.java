@@ -100,7 +100,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class VisualizePanel extends PrintablePanel {
 
