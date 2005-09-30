@@ -57,7 +57,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -241,7 +241,7 @@ public class XMLBeans
     m_BeanContextSupport = context;
     setDataType(datatype);
   }
-  
+
   /**
    * sets what kind of data is to be read/written
    * @param value       the type of data
@@ -326,7 +326,7 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
-    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");    
+    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
@@ -395,7 +395,7 @@ public class XMLBeans
       }
     }
   }
-  
+
   /**
    * enables derived classes to due some pre-processing on the objects, that's
    * about to be serialized. Right now it only returns the object.
@@ -807,7 +807,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -886,7 +886,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -965,7 +965,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1044,7 +1044,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1118,7 +1118,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1188,7 +1188,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1268,7 +1268,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1407,7 +1407,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1583,7 +1583,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
@@ -1686,7 +1686,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
@@ -1766,7 +1766,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result       = null;

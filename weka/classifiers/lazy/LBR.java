@@ -63,7 +63,7 @@ import weka.core.*;
  * Zijian Zheng &amp; G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4.2.2 $
  */
 public class LBR extends Classifier {
 

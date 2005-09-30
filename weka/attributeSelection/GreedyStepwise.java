@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 
@@ -43,7 +44,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {

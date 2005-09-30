@@ -55,7 +55,7 @@ import weka.core.converters.DatabaseSaver;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
@@ -87,12 +87,6 @@ public class SaverCustomizer extends JPanel implements Customizer, CustomizerClo
 		      weka.gui.GenericArrayEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.Classifier.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.NearestNeighbourSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.DistanceFunction.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,

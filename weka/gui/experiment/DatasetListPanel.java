@@ -62,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.13.4.3 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -260,7 +260,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     //    System.err.println("new path : "+relativePath.toString());
     return new File(relativePath.toString());
   }
-
+  
   /**
    * Converts a File's absolute path to a path relative to the user
    * (ie start) directory. Includes an additional workaround for Cygwin, which

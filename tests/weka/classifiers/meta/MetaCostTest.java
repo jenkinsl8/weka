@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
  * java weka.classifiers.meta.MetaCostTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class MetaCostTest extends AbstractClassifierTest {
 
@@ -55,7 +55,7 @@ public class MetaCostTest extends AbstractClassifierTest {
     catch (Exception e) {
       e.printStackTrace();
     }
-    
+
     return cl;
   }
 

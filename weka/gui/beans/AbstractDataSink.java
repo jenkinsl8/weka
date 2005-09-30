@@ -35,7 +35,7 @@ import java.beans.EventSetDescriptor;
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Serializable

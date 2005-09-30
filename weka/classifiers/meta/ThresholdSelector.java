@@ -88,7 +88,7 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.30.2.2 $ 
  */
 public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {

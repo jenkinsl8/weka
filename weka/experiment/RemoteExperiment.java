@@ -105,7 +105,7 @@ import java.io.BufferedOutputStream;
  * file. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.2.2 $
  */
 public class RemoteExperiment extends Experiment {
 

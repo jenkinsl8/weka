@@ -78,7 +78,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.3 $
 */
 
 public class Matrix 
@@ -1362,7 +1362,7 @@ public class Matrix
 
     return text.toString();
   } 
-
+  
   /**
    * converts the Matrix into a single line Matlab string: matrix is enclosed 
    * by parentheses, rows are separated by semicolon and single cells by

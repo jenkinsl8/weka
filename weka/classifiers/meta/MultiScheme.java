@@ -52,7 +52,7 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 

@@ -41,7 +41,7 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class XMLSerializationMethodHandler {
    /** for storing read methods */

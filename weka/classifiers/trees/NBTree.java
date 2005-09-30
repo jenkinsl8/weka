@@ -36,9 +36,7 @@ import weka.classifiers.*;
  * Ron Kohavi (1996). Scaling up the accuracy of naive-Bayes classifiers:
  * a decision tree hybrid. <i>Proceedings of the Second International
  * Conference on Knowledge Discovery and Data Mining</i>.</p>
- *
- * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class NBTree extends Classifier 
   implements WeightedInstancesHandler, Drawable, Summarizable,

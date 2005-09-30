@@ -52,7 +52,7 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
 public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */

@@ -24,13 +24,7 @@ package weka.classifiers;
 
 import java.util.*;
 import java.io.*;
-import weka.classifiers.xml.XMLClassifier;
-import weka.classifiers.evaluation.NominalPrediction;
-import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.*;
-import weka.core.xml.KOML;
-import weka.core.xml.XMLOptions;
-import weka.core.xml.XMLSerialization;
 import weka.estimators.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -62,12 +56,10 @@ import java.util.zip.GZIPOutputStream;
  * The name of a file containing a cost matrix. <p>
  *
  * -l filename <br>
- * Loads classifier from the given file. In case the filename ends with ".xml" 
- * the options are loaded from XML. <p>
+ * Loads classifier from the given file. <p>
  *
  * -d filename <br>
- * Saves classifier built from the training data into the given file. In case 
- * the filename ends with ".xml" the options are saved XML, not the model. <p>
+ * Saves classifier built from the training data into the given file. <p>
  *
  * -v <br>
  * Outputs no statistics for the training data. <p>
@@ -93,9 +85,6 @@ import java.util.zip.GZIPOutputStream;
  * Only for classifiers that implement "Graphable." Outputs
  * the graph representation of the classifier (and nothing
  * else). <p>
- * 
- * -xml filename | xml-string <br>
- * Retrieves the options from the XML-data instead of the command line. <p>
  *
  * ------------------------------------------------------------------- <p>
  *
@@ -128,8 +117,8 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.60 $
- */
+ * @version  $Revision: 1.53.2.2 $
+  */
 public class Evaluation implements Summarizable {
 
   /** The number of classes. */
@@ -137,7 +126,7 @@ public class Evaluation implements Summarizable {
 
   /** The number of folds for a cross-validation. */
   protected int m_NumFolds;
-
+ 
   /** The weight of all incorrectly classified instances. */
   protected double m_Incorrect;
 
@@ -161,7 +150,7 @@ public class Evaluation implements Summarizable {
 
   /** Is the class nominal or numeric? */
   protected boolean m_ClassIsNominal;
-
+  
   /** The prior probabilities of the classes */
   protected double [] m_ClassPriors;
 
@@ -176,7 +165,7 @@ public class Evaluation implements Summarizable {
 
   /** Sum of errors. */
   protected double m_SumErr;
-
+  
   /** Sum of absolute errors. */
   protected double m_SumAbsErr;
 
@@ -185,7 +174,7 @@ public class Evaluation implements Summarizable {
 
   /** Sum of class values. */
   protected double m_SumClass;
-
+  
   /** Sum of squared class values. */
   protected double m_SumSqrClass;
 
@@ -236,13 +225,10 @@ public class Evaluation implements Summarizable {
 
   /** Total entropy of prior predictions */
   protected double m_SumPriorEntropy;
-
+  
   /** Total entropy of scheme predictions */
   protected double m_SumSchemeEntropy;
-     
-  /** The list of predictions that have been generated (for computing AUC) */
-  private FastVector m_Predictions;
-
+  
   /**
    * Initializes all the counters for the evaluation.
    *
@@ -251,7 +237,7 @@ public class Evaluation implements Summarizable {
    * @exception Exception if the class is not defined
    */
   public Evaluation(Instances data) throws Exception {
-
+    
     this(data, null);
   }
 
@@ -266,7 +252,7 @@ public class Evaluation implements Summarizable {
    */
   public Evaluation(Instances data, CostMatrix costMatrix) 
        throws Exception {
-
+    
     m_NumClasses = data.numClasses();
     m_NumFolds = 1;
     m_ClassIsNominal = data.classAttribute().isNominal();
@@ -294,26 +280,6 @@ public class Evaluation implements Summarizable {
   }
 
   /**
-   * Returns the area under ROC for those predictions that have been collected
-   * in the evaluateClassifier(Classifier, Instances) method. Returns 
-   * Instance.missingValue() if the area is not available.
-   *
-   * @param classIndex the index of the class to consider as "positive"
-   * @return the area under the ROC curve or not a number
-   */
-  public double areaUnderROC(int classIndex) {
-
-    // Check if any predictions have been collected
-    if (m_Predictions == null) {
-      return Instance.missingValue();
-    } else {
-      ThresholdCurve tc = new ThresholdCurve();
-      Instances result = tc.getCurve(m_Predictions, classIndex);
-      return tc.getROCArea(result);
-    }
-  }
-
-  /**
    * Returns a copy of the confusion matrix.
    *
    * @return a copy of the confusion matrix as a two-dimensional array
@@ -332,10 +298,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Performs a (stratified if class is nominal) cross-validation 
-   * for a classifier on a set of instances. Now performs
-   * a deep copy of the classifier before each call to 
-   * buildClassifier() (just in case the classifier is not
-   * initialized properly).
+   * for a classifier on a set of instances.
    *
    * @param classifier the classifier with any options set.
    * @param data the data on which the cross-validation is to be 
@@ -348,7 +311,7 @@ public class Evaluation implements Summarizable {
   public void crossValidateModel(Classifier classifier,
 				 Instances data, int numFolds, Random random) 
     throws Exception {
-
+    
     // Make a copy of the data we can reorder
     data = new Instances(data);
     data.randomize(random);
@@ -385,7 +348,7 @@ public class Evaluation implements Summarizable {
 				 Instances data, int numFolds,
 				 String[] options, Random random) 
        throws Exception {
-
+    
     crossValidateModel(Classifier.forName(classifierString, options),
 		       data, numFolds, random);
   }
@@ -416,12 +379,10 @@ public class Evaluation implements Summarizable {
    * The name of a file containing a cost matrix. <p>
    *
    * -l filename <br>
-   * Loads classifier from the given file. In case the filename ends with
-   * ".xml" the options are loaded from XML. <p>
+   * Loads classifier from the given file. <p>
    *
    * -d filename <br>
-   * Saves classifier built from the training data into the given file. In case 
-   * the filename ends with ".xml" the options are saved XML, not the model. <p>
+   * Saves classifier built from the training data into the given file. <p>
    *
    * -v <br>
    * Outputs no statistics for the training data. <p>
@@ -448,9 +409,6 @@ public class Evaluation implements Summarizable {
    * the graph representation of the classifier (and nothing
    * else). <p>
    *
-   * -xml filename | xml-string <br>
-   * Retrieves the options from the XML-data instead of the command line. <p>
-   *
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
    * @exception Exception if model could not be evaluated successfully
@@ -471,7 +429,7 @@ public class Evaluation implements Summarizable {
     }
     return evaluateModel(classifier, options);
   }
-
+  
   /**
    * A test method for this class. Just extracts the first command line
    * argument as a classifier class name and calls evaluateModel.
@@ -519,13 +477,11 @@ public class Evaluation implements Summarizable {
    * -m file with cost matrix <br>
    * The name of a file containing a cost matrix. <p>
    *
-   * -l filename <br>
-   * Loads classifier from the given file. In case the filename ends with
-   * ".xml" the options are loaded from XML. <p>
+   * -l name of model input file <br>
+   * Loads classifier from the given file. <p>
    *
-   * -d filename <br>
-   * Saves classifier built from the training data into the given file. In case 
-   * the filename ends with ".xml" the options are saved XML, not the model. <p>
+   * -d name of model output file <br>
+   * Saves classifier built from the training data into the given file. <p>
    *
    * -v <br>
    * Outputs no statistics for the training data. <p>
@@ -550,14 +506,10 @@ public class Evaluation implements Summarizable {
    * the graph representation of the classifier (and nothing
    * else). <p>
    *
-   * -xml filename | xml-string <br>
-   * Retrieves the options from the XML-data instead of the command line. <p>
-   *
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
    * @exception Exception if model could not be evaluated successfully
-   * @return a string describing the results 
-   */
+   * @return a string describing the results */
   public static String evaluateModel(Classifier classifier,
 				     String [] options) throws Exception {
 			      
@@ -573,36 +525,13 @@ public class Evaluation implements Summarizable {
     StringBuffer text = new StringBuffer();
     BufferedReader trainReader = null, testReader = null;
     ObjectInputStream objectInputStream = null;
-    BufferedInputStream xmlInputStream = null;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
     Range attributesToOutput = null;
     long trainTimeStart = 0, trainTimeElapsed = 0,
       testTimeStart = 0, testTimeElapsed = 0;
-    Instances originalTrain = null;
-    String xml = "";
-    String[] optionsTmp = null;
-
+    
     try {
-      // do we get the input from XML instead of normal parameters?
-      xml = Utils.getOption("xml", options);
-      if (!xml.equals(""))
-         options = new XMLOptions(xml).toArray();
-
-      // is the input model only the XML-Options, i.e. w/o built model?
-      optionsTmp = new String[options.length];
-      for (int i = 0; i < options.length; i++)
-         optionsTmp[i] = options[i];
-      if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
-         // load options from serialized data ('-l' is automatically erased!)
-         XMLClassifier xmlserial = new XMLClassifier();
-         Classifier cl = (Classifier) xmlserial.read(Utils.getOption('l', options));
-         // merge options
-         optionsTmp = new String[options.length + cl.getOptions().length];
-         System.arraycopy(cl.getOptions(), 0, optionsTmp, 0, cl.getOptions().length);
-         System.arraycopy(options, 0, optionsTmp, cl.getOptions().length, options.length);
-         options = optionsTmp;
-      }
 
       // Get basic options (options the same for all schemes)
       classIndexString = Utils.getOption('c', options);
@@ -614,20 +543,20 @@ public class Evaluation implements Summarizable {
       objectOutputFileName = Utils.getOption('d', options);
       testFileName = Utils.getOption('T', options);
       if (trainFileName.length() == 0) {
-         if (objectInputFileName.length() == 0) {
-            throw new Exception("No training file and no object "+
-            "input file given.");
-         } 
-         if (testFileName.length() == 0) {
-            throw new Exception("No training file and no test "+
-            "file given.");
-         }
+	if (objectInputFileName.length() == 0) {
+	  throw new Exception("No training file and no object "+
+			      "input file given.");
+	} 
+	if (testFileName.length() == 0) {
+	  throw new Exception("No training file and no test "+
+			      "file given.");
+	}
       } else if ((objectInputFileName.length() != 0) &&
-      ((!(classifier instanceof UpdateableClassifier)) ||
-      (testFileName.length() == 0))) {
-         throw new Exception("Classifier not incremental, or no " +
-         "test file provided: can't "+
-         "use both train and model file.");
+		 ((!(classifier instanceof UpdateableClassifier)) ||
+		 (testFileName.length() == 0))) {
+	throw new Exception("Classifier not incremental, or no " +
+			    "test file provided: can't "+
+			    "use both train and model file.");
       }
       try {
 	if (trainFileName.length() != 0) {
@@ -641,15 +570,7 @@ public class Evaluation implements Summarizable {
           if (objectInputFileName.endsWith(".gz")) {
             is = new GZIPInputStream(is);
           }
-     // load from KOML?
-     if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent()) ) {
-        objectInputStream = new ObjectInputStream(is);
-        xmlInputStream    = null;
-     }
-     else {
-        objectInputStream = null;
-        xmlInputStream    = new BufferedInputStream(is);
-     }
+	  objectInputStream = new ObjectInputStream(is);
 	}
       } catch (Exception e) {
 	throw new Exception("Can't open file " + e.getMessage() + '.');
@@ -707,7 +628,7 @@ public class Evaluation implements Summarizable {
       printGraph = Utils.getFlag('g', options);
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
-
+      
       // Check -p option
       try {
 	attributeRangeString = Utils.getOption('p', options);
@@ -756,27 +677,20 @@ public class Evaluation implements Summarizable {
     // Setup up evaluation objects
     Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
-
+    
     if (objectInputFileName.length() != 0) {
-
+      
       // Load classifier from file
-      if (objectInputStream != null) {
-         classifier = (Classifier) objectInputStream.readObject();
-         objectInputStream.close();
-      }
-      else {
-         // whether KOML is available has already been checked (objectInputStream would null otherwise)!
-         classifier = (Classifier) KOML.read(xmlInputStream);
-         xmlInputStream.close();
-      }
+      classifier = (Classifier) objectInputStream.readObject();
+      objectInputStream.close();
     }
-
+    
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier) &&
 	(testFileName.length() != 0) &&
 	(costMatrix == null) &&
 	(trainFileName.length() != 0)) {
-
+      
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
@@ -795,6 +709,7 @@ public class Evaluation implements Summarizable {
       trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
       trainReader.close();
     } else if (objectInputFileName.length() == 0) {
+      
       // Build classifier in one go
       tempTrain = new Instances(train);
       trainingEvaluation.setPriors(tempTrain);
@@ -807,31 +722,13 @@ public class Evaluation implements Summarizable {
     // Save the classifier if an object output file is provided
     if (objectOutputFileName.length() != 0) {
       OutputStream os = new FileOutputStream(objectOutputFileName);
-      // binary
-      if (!(objectOutputFileName.endsWith(".xml") || (objectOutputFileName.endsWith(".koml") && KOML.isPresent()))) {
-         if (objectOutputFileName.endsWith(".gz")) {
-           os = new GZIPOutputStream(os);
-         }
-         ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
-         objectOutputStream.writeObject(classifier);
-         objectOutputStream.flush();
-         objectOutputStream.close();
+      if (objectOutputFileName.endsWith(".gz")) {
+        os = new GZIPOutputStream(os);
       }
-      // KOML/XML
-      else {
-         BufferedOutputStream xmlOutputStream = new BufferedOutputStream(os);
-         if (objectOutputFileName.endsWith(".xml")) {
-            XMLSerialization xmlSerial = new XMLClassifier();
-            xmlSerial.write(xmlOutputStream, classifier);
-         }
-         else
-         // whether KOML is present has already been checked
-         // if not present -> ".koml" is interpreted as binary - see above
-         if (objectOutputFileName.endsWith(".koml")) {
-            KOML.write(xmlOutputStream, classifier);
-         }
-         xmlOutputStream.close();
-      }
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
+      objectOutputStream.writeObject(classifier);
+      objectOutputStream.flush();
+      objectOutputStream.close();
     }
 
     // If classifier is drawable output string describing graph
@@ -929,19 +826,19 @@ public class Evaluation implements Summarizable {
 
     // Compute proper error estimates
     if (testFileName.length() != 0) {
+
       // Testing is on the supplied test data
       while (test.readInstance(testReader)) {
-
-        testingEvaluation.evaluateModelOnce((Classifier)classifier, 
+	  
+	testingEvaluation.evaluateModelOnce((Classifier)classifier, 
                                             test.instance(0));
-        test.delete(0);
+	test.delete(0);
       }
       testReader.close();
 
       text.append("\n\n" + testingEvaluation.
 		  toSummaryString("=== Error on test data ===\n",
 				  printComplexityStatistics));
-
     } else if (trainFileName.length() != 0) {
 
       // Testing is via cross-validation on training data
@@ -1038,54 +935,16 @@ public class Evaluation implements Summarizable {
    */
   public double[] evaluateModel(Classifier classifier,
 			    Instances data) throws Exception {
-
+    
     double predictions[] = new double[data.numInstances()];
 
-    // Need to be able to collect predictions if appropriate (for AUC)
-
     for (int i = 0; i < data.numInstances(); i++) {
-      predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier, 
-							    data.instance(i));
+      predictions[i] = evaluateModelOnce((Classifier)classifier, 
+                                data.instance(i));
     }
     return predictions;
   }
-
-  /**
-   * Evaluates the classifier on a single instance and records the
-   * prediction (if the class is nominal).
-   *
-   * @param classifier machine learning classifier
-   * @param instance the test instance to be classified
-   * @return the prediction made by the clasifier
-   * @exception Exception if model could not be evaluated 
-   * successfully or the data contains string attributes
-   */
-  public double evaluateModelOnceAndRecordPrediction(Classifier classifier,
-						     Instance instance) throws Exception {
-
-    Instance classMissing = (Instance)instance.copy();
-    double pred = 0;
-    classMissing.setDataset(instance.dataset());
-    classMissing.setClassMissing();
-    if (m_ClassIsNominal) {
-      if (m_Predictions == null) {
-	m_Predictions = new FastVector();
-      }
-      double [] dist = classifier.distributionForInstance(classMissing);
-      pred = Utils.maxIndex(dist);
-      if (dist[(int)pred] <= 0) {
-	pred = Instance.missingValue();
-      }
-      updateStatsForClassifier(dist, instance);
-      m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist, 
-						     instance.weight()));
-    } else {
-      pred = classifier.classifyInstance(classMissing);
-      updateStatsForPredictor(pred, instance);
-    }
-    return pred;
-  }
-
+  
   /**
    * Evaluates the classifier on a single instance.
    *
@@ -1097,7 +956,7 @@ public class Evaluation implements Summarizable {
    */
   public double evaluateModelOnce(Classifier classifier,
 				  Instance instance) throws Exception {
-
+  
     Instance classMissing = (Instance)instance.copy();
     double pred = 0;
     classMissing.setDataset(instance.dataset());
@@ -1150,7 +1009,7 @@ public class Evaluation implements Summarizable {
    */
   public void evaluateModelOnce(double prediction,
 				Instance instance) throws Exception {
-
+    
     if (m_ClassIsNominal) {
       updateStatsForClassifier(makeDistribution(prediction), 
 			       instance);
@@ -1159,17 +1018,6 @@ public class Evaluation implements Summarizable {
     }
   }
 
-  /**
-   * Returns the predictions that have been collected.
-   *
-   * @return a reference to the FastVector containing the predictions
-   * that have been collected. This should be null if no predictions
-   * have been collected (e.g. if the class is numeric).
-   */
-  public FastVector predictions() {
-
-    return m_Predictions;
-  }
 
   /**
    * Wraps a static classifier in enough source to test using the weka
@@ -1183,7 +1031,7 @@ public class Evaluation implements Summarizable {
   protected static String wekaStaticWrapper(Sourcable classifier, 
                                             String className) 
     throws Exception {
-
+    
     //String className = "StaticClassifier";
     String staticClassifier = classifier.toSource(className);
     return "package weka.classifiers;\n"
@@ -1219,7 +1067,7 @@ public class Evaluation implements Summarizable {
    * @return the number of test instances with known class
    */
   public final double numInstances() {
-
+    
     return m_WithClass;
   }
 
@@ -1257,7 +1105,7 @@ public class Evaluation implements Summarizable {
 
     return m_TotalCost;
   }
-
+  
   /**
    * Gets the average cost, that is, total cost of misclassifications
    * (incorrect plus unclassified) over the total number of instances.
@@ -1277,7 +1125,7 @@ public class Evaluation implements Summarizable {
    * @return the number of correctly classified instances
    */
   public final double correct() {
-
+    
     return m_Correct;
   }
 
@@ -1288,10 +1136,10 @@ public class Evaluation implements Summarizable {
    * @return the percent of correctly classified instances (between 0 and 100)
    */
   public final double pctCorrect() {
-
+    
     return 100 * m_Correct / m_WithClass;
   }
-
+  
   /**
    * Gets the number of instances not classified (that is, for
    * which no prediction was made by the classifier). (Actually the sum
@@ -1300,7 +1148,7 @@ public class Evaluation implements Summarizable {
    * @return the number of unclassified instances
    */
   public final double unclassified() {
-
+    
     return m_Unclassified;
   }
 
@@ -1311,7 +1159,7 @@ public class Evaluation implements Summarizable {
    * @return the percent of unclassified instances (between 0 and 100)
    */
   public final double pctUnclassified() {
-
+    
     return 100 * m_Unclassified / m_WithClass;
   }
 
@@ -1341,7 +1189,7 @@ public class Evaluation implements Summarizable {
    * @return the value of the kappa statistic
    */
   public final double kappa() {
-
+    
 
     double[] sumRows = new double[m_ConfusionMatrix.length];
     double[] sumColumns = new double[m_ConfusionMatrix.length];
@@ -1432,7 +1280,7 @@ public class Evaluation implements Summarizable {
 
     return 100 * meanAbsoluteError() / meanPriorAbsoluteError();
   }
-
+  
   /**
    * Returns the root mean squared error.
    *
@@ -1442,7 +1290,7 @@ public class Evaluation implements Summarizable {
 
     return Math.sqrt(m_SumSqrErr / m_WithClass);
   }
-
+  
   /**
    * Returns the root mean prior squared error.
    *
@@ -1452,7 +1300,7 @@ public class Evaluation implements Summarizable {
 
     return Math.sqrt(m_SumPriorSqrErr / m_WithClass);
   }
-
+  
   /**
    * Returns the root relative squared error if the class is numeric.
    *
@@ -1594,7 +1442,7 @@ public class Evaluation implements Summarizable {
    * @return the SF per instance
    */
   public final double SFMeanEntropyGain() {
-
+    
     return (m_SumPriorEntropy - m_SumSchemeEntropy) / m_WithClass;
   }
 
@@ -1646,7 +1494,7 @@ public class Evaluation implements Summarizable {
    * returned as well
    */
   public String toSummaryString(boolean printComplexityStatistics) {
-
+    
     return toSummaryString("=== Summary ===\n", printComplexityStatistics);
   }
 
@@ -1664,7 +1512,7 @@ public class Evaluation implements Summarizable {
    */
   public String toSummaryString(String title, 
 				boolean printComplexityStatistics) { 
-
+    
     double mae, mad = 0;
     StringBuffer text = new StringBuffer();
 
@@ -1753,10 +1601,10 @@ public class Evaluation implements Summarizable {
       // here
       System.err.println("Arggh - Must be a bug in Evaluation class");
     }
-
+   
     return text.toString(); 
   }
-
+  
   /**
    * Calls toMatrixString() with a default title.
    *
@@ -1859,7 +1707,7 @@ public class Evaluation implements Summarizable {
     StringBuffer text = new StringBuffer(title 
 					 + "\nTP Rate   FP Rate"
                                          + "   Precision   Recall"
-                                         + "  F-Measure   ROC Area  Class\n");
+                                         + "  F-Measure   Class\n");
     for(int i = 0; i < m_NumClasses; i++) {
       text.append(Utils.doubleToString(truePositiveRate(i), 7, 3))
         .append("   ");
@@ -1871,14 +1719,6 @@ public class Evaluation implements Summarizable {
         .append("   ");
       text.append(Utils.doubleToString(fMeasure(i), 7, 3))
         .append("    ");
-      double rocVal = areaUnderROC(i);
-      if (Instance.isMissingValue(rocVal)) {
-	text.append("  ?    ")
-	  .append("    ");
-      } else {
-	text.append(Utils.doubleToString(rocVal, 7, 3))
-	  .append("    ");
-      }
       text.append(m_ClassNames[i]).append('\n');
     }
     return text.toString();
@@ -2271,7 +2111,7 @@ public class Evaluation implements Summarizable {
 	}
       }
     }
-
+    
     return true;
   }
 
@@ -2392,11 +2232,9 @@ public class Evaluation implements Summarizable {
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText.append("-l <name of input file>\n");
-    optionsText.append("\tSets model input file. In case the filename ends with '.xml',\n");
-    optionsText.append("\tthe options are loaded from the XML file.\n");
+    optionsText.append("\tSets model input file.\n");
     optionsText.append("-d <name of output file>\n");
-    optionsText.append("\tSets model output file. In case the filename ends with '.xml',\n");
-    optionsText.append("\tonly the options are saved to the XML file, not the model.\n");
+    optionsText.append("\tSets model output file.\n");
     optionsText.append("-v\n");
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
@@ -2422,9 +2260,6 @@ public class Evaluation implements Summarizable {
       optionsText.append("\tOnly outputs the graph representation"
 			 + " of the classifier.\n");
     }
-    optionsText.append("-xml filename | xml-string\n");
-    optionsText.append("\tRetrieves the options from the XML-data instead of the " 
-                        + "command line.\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
@@ -2449,10 +2284,10 @@ public class Evaluation implements Summarizable {
    * @return the formatted integer as a string
    */
   protected String num2ShortID(int num,char [] IDChars,int IDWidth) {
-
+    
     char ID [] = new char [IDWidth];
     int i;
-
+    
     for(i = IDWidth - 1; i >=0; i--) {
       ID[i] = IDChars[num % IDChars.length];
       num = num / IDChars.length - 1;
@@ -2627,7 +2462,7 @@ public class Evaluation implements Summarizable {
       updateNumericScores(makeDistribution(predictedValue),
 			  makeDistribution(instance.classValue()),
 			  instance.weight());
-
+     
     } else
       m_MissingClass += instance.weight();
   }
@@ -2722,7 +2557,7 @@ public class Evaluation implements Summarizable {
    * training class values that have been seen so far.
    */
   protected void setNumericPriorsFromBuffer() {
-
+    
     double numPrecision = 0.01; // Default value
     if (m_NumTrainClassVals > 1) {
       double [] temp = new double [m_NumTrainClassVals];
@@ -2755,3 +2590,7 @@ public class Evaluation implements Summarizable {
   }
 
 }
+
+
+
+

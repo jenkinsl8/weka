@@ -33,7 +33,7 @@ import java.io.*;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class Version implements Comparable {
   

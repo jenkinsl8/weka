@@ -82,7 +82,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.18.2.3 $
  */
 public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {

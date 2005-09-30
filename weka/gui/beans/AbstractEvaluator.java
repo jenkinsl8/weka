@@ -39,7 +39,7 @@ import weka.gui.Logger;
  * classifier, clusterers etc.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Visible

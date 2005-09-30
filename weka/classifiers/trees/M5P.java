@@ -46,7 +46,7 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 
 public class M5P extends M5Base 

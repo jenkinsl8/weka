@@ -2,7 +2,7 @@
 # "simple" indicates that this property is only available for simple
 # experiments.
 #
-# $Revision: 1.1 $
+# $Revision: 1.1.2.2 $
 
 # the default extension in the file-dialog
 # possible values: 
@@ -47,12 +47,6 @@ InitialDatasetsDirectory=
 # whether to use relative paths
 UseRelativePaths=false
 
-# the default tester to use
-# possible values (at least):
-#   Paired T-Tester (corrected)
-#   Paired T-Tester
-Tester=Paired T-Tester (corrected)
-
 # the row selection (1-based index/indices)
 Row=1
 
@@ -66,9 +60,6 @@ ComparisonField=percent_correct
 # the default significance
 Significance=0.05
 
-# the default sorting
-Sorting=
-
 # whether stddevs are displayed by default
 ShowStdDev=false
 
@@ -77,10 +68,4 @@ MeanPrecision=2
 
 # the default precision for the stdev
 StdDevPrecision=2
-
-# the classname of the ResultMatrix, reponsible for the default output format
-OutputFormat=weka.experiment.ResultMatrixPlainText
-
-# whether filter classnames are removed by default
-RemoveFilterClassnames=false
 

@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1.2.6 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -240,7 +240,7 @@ public class GenericPropertiesCreator {
       e.printStackTrace();
     }
   }
-
+  
   /**
    * checks whether the classname is a valid one, i.e., from a public class
    *

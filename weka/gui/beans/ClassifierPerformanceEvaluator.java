@@ -48,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.3 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -93,6 +93,7 @@ public class ClassifierPerformanceEvaluator
   // Plottable Instances with predictions appended
   private Instances m_predInstances = null;
   // Actual predictions
+  private FastVector m_preds = null;
   private FastVector m_plotShape = null;
   private FastVector m_plotSize = null;
 
@@ -118,6 +119,7 @@ public class ClassifierPerformanceEvaluator
 		  m_predInstances = 
 		    weka.gui.explorer.ClassifierPanel.
 		    setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
+		  m_preds = new FastVector();
 		  m_plotShape = new FastVector();
 		  m_plotSize = new FastVector();
 		}
@@ -136,7 +138,8 @@ public class ClassifierPerformanceEvaluator
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
 		    weka.gui.explorer.ClassifierPanel.
 		    processClassifierPrediction(temp, ce.getClassifier(),
-						m_eval, m_predInstances, m_plotShape,
+						m_eval, m_preds,
+						m_predInstances, m_plotShape,
 						m_plotSize);
 		  }
 		}
@@ -184,7 +187,7 @@ public class ClassifierPerformanceEvaluator
 
 		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
 		    ThresholdCurve tc = new ThresholdCurve();
-		    Instances result = tc.getCurve(m_eval.predictions(), 0);
+		    Instances result = tc.getCurve(m_preds, 0);
 		    result.
 		      setRelationName(ce.getTestSet().getDataSet().relationName());
 		    PlotData2D pd = new PlotData2D(result);

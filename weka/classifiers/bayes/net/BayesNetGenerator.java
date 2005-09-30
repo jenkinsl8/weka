@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4.2.2 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -430,7 +430,7 @@ public class BayesNetGenerator extends BayesNet {
     	try {
 		if ( (Argv.length == 0) || (Utils.getFlag('h', Argv)) ) {
                         printOptions(b);
-                        return;
+			return;
 		}
 	    	b.setOptions(Argv);
 	    	
@@ -441,7 +441,7 @@ public class BayesNetGenerator extends BayesNet {
 	    	System.out.println(b.toString());
     	} catch (Exception e) {
     		e.printStackTrace();
-    		printOptions(b);
+                printOptions(b);
     	}
     } // main
     

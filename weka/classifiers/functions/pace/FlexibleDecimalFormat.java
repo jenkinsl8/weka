@@ -27,7 +27,7 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class FlexibleDecimalFormat extends DecimalFormat {
 

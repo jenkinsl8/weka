@@ -71,7 +71,7 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.30.2.3 $
  */
 public class EM
   extends DensityBasedClusterer

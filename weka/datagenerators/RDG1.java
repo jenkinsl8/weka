@@ -1,4 +1,7 @@
 /*
+ *    RDG1.java
+ *    Copyright (C) 2000 Gabi Schmidberger.
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -14,27 +17,20 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * RDG1.java
- * Copyright (C) 2000 Gabi Schmidberger.
- *
- */
-
-package weka.datagenerators.classifiers.classification;
+package weka.datagenerators;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.Utils;
-import weka.datagenerators.ClassificationGenerator;
-import weka.datagenerators.DataGenerator;
-import weka.datagenerators.Test;
 
 import java.io.Serializable;
-import java.util.Enumeration;
+
 import java.util.Random;
+import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
@@ -42,104 +38,80 @@ import java.util.Vector;
  * The decision list consists of rules.
  * Instances are generated randomly one by one. If decision list fails
  * to classify the current instance, a new rule according to this current
- * instance is generated and added to the decision list.<p/>
+ * instance is generated and added to the decision list.<p>
  *
  * The option -V switches on voting, which means that at the end
  * of the generation all instances are
- * reclassified to the class value that is supported by the most rules.<p/>
+ * reclassified to the class value that is supported by the most rules.<p>
  *
  * This data generator can generate 'boolean' attributes (= nominal with
  * the values {true, false}) and numeric attributes. The rules can be
- * 'A' or 'NOT A' for boolean values and 'B &lt; random_value' or
- * 'B &gt;= random_value' for numeric values.<p/> 
+ * 'A' or 'NOT A' for boolean values and 'B < random_value' or
+ * 'B >= random_value' for numeric values.<p> 
  *
- * Valid options are: <p/>
+ * Valid options are:<p>
  *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
+ * -R num <br>
+ * The maximum number of attributes chosen to form a rule (default 10).<p>
  *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
+ * -M num <br>
+ * The minimum number of attributes chosen to form a rule (default 1).<p>
  *
- * -a num <br/>
- *  Number of attributes. <p/>
+ * -I num <br>
+ * The number of irrelevant attributes (default 0).<p>
  *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
+ * -N num <br>
+ * The number of numeric attributes (default 0).<p>
  *
- * -c num <br/>
- *  Number of classes - NOT used in this generator. <p/>
+ * -S seed <br>
+ * Random number seed for random function used (default 1). <p>
  *
- * -n num <br/>
- *  Number of examples. <p/>
- * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
+ * -V <br>
+ * Flag to use voting. <p>
  *
- * -R num <br/>
- * The maximum number of attributes chosen to form a rule.<p/>
+ * Following an example of a generated dataset: <br>
  *
- * -M num <br/>
- * The minimum number of attributes chosen to form a rule.<p/>
- *
- * -I num <br/>
- * The number of irrelevant attributes.<p/>
- *
- * -N num <br/>
- * The number of numeric attributes.<p/>
- *
- * -V <br/>
- * Flag to use voting. <p/>
- *
- * Following an example of a generated dataset: <br/>
- *
- * %<br/>
- * % weka.datagenerators.RDG1 -r expl -a 2 -c 3 -n 4 -N 1 -I 0 -M 2 -R 10 -S 2<br/>
- * %<br/>
- * relation expl<br/>
- *<br/>
- * attribute a0 {false,true}<br/>
- * attribute a1 numeric<br/>
- * attribute class {c0,c1,c2}<br/>
- *<br/>
- * data<br/>
- *<br/>
- * true,0.496823,c0<br/>
- * false,0.743158,c1<br/>
- * false,0.408285,c1<br/>
- * false,0.993687,c2<br/>
- * %<br/>
- * % Number of attributes chosen as irrelevant = 0<br/>
- * %<br/>
- * % DECISIONLIST (number of rules = 3):<br/>
- * % RULE 0:   c0 := a1 &lt; 0.986, a0<br/>
- * % RULE 1:   c1 := a1 &lt; 0.95, not(a0)<br/>
- * % RULE 2:   c2 := not(a0), a1 &gt;= 0.562<br/>
- *<p/>
- *
+ * %<br>
+ * % weka.datagenerators.RDG1 -r expl -a 2 -c 3 -n 4 -N 1 -I 0 -M 2 -R 10 -S 2<br>
+ * %<br>
+ * relation expl<br>
+ *<br>
+ * attribute a0 {false,true}<br>
+ * attribute a1 numeric<br>
+ * attribute class {c0,c1,c2}<br>
+ *<br>
+ * data<br>
+ *<br>
+ * true,0.496823,c0<br>
+ * false,0.743158,c1<br>
+ * false,0.408285,c1<br>
+ * false,0.993687,c2<br>
+ * %<br>
+ * % Number of attributes chosen as irrelevant = 0<br>
+ * %<br>
+ * % DECISIONLIST (number of rules = 3):<br>
+ * % RULE 0:   c0 := a1 < 0.986, a0<br>
+ * % RULE 1:   c1 := a1 < 0.95, not(a0)<br>
+ * % RULE 2:   c2 := not(a0), a1 >= 0.562<br>
+ *<p>
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
- */
-public class RDG1 
-  extends ClassificationGenerator {
+ * @version $Revision: 1.2.2.1 $ 
+ **/
+public class RDG1 extends Generator implements OptionHandler,
+			                       Serializable {
 
   /*
    * class to represent decisionlist
    */
-  private class RuleList 
-    implements Serializable {
+  private class RuleList implements Serializable {
 
-    /** rule list */
+    /**@serial rule list */
     private FastVector m_RuleList = null;
     
-    /** class */
+    /**@serial class */
     double m_ClassValue = 0.0;
 
-    public double getClassValue() { 
-      return m_ClassValue; 
-    }
+    public double getClassValue() { return m_ClassValue; }
     
     public void setClassValue(double newClassValue) {
       m_ClassValue = newClassValue;
@@ -180,47 +152,39 @@ public class RDG1
     
   } /*end class RuleList ******/
 
-  /** Number of attribute the dataset should have */
-  protected int m_NumAttributes;
-
-  /** Number of Classes the dataset should have */
-  protected int m_NumClasses;
-
-  /** maximum rule size*/ 
-  private int m_MaxRuleSize;
+  /**@serial maximum rule size*/ 
+  private int m_MaxRuleSize = 10;
   
-  /** minimum rule size*/ 
-  private int m_MinRuleSize;
+  /**@serial minimum rule size*/ 
+  private int m_MinRuleSize = 1;
   
-  /** number of irrelevant attributes.*/
-  private int m_NumIrrelevant;
+  /**@serial number of irrelevant attributes.*/
+  private int m_NumIrrelevant = 0;
 
-  /** number of numeric attribute*/
-  private int m_NumNumeric;
+  /**@serial number of numeric attribute*/
+  private int m_NumNumeric = 0;
+
+  /**@serial random number generator seed*/ 
+  private int m_Seed = 1;
  
-  /** flag that stores if voting is wished*/ 
+  /**@serial flag that stores if voting is wished*/ 
   private boolean m_VoteFlag = false;
 
-   /** decision list */
+  /**@serial dataset format*/ 
+  private Instances m_DatasetFormat = null;
+
+  /**@serial random number generator*/ 
+  private Random m_Random = null;
+
+   /**@serial decision list */
   private FastVector m_DecisionList = null;
 
-  /** array defines which attributes are irrelevant, with: */
+  /**@serial array defines which attributes are irrelevant, with: */
   /* true = attribute is irrelevant; false = attribute is not irrelevant*/
-  boolean[] m_AttList_Irr;
+  boolean [] m_AttList_Irr;
 
-  /**
-   * initializes the generator with default values
-   */
-  public RDG1() {
-    super();
-
-    setNumAttributes(defaultNumAttributes());
-    setNumClasses(defaultNumClasses());
-    setMaxRuleSize(defaultMaxRuleSize());
-    setMinRuleSize(defaultMinRuleSize());
-    setNumIrrelevant(defaultNumIrrelevant());
-    setNumNumeric(defaultNumNumeric());
-  }
+  /**@serial debug flag*/ 
+  private int m_Debug = 0;
 
   /**
    * Returns a string describing this data generator.
@@ -229,8 +193,9 @@ public class RDG1
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
+    
     return "A data generator that produces data randomly "
-           + "with \'boolean\' (nominal with values {false,true}) and "
+           + "with \'boolean\' (nominal with values {false,true}) and"
            + "numeric attributes by producing a decisionlist.";
   }
 
@@ -240,97 +205,82 @@ public class RDG1
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
-    Vector result = enumToVector(super.listOptions());
 
-    result.addElement(new Option(
-          "\tThe number of attributes (default " 
-          + defaultNumAttributes() + ").",
-          "a", 1, "-a <num>"));
+    Vector newVector = new Vector(5);
 
-    result.addElement(new Option(
-        "\tThe number of classes (default " + defaultNumClasses() + ")",
-        "c", 1, "-c <num>"));
-
-    result.addElement(new Option(
-          "\tmaximum size for rules (default " 
-          + defaultMaxRuleSize() + ") ",
-          "R", 1, "-R <num>"));
-    
-    result.addElement(new Option(
-          "\tminimum size for rules (default " 
-          + defaultMinRuleSize() + ") ",
-          "M", 1, "-M <num>"));
-    
-    result.addElement(new Option(
-          "\tnumber of irrelevant attributes (default " 
-          + defaultNumIrrelevant() + ")",
-          "I", 1, "-I <num>"));
-    
-    result.addElement(new Option(
-          "\tnumber of numeric attributes (default "
-          + defaultNumNumeric() + ")",
-          "N", 1, "-N"));
-    
-    result.addElement(new Option(
-          "\tswitch on voting (default is no voting)",
-          "V", 1, "-V"));
-    
-    return result.elements();
+    newVector.addElement(new Option(
+              "\tmaximum size for rules (default 10) ",
+              "R", 1, "-R <num>"));
+    newVector.addElement(new Option(
+              "\tminimum size for rules (default 1) ",
+              "M", 1, "-M <num>"));
+    newVector.addElement(new Option(
+              "\tnumber of irrelevant attributes (default 0)",
+              "I", 1, "-I <num>"));
+    newVector.addElement(new Option(
+              "\tnumber of numeric attributes (default 0)",
+              "N", 1, "-N"));
+    newVector.addElement(new Option(
+              "\tseed for random function (default 1)",
+              "S", 1, "-S"));
+    newVector.addElement(new Option(
+              "\tswitch on voting (default is no voting)",
+              "V", 1, "-V"));
+    return newVector.elements();
   }
 
   /**
-   * Parses a list of options for this object. <p/>
+   * Parses a list of options for this object. <p>
    *
-   * For list of valid options see class description.<p/>
+   * For list of valid options see class description.<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String      tmpStr;
 
-    super.setOptions(options);
+    boolean voting = false;
 
-    tmpStr = Utils.getOption('a', options);
-    if (tmpStr.length() != 0)
-      setNumAttributes(Integer.parseInt(tmpStr));
-    else
-      setNumAttributes(defaultNumAttributes());
+    String ruleSizeString = Utils.getOption('R', options);
+    if (ruleSizeString.length() != 0) {
+      setMaxRuleSize((int)Double.valueOf(ruleSizeString).doubleValue());
+    } else {
+      setMaxRuleSize(10);
+    }
 
-    tmpStr = Utils.getOption('c', options);
-    if (tmpStr.length() != 0)
-      setNumClasses(Integer.parseInt(tmpStr));
-    else
-      setNumClasses(defaultNumClasses());
+    ruleSizeString = Utils.getOption('M', options);
+    if (ruleSizeString.length() != 0) {
+      setMinRuleSize((int)Double.valueOf(ruleSizeString).doubleValue());
+    } else {
+      setMinRuleSize(1);
+    }
 
-    tmpStr = Utils.getOption('R', options);
-    if (tmpStr.length() != 0)
-      setMaxRuleSize(Integer.parseInt(tmpStr));
-    else 
-      setMaxRuleSize(defaultMaxRuleSize());
-
-    tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
-      setMinRuleSize(Integer.parseInt(tmpStr));
-    else
-      setMinRuleSize(defaultMinRuleSize());
-
-    tmpStr = Utils.getOption('I', options);
-    if (tmpStr.length() != 0)
-      setNumIrrelevant(Integer.parseInt(tmpStr));
-    else
-      setNumIrrelevant(defaultNumIrrelevant());
+    String numIrrelevantString = Utils.getOption('I', options);
+    if (numIrrelevantString.length() != 0) {
+      setNumIrrelevant((int)Double.valueOf(numIrrelevantString).doubleValue());
+    } else {
+      setNumIrrelevant(0);
+    }
 
     if ((getNumAttributes() - getNumIrrelevant()) < getMinRuleSize())
        throw new Exception("Possible rule size is below minimal rule size.");
 
-    tmpStr = Utils.getOption('N', options);
-    if (tmpStr.length() != 0)
-      setNumNumeric(Integer.parseInt(tmpStr));
-    else
-      setNumNumeric(defaultNumNumeric());
+    String numNumericString = Utils.getOption('N', options);
+    if (numNumericString.length() != 0) {
+      setNumNumeric((int)Double.valueOf(numNumericString).doubleValue());
+    } else {
+      setNumNumeric(0);
+    }
 
-    setVoteFlag(Utils.getFlag('V', options));
+    String seedString = Utils.getOption('S', options);
+    if (seedString.length() != 0) {
+      setSeed(Integer.parseInt(seedString));
+    } else {
+      setSeed(1);
+    }
+   
+    voting = Utils.getFlag('V', options);
+    setVoteFlag(voting);
   }
 
   /**
@@ -338,111 +288,45 @@ public class RDG1
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
-    
-    result  = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    result.add("-a");
-    result.add("" + getNumAttributes());
-    
-    result.add("-c");
-    result.add("" + getNumClasses());
+  public String [] getOptions() {
 
-    result.add("-N"); 
-    result.add("" + getNumNumeric());
-    
-    result.add("-I"); 
-    result.add("" + getNumIrrelevant());
-    
-    result.add("-M"); 
-    result.add("" + getMinRuleSize());
-    
-    result.add("-R"); 
-    result.add("" + getMaxRuleSize());
-    
-    if (getVoteFlag())
-      result.add("-V"); 
+    String [] options = new String [12];
+    int current = 0;
+    options[current++] = "-N"; options[current++] = "" + getNumNumeric();
+    options[current++] = "-I"; options[current++] = "" + getNumIrrelevant();
+    options[current++] = "-M"; options[current++] = "" + getMinRuleSize();
+    options[current++] = "-R"; options[current++] = "" + getMaxRuleSize();
+    options[current++] = "-S"; options[current++] = "" + getSeed();
+    if (getVoteFlag()) {
+      options[current++] = "-V"; 
+      options[current++] = "";
+    }
 
-    return (String[]) result.toArray(new String[result.size()]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
-
+    
   /**
-   * returns the default number of attributes
+   * Gets the random generator.
+   *
+   * @return the random generator
    */
-  protected int defaultNumAttributes() {
-    return 10;
-  }
-
-  /**
-   * Sets the number of attributes the dataset should have.
-   * @param numAttributes the new number of attributes
-   */
-  public void setNumAttributes(int numAttributes) {
-    m_NumAttributes = numAttributes;
-  }
-
-  /**
-   * Gets the number of attributes that should be produced.
-   * @return the number of attributes that should be produced
-   */
-  public int getNumAttributes() { 
-    return m_NumAttributes; 
+  public Random getRandom() {
+    if (m_Random == null) {
+      m_Random = new Random (getSeed());
+    }
+    return m_Random;
   }
   
   /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
+   * Sets the random generator.
+   *
+   * @param newRandom is the random generator.
    */
-  public String numAttributesTipText() {
-    return "The number of attributes the generated data will contain.";
-  }
-
-  /**
-   * returns the default number of classes
-   */
-  protected int defaultNumClasses() {
-    return 2;
-  }
-
-  /**
-   * Sets the number of classes the dataset should have.
-   * @param numClasses the new number of classes
-   */
-  public void setNumClasses(int numClasses) { 
-    m_NumClasses = numClasses; 
-  }
-
-  /**
-   * Gets the number of classes the dataset should have.
-   * @return the number of classes the dataset should have
-   */
-  public int getNumClasses() { 
-    return m_NumClasses; 
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String numClassesTipText() {
-    return "The number of classes to generate.";
-  }
-
-  /**
-   * returns the default max size of rules
-   */
-  protected int defaultMaxRuleSize() {
-    return 10;
+  public void setRandom(Random newRandom) {
+    m_Random = newRandom;
   }
 
   /**
@@ -450,9 +334,7 @@ public class RDG1
    *
    * @return the maximum number of tests allowed in rules
    */
-  public int getMaxRuleSize() { 
-    return m_MaxRuleSize; 
-  }
+  public int getMaxRuleSize() { return m_MaxRuleSize; }
   
   /**
    * Sets the maximum number of tests in rules.
@@ -462,32 +344,13 @@ public class RDG1
   public void setMaxRuleSize(int newMaxRuleSize) {
     m_MaxRuleSize = newMaxRuleSize;
   }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String maxRuleSizeTipText() {
-    return "The maximum number of tests in rules.";
-  }
-
-  /**
-   * returns the default min size of rules
-   */
-  protected int defaultMinRuleSize() {
-    return 1;
-  }
 
   /**
    * Gets the minimum number of tests in rules.
    *
    * @return the minimum number of tests allowed in rules
    */
-  public int getMinRuleSize() { 
-    return m_MinRuleSize; 
-  }
+  public int getMinRuleSize() { return m_MinRuleSize; }
   
   /**
    * Sets the minimum number of tests in rules.
@@ -497,57 +360,21 @@ public class RDG1
   public void setMinRuleSize(int newMinRuleSize) {
     m_MinRuleSize = newMinRuleSize;
   }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String minRuleSizeTipText() {
-    return "The minimum number of tests in rules.";
-  }
-
-  /**
-   * returns the default number of irrelevant attributes
-   */
-  protected int defaultNumIrrelevant() {
-    return 0;
-  }
 
   /**
    * Gets the number of irrelevant attributes.
    *
    * @return the number of irrelevant attributes
    */
-  public int getNumIrrelevant() { 
-    return m_NumIrrelevant; 
-  }
+  public int getNumIrrelevant() { return m_NumIrrelevant; }
   
   /**
    * Sets the number of irrelevant attributes.
    *
-   * @param newNumIrrelevant the number of irrelevant attributes.
+   * @param the number of irrelevant attributes.
    */
   public void setNumIrrelevant(int newNumIrrelevant) {
     m_NumIrrelevant = newNumIrrelevant;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String numIrrelevantTipText() {
-    return "The number of irrelevant attributes.";
-  }
-
-  /**
-   * returns the default number of numeric attributes
-   */
-  protected int defaultNumNumeric() {
-    return 0;
   }
 
   /**
@@ -555,27 +382,15 @@ public class RDG1
    *
    * @return the number of numerical attributes.
    */
-  public int getNumNumeric() { 
-    return m_NumNumeric; 
-  }
+  public int getNumNumeric() { return m_NumNumeric; }
   
   /**
    * Sets the number of numerical attributes.
    *
-   * @param newNumNumeric the number of numerical attributes.
+   * @param the number of numerical attributes.
    */
   public void setNumNumeric(int newNumNumeric) { 
     m_NumNumeric = newNumNumeric;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String numNumericTipText() {
-    return "The number of numerical attributes.";
   }
 
   /**
@@ -583,37 +398,51 @@ public class RDG1
    *
    * @return voting flag.
    */
-  public boolean getVoteFlag() { 
-    return m_VoteFlag; 
-  }
+  public boolean getVoteFlag() { return m_VoteFlag; }
   
   /**
    * Sets the vote flag.
    *
    * @param newVoteFlag boolean with the new setting of the vote flag.
    */
-  public void setVoteFlag(boolean newVoteFlag) { 
-    m_VoteFlag = newVoteFlag; 
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String voteFlagTipText() {
-    return "Whether to use voting or not.";
-  }
+  public void setVoteFlag(boolean newVoteFlag) { m_VoteFlag = newVoteFlag; }  
 
   /**
    * Gets the single mode flag.
    *
    * @return true if methode generateExample can be used.
    */
-  public boolean getSingleModeFlag() { 
-    return (!getVoteFlag()); 
-  }
+  public boolean getSingleModeFlag() { return (getVoteFlag() == false); }
+  
+  /**
+   * Gets the random number seed.
+   *
+   * @return the random number seed.
+   */
+  public int getSeed() { return m_Seed; }
+  
+  /**
+   * Sets the random number seed.
+   *
+   * @param newSeed the new random number seed.
+   */
+  public void setSeed(int newSeed) { m_Seed = newSeed; }  
+
+  /**
+   * Gets the dataset format.
+   *
+   * @return the dataset format.
+   */
+  public Instances getDatasetFormat() { return m_DatasetFormat; }
+  
+  /**
+   * Sets the dataset format.
+   *
+   * @param newDatasetFormat the new dataset format.
+   */
+  public void setDatasetFormat(Instances newDatasetFormat) { 
+    m_DatasetFormat = newDatasetFormat;
+  }  
 
   /**
    * Gets the array that defines which of the attributes
@@ -621,9 +450,7 @@ public class RDG1
    *
    * @return the array that defines the irrelevant attributes
    */
-  public boolean[] getAttList_Irr() { 
-    return m_AttList_Irr; 
-  }
+  public boolean [] getAttList_Irr() { return m_AttList_Irr; }
   
   /**
    * Sets the array that defines which of the attributes
@@ -631,18 +458,9 @@ public class RDG1
    *
    * @param newAttList_Irr array that defines the irrelevant attributes.
    */
-  public void setAttList_Irr(boolean[] newAttList_Irr) {
+  public void setAttList_Irr(boolean [] newAttList_Irr) {
+
     m_AttList_Irr = newAttList_Irr;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   *         displaying in the explorer/experimenter gui
-   */
-  public String attList_IrrTipText() {
-    return "The array with the indices of the irrelevant attributes.";
   }
 
   /**
@@ -651,7 +469,9 @@ public class RDG1
    * @return the output data format
    * @exception Exception data format could not be defined 
    */
+
   public Instances defineDataFormat() throws Exception {
+
     Instances dataset;
     Random random = new Random (getSeed());
     setRandom(random);
@@ -669,35 +489,36 @@ public class RDG1
   /**
    * Generate an example of the dataset dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @exception Exception if format not defined or generating <br>
    * examples one by one is not possible, because voting is chosen
    */
+
   public Instance generateExample() throws Exception {
+
     Random random = getRandom();
     Instances format = getDatasetFormat();
-
-    if (format == null) 
-      throw new Exception("Dataset format not defined.");
-    if (getVoteFlag()) 
-      throw new Exception("Examples cannot be generated one by one.");
+    if (format == null) throw new Exception("Dataset format not defined.");
+    if (getVoteFlag()) throw new Exception("Examples cannot be generated" +
+                                           " one by one.");
 
     // generate values for all attributes
     format = generateExamples(1, random, format);
 
-    return format.lastInstance();
+    return (format.lastInstance());
   }
 
   /**
    * Generate all examples of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @exception Exception if format not defined or generating <br>
    * examples one by one is not possible, because voting is chosen
    */
+
   public Instances generateExamples() throws Exception {
+
     Random random = getRandom();
     Instances format = getDatasetFormat();
-    if (format == null) 
-      throw new Exception("Dataset format not defined.");
+    if (format == null) throw new Exception("Dataset format not defined.");
 
     // generate values for all attributes
     format = generateExamples(getNumExamplesAct(), random, format);
@@ -706,26 +527,26 @@ public class RDG1
     if (getVoteFlag())
       format = voteDataset(format);
 
-    return format;
+    return (format);
   }
 
   /**
    * Generate all examples of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @exception Exception if format not defined or generating <br>
    * examples one by one is not possible, because voting is chosen
    */
+
   public Instances generateExamples(int num, 
                                    Random random,
                                    Instances format) throws Exception {
 
-    if (format == null) 
-      throw new Exception("Dataset format not defined.");
+    if (format == null) throw new Exception("Dataset format not defined.");
     
     // generate values for all attributes
     for (int i = 0; i < num; i++)  {
       // over all examples to be produced
-      Instance example = generateExample(random, format);
+      Instance example =  generateExample(random, format);
 
       // set class of example using decision list
       boolean classDefined = classifyExample(example);
@@ -751,8 +572,7 @@ public class RDG1
 
     FastVector TestList;
     Instances format = getDatasetFormat();
-    if (format == null) 
-      throw new Exception("Dataset format not defined.");
+    if (format == null) throw new Exception("Dataset format not defined.");
 
     TestList = generateTestList(random, example);
 
@@ -769,6 +589,8 @@ public class RDG1
           
       newRule.addTest(test);
       TestList.removeElementAt(testIndex);
+//      newRule.addTest((Test) TestList.elementAt(
+//                       (int) (random.nextDouble() * (double) ruleSize)));
     }
     double newClassValue = 0.0;
     if (m_DecisionList.size() > 0) {
@@ -797,12 +619,11 @@ public class RDG1
    throws Exception {
 
     Instances format = getDatasetFormat();
-    if (format == null) 
-      throw new Exception("Dataset format not defined.");
+    if (format == null) throw new Exception("Dataset format not defined.");
 
     int numTests = getNumAttributes() - getNumIrrelevant();
     FastVector TestList = new FastVector(numTests);
-    boolean[] irrelevant = getAttList_Irr();
+    boolean [] irrelevant = getAttList_Irr();
 
     for (int i = 0; i < getNumAttributes(); i++) {
       if (!irrelevant[i]) {
@@ -818,8 +639,7 @@ public class RDG1
       TestList.addElement (newTest);     
       }
     }
-    
-    return TestList;
+  return TestList;
   }
 
  /**
@@ -831,7 +651,7 @@ public class RDG1
    */
   private Instance generateExample(Random random, Instances format) 
     throws Exception {     
-    double[] attributes;
+    double [] attributes;
     Instance example;
 
     attributes = new double[getNumAttributes() + 1];
@@ -840,16 +660,16 @@ public class RDG1
       if (format.attribute(i).isNumeric()) {
         attributes[i] = value; 
       } else {
-	if (format.attribute(i).isNominal())
-	  attributes[i] = (value > 0.5) ? 1.0 : 0.0;
-	else
+	if (format.attribute(i).isNominal()) {
+	  attributes[i] = (value > 0.5)? 1.0 : 0.0;
+	} else {
 	  throw new Exception ("Attribute type is not supported.");
+	}
       }
     }
     example = new Instance(0, attributes);
     example.setDataset(format);
     example.setClassMissing();
-
     return example; 
   }
 
@@ -869,10 +689,7 @@ public class RDG1
     if (classValue >= 0.0) {
       example.setClassValue(classValue);
       return true;
-    } 
-    else {
-      return false;
-    }
+    } else return false;
   }
 
  /**
@@ -886,7 +703,9 @@ public class RDG1
    * @return instance with new class value
    */
   private Instance votedReclassifyExample(Instance example) throws Exception {
-    int classVotes[] = new int [getNumClasses()]; 
+
+    boolean classDefined = false; 
+    int classVotes [] = new int [getNumClasses()]; 
     for (int i = 0; i < classVotes.length; i++) classVotes[i] = 0; 
 
     for (Enumeration e = m_DecisionList.elements(); 
@@ -903,12 +722,11 @@ public class RDG1
         vote = i; 
       }
     }
-    if (vote >= 0)
+    if (vote >= 0) {
       example.setClassValue((double) vote);
-    else
+    } else
       throw new Exception ("Error in instance classification.");
-
-    return example;
+  return example;
   }
 
  /**
@@ -918,8 +736,8 @@ public class RDG1
    */
   private Instances defineDataset(Random random) throws Exception {
 
-    boolean[] attList_Irr;
-    int[] attList_Num;
+    boolean [] attList_Irr;
+    int [] attList_Num;
     FastVector attributes = new FastVector();
     Attribute attribute;
     FastVector nominalValues = new FastVector (2);
@@ -937,25 +755,28 @@ public class RDG1
 
     // define dataset
     for (int i = 0; i < getNumAttributes(); i++) {
-      if (attList_Num[i] == Attribute.NUMERIC)
+      if (attList_Num[i] == Attribute.NUMERIC) {
         attribute = new Attribute("a" + i); 
-      else
+      }
+      else {       
         attribute = new Attribute("a" + i, nominalValues); 
+      }
       attributes.addElement(attribute);
     }
-    for (int i = 0; i < classValues.capacity(); i++)
+    int s = classValues.capacity();
+    for (int i = 0; i < classValues.capacity(); i++) {
       classValues.addElement("c" + i);
+    }
     attribute = new Attribute ("class", classValues); 
     attributes.addElement(attribute);
 
-    dataset = new Instances(getRelationNameToUse(), attributes,
+    dataset = new Instances(getRelationName(), attributes,
                             getNumExamplesAct());
     dataset.setClassIndex(getNumAttributes());
 
     // set dataset format of this class
     Instances format = new Instances(dataset, 0);
     setDatasetFormat(format);
-    
     return dataset; 
   } 
 
@@ -969,14 +790,14 @@ public class RDG1
    * and each value set true or false according to if the corresponding
    * attribute was defined irrelevant or not
    */
-  private boolean[] defineIrrelevant(Random random) {
+  private boolean [] defineIrrelevant(Random random) {
 
-    boolean[] irr = new boolean [getNumAttributes()];
+    boolean [] irr = new boolean [getNumAttributes()];
  
     // initialize
-    for (int i = 0; i < irr.length; i++)
+    for (int i = 0; i < irr.length; i++) {
       irr[i] = false;
-
+    }
     // set randomly
     int numIrr = 0;
     for (int i = 0; 
@@ -988,7 +809,6 @@ public class RDG1
         numIrr++;
       }
     }
-    
     return irr;
   }
 
@@ -998,14 +818,14 @@ public class RDG1
    * @return list of integer values, with one value for each attribute,
    * and each value set to Attribut.NOMINAL or Attribut.NUMERIC
    */
-  private int[] defineNumeric(Random random) {
+  private int [] defineNumeric(Random random) {
     
-    int[] num = new int [getNumAttributes()];
+    int [] num = new int [getNumAttributes()];
 
     // initialize
-    for (int i = 0; i < num.length; i++)
+    for (int i = 0; i < num.length; i++) {
       num[i] = Attribute.NOMINAL;
-
+    }
     int numNum = 0;
     for (int i = 0;
          (numNum < getNumNumeric()) && (i < getNumAttributes() * 5); i++) {
@@ -1015,20 +835,7 @@ public class RDG1
         numNum++;
       }
     }
-    
     return num;
-  }
-
-  /**
-   * Generates a comment string that documentates the data generator.
-   * By default this string is added at the beginning of the produced output
-   * as ARFF file type, next after the options.
-   * 
-   * @return string contains info about the generated rules
-   * @exception Exception if the generating of the documentation fails
-   */
-  public String generateStart () {
-    return "";
   }
 
   /**
@@ -1046,9 +853,9 @@ public class RDG1
     StringBuffer dLString = new StringBuffer();
 
     // string for output at end of ARFF-File
-    boolean[] attList_Irr = getAttList_Irr();
+    boolean [] attList_Irr = getAttList_Irr();
     Instances format = getDatasetFormat();
-    dLString.append("%\n% Number of attributes chosen as irrelevant = " +
+    dLString.append("\n%\n% Number of attributes chosen as irrelevant = " +
                     getNumIrrelevant() + "\n");
     for (int i = 0; i < attList_Irr.length; i++) {
       if (attList_Irr[i])
@@ -1061,6 +868,7 @@ public class RDG1
     for (int i = 0; i < m_DecisionList.size(); i++) {
       RuleList rl = (RuleList) m_DecisionList.elementAt(i);
       dLString.append("% RULE " + i + ": " + rl.toString() + "\n");
+      
     }
     
     return dLString.toString();
@@ -1075,28 +883,27 @@ public class RDG1
    * @return the changed instances
    */
   private Instances voteDataset(Instances dataset) throws Exception {
-    for (int i = 0; i < dataset.numInstances(); i++) {
-      Instance inst = dataset.firstInstance();
-      inst = votedReclassifyExample(inst); 
-      dataset.add(inst);
-      dataset.delete(0);
+ 
+  for (int i = 0; i < dataset.numInstances(); i++) {
+    Instance inst = dataset.firstInstance();
+    inst = votedReclassifyExample(inst); 
+    dataset.add(inst);
+    dataset.delete(0);
     }  
-
-    return dataset;
+  return dataset;
   }
 
   /**
    * Main method for testing this class.
    *
-   * @param args should contain arguments for the data producer: 
+   * @param argv should contain arguments for the data producer: 
    */
-  public static void main(String[] args) {
+  public static void main(String [] argv) {
+
     try {
-      DataGenerator.makeData(new RDG1(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
+      Generator.makeData(new RDG1(), argv);
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
     }
   }
 }

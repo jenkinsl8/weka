@@ -56,7 +56,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.16.2.3 $
  */
 public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer,

@@ -105,7 +105,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.16.2.1 $
  */
 
 /*

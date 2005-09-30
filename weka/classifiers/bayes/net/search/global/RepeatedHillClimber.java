@@ -32,7 +32,7 @@ import java.util.*;
  * The best network found is returned.  
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.3 $
+ * Version: $Revision: 1.2.2.1 $
  */
 public class RepeatedHillClimber extends HillClimber {
 

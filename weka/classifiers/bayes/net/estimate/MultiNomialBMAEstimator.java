@@ -26,7 +26,7 @@ import weka.estimators.Estimator;
 import weka.classifiers.bayes.net.search.local.K2;
 
 /**
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class MultiNomialBMAEstimator extends BayesNetEstimator {
 

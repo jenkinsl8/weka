@@ -54,7 +54,7 @@ import java.sql.*;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class DatabaseSaver extends AbstractSaver implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
     

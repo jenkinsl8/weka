@@ -51,7 +51,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,

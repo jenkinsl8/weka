@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.experiment.PairedStats;
@@ -70,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -1299,7 +1300,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     throws Exception {
     // the evaluators --- one for each subset
     ASEvaluation [] evaluators = 
-      ASEvaluation.makeCopies(m_theEvaluator, raceSets.length);
+      m_theEvaluator.makeCopies(m_theEvaluator, raceSets.length);
 
     // array of subsets eliminated from the race
     boolean [] eliminated = new boolean [raceSets.length];

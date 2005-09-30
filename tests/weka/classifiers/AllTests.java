@@ -10,7 +10,7 @@ import junit.framework.Test;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class AllTests 
   extends WekaTestSuite {

@@ -31,7 +31,7 @@ import weka.core.*;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class RBFKernel extends CachedKernel {
 
@@ -57,20 +57,15 @@ public class RBFKernel extends CachedKernel {
   protected double evaluate(int id1, int id2, Instance inst1)
     throws Exception {
 
-
-    if (id1 == id2) {
-      return 1.0;
-    } else {
-      double precalc1;
-      if (id1 == -1)
-        precalc1 = dotProd(inst1, inst1);
-      else
-        precalc1 = m_kernelPrecalc[id1];
-      Instance inst2 = m_data.instance(id2);
-      double result = Math.exp(m_gamma
-  			     * (2. * dotProd(inst1, inst2) - precalc1 - m_kernelPrecalc[id2]));
-      return result;
-    }
+    double precalc1;
+    if (id1 == -1)
+      precalc1 = dotProd(inst1, inst1);
+    else
+      precalc1 = m_kernelPrecalc[id1];
+    Instance inst2 = m_data.instance(id2);
+    double result = Math.exp(m_gamma
+			     * (2. * dotProd(inst1, inst2) - precalc1 - m_kernelPrecalc[id2]));
+    return result;
   }
     
 }

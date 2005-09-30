@@ -29,7 +29,7 @@ import weka.classifiers.Classifier;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  * @see ThresholdSelectorTest
  */
 

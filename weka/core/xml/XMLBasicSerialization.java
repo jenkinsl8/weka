@@ -56,7 +56,7 @@ import org.w3c.dom.Element;
  *    <li>java.util.Vector</li>
  *    <li>javax.swing.DefaultListModel</li>
  * </ul>
- *
+ * 
  * Weka classes:
  * <ul>
  *    <li>weka.core.Matrix</li>
@@ -64,7 +64,7 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
 public class XMLBasicSerialization extends XMLSerialization {
 
@@ -167,7 +167,7 @@ public class XMLBasicSerialization extends XMLSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
@@ -251,7 +251,7 @@ public class XMLBasicSerialization extends XMLSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
@@ -349,7 +349,7 @@ public class XMLBasicSerialization extends XMLSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       map      = (Map) Class.forName(
@@ -379,7 +379,7 @@ public class XMLBasicSerialization extends XMLSerialization {
       
       return map;
    }
-   
+
    /**
     * adds the given Matrix to a DOM structure. 
     * 

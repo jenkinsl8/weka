@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.2.2.2 $ 
  */
 
 public class ArffTable extends JTable {

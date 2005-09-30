@@ -42,9 +42,6 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
@@ -79,7 +76,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.7.2.5 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -167,15 +164,6 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       .registerEditor(weka.classifiers.Classifier.class,
 		      weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager
-      .registerEditor(weka.core.NearestNeighbourSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.DistanceFunction.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.associations.CARuleMiner.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,
 		      weka.gui.CostMatrixEditor.class);
   }
@@ -197,20 +185,6 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   public AlgorithmListPanel() {
     
     m_List = new JList();
-    MouseListener mouseListener = new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-          // unfortunately, locationToIndex only returns the nearest entry
-          // and not the exact one, i.e. if there's one item in the list and
-          // one doublelclicks somewhere in the list, this index will be
-          // returned
-          int index = m_List.locationToIndex(e.getPoint());
-          if (index > -1)
-            actionPerformed(new ActionEvent(m_EditBut, 0, ""));
-        }
-      }
-    };
-    m_List.addMouseListener(mouseListener);
   
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
@@ -431,9 +405,6 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
           }
         }
       }
-    }
-    else if (e.getSource() == m_List) {
-      System.out.println("yep!");
     }
   }
 

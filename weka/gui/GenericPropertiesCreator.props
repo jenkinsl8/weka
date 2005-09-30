@@ -19,8 +19,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions,\
  weka.classifiers.lazy,\
  weka.classifiers.meta,\
- weka.classifiers.meta.nestedDichotomies,\
- weka.classifiers.misc,\
  weka.classifiers.trees,\
  weka.classifiers.rules
 
@@ -65,14 +63,6 @@ weka.core.converters.Loader=\
 weka.core.converters.Saver=\
  weka.core.converters
 
-# Lists the search algorithms for nearest neighbour search
-weka.core.NearestNeighbourSearch =\
- weka.core
-
-# Lists the distance functions for use nearest neighbour search
-weka.core.DistanceFunction =\
- weka.core 
-
 # Lists the Search algorithm for Bayes net structure learning-Packages I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm=\
  weka.classifiers.bayes.net.search.local, \
@@ -82,15 +72,3 @@ weka.classifiers.bayes.net.search.SearchAlgorithm=\
 
 weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
  weka.classifiers.bayes.net.estimate
-
-# Lists the DataGenerator Algorithms-Packages
-weka.datagenerators.DataGenerator=\
- weka.datagenerators.classifiers.classification,\
- weka.datagenerators.classifiers.regression,\
- weka.datagenerators.clusterers
-
-# Lists the packages where to find ClusterDefinition
-weka.datagenerators.ClusterDefinition=\
- weka.datagenerators,\
- weka.datagenerators.clusterers
-

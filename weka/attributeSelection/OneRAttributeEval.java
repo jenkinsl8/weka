@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
@@ -46,7 +47,7 @@ import  weka.filters.Filter;
  * Use the training data to evaluate attributes rather than cross validation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator implements OptionHandler

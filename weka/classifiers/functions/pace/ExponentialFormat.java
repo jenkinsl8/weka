@@ -26,8 +26,8 @@ import java.text.DecimalFormatSymbols;
 import java.text.FieldPosition;
 
 /**
- * @author Yong Wang
- * @version $Revision: 1.3 $
+ * @author  Yong Wang
+ * @version $Revision: 1.2.2.1 $
  */
 public class ExponentialFormat extends DecimalFormat {
     
