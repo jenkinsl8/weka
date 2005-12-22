@@ -67,7 +67,7 @@ import weka.core.SingleIndex;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {

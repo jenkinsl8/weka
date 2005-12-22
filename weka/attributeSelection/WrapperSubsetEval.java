@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.classifiers.*;
@@ -57,7 +58,7 @@ import  weka.filters.Filter;
  * (default = 1) <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.22.2.1 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator

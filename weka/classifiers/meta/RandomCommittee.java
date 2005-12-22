@@ -57,7 +57,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5.2.2 $
  */
 public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {

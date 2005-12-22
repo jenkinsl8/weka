@@ -80,7 +80,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.15.2.1 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
@@ -242,7 +242,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
       setOnDemandDirectory(new File(demandDir));
     }
 
-    String cost_matrix= Utils.getOption("cost-matrix", options);
+    String cost_matrix = Utils.getOption("cost-matrix", options);
     if (cost_matrix.length() != 0) {
       StringWriter writer = new StringWriter();
       CostMatrix.parseMatlab(cost_matrix).write(writer);

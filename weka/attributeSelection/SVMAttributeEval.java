@@ -23,11 +23,13 @@
 
 package weka.attributeSelection;
 
+import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.functions.SMO;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.attributeSelection.*;
 
 /** 
  * Class for Evaluating attributes individually by using the SVM
@@ -64,7 +66,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.17 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {

@@ -20,7 +20,7 @@ import weka.core.Utils;
  * Class for performing (ridged) linear regression.
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.2 $
  */
  
 public class LinearRegression {

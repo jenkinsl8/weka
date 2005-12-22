@@ -39,13 +39,36 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.SelectedTag.class,
+		      weka.gui.SelectedTagEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.filters.Filter.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASEvaluation.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.Classifier [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.Classifier.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.CostMatrix.class,
+		      weka.gui.CostMatrixEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

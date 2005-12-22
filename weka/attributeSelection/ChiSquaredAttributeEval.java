@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 import  weka.filters.supervised.attribute.Discretize;
@@ -41,7 +42,7 @@ import  weka.filters.Filter;
  * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator

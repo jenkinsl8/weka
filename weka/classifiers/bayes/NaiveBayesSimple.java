@@ -37,7 +37,7 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.13.2.2 $ 
 */
 public class NaiveBayesSimple extends Classifier {
 

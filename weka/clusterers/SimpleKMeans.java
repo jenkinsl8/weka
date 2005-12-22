@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.19.2.4 $
  * @see Clusterer
  * @see OptionHandler
  */

@@ -22,6 +22,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 
@@ -31,9 +32,6 @@ import  weka.core.*;
  * Valid options are: <p>
  * -B <br>
  * Use a backward search instead of a forward one. <p>
- *
- * -C <br>
- * Use conservative forward selection. <p>
  *
  * -P <start set> <br>
  * Specify a starting set of attributes. Eg 1,4,7-9. <p>
@@ -46,7 +44,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
 public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -105,10 +103,6 @@ public class GreedyStepwise extends ASSearch
 
   /** Use a backwards search instead of a forwards one */
   protected boolean m_backward = false;
-
-  /** If set then attributes will continue to be added during a forward
-      search as long as the merit does not degrade */
-  protected boolean m_conservativeSelection = false;
 
   /**
    * Returns a string describing this search method
@@ -294,44 +288,13 @@ public class GreedyStepwise extends ASSearch
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String conservativeForwardSelectionTipText() {
-    return "If true (and forward search is selected) then attributes "
-      +"will continue to be added to the best subset as long as merit does "
-      +"not degrade.";
-  }
-
-  /**
-   * Set whether attributes should continue to be added during
-   * a forward search as long as merit does not decrease
-   * @param c true if atts should continue to be atted
-   */
-  public void setConservativeForwardSelection(boolean c) {
-    m_conservativeSelection = c;
-  }
-
-  /**
-   * Gets whether conservative selection has been enabled
-   * @return true if conservative forward selection is enabled
-   */
-  public boolean getConservativeForwardSelection() {
-    return m_conservativeSelection;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(4);
 
-    newVector.addElement(new Option("\tUse conservative forward search"
-				    ,"-C", 0, "-C"));
-
-    newVector.addElement(new Option("\tUse a backward search instead of a"
+    newVector.addElement(new Option("\tUse a backward search instead  of a"
 				    +"\n\tforward one."
 				    ,"-B", 0, "-B"));
     newVector
@@ -364,9 +327,6 @@ public class GreedyStepwise extends ASSearch
    *
    * -B <br>
    * Use a backward search instead of a forward one. <p>
-   *
-   * -C <br>
-   * Use conservative forward selection. <p>
    * 
    * -P <start set> <br>
    * Specify a starting set of attributes. Eg 1,4,7-9. <p>
@@ -392,8 +352,6 @@ public class GreedyStepwise extends ASSearch
     resetOptions();
 
     setSearchBackwards(Utils.getFlag('B', options));
-
-    setConservativeForwardSelection(Utils.getFlag('C', options));
 
     optionString = Utils.getOption('P', options);
     if (optionString.length() != 0) {
@@ -421,15 +379,11 @@ public class GreedyStepwise extends ASSearch
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[9];
+    String[] options = new String[8];
     int current = 0;
     
     if (getSearchBackwards()) {
       options[current++] = "-B";
-    }
-
-    if (getConservativeForwardSelection()) {
-      options[current++] = "-C";
     }
 
     if (!(getStartSet().equals(""))) {
@@ -630,17 +584,13 @@ public class GreedyStepwise extends ASSearch
 	  if (m_backward) {
 	    z = (temp_merit >= temp_best);
 	  } else {
-            if (m_conservativeSelection) {
-              z = (temp_merit >= temp_best);
-            } else {
-              z = (temp_merit > temp_best);
-            }
+	    z = (temp_merit > temp_best);
 	  }
 	  if (z) {
-            temp_best = temp_merit;
-            temp_index = i;
-            addone = true;
-            done = false;
+	    temp_best = temp_merit;
+	    temp_index = i;
+	    addone = true;
+	    done = false;
 	  }
 
 	  // unset this addition/deletion

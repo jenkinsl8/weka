@@ -64,7 +64,7 @@ import java.awt.Graphics;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.20.2.2 $
  */
 public class Plot2D extends JPanel {
 

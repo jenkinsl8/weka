@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -119,14 +119,12 @@ public class PairedCorrectedTTester extends PairedTTester {
       Instance current1 = (Instance) dataset1.elementAt(k);
       Instance current2 = (Instance) dataset2.elementAt(k);
       if (current1.isMissing(comparisonColumn)) {
-	System.err.println("Instance has missing value in comparison "
-			   + "column!\n" + current1);
-	continue;
+	throw new Exception("Instance has missing value in comparison "
+			    + "column!\n" + current1);
       }
       if (current2.isMissing(comparisonColumn)) {
-	System.err.println("Instance has missing value in comparison "
-			   + "column!\n" + current2);
-	continue;
+	throw new Exception("Instance has missing value in comparison "
+			    + "column!\n" + current2);
       }
       if (current1.value(m_RunColumn) != current2.value(m_RunColumn)) {
 	System.err.println("Run numbers do not match!\n"
@@ -215,20 +213,5 @@ public class PairedCorrectedTTester extends PairedTTester {
       e.printStackTrace();
       System.err.println(e.getMessage());
     }
-  }
-
-  /**
-   * returns the name of the tester
-   */
-  public String getDisplayName() {
-    return "Paired T-Tester (corrected)";
-  }
-
-  /**
-   * returns a string that is displayed as tooltip on the "perform test"
-   * button in the experimenter
-   */
-  public String getToolTipText() {
-    return "Performs test using corrected resampled t-test statistic (Nadeau and Bengio)";
   }
 }

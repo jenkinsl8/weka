@@ -23,10 +23,6 @@
 package weka.gui.experiment;
 
 import weka.core.Utils;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
 
 import java.io.File;
 import java.io.Serializable;
@@ -37,7 +33,7 @@ import java.util.Properties;
  * the props file <code>weka.gui.experiment.Experimenter.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.3 $
  * @see #PROPERTY_FILE
  */
 public class ExperimenterDefaults
@@ -155,16 +151,6 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the display name of the preferred Tester algorithm
-   *
-   * @see Tester
-   * @see PairedCorrectedTTester
-   */
-  public final static String getTester() {
-    return get("Tester", new PairedCorrectedTTester().getDisplayName());
-  }
-
-  /**
    * the comma-separated list of attribute names that identify a row
    */
   public final static String getRow() {
@@ -193,24 +179,10 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default sorting (empty string means none)
-   */
-  public final static String getSorting() {
-    return get("Sorting", "");
-  }
-
-  /**
    * returns whether StdDevs are shown by default
    */
   public final static boolean getShowStdDevs() {
     return Boolean.valueOf(get("ShowStdDev", "false")).booleanValue();
-  }
-
-  /**
-   * returns whether the Average is shown by default
-   */
-  public final static boolean getShowAverage() {
-    return Boolean.valueOf(get("ShowAverage", "false")).booleanValue();
   }
 
   /**
@@ -225,24 +197,6 @@ public class ExperimenterDefaults
    */
   public final static int getStdDevPrecision() {
     return Integer.parseInt(get("StdDevPrecision", "2"));
-  }
-
-  /**
-   * returns the classname of the ResultMatrix class, responsible for the
-   * output format
-   *
-   * @see ResultMatrix
-   * @see ResultMatrixPlainText
-   */
-  public final static String getOutputFormat() {
-    return get("OutputFormat", ResultMatrixPlainText.class.getName());
-  }
-
-  /**
-   * whether the filter classnames in the dataset names are removed by default
-   */
-  public final static boolean getRemoveFilterClassnames() {
-    return Boolean.valueOf(get("RemoveFilterClassnames", "false")).booleanValue();
   }
 }
 

@@ -24,7 +24,7 @@
 package weka.gui.experiment;
 
 import weka.core.Instances;
-import weka.core.ClassDiscovery;
+import weka.core.RTSI;
 import weka.experiment.Experiment;
 
 import weka.gui.ExtensionFileFilter;
@@ -62,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.13.4.3 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -260,7 +260,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     //    System.err.println("new path : "+relativePath.toString());
     return new File(relativePath.toString());
   }
-
+  
   /**
    * Converts a File's absolute path to a path relative to the user
    * (ie start) directory. Includes an additional workaround for Cygwin, which
@@ -316,7 +316,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	      getFilesRecursively(selected[i], files);
     
 	      // sort the result
-	      Collections.sort(files, new ClassDiscovery().new StringCompare());
+	      RTSI r = new RTSI();
+	      Collections.sort(files, r.new StringCompare());
 
 	      for (int j = 0; j < files.size(); j++) {
 		File temp = (File)files.elementAt(j);
@@ -348,7 +349,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
     
 	    // sort the result
-	    Collections.sort(files, new ClassDiscovery().new StringCompare());
+	    RTSI r = new RTSI();
+	    Collections.sort(files, r.new StringCompare());
 
 	    for (int j = 0; j < files.size(); j++) {
 	      File temp = (File)files.elementAt(j);

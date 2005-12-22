@@ -62,7 +62,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -101,14 +101,12 @@ public class ArffViewerMainPanel
   protected JMenuItem             menuEditDeleteAttribute;
   protected JMenuItem             menuEditDeleteAttributes;
   protected JMenuItem             menuEditRenameAttribute;
-  protected JMenuItem             menuEditAttributeAsClass;
   protected JMenuItem             menuEditDeleteInstance;
   protected JMenuItem             menuEditDeleteInstances;
   protected JMenuItem             menuEditSortInstances;
   protected JMenu                 menuView;
   protected JMenuItem             menuViewAttributes;
   protected JMenuItem             menuViewValues;
-  protected JMenuItem             menuViewOptimalColWidths;
   
   protected FileChooser           fileChooser;
   protected ExtensionFileFilter   arffFilter;
@@ -198,8 +196,6 @@ public class ArffViewerMainPanel
     menuEditClearSearch.addActionListener(this);
     menuEditRenameAttribute = new JMenuItem("Rename attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditRenameAttribute.addActionListener(this);
-    menuEditAttributeAsClass = new JMenuItem("Attribute as class", ComponentHelper.getImageIcon("empty.gif"));
-    menuEditAttributeAsClass.addActionListener(this);
     menuEditDeleteAttribute = new JMenuItem("Delete attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttribute.addActionListener(this);
     menuEditDeleteAttributes = new JMenuItem("Delete attributes", ComponentHelper.getImageIcon("empty.gif"));
@@ -218,7 +214,6 @@ public class ArffViewerMainPanel
     menuEdit.add(menuEditClearSearch);
     menuEdit.addSeparator();
     menuEdit.add(menuEditRenameAttribute);
-    menuEdit.add(menuEditAttributeAsClass);
     menuEdit.add(menuEditDeleteAttribute);
     menuEdit.add(menuEditDeleteAttributes);
     menuEdit.addSeparator();
@@ -234,12 +229,8 @@ public class ArffViewerMainPanel
     menuViewValues   = new JMenuItem("Values...", ComponentHelper.getImageIcon("properties.gif"));
     menuViewValues.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuViewValues.addActionListener(this);
-    menuViewOptimalColWidths = new JMenuItem("Optimal column width (all)", ComponentHelper.getImageIcon("resize.gif"));
-    menuViewOptimalColWidths.addActionListener(this);
     menuView.add(menuViewAttributes);
     menuView.add(menuViewValues);
-    menuView.addSeparator();
-    menuView.add(menuViewOptimalColWidths);
     menuBar.add(menuView);
     
     // tabbed pane
@@ -348,7 +339,6 @@ public class ArffViewerMainPanel
     menuEditCopy.setEnabled(fileOpen);
     menuEditSearch.setEnabled(fileOpen);
     menuEditClearSearch.setEnabled(fileOpen);
-    menuEditAttributeAsClass.setEnabled(fileOpen);
     menuEditRenameAttribute.setEnabled(fileOpen);
     menuEditDeleteAttribute.setEnabled(fileOpen);
     menuEditDeleteAttributes.setEnabled(fileOpen);
@@ -358,7 +348,6 @@ public class ArffViewerMainPanel
     // View
     menuViewAttributes.setEnabled(fileOpen);
     menuViewValues.setEnabled(fileOpen);
-    menuViewOptimalColWidths.setEnabled(fileOpen);
   }
   
   /**
@@ -759,17 +748,6 @@ public class ArffViewerMainPanel
   }
   
   /**
-   * sets the current selected Attribute as class attribute, i.e. it moves it
-   * to the end of the attributes
-   */
-  public void attributeAsClass() {
-    if (!isPanelSelected())
-      return;
-    
-    getCurrentPanel().attributeAsClass();
-  }
-  
-  /**
    * deletes the current selected Attribute or several chosen ones
    */
   public void deleteAttribute(boolean multiple) {
@@ -809,7 +787,7 @@ public class ArffViewerMainPanel
    * displays all the attributes, returns the selected item or NULL if canceled
    */
   public String showAttributes() {
-    ArffSortedTableModel     model;
+    ArffTableSorter     model;
     ListSelectorDialog  dialog;
     int                 i;
     JList               list;
@@ -824,7 +802,7 @@ public class ArffViewerMainPanel
     result = dialog.showDialog();
     
     if (result == ListSelectorDialog.APPROVE_OPTION) {
-      model = (ArffSortedTableModel) getCurrentPanel().getTable().getModel();
+      model = (ArffTableSorter) getCurrentPanel().getTable().getModel();
       name  = list.getSelectedValue().toString();
       i     = model.getAttributeColumn(name);
       JTableHelper.scrollToVisible(getCurrentPanel().getTable(), 0, i);
@@ -841,7 +819,7 @@ public class ArffViewerMainPanel
    */
   public void showValues() {
     String                attribute;
-    ArffSortedTableModel       model;
+    ArffTableSorter       model;
     ArffTable             table;
     HashSet               values;
     Vector                items;
@@ -856,7 +834,7 @@ public class ArffViewerMainPanel
       return;
     
     table  = (ArffTable) getCurrentPanel().getTable();
-    model  = (ArffSortedTableModel) table.getModel();
+    model  = (ArffTableSorter) table.getModel();
     
     // get column index
     col    = -1;
@@ -884,16 +862,6 @@ public class ArffViewerMainPanel
     
     dialog = new ListSelectorDialog(parent, new JList(items));
     dialog.showDialog();
-  }
-  
-  /**
-   * sets the optimal column width for all columns
-   */
-  public void setOptimalColWidths() {
-    if (!isPanelSelected())
-      return;
-    
-    getCurrentPanel().setOptimalColWidths();
   }
   
   /**
@@ -932,8 +900,6 @@ public class ArffViewerMainPanel
       deleteAttribute(true);
     else if (o == menuEditRenameAttribute)
       renameAttribute();
-    else if (o == menuEditAttributeAsClass)
-      attributeAsClass();
     else if (o == menuEditDeleteInstance)
       deleteInstance(false);
     else if (o == menuEditDeleteInstances)
@@ -944,8 +910,6 @@ public class ArffViewerMainPanel
       showAttributes();
     else if (o == menuViewValues)
       showValues();
-    else if (o == menuViewOptimalColWidths)
-      setOptimalColWidths();
     
     updateMenu();
   }

@@ -23,8 +23,6 @@ package weka.classifiers.functions.pace;
 
 import java.util.Random;
 import weka.core.Statistics;
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.IntVector;
 
 
 /**
@@ -40,7 +38,7 @@ import weka.core.matrix.IntVector;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.1 $ */
 
 public abstract class  MixtureDistribution 
 {

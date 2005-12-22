@@ -100,7 +100,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 public class BVDecomposeSegCVSub implements OptionHandler {

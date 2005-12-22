@@ -92,7 +92,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.1.2.9 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -102,7 +102,7 @@ public class XMLSerialization {
     * (something might go wrong writing the new child) and in case of reading 
     * the actual node that is tried to process */
    protected Element m_CurrentNode = null;
-   
+  
    /** the tag for an object */
    public final static String TAG_OBJECT = "object";
    
@@ -373,7 +373,7 @@ public class XMLSerialization {
    protected Element addElement(Element parent, String name, String classname, boolean primitive) {
      return addElement(parent, name, classname, primitive, 0);
    }
-   
+
    /**
     * appends a new node to the parent with the given parameters
     * 
@@ -716,7 +716,7 @@ public class XMLSerialization {
     else
        return c.getComponentType().isPrimitive();
    }
-   
+
    /**
     * adds the given Object to a DOM structure. 
     * (only public due to reflection).<br>
@@ -894,7 +894,7 @@ public class XMLSerialization {
       node       = null;
       method     = null;
       useDefault = false;
-
+      
       m_CurrentNode = parent;
       
       // default, if null
@@ -1117,7 +1117,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Boolean) getPrimitive(node)).booleanValue();
@@ -1135,7 +1135,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Byte) getPrimitive(node)).byteValue();
@@ -1153,7 +1153,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Character) getPrimitive(node)).charValue();
@@ -1171,7 +1171,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Double) getPrimitive(node)).doubleValue();
@@ -1189,7 +1189,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Float) getPrimitive(node)).floatValue();
@@ -1207,7 +1207,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Integer) getPrimitive(node)).intValue();
@@ -1225,7 +1225,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Long) getPrimitive(node)).longValue();
@@ -1243,7 +1243,7 @@ public class XMLSerialization {
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Short) getPrimitive(node)).shortValue();
@@ -1403,7 +1403,7 @@ public class XMLSerialization {
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       result    = null;
@@ -1492,7 +1492,7 @@ public class XMLSerialization {
       useDefault = false;
       method     = null;
       m_CurrentNode = node;
-      
+
       try {
          // special handling of null values
          if (stringToBoolean(node.getAttribute(ATT_NULL)))

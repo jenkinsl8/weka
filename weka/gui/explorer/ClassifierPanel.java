@@ -31,7 +31,6 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Drawable;
 import weka.core.SerializedObject;
-import weka.associations.CARuleMiner;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
@@ -137,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.85 $
+ * @version $Revision: 1.79.2.3 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -288,7 +287,25 @@ public class ClassifierPanel extends JPanel {
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.SelectedTag.class,
+		      weka.gui.SelectedTagEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.filters.Filter.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.Classifier [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.Classifier.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.CostMatrix.class,
+		      weka.gui.CostMatrixEditor.class);
+    
   }
   
   /**
@@ -740,7 +757,6 @@ public class ClassifierPanel extends JPanel {
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
-      sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
@@ -760,6 +776,7 @@ public class ClassifierPanel extends JPanel {
    * @param classifier the classifier
    * @param eval the evaluation object to use for evaluating the classifier on
    * the instance to predict
+   * @param predictions a fastvector to add the prediction to
    * @param plotInstances a set of plottable instances
    * @param plotShape additional plotting information (shape)
    * @param plotSize additional plotting information (size)
@@ -767,12 +784,27 @@ public class ClassifierPanel extends JPanel {
   public static void processClassifierPrediction(Instance toPredict,
                                            Classifier classifier,
 					   Evaluation eval,
+					   FastVector predictions,
 					   Instances plotInstances,
 					   FastVector plotShape,
 					   FastVector plotSize) {
     try {
-      double pred = eval.evaluateModelOnceAndRecordPrediction(classifier, 
-							      toPredict);
+      double pred;
+      // classifier is a distribution classifier and class is nominal
+      if (predictions != null) {
+	Instance classMissing = (Instance)toPredict.copy();
+	classMissing.setDataset(toPredict.dataset());
+	classMissing.setClassMissing();
+	Classifier dc = classifier;
+	double [] dist = 
+	  dc.distributionForInstance(classMissing);
+	pred = eval.evaluateModelOnce(dist, toPredict);
+	predictions.addElement(new 
+	  NominalPrediction(toPredict.classValue(), dist, toPredict.weight()));
+      } else {
+	pred = eval.evaluateModelOnce(classifier, 
+				      toPredict);
+      }
 
       double [] values = new double[plotInstances.numAttributes()];
       for (int i = 0; i < plotInstances.numAttributes(); i++) {
@@ -921,6 +953,9 @@ public class ClassifierPanel extends JPanel {
 	  FastVector plotShape = new FastVector();
 	  FastVector plotSize = new FastVector();
 	  Instances predInstances = null;
+
+	  // will hold the prediction objects if the class is nominal
+	  FastVector predictions = null;
 	 
 	  // for timing
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
@@ -962,7 +997,6 @@ public class ClassifierPanel extends JPanel {
 	  } else {
 	    name += cname;
 	  }
-	  Evaluation eval = null;
 	  try {
 	    if (m_CVBut.isSelected()) {
 	      testMode = 1;
@@ -997,6 +1031,10 @@ public class ClassifierPanel extends JPanel {
 	    // visualization
 	    predInstances = setUpVisualizableInstances(inst);
 	    predInstances.setClassIndex(inst.classIndex()+1);
+	    
+	    if (inst.classAttribute().isNominal()) {
+	      predictions = new FastVector();
+	    }
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
@@ -1075,6 +1113,7 @@ public class ClassifierPanel extends JPanel {
 	      fullClassifier = (Classifier) so.getObject();
 	    }
 	    
+	    Evaluation eval = null;
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
@@ -1091,7 +1130,8 @@ public class ClassifierPanel extends JPanel {
 
 	      for (int jj=0;jj<inst.numInstances();jj++) {
 		processClassifierPrediction(inst.instance(jj), classifier,
-					    eval, predInstances, plotShape, 
+					    eval, predictions,
+					    predInstances, plotShape, 
 					    plotSize);
 		
 		if (outputPredictionsText) { 
@@ -1155,7 +1195,8 @@ public class ClassifierPanel extends JPanel {
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
 		  processClassifierPrediction(test.instance(jj), current,
-					      eval, predInstances, plotShape,
+					      eval, predictions,
+					      predInstances, plotShape,
 					      plotSize);
 		  if (outputPredictionsText) { 
 		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
@@ -1207,7 +1248,8 @@ public class ClassifierPanel extends JPanel {
      
 	      for (int jj=0;jj<test.numInstances();jj++) {
 		processClassifierPrediction(test.instance(jj), current,
-					    eval, predInstances, plotShape,
+					    eval, predictions,
+					    predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
 		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
@@ -1238,7 +1280,8 @@ public class ClassifierPanel extends JPanel {
 
 	      for (int jj=0;jj<userTest.numInstances();jj++) {
 		processClassifierPrediction(userTest.instance(jj), classifier,
-					    eval, predInstances, plotShape,
+					    eval, predictions,
+					    predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
 		  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
@@ -1316,8 +1359,8 @@ public class ClassifierPanel extends JPanel {
 		  if (grph != null) {
 		    vv.addElement(grph);
 		  }
-		  if ((eval != null) && (eval.predictions() != null)) {
-		    vv.addElement(eval.predictions());
+		  if (predictions != null) {
+		    vv.addElement(predictions);
 		    vv.addElement(inst.classAttribute());
 		  }
 		  m_History.addObject(name, vv);
@@ -1926,7 +1969,9 @@ public class ClassifierPanel extends JPanel {
     FastVector plotShape = new FastVector();
     FastVector plotSize = new FastVector();
     Instances predInstances = null;
-
+    
+    // will hold the prediction objects if the class is nominal
+    FastVector predictions = null;
     CostMatrix costMatrix = null;
     if (m_EvalWRTCostsBut.isSelected()) {
       costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
@@ -1939,8 +1984,7 @@ public class ClassifierPanel extends JPanel {
     boolean saveVis = m_StorePredictionsBut.isSelected();
     boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
     String grph = null;    
-    Evaluation eval = null;
-
+    
     try {
 
       if (m_TestInstances != null) {
@@ -1962,12 +2006,16 @@ public class ClassifierPanel extends JPanel {
       }
       m_Log.statusMessage("Evaluating on test data...");
       m_Log.logMessage("Re-evaluating classifier (" + name + ") on test set");
-      eval = new Evaluation(userTest, costMatrix);
+      Evaluation eval = new Evaluation(userTest, costMatrix);
       
       // set up the structure of the plottable instances for 
       // visualization
       predInstances = setUpVisualizableInstances(userTest);
       predInstances.setClassIndex(userTest.classIndex()+1);
+      
+      if (userTest.classAttribute().isNominal()) {
+	predictions = new FastVector();
+      }
       
       outBuff.append("\n=== Re-evaluation on test set ===\n\n");
       outBuff.append("User supplied test set\n");  
@@ -1989,7 +2037,8 @@ public class ClassifierPanel extends JPanel {
 
       for (int jj=0;jj<userTest.numInstances();jj++) {
 	processClassifierPrediction(userTest.instance(jj), classifier,
-				    eval, predInstances, plotShape,
+				    eval, predictions,
+				    predInstances, plotShape,
 				    plotSize);
 	if (outputPredictionsText) { 
 	  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
@@ -2069,8 +2118,8 @@ public class ClassifierPanel extends JPanel {
 	    if (grph != null) {
 	      vv.addElement(grph);
 	    }
-	    if ((eval != null) && (eval.predictions() != null)) {
-	      vv.addElement(eval.predictions());
+	    if (predictions != null) {
+	      vv.addElement(predictions);
 	      vv.addElement(userTest.classAttribute());
 	    }
 	    m_History.addObject(name, vv);

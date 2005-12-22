@@ -43,7 +43,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.2.2.2 $ 
  */
 
 public class ArffTable extends JTable {
@@ -56,7 +56,7 @@ public class ArffTable extends JTable {
    * initializes with no model
    */
   public ArffTable() {
-    this(new ArffSortedTableModel(""));
+    this(new ArffTableSorter(""));
   }
   
   /**
@@ -72,7 +72,7 @@ public class ArffTable extends JTable {
    * sets the new model
    */
   public void setModel(TableModel model) {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     
     // initialize the search
     searchString = null;
@@ -86,31 +86,27 @@ public class ArffTable extends JTable {
     if (model == null)
       return;
     
-    if (!(model instanceof ArffSortedTableModel))
+    if (!(model instanceof ArffTableSorter))
       return;
     
-    arffModel = (ArffSortedTableModel) model;
-    arffModel.addMouseListenerToHeader(this);
+    arffModel = (ArffTableSorter) model;
+    arffModel.addMouseListenerToHeaderInTable(this);
     arffModel.addTableModelListener(this);
-    arffModel.sort(0);
+    arffModel.sortByColumn(0);
     setLayout();
     setSelectedColumn(0);
-    
-    // disable column moving
-    if (getTableHeader() != null)
-      getTableHeader().setReorderingAllowed(false);
   }
   
   /**
    * sets the cell renderer and calcs the optimal column width
    */
   private void setLayout() {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     int                  i;
     JComboBox            combo;
     Enumeration          enm;
     
-    arffModel = (ArffSortedTableModel) getModel();
+    arffModel = (ArffTableSorter) getModel();
     
     for (i = 0; i < getColumnCount(); i++) {
       // optimal colwidths (only according to header!)
@@ -142,17 +138,17 @@ public class ArffTable extends JTable {
    * HTML column name via getColumnName(int)
    */
   public String getPlainColumnName(int columnIndex) {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     String               result;
     
     result = "";
     
     if (getModel() == null)
       return result;
-    if (!(getModel() instanceof ArffSortedTableModel))  
+    if (!(getModel() instanceof ArffTableSorter))  
       return result;
     
-    arffModel = (ArffSortedTableModel) getModel();
+    arffModel = (ArffTableSorter) getModel();
     
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)

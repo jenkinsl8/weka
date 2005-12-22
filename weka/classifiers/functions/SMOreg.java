@@ -58,7 +58,7 @@ import weka.core.*;
  *
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.3.2.3 $
  */
 public class SMOreg extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {

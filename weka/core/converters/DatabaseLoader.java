@@ -66,7 +66,7 @@ import java.util.Vector;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {

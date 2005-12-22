@@ -31,7 +31,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.3 $
  */
 public class MultiNomialBMAEstimator extends BayesNetEstimator {
 

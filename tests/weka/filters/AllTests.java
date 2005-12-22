@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class AllTests 
   extends WekaTestSuite {
@@ -21,7 +21,7 @@ public class AllTests
     
     suite.addTest(AllFilterTest.suite());
     suite.addTest(NullFilterTest.suite());
-    
+
     return suite;
   }
 

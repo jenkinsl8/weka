@@ -31,7 +31,7 @@ import java.awt.Font;
  * A dialog to enter URL, username and password for a database connection.
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 public class DatabaseConnectionDialog extends JDialog {
@@ -124,20 +124,14 @@ public class DatabaseConnectionDialog extends JDialog {
     m_DbaseURLText = new JTextField(url,50); 
     m_DbaseURLLab = new JLabel(" Database URL:", SwingConstants.LEFT);
     m_DbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_DbaseURLLab.setDisplayedMnemonic('D');
-    m_DbaseURLLab.setLabelFor(m_DbaseURLText);
 
     m_UserNameText = new JTextField(uname,25); 
     m_UserNameLab = new JLabel(" Username:    ", SwingConstants.LEFT);
     m_UserNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_UserNameLab.setDisplayedMnemonic('U');
-    m_UserNameLab.setLabelFor(m_UserNameText);
 
     m_PasswordText = new JPasswordField(25); 
     m_PasswordLab = new JLabel(" Password:    ", SwingConstants.LEFT);
     m_PasswordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_PasswordLab.setDisplayedMnemonic('P');
-    m_PasswordLab.setLabelFor(m_PasswordText);
 
     JPanel urlP = new JPanel();   
     //urlP.setLayout(new BorderLayout());
@@ -165,14 +159,12 @@ public class DatabaseConnectionDialog extends JDialog {
     JButton ok,cancel;
     buttonsP.add(ok = new JButton("OK"));
     buttonsP.add(cancel=new JButton("Cancel"));
-    ok.setMnemonic('O');
     ok.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
 	  m_returnValue=JOptionPane.OK_OPTION;
 	  DatabaseConnectionDialog.this.dispose();
       }
     });
-    cancel.setMnemonic('C');
     cancel.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
 	  m_returnValue=JOptionPane.CLOSED_OPTION;
@@ -183,7 +175,6 @@ public class DatabaseConnectionDialog extends JDialog {
     DbP.add(buttonsP);
     this.getContentPane().add(DbP,BorderLayout.CENTER);
     this.pack();
-    getRootPane().setDefaultButton(ok);
     setResizable(false);
   }
   public static void main(String[] args){

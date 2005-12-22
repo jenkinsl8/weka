@@ -21,12 +21,6 @@
 
 package weka.classifiers.functions.pace;
 
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.FlexibleDecimalFormat;
-import weka.core.matrix.IntVector;
-import weka.core.matrix.Matrix;
-import weka.core.matrix.Maths;
-
 import java.util.Random;
 import java.text.DecimalFormat;
 
@@ -43,7 +37,7 @@ import java.text.DecimalFormat;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.1 $ */
 
 public class PaceMatrix extends Matrix {
     

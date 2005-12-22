@@ -34,7 +34,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 

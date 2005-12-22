@@ -20,7 +20,7 @@ import weka.classifiers.*;
  * java weka.classifiers.nn.PaceRegressionTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class PaceRegressionTest extends AbstractClassifierTest {
 

@@ -32,14 +32,11 @@ import weka.experiment.Experiment;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
 import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
+import weka.experiment.PairedTTester;
 import weka.experiment.InstanceQuery;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Range;
-import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.converters.CSVLoader;
 
@@ -88,7 +85,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.28.2.4 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -122,60 +119,11 @@ public class ResultsPanel extends JPanel {
   protected DefaultComboBoxModel m_CompareModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_SortCombo */
-  protected DefaultComboBoxModel m_SortModel = 
-    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
-  
   /** The model embedded in m_TestsList */
   protected DefaultListModel m_TestsModel = new DefaultListModel();
   
   /** The model embedded in m_DisplayedList */
   protected DefaultListModel m_DisplayedModel = new DefaultListModel();
-
-  /** Displays the currently selected Tester-Class */
-  protected JLabel m_TesterClassesLabel = new JLabel("Testing with",
-						 SwingConstants.RIGHT);
-  
-  /** Contains all the available classes implementing the Tester-Interface 
-   * (the display names)
-   * @see Tester */
-  protected static DefaultComboBoxModel m_TesterClassesModel = 
-    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
-
-  /** Contains all the available classes implementing the Tester-Interface
-   * (the actual Classes) 
-   * @see Tester */
-  protected static Vector m_Testers = null;
-  
-  /** determine all classes implementing the Tester interface (in the same
-   * package!)
-   * @see Tester
-   * @see ClassDiscovery */
-  static {
-    Vector classes = ClassDiscovery.find(
-                      Tester.class.getName(),
-                      Tester.class.getPackage().getName());
-
-    // set names and classes
-    m_Testers            = new Vector();
-    m_TesterClassesModel = new DefaultComboBoxModel();
-    for (int i = 0; i < classes.size(); i++) {
-      try {
-        Class cls = Class.forName(classes.get(i).toString());
-        Tester tester = (Tester) cls.newInstance();
-        m_Testers.add(cls);
-        m_TesterClassesModel.addElement(tester.getDisplayName());
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  /** Lists all the available classes implementing the Tester-Interface 
-   * @see Tester */
-  protected JComboBox m_TesterClasses = 
-    new JComboBox(m_TesterClassesModel);
 
   /** Displays the currently selected column names for the scheme & options */
   protected JLabel m_DatasetKeyLabel = new JLabel("Row",
@@ -204,7 +152,7 @@ public class ResultsPanel extends JPanel {
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
 
   /** Lets the user select which scheme to base comparisons against */
-  protected JButton m_TestsButton = new JButton("Select");
+  protected JButton m_TestsButton = new JButton("Select base...");
 
   /** Lets the user select which schemes are compared to base */
   protected JButton m_DisplayedButton = new JButton("Select");
@@ -217,9 +165,6 @@ public class ResultsPanel extends JPanel {
 
   /** Lets the user select which performance measure to analyze */
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
-
-  /** Lets the user select which column to use for sorting */
-  protected JComboBox m_SortCombo = new JComboBox(m_SortModel);
 
   /** Lets the user edit the test significance */
   protected JTextField m_SigTex = new JTextField(
@@ -261,7 +206,7 @@ public class ResultsPanel extends JPanel {
 			    "Arff data files");
 
   /** The PairedTTester object */
-  protected Tester m_TTester = new PairedCorrectedTTester();
+  protected PairedTTester m_TTester = new PairedCorrectedTTester();
   
   /** The instances we're extracting results from */
   protected Instances m_Instances;
@@ -278,29 +223,22 @@ public class ResultsPanel extends JPanel {
   private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
 					       .getPreferredSize().height);
 
-  /** the initial result matrix */
-  protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
+  /** Produce tables in latex format */
+  protected boolean m_latexOutput = false;
   
+  /** Produce tables in csv format */
+  protected boolean m_csvOutput = false;
+  
+  /** the number of digits after the period (= precision) for printing the mean */
+  protected int m_MeanPrec = ExperimenterDefaults.getMeanPrecision();
+  
+  /** the number of digits after the period (= precision) for printing the std. deviation */
+  protected int m_StdDevPrec = ExperimenterDefaults.getStdDevPrecision();
+
   /**
    * Creates the results panel with no initial experiment.
    */
   public ResultsPanel() {
-
-    // defaults
-    m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
-    m_TTester.setShowStdDevs(ExperimenterDefaults.getShowStdDevs());
-    try {
-      m_ResultMatrix = (ResultMatrix) Class.forName(
-          ExperimenterDefaults.getOutputFormat()).newInstance();
-    }
-    catch (Exception e) {
-      m_ResultMatrix = new ResultMatrixPlainText();
-    }
-    m_ResultMatrix.setShowStdDev(ExperimenterDefaults.getShowStdDevs());
-    m_ResultMatrix.setMeanPrec(ExperimenterDefaults.getMeanPrecision());
-    m_ResultMatrix.setStdDevPrec(ExperimenterDefaults.getStdDevPrecision());
-    m_ResultMatrix.setRemoveFilterName(ExperimenterDefaults.getRemoveFilterClassnames());
-    m_ResultMatrix.setShowAverage(ExperimenterDefaults.getShowAverage());
 
     // Create/Configure/Connect components
     
@@ -311,7 +249,6 @@ public class ResultsPanel extends JPanel {
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_FromExpBut.setEnabled(false);
-    m_FromExpBut.setMnemonic('E');
     m_FromExpBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	if (m_LoadThread == null) {
@@ -325,7 +262,6 @@ public class ResultsPanel extends JPanel {
 	}
       }
     });
-    m_FromDBaseBut.setMnemonic('D');
     m_FromDBaseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	if (m_LoadThread == null) {
@@ -339,7 +275,6 @@ public class ResultsPanel extends JPanel {
 	}
       }
     });
-    m_FromFileBut.setMnemonic('F');
     m_FromFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	int returnVal = m_FileChooser.showOpenDialog(ResultsPanel.this);
@@ -358,7 +293,6 @@ public class ResultsPanel extends JPanel {
       }
     });
     setComboSizes();
-    m_TesterClasses.setEnabled(false);
     m_DatasetKeyBut.setEnabled(false);
     m_DatasetKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -376,7 +310,6 @@ public class ResultsPanel extends JPanel {
     m_ResultKeyList.setSelectionMode(ListSelectionModel
 				     .MULTIPLE_INTERVAL_SELECTION);
     m_CompareCombo.setEnabled(false);
-    m_SortCombo.setEnabled(false);
 
     m_SigTex.setEnabled(false);
     m_TestsButton.setEnabled(false);
@@ -410,7 +343,7 @@ public class ResultsPanel extends JPanel {
       }
     });
 
-    m_PerformBut.setToolTipText(m_TTester.getToolTipText());
+    m_PerformBut.setToolTipText("Performs test using corrected resampled t-test statistic (Nadeau and Bengio)");
 
     m_SaveOutBut.setEnabled(false);
     m_SaveOutBut.addActionListener(new ActionListener() {
@@ -453,176 +386,108 @@ public class ResultsPanel extends JPanel {
     GridBagLayout gbL = new GridBagLayout();
     p3.setLayout(gbL);
 
-    int y = 0;
     GridBagConstraints gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
-    gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(m_TesterClassesLabel,gbC);
-    m_TesterClassesLabel.setDisplayedMnemonic('w');
-    m_TesterClassesLabel.setLabelFor(m_TesterClasses);
-    p3.add(m_TesterClassesLabel);
-    gbC = new GridBagConstraints();
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
-    gbC.insets = new Insets(5,0,5,0);
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbL.setConstraints(m_TesterClasses, gbC);
-    p3.add(m_TesterClasses);
-    m_TesterClasses.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  setTester();
-	}
-      });
-    setSelectedItem(m_TesterClasses, ExperimenterDefaults.getTester());
-    
-    y++;
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 0;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(m_DatasetKeyLabel,gbC);
-    m_DatasetKeyLabel.setDisplayedMnemonic('R');
-    m_DatasetKeyLabel.setLabelFor(m_DatasetKeyBut);
     p3.add(m_DatasetKeyLabel);
     gbC = new GridBagConstraints();
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 0;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_DatasetKeyBut, gbC);
     p3.add(m_DatasetKeyBut);
     
-    y++;
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 2;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(m_ResultKeyLabel, gbC);
-    m_ResultKeyLabel.setDisplayedMnemonic('C');
-    m_ResultKeyLabel.setLabelFor(m_ResultKeyBut);
     p3.add(m_ResultKeyLabel);
     gbC = new GridBagConstraints();
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 2;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_ResultKeyBut, gbC);
     p3.add(m_ResultKeyBut);
     
-    y++;
     JLabel lab = new JLabel("Comparison field", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('m');
-    lab.setLabelFor(m_CompareCombo);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 3;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 3;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbC.fill = GridBagConstraints.HORIZONTAL;
     gbL.setConstraints(m_CompareCombo, gbC);
     p3.add(m_CompareCombo);
     
-    y++;
     lab = new JLabel("Significance", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('g');
-    lab.setLabelFor(m_SigTex);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 4;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 4;     gbC.gridx = 1;  gbC.weightx = 100;
     gbL.setConstraints(m_SigTex, gbC);
     p3.add(m_SigTex);
     
-    y++;
-    lab = new JLabel("Sorting (asc.) by", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('S');
-    lab.setLabelFor(m_SortCombo);
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
-    gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(lab, gbC);
-    p3.add(lab);
-    gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.WEST;
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
-    gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_SortCombo, gbC);
-    p3.add(m_SortCombo);
-    
-    y++;
     lab = new JLabel("Test base", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('b');
-    lab.setLabelFor(m_TestsButton);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 5;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 5;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_TestsButton, gbC);
     p3.add(m_TestsButton);
 
-    y++;
     lab = new JLabel("Displayed Columns", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('i');
-    lab.setLabelFor(m_DisplayedButton);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 6;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 6;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_DisplayedButton, gbC);
     p3.add(m_DisplayedButton);
 
-    y++;
+
     lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('a');
-    lab.setLabelFor(m_ShowStdDevs);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 7;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.WEST;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 7;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_ShowStdDevs, gbC);
     p3.add(m_ShowStdDevs);
 
-    y++;
     lab = new JLabel("Output Format", SwingConstants.RIGHT);
-    lab.setDisplayedMnemonic('O');
-    lab.setLabelFor(m_OutputFormatButton);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
-    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.gridy = 8;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
     gbL.setConstraints(lab, gbC);
     p3.add(lab);
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.WEST;
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.gridy = 8;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
     gbL.setConstraints(m_OutputFormatButton, gbC);
     p3.add(m_OutputFormatButton);
@@ -643,8 +508,6 @@ public class ResultsPanel extends JPanel {
     mondo.add(p3);
 
     JPanel bts = new JPanel();
-    m_PerformBut.setMnemonic('t');
-    m_SaveOutBut.setMnemonic('S');
     bts.setLayout(new GridLayout(1,2,5,5));
     bts.add(m_PerformBut);
     bts.add(m_SaveOutBut);
@@ -687,26 +550,20 @@ public class ResultsPanel extends JPanel {
    */
   protected void setComboSizes() {
     
-    m_TesterClasses.setPreferredSize(COMBO_SIZE);
     m_DatasetKeyBut.setPreferredSize(COMBO_SIZE);
     m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
-    m_SortCombo.setPreferredSize(COMBO_SIZE);
 
-    m_TesterClasses.setMaximumSize(COMBO_SIZE);
     m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
     m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
-    m_SortCombo.setMaximumSize(COMBO_SIZE);
 
-    m_TesterClasses.setMinimumSize(COMBO_SIZE);
     m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
     m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
     m_SigTex.setMinimumSize(COMBO_SIZE);
-    m_SortCombo.setMinimumSize(COMBO_SIZE);
   }
   
   /**
@@ -781,15 +638,8 @@ public class ResultsPanel extends JPanel {
       }
       JList jl = new JList(lm);
       jl.setSelectedIndex(0);
-      int result;
-      // display dialog only if there's not just one result!
-      if (jl.getModel().getSize() != 1) {
-        ListSelectorDialog jd = new ListSelectorDialog(null, jl);
-        result = jd.showDialog();
-      }
-      else {
-        result = ListSelectorDialog.APPROVE_OPTION;
-      }
+      ListSelectorDialog jd = new ListSelectorDialog(null, jl);
+      int result = jd.showDialog();
       if (result != ListSelectorDialog.APPROVE_OPTION) {
 	m_FromLab.setText("Cancelled");
 	return;
@@ -980,9 +830,6 @@ public class ResultsPanel extends JPanel {
     m_DatasetKeyModel.removeAllElements();
     m_ResultKeyModel.removeAllElements();
     m_CompareModel.removeAllElements();
-    m_SortModel.removeAllElements();
-    m_SortModel.addElement("<default>");
-    m_TTester.setSortColumn(-1);
     String selectedList = "";
     String selectedListDataset = "";
     boolean comparisonFieldSet = false; 
@@ -996,8 +843,6 @@ public class ResultsPanel extends JPanel {
 	m_DatasetKeyModel.addElement(name);
 	m_ResultKeyModel.addElement(name);
 	m_CompareModel.addElement(name);
-        if (m_Instances.attribute(i).isNumeric())
-	  m_SortModel.addElement(name);
       }
 
       if (rows.contains(name.toLowerCase())) {
@@ -1020,13 +865,9 @@ public class ResultsPanel extends JPanel {
 	comparisonFieldSet = true;
       }
     }
-    m_TesterClasses.setEnabled(true);
     m_DatasetKeyBut.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
-    m_SortCombo.setEnabled(true);
-    if (ExperimenterDefaults.getSorting().length() != 0)
-      setSelectedItem(m_SortCombo, ExperimenterDefaults.getSorting());
 
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
@@ -1053,24 +894,6 @@ public class ResultsPanel extends JPanel {
     m_SigTex.setEnabled(true);
 
     setTTester();
-  }
-
-  /**
-   * Sets the selected item of an combobox, since using setSelectedItem(...)
-   * doesn't work, if one checks object references!
-   *
-   * @param cb      the combobox to set the item for
-   * @param item    the item to set active
-   */
-  protected void setSelectedItem(JComboBox cb, String item) {
-    int       i;
-
-    for (i = 0; i < cb.getItemCount(); i++) {
-      if (cb.getItemAt(i).toString().equals(item)) {
-        cb.setSelectedIndex(i);
-        break;
-      }
-    }
   }
 
   /**
@@ -1132,12 +955,6 @@ public class ResultsPanel extends JPanel {
 
     // Carry out the test chosen and biff the results to the output area
     m_TTester.setShowStdDevs(m_ShowStdDevs.isSelected());
-    if (m_Instances.attribute(m_SortCombo.getSelectedItem().toString()) != null)
-      m_TTester.setSortColumn(
-          m_Instances.attribute(
-            m_SortCombo.getSelectedItem().toString()).index());
-    else
-      m_TTester.setSortColumn(-1);
     int compareCol = m_CompareCombo.getSelectedIndex();
     int tType = m_TestsList.getSelectedIndex();
 
@@ -1151,7 +968,10 @@ public class ResultsPanel extends JPanel {
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
     m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
-    m_TTester.setResultMatrix(m_ResultMatrix);
+    m_TTester.setMeanPrec(m_MeanPrec);
+    m_TTester.setStdDevPrec(m_StdDevPrec);
+    m_TTester.setProduceLatex(m_latexOutput);
+    m_TTester.setProduceCSV(m_csvOutput);
     try {
       if (tType < m_TTester.getNumResultsets()) {
 	outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));
@@ -1174,7 +994,7 @@ public class ResultsPanel extends JPanel {
 
     // Open the dialog
     int result = jd.showDialog();
-  
+    
     // If accepted, update the ttester
     if (result == ListSelectorDialog.APPROVE_OPTION) {
       int [] selected = m_ResultKeyList.getSelectedIndices();
@@ -1245,24 +1065,16 @@ public class ResultsPanel extends JPanel {
   public void setOutputFormatFromDialog() {
     OutputFormatDialog dialog = new OutputFormatDialog(null);
     
-    dialog.setResultMatrix(m_ResultMatrix.getClass());
-    dialog.setMeanPrec(m_ResultMatrix.getMeanPrec());
-    dialog.setStdDevPrec(m_ResultMatrix.getStdDevPrec());
-    dialog.setRemoveFilterName(m_ResultMatrix.getRemoveFilterName());
-    dialog.setShowAverage(m_ResultMatrix.getShowAverage());
+    dialog.setProduceLatex(m_latexOutput);
+    dialog.setProduceCSV(m_csvOutput);
+    dialog.setMeanPrec(m_MeanPrec);
+    dialog.setStdDevPrec(m_StdDevPrec);
     
     if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
-      try {
-        m_ResultMatrix = (ResultMatrix) dialog.getResultMatrix().newInstance();
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        m_ResultMatrix = new ResultMatrixPlainText();
-      }
-      m_ResultMatrix.setMeanPrec(dialog.getMeanPrec());
-      m_ResultMatrix.setStdDevPrec(dialog.getStdDevPrec());
-      m_ResultMatrix.setRemoveFilterName(dialog.getRemoveFilterName());
-      m_ResultMatrix.setShowAverage(dialog.getShowAverage());
+      m_latexOutput = dialog.getProduceLatex();
+      m_csvOutput   = dialog.getProduceCSV();
+      m_MeanPrec    = dialog.getMeanPrec();
+      m_StdDevPrec  = dialog.getStdDevPrec();
     }
   }
 
@@ -1281,44 +1093,6 @@ public class ResultsPanel extends JPanel {
     } else {
       m_SaveOutBut.setEnabled(false);
     }
-  }
-
-  /**
-   * sets the currently selected Tester-Class
-   */
-  protected void setTester() {
-    Tester        tester;
-    Tester        t;
-    int           i;
-    
-    if (m_TesterClasses.getSelectedItem() == null)
-      return;
-
-    tester = null;
-    
-    // find display name
-    try {
-      for (i = 0; i < m_Testers.size(); i++) {
-        t = (Tester) ((Class) m_Testers.get(i)).newInstance();
-        if (t.getDisplayName().equals(m_TesterClasses.getSelectedItem())) {
-          tester = t;
-          break;
-        }
-      }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    if (tester == null) {
-      tester  = new PairedCorrectedTTester();  // default
-      m_TesterClasses.setSelectedItem(tester.getDisplayName());
-    }
-
-    tester.assign(m_TTester);
-    m_TTester = tester;
-    m_PerformBut.setToolTipText(m_TTester.getToolTipText());
-    System.out.println("Tester set to: " + m_TTester.getClass().getName());
   }
   
   /**

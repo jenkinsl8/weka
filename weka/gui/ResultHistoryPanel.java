@@ -62,7 +62,7 @@ import weka.gui.visualize.PrintableComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.18.2.3 $
  */
 public class ResultHistoryPanel extends JPanel {
   

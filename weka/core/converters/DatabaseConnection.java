@@ -46,7 +46,7 @@ import java.sql.DatabaseMetaData;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class DatabaseConnection implements Serializable {
 

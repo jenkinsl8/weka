@@ -68,7 +68,7 @@ import weka.gui.visualize.PrintableComponent;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.18.2.3 $
  */
 
 public class AttributeVisualizationPanel extends PrintablePanel {

@@ -29,7 +29,7 @@ import weka.core.*;
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.4 $
  */
 public abstract class CachedKernel extends Kernel {
     

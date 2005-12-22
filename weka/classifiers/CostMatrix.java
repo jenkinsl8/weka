@@ -34,7 +34,7 @@ import java.util.Random;
  * an instance of class j as class i.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class CostMatrix extends Matrix {
 

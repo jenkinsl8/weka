@@ -66,7 +66,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {

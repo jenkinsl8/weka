@@ -28,6 +28,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -77,7 +78,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.3 $
 */
 
 public class Matrix 
@@ -87,14 +88,14 @@ public class Matrix
    * Array for internal storage of elements.
    * @serial internal array storage.
    */
-  protected double[][] A;
+  private double[][] A;
 
   /** 
    * Row and column dimensions.
    * @serial row dimension.
    * @serial column dimension.
    */
-  protected int m, n;
+  private int m, n;
 
   /** 
    * Construct an m-by-n matrix of zeros. 
@@ -1361,7 +1362,7 @@ public class Matrix
 
     return text.toString();
   } 
-
+  
   /**
    * converts the Matrix into a single line Matlab string: matrix is enclosed 
    * by parentheses, rows are separated by semicolon and single cells by

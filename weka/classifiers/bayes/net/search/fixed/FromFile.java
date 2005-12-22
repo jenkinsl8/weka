@@ -32,7 +32,7 @@ import java.util.*;
  * in BIFF format.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class FromFile extends SearchAlgorithm {
 	/** name of file to read structure from **/
@@ -104,7 +104,7 @@ public class FromFile extends SearchAlgorithm {
 	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
-	  setBIFFile( Utils.getOption('B', options));
+     setBIFFile( Utils.getOption('B', options));
           
           super.setOptions(options);
 	}
@@ -119,7 +119,7 @@ public class FromFile extends SearchAlgorithm {
 	  String [] options  = new String [2 + superOptions.length];
 	  int current = 0;
 
-          options[current++] = "-B";
+	  options[current++] = "-B";
 	  options[current++] = "" + getBIFFile();
 
           // insert options from parent class

@@ -22,13 +22,14 @@
 
 package weka.gui.arffviewer;
 
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
 import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
-
+import weka.gui.arffviewer.ArffTable;
+import weka.gui.arffviewer.ArffTableCellRenderer;
+import weka.gui.arffviewer.ArffTableSorter;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Undoable;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -43,7 +44,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
-
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffPanel 
@@ -80,7 +80,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   private JMenuItem             menuItemSetMissingValues;
   private JMenuItem             menuItemReplaceValues;
   private JMenuItem             menuItemRenameAttribute;
-  private JMenuItem             menuItemAttributeAsClass;
   private JMenuItem             menuItemDeleteAttribute;
   private JMenuItem             menuItemDeleteAttributes;
   private JMenuItem             menuItemSortInstances;
@@ -90,8 +89,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   private JMenuItem             menuItemClearSearch;
   private JMenuItem             menuItemUndo;
   private JMenuItem             menuItemCopy;
-  private JMenuItem             menuItemOptimalColWidth;
-  private JMenuItem             menuItemOptimalColWidths;
   
   private String                filename;
   private String                title;
@@ -172,9 +169,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     menuItemRenameAttribute = new JMenuItem("Rename attribute...");
     menuItemRenameAttribute.addActionListener(this);
     popupHeader.add(menuItemRenameAttribute);
-    menuItemAttributeAsClass = new JMenuItem("Attribute as class");
-    menuItemAttributeAsClass.addActionListener(this);
-    popupHeader.add(menuItemAttributeAsClass);
     menuItemDeleteAttribute = new JMenuItem("Delete attribute");
     menuItemDeleteAttribute.addActionListener(this);
     popupHeader.add(menuItemDeleteAttribute);
@@ -184,13 +178,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     menuItemSortInstances = new JMenuItem("Sort data (ascending)");
     menuItemSortInstances.addActionListener(this);
     popupHeader.add(menuItemSortInstances);
-    popupHeader.addSeparator();
-    menuItemOptimalColWidth = new JMenuItem("Optimal column width (current)");
-    menuItemOptimalColWidth.addActionListener(this);
-    popupHeader.add(menuItemOptimalColWidth);
-    menuItemOptimalColWidths = new JMenuItem("Optimal column width (all)");
-    menuItemOptimalColWidths.addActionListener(this);
-    popupHeader.add(menuItemOptimalColWidths);
     
     // row popup
     popupRows = new JPopupMenu();
@@ -241,9 +228,9 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     boolean            hasColumns;
     boolean            hasRows;
     boolean            attSelected;
-    ArffSortedTableModel    model;
+    ArffTableSorter    model;
     
-    model       = (ArffSortedTableModel) tableArff.getModel();
+    model       = (ArffTableSorter) tableArff.getModel();
     hasColumns  = (model.getInstances().numAttributes() > 0);
     hasRows     = (model.getInstances().numInstances() > 0);
     attSelected = hasColumns && (currentCol > 0);
@@ -303,7 +290,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     result = null;
     
     if (tableArff.getModel() != null)
-      result = ((ArffSortedTableModel) tableArff.getModel()).getInstances();
+      result = ((ArffTableSorter) tableArff.getModel()).getInstances();
     
     return result;
   }
@@ -318,7 +305,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * @see               #clearUndo()
    */
   public void setInstances(Instances data) {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
     this.filename = TAB_INSTANCES;
     
@@ -326,7 +313,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     if (data == null)   
       model = null;
     else
-      model = new ArffSortedTableModel(data);
+      model = new ArffTableSorter(data);
     
     tableArff.setModel(model);
     clearUndo();
@@ -371,28 +358,28 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * returns whether undo support is enabled
    */
   public boolean isUndoEnabled() {
-    return ((ArffSortedTableModel) tableArff.getModel()).isUndoEnabled();
+    return ((ArffTableSorter) tableArff.getModel()).isUndoEnabled();
   }
   
   /**
    * sets whether undo support is enabled
    */
   public void setUndoEnabled(boolean enabled) {
-    ((ArffSortedTableModel) tableArff.getModel()).setUndoEnabled(enabled);
+    ((ArffTableSorter) tableArff.getModel()).setUndoEnabled(enabled);
   }
   
   /**
    * removes the undo history
    */
   public void clearUndo() {
-    ((ArffSortedTableModel) tableArff.getModel()).clearUndo();
+    ((ArffTableSorter) tableArff.getModel()).clearUndo();
   }
   
   /**
    * returns whether an undo is possible 
    */
   public boolean canUndo() {
-    return ((ArffSortedTableModel) tableArff.getModel()).canUndo();
+    return ((ArffTableSorter) tableArff.getModel()).canUndo();
   }
   
   /**
@@ -400,7 +387,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    */
   public void undo() {
     if (canUndo()) {
-      ((ArffSortedTableModel) tableArff.getModel()).undo();
+      ((ArffTableSorter) tableArff.getModel()).undo();
       
       // notify about update
       notifyListener();
@@ -411,7 +398,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * adds the current state of the instances to the undolist 
    */
   public void addUndoPoint() {
-    ((ArffSortedTableModel) tableArff.getModel()).addUndoPoint();
+    ((ArffTableSorter) tableArff.getModel()).addUndoPoint();
         
     // update menu
     setMenu();
@@ -447,9 +434,9 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * sets the relation name
    */
   private void createName() {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     if (model != null)
       labelName.setText("Relation: " + model.getInstances().relationName());
     else
@@ -460,7 +447,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * loads the specified file into the table
    */
   private void loadFile(String filename) {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
     this.filename = filename;
     
@@ -469,7 +456,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     if (filename.equals(""))   
       model = null;
     else
-      model = new ArffSortedTableModel(filename);
+      model = new ArffTableSorter(filename);
     
     tableArff.setModel(model);
     setChanged(false);
@@ -480,7 +467,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * calculates the mean of the given numeric column
    */
   private void calcMean() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     int               i;
     double            mean;
     
@@ -488,7 +475,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     if (currentCol == -1)
       return;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     
     // not numeric?
     if (!model.getAttributeAt(currentCol).isNumeric())
@@ -519,7 +506,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     String                     value;
     String                     valueNew;
     int                        i;
-    ArffSortedTableModel      model;
+    ArffTableSorter      model;
     
     value    = "";
     valueNew = "";
@@ -555,7 +542,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       lastReplace = valueNew;
     }
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     model.setNotificationEnabled(false);
 
     // undo
@@ -586,14 +573,14 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * deletes the currently selected attribute
    */
   public void deleteAttribute() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     
     // no column selected?
     if (currentCol == -1)
       return;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
-
+    model = (ArffTableSorter) tableArff.getModel();
+    
     // really an attribute column?
     if (model.getAttributeAt(currentCol) == null)
       return;
@@ -618,7 +605,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    */
   public void deleteAttributes() {
     ListSelectorDialog    dialog;
-    ArffSortedTableModel       model;
+    ArffTableSorter       model;
     Object[]              atts;
     int[]                 indices;
     int                   i;
@@ -644,7 +631,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
         JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
       return;
     
-    model   = (ArffSortedTableModel) tableArff.getModel();
+    model   = (ArffTableSorter) tableArff.getModel();
     indices = new int[atts.length];
     for (i = 0; i < atts.length; i++)
       indices[i] = model.getAttributeColumn(atts[i].toString());
@@ -655,39 +642,17 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   }
   
   /**
-   * sets the current attribute as class attribute, i.e. it moves it to the end
-   * of the attributes
-   */
-  public void attributeAsClass() {
-    ArffSortedTableModel   model;
-    
-    // no column selected?
-    if (currentCol == -1)
-      return;
-    
-    model   = (ArffSortedTableModel) tableArff.getModel();
-
-    // really an attribute column?
-    if (model.getAttributeAt(currentCol) == null)
-      return;
-    
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    model.attributeAsClassAt(currentCol);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-  
-  /**
    * renames the current attribute
    */
   public void renameAttribute() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     String            newName;
     
     // no column selected?
     if (currentCol == -1)
       return;
-    
-    model   = (ArffSortedTableModel) tableArff.getModel();
+
+    model   = (ArffTableSorter) tableArff.getModel();
 
     // really an attribute column?
     if (model.getAttributeAt(currentCol) == null)
@@ -712,7 +677,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     if (index == -1)
       return;
     
-    ((ArffSortedTableModel) tableArff.getModel()).deleteInstanceAt(index);
+    ((ArffTableSorter) tableArff.getModel()).deleteInstanceAt(index);
   }
   
   /**
@@ -725,7 +690,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       return;
     
     indices = tableArff.getSelectedRows();
-    ((ArffSortedTableModel) tableArff.getModel()).deleteInstances(indices);
+    ((ArffTableSorter) tableArff.getModel()).deleteInstances(indices);
   }
   
   /**
@@ -735,7 +700,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
     if (currentCol == -1)
       return;
     
-    ((ArffSortedTableModel) tableArff.getModel()).sortInstances(currentCol);
+    ((ArffTableSorter) tableArff.getModel()).sortInstances(currentCol);
   }
   
   /**
@@ -757,7 +722,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * searches for a string in the cells
    */
   public void search() {
-    String              searchString;
+    ArffTable            table;
+    String               searchString;
     
     // display dialog
     searchString = ComponentHelper.showInputBox(getParent(), "Search...", "Enter the string to search for", lastSearch);
@@ -772,24 +738,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    */
   public void clearSearch() {
     getTable().setSearchString("");
-  }
-  
-  /**
-   * calculates the optimal column width for the current column
-   */
-  public void setOptimalColWidth() {
-    // no column selected?
-    if (currentCol == -1)
-      return;
-
-    JTableHelper.setOptimalColumnWidth(getTable(), currentCol);
-  }
-  
-  /**
-   * calculates the optimal column widths for all columns
-   */
-  public void setOptimalColWidths() {
-    JTableHelper.setOptimalColumnWidth(getTable());
   }
   
   /**
@@ -810,8 +758,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       setValues(menuItemReplaceValues);
     else if (o == menuItemRenameAttribute)
       renameAttribute();
-    else if (o == menuItemAttributeAsClass)
-      attributeAsClass();
     else if (o == menuItemDeleteAttribute)
       deleteAttribute();
     else if (o == menuItemDeleteAttributes)
@@ -830,10 +776,6 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
       undo();
     else if (o == menuItemCopy)
       copyContent();
-    else if (o == menuItemOptimalColWidth)
-      setOptimalColWidth();
-    else if (o == menuItemOptimalColWidths)
-      setOptimalColWidths();
   }
   
   /**

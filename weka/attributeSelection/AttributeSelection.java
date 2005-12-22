@@ -79,7 +79,7 @@ import java.lang.reflect.Method;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.39 $
+ * @version  $Revision: 1.35.2.3 $
  */
 public class AttributeSelection implements Serializable {
 

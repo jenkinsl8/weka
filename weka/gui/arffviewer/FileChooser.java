@@ -36,7 +36,7 @@ import javax.swing.JFileChooser;
  * NullPointerException! ;-)
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class FileChooser 

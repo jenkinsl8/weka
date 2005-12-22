@@ -54,7 +54,7 @@ import java.util.Vector;
  * and for choosing the value it is changed to (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.2.2.1 $ 
  **/
 public class AddNoise extends Filter implements UnsupervisedFilter,
 						OptionHandler {

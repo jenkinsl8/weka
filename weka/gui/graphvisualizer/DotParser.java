@@ -48,7 +48,7 @@ import weka.gui.graphvisualizer.GraphEdge;
  * grouping of nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.2.2.1 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class DotParser implements GraphConstants  {
   

@@ -22,6 +22,8 @@
 
 
 package weka.attributeSelection;
+import java.io.*;
+import weka.core.*;
 
 
 /** 
@@ -29,7 +31,7 @@ package weka.attributeSelection;
  * ranked list of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public interface RankedOutputSearch {
 

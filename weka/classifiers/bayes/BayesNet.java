@@ -44,9 +44,22 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
+
+    static {
+        try {
+            java.beans.PropertyEditorManager.registerEditor(
+                weka.classifiers.bayes.net.search.SearchAlgorithm.class,
+                weka.gui.GenericObjectEditor.class);
+            java.beans.PropertyEditorManager.registerEditor(
+                weka.classifiers.bayes.net.estimate.BayesNetEstimator.class,
+                weka.gui.GenericObjectEditor.class);
+        } catch (Throwable t) {
+            // ignore
+        }
+    }
 
     /**
      * The parent sets.

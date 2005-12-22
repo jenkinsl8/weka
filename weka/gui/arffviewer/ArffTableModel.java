@@ -29,8 +29,6 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Undoable;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Reorder;
 import weka.gui.ComponentHelper;
 
 import java.io.BufferedInputStream;
@@ -55,7 +53,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffTableModel implements TableModel, Undoable {
@@ -259,52 +257,6 @@ public class ArffTableModel implements TableModel, Undoable {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
       addUndoPoint();
       data.renameAttribute(columnIndex - 1, newName);
-      notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
-    }
-  }
-  
-  /**
-   * sets the attribute at the given col index as the new class attribute, i.e.
-   * it moves it to the end of the attributes
-   */
-  public void attributeAsClassAt(int columnIndex) {
-    Reorder     reorder;
-    String      order;
-    int         i;
-    
-    if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
-      addUndoPoint();
-      
-      try {
-        // build order string (1-based!)
-        order = "";
-        for (i = 1; i < data.numAttributes() + 1; i++) {
-          // skip new class
-          if (i == columnIndex)
-            continue;
-          
-          if (!order.equals(""))
-            order += ",";
-          order += Integer.toString(i);
-        }
-        if (!order.equals(""))
-          order += ",";
-        order += Integer.toString(columnIndex);
-        
-        // process data
-        reorder = new Reorder();
-        reorder.setAttributeIndices(order);
-        reorder.setInputFormat(data);
-        data = Filter.useFilter(data, reorder);
-        
-        // set class index
-        data.setClassIndex(data.numAttributes() - 1);
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        undo();
-      }
-      
       notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
   }
@@ -631,7 +583,7 @@ public class ArffTableModel implements TableModel, Undoable {
     
     // notify only if the value has changed!
     if (notify && (!("" + oldValue).equals("" + aValue)) )
-        notifyListener(new TableModelEvent(this, rowIndex, columnIndex));
+      notifyListener(new TableModelEvent(this, rowIndex, columnIndex));
   }
   
   /**
@@ -689,6 +641,7 @@ public class ArffTableModel implements TableModel, Undoable {
    * undoes the last action
    */
   public void undo() {
+    ArffTableSorter       model;
     File                  tempFile;
     Instances             inst;
     ObjectInputStream     ooi;
@@ -723,6 +676,7 @@ public class ArffTableModel implements TableModel, Undoable {
    * @see #setUndoEnabled(boolean)
    */
   public void addUndoPoint() {
+    ArffTableSorter       model;
     File                  tempFile;
     ObjectOutputStream    oos;
 

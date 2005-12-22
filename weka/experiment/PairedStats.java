@@ -30,7 +30,7 @@ import weka.core.Statistics;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6 $
  */
 public class PairedStats {
   
@@ -65,9 +65,6 @@ public class PairedStats {
   
   /** The significance level for comparisons */
   public double sigLevel;
-
-  /** The degrees of freedom (if set programmatically) */
-  protected int m_degreesOfFreedom = 0;
     
   /**
    * Creates a new PairedStats object with the supplied significance level.
@@ -80,25 +77,6 @@ public class PairedStats {
     yStats = new Stats();
     differencesStats = new Stats();
     sigLevel = sig;
-  }
-
-  /**
-   * Sets the degrees of freedom (if calibration is required).
-   */
-  public void setDegreesOfFreedom(int d) {
-   
-    if (d <= 0) {
-      throw new IllegalArgumentException("PairedStats: degrees of freedom must be >= 1");
-    }
-    m_degreesOfFreedom = d;
-  }
-
-  /**
-   * Gets the degrees of freedom.
-   */
-  public int getDegreesOfFreedom() {
-
-    return m_degreesOfFreedom;
   }
 
   /**
@@ -130,46 +108,7 @@ public class PairedStats {
     xySum -= value1 * value2;
     count --;
   }
-
     
-  /**
-   * Adds an array of observed pair of values.
-   *
-   * @param value1 the array containing values from column 1
-   * @param value2 the array containing values from column 2
-   */
-  public void add(double value1[], double value2[]) {
-    if ((value1 == null) || (value2 == null)) {
-      throw new NullPointerException();
-    }
-    if (value1.length != value2.length) {
-      throw new IllegalArgumentException("Arrays must be of the same length");
-    }
-    for (int i = 0; i < value1.length; i++) {
-      add(value1[i], value2[i]);
-    }
-  }
-
-
-  /**
-   * Removes an array of observed pair of values.
-   *
-   * @param value1 the array containing values from column 1
-   * @param value2 the array containing values from column 2
-   */
-  public void subtract(double value1[], double value2[]) {
-    if ((value1 == null) || (value2 == null)) {
-      throw new NullPointerException();
-    }
-    if (value1.length != value2.length) {
-      throw new IllegalArgumentException("Arrays must be of the same length");
-    }
-    for (int i = 0; i < value1.length; i++) {
-      subtract(value1[i], value2[i]);
-    }
-  }  
-
-
   /**
    * Calculates the derived statistics (significance etc).
    */
@@ -195,18 +134,11 @@ public class PairedStats {
       double tval = differencesStats.mean
 	* Math.sqrt(count)
 	/ differencesStats.stdDev;
-
-      if (m_degreesOfFreedom >= 1){
-        differencesProbability = Statistics.FProbability(tval * tval, 1,
-                                                         m_degreesOfFreedom);
-      } else {
-        if (count > 1) {
-          differencesProbability = Statistics.FProbability(tval * tval, 1,
-                                                           (int) count - 1);
-        } else {
-          differencesProbability = 1;
-        }
-      }
+      
+      if (count > 1) {
+	differencesProbability = Statistics.FProbability(tval * tval, 1,
+							 (int) count - 1);
+      } else differencesProbability = 1;
     } else {
       if (differencesStats.sumSq == 0) {
 	differencesProbability = 1.0;

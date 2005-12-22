@@ -23,6 +23,7 @@
 
 package  weka.attributeSelection;
 
+import  java.io.*;
 import  java.util.*;
 import  weka.core.*;
 
@@ -39,7 +40,7 @@ import  weka.core.*;
  * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.21 $
  */
 public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {

@@ -70,7 +70,7 @@ import weka.core.*;
  * calculating the random matrix (default 42). <p>
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
+ * @version $Revision: 1.3.2.1 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
  *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter, OptionHandler {

@@ -59,7 +59,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class RemoveMisclassified extends Filter implements UnsupervisedFilter, OptionHandler {
 

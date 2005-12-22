@@ -2,21 +2,6 @@
 KnowledgeFlow GUI Quick Primer
 ===============================================================
 
-What's new in the KnowledgeFlow:
-
-Components can now be grouped together under a "meta" component. Start
-by placing some components on the layout and connecting them
-together. Then select a subset of components with the mouse by holding
-down the left button and dragging the resulting rectangle. You will
-then be asked whether you wish to group the selected components and
-for a name to give the group. The selected components will then be
-replaced by a single icon on the layout. All grouped beans can still
-be configured and connections made by right-clicking on the icon to
-display a pop-up menu. At the moment meta components can't form part
-of another group (this functionality will be added in a later
-release). Eventually, functionality will be added to allow the user
-to store custom groups in a user toolbar for reuse.
-
 Introduction:
 
 The KnowledgeFlow provides an alternative to the Explorer as a

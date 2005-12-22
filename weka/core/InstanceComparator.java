@@ -35,7 +35,7 @@ import java.util.Comparator;
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.2 $
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */

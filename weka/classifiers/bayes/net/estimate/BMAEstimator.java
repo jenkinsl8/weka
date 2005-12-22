@@ -39,7 +39,7 @@ import java.util.Vector;
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
  *
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 
 public class BMAEstimator extends SimpleEstimator {

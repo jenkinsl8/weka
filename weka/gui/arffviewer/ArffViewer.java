@@ -38,13 +38,13 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
 
 public class ArffViewer 
   extends     JFrame
   implements  WindowListener {
-
+  
   /** the main panel */
   private ArffViewerMainPanel m_MainPanel;
   
@@ -88,7 +88,7 @@ public class ArffViewer
     m_MainPanel = new ArffViewerMainPanel(this);
     m_MainPanel.setConfirmExit(false);
     getContentPane().add(m_MainPanel, BorderLayout.CENTER);
-    
+
     setJMenuBar(m_MainPanel.getMenu());
   }
   
@@ -100,7 +100,7 @@ public class ArffViewer
     int            x;
     
     width  = getBounds().width;
-    x      = (getGraphicsConfiguration().getBounds().width  - width) / 2;
+    x      = (getGraphicsConfiguration().getBounds().width  - width)  / 2;
     
     if (x < 0) 
       x = 0;
@@ -148,7 +148,7 @@ public class ArffViewer
   public boolean getConfirmExit() {
     return m_MainPanel.getConfirmExit();
   }
-
+  
   /**
    * whether to do a System.exit(0) on close
    */
@@ -177,7 +177,7 @@ public class ArffViewer
     validate();
     repaint();
   }
-
+  
   /**
    * invoked when a window is activated
    */

@@ -35,7 +35,7 @@ import weka.estimators.*;
  * Bayes networks and random instances based on a Bayes network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.4.2.3 $
  */
 public class BayesNetGenerator extends BayesNet {
 	int m_nSeed = 1;
@@ -254,14 +254,12 @@ public class BayesNetGenerator extends BayesNet {
 	 * a Bayes network structure has been initialized
 	 * @param nInstances: nr of isntances to generate
 	 */
-	public void generateInstances () throws Exception {
-	    int [] order = getOrder();
+	public void generateInstances(){
 		for (int iInstance = 0; iInstance < m_nNrOfInstances; iInstance++) {
 		    int nNrOfAtts = m_Instances.numAttributes();
 			Instance instance = new Instance(nNrOfAtts);
 			instance.setDataset(m_Instances);
-			for (int iAtt2 = 0; iAtt2 < nNrOfAtts; iAtt2++) {
-			    int iAtt = order[iAtt2];
+			for (int iAtt = 0; iAtt < nNrOfAtts; iAtt++) {
 
 				double iCPT = 0;
 
@@ -281,37 +279,6 @@ public class BayesNetGenerator extends BayesNet {
 			m_Instances.add(instance);
 		}
 	} // GenerateInstances
-
-    int [] getOrder() throws Exception {
-	int nNrOfAtts = m_Instances.numAttributes();
-	int [] order = new int[nNrOfAtts];
-	boolean [] bDone = new boolean[nNrOfAtts];
-	for (int iAtt = 0; iAtt < nNrOfAtts; iAtt++) {
-	    int iAtt2 = 0; 
-	    boolean allParentsDone = false;
-	    while (!allParentsDone && iAtt2 < nNrOfAtts) {
-		if (!bDone[iAtt2]) {
-		    allParentsDone = true;
-		    int iParent = 0;
-		    while (allParentsDone && iParent < m_ParentSets[iAtt2].getNrOfParents()) {
-			allParentsDone = bDone[m_ParentSets[iAtt].getParent(iParent++)];
-		    }
-		    if (allParentsDone && iParent == m_ParentSets[iAtt2].getNrOfParents()) {
-			order[iAtt] = iAtt2;
-			bDone[iAtt2] = true;
-		    } else {
-			iAtt2++;
-		    }
-		} else {
-		    iAtt2++;
-		}
-	    }
-	    if (!allParentsDone && iAtt2 == nNrOfAtts) {
-		throw new Exception("There appears to be a cycle in the graph");
-	    }
-	}
-	return order;
-    } // getOrder
     
   	public String toString() {
 		if (m_bGenerateNet) {
@@ -464,7 +431,7 @@ public class BayesNetGenerator extends BayesNet {
     	try {
 		if ( (Argv.length == 0) || (Utils.getFlag('h', Argv)) ) {
                         printOptions(b);
-                        return;
+			return;
 		}
 	    	b.setOptions(Argv);
 	    	
@@ -475,7 +442,7 @@ public class BayesNetGenerator extends BayesNet {
 	    	System.out.println(b.toString());
     	} catch (Exception e) {
     		e.printStackTrace();
-    		printOptions(b);
+                printOptions(b);
     	}
     } // main
     

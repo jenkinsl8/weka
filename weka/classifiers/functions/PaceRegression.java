@@ -26,8 +26,6 @@ import weka.classifiers.Evaluation;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.IntVector;
 
 /**
  * Class for building pace regression linear models and using them for
@@ -81,7 +79,7 @@ import weka.core.matrix.IntVector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.1.2.1 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 

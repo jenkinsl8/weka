@@ -32,7 +32,7 @@ import java.io.Serializable;
  * for learning Bayesian network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.5 $
+ * Version: $Revision: 1.4.2.1 $
  */
 public class HillClimber extends LocalScoreSearchAlgorithm {
 

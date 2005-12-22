@@ -57,7 +57,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.29.2.1 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 

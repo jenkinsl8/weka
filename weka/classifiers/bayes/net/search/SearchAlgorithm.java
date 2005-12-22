@@ -36,7 +36,7 @@ import weka.core.OptionHandler;
  * and should not be used by itself.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
@@ -216,7 +216,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @return an enumeration of all the available options.
      */
     public Enumeration listOptions() {
-        return new Vector(0).elements();
+      return new Vector(0).elements();
     } // listOption
 
     /**
@@ -233,7 +233,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-        return new String[0];
+      return new String[0];
     } // getOptions
 
     public String toString() {

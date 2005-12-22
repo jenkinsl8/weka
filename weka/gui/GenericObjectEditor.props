@@ -70,7 +70,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
  weka.classifiers.meta.Vote,\
- weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.ADTree,\
@@ -113,7 +112,6 @@ weka.filters.Filter = \
  weka.filters.unsupervised.attribute.Discretize, \
  weka.filters.unsupervised.attribute.FirstOrder, \
  weka.filters.unsupervised.attribute.MakeIndicator, \
- weka.filters.unsupervised.attribute.MathExpression, \
  weka.filters.unsupervised.attribute.MergeTwoValues, \
  weka.filters.unsupervised.attribute.NominalToBinary, \
  weka.filters.unsupervised.attribute.Normalize, \
@@ -136,7 +134,6 @@ weka.filters.Filter = \
  weka.filters.unsupervised.instance.NonSparseToSparse, \
  weka.filters.unsupervised.instance.Randomize, \
  weka.filters.unsupervised.instance.RemoveFolds, \
- weka.filters.unsupervised.instance.RemoveFrequentValues, \
  weka.filters.unsupervised.instance.RemoveMisclassified, \
  weka.filters.unsupervised.instance.RemovePercentage, \
  weka.filters.unsupervised.instance.RemoveRange, \
@@ -197,8 +194,7 @@ weka.attributeSelection.ASEvaluation = \
  weka.attributeSelection.OneRAttributeEval, \
  weka.attributeSelection.ChiSquaredAttributeEval, \
  weka.attributeSelection.PrincipalComponents, \
- weka.attributeSelection.SVMAttributeEval, \
- weka.attributeSelection.SymmetricalUncertAttributeSetEval
+ weka.attributeSelection.SVMAttributeEval
 
 # Lists the Attribute Selection Search methods I want to choose from
 weka.attributeSelection.ASSearch = \
@@ -208,7 +204,6 @@ weka.attributeSelection.ASSearch = \
  weka.attributeSelection.GeneticSearch, \
  weka.attributeSelection.RandomSearch, \
  weka.attributeSelection.ExhaustiveSearch, \
- weka.attributeSelection.FCBFSearch, \
  weka.attributeSelection.Ranker, \
  weka.attributeSelection.RankSearch
 
@@ -225,9 +220,7 @@ weka.clusterers.Clusterer=\
  weka.clusterers.SimpleKMeans, \
  weka.clusterers.Cobweb, \
  weka.clusterers.FarthestFirst, \
- weka.clusterers.MakeDensityBasedClusterer, \
- weka.clusterers.DBScan, \
- weka.clusterers.OPTICS
+ weka.clusterers.MakeDensityBasedClusterer
 
 # Lists the DensityBasedClusterers I want to choose from
 weka.clusterers.DensityBasedClusterer=\
@@ -273,27 +266,3 @@ weka.classifiers.bayes.net.search.SearchAlgorithm =\
 weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
  weka.classifiers.bayes.net.estimate.SimpleEstimator, \
  weka.classifiers.bayes.net.estimate.BMAEstimator
-
-# Lists the data generator algorithms
-weka.datagenerators.DataGenerator=\
-  weka.datagenerators.classifiers.classification.Agrawal,\
-  weka.datagenerators.classifiers.classification.BayesNet,\
-  weka.datagenerators.classifiers.classification.LED24,\
-  weka.datagenerators.classifiers.classification.RandomRBF,\
-  weka.datagenerators.classifiers.classification.RDG1,\
-  weka.datagenerators.classifiers.regression.Expression,\
-  weka.datagenerators.classifiers.regression.MexicanHat,\
-  weka.datagenerators.clusterers.BIRCHCluster,\
-  weka.datagenerators.clusterers.SubspaceCluster
-
-# Lists the Cluster definitions
-weka.datagenerators.ClusterDefinition=\
-  weka.datagenerators.clusterers.SubspaceClusterDefinition
-
-# Lists the Stemmer algorithms
-weka.core.stemmers.Stemmer=\
- weka.core.stemmers.IteratedLovinsStemmer,\
- weka.core.stemmers.LovinsStemmer,\
- weka.core.stemmers.NullStemmer,\
- weka.core.stemmers.SnowballStemmer
-   

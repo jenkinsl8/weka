@@ -37,7 +37,7 @@ import java.util.Vector;
  * algorithm for Bayes Network structure learning.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */ 
 public class ICSSearchAlgorithm extends CISearchAlgorithm {
 
@@ -524,7 +524,7 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	  
 	  return (String[]) result.toArray(new String[result.size()]);
 	} // getOptions
-	
+
 
 	/**
 	 * @return a string to describe the MaxCardinality option.

@@ -62,7 +62,7 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.4.2.2 $ 
  */
 public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnhancer
   implements UpdateableClassifier {

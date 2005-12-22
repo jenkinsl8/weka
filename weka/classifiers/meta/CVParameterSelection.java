@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.27.2.3 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {

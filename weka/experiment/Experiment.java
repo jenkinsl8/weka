@@ -66,7 +66,7 @@ import java.beans.PropertyChangeListener;
  * on disk.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.22.2.3 $
  */
 public class Experiment implements Serializable, OptionHandler {
   

@@ -13,7 +13,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8.2.2 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(boolean,boolean,boolean)

@@ -36,7 +36,7 @@ import weka.core.*;
  * association rules.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class AprioriItemSet extends ItemSet implements Serializable {
 

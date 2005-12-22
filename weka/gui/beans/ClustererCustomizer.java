@@ -39,12 +39,32 @@ import weka.clusterers.Clusterer;
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 public class ClustererCustomizer extends JPanel implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.SelectedTag.class,
+		      weka.gui.SelectedTagEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.filters.Filter.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASSearch.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.attributeSelection.ASEvaluation.class,
+		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(Object [].class,
+		      weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.classifiers.CostMatrix.class,
+		      weka.gui.CostMatrixEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.clusterers.Clusterer.class,
+		      weka.gui.GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

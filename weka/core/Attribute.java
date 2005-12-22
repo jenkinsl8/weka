@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.32.2.2 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -89,9 +89,6 @@ public class Attribute implements Copyable, Serializable {
 
   /** Constant set for attributes with date values. */
   public static final int DATE = 3;
-
-  /** Constant set for relation-valued attributes. */
-  public static final int RELATIONAL = 4;
 
   /** Constant set for symbolic attributes. */
   public static final int ORDERING_SYMBOLIC = 0;
@@ -120,12 +117,6 @@ public class Attribute implements Copyable, Serializable {
   /** The keyword used to denote a date attribute */
   static String ARFF_ATTRIBUTE_DATE = "date";
 
-  /** The keyword used to denote a relation-valued attribute */
-  static String ARFF_ATTRIBUTE_RELATIONAL = "relational";
-
-  /** The keyword used to denote the end of the declaration of a subrelation */
-  static String ARFF_END_SUBRELATION = "@end";
-
   /** Strings longer than this will be stored compressed. */
   private static final int STRING_COMPRESS_THRESHOLD = 200;
 
@@ -137,8 +128,7 @@ public class Attribute implements Copyable, Serializable {
   /*@ invariant m_Type == NUMERIC || 
                 m_Type == DATE || 
                 m_Type == STRING || 
-                m_Type == NOMINAL ||
-                m_Type == RELATIONAL;
+                m_Type == NOMINAL;
   */
 
   /** The attribute's values (if nominal or string). */
@@ -146,9 +136,6 @@ public class Attribute implements Copyable, Serializable {
 
   /** Mapping of values to indices (if nominal or string). */
   private Hashtable m_Hashtable;
-
-  /** The header information for a relation-valued attribute. */
-  private Instances m_Header;
 
   /** Date format specification for date attributes */
   private SimpleDateFormat m_DateFormat;
@@ -213,7 +200,6 @@ public class Attribute implements Copyable, Serializable {
     m_Index = -1;
     m_Values = null;
     m_Hashtable = null;
-    m_Header = null;
     m_Type = NUMERIC;
     setMetadata(metadata);
   }
@@ -253,7 +239,6 @@ public class Attribute implements Copyable, Serializable {
     m_Index = -1;
     m_Values = null;
     m_Hashtable = null;
-    m_Header = null;
     m_Type = DATE;
     if (dateFormat != null) {
       m_DateFormat = new SimpleDateFormat(dateFormat);
@@ -311,12 +296,10 @@ public class Attribute implements Copyable, Serializable {
     if (attributeValues == null) {
       m_Values = new FastVector();
       m_Hashtable = new Hashtable();
-      m_Header = null;
       m_Type = STRING;
     } else {
       m_Values = new FastVector(attributeValues.size());
       m_Hashtable = new Hashtable(attributeValues.size());
-      m_Header = null;
       for (int i = 0; i < attributeValues.size(); i++) {
 	Object store = attributeValues.elementAt(i);
 	if (((String)store).length() > STRING_COMPRESS_THRESHOLD) {
@@ -341,43 +324,6 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Constructor for relation-valued attributes.
-   *
-   * @param attributeName the name for the attribute
-   * @param header an Instances object specifying the header of the relation.
-   */
-  public Attribute(String attributeName, Instances header) {
-
-    this(attributeName, header,
-	 new ProtectedProperties(new Properties()));
-  }
-
-  /**
-   * Constructor for relation-valued attributes.
-   *
-   * @param attributeName the name for the attribute
-   * @param header an Instances object specifying the header of the relation.
-   * @param metadata the attribute's properties
-   */
-  public Attribute(String attributeName, 
-		   Instances header,
-		   ProtectedProperties metadata) {
-
-    if (header.numInstances() > 0) {
-      throw new IllegalArgumentException("Header for relation-valued " +
-                                         "attribute should not contain " +
-                                         "any instances");
-    }
-    m_Name = attributeName;
-    m_Index = -1;
-    m_Values = new FastVector();
-    m_Hashtable = null;
-    m_Header = header;
-    m_Type = RELATIONAL;
-    setMetadata(metadata);
-  }
-
-  /**
    * Produces a shallow copy of this attribute.
    *
    * @return a copy of this attribute with the same index
@@ -392,15 +338,14 @@ public class Attribute implements Copyable, Serializable {
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
     copy.m_DateFormat = m_DateFormat;
-    copy.m_Header = m_Header;
     copy.setMetadata(m_Metadata);
  
     return copy;
   }
 
   /**
-   * Returns an enumeration of all the attribute's values if the
-   * attribute is nominal, string, or relation-valued, null otherwise.
+   * Returns an enumeration of all the attribute's values if
+   * the attribute is nominal or a string, null otherwise. 
    *
    * @return enumeration of all the attribute's values
    */
@@ -450,14 +395,9 @@ public class Attribute implements Copyable, Serializable {
         }
       }
       return true;
-    } 
-    if (isRelationValued() && att.isRelationValued()) {
-      if (!m_Header.equalHeaders(att.m_Header)) {
-        return false;
-      }
-      return true;
-    } 
-    return (type() == att.type());
+    } else {
+      return (type() == att.type());
+    }
   }
 
   /**
@@ -477,7 +417,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param value the value for which the index is to be returned
    * @return the index of the given attribute value if attribute
-   * is nominal or a string, -1 if it is not or the value 
+   * is nominal or a string, -1 if it is numeric or the value 
    * can't be found
    */
   public final int indexOfValue(String value) {
@@ -521,17 +461,6 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Tests if the attribute is relation valued.
-   *
-   * @return true if the attribute is relation valued
-   */
-  //@ ensures \result <==> (m_Type == RELATIONAL);
-  public final /*@ pure @*/ boolean isRelationValued() {
-
-    return (m_Type == RELATIONAL);
-  }
-
-  /**
    * Tests if the attribute is a string.
    *
    * @return true if the attribute is a string
@@ -565,15 +494,13 @@ public class Attribute implements Copyable, Serializable {
   }
   
   /**
-   * Returns the number of attribute values. Returns 0 for 
-   * attributes that are not either nominal, string, or
-   * relation-valued.
+   * Returns the number of attribute values. Returns 0 for numeric attributes.
    *
    * @return the number of attribute values
    */
   public final /*@ pure @*/ int numValues() {
 
-    if (!isNominal() && !isString() && !isRelationValued()) {
+    if (!isNominal() && !isString()) {
       return 0;
     } else {
       return m_Values.size();
@@ -612,14 +539,6 @@ public class Attribute implements Copyable, Serializable {
     case DATE:
       text.append(ARFF_ATTRIBUTE_DATE).append(" ").append(Utils.quote(m_DateFormat.toPattern()));
       break;
-    case RELATIONAL:
-      text.append(ARFF_ATTRIBUTE_RELATIONAL).append("\n");
-      Enumeration enm = m_Header.enumerateAttributes();
-      while (enm.hasMoreElements()) {
-        text.append(enm.nextElement()).append("\n");
-      }
-      text.append(ARFF_END_SUBRELATION).append(" ").append(m_Name);
-      break;
     default:
       text.append("UNKNOWN");
       break;
@@ -639,9 +558,9 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Returns a value of a nominal or string attribute.  Returns an
-   * empty string if the attribute is neither a string nor a nominal
-   * attribute.
+   * Returns a value of a nominal or string attribute. 
+   * Returns an empty string if the attribute is neither
+   * nominal nor a string attribute.
    *
    * @param valIndex the value's index
    * @return the attribute's value as a string
@@ -658,38 +577,6 @@ public class Attribute implements Copyable, Serializable {
         val = ((SerializedObject)val).getObject();
       }
       return (String) val;
-    }
-  }
-
-  /**
-   * Returns the header info for a relation-valued attribute,
-   * null if the attribute is not relation-valued.
-   *
-   * @param valIndex the value's index
-   * @return the attribute's value as an Instances object
-   */
-  public final /*@ non_null pure @*/ Instances relation() {
-    
-    if (!isRelationValued()) {
-      return null;
-    } else {
-      return m_Header;
-    }
-  }
-
-  /**
-   * Returns a value of a relation-valued attribute. Returns
-   * null if the attribute is not relation-valued.
-   *
-   * @param valIndex the value's index
-   * @return the attribute's value as an Instances object
-   */
-  public final /*@ non_null pure @*/ Instances relation(int valIndex) {
-    
-    if (!isRelationValued()) {
-      return null;
-    } else {
-      return (Instances) m_Values.elementAt(valIndex);
     }
   }
 
@@ -748,24 +635,6 @@ public class Attribute implements Copyable, Serializable {
 	    int index) {
 
     this(attributeName, attributeValues);
-    m_Index = index;
-  }
-
-  /**
-   * Constructor for a relation-valued attribute with a particular index.
-   *
-   * @param attributeName the name for the attribute
-   * @param header the header information for this attribute
-   * @param index the attribute's index
-   */
-  //@ requires attributeName != null;
-  //@ requires index >= 0;
-  //@ ensures  m_Name == attributeName;
-  //@ ensures  m_Index == index;
-  Attribute(String attributeName, Instances header,
-	    int index) {
-
-    this(attributeName, header);
     m_Index = index;
   }
 
@@ -840,27 +709,6 @@ public class Attribute implements Copyable, Serializable {
   }
 
   /**
-   * Adds a relation to a relation-valued attribute.
-   *
-   * @param value The value to add
-   * @return the index assigned to the value, or -1 if the attribute is not
-   * of type Attribute.RELATIONAL 
-   */
-  public int addRelation(Instances value) {
-
-    if (!isRelationValued()) {
-      return -1;
-    }
-    if (!m_Header.equalHeaders(value)) {
-      throw new IllegalArgumentException("Incompatible value for " +
-                                         "relation-valued attribute.");
-    }
-    int intIndex = m_Values.size();
-    m_Values.addElement(value);
-    return intIndex;
-  }
-
-  /**
    * Adds an attribute value. Creates a fresh list of attribute
    * values before adding it.
    *
@@ -892,47 +740,41 @@ public class Attribute implements Copyable, Serializable {
     copy.m_Type = m_Type;
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
-    copy.m_Header = m_Header;
     copy.setMetadata(m_Metadata);
  
     return copy;
   }
 
   /**
-   * Removes a value of a nominal, string, or relation-valued
-   * attribute. Creates a fresh list of attribute values before
-   * removing it.
+   * Removes a value of a nominal or string attribute. Creates a 
+   * fresh list of attribute values before removing it.
    *
    * @param index the value's index
-   * @exception IllegalArgumentException if the attribute is not 
-   * of the correct type
+   * @exception IllegalArgumentException if the attribute is not nominal
    */
-  //@ requires isNominal() || isString() || isRelationValued();
+  //@ requires isNominal() || isString();
   //@ requires 0 <= index && index < m_Values.size();
   final void delete(int index) {
     
-    if (!isNominal() && !isString() && !isRelationValued()) 
-      throw new IllegalArgumentException("Can only remove value of " +
-                                         "nominal, string or relation-" +
-                                         " valued attribute!");
+    if (!isNominal() && !isString()) 
+      throw new IllegalArgumentException("Can only remove value of" +
+                                         "nominal or string attribute!");
     else {
       m_Values = (FastVector)m_Values.copy();
       m_Values.removeElementAt(index);
-      if (!isRelationValued()) {
-        Hashtable hash = new Hashtable(m_Hashtable.size());
-        Enumeration enu = m_Hashtable.keys();
-        while (enu.hasMoreElements()) {
-          Object string = enu.nextElement();
-          Integer valIndexObject = (Integer)m_Hashtable.get(string);
-          int valIndex = valIndexObject.intValue();
-          if (valIndex > index) {
-            hash.put(string, new Integer(valIndex - 1));
-          } else if (valIndex < index) {
-            hash.put(string, valIndexObject);
-          }
-        }
-        m_Hashtable = hash;
+      Hashtable hash = new Hashtable(m_Hashtable.size());
+      Enumeration enu = m_Hashtable.keys();
+      while (enu.hasMoreElements()) {
+	Object string = enu.nextElement();
+	Integer valIndexObject = (Integer)m_Hashtable.get(string);
+	int valIndex = valIndexObject.intValue();
+	if (valIndex > index) {
+	  hash.put(string, new Integer(valIndex - 1));
+	} else if (valIndex < index) {
+	  hash.put(string, valIndexObject);
+	}
       }
+      m_Hashtable = hash;
     }
   }
 
@@ -1006,30 +848,6 @@ public class Attribute implements Copyable, Serializable {
     default:
       throw new IllegalArgumentException("Can only set values for nominal"
                                          + " or string attributes!");
-    }
-  }
-
-  /**
-   * Sets a value of a relation-valued attribute.
-   * Creates a fresh list of attribute values before it is set.
-   *
-   * @param index the value's index
-   * @param string the value
-   * @exception IllegalArgumentException if the attribute is not 
-   * relation-valued.
-   */
-  final void setValue(int index, Instances data) {
-    
-    if (isRelationValued()) { 
-      if (!data.equalHeaders(m_Header)) {
-        throw new IllegalArgumentException("Can't set relational value. " +
-                                           "Headers not compatible.");
-      }
-      m_Values = (FastVector)m_Values.copy();
-      m_Values.setElementAt(data, index);
-    } else {
-      throw new IllegalArgumentException("Can only set value for"
-                                         + " relation-valued attributes!");
     }
   }
 
@@ -1493,18 +1311,9 @@ public class Attribute implements Copyable, Serializable {
       case Attribute.DATE:
 	System.out.println("\"position\" is date");
 	break;
-      case Attribute.RELATIONAL:
-	System.out.println("\"position\" is relation-valued");
-	break;
       default:
 	System.out.println("\"position\" has unknown type");
       }
-
-      FastVector atts = new FastVector(1);
-      atts.addElement(position);
-      Instances relation = new Instances("Test", atts, 0);
-      Attribute relationValuedAtt = new Attribute("test", relation);
-      System.out.println(relationValuedAtt);
     } catch (Exception e) {
       e.printStackTrace();
     }

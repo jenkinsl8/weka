@@ -44,7 +44,7 @@ import  weka.filters.Filter;
  * Don't include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.19.2.1 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator

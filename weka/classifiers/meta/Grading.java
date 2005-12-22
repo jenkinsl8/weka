@@ -57,7 +57,7 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.4.2.2 $ 
  */
 public class Grading extends Stacking {
 

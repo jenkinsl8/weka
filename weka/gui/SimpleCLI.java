@@ -56,7 +56,7 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class SimpleCLI extends Frame implements ActionListener {
   
