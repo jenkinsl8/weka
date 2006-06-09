@@ -1,4 +1,7 @@
 /*
+ *    Test.java
+ *    Copyright (C) 2000 Gabi Schmidberger.
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -14,85 +17,70 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * Test.java
- * Copyright (C) 2000 Gabi Schmidberger.
- *
- */
-
 package weka.datagenerators;
 
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Attribute;
+import weka.core.OptionHandler;
+import weka.core.Option;
 import weka.core.Utils;
 
 import java.io.Serializable;
 
+import java.util.Random;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /** 
- * Class to represent a test. <br/>
- * <br/>
+ * Class to represent a test.<br>
+ *<br>
  * The string representation of the test can be supplied in standard notation
- * or for a subset of types of attributes  in Prolog notation.<br/>
+ * or for a subset of types of attributes  in Prolog notation.<br>
  *
  * Following examples for all possible tests that can be represented by
- * this class, given in standard notation.<br/>
- * <br/>
- * Examples of tests for numeric attributes:<br/>
- * B &gt;= 2.333<br/>        B &lt; 4.56<br/>
- * <br/>
- * Examples of tests for nominal attributes with more then 2 values:<br/>
- * A = rain <br/>            A != rain<br/>
- * <br/>
- * Examples of tests for nominal attribute with exactly 2 values:<br/>
- * A = false <br/>            A = true<br/>
- * <br/>
- * <br/>
+ * this class, given in standard notation.<br>
+ *<br>
+ * Examples of tests for numeric attributes:<br>
+ * B >= 2.333<br>        B < 4.56<br>
+ *<br>
+ * Examples of tests for nominal attributes with more then 2 values:<br>
+ * A = rain <br>            A != rain<br>
+ *<br>
+ * Examples of tests for nominal attribute with exactly 2 values:<br>
+ * A = false <br>            A = true<br>
+ *<br>
+ *<br>
  * The Prolog notation is only supplied for numeric attributes and
- * for nominal attributes that have the values "true" and "false".<br/>
- * <br/>
- * Following examples for the Prolog notation provided.<br/>
- * <br/>
- * Examples of tests for numeric attributes:<br/>
- * The same as for standard notation above.<br/>
- * <br/>
- * Examples of tests for nominal attributes with values "true"and "false":<br/>
- * A<br/>
- * not(A)<br/>
- * <br/>
- * (Other nominal attributes are not supported by the Prolog notation.)<br/>
- * <br/>
+ * for nominal attributes that have the values "true" and "false".<br>
+ * <br>
+ * Following examples for the Prolog notation provided.<br>
+ *<br>
+ * Examples of tests for numeric attributes:<br>
+ * The same as for standard notation above.<br>
+ *<br>
+ * Examples of tests for nominal attributes with values "true"and "false":<br>
+ * A<br>
+ * not(A)<br>
+ *<br>
+ * (Other nominal attributes are not supported by the Prolog notation.)<br>
+ *<br>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1 $ 
  **/
 
-public class Test 
-  implements Serializable {
+public class Test implements Serializable {
 
-  /** for serialization */
-  static final long serialVersionUID = -8890645875887157782L;
-  
-  /** the attribute index */
   int m_AttIndex;
-  
-  /** the split */
   double m_Split;
-  
-  /** whether to negate the test */
   boolean m_Not;
-  
-  /** the dataset */
   Instances m_Dataset;
 	
   /** 
    * Constructor 
-   * 
-   * @param i the attribute index
-   * @param s the split
-   * @param dataset the dataset
    */
-  public Test(int i, double s, Instances dataset) { 
+  Test(int i, double s, Instances dataset) { 
     m_AttIndex = i; 
     m_Split = s;
     m_Dataset = dataset;
@@ -102,13 +90,8 @@ public class Test
 
   /** 
    * Constructor 
-   * 
-   * @param i the attribute index
-   * @param s the split
-   * @param dataset the dataset
-   * @param n whether to negate the test
    */
-  public Test(int i, double s, Instances dataset, boolean n) {
+  Test(int i, double s, Instances dataset, boolean n) {
     m_AttIndex = i;
     m_Split = s;
     m_Dataset = dataset;
@@ -129,8 +112,9 @@ public class Test
    *
    * @param inst the instance
    * @return true if the instance satisfies the test, false otherwise
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */   
+
   public boolean passesTest(Instance inst) throws Exception {
     if (inst.isMissing(m_AttIndex)) return false; // missing values fail
 	

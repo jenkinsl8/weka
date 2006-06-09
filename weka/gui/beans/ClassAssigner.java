@@ -39,7 +39,7 @@ import java.beans.EventSetDescriptor;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,

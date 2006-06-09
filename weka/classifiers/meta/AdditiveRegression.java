@@ -24,91 +24,55 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.IteratedSingleClassifierEnhancer;
+import weka.classifiers.trees.DecisionStump;
 import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
- <!-- globalinfo-start -->
- * Meta classifier that enhances the performance of a regression base classifier. Each iteration fits a model to the residuals left by the classifier on the previous iteration. Prediction is accomplished by adding the predictions of each classifier. Reducing the shrinkage (learning rate) parameter helps prevent overfitting and has a smoothing effect but increases the learning time.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * J.H. Friedman (1999). Stochastic Gradient Boosting.
- * <p/>
- <!-- globalinfo-end -->
+ * Meta classifier that enhances the performance of a regression base
+ * classifier. Each iteration fits a model to the residuals left by the
+ * classifier on the previous iteration. Prediction is accomplished by
+ * adding the predictions of each classifier. Smoothing is accomplished
+ * through varying the shrinkage (learning rate) parameter. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;techreport{Friedman1999,
- *    author = {J.H. Friedman},
- *    institution = {Stanford University},
- *    title = {Stochastic Gradient Boosting},
- *    year = {1999},
- *    PS = {http://www-stat.stanford.edu/~jhf/ftp/stobst.ps}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Friedman, J.H. (1999). Stochastic Gradient Boosting. Technical Report
+ * Stanford University. http://www-stat.stanford.edu/~jhf/ftp/stobst.ps. <p>
+ *
+ * Valid options from the command line are: <p>
  * 
- * <pre> -S
- *  Specify shrinkage rate. (default = 1.0, ie. no shrinkage)
- * </pre>
- * 
- * <pre> -I &lt;num&gt;
- *  Number of iterations.
- *  (default 10)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.DecisionStump)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.DecisionStump:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * -W classifierstring <br>
+ * Classifierstring should contain the full class name of a classifier.<p>
+ *
+ * -S shrinkage rate <br>
+ * Smaller values help prevent overfitting and have a smoothing effect 
+ * (but increase learning time).
+ * (default = 1.0, ie no shrinkage). <p>
+ *
+ * -I max models <br>
+ * Set the maximum number of models to generate.
+ * (default = 10). <p>
+ *
+ * -D <br>
+ * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.17 $
  */
-public class AdditiveRegression 
-  extends IteratedSingleClassifierEnhancer 
+public class AdditiveRegression extends IteratedSingleClassifierEnhancer 
   implements OptionHandler,
 	     AdditionalMeasureProducer,
-	     WeightedInstancesHandler,
-	     TechnicalInformationHandler {
+	     WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -2368937577670527151L;
-  
+  /**
+   * Class index.
+   */
+  private int m_classIndex;
+
   /**
    * Shrinkage (Learning rate). Default = no shrinkage.
    */
@@ -132,29 +96,9 @@ public class AdditiveRegression
       +"accomplished by adding the predictions of each classifier. "
       +"Reducing the shrinkage (learning rate) parameter helps prevent "
       +"overfitting and has a smoothing effect but increases the learning "
-      +"time.\n\n"
-      +"For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.TECHREPORT);
-    result.setValue(Field.AUTHOR, "J.H. Friedman");
-    result.setValue(Field.YEAR, "1999");
-    result.setValue(Field.TITLE, "Stochastic Gradient Boosting");
-    result.setValue(Field.INSTITUTION, "Stanford University");
-    result.setValue(Field.PS, "http://www-stat.stanford.edu/~jhf/ftp/stobst.ps");
-    
-    return result;
+      +"time.  For more information see: Friedman, J.H. (1999). Stochastic "
+      +"Gradient Boosting. Technical Report Stanford University. "
+      +"http://www-stat.stanford.edu/~jhf/ftp/stobst.ps.";
   }
 
   /**
@@ -177,8 +121,6 @@ public class AdditiveRegression
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -207,39 +149,24 @@ public class AdditiveRegression
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S
-   *  Specify shrinkage rate. (default = 1.0, ie. no shrinkage)
-   * </pre>
-   * 
-   * <pre> -I &lt;num&gt;
-   *  Number of iterations.
-   *  (default 10)</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.DecisionStump)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.DecisionStump:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * -W classifierstring <br>
+   * Classifierstring should contain the full class name of a classifier.<p>
+   *
+   * -S shrinkage rate <br>
+   * Smaller values help prevent overfitting and have a smoothing effect 
+   * (but increase learning time).
+   * (default = 1.0, ie. no shrinkage). <p>
+   *
+   * -D <br>
+   * Debugging output. <p>
+   *
+   * -I max models <br>
+   * Set the maximum number of models to generate. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -305,38 +232,21 @@ public class AdditiveRegression
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    
-    return result;
-  }
-
-  /**
    * Build the classifier on the supplied data
    *
    * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
     super.buildClassifier(data);
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
+    if (data.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("Class must be numeric!");
+    }
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+    m_classIndex = newData.classIndex();
 
     double sum = 0;
     double temp_sum = 0;
@@ -379,7 +289,7 @@ public class AdditiveRegression
    *
    * @param inst the instance to predict
    * @return a prediction for the instance
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public double classifyInstance(Instance inst) throws Exception {
 
@@ -402,7 +312,6 @@ public class AdditiveRegression
    * @param c the classifier to use
    * @param useShrinkage whether shrinkage is to be applied to the model's output
    * @return a new set of instances with class values replaced by residuals
-   * @throws Exception if something goes wrong
    */
   private Instances residualReplace(Instances data, Classifier c, 
 				    boolean useShrinkage) throws Exception {
@@ -433,9 +342,9 @@ public class AdditiveRegression
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumIterations") == 0) {

@@ -31,7 +31,7 @@ import java.awt.Font;
  * A dialog to enter URL, username and password for a database connection.
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 public class DatabaseConnectionDialog extends JDialog {
@@ -47,10 +47,6 @@ public class DatabaseConnectionDialog extends JDialog {
   /* Password field and label */
   protected JPasswordField m_PasswordText; 
   protected JLabel m_PasswordLab;
-
-  /* Debug checkbox and label */
-  protected JCheckBox m_DebugCheckBox; 
-  protected JLabel m_DebugLab;
   
   /* whether dialog was cancel'ed or OK'ed */
   protected int m_returnValue;
@@ -60,10 +56,10 @@ public class DatabaseConnectionDialog extends JDialog {
    *
    * @param parentFrame the parent frame of the dialog
    */
-  public DatabaseConnectionDialog(Frame parentFrame) {
-    this(parentFrame, "", "");
+  public DatabaseConnectionDialog(Frame parentFrame){
+    super(parentFrame,"Database Connection Parameters",true);
+    DbConnectionDialog("","");
   }
-  
   /**
    * Create database connection dialog.
    *
@@ -71,21 +67,9 @@ public class DatabaseConnectionDialog extends JDialog {
    * @param url initial text for URL field
    * @param uname initial text for username field
    */
-  public DatabaseConnectionDialog(Frame parentFrame, String url, String uname) {
-    this(parentFrame, url, uname, true);
-  }
-  
-  /**
-   * Create database connection dialog.
-   *
-   * @param parentFrame the parent frame of the dialog
-   * @param url initial text for URL field
-   * @param uname initial text for username field
-   * @param debug whether to display the debug checkbox
-   */
-  public DatabaseConnectionDialog(Frame parentFrame, String url, String uname, boolean debug) {
-    super(parentFrame,"Database Connection Parameters", true);
-    DbConnectionDialog(url, uname, debug);
+  public DatabaseConnectionDialog(Frame parentFrame,String url, String uname) {
+    super(parentFrame,"Database Connection Parameters",true);
+    DbConnectionDialog(url, uname);
   }
 
   /**
@@ -114,15 +98,6 @@ public class DatabaseConnectionDialog extends JDialog {
   public String getPassword(){
     return(new String(m_PasswordText.getPassword()));
   }
-  
-  /**
-   * Returns the debug flag
-   * 
-   * @return true if debugging should be enabled
-   */
-  public boolean getDebug() {
-    return m_DebugCheckBox.isSelected();
-  }
 
   /**
    * Returns which of OK or cancel was clicked from dialog 
@@ -140,87 +115,56 @@ public class DatabaseConnectionDialog extends JDialog {
    * @param uname initial text for username field
    */
   public void DbConnectionDialog(String url, String uname) {
-    DbConnectionDialog(url, uname, true);
-  }
-  
-  /**
-   * Display the database connection dialog
-   *
-   * @param url initial text for URL field
-   * @param uname initial text for username field
-   * @param debug whether to display the debug checkbox
-   */
-  public void DbConnectionDialog(String url, String uname, boolean debug) {
 
     JPanel DbP = new JPanel();
-    if (debug)
-      DbP.setLayout(new GridLayout(5, 1));
-    else
-      DbP.setLayout(new GridLayout(4, 1));
-    
+    //DbP.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+
+    DbP.setLayout(new GridLayout(4, 1));
+    //DbP.setLayout(new FlowLayout(FlowLayout.LEFT));
     m_DbaseURLText = new JTextField(url,50); 
-    m_DbaseURLLab = new JLabel(" Database URL", SwingConstants.LEFT);
+    m_DbaseURLLab = new JLabel(" Database URL:", SwingConstants.LEFT);
     m_DbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_DbaseURLLab.setDisplayedMnemonic('D');
-    m_DbaseURLLab.setLabelFor(m_DbaseURLText);
 
     m_UserNameText = new JTextField(uname,25); 
-    m_UserNameLab = new JLabel(" Username    ", SwingConstants.LEFT);
+    m_UserNameLab = new JLabel(" Username:    ", SwingConstants.LEFT);
     m_UserNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_UserNameLab.setDisplayedMnemonic('U');
-    m_UserNameLab.setLabelFor(m_UserNameText);
 
     m_PasswordText = new JPasswordField(25); 
-    m_PasswordLab = new JLabel(" Password    ", SwingConstants.LEFT);
+    m_PasswordLab = new JLabel(" Password:    ", SwingConstants.LEFT);
     m_PasswordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_PasswordLab.setDisplayedMnemonic('P');
-    m_PasswordLab.setLabelFor(m_PasswordText);
-
-    m_DebugCheckBox = new JCheckBox(); 
-    m_DebugLab = new JLabel(" Debug       ", SwingConstants.LEFT);
-    m_DebugLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_DebugLab.setDisplayedMnemonic('P');
-    m_DebugLab.setLabelFor(m_DebugCheckBox);
 
     JPanel urlP = new JPanel();   
+    //urlP.setLayout(new BorderLayout());
     urlP.setLayout(new FlowLayout(FlowLayout.LEFT));
-    urlP.add(m_DbaseURLLab);
-    urlP.add(m_DbaseURLText);
+    urlP.add(m_DbaseURLLab);//, BorderLayout.WEST);
+    urlP.add(m_DbaseURLText);//, BorderLayout.CENTER);
     DbP.add(urlP);
 
     JPanel usernameP = new JPanel();   
+    //usernameP.setLayout(new BorderLayout());
     usernameP.setLayout(new FlowLayout(FlowLayout.LEFT));
-    usernameP.add(m_UserNameLab);
-    usernameP.add(m_UserNameText);
+    usernameP.add(m_UserNameLab);//, BorderLayout.WEST);
+    usernameP.add(m_UserNameText);//, BorderLayout.CENTER);
     DbP.add(usernameP);
 
     JPanel passwordP = new JPanel();   
+    //passwordP.setLayout(new BorderLayout());
     passwordP.setLayout(new FlowLayout(FlowLayout.LEFT));
-    passwordP.add(m_PasswordLab);
-    passwordP.add(m_PasswordText);
+    passwordP.add(m_PasswordLab);//, BorderLayout.WEST);
+    passwordP.add(m_PasswordText);//, BorderLayout.CENTER);
     DbP.add(passwordP);
-
-    if (debug) {
-      JPanel debugP = new JPanel();   
-      debugP.setLayout(new FlowLayout(FlowLayout.LEFT));
-      debugP.add(m_DebugLab);
-      debugP.add(m_DebugCheckBox);
-      DbP.add(debugP);
-    }
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
     JButton ok,cancel;
     buttonsP.add(ok = new JButton("OK"));
     buttonsP.add(cancel=new JButton("Cancel"));
-    ok.setMnemonic('O');
     ok.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
 	  m_returnValue=JOptionPane.OK_OPTION;
 	  DatabaseConnectionDialog.this.dispose();
       }
     });
-    cancel.setMnemonic('C');
     cancel.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
 	  m_returnValue=JOptionPane.CLOSED_OPTION;
@@ -231,18 +175,15 @@ public class DatabaseConnectionDialog extends JDialog {
     DbP.add(buttonsP);
     this.getContentPane().add(DbP,BorderLayout.CENTER);
     this.pack();
-    getRootPane().setDefaultButton(ok);
     setResizable(false);
   }
-  
-  /**
-   * for testing only
-   */
   public static void main(String[] args){
+ 
     DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,"URL","username");
     dbd.setVisible(true);
     System.out.println(dbd.getReturnValue()+":"+dbd.getUsername()+":"+dbd.getPassword()+":"+dbd.getURL());
   }
+
 }
 
 

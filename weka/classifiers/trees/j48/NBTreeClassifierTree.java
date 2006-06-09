@@ -24,16 +24,16 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Capabilities.Capability;
+import weka.core.*;
+import weka.classifiers.*;
+import java.io.*;
 
 /**
  * Class for handling a naive bayes tree structure used for
  * classification.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */ 
 
 public class NBTreeClassifierTree extends ClassifierTree {
@@ -43,36 +43,20 @@ public class NBTreeClassifierTree extends ClassifierTree {
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Method for building a naive bayes classifier tree
    *
    * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
-   super.buildClassifier(data);
+
+   if (data.classAttribute().isNumeric())
+     throw new UnsupportedClassTypeException("Class is numeric!");
+   if (data.checkForStringAttributes()) {
+     throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+   }
+   data = new Instances(data);
+   data.deleteWithMissingClass();
+   buildTree(data, false);
    cleanup(new Instances(data, 0));
    assignIDs(-1);
   }

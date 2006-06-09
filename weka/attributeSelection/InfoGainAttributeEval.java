@@ -20,53 +20,33 @@
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-import weka.filters.unsupervised.attribute.NumericToBinary;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.unsupervised.attribute.NumericToBinary;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * InfoGainAttributeEval :<br/>
- * <br/>
- * Evaluates the worth of an attribute by measuring the information gain with respect to the class.<br/>
- * <br/>
- * InfoGain(Class,Attribute) = H(Class) - H(Class | Attribute).<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for Evaluating attributes individually by measuring information gain 
+ * with respect to the class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M
- *  treat missing values as a seperate value.</pre>
- * 
- * <pre> -B
- *  just binarize numeric attributes instead
- *   of properly discretizing them.</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <br>
+ *
+ * -B <br>
+ * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.14 $
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator
   implements OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -1949849512589218930L;
 
   /** Treat missing values as a seperate value */
   private boolean m_missing_merge;
@@ -111,23 +91,20 @@ public class InfoGainAttributeEval
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. <p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M
-   *  treat missing values as a seperate value.</pre>
-   * 
-   * <pre> -B
-   *  just binarize numeric attributes instead
-   *   of properly discretizing them.</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are:<p>
+   *
+   * -M <br>
+   * Treat missing values as a seperate value. <br>
+   *
+   * -B <br>
+   * Just binarize numeric attributes instead of properly discretizing them. <br>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
 
@@ -224,7 +201,7 @@ public class InfoGainAttributeEval
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -392,8 +369,7 @@ public class InfoGainAttributeEval
    * of information gained about the class given the attribute.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @return the info gain
-   * @throws Exception if the attribute could not be evaluated
+   * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -432,7 +408,7 @@ public class InfoGainAttributeEval
   /**
    * Main method for testing this class.
    *
-   * @param args the options
+   * @param argv the options
    */
   public static void main (String[] args) {
     try {
@@ -445,3 +421,5 @@ public class InfoGainAttributeEval
     }
   }
 }
+
+

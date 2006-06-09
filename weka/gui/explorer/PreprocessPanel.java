@@ -23,11 +23,7 @@
 package weka.gui.explorer;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -41,15 +37,11 @@ import java.io.*;
 import java.net.URL;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JComboBox;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -57,7 +49,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-
 import weka.core.Instances;
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -65,7 +56,6 @@ import weka.core.SerializedObject;
 import weka.core.converters.Loader;
 import weka.core.converters.CSVLoader;
 import weka.core.converters.C45Loader;
-import weka.datagenerators.DataGenerator;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
@@ -84,7 +74,6 @@ import weka.gui.TaskLogger;
 import weka.gui.PropertyPanel;
 import weka.gui.AttributeVisualizationPanel;
 import weka.gui.ViewerDialog;
-import weka.gui.sql.SqlViewerDialog;
 import weka.core.UnassignedClassException;
 
 /** 
@@ -95,7 +84,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.50.2.5 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -112,8 +101,9 @@ public class PreprocessPanel extends JPanel {
   /** Click to load base instances from a Database */
   protected JButton m_OpenDBBut = new JButton("Open DB...");
 
-  /** Click to generate artificial data */
-  protected JButton m_GenerateBut = new JButton("Generate...");
+  /** Lets the user enter a DB query */
+  protected GenericObjectEditor m_DatabaseQueryEditor = 
+    new GenericObjectEditor();
 
   /** Click to revert back to the last saved point */
   protected JButton m_UndoBut = new JButton("Undo");
@@ -174,9 +164,6 @@ public class PreprocessPanel extends JPanel {
   /** The working instances */
   protected Instances m_Instances;
 
-  /** The last generator that was selected */
-  protected DataGenerator m_DataGenerator = null;
-
   /** The visualization of the attribute values */
   protected AttributeVisualizationPanel m_AttVisualizePanel = 
     new AttributeVisualizationPanel();
@@ -200,7 +187,7 @@ public class PreprocessPanel extends JPanel {
   protected Logger m_Log = new SysErrLog();
   
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
   
   /**
@@ -209,11 +196,21 @@ public class PreprocessPanel extends JPanel {
   public PreprocessPanel() {
 
     // Create/Configure/Connect components
+    try {
+    m_DatabaseQueryEditor.setClassType(weka.experiment.InstanceQuery.class);
+    m_DatabaseQueryEditor.setValue(new weka.experiment.InstanceQuery());
+    ((GenericObjectEditor.GOEPanel)m_DatabaseQueryEditor.getCustomEditor())
+      .addOkListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    setInstancesFromDBQ();
+	  }
+	});
+    } catch (Exception ex) {
+    }
     m_FilterEditor.setClassType(weka.filters.Filter.class);
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
-    m_GenerateBut.setToolTipText("Generates artificial data");
     m_UndoBut.setToolTipText("Undo the last change to the dataset");
     m_EditBut.setToolTipText("Open the current dataset in a Viewer for editing");
     m_SaveBut.setToolTipText("Save the working relation to a file");
@@ -236,21 +233,12 @@ public class PreprocessPanel extends JPanel {
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        SqlViewerDialog dialog = new SqlViewerDialog(null);
-        dialog.setVisible(true);
-        if (dialog.getReturnValue() == JOptionPane.OK_OPTION)
-          setInstancesFromDBQ(dialog.getURL(), dialog.getUser(),
-                              dialog.getPassword(), dialog.getQuery());
+	PropertyDialog pd = new PropertyDialog(m_DatabaseQueryEditor,100,100);
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setInstancesFromFileQ();
-      }
-    });
-    m_GenerateBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	generateInstances();
       }
     });
     m_UndoBut.addActionListener(new ActionListener() {
@@ -354,7 +342,6 @@ public class PreprocessPanel extends JPanel {
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
     buttons.add(m_OpenDBBut);
-    buttons.add(m_GenerateBut);
     buttons.add(m_UndoBut);
     buttons.add(m_EditBut);
     buttons.add(m_SaveBut);
@@ -677,24 +664,15 @@ public class PreprocessPanel extends JPanel {
   }
 
   /**
-   * Loads instances from an SQL query the user provided with the
-   * SqlViewerDialog, then loads the instances in a background process. This is
-   * done in the IO thread, and an error message is popped up if the IO thread
-   * is busy.
-   * @param url           the database URL
-   * @param user          the user to connect as
-   * @param pw            the password of the user
-   * @param query         the query for retrieving instances from
+   * Queries the user for a URL to a database to load instances from, 
+   * then loads the instances in a background process. This is done in the IO
+   * thread, and an error message is popped up if the IO thread is busy.
    */
-  public void setInstancesFromDBQ(String url, String user, 
-                                  String pw, String query) {
+  public void setInstancesFromDBQ() {
     if (m_IOThread == null) {
       try {
-	InstanceQuery InstQ = new InstanceQuery();
-        InstQ.setDatabaseURL(url);
-        InstQ.setUsername(user);
-        InstQ.setPassword(pw);
-        InstQ.setQuery(query);
+	InstanceQuery InstQ = 
+	  (InstanceQuery)m_DatabaseQueryEditor.getValue();
 	
         // we have to disconnect, otherwise we can't change the DB!
         if (InstQ.isConnected())
@@ -763,143 +741,6 @@ public class PreprocessPanel extends JPanel {
     }
   }
   
-  /**
-   * sets Instances generated via DataGenerators (pops up a Dialog)
-   */
-  public void generateInstances() {
-    if (m_IOThread == null) {
-      m_IOThread = new Thread() {
-	  public void run() {
-	    try {
-              // create dialog
-              final DataGeneratorPanel generatorPanel = new DataGeneratorPanel();
-              final JDialog dialog = new JDialog();
-              final JButton generateButton = new JButton("Generate");
-              final JCheckBox showOutputCheckBox = 
-                                  new JCheckBox("Show generated data as text, incl. comments");
-
-              showOutputCheckBox.setMnemonic('S');
-              generatorPanel.setGenerator(m_DataGenerator);
-              generatorPanel.setPreferredSize(
-                  new Dimension(
-                        300, 
-                        (int) generatorPanel.getPreferredSize().getHeight()));
-              generateButton.setMnemonic('G');
-              generateButton.setToolTipText("Generates the dataset according the settings.");
-              generateButton.addActionListener(new ActionListener(){
-                  public void actionPerformed(ActionEvent evt){
-                    // generate
-                    generatorPanel.execute();
-                    boolean generated = (generatorPanel.getInstances() != null);
-                    if (generated)
-                      setInstances(generatorPanel.getInstances());
-
-                    // close dialog
-                    dialog.dispose();
-
-                    // get last generator
-                    m_DataGenerator = generatorPanel.getGenerator();
-
-                    // display output?
-                    if ( (generated) && (showOutputCheckBox.isSelected()) )
-                      showGeneratedInstances(generatorPanel.getOutput());
-                }
-              });
-              dialog.setTitle("DataGenerator");
-              dialog.getContentPane().add(generatorPanel, BorderLayout.CENTER);
-              dialog.getContentPane().add(generateButton, BorderLayout.EAST);
-              dialog.getContentPane().add(showOutputCheckBox, BorderLayout.SOUTH);
-              dialog.pack();
-              
-              // display dialog
-              dialog.setVisible(true);
-	    } 
-            catch (Exception ex) {
-	      ex.printStackTrace();
-	      m_Log.logMessage(ex.getMessage());
-	    }
-	    m_IOThread = null;
-	  }
-	};
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
-    } 
-    else {
-      JOptionPane.showMessageDialog(this,
-				    "Can't generate data at this time,\n"
-				    + "currently busy with other IO",
-				    "Generate Data",
-				    JOptionPane.WARNING_MESSAGE);
-    }
-  }
-  
-  /**
-   * displays a dialog with the generated instances from the DataGenerator
-   */
-  protected void showGeneratedInstances(String data) {
-    final JDialog dialog = new JDialog();
-    final JButton saveButton = new JButton("Save");
-    final JButton closeButton = new JButton("Close");
-    final JTextArea textData = new JTextArea(data);
-    final JPanel panel = new JPanel();
-    panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    textData.setEditable(false);
-    textData.setFont(
-        new Font("Monospaced", Font.PLAIN, textData.getFont().getSize()));
-
-    saveButton.setMnemonic('S');
-    saveButton.setToolTipText("Saves the output to a file");
-    saveButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        JFileChooser filechooser = new JFileChooser();
-        int result = filechooser.showSaveDialog(dialog);
-        if (result == JFileChooser.APPROVE_OPTION) {
-          try {
-            BufferedWriter writer = new BufferedWriter(
-                                      new FileWriter(
-                                        filechooser.getSelectedFile()));
-            writer.write(textData.getText());
-            writer.flush();
-            writer.close();
-            JOptionPane.showMessageDialog(
-              dialog, 
-              "Output successfully saved to file '" 
-              + filechooser.getSelectedFile() + "'!",
-              "Information",
-              JOptionPane.INFORMATION_MESSAGE);
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-          }
-          dialog.dispose();
-        }
-      }
-    });
-    closeButton.setMnemonic('C');
-    closeButton.setToolTipText("Closes the dialog");
-    closeButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        dialog.dispose();
-      }
-    });
-    panel.add(saveButton);
-    panel.add(closeButton);
-    dialog.setTitle("Generated Instances (incl. comments)");
-    dialog.getContentPane().add(new JScrollPane(textData), BorderLayout.CENTER);
-    dialog.getContentPane().add(panel, BorderLayout.SOUTH);
-    dialog.pack();
-
-    // make sure, it's not bigger than 80% of the screen
-    Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    int width  = dialog.getWidth() > screen.getWidth()*0.8
-                    ? (int) (screen.getWidth()*0.8) : dialog.getWidth();
-    int height = dialog.getHeight() > screen.getHeight()*0.8 
-                    ? (int) (screen.getHeight()*0.8) : dialog.getHeight();
-    dialog.setSize(width, height);
-    
-    // display dialog
-    dialog.setVisible(true);
-  }
 
   /**
    * Saves the current instances in C45 names and data file format

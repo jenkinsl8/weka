@@ -23,54 +23,35 @@
 
 package weka.filters.supervised.instance;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.filters.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * This filter takes a dataset and outputs a specified fold for cross validation. If you do not want the folds to be stratified use the unsupervised version.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -V
- *  Specifies if inverse of selection is to be output.
- * </pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Specifies number of folds dataset is split into. 
- *  (default 10)
- * </pre>
- * 
- * <pre> -F &lt;fold&gt;
- *  Specifies which fold is selected. (default 1)
- * </pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Specifies random number seed. (default 0, no randomizing)
- * </pre>
- * 
- <!-- options-end -->
+ * This filter takes a dataset and outputs folds suitable for cross validation.
+ * If you do not want the folds to be stratified then use the unsupervised 
+ * version.
+ *
+ * Valid options are: <p>
+ *
+ * -V <br>
+ * Specifies if inverse of selection is to be output.<p>
+ *
+ * -N number of folds <br>
+ * Specifies number of folds dataset is split into (default 10). <p>
+ *
+ * -F fold <br>
+ * Specifies which fold is selected. (default 1)<p>
+ *
+ * -S seed <br>
+ * Specifies a random number seed for shuffling the dataset.
+ * (default 0, don't randomize)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
- */
-public class StratifiedRemoveFolds 
-  extends Filter 
-  implements SupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -7069148179905814324L;
+ * @version $Revision: 1.1 $ 
+*/
+public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
+						      OptionHandler {
 
   /** Indicates if inverse of selection is to be output. */
   private boolean m_Inverse = false;
@@ -114,32 +95,26 @@ public class StratifiedRemoveFolds
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -V
-   *  Specifies if inverse of selection is to be output.
-   * </pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Specifies number of folds dataset is split into. 
-   *  (default 10)
-   * </pre>
-   * 
-   * <pre> -F &lt;fold&gt;
-   *  Specifies which fold is selected. (default 1)
-   * </pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Specifies random number seed. (default 0, no randomizing)
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -V <br>
+   * Specifies if inverse of selection is to be output.<p>
+   *
+   * -N number of folds <br>
+   * Specifies number of folds dataset is split into (default 10). <p>
+   *
+   * -F fold <br>
+   * Specifies which fold is selected. (default 1)<p>
+   *
+   * -S seed <br>
+   * Specifies a random number seed for shuffling the dataset.
+   * (default 0, no randomizing)<p>
+   *
+   * -A <br>
+   * If set, data will not be stratified. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -196,10 +171,8 @@ public class StratifiedRemoveFolds
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "This filter takes a dataset and outputs a specified fold for "
-      + "cross validation. If you do not want the folds to be stratified "
-      + "use the unsupervised version.";
+
+    return "This filter takes a dataset and outputs a specified fold for cross validation. If you do not want the folds to be stratified use the unsupervised version.";
   }
 
   /**
@@ -259,7 +232,7 @@ public class StratifiedRemoveFolds
    * of folds is zero, it won't split it into folds. 
    *
    * @param numFolds number of folds dataset is to be split into
-   * @throws IllegalArgumentException if number of folds is negative
+   * @exception IllegalArgumentException if number of folds is negative
    */
   public void setNumFolds(int numFolds) {
 
@@ -294,7 +267,7 @@ public class StratifiedRemoveFolds
    * Selects a fold.
    *
    * @param fold the fold to be selected.
-   * @throws IllegalArgumentException if fold's index is smaller than 1
+   * @exception IllegalArgumentException if fold's index is smaller than 1
    */
   public void setFold(int fold) {
 
@@ -343,7 +316,7 @@ public class StratifiedRemoveFolds
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true because outputFormat can be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */  
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -362,7 +335,7 @@ public class StratifiedRemoveFolds
    * instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
   public boolean batchFinished() {
 

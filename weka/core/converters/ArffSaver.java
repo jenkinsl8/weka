@@ -22,39 +22,40 @@
 
 package weka.core.converters;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-
 /**
- * Writes to a destination in arff text format. <p/>
+ * Writes to a destination in arff text format.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -i &lt;the input file&gt;
- * The input file</pre>
- * 
- * <pre> -o &lt;the output file&gt;
- * The output file</pre>
- * 
- <!-- options-end -->
+ * Valid options:
+ *
+ * -i input arff file <br>
+ * The input filw in ARFF format. <p>
+ *
+ * -o the output file <br>
+ * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
+ *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class ArffSaver 
-  extends AbstractFileSaver 
-  implements BatchConverter, IncrementalConverter {
+public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2223634248900042228L;    
-  
+    
   /** Constructor */  
   public ArffSaver(){
   
@@ -162,8 +163,6 @@ public class ArffSaver
               }
               m_incrementalCounter = 0;
               resetStructure();
-              outW = null;
-              resetWriter();
           }
       }
   }
@@ -189,9 +188,6 @@ public class ArffSaver
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
-      outW = null;
-      resetWriter();
-      setWriteMode(CANCEL);
   }
 
   /**
@@ -234,3 +230,5 @@ public class ArffSaver
       
     }
 }
+  
+  

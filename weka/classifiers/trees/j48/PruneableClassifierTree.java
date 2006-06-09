@@ -22,25 +22,17 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Random;
+import weka.core.*;
+import java.util.*;
 
 /**
  * Class for handling a tree structure that can
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8 $
  */
-public class PruneableClassifierTree 
-  extends ClassifierTree {
-  
-  /** for serialization */
-  static final long serialVersionUID = -555775736857600201L;
+public class PruneableClassifierTree extends ClassifierTree{
 
   /** True if the tree is to be pruned. */
   private boolean pruneTheTree = false;
@@ -61,9 +53,7 @@ public class PruneableClassifierTree
    * @param toSelectLocModel selection method for local splitting model
    * @param pruneTree true if the tree is to be pruned
    * @param num number of subsets of equal size
-   * @param cleanup
-   * @param seed the seed value to use
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public PruneableClassifierTree(ModelSelection toSelectLocModel,
 				 boolean pruneTree, int num, boolean cleanup,
@@ -79,46 +69,19 @@ public class PruneableClassifierTree
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Method for building a pruneable classifier tree.
    *
-   * @param data the data to build the tree from 
-   * @throws Exception if tree can't be built successfully
+   * @exception Exception if tree can't be built successfully
    */
   public void buildClassifier(Instances data) 
        throws Exception {
 
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+   if (data.classAttribute().isNumeric())
+      throw new Exception("Class is numeric!");
+   
+   data = new Instances(data);
    Random random = new Random(m_seed);
+   data.deleteWithMissingClass();
    data.stratify(numSets);
    buildTree(data.trainCV(numSets, numSets - 1, random),
 	     data.testCV(numSets, numSets - 1), false);
@@ -133,7 +96,7 @@ public class PruneableClassifierTree
   /**
    * Prunes a tree.
    *
-   * @throws Exception if tree can't be pruned successfully
+   * @exception Exception if tree can't be pruned successfully
    */
   public void prune() throws Exception {
   
@@ -159,10 +122,7 @@ public class PruneableClassifierTree
   /**
    * Returns a newly created tree.
    *
-   * @param train the training data
-   * @param test the test data
-   * @return the generated tree
-   * @throws Exception if something goes wrong
+   * @param data and selection method for local models.
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
        throws Exception {
@@ -177,8 +137,7 @@ public class PruneableClassifierTree
   /**
    * Computes estimated errors for tree.
    *
-   * @return the estimated errors
-   * @throws Exception if error estimate can't be computed
+   * @exception Exception if error estimate can't be computed
    */
   private double errorsForTree() throws Exception {
 
@@ -202,8 +161,7 @@ public class PruneableClassifierTree
   /**
    * Computes estimated errors for leaf.
    *
-   * @return the estimated errors
-   * @throws Exception if error estimate can't be computed
+   * @exception Exception if error estimate can't be computed
    */
   private double errorsForLeaf() throws Exception {
 

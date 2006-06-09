@@ -44,6 +44,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -53,14 +54,11 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6.2.2 $
  */
 public class SimpleCLI
   extends Frame
   implements ActionListener {
-  
-  /** for serialization */
-  static final long serialVersionUID = -50661410800566036L;
   
   /** The output area canvas added to the frame */
   protected TextArea m_OutputArea = new TextArea();
@@ -92,9 +90,9 @@ public class SimpleCLI
 
   /**
    * A class that sends all lines from a reader to a TextArea component
-   * 
+   *
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.6.2.2 $
    */
   class ReaderToTextArea extends Thread {
 
@@ -138,9 +136,9 @@ public class SimpleCLI
   /**
    * A class that handles running the main method of the class
    * in a separate thread
-   * 
+   *
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.6.2.2 $
    */
   class ClassRunner extends Thread {
 
@@ -430,4 +428,5 @@ public class SimpleCLI
       System.exit(0);
     }
   }
+  
 }

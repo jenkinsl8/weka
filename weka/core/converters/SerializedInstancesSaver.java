@@ -15,65 +15,64 @@
  */
 
 /*
- *    SerializedInstancesSaver.java
+ *    SerializedInsancesSaver.java
  *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Option;
-
-import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.ObjectOutputStream;
+import java.io.BufferedOutputStream;
 import java.util.Enumeration;
 
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+
 /**
- <!-- globalinfo-start -->
- * Serializes the instances to a file with extension bsi.
- * <p/>
- <!-- globalinfo-end -->
+ * Serialzes to a destination.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -i &lt;the input file&gt;
- * The input file</pre>
- * 
- * <pre> -o &lt;the output file&gt;
- * The output file</pre>
- * 
- <!-- options-end -->
+ * Valid options:
+ *
+ * -i input arff file <br>
+ * The input filw in arff format. <p>
+ *
+ * -o the output file <br>
+ * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class SerializedInstancesSaver 
-  extends AbstractFileSaver 
-  implements BatchConverter, IncrementalConverter {
+public class SerializedInstancesSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = -7717010648500658872L;
-  
-  /** Constructor */  
+   /** Constructor */  
   public SerializedInstancesSaver(){
+  
       resetOptions();
   }
     
+    
   /**
    * Returns a string describing this Saver
-   * 
    * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
     return "Serializes the instances to a file with extension bsi.";
   }
- 
+
+  
   /**
    * Returns a description of the file type.
    *
@@ -92,11 +91,11 @@ public class SerializedInstancesSaver
     setFileExtension(".bsi");
   }
 
-  /**
+/**
    * Sets the destination file (and directories if necessary).
    *
    * @param file the File
-   * @throws IOException always
+   * @exception IOException always
    */
   public void setDestination(File file) throws IOException {
 
@@ -131,12 +130,13 @@ public class SerializedInstancesSaver
     }
   }
   
-  /** 
-   * Writes a Batch of instances
-   * 
+  
+  
+  /** Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
+  
       
       resetWriter();
       
@@ -158,9 +158,6 @@ public class SerializedInstancesSaver
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
-      outW = null;
-      resetWriter();
-      setWriteMode(CANCEL);
   }
 
   /**
@@ -190,5 +187,8 @@ public class SerializedInstancesSaver
       } catch (Exception ex) {
 	ex.printStackTrace();
 	}
+      
     }
 }
+  
+  

@@ -22,57 +22,40 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.RandomizableMultipleClassifiersCombiner;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
+import weka.classifiers.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Class for selecting a classifier from among several using cross validation on the training data or the performance on the training data. Performance is measured based on percent correct (classification) or mean-squared error (regression).
- * <p/>
- <!-- globalinfo-end -->
+ * Class for selecting a classifier from among several using cross 
+ * validation on the training data or the performance on the
+ * training data. Performance is measured based on percent correct
+ * (classification) or mean-squared error (regression).<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -X &lt;number of folds&gt;
- *  Use cross validation for model selection using the
- *  given number of folds. (default 0, is to
- *  use training error)</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -B &lt;classifier specification&gt;
- *  Full class name of classifier to include, followed
- *  by scheme options. May be specified multiple times.
- *  (default: "weka.classifiers.rules.ZeroR")</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options from the command line are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -S seed <br>
+ * Random number seed (default 1).<p>
+ *
+ * -B classifierstring <br>
+ * Classifierstring should contain the full class name of a scheme
+ * included for selection followed by options to the classifier
+ * (required, option should be used once for each classifier).<p>
+ *
+ * -X num_folds <br>
+ * Use cross validation error as the basis for classifier selection.
+ * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.18.2.1 $
  */
-public class MultiScheme 
-  extends RandomizableMultipleClassifiersCombiner {
+public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 
-  /** for serialization */
-  static final long serialVersionUID = 5710744346128957520L;
-  
   /** The classifier that had the best performance on training data. */
   protected Classifier m_Classifier;
  
@@ -120,33 +103,25 @@ public class MultiScheme
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -X &lt;number of folds&gt;
-   *  Use cross validation for model selection using the
-   *  given number of folds. (default 0, is to
-   *  use training error)</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -B &lt;classifier specification&gt;
-   *  Full class name of classifier to include, followed
-   *  by scheme options. May be specified multiple times.
-   *  (default: "weka.classifiers.rules.ZeroR")</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * -D <br>
+   * Turn on debugging output.<p>
+   *
+   * -S seed <br>
+   * Random number seed (default 1).<p>
+   *
+   * -B classifierstring <br>
+   * Classifierstring should contain the full class name of a scheme
+   * included for selection followed by options to the classifier
+   * (required, option should be used once for each classifier).<p>
+   *
+   * -X num_folds <br>
+   * Use cross validation error as the basis for classifier selection.
+   * (default 0, is to use error on the training data instead)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -338,21 +313,15 @@ public class MultiScheme
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_Classifiers.length == 0) {
       throw new Exception("No base classifiers have been set!");
     }
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    
     Random random = new Random(m_Seed);
     newData.randomize(random);
     if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1)) {
@@ -409,8 +378,7 @@ public class MultiScheme
    * Returns class probabilities.
    *
    * @param instance the instance to be classified
-   * @return the distribution for the instance
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -420,7 +388,6 @@ public class MultiScheme
 
   /**
    * Output a representation of this classifier
-   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -460,4 +427,5 @@ public class MultiScheme
       System.err.println(e.getMessage());
     }
   }
+
 }

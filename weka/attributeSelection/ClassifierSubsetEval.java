@@ -22,68 +22,41 @@
 
 package weka.attributeSelection;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
+import weka.classifiers.Evaluation;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.io.File;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Vector;
-
 
 /**
- <!-- globalinfo-start -->
- * Classifier subset evaluator:<br/>
- * <br/>
- * Evaluates attribute subsets on training data or a seperate hold out testing set. Uses a classifier to estimate the 'merit' of a set of attributes.
- * <p/>
- <!-- globalinfo-end -->
+ * Classifier subset evaluator. Uses a classifier to estimate the "merit"
+ * of a set of attributes.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;classifier&gt;
- *  class name of the classifier to use for
- *  accuracy estimation. Place any
- *  classifier options LAST on the
- *  command line following a "--".
- *  eg. -C weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
- * 
- * <pre> -T
- *  Use the training data to estimate accuracy.</pre>
- * 
- * <pre> -H &lt;filename&gt;
- *  Name of the hold out/test set to 
- *  estimate accuracy on.</pre>
- * 
- * <pre> 
- * Options specific to scheme weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -B <classifier> <br>
+ * Class name of the classifier to use for accuracy estimation.
+ * Place any classifier options last on the command line following a
+ * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
+ *
+ * -T <br>
+ * Use the training data for accuracy estimation rather than a hold out/
+ * test set. <p>
+ *
+ * -H <filename> <br>
+ * The file containing hold out/test instances to use for accuracy estimation
+ * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
   implements OptionHandler, ErrorBasedMeritEvaluator {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7532217899385278710L;
 
   /** training instances */
   private Instances m_trainingInstances;
@@ -119,13 +92,25 @@ public class ClassifierSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Classifier subset evaluator:\n\nEvaluates attribute subsets on training data or a seperate "
-      + "hold out testing set. Uses a classifier to estimate the 'merit' of a set of attributes.";
+    return "Evaluates attribute subsets on training data or a seperate "
+      +"hold out testing set";
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options. <p>
+   *
+   * -B <classifier> <br>
+   * Class name of the classifier to use for accuracy estimation.
+   * Place any classifier options last on the command line following a
+   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
+   *
+   * -T <br>
+   * Use the training data for accuracy estimation rather than a hold out/
+   * test set. <p>
+   *
+   * -H <filename> <br>
+   * The file containing hold out/test instances to use for accuracy estimation
+   * <p>
    *
    * @return an enumeration of all the available options.
    **/
@@ -163,38 +148,27 @@ public class ClassifierSubsetEval
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -B &lt;classifier&gt;
-   *  class name of the classifier to use for
-   *  accuracy estimation. Place any
-   *  classifier options LAST on the
-   *  command line following a "--".
-   *  eg. -C weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
-   * 
-   * <pre> -T
-   *  Use the training data to estimate accuracy.</pre>
-   * 
-   * <pre> -H &lt;filename&gt;
-   *  Name of the hold out/test set to 
-   *  estimate accuracy on.</pre>
-   * 
-   * <pre> 
-   * Options specific to scheme weka.classifiers.rules.ZeroR:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are:<p>
+   *
+   * -C <classifier> <br>
+   * Class name of classifier to use for accuracy estimation.
+   * Place any classifier options last on the command line following a
+   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
+   *
+   * -T <br>
+   * Use training data instead of a hold out/test set for accuracy estimation.
+   * <p>
+   *
+   * -H <filname> <br>
+   * Name of the hold out/test set to estimate classifier accuracy on.
+   * <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -290,7 +264,7 @@ public class ClassifierSubsetEval
 
   /**
    * Set if training data is to be used instead of hold out/test data
-   * @param t true if training data is to be used instead of hold out data
+   * @return true if training data is to be used instead of hold out data
    */
   public void setUseTraining(boolean t) {
     m_useTraining = t;
@@ -337,7 +311,7 @@ public class ClassifierSubsetEval
    * evaluator that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -370,8 +344,7 @@ public class ClassifierSubsetEval
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
-   * @return the error rate
-   * @throws Exception if the subset could not be evaluated
+   * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
@@ -451,7 +424,7 @@ public class ClassifierSubsetEval
    * from those use to build/train the evaluator) with which to
    * evaluate the merit of the subset
    * @return the "merit" of the subset on the holdOut data
-   * @throws Exception if the subset cannot be evaluated
+   * @exception Exception if the subset cannot be evaluated
    */
   public double evaluateSubset(BitSet subset, Instances holdOut) 
     throws Exception {
@@ -523,7 +496,7 @@ public class ClassifierSubsetEval
    * @param retrain true if the classifier should be retrained with respect
    * to the new subset before testing on the holdOut instance.
    * @return the "merit" of the subset on the holdOut instance
-   * @throws Exception if the subset cannot be evaluated
+   * @exception Exception if the subset cannot be evaluated
    */
   public double evaluateSubset(BitSet subset, Instance holdOut,
 			       boolean retrain) 

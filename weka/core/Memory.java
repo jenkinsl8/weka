@@ -32,11 +32,10 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.4 $
+ * @version   $Revision: 1.1.2.4 $
  * @see       #setEnabled(boolean)
  */
 public class Memory {
-  
   /** whether memory management is enabled */
   protected static boolean m_Enabled = true;
   
@@ -75,8 +74,6 @@ public class Memory {
 
   /**
    * returns whether the memory management is enabled
-   * 
-   * @return		true if enabled
    */
   public boolean isEnabled() {
     return m_Enabled;
@@ -84,8 +81,6 @@ public class Memory {
 
   /**
    * sets whether the memory management is enabled
-   * 
-   * @param value	true if the management should be enabled
    */
   public void setEnabled(boolean value) {
     m_Enabled = value;
@@ -94,8 +89,6 @@ public class Memory {
   /**
    * whether to display a dialog in case of a problem (= TRUE) or just print
    * on stderr (= FALSE)
-   * 
-   * @return		true if the GUI is used
    */
   public boolean getUseGUI() {
     return m_UseGUI;
@@ -103,8 +96,6 @@ public class Memory {
 
   /**
    * returns the initial size of the JVM
-   * 
-   * @return		the initial size in bytes
    */
   public long getInitial() {
     return m_Initial;
@@ -112,8 +103,6 @@ public class Memory {
 
   /**
    * returns the current memory consumption
-   * 
-   * @return		the current size in bytes
    */
   public long getCurrent() {
     m_Runtime = Runtime.getRuntime();
@@ -124,8 +113,6 @@ public class Memory {
 
   /**
    * returns the maximum amount of memory that can be assigned
-   * 
-   * @return		the maximum size in bytes
    */
   public long getMax() {
     return m_Max;
@@ -134,9 +121,6 @@ public class Memory {
   /**
    * checks if there's still enough memory left. if ENABLED is true, then
    * false is returned always
-   * 
-   * @return		true if out of memory (only if management enabled, 
-   * 			otherwise always false)
    */
   public boolean isOutOfMemory() {
     if (isEnabled())

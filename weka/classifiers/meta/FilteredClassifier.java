@@ -23,90 +23,39 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
+import weka.classifiers.rules.ZeroR;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.Drawable;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.Attribute;
+import weka.core.Drawable;
 
 /**
- <!-- globalinfo-start -->
- * Class for running an arbitrary classifier on data that has been passed through an arbitrary filter. Like the classifier, the structure of the filter is based exclusively on the training data and test instances will be processed by the filter without changing their structure.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for running an arbitrary classifier on data that has been passed
+ * through an arbitrary filter.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -F &lt;filter specification&gt;
- *  Full class name of filter to use, followed
- *  by filter options.
- *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
- * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Valid options from the command line are:<p>
+ *
+ * -W classifierstring <br>
+ * Classifierstring should contain the full class name of a classifier
+ * (options are specified after a --). <p>
+ *
+ * -F filterstring <br>
+ * Filterstring should contain the full class name of a filter
+ * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.20.2.2 $
  */
-public class FilteredClassifier 
-  extends SingleClassifierEnhancer 
-  implements Drawable {
+public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 
-  /** for serialization */
-  static final long serialVersionUID = -4523450618538717400L;
-  
   /** The filter */
   protected Filter m_Filter = new weka.filters.supervised.attribute.AttributeSelection();
 
@@ -127,8 +76,6 @@ public class FilteredClassifier
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -145,10 +92,8 @@ public class FilteredClassifier
   }
 
   /**
-   * Returns the type of graph this classifier
-   * represents.
-   *  
-   * @return the graph type of this classifier
+   *  Returns the type of graph this classifier
+   *  represents.
    */   
   public int graphType() {
     
@@ -162,7 +107,7 @@ public class FilteredClassifier
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @throws Exception if the classifier cannot be graphed
+   * @exception Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     
@@ -195,66 +140,18 @@ public class FilteredClassifier
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -F &lt;filter specification&gt;
-   *  Full class name of filter to use, followed
-   *  by filter options.
-   *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.J48)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.J48:
-   * </pre>
-   * 
-   * <pre> -U
-   *  Use unpruned tree.</pre>
-   * 
-   * <pre> -C &lt;pruning confidence&gt;
-   *  Set confidence threshold for pruning.
-   *  (default 0.25)</pre>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.
-   *  (default 2)</pre>
-   * 
-   * <pre> -R
-   *  Use reduced error pruning.</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Set number of folds for reduced error
-   *  pruning. One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -B
-   *  Use binary splits only.</pre>
-   * 
-   * <pre> -S
-   *  Don't perform subtree raising.</pre>
-   * 
-   * <pre> -L
-   *  Do not clean up after the tree has been built.</pre>
-   * 
-   * <pre> -A
-   *  Laplace smoothing for predicted probabilities.</pre>
-   * 
-   * <pre> -Q &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   <!-- options-end -->
+   * -W classifierstring <br>
+   * Classifierstring should contain the full class name of a classifier
+   * (options are specified after a --). <p>
+   *
+   * -F filterstring <br>
+   * Filterstring should contain the full class name of a filter
+   * followed by options to the filter.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -343,18 +240,13 @@ public class FilteredClassifier
    * Build the classifier on the filtered data.
    *
    * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
     }
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    
     /*
     String fname = m_Filter.getClass().getName();
     fname = fname.substring(fname.lastIndexOf('.') + 1);
@@ -364,10 +256,6 @@ public class FilteredClassifier
     m_Filter.setInputFormat(data);
     data = Filter.useFilter(data, m_Filter);
     //t.stop();
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
     m_FilteredInstances = data.stringFreeStructure();
     m_Classifier.buildClassifier(data);
   }
@@ -376,8 +264,7 @@ public class FilteredClassifier
    * Classifies a given instance after filtering.
    *
    * @param instance the instance to be classified
-   * @return the class distribution for the given instance
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance)
@@ -414,8 +301,6 @@ public class FilteredClassifier
 
   /**
    * Output a representation of this classifier
-   * 
-   * @return a representation of this classifier
    */
   public String toString() {
 
@@ -450,4 +335,5 @@ public class FilteredClassifier
       System.err.println(e.getMessage());
     }
   }
+
 }

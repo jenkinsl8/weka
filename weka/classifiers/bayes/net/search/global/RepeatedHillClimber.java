@@ -15,7 +15,7 @@
  */
 
 /*
- * RepeatedHillClimber.java
+ * TabuSearch.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
@@ -23,64 +23,19 @@
 package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.ParentSet;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
+import weka.classifiers.bayes.net.*;
+import weka.core.*;
+import java.util.*;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-/** 
- <!-- globalinfo-start -->
- * This Bayes Network learning algorithm repeatedly uses hill climbing starting with a randomly generated network structure and return the best structure of the various runs.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -U &lt;integer&gt;
- *  Number of runs</pre>
- * 
- * <pre> -A &lt;seed&gt;
- *  Random number seed</pre>
- * 
- * <pre> -P &lt;nr of parents&gt;
- *  Maximum number of parents</pre>
- * 
- * <pre> -R
- *  Use arc reversal operation.
- *  (default false)</pre>
- * 
- * <pre> -N
- *  Initial structure is empty (instead of Naive Bayes)</pre>
- * 
- * <pre> -mbc
- *  Applies a Markov Blanket correction to the network structure, 
- *  after a network structure is learned. This ensures that all 
- *  nodes in the network are part of the Markov blanket of the 
- *  classifier node.</pre>
- * 
- * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
- *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
- * 
- * <pre> -Q
- *  Use probabilistic or 0/1 scoring.
- *  (default probabilistic scoring)</pre>
- * 
- <!-- options-end -->
+/** RepeatedHillClimber searches for Bayesian network structures by
+ * repeatedly generating a random network and apply hillclimber on it.
+ * The best network found is returned.  
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * Version: $Revision: 1.2.2.1 $
  */
-public class RepeatedHillClimber 
-    extends HillClimber {
+public class RepeatedHillClimber extends HillClimber {
 
-    /** for serialization */
-    static final long serialVersionUID = -7359197180460703069L;
-  
     /** number of runs **/
     int m_nRuns = 10;
     /** random number seed **/
@@ -91,10 +46,6 @@ public class RepeatedHillClimber
 	/**
 	* search determines the network structure/graph of the network
 	* with the repeated hill climbing.
-	* 
-	* @param bayesNet the network to use
-	* @param instances the data to use
-	* @throws Exception if something goes wrong
 	**/
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {
 		m_random = new Random(getSeed());
@@ -138,11 +89,6 @@ public class RepeatedHillClimber
 		bestBayesNet = null;
     } // search
 
-	/**
-	 * 
-	 * @param bayesNet
-	 * @param instances
-	 */
 	void generateRandomNet(BayesNet bayesNet, Instances instances) {
 		int nNodes = instances.numAttributes();
 		// clear network
@@ -177,11 +123,9 @@ public class RepeatedHillClimber
 		}
 	} // generateRandomNet
 
-	/** 
-	 * copyParentSets copies parent sets of source to dest BayesNet
-	 * 
-	 * @param dest destination network
-	 * @param source source network
+	/** copyParentSets copies parent sets of source to dest BayesNet
+	 * @param dest: destination network
+	 * @param source: source network
 	 */
 	void copyParentSets(BayesNet dest, BayesNet source) {
 		int nNodes = source.getNrOfNodes();
@@ -193,17 +137,14 @@ public class RepeatedHillClimber
 
 
     /**
-     * Returns the number of runs
-     * 
-     * @return number of runs
-     */
+    * @return number of runs
+    */
     public int getRuns() {
         return m_nRuns;
     } // getRuns
 
     /**
      * Sets the number of runs
-     * 
      * @param nRuns The number of runs to set
      */
     public void setRuns(int nRuns) {
@@ -211,17 +152,14 @@ public class RepeatedHillClimber
     } // setRuns
 
 	/**
-	 * Returns the random seed
-	 * 
-	 * @return random number seed
-	 */
+	* @return random number seed
+	*/
 	public int getSeed() {
 		return m_nSeed;
 	} // getSeed
 
 	/**
 	 * Sets the random number seed
-	 * 
 	 * @param nSeed The number of the seed to set
 	 */
 	public void setSeed(int nSeed) {
@@ -236,8 +174,8 @@ public class RepeatedHillClimber
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(4);
 
-		newVector.addElement(new Option("\tNumber of runs", "U", 1, "-U <integer>"));
-		newVector.addElement(new Option("\tRandom number seed", "A", 1, "-A <seed>"));
+		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tRandom number seed\n", "A", 1, "-A <seed>"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -247,44 +185,12 @@ public class RepeatedHillClimber
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. <p/>
+	 * Parses a given list of options. Valid options are:<p>
 	 *
-	 <!-- options-start -->
-	 * Valid options are: <p/>
-	 * 
-	 * <pre> -U &lt;integer&gt;
-	 *  Number of runs</pre>
-	 * 
-	 * <pre> -A &lt;seed&gt;
-	 *  Random number seed</pre>
-	 * 
-	 * <pre> -P &lt;nr of parents&gt;
-	 *  Maximum number of parents</pre>
-	 * 
-	 * <pre> -R
-	 *  Use arc reversal operation.
-	 *  (default false)</pre>
-	 * 
-	 * <pre> -N
-	 *  Initial structure is empty (instead of Naive Bayes)</pre>
-	 * 
-	 * <pre> -mbc
-	 *  Applies a Markov Blanket correction to the network structure, 
-	 *  after a network structure is learned. This ensures that all 
-	 *  nodes in the network are part of the Markov blanket of the 
-	 *  classifier node.</pre>
-	 * 
-	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
-	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
-	 * 
-	 * <pre> -Q
-	 *  Use probabilistic or 0/1 scoring.
-	 *  (default probabilistic scoring)</pre>
-	 * 
-	 <!-- options-end -->
+	 * For other options see search algorithm.
 	 *
 	 * @param options the list of options as an array of strings
-	 * @throws Exception if an option is not supported
+	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		String sRuns = Utils.getOption('U', options);
@@ -330,7 +236,6 @@ public class RepeatedHillClimber
 
 	/**
 	 * This will return a string describing the classifier.
-	 * 
 	 * @return The string.
 	 */
 	public String globalInfo() {
@@ -354,4 +259,4 @@ public class RepeatedHillClimber
 	  " Setting the seed allows replicability of experiments.";
 	} // seedTipText
 
-}
+} // RepeatedHillClimber

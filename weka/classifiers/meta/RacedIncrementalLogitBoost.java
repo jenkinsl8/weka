@@ -22,96 +22,54 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
+import weka.core.*;
+import java.util.*;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Classifier for incremental learning of large datasets by way of racing logit-boosted committees.
- * <p/>
- <!-- globalinfo-end -->
+ * Classifier for incremental learning of large datasets by way of racing logit-boosted committees. 
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;num&gt;
- *  Minimum size of chunks.
- *  (default 500)</pre>
- * 
- * <pre> -M &lt;num&gt;
- *  Maximum size of chunks.
- *  (default 2000)</pre>
- * 
- * <pre> -V &lt;num&gt;
- *  Size of validation set.
- *  (default 1000)</pre>
- * 
- * <pre> -P &lt;pruning type&gt;
- *  Committee pruning to perform.
- *  0=none, 1=log likelihood (default)</pre>
- * 
- * <pre> -Q
- *  Use resampling for boosting.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.DecisionStump)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.DecisionStump:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -C num <br>
+ * Set the minimum chunk size (default 500). <p>
+ *
+ * -M num <br>
+ * Set the maximum chunk size (default 2000). <p>
+ *
+ * -V num <br>
+ * Set the validation set size (default 1000). <p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -W classname <br>
+ * Specify the full class name of a weak learner as the basis for 
+ * boosting (required).<p>
+ *
+ * -Q <br>
+ * Use resampling instead of reweighting.<p>
+ *
+ * -S seed <br>
+ * Random number seed for resampling (default 1).<p>
+ *
+ * -P type <br>
+ * The type of pruning to use. <p>
  *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.4.2.2 $ 
  */
-public class RacedIncrementalLogitBoost 
-  extends RandomizableSingleClassifierEnhancer
+public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnhancer
   implements UpdateableClassifier {
-  
-  /** for serialization */
-  static final long serialVersionUID = 908598343772170052L;
 
-  /** no pruning */
-  public static final int PRUNETYPE_NONE = 0;
-  /** log likelihood pruning */
-  public static final int PRUNETYPE_LOGLIKELIHOOD = 1;
   /** The pruning types */
+  public static final int PRUNETYPE_NONE = 0;
+  public static final int PRUNETYPE_LOGLIKELIHOOD = 1;
   public static final Tag [] TAGS_PRUNETYPE = {
     new Tag(PRUNETYPE_NONE, "No pruning"),
     new Tag(PRUNETYPE_LOGLIKELIHOOD, "Log likelihood pruning")
@@ -182,8 +140,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -191,20 +147,11 @@ public class RacedIncrementalLogitBoost
   }
 
 
-  /** 
-   * Class representing a committee of LogitBoosted models
-   */
-  protected class Committee 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = 5559880306684082199L;
+  /* Class representing a committee of LogitBoosted models */
+  protected class Committee implements Serializable {
 
     protected int m_chunkSize;
-    
-    /** number eaten from m_currentSet */
-    protected int m_instancesConsumed; 
-    
+    protected int m_instancesConsumed; // number eaten from m_currentSet
     protected FastVector m_models;
     protected double m_lastValidationError;
     protected double m_lastLogLikelihood;
@@ -213,11 +160,7 @@ public class RacedIncrementalLogitBoost
     protected double[][] m_validationFs;
     protected double[][] m_newValidationFs;
 
-    /** 
-     * constructor 
-     * 
-     * @param chunkSize the size of the chunk
-     */
+    /* constructor */
     public Committee(int chunkSize) {
 
       m_chunkSize = chunkSize;
@@ -231,12 +174,7 @@ public class RacedIncrementalLogitBoost
       m_newValidationFs = new double[m_validationChunkSize][m_NumClasses];
     } 
 
-    /** 
-     * update the committee 
-     * 
-     * @return true if the committee has changed
-     * @throws Exception if anything goes wrong
-     */
+    /* update the committee */
     public boolean update() throws Exception {
 
       boolean hasChanged = false;
@@ -256,13 +194,13 @@ public class RacedIncrementalLogitBoost
       return hasChanged;
     }
 
-    /** reset consumation counts */
+    /* reset consumation counts */
     public void resetConsumed() {
 
       m_instancesConsumed = 0;
     }
 
-    /** remove the last model from the committee */
+    /* remove the last model from the committee */
     public void pruneLastModel() {
 
       if (m_models.size() > 0) {
@@ -272,10 +210,7 @@ public class RacedIncrementalLogitBoost
       }
     }
 
-    /** 
-     * decide to keep the last model in the committee 
-     * @throws Exception if anything goes wrong
-     */
+    /* decide to keep the last model in the committee */    
     public void keepLastModel() throws Exception {
 
       m_validationFs = m_newValidationFs;
@@ -284,11 +219,7 @@ public class RacedIncrementalLogitBoost
       m_modelHasChangedLL = true;
     }
 
-    /** 
-     * calculate the log likelihood on the validation data 
-     * @return the log likelihood
-     * @throws Exception if computation fails
-     */        
+    /* calculate the log likelihood on the validation data */        
     public double logLikelihood() throws Exception {
 
       if (m_modelHasChangedLL) {
@@ -305,11 +236,7 @@ public class RacedIncrementalLogitBoost
       return m_lastLogLikelihood;
     }
 
-    /** 
-     * calculate the log likelihood on the validation data after adding the last model 
-     * @return the log likelihood
-     * @throws Exception if computation fails
-     */
+    /* calculate the log likelihood on the validation data after adding the last model */    
     public double logLikelihoodAfter() throws Exception {
 
 	Instance inst;
@@ -322,23 +249,13 @@ public class RacedIncrementalLogitBoost
     }
 
     
-    /** 
-     * calculates the log likelihood of an instance 
-     * @param Fs the Fs values
-     * @param classIndex the class index
-     * @return the log likelihood
-     * @throws Exception if computation fails
-     */
+    /* calculates the log likelihood of an instance */
     private double logLikelihood(double[] Fs, int classIndex) throws Exception {
 
       return -Math.log(distributionForInstance(Fs)[classIndex]);
     }
 
-    /** 
-     * calculates the validation error of the committee 
-     * @return the validation error
-     * @throws Exception if computation fails
-     */
+    /* calculates the validation error of the committee */
     public double validationError() throws Exception {
 
       if (m_modelHasChanged) {
@@ -356,34 +273,20 @@ public class RacedIncrementalLogitBoost
       return m_lastValidationError;
     }
 
-    /** 
-     * returns the chunk size used by the committee 
-     * 
-     * @return the chunk size
-     */
+    /* returns the chunk size used by the committee */
     public int chunkSize() {
 
       return m_chunkSize;
     }
 
-    /** 
-     * returns the number of models in the committee 
-     * 
-     * @return the committee size
-     */
+    /* returns the number of models in the committee */
     public int committeeSize() {
 
       return m_models.size();
     }
 
     
-    /** 
-     * classifies an instance (given Fs values) with the committee 
-     * 
-     * @param Fs the Fs values
-     * @return the classification
-     * @throws Exception if anything goes wrong
-     */
+    /* classifies an instance (given Fs values) with the committee */
     public double classifyInstance(double[] Fs) throws Exception {
       
       double [] dist = distributionForInstance(Fs);
@@ -404,13 +307,7 @@ public class RacedIncrementalLogitBoost
       }
     }
 
-    /** 
-     * classifies an instance with the committee 
-     * 
-     * @param instance the instance to classify
-     * @return the classification
-     * @throws Exception if anything goes wrong
-     */
+    /* classifies an instance with the committee */    
     public double classifyInstance(Instance instance) throws Exception {
       
       double [] dist = distributionForInstance(instance);
@@ -437,13 +334,7 @@ public class RacedIncrementalLogitBoost
       }
     }
 
-    /** 
-     * returns the distribution the committee generates for an instance (given Fs values) 
-     * 
-     * @param Fs the Fs values
-     * @return the distribution
-     * @throws Exception if anything goes wrong
-     */
+    /* returns the distribution the committee generates for an instance (given Fs values) */
     public double[] distributionForInstance(double[] Fs) throws Exception {
       
       double [] distribution = new double [m_NumClasses];
@@ -453,15 +344,7 @@ public class RacedIncrementalLogitBoost
       return distribution;
     }
     
-    /** 
-     * updates the Fs values given a new model in the committee 
-     * 
-     * @param instance the instance to use
-     * @param newModel the new model
-     * @param Fs the Fs values to update
-     * @return the updated Fs values
-     * @throws Exception if anything goes wrong
-     */
+    /* updates the Fs values given a new model in the committee */
     public double[] updateFS(Instance instance, Classifier[] newModel, double[] Fs) throws Exception {
       
       instance = (Instance)instance.copy();
@@ -482,13 +365,7 @@ public class RacedIncrementalLogitBoost
       return newFs;
     }
 
-    /** 
-     * returns the distribution the committee generates for an instance
-     * 
-     * @param instance the instance to get the distribution for
-     * @return the distribution
-     * @throws Exception if anything goes wrong
-     */
+    /* returns the distribution the committee generates for an instance */
     public double[] distributionForInstance(Instance instance) throws Exception {
 
       instance = (Instance)instance.copy();
@@ -514,13 +391,7 @@ public class RacedIncrementalLogitBoost
       return distribution;
     }
 
-    /** 
-     * performs a boosting iteration, returning a new model for the committee
-     * 
-     * @param data the data to boost on
-     * @return the new model
-     * @throws Exception if anything goes wrong
-     */
+    /* performs a boosting iteration, returning a new model for the committee */
     protected Classifier[] boost(Instances data) throws Exception {
       
       Classifier[] newModel = Classifier.makeCopies(m_Classifier, m_NumClasses);
@@ -606,11 +477,7 @@ public class RacedIncrementalLogitBoost
       return newModel;
     }
 
-    /** 
-     * outputs description of the committee
-     * 
-     * @return a string representation of the classifier
-     */
+    /* outputs description of the committee */
     public String toString() {
       
       StringBuffer text = new StringBuffer();
@@ -636,30 +503,11 @@ public class RacedIncrementalLogitBoost
     }
   }
 
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NOMINAL_CLASS);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
  /**
    * Builds the classifier.
    *
-   * @param data the instances to train the classifier with
-   * @throws Exception if something goes wrong
+   * @param instances the instances to train the classifier with
+   * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -668,13 +516,9 @@ public class RacedIncrementalLogitBoost
     Instances boostData;
     int classIndex = data.classIndex();
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+    if (data.classAttribute().isNumeric()) {
+      throw new Exception("RacedIncrementalLogitBoost can't handle a numeric class!");
+    }
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
@@ -683,12 +527,16 @@ public class RacedIncrementalLogitBoost
 	!m_UseResampling) {
       m_UseResampling = true;
     }
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
 
     m_NumClasses = data.numClasses();
     m_ClassAttribute = data.classAttribute();
 
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
+    boostData.deleteWithMissingClass();
 
     // Temporarily unset the class index
     boostData.setClassIndex(-1);
@@ -697,6 +545,7 @@ public class RacedIncrementalLogitBoost
     boostData.setClassIndex(classIndex);
     m_NumericClassData = new Instances(boostData, 0);
 
+    data = new Instances(data);
     data.randomize(m_RandomInstance);
 
     // create the committees
@@ -722,7 +571,7 @@ public class RacedIncrementalLogitBoost
    * Updates the classifier.
    *
    * @param instance the next instance in the stream of training data
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void updateClassifier(Instance instance) throws Exception {
 
@@ -795,10 +644,9 @@ public class RacedIncrementalLogitBoost
   /**
    * Convert from function responses to probabilities
    *
-   * @param Fs an array containing the responses from each function
+   * @param R an array containing the responses from each function
    * @param j the class value of interest
    * @return the probability prediction for j
-   * @throws Exception if can't normalize
    */
   protected static double RtoP(double []Fs, int j) 
     throws Exception {
@@ -823,10 +671,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Computes class distribution of an instance using the best committee.
-   * 
-   * @param instance the instance to get the distribution for
-   * @return the distribution
-   * @throws Exception if anything goes wrong
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -884,54 +728,10 @@ public class RacedIncrementalLogitBoost
 
 
   /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;num&gt;
-   *  Minimum size of chunks.
-   *  (default 500)</pre>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  Maximum size of chunks.
-   *  (default 2000)</pre>
-   * 
-   * <pre> -V &lt;num&gt;
-   *  Size of validation set.
-   *  (default 1000)</pre>
-   * 
-   * <pre> -P &lt;pruning type&gt;
-   *  Committee pruning to perform.
-   *  0=none, 1=log likelihood (default)</pre>
-   * 
-   * <pre> -Q
-   *  Use resampling for boosting.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.DecisionStump)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.DecisionStump:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options. Valid options are:<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -1011,22 +811,6 @@ public class RacedIncrementalLogitBoost
   }
 
   /**
-   * Set the base learner.
-   *
-   * @param newClassifier 		the classifier to use.
-   * @throws IllegalArgumentException 	if base classifier cannot handle numeric 
-   * 					class
-   */
-  public void setClassifier(Classifier newClassifier) {
-    Capabilities cap = newClassifier.getCapabilities();
-    
-    if (!cap.handles(Capability.NUMERIC_CLASS))
-      throw new IllegalArgumentException("Base classifier cannot handle numeric class!");
-      
-    super.setClassifier(newClassifier);
-  }
-
-  /**
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -1038,7 +822,7 @@ public class RacedIncrementalLogitBoost
   /**
    * Set the minimum chunk size
    *
-   * @param chunkSize the minimum chunk size
+   * @param chunkSize
    */
   public void setMinChunkSize(int chunkSize) {
 
@@ -1067,7 +851,7 @@ public class RacedIncrementalLogitBoost
   /**
    * Set the maximum chunk size
    *
-   * @param chunkSize the maximum chunk size
+   * @param chunkSize
    */
   public void setMaxChunkSize(int chunkSize) {
 
@@ -1096,7 +880,7 @@ public class RacedIncrementalLogitBoost
   /**
    * Set the validation chunk size
    *
-   * @param chunkSize the validation chunk size
+   * @param chunkSize
    */
   public void setValidationChunkSize(int chunkSize) {
 
@@ -1125,7 +909,7 @@ public class RacedIncrementalLogitBoost
   /**
    * Set the pruning type
    *
-   * @param pruneType the pruning type
+   * @param pruneType
    */
   public void setPruningType(SelectedTag pruneType) {
 
@@ -1156,7 +940,7 @@ public class RacedIncrementalLogitBoost
   /**
    * Set resampling mode
    *
-   * @param r true if resampling should be done
+   * @param resampling true if resampling should be done
    */
   public void setUseResampling(boolean r) {
     
@@ -1175,8 +959,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the best committee chunk size
-   * 
-   * @return the best committee chunk size
    */
   public int getBestCommitteeChunkSize() {
 
@@ -1188,8 +970,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the number of members in the best committee
-   * 
-   * @return the number of members
    */
   public int getBestCommitteeSize() {
 
@@ -1201,8 +981,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the best committee's error on the validation data
-   * 
-   * @return the best committee's error
    */
   public double getBestCommitteeErrorEstimate() {
 
@@ -1219,8 +997,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Get the best committee's log likelihood on the validation data
-   * 
-   * @return best committee's log likelihood
    */
   public double getBestCommitteeLLEstimate() {
 
@@ -1263,8 +1039,6 @@ public class RacedIncrementalLogitBoost
 
   /**
    * Main method for this class.
-   * 
-   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 
@@ -1275,4 +1049,5 @@ public class RacedIncrementalLogitBoost
       System.err.println(e.getMessage());
     }
   }
+
 }

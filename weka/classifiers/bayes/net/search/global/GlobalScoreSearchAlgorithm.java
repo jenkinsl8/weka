@@ -15,7 +15,7 @@
  */
 
 /*
- * GlobalScoreSearchAlgorithm.java
+ * CVSearchAlgorithm.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
@@ -24,49 +24,19 @@ package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
-import weka.classifiers.bayes.net.search.SearchAlgorithm;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
-
-import java.util.Enumeration;
+import weka.classifiers.bayes.net.search.*;
+import weka.core.*;
 import java.util.Vector;
+import java.util.Enumeration;
 
-/** 
- <!-- globalinfo-start -->
- * This Bayes Network learning algorithm uses cross validation to estimate classification accuracy.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -mbc
- *  Applies a Markov Blanket correction to the network structure, 
- *  after a network structure is learned. This ensures that all 
- *  nodes in the network are part of the Markov blanket of the 
- *  classifier node.</pre>
- * 
- * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
- *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
- * 
- * <pre> -Q
- *  Use probabilistic or 0/1 scoring.
- *  (default probabilistic scoring)</pre>
- * 
- <!-- options-end -->
+/** The CVSearchAlgorithm class supports Bayes net structure search algorithms
+ * that are based on cross validation (as opposed to for example
+ * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5.2.1 $
  */
-public class GlobalScoreSearchAlgorithm 
-	extends SearchAlgorithm {
-
-  	/** for serialization */
-  	static final long serialVersionUID = 7341389867906199781L;
+public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	
 	/** points to Bayes network for which a structure is searched for **/
 	BayesNet m_BayesNet;
@@ -77,14 +47,11 @@ public class GlobalScoreSearchAlgorithm
 	/** number of folds for k-fold cross validation **/
 	int m_nNrOfFolds = 10;
 
-	/** constant for score type: LOO-CV */
+	/** constants for score types **/
 	final static int LOOCV = 0;
-	/** constant for score type: k-fold-CV */
 	final static int KFOLDCV = 1;
-	/** constant for score type: Cumulative-CV */
 	final static int CUMCV = 2;
 
-	/** the score types **/
 	public static final Tag[] TAGS_CV_TYPE =
 		{
 			new Tag(LOOCV, "LOO-CV"),
@@ -99,7 +66,6 @@ public class GlobalScoreSearchAlgorithm
 	/**
 	 * performCV returns the accuracy calculated using cross validation.  
 	 * The dataset used is m_Instances associated with the Bayes Network.
-	 * 
 	 * @param bayesNet : Bayes Network containing structure to evaluate
 	 * @return accuracy (in interval 0..1) measured using cv.
 	 * @throws Exception whn m_nCVType is invalided + exceptions passed on by updateClassifier
@@ -123,7 +89,6 @@ public class GlobalScoreSearchAlgorithm
 	 * @param nNode node for which the score is calculate
 	 * @param nCandidateParent candidate parent to add to the existing parent set
 	 * @return log score
-	 * @throws Exception if something goes wrong
 	 */
 	public double calcScoreWithExtraParent(int nNode, int nCandidateParent) throws Exception {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
@@ -135,6 +100,12 @@ public class GlobalScoreSearchAlgorithm
 				return -1e100;
 			}
 		}
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality =
+			oParentSet.getCardinalityOfParents() * instances.attribute(nCandidateParent).numValues();
+		int numValues = instances.attribute(nNode).numValues();
+		int[][] nCounts = new int[nCardinality][numValues];
 
 		// set up candidate parent
 		oParentSet.addParent(nCandidateParent, instances);
@@ -155,7 +126,6 @@ public class GlobalScoreSearchAlgorithm
 	 * @param nNode node for which the score is calculate
 	 * @param nCandidateParent candidate parent to delete from the existing parent set
 	 * @return log score
-	 * @throws Exception if something goes wrong
 	 */
 	public double calcScoreWithMissingParent(int nNode, int nCandidateParent) throws Exception {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
@@ -168,6 +138,11 @@ public class GlobalScoreSearchAlgorithm
 
 		// set up candidate parent
 		int iParent = oParentSet.deleteParent(nCandidateParent, instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
 
 		// calculate the score
 		double fAccuracy = calcScore(m_BayesNet);
@@ -184,7 +159,6 @@ public class GlobalScoreSearchAlgorithm
 	 * @param nNode node for which the score is calculate
 	 * @param nCandidateParent candidate parent to delete from the existing parent set
 	 * @return log score
-	 * @throws Exception if something goes wrong
 	 */
 	public double calcScoreWithReversedParent(int nNode, int nCandidateParent) throws Exception {
 		ParentSet oParentSet = m_BayesNet.getParentSet(nNode);
@@ -199,6 +173,11 @@ public class GlobalScoreSearchAlgorithm
 		// set up candidate parent
 		int iParent = oParentSet.deleteParent(nCandidateParent, instances);
 		oParentSet2.addParent(nNode, instances);
+
+		// determine cardinality of parent set & reserve space for frequency counts
+		int nCardinality = oParentSet.getCardinalityOfParents();
+		int numValues = instances.attribute(nNode).numValues();
+		int [][] nCounts = new int[nCardinality][numValues];
 
 		// calculate the score
 		double fAccuracy = calcScore(m_BayesNet);
@@ -362,21 +341,13 @@ public class GlobalScoreSearchAlgorithm
 		return new SelectedTag(m_nCVType, TAGS_CV_TYPE);
 	} // getCVType
 
-	/**
-	 * 
-	 * @param bMarkovBlanketClassifier
-	 */
-	public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
-	  super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
-	}
+  public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
+    super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
+  }
 
-	/**
-	 * 
-	 * @return
-	 */
-	public boolean getMarkovBlanketClassifier() {
-	  return super.getMarkovBlanketClassifier();
-	}
+  public boolean getMarkovBlanketClassifier() {
+    return super.getMarkovBlanketClassifier();
+  }
 
 	/**
 	 * Returns an enumeration describing the available options
@@ -386,16 +357,16 @@ public class GlobalScoreSearchAlgorithm
 	public Enumeration listOptions() {
 		Vector newVector = new Vector();
 
-		newVector.addElement(new Option(
-		    "\tApplies a Markov Blanket correction to the network structure, \n"
-		    + "\tafter a network structure is learned. This ensures that all \n"
-		    + "\tnodes in the network are part of the Markov blanket of the \n"
-		    + "\tclassifier node.",
-		    "mbc", 0, "-mbc"));
+    newVector.addElement(new Option(
+            "\tApplies a Markov Blanket correction to the network structure, "
+          + "\tafter a network structure is learned. This ensures that all "
+          + "\tnodes in the network are part of the Markov blanket of the "
+          + "\tclassifier node.\n",
+          "mbc", 0, "-mbc"));
       
 		newVector.addElement(
 			new Option(
-				"\tScore type (LOO-CV,k-Fold-CV,Cumulative-CV)",
+				"\tScore type (LOO-CV,k-Fold-CV,Cumulative-CV)\n",
 				"S",
 				1,
 				"-S [LOO-CV|k-Fold-CV|Cumulative-CV]"));
@@ -410,32 +381,16 @@ public class GlobalScoreSearchAlgorithm
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. <p/>
+	 * Parses a given list of options. Valid options are:<p>
 	 *
-	 <!-- options-start -->
-	 * Valid options are: <p/>
-	 * 
-	 * <pre> -mbc
-	 *  Applies a Markov Blanket correction to the network structure, 
-	 *  after a network structure is learned. This ensures that all 
-	 *  nodes in the network are part of the Markov blanket of the 
-	 *  classifier node.</pre>
-	 * 
-	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
-	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
-	 * 
-	 * <pre> -Q
-	 *  Use probabilistic or 0/1 scoring.
-	 *  (default probabilistic scoring)</pre>
-	 * 
-	 <!-- options-end -->
+	 * For other options see search algorithm.
 	 *
 	 * @param options the list of options as an array of strings
-	 * @throws Exception if an option is not supported
+	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 
-	  	setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
+    setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
 
 		String sScore = Utils.getOption('S', options);
 
@@ -462,8 +417,8 @@ public class GlobalScoreSearchAlgorithm
 		String[] options = new String[4 + superOptions.length];
 		int current = 0;
 
-		if (getMarkovBlanketClassifier())
-		  options[current++] = "-mbc";
+    if (getMarkovBlanketClassifier())
+      options[current++] = "-mbc";
 
 		options[current++] = "-S";
 
@@ -523,12 +478,12 @@ public class GlobalScoreSearchAlgorithm
 	  return "This Bayes Network learning algorithm uses cross validation to estimate " +
 	  "classification accuracy.";
 	} // globalInfo
-	
-	/**
-	 * @return a string to describe the MarkovBlanketClassifier option.
-	 */
-	public String markovBlanketClassifierTipText() {
-	  return super.markovBlanketClassifierTipText();
-	}
 
-}
+  /**
+   * @return a string to describe the MarkovBlanketClassifier option.
+   */
+  public String markovBlanketClassifierTipText() {
+    return super.markovBlanketClassifierTipText();
+  }
+
+} // class CVSearchAlgorithm

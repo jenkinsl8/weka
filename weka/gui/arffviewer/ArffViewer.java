@@ -38,16 +38,13 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
 
 public class ArffViewer 
-  extends JFrame
-  implements WindowListener {
+  extends     JFrame
+  implements  WindowListener {
   
-  /** for serialization */
-  static final long serialVersionUID = -7455845566922685175L;
-
   /** the main panel */
   private ArffViewerMainPanel m_MainPanel;
   
@@ -91,21 +88,19 @@ public class ArffViewer
     m_MainPanel = new ArffViewerMainPanel(this);
     m_MainPanel.setConfirmExit(false);
     getContentPane().add(m_MainPanel, BorderLayout.CENTER);
-    
+
     setJMenuBar(m_MainPanel.getMenu());
   }
   
   /**
    * returns the left coordinate if the frame would be centered
-   * 
-   * @return 		the left coordinate
    */
   protected int getCenteredLeft() {
     int            width;
     int            x;
     
     width  = getBounds().width;
-    x      = (getGraphicsConfiguration().getBounds().width  - width) / 2;
+    x      = (getGraphicsConfiguration().getBounds().width  - width)  / 2;
     
     if (x < 0) 
       x = 0;
@@ -115,8 +110,6 @@ public class ArffViewer
   
   /**
    * returns the top coordinate if the frame would be centered
-   * 
-   * @return		the top coordinate
    */
   protected int getCenteredTop() {
     int            height;
@@ -155,11 +148,9 @@ public class ArffViewer
   public boolean getConfirmExit() {
     return m_MainPanel.getConfirmExit();
   }
-
+  
   /**
    * whether to do a System.exit(0) on close
-   * 
-   * @param value	enables/disables the System.exit(0)
    */
   public void setExitOnClose(boolean value) {
     m_MainPanel.setExitOnClose(value);
@@ -167,8 +158,6 @@ public class ArffViewer
 
   /**
    * returns TRUE if a System.exit(0) is done on a close
-   * 
-   * @return		true if System.exit(0) is done
    */
   public boolean getExitOnClose() {
     return m_MainPanel.getExitOnClose();
@@ -176,8 +165,6 @@ public class ArffViewer
   
   /**
    * returns the main panel
-   * 
-   * @return		the main panel
    */
   public ArffViewerMainPanel getMainPanel() {
     return m_MainPanel;
@@ -190,27 +177,21 @@ public class ArffViewer
     validate();
     repaint();
   }
-
+  
   /**
    * invoked when a window is activated
-   * 
-   * @param e		the window event
    */
   public void windowActivated(WindowEvent e) {
   }
   
   /**
    * invoked when a window is closed
-   * 
-   * @param e		the window event
    */
   public void windowClosed(WindowEvent e) {
   }
   
   /**
    * invoked when a window is in the process of closing
-   * 
-   * @param e		the window event
    */
   public void windowClosing(WindowEvent e) {
     int         button;
@@ -238,40 +219,30 @@ public class ArffViewer
   
   /**
    * invoked when a window is deactivated
-   * 
-   * @param e		the window event
    */
   public void windowDeactivated(WindowEvent e) {
   }
   
   /**
    * invoked when a window is deiconified
-   * 
-   * @param e		the window event
    */
   public void windowDeiconified(WindowEvent e) {
   }
   
   /**
    * invoked when a window is iconified
-   * 
-   * @param e		the window event
    */
   public void windowIconified(WindowEvent e) {
   }
   
   /**
    * invoked when a window is has been opened
-   * 
-   * @param e		the window event
    */
   public void windowOpened(WindowEvent e) {
   }
   
   /**
    * returns only the classname
-   * 
-   * @return 		the classname
    */
   public String toString() {
     return this.getClass().getName();
@@ -280,9 +251,6 @@ public class ArffViewer
   /**
    * shows the frame and it tries to load all the arff files that were
    * provided as arguments.
-   * 
-   * @param args	the commandline parameters
-   * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     LookAndFeel.setLookAndFeel();

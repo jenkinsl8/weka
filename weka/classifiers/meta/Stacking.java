@@ -22,89 +22,40 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.RandomizableMultipleClassifiersCombiner;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Combines several classifiers using the stacking method. Can do classification or regression.<br/>
- * <br/>
- * For more information, see<br/>
- * <br/>
- * David H. Wolpert (1992). Stacked generalization. Neural Networks. 5:241-259.
- * <p/>
- <!-- globalinfo-end -->
+ * Implements stacking. For more information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Wolpert1992,
- *    author = {David H. Wolpert},
- *    journal = {Neural Networks},
- *    pages = {241-259},
- *    publisher = {Pergamon Press},
- *    title = {Stacked generalization},
- *    volume = {5},
- *    year = {1992}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * David H. Wolpert (1992). <i>Stacked
+ * generalization</i>. Neural Networks, 5:241-259, Pergamon Press. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M &lt;scheme specification&gt;
- *  Full name of meta classifier, followed by options.
- *  (default: "weka.classifiers.rules.Zero")</pre>
- * 
- * <pre> -X &lt;number of folds&gt;
- *  Sets the number of cross-validation folds.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -B &lt;classifier specification&gt;
- *  Full class name of classifier to include, followed
- *  by scheme options. May be specified multiple times.
- *  (default: "weka.classifiers.rules.ZeroR")</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -X num_folds <br>
+ * The number of folds for the cross-validation (default 10).<p>
+ *
+ * -S seed <br>
+ * Random number seed (default 1).<p>
+ *
+ * -B classifierstring <br>
+ * Classifierstring should contain the full class name of a base scheme
+ * followed by options to the classifier.
+ * (required, option should be used once for each classifier).<p>
+ *
+ * -M classifierstring <br>
+ * Classifierstring for the meta classifier. Same format as for base
+ * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.23.2.1 $ 
  */
-public class Stacking 
-  extends RandomizableMultipleClassifiersCombiner
-  implements TechnicalInformationHandler {
+public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
-  /** for serialization */
-  static final long serialVersionUID = 5134738557155845452L;
-  
   /** The meta classifier */
   protected Classifier m_MetaClassifier = new ZeroR();
  
@@ -125,31 +76,10 @@ public class Stacking
   public String globalInfo() {
 
     return "Combines several classifiers using the stacking method. "
-      + "Can do classification or regression.\n\n"
+      + "Can do classification or regression. "
       + "For more information, see\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "David H. Wolpert");
-    result.setValue(Field.YEAR, "1992");
-    result.setValue(Field.TITLE, "Stacked generalization");
-    result.setValue(Field.JOURNAL, "Neural Networks");
-    result.setValue(Field.VOLUME, "5");
-    result.setValue(Field.PAGES, "241-259");
-    result.setValue(Field.PUBLISHER, "Pergamon Press");
-    
-    return result;
+      + "David H. Wolpert (1992). \"Stacked "
+      + "generalization\". Neural Networks, 5:241-259, Pergamon Press.";
   }
   
   /**
@@ -176,8 +106,6 @@ public class Stacking
 
   /**
    * String describing option for setting meta classifier
-   * 
-   * @return the string describing the option
    */
   protected String metaOption() {
 
@@ -186,35 +114,25 @@ public class Stacking
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M &lt;scheme specification&gt;
-   *  Full name of meta classifier, followed by options.
-   *  (default: "weka.classifiers.rules.Zero")</pre>
-   * 
-   * <pre> -X &lt;number of folds&gt;
-   *  Sets the number of cross-validation folds.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -B &lt;classifier specification&gt;
-   *  Full class name of classifier to include, followed
-   *  by scheme options. May be specified multiple times.
-   *  (default: "weka.classifiers.rules.ZeroR")</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * -X num_folds <br>
+   * The number of folds for the cross-validation (default 10).<p>
+   *
+   * -S seed <br>
+   * Random number seed (default 1).<p>
+   *
+   * -B classifierstring <br>
+   * Classifierstring should contain the full class name of a base scheme
+   * followed by options to the classifier.
+   * (required, option should be used once for each classifier).<p>
+   *
+   * -M classifierstring <br>
+   * Classifierstring for the meta classifier. Same format as for base
+   * classifiers. (default: weka.classifiers.rules.ZeroR) <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -230,9 +148,6 @@ public class Stacking
 
   /**
    * Process options setting meta classifier.
-   * 
-   * @param options the options to parse
-   * @throws Exception if the parsing fails
    */
   protected void processMetaOptions(String[] options) throws Exception {
 
@@ -292,7 +207,7 @@ public class Stacking
    * Sets the number of folds for the cross-validation.
    *
    * @param numFolds the number of folds for the cross-validation
-   * @throws Exception if parameter illegal
+   * @exception Exception if parameter illegal
    */
   public void setNumFolds(int numFolds) throws Exception {
     
@@ -333,48 +248,30 @@ public class Stacking
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-
-    // instances
-    result.setMinimumNumberInstances(1);
-    
-    return result;
-  }
-
-  /**
    * Buildclassifier selects a classifier from the set of classifiers
    * by minimising error on the training data.
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
     if (m_MetaClassifier == null) {
       throw new IllegalArgumentException("No meta classifier has been set");
     }
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
+    if (!(data.classAttribute().isNominal() ||
+	  data.classAttribute().isNumeric())) {
+      throw new UnsupportedClassTypeException("Class attribute has to be nominal " +
+					      "or numeric!");
+    }
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
-    
+    if (newData.numInstances() == 0) {
+      throw new IllegalArgumentException("No training instances without missing " +
+					 "class!");
+    }
     Random random = new Random(m_Seed);
     newData.randomize(random);
     if (newData.classAttribute().isNominal()) {
@@ -392,10 +289,6 @@ public class Stacking
 
   /**
    * Generates the meta data
-   * 
-   * @param newData the data to work on
-   * @param random the random number generator to use for cross-validation
-   * @throws Exception if generation fails
    */
   protected void generateMetaLevel(Instances newData, Random random) 
     throws Exception {
@@ -424,8 +317,7 @@ public class Stacking
    * Returns class probabilities.
    *
    * @param instance the instance to be classified
-   * @return the distribution
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -435,8 +327,6 @@ public class Stacking
 
   /**
    * Output a representation of this classifier
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -465,12 +355,13 @@ public class Stacking
    *
    * @param instances the level-0 format
    * @return the format for the meta data
-   * @throws Exception if the format generation fails
    */
   protected Instances metaFormat(Instances instances) throws Exception {
 
     FastVector attributes = new FastVector();
     Instances metaFormat;
+    Attribute attribute;
+    int i = 0;
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
@@ -496,7 +387,6 @@ public class Stacking
    * 
    * @param instance the instance to be transformed
    * @return the level-1 instance
-   * @throws Exception if the instance generation fails
    */
   protected Instance metaInstance(Instance instance) throws Exception {
 
@@ -535,3 +425,12 @@ public class Stacking
     }
   }
 }
+
+
+
+
+
+
+
+
+

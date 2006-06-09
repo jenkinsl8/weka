@@ -23,58 +23,52 @@
 
 package weka.filters.supervised.instance;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.UnassignedClassException;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-
+import weka.filters.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.UnsupportedClassTypeException;
 
 /** 
- <!-- globalinfo-start -->
- * Produces a random subsample of a dataset. The original dataset must fit entirely in memory. This filter allows you to specify the maximum "spread" between the rarest and most common class. For example, you may specify that there be at most a 2:1 difference in class frequencies. When used in batch mode, subsequent batches are NOT resampled.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -S &lt;num&gt;
- *  Specify the random number seed (default 1)</pre>
- * 
- * <pre> -M &lt;num&gt;
- *  The maximum class distribution spread.
- *  0 = no maximum spread, 1 = uniform distribution, 10 = allow at most
- *  a 10:1 ratio between the classes (default 0)</pre>
- * 
- * <pre> -W
- *  Adjust weights so that total weight per class is maintained.
- *  Individual instance weighting is not preserved. (default no
- *  weights adjustment</pre>
- * 
- * <pre> -X &lt;num&gt;
- *  The maximum count for any class value (default 0 = unlimited).
- * </pre>
- * 
- <!-- options-end -->
+ * Produces a random subsample of a dataset. The original dataset must
+ * fit entirely in memory. This filter allows you to specify the maximum
+ * "spread" between the rarest and most common class. For example, you may
+ * specify that there be at most a 2:1 difference in class frequencies.
+ * When used in batch mode, subsequent batches are
+ * <b>not</b> resampled.
+ *
+ * Valid options are:<p>
+ *
+ * -S num <br>
+ * Specify the random number seed (default 1).<p>
+ *
+ * -M num <br>
+ *  The maximum class distribution spread. <br>
+ *  0 = no maximum spread, 1 = uniform distribution, 10 = allow at most a
+ *  10:1 ratio between the classes (default 0)
+ *  <p>
+ *
+ * -X num <br>
+ *  The maximum count for any class value. <br>
+ *  (default 0 = unlimited)
+ *  <p>
+ *
+ * -W <br>
+ *  Adjust weights so that total weight per class is maintained. Individual
+ *  instance weighting is not preserved. (default no weights adjustment)
+ *  <p>
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.3 $ 
  **/
-public class SpreadSubsample 
-  extends Filter 
-  implements SupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -3947033795243930016L;
+public class SpreadSubsample extends Filter implements SupervisedFilter,
+						       OptionHandler {
 
   /** The random number generator seed */
   private int m_RandomSeed = 1;
@@ -137,7 +131,7 @@ public class SpreadSubsample
    * Sets whether the instance weights will be adjusted to maintain
    * total weight per class.
    *
-   * @param newAdjustWeights whether to adjust weights
+   * @param newAdjustWeights
    */
   public void setAdjustWeights(boolean newAdjustWeights) {
 
@@ -175,32 +169,29 @@ public class SpreadSubsample
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Specify the random number seed (default 1)</pre>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  The maximum class distribution spread.
-   *  0 = no maximum spread, 1 = uniform distribution, 10 = allow at most
-   *  a 10:1 ratio between the classes (default 0)</pre>
-   * 
-   * <pre> -W
-   *  Adjust weights so that total weight per class is maintained.
-   *  Individual instance weighting is not preserved. (default no
-   *  weights adjustment</pre>
-   * 
-   * <pre> -X &lt;num&gt;
-   *  The maximum count for any class value (default 0 = unlimited).
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses a list of options for this object. Valid options are:<p>
+   *
+   * -S num <br>
+   * Specify the random number seed (default 1).<p>
+   *
+   * -M num <br>
+   *  The maximum class distribution spread. <br>
+   *  0 = no maximum spread, 1 = uniform distribution, 10 = allow at most a
+   *  10:1 ratio between the classes (default 0)
+   *  <p>
+   *
+   * -X num <br>
+   *  The maximum count for any class value. <br>
+   *  (default 0 = unlimited)
+   *  <p>
+   *
+   * -W <br>
+   *  Adjust weights so that total weight per class is maintained. Individual
+   *  instance weighting is not preserved. (default no weights adjustment)
+   *  <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -306,7 +297,7 @@ public class SpreadSubsample
   /**
    * Sets the value for the max count
    *
-   * @param maxcount the new max count
+   * @param spread the new max count
    */
   public void setMaxCount(double maxcount) {
 
@@ -360,8 +351,8 @@ public class SpreadSubsample
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnassignedClassException if no class attribute has been set.
-   * @throws UnsupportedClassTypeException if the class attribute
+   * @exception UnassignedClassException if no class attribute has been set.
+   * @exception UnsupportedClassTypeException if the class attribute
    * is not nominal. 
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -383,7 +374,7 @@ public class SpreadSubsample
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
   public boolean input(Instance instance) {
 
@@ -409,7 +400,7 @@ public class SpreadSubsample
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -536,8 +527,6 @@ public class SpreadSubsample
   /**
    * Creates an index containing the position where each class starts in 
    * the getInputFormat(). m_InputFormat must be sorted on the class attribute.
-   * 
-   * @return the positions
    */
   private int []getClassIndices() {
 
@@ -588,3 +577,11 @@ public class SpreadSubsample
     }
   }
 }
+
+
+
+
+
+
+
+

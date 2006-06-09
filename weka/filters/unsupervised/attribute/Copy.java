@@ -23,48 +23,32 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that copies a range of attributes in the dataset. This is used in conjunction with other filters that overwrite attribute values during the course of their operation -- this filter allows the original attributes to be kept as well as the new attributes.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to copy. First and last are valid
- *  indexes. (default none)</pre>
- * 
- * <pre> -V
- *  Invert matching sense (i.e. copy all non-specified columns)</pre>
- * 
- <!-- options-end -->
+ * An instance filter that copies a range of attributes in the dataset.
+ * This is used in conjunction with other filters that overwrite attribute
+ * during the course of their operation -- this filter allows the original
+ * attributes to be kept as well as the new attributes.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -R index1,index2-index4,...<br>
+ * Specify list of columns to copy. First and last are valid indexes.
+ * Attribute copies are placed at the end of the dataset.
+ * (default none)<p>
+ *
+ * -V<br>
+ * Invert matching sense (i.e. copy all non-specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class Copy 
-  extends Filter 
-  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8543707493627441566L;
+public class Copy extends Filter implements UnsupervisedFilter,
+					    StreamableFilter, OptionHandler {
 
   /** Stores which columns to copy */
   protected Range m_CopyCols = new Range();
@@ -74,6 +58,12 @@ public class Copy
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
+
+  /** 
+   * Contains an index of string attributes in the input format
+   * that survive the filtering process -- some entries may be duplicated 
+   */
+  protected int [] m_InputStringIndex;
 
   /**
    * Returns an enumeration describing the available options.
@@ -96,22 +86,18 @@ public class Copy
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of columns to copy. First and last are valid
-   *  indexes. (default none)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense (i.e. copy all non-specified columns)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options controlling the behaviour of this object.
+   * Valid options are:<p>
+   *
+   * -R index1,index2-index4,...<br>
+   * Specify list of columns to copy. First and last are valid indexes.
+   * (default none)<p>
+   *
+   * -V<br>
+   * Invert matching sense (i.e. copy all non-specified columns)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -156,7 +142,7 @@ public class Copy
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if a problem occurs setting the input format
+   * @exception Exception if a problem occurs setting the input format
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -167,6 +153,8 @@ public class Copy
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     m_SelectedAttributes = m_CopyCols.getSelection();
+    int inStrCopiedLen = 0;
+    int [] inStrCopied = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
@@ -175,19 +163,16 @@ public class Copy
 				     outputFormat.numAttributes());
       outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
 				   "Copy of " + origAttribute.name());
-
+      if (origAttribute.type() == Attribute.STRING) {
+        inStrCopied[inStrCopiedLen++] = current;
+      }
     }
-
-    // adapt locators
-    int[] newIndices = new int[instanceInfo.numAttributes() + m_SelectedAttributes.length];
-    for (int i = 0; i < instanceInfo.numAttributes(); i++)
-      newIndices[i] = i;
-    for (int i = 0; i < m_SelectedAttributes.length; i++)
-      newIndices[instanceInfo.numAttributes() + i] = m_SelectedAttributes[i];
-    initInputLocators(instanceInfo, newIndices);
-
+    int [] origIndex = getInputStringIndex(); 
+    m_InputStringIndex = new int [origIndex.length + inStrCopiedLen];
+    System.arraycopy(origIndex, 0, m_InputStringIndex, 0, origIndex.length);
+    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length, 
+                     inStrCopiedLen);
     setOutputFormat(outputFormat);
-    
     return true;
   }
   
@@ -200,7 +185,7 @@ public class Copy
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -227,9 +212,8 @@ public class Copy
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
+                     getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
@@ -275,10 +259,7 @@ public class Copy
   /**
    * Set whether selected columns should be removed or kept. If true the 
    * selected columns are kept and unselected columns are copied. If false
-   * selected columns are copied and unselected columns are kept. <br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
+   * selected columns are copied and unselected columns are kept.
    *
    * @param invert the new invert setting
    */
@@ -316,11 +297,8 @@ public class Copy
    * @param rangeList a string representing the list of attributes.  Since
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
-   * eg: first-3,5,6-last<br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
-   * @throws Exception if an invalid range list is supplied
+   * eg: first-3,5,6-last
+   * @exception Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
 
@@ -332,11 +310,8 @@ public class Copy
    *
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
-   * from 0.<br>
-   * Note: use this method before you call 
-   * <code>setInputFormat(Instances)</code>, since the output format is
-   * determined in that method.
-   * @throws Exception if an invalid set of ranges is supplied
+   * from 0.
+   * @exception Exception if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
@@ -361,3 +336,11 @@ public class Copy
     }
   }
 }
+
+
+
+
+
+
+
+

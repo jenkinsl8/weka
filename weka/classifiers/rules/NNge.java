@@ -25,79 +25,42 @@ package weka.classifiers.rules;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 
 /**
- <!-- globalinfo-start -->
- * Nearest-neighbor-like algorithm using non-nested generalized exemplars (which are hyperrectangles that can be viewed as if-then rules). For more information, see <br/>
- * <br/>
- * Brent Martin (1995). Instance-Based learning: Nearest Neighbor With Generalization. Hamilton, New Zealand.<br/>
- * <br/>
- * Sylvain Roy (2002). Nearest Neighbor With Generalization. Christchurch, New Zealand.
- * <p/>
- <!-- globalinfo-end -->
+ * NNge classifier. 
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;mastersthesis{Martin1995,
- *    address = {Hamilton, New Zealand},
- *    author = {Brent Martin},
- *    school = {University of Waikato},
- *    title = {Instance-Based learning: Nearest Neighbor With Generalization},
- *    year = {1995}
- * }
- * 
- * &#64;unpublished{Roy2002,
- *    address = {Christchurch, New Zealand},
- *    author = {Sylvain Roy},
- *    school = {University of Canterbury},
- *    title = {Nearest Neighbor With Generalization},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Nearest neighbor like algorithm using non-nested generalized exemplars.
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * For more information, see <p>
  * 
- * <pre> -G &lt;value&gt;
- *  Number of attempts of generalisation.
- * </pre>
- * 
- * <pre> -I &lt;value&gt;
- *  Number of folder for computing the mutual information.
- * </pre>
- * 
- <!-- options-end -->
+ * Brent Martin, (1995) "Instance-Based learning : Nearest Neighbor With Generalization",
+ * Master Thesis, University of Waikato, Hamilton, New Zealand
+ * <p>
+ *
+ * Sylvain Roy (2002) "Nearest Neighbor With Generalization",
+ * Unpublished, University of Canterbury, Christchurch, New Zealand
+ * <p>
+ *
+ * Valid options are:<p>
+ *
+ * -I num <br>
+ * Set the number of folder to use in the computing of the mutual information
+ * (default 5) <p>
+ *
+ * -G num <br>
+ * Set the number of attempts of generalisation
+ * (default 5) <p>
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class NNge 
-  extends Classifier 
-  implements UpdateableClassifier, OptionHandler, TechnicalInformationHandler {
+public class NNge extends Classifier implements UpdateableClassifier, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 4084742275553788972L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -108,45 +71,17 @@ public class NNge
     return "Nearest-neighbor-like algorithm using non-nested generalized exemplars "
       + "(which are hyperrectangles that can be viewed as if-then rules). For more "
       + "information, see \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.MASTERSTHESIS);
-    result.setValue(Field.AUTHOR, "Brent Martin");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.TITLE, "Instance-Based learning: Nearest Neighbor With Generalization");
-    result.setValue(Field.SCHOOL, "University of Waikato");
-    result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
-    
-    additional = result.add(Type.UNPUBLISHED);
-    additional.setValue(Field.AUTHOR, "Sylvain Roy");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.TITLE, "Nearest Neighbor With Generalization");
-    additional.setValue(Field.SCHOOL, "University of Canterbury");
-    additional.setValue(Field.ADDRESS, "Christchurch, New Zealand");
-    
-    return result;
+      + "Brent Martin, (1995) \"Instance-Based learning : Nearest Neighbor With "
+      + "Generalization\", Master Thesis, University of Waikato, Hamilton, New "
+      + "Zealand\n\n"
+      + "Sylvain Roy (2002) \"Nearest Neighbor With Generalization\","
+      + "Unpublished, University of Canterbury, Christchurch, New Zealand\n\n";
   }
 
   /**
    * Implements Exemplar as used by NNge : parallel axis hyperrectangle.
    */
-  private class Exemplar 
-    extends Instances {
-    
-    /** for serialization */
-    static final long serialVersionUID = 3960180128928697216L;
+  private class Exemplar extends Instances {
     
     /** List of all the Exemplar */
     private Exemplar previous = null;
@@ -220,8 +155,8 @@ public class NNge
     /**
      * Generalise the Exemplar with inst
      *
-     * @param inst the new example used for the generalisation
-     * @throws Exception if either the class of inst is not equal to the class of the Exemplar or inst misses a value.
+     * @param instance the new example used for the generalisation
+     * @exception Exception if either the class of inst is not equal to the class of the Exemplar or inst misses a value.
      */
     private void generalise(Instance inst) throws Exception {
 
@@ -257,8 +192,8 @@ public class NNge
      * i.e. the boundaries of the Exemplar include inst but the Exemplar still doesn't 'own' inst.
      * To be complete, the generalisation must be validated with validateGeneralisation.
      * the generalisation can be canceled with cancelGeneralisation.
-     * @param inst the new example used for the generalisation
-     * @throws Exception if either the class of inst is not equal to the class of the Exemplar or inst misses a value.
+     * @param instance the new example used for the generalisation
+     * @exception Exception if either the class of inst is not equal to the class of the Exemplar or inst misses a value.
      */
     private void preGeneralise(Instance inst) throws Exception {
 	
@@ -305,7 +240,7 @@ public class NNge
      * Validates a generalisation started with preGeneralise.
      * Watch out, preGeneralise must have been called before.
      *
-     * @throws Exception is thrown if preGeneralise hasn't been called before
+     * @exception Exception is thrown if preGeneralise hasn't been called before
      */
     private void validateGeneralisation() throws Exception {
       if(m_PreInst == null){
@@ -322,7 +257,7 @@ public class NNge
      * Cancels a generalisation started with preGeneralise.
      * Watch out, preGeneralise must have been called before.
      *
-     * @throws Exception is thrown if preGeneralise hasn't been called before
+     * @exception Exception is thrown if preGeneralise hasn't been called before
      */
     private void cancelGeneralisation() throws Exception {
       if(m_PreInst == null){
@@ -381,7 +316,7 @@ public class NNge
      *
      * @param ex an Exemplar
      * @return true if ex is overlapped by the Exemplar
-     * @throws Exception
+     * @exception Exception
      */
     private boolean overlaps(Exemplar ex) {
 
@@ -508,7 +443,7 @@ public class NNge
      *
      * @param attrIndex the index of the attribute
      * @return the value of the inf border for this attribute
-     * @throws Exception is thrown either if the attribute is nominal or if the Exemplar is empty
+     * @exception Exception is thrown either if the attribute is nominal or if the Exemplar is empty
      */
     private double getMinBorder(int attrIndex) throws Exception {
       if(!attribute(attrIndex).isNumeric())
@@ -525,7 +460,7 @@ public class NNge
      *
      * @param attrIndex the index of the attribute
      * @return the value of the sup border for this attribute
-     * @throws Exception is thrown either if the attribute is nominal or if the Exemplar is empty
+     * @exception Exception is thrown either if the attribute is nominal or if the Exemplar is empty
      */
     private double getMaxBorder(int attrIndex) throws Exception {
       if(!attribute(attrIndex).isNumeric())
@@ -719,48 +654,29 @@ public class NNge
 
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Generates a classifier. Must initialize all fields of the classifier
    * that are not being set via options (ie. multiple calls of buildClassifier
    * must always lead to the same result). Must not change the dataset
    * in any way.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the classifier has not been 
+   * @exception Exception if the classifier has not been 
    * generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    /* check the data */
 
-    // remove instances with missing class
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+    if (!data.attribute(data.classIndex()).isNominal()) {
+      throw new UnsupportedAttributeTypeException("Class type must be nominal!");
+    }	
+
+    // Make a copy of the instances
     data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+
     /* initialize the classifier */
 
     m_Train = new Instances(data, 0);
@@ -846,7 +762,7 @@ public class NNge
    *
    * @param instance the instance to be classified
    * @return index of the predicted class as a double
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -868,7 +784,7 @@ public class NNge
    * Updates the classifier using the given instance.
    *
    * @param instance the instance to include
-   * @throws Exception if instance could not be incorporated
+   * @exception Exception if instance could not be incorporated
    * successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
@@ -889,7 +805,7 @@ public class NNge
    * Performs the update of the classifier
    *
    * @param instance the new instance
-   * @throws Exception if the update fails
+   * @exception Exception if the update fails
    */
   private void update(Instance instance) throws Exception {
 
@@ -978,7 +894,8 @@ public class NNge
    * predictedExemplar must be in NNge's lists
    *
    * @param newInst the new instance
-   * @throws Exception in case of inconsitent situation
+   * @param predictedExemplar the Exemplar that matches newInst
+   * @exception Exception in case of inconsitent situation
    */
   private void generalise(Instance newInst) throws Exception {
 
@@ -1033,7 +950,7 @@ public class NNge
    *
    * @param newInst the instance to classify
    * @param predictedExemplar the Exemplar that matches newInst
-   * @throws Exception in case of inconsistent situation
+   * @exception Exception in case of inconsistent situation
    */
   private void adjust(Instance newInst, Exemplar predictedExemplar) throws Exception {
 
@@ -1057,7 +974,7 @@ public class NNge
    *
    * @param predictedExemplar an Exemplar
    * @param newInst an Instance matched by predictedExemplar
-   * @throws Exception in case of inconsistent situation. (shouldn't happen.)
+   * @exception Exception in case of inconsistent situation. (shouldn't happen.)
    */
   private void prune(Exemplar predictedExemplar, Instance newInst) throws Exception {
 
@@ -1261,8 +1178,8 @@ public class NNge
    *
    * MUST be called AFTER adding inst in m_Train 
    *
-   * @param inst the new instance
-   * @throws Exception is thrown if an inconsistent situation is met
+   * @param instance the new instance
+   * @exception Exception is thrown if an inconsistent situation is met
    */
   private void updateMI(Instance inst) throws Exception {
 
@@ -1477,6 +1394,7 @@ public class NNge
    * returns the weight of indexth attribute
    *
    * @param index attribute's index
+   * @param classValue class' value (of the concept learnt, see IB4 attribute weight system)
    * @return the weight of indexth attribute
    */
   private double attrWeight (int index) {
@@ -1578,23 +1496,10 @@ public class NNge
   /**
    * Sets the OptionHandler's options using the given list. All options
    * will be set (or reset) during this call (i.e. incremental setting
-   * of options is not possible). <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -G &lt;value&gt;
-   *  Number of attempts of generalisation.
-   * </pre>
-   * 
-   * <pre> -I &lt;value&gt;
-   *  Number of folder for computing the mutual information.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * of options is not possible).
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 

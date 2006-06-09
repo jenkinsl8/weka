@@ -43,7 +43,7 @@ import weka.clusterers.DensityBasedClusterer;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class PredictionAppender extends JPanel
   implements DataSource, Visible, BeanCommon,

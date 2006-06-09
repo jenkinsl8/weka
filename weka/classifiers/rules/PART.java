@@ -22,97 +22,55 @@
 
 package weka.classifiers.rules;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.rules.part.MakeDecList;
+import weka.classifiers.rules.part.*;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Summarizable;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for generating a PART decision list. Uses separate-and-conquer. Builds a partial C4.5 decision tree in each iteration and makes the "best" leaf into a rule.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
- * Eibe Frank, Ian H. Witten: Generating Accurate Rule Sets Without Global Optimization. In: Fifteenth International Conference on Machine Learning, 144-151, 1998.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for generating a PART decision list. For more information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Frank1998,
- *    author = {Eibe Frank and Ian H. Witten},
- *    booktitle = {Fifteenth International Conference on Machine Learning},
- *    editor = {J. Shavlik},
- *    pages = {144-151},
- *    publisher = {Morgan Kaufmann},
- *    title = {Generating Accurate Rule Sets Without Global Optimization},
- *    year = {1998},
- *    PS = {http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Eibe Frank and Ian H. Witten (1998).  <a
+ * href="http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz">Generating
+ * Accurate Rule Sets Without Global Optimization.</a> In Shavlik, J.,
+ * ed., <i>Machine Learning: Proceedings of the Fifteenth
+ * International Conference</i>, Morgan Kaufmann Publishers, San
+ * Francisco, CA. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of objects&gt;
- *  Set minimum number of objects per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -U
- *  Generate unpruned decision list.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -C confidence <br>
+ * Set confidence threshold for pruning. (Default: 0.25) <p>
+ *
+ * -M number <br>
+ * Set minimum number of instances per leaf. (Default: 2) <p>
+ *
+ * -R <br>
+ * Use reduced error pruning. <p>
+ *
+ * -N number <br>
+ * Set number of folds for reduced error pruning. One fold is
+ * used as the pruning set. (Default: 3) <p>
+ *
+ * -B <br>
+ * Use binary splits for nominal attributes. <p>
+ *
+ * -U <br>
+ * Generate unpruned decision list. <p>
+ *
+ * -Q <br>
+ * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class PART 
-  extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, Summarizable, 
-             AdditionalMeasureProducer, TechnicalInformationHandler {
+public class PART extends Classifier implements OptionHandler,
+  WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
 
-  /** for serialization */
-  static final long serialVersionUID = 8121455039782598361L;
-  
   /** The decision list */
   private MakeDecList m_root;
 
@@ -146,68 +104,22 @@ public class PART
 
     return  "Class for generating a PART decision list. Uses "
       + "separate-and-conquer. Builds a partial C4.5 decision tree "
-      + "in each iteration and makes the \"best\" leaf into a rule.\n\n"
+      + "in each iteration and makes the \"best\" leaf into a rule. "
       + "For more information, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Eibe Frank and Ian H. Witten");
-    result.setValue(Field.TITLE, "Generating Accurate Rule Sets Without Global Optimization");
-    result.setValue(Field.BOOKTITLE, "Fifteenth International Conference on Machine Learning");
-    result.setValue(Field.EDITOR, "J. Shavlik");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.PAGES, "144-151");
-    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
-    result.setValue(Field.PS, "http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities      result;
-
-    if (m_unpruned) 
-      result = new MakeDecList(null, m_minNumObj).getCapabilities();
-    else if (m_reducedErrorPruning) 
-      result = new MakeDecList(null, m_numFolds, m_minNumObj, m_Seed).getCapabilities();
-    else
-      result = new MakeDecList(null, m_CF, m_minNumObj).getCapabilities();
-    
-    return result;
+      + "Eibe Frank and Ian H. Witten (1998). \"Generating "
+      + "Accurate Rule Sets Without Global Optimization.\""
+      + "In Shavlik, J., ed., Machine Learning: Proceedings of the "
+      + "Fifteenth International Conference, Morgan Kaufmann Publishers.";
   }
 
   /**
    * Generates the classifier.
    *
-   * @param instances the data to train with
-   * @throws Exception if classifier can't be built successfully
+   * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
        throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     ModelSelection modSelection;	 
 
     if (m_binarySplits)
@@ -231,9 +143,7 @@ public class PART
   /**
    * Classifies an instance.
    *
-   * @param instance the instance to classify
-   * @return the classification
-   * @throws Exception if instance can't be classified successfully
+   * @exception Exception if instance can't be classified successfully
    */
   public double classifyInstance(Instance instance) 
        throws Exception {
@@ -244,9 +154,7 @@ public class PART
   /** 
    * Returns class probabilities for an instance.
    *
-   * @param instance the instance to get the distribution for
-   * @return the class probabilities
-   * @throws Exception if the distribution can't be computed successfully
+   * @exception Exception if the distribution can't be computed successfully
    */
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
@@ -317,40 +225,10 @@ public class PART
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;pruning confidence&gt;
-   *  Set confidence threshold for pruning.
-   *  (default 0.25)</pre>
-   * 
-   * <pre> -M &lt;minimum number of objects&gt;
-   *  Set minimum number of objects per leaf.
-   *  (default 2)</pre>
-   * 
-   * <pre> -R
-   *  Use reduced error pruning.</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Set number of folds for reduced error
-   *  pruning. One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -B
-   *  Use binary splits only.</pre>
-   * 
-   * <pre> -U
-   *  Generate unpruned decision list.</pre>
-   * 
-   * <pre> -Q &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -436,8 +314,6 @@ public class PART
 
   /**
    * Returns a description of the classifier
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -449,8 +325,6 @@ public class PART
   
   /**
    * Returns a superconcise version of the model
-   * 
-   * @return a concise version of the model
    */
   public String toSummaryString() {
 
@@ -477,9 +351,9 @@ public class PART
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
@@ -711,3 +585,12 @@ public class PART
     }
   }
 }
+
+
+  
+
+
+
+
+
+

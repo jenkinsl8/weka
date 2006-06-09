@@ -40,121 +40,70 @@
 
 package weka.classifiers;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.rules.ZeroR;
+import weka.classifiers.Classifier;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * This class performs Bias-Variance decomposion on any classifier using the sub-sampled cross-validation procedure as specified in (1).<br/>
- * The Kohavi and Wolpert definition of bias and variance is specified in (2).<br/>
- * The Webb definition of bias and variance is specified in (3).<br/>
- * <br/>
- * Geoffrey I. Webb, Paul Conilione (2002). Estimating bias and variance from data. School of Computer Science and Software Engineering, Victoria, Australia.<br/>
- * <br/>
- * Ron Kohavi, David H. Wolpert: Bias Plus Variance Decomposition for Zero-One Loss Functions. In: Machine Learning: Proceedings of the Thirteenth International Conference, 275-283, 1996.<br/>
- * <br/>
- * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. 40(2):159-196.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;misc{Webb2002,
- *    address = {School of Computer Science and Software Engineering, Victoria, Australia},
- *    author = {Geoffrey I. Webb and Paul Conilione},
- *    institution = {Monash University},
- *    title = {Estimating bias and variance from data},
- *    year = {2002},
- *    PDF = {http://www.csse.monash.edu.au/~webb/Files/WebbConilione04.pdf}
- * }
- * 
- * &#64;inproceedings{Kohavi1996,
- *    author = {Ron Kohavi and David H. Wolpert},
- *    booktitle = {Machine Learning: Proceedings of the Thirteenth International Conference},
- *    editor = {Lorenza Saitta},
- *    pages = {275-283},
- *    publisher = {Morgan Kaufmann},
- *    title = {Bias Plus Variance Decomposition for Zero-One Loss Functions},
- *    year = {1996},
- *    PS = {http://robotics.stanford.edu/~ronnyk/biasVar.ps}
- * }
- * 
- * &#64;article{Webb2000,
- *    author = {Geoffrey I. Webb},
- *    journal = {Machine Learning},
- *    number = {2},
- *    pages = {159-196},
- *    title = {MultiBoosting: A Technique for Combining Boosting and Wagging},
- *    volume = {40},
- *    year = {2000}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * This class performs Bias-Variance decomposion on any classifier using the
+ * sub-sampled cross-validation procedure as specified in:<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -c &lt;class index&gt;
- *  The index of the class attribute.
- *  (default last)</pre>
- * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
- * <pre> -l &lt;num&gt;
- *  The number of times each instance is classified.
- *  (default 10)</pre>
- * 
- * <pre> -p &lt;proportion of objects in common&gt;
- *  The average proportion of instances common between any two training sets</pre>
- * 
- * <pre> -s &lt;seed&gt;
- *  The random number seed used.</pre>
- * 
- * <pre> -t &lt;name of arff file&gt;
- *  The name of the arff file used for the decomposition.</pre>
- * 
- * <pre> -T &lt;number of instances in training set&gt;
- *  The number of instances in the training set.</pre>
- * 
- * <pre> -W &lt;classifier class name&gt;
- *  Full class name of the learner used in the decomposition.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
- * 
- * <pre> 
- * Options specific to learner weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Geoffrey I. Webb & Paul Conilione (2002), <i> Estimating bias and variance
+ * from data </i>, School of Computer Science and Software Engineering,
+ * Monash University, Australia <p>
+ *
+ *
+ * The Kohavi and Wolpert definition of bias and variance is specified in:<p>
+ * R. Kohavi & D. Wolpert (1996), <i>Bias plus variance decomposition for
+ * zero-one loss functions</i>, in Proc. of the Thirteenth International
+ * Machine Learning Conference (ICML96)
+ * <a href="http://robotics.stanford.edu/~ronnyk/biasVar.ps">
+ * download postscript</a>.<p>
+ *
+ * The Webb definition of bias and variance is specified in:<p>
+ * Geoffrey I. Webb (2000), <i> MultiBoosting: A Technique for Combining
+ * Boosting and Wagging</i>, Machine Learning, 40(2), pages 159-196<p>
+ *
+ * Valid options are:<p>
+ *
+ * -c num <br>
+ * Specify the index of the class attribute (default last).<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -l num <br>
+ * Set the number times each instance is to be classified (default 10). <p>
+ *
+ * -p num <br>
+ * Set the proportion of instances that are the same between any two
+ * training sets. Training set size/(Dataset size - 1) < num < 1.0
+ * (Default is Training set size/(Dataset size - 1) ) <p>
+ *
+ * -s num <br>
+ * Set the seed for the dataset randomisation (default 1). <p>
+ *
+ * -t filename <br>
+ * Set the arff file to use for the decomposition (required).<p>
+ *
+ * -T num <br>
+ * Set the size of the training sets. Must be greater than 0 and
+ * less size of the dataset. (default half of dataset size) <p>
+ *
+ * -W classname <br>
+ * Specify the full class name of a learner to perform the
+ * decomposition on (required).<p>
  *
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class BVDecomposeSegCVSub
-    implements OptionHandler, TechnicalInformationHandler {
+
+public class BVDecomposeSegCVSub implements OptionHandler {
     
     /** Debugging mode, gives extra output if true. */
     protected boolean m_Debug;
@@ -202,61 +151,6 @@ public class BVDecomposeSegCVSub
     protected double m_P;
     
     /**
-     * Returns a string describing this object
-     * @return a description of the classifier suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String globalInfo() {
-      return 
-          "This class performs Bias-Variance decomposion on any classifier using the "
-        + "sub-sampled cross-validation procedure as specified in (1).\n"
-        + "The Kohavi and Wolpert definition of bias and variance is specified in (2).\n"
-        + "The Webb definition of bias and variance is specified in (3).\n\n"
-        + getTechnicalInformation().toString();
-    }
-
-    /**
-     * Returns an instance of a TechnicalInformation object, containing 
-     * detailed information about the technical background of this class,
-     * e.g., paper reference or book this class is based on.
-     * 
-     * @return the technical information about this class
-     */
-    public TechnicalInformation getTechnicalInformation() {
-      TechnicalInformation 	result;
-      TechnicalInformation 	additional;
-      
-      result = new TechnicalInformation(Type.MISC);
-      result.setValue(Field.AUTHOR, "Geoffrey I. Webb and Paul Conilione");
-      result.setValue(Field.YEAR, "2002");
-      result.setValue(Field.TITLE, "Estimating bias and variance from data");
-      result.setValue(Field.INSTITUTION, "Monash University");
-      result.setValue(Field.ADDRESS, "School of Computer Science and Software Engineering, Victoria, Australia");
-      result.setValue(Field.PDF, "http://www.csse.monash.edu.au/~webb/Files/WebbConilione04.pdf");
-
-      additional = result.add(Type.INPROCEEDINGS);
-      additional.setValue(Field.AUTHOR, "Ron Kohavi and David H. Wolpert");
-      additional.setValue(Field.YEAR, "1996");
-      additional.setValue(Field.TITLE, "Bias Plus Variance Decomposition for Zero-One Loss Functions");
-      additional.setValue(Field.BOOKTITLE, "Machine Learning: Proceedings of the Thirteenth International Conference");
-      additional.setValue(Field.PUBLISHER, "Morgan Kaufmann");
-      additional.setValue(Field.EDITOR, "Lorenza Saitta");
-      additional.setValue(Field.PAGES, "275-283");
-      additional.setValue(Field.PS, "http://robotics.stanford.edu/~ronnyk/biasVar.ps");
-
-      additional = result.add(Type.ARTICLE);
-      additional.setValue(Field.AUTHOR, "Geoffrey I. Webb");
-      additional.setValue(Field.YEAR, "2000");
-      additional.setValue(Field.TITLE, "MultiBoosting: A Technique for Combining Boosting and Wagging");
-      additional.setValue(Field.JOURNAL, "Machine Learning");
-      additional.setValue(Field.VOLUME, "40");
-      additional.setValue(Field.NUMBER, "2");
-      additional.setValue(Field.PAGES, "159-196");
-
-      return result;
-    }
-    
-    /**
      * Returns an enumeration describing the available options.
      *
      * @return an enumeration of all the available options.
@@ -277,7 +171,7 @@ public class BVDecomposeSegCVSub
         +"\t(default 10)",
         "l", 1, "-l <num>"));
         newVector.addElement(new Option(
-        "\tThe average proportion of instances common between any two training sets",
+        "\tThe average proportion of instances common between any two training sets\n",
         "p", 1, "-p <proportion of objects in common>"));
         newVector.addElement(new Option(
         "\tThe random number seed used.",
@@ -309,55 +203,53 @@ public class BVDecomposeSegCVSub
     }
     
     
-    /** 
-     * Sets the OptionHandler's options using the given list. All options
+    /** Sets the OptionHandler's options using the given list. All options
      * will be set (or reset) during this call (i.e. incremental setting
-     * of options is not possible). <p/>
-     *
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -c &lt;class index&gt;
-     *  The index of the class attribute.
-     *  (default last)</pre>
-     * 
-     * <pre> -D
-     *  Turn on debugging output.</pre>
-     * 
-     * <pre> -l &lt;num&gt;
-     *  The number of times each instance is classified.
-     *  (default 10)</pre>
-     * 
-     * <pre> -p &lt;proportion of objects in common&gt;
-     *  The average proportion of instances common between any two training sets</pre>
-     * 
-     * <pre> -s &lt;seed&gt;
-     *  The random number seed used.</pre>
-     * 
-     * <pre> -t &lt;name of arff file&gt;
-     *  The name of the arff file used for the decomposition.</pre>
-     * 
-     * <pre> -T &lt;number of instances in training set&gt;
-     *  The number of instances in the training set.</pre>
-     * 
-     * <pre> -W &lt;classifier class name&gt;
-     *  Full class name of the learner used in the decomposition.
-     *  eg: weka.classifiers.bayes.NaiveBayes</pre>
-     * 
-     * <pre> 
-     * Options specific to learner weka.classifiers.rules.ZeroR:
-     * </pre>
-     * 
-     * <pre> -D
-     *  If set, classifier is run in debug mode and
-     *  may output additional info to the console</pre>
-     * 
-     <!-- options-end -->
+     * of options is not possible).
      *
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     *
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
+        
+        /**
+         * Parses a given list of options. Valid options are:<p>
+         *
+         * -c num <br>
+         * Specify the index of the class attribute (default last).<p>
+         *
+         * -D <br>
+         * Turn on debugging output.<p>
+         *
+         * -l num <br>
+         * Set the number times each instance is to be classified (default 10). <p>
+         *
+         * -p num <br>
+         * Set the proportion of instances that are the same between any two
+         * training sets. Training set size/(Dataset size - 1) < num < 1.0
+         * (Default Training set size/(Dataset size - 1)) <p>
+         *
+         * -s num <br>
+         * Set the seed for the dataset randomisation (default 1). <p>
+         *
+         * -t filename <br>
+         * Set the arff file to use for the decomposition (required).<p>
+         *
+         * -T num <br>
+         * Set the size of the training sets. Must be greater than 0 and
+         * less size of the dataset. (default half of dataset size) <p>
+         *
+         * -W classname <br>
+         * Specify the full class name of a learner to perform the
+         * decomposition on (required).<p>
+         *
+         * Options after -- are passed to the designated sub-learner. <p>
+         *
+         * @param options the list of options as an array of strings
+         * @exception Exception if an option is not supported
+         */
+        
         setDebug(Utils.getFlag('D', options));
         
         String classIndex = Utils.getOption('c', options);
@@ -502,8 +394,6 @@ public class BVDecomposeSegCVSub
     
     /**
      * Sets the random number seed
-     * 
-     * @param seed the random number seed
      */
     public void setSeed(int seed) {
         
@@ -615,7 +505,7 @@ public class BVDecomposeSegCVSub
     /**
      * Get the calculated variance according to the Webb definition
      *
-     * @return the variance according to Webb
+     * @return
      *
      */
     public double getWVariance() {
@@ -693,7 +583,7 @@ public class BVDecomposeSegCVSub
     /**
      * Carry out the bias-variance decomposition using the sub-sampled cross-validation method.
      *
-     * @throws Exception if the decomposition couldn't be carried out
+     * @exception Exception if the decomposition couldn't be carried out
      */
     public void decompose() throws Exception {
         
@@ -790,7 +680,7 @@ public class BVDecomposeSegCVSub
         //foldSize = ROUNDUP( tps / k ) (round up, eg 3 -> 3,  3.3->4)
         int foldSize = (int) Math.ceil( (double)tps /(double) k); //roundup fold size double to integer
         int index = 0;
-        int currentIndex;
+        int currentIndex, endIndex;
         
         for( int count = 0; count < k; count ++){
             if( remainder != 0 && count == remainder ){
@@ -984,6 +874,7 @@ public class BVDecomposeSegCVSub
         int centralTValue = 0;
         int currentValue = 0;
         //array to store the list of classes the have the greatest number of classifictions.
+        int index = 0;
         Vector centralTClasses;
         
         centralTClasses = new Vector(); //create an array with size of the number of classes.
@@ -1104,5 +995,7 @@ public class BVDecomposeSegCVSub
             index[k] = temp;
         }
     }
+    
+    
+    
 }
-

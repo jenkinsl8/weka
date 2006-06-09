@@ -23,9 +23,6 @@
 package weka.clusterers;
 
 import java.io.Serializable;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializedObject;
@@ -36,9 +33,9 @@ import weka.core.Utils;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
-public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
+public abstract class Clusterer implements Cloneable, Serializable {
 
   // ===============
   // Public methods.
@@ -149,22 +146,6 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
       clusterers[i] = (Clusterer) so.getObject();
     }
     return clusterers;
-  }
-
-  /** 
-   * Returns the Capabilities of this clusterer. Derived classifiers have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities 	result;
-    
-    result = new Capabilities(this);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
   }
 }
 

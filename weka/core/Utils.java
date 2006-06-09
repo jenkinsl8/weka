@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.53 $
+ * @version $Revision: 1.44.2.3 $
  */
 public final class Utils {
 
@@ -174,7 +174,7 @@ public final class Utils {
    * another string.
    *
    * @param inString the string to replace substrings in.
-   * @param subString the substring to replace.
+   * @param substring the substring to replace.
    * @param replaceString the replacement substring
    * @return the input string with occurrences of substring replaced.
    */
@@ -256,7 +256,7 @@ public final class Utils {
     
     StringBuffer stringBuffer;
     double temp;
-    int dotPosition;
+    int i,dotPosition;
     long precisionValue;
     
     temp = value * Math.pow(10.0, afterDecimalPoint);
@@ -367,7 +367,7 @@ public final class Utils {
   /**
    * Returns the basic class of an array class (handles multi-dimensional
    * arrays).
-   * @param c        the array to inspect
+   * @param o        the array to inspect
    * @return         the class of the innermost elements
    */
   public static Class getArrayClass(Class c) {
@@ -458,7 +458,7 @@ public final class Utils {
   /**
    * Checks if the given array contains any non-empty options.
    *
-   * @param options an array of strings
+   * @param strings an array of strings
    * @exception Exception if there are any non-empty options
    */
   public static void checkForRemainingOptions(String [] options) 
@@ -487,14 +487,13 @@ public final class Utils {
    * it is replaced with the empty string.
    *
    * @param flag the character indicating the flag.
-   * @param options the array of strings containing all the options.
+   * @param strings the array of strings containing all the options.
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
   public static boolean getFlag(char flag, String [] options) 
     throws Exception {
-    
-    return getFlag("" + flag, options);
+       return getFlag("" + flag, options);
   }
   
   /**
@@ -503,19 +502,32 @@ public final class Utils {
    * it is replaced with the empty string.
    *
    * @param flag the String indicating the flag.
-   * @param options the array of strings containing all the options.
+   * @param strings the array of strings containing all the options.
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
   public static boolean getFlag(String flag, String [] options) 
     throws Exception {
-    
-    int pos = getOptionPos(flag, options);
 
-    if (pos > -1)
-      options[pos] = "";
-    
-    return (pos > -1);
+    if (options == null) {
+      return false;
+    }
+    for (int i = 0; i < options.length; i++) {
+      if ((options[i].length() > 1) && (options[i].charAt(0) == '-')) {
+	try {
+	  Double dummy = Double.valueOf(options[i]);
+	} catch (NumberFormatException e) {
+	  if (options[i].equals("-" + flag)) {
+	    options[i] = "";
+	    return true;
+	  }
+	  if (options[i].charAt(1) == '-') {
+	    return false;
+	  }
+	}
+      }
+    }
+    return false;
   }
 
   /**
@@ -530,8 +542,7 @@ public final class Utils {
    */
   public static /*@non_null@*/ String getOption(char flag, String [] options) 
     throws Exception {
-    
-    return getOption("" + flag, options);
+     return getOption("" + flag, options);
   }
 
   /**
@@ -548,68 +559,32 @@ public final class Utils {
     throws Exception {
 
     String newString;
-    int i = getOptionPos(flag, options);
 
-    if (i > -1) {
-      if (options[i].equals("-" + flag)) {
-	if (i + 1 == options.length) {
-	  throw new Exception("No value given for -" + flag + " option.");
-	}
-	options[i] = "";
-	newString = new String(options[i + 1]);
-	options[i + 1] = "";
-	return newString;
-      }
-      if (options[i].charAt(1) == '-') {
-	return "";
-      }
-    }
-    
-    return "";
-  }
-
-  /**
-   * Gets the index of an option or flag indicated by a flag "-Char" from 
-   * the given array of strings. Stops searching at the first marker "--".
-   *
-   * @param flag 	the character indicating the option.
-   * @param options 	the array of strings containing all the options.
-   * @return 		the position if found, or -1 otherwise
-   */
-  public static int getOptionPos(char flag, String[] options) {
-     return getOptionPos("" + flag, options);
-  }
-
-  /**
-   * Gets the index of an option or flag indicated by a flag "-String" from 
-   * the given array of strings. Stops searching at the first marker "--".
-   *
-   * @param flag 	the String indicating the option.
-   * @param options 	the array of strings containing all the options.
-   * @return 		the position if found, or -1 otherwise
-   */
-  public static int getOptionPos(String flag, String[] options) {
     if (options == null)
-      return -1;
-    
+      return "";
     for (int i = 0; i < options.length; i++) {
       if ((options[i].length() > 0) && (options[i].charAt(0) == '-')) {
+	
 	// Check if it is a negative number
 	try {
-	  Double.valueOf(options[i]);
-	} 
-	catch (NumberFormatException e) {
-	  // found?
-	  if (options[i].equals("-" + flag))
-	    return i;
-	  // did we reach "--"?
-	  if (options[i].charAt(1) == '-')
-	    return -1;
+	  Double dummy = Double.valueOf(options[i]);
+	} catch (NumberFormatException e) {
+	  if (options[i].equals("-" + flag)) {
+	    if (i + 1 == options.length) {
+	      throw new Exception("No value given for -" + flag + " option.");
+	    }
+	    options[i] = "";
+	    newString = new String(options[i + 1]);
+	    options[i + 1] = "";
+	    return newString;
+	  }
+	  if (options[i].charAt(1) == '-') {
+	    return "";
+	  }
 	}
       }
     }
-    
-    return -1;
+    return "";
   }
 
   /**
@@ -803,10 +778,8 @@ public final class Utils {
    * Split up a string containing options into an array of strings,
    * one for each option.
    *
-   * @param 		quotedOptionString the string containing the options
-   * @return 		the array of options
-   * @throws Exception 	in case of an unterminated string, unknown character or
-   * 			a parse error
+   * @param optionString the string containing the options
+   * @return the array of options
    */
   public static String [] splitOptions(String quotedOptionString) throws Exception{
 
@@ -835,6 +808,8 @@ public final class Utils {
 	    i += 1;
 	    if (i >= str.length()) 
 	      throw new Exception("String should not finish with \\");
+	    if (str.charAt(i) != '\\' &&  str.charAt(i) != '"') 
+	      throw new Exception("Unknow character \\" + str.charAt(i));
 	  }
 	  i += 1;
 	}
@@ -880,7 +855,7 @@ public final class Utils {
 	continue;
       }
       if (optionArray[i].indexOf(' ') != -1) {
-	optionString += '"' + backQuoteChars(optionArray[i]) + '"';
+	optionString += '"' + optionArray[i] + '"';
       } else {
 	optionString += optionArray[i];
       }
@@ -946,7 +921,7 @@ public final class Utils {
    */
   public static /*@pure@*/ double info(int counts[]) {
     
-    int total = 0;
+    int total = 0; int c;
     double x = 0;
     for (int j = 0; j < counts.length; j++) {
       x -= xlogx(counts[j]);
@@ -1038,8 +1013,7 @@ public final class Utils {
   /**
    * Returns the logarithm of a for base 2.
    *
-   * @param a 	a double
-   * @return	the logarithm for base 2
+   * @param a a double
    */
   public static /*@pure@*/ double log2(double a) {
     
@@ -1214,24 +1188,6 @@ public final class Utils {
   } 
 
   /**
-   * Returns the log-odds for a given probabilitiy.
-   *
-   * @param prob the probabilitiy
-   *
-   * @return the log-odds after the probability has been mapped to
-   * [Utils.SMALL, 1-Utils.SMALL]
-   */
-  public static /*@pure@*/ double probToLogOdds(double prob) {
-
-    if (gr(prob, 1) || (sm(prob, 0))) {
-      throw new IllegalArgumentException("probToLogOdds: probability must " +
-				     "be in [0,1] "+prob);
-    }
-    double p = SMALL + (1.0 - 2 * SMALL) * prob;
-    return Math.log(p / (1 - p));
-  }
-
-  /**
    * Rounds a double to the next nearest integer value. The JDK version
    * of it doesn't work properly.
    *
@@ -1255,7 +1211,6 @@ public final class Utils {
    * the original double.
    *
    * @param value the double value
-   * @param rand the random number generator
    * @return the resulting integer value
    */
   public static int probRound(double value, Random rand) {
@@ -1500,8 +1455,8 @@ public final class Utils {
    *
    * @param array the array of doubles to be sorted
    * @param index the index into the array of doubles
-   * @param l the first index of the subset 
-   * @param r the last index of the subset 
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
    *
    * @return the index of the middle element
    */
@@ -1538,8 +1493,8 @@ public final class Utils {
    *
    * @param array the array of integers to be sorted
    * @param index the index into the array of integers
-   * @param l the first index of the subset 
-   * @param r the last index of the subset 
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
    *
    * @return the index of the middle element
    */
@@ -1698,9 +1653,7 @@ public final class Utils {
       for (int i  = 0; i < partitionedOptions.length; i++) {
 	System.out.println(partitionedOptions[i]);
       }
-      System.out.println("Get position of flag -f: " + Utils.getOptionPos('f', ops));
       System.out.println("Get flag -f: " + Utils.getFlag('f', ops));
-      System.out.println("Get position of option -o: " + Utils.getOptionPos('o', ops));
       System.out.println("Get option -o: " + Utils.getOption('o', ops));
       System.out.println("Checking for remaining options... ");
       Utils.checkForRemainingOptions(ops);

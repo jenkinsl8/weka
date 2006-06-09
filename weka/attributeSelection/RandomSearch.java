@@ -20,82 +20,32 @@
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * RandomSearch : <br/>
- * <br/>
- * Performs a Random search in the space of attribute subsets. If no start set is supplied, Random search starts from a random point and reports the best subset found. If a start set is supplied, Random searches randomly for subsets that are as good or better than the start point with the same or or fewer attributes. Using RandomSearch in conjunction with a start set containing all attributes equates to the LVF algorithm of Liu and Setiono (ICML-96).<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * H. Liu, R. Setiono: A probabilistic approach to feature selection - A filter solution. In: 13th International Conference on Machine Learning, 319-327, 1996.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing a random search. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Liu1996,
- *    author = {H. Liu and R. Setiono},
- *    booktitle = {13th International Conference on Machine Learning},
- *    pages = {319-327},
- *    title = {A probabilistic approach to feature selection - A filter solution},
- *    year = {1996}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Valid options are: <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.
- *  If a start point is supplied,
- *  random search evaluates the start
- *  point and then randomly looks for
- *  subsets that are as good as or better
- *  than the start point with the same
- *  or lower cardinality.</pre>
- * 
- * <pre> -F &lt;percent&gt; 
- *  Percent of search space to consider.
- *  (default = 25%).</pre>
- * 
- * <pre> -V
- *  Output subsets as the search progresses.
- *  (default = false).</pre>
- * 
- <!-- options-end -->
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -F <percent) <br>
+ * Percentage of the search space to consider. (default = 25). <p>
+ *
+ * -V <br>
+ * Verbose output. Output new best subsets as the search progresses. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.12 $
  */
-public class RandomSearch 
-  extends ASSearch 
-  implements StartSetHandler, OptionHandler, TechnicalInformationHandler {
+public class RandomSearch extends ASSearch 
+  implements StartSetHandler, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 7479392617377425484L;
-  
   /** 
    * holds a starting set as an array of attributes.
    */
@@ -154,29 +104,7 @@ public class RandomSearch
       +"that are as good or better than the start point with the same or "
       +"or fewer attributes. Using RandomSearch in conjunction with a start "
       +"set containing all attributes equates to the LVF algorithm of Liu "
-      +"and Setiono (ICML-96).\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "H. Liu and R. Setiono");
-    result.setValue(Field.TITLE, "A probabilistic approach to feature selection - A filter solution");
-    result.setValue(Field.BOOKTITLE, "13th International Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1996");
-    result.setValue(Field.PAGES, "319-327");
-    
-    return result;
+      +"and Setiono (ICML-96).\n";
   }
 
   /**
@@ -216,33 +144,21 @@ public class RandomSearch
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.
-   *  If a start point is supplied,
-   *  random search evaluates the start
-   *  point and then randomly looks for
-   *  subsets that are as good as or better
-   *  than the start point with the same
-   *  or lower cardinality.</pre>
-   * 
-   * <pre> -F &lt;percent&gt; 
-   *  Percent of search space to consider.
-   *  (default = 25%).</pre>
-   * 
-   * <pre> -V
-   *  Output subsets as the search progresses.
-   *  (default = false).</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are: <p>
+   *
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
+   * -F <percent) <br>
+   * Percentage of the search space to consider. (default = 25). <p>
+   *
+   * -V <br>
+   * Verbose output. Output new best subsets as the search progresses. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
@@ -285,7 +201,7 @@ public class RandomSearch
    * If a start point is supplied, random search evaluates the
    * start point and then looks for subsets that are as good as or better 
    * than the start point with the same or lower cardinality.
-   * @throws Exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -450,10 +366,10 @@ public class RandomSearch
   /**
    * Searches the attribute subset space randomly.
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
    public int[] search (ASEvaluation ASEval, Instances data)
      throws Exception {
@@ -656,4 +572,3 @@ public class RandomSearch
     m_verbose = false;
   }
 }
-

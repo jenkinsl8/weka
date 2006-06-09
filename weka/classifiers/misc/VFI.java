@@ -22,49 +22,31 @@
 
 package weka.classifiers.misc;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Capabilities;
+import weka.classifiers.Classifier;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.OptionHandler;
+import weka.core.Option;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
+import weka.core.UnsupportedClassTypeException;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Classification by voting feature intervals. Intervals are constucted around each class for each attribute (basically discretization). Class counts are recorded for each interval on each attribute. Classification is by voting. For more info see:<br/>
- * <br/>
- * G. Demiroz, A. Guvenir: Classification by voting feature intervals. In: 9th European Conference on Machine Learning, 85-92, 1997.<br/>
- * <br/>
- * Have added a simple attribute weighting scheme. Higher weight is assigned to more confident intervals, where confidence is a function of entropy:<br/>
- * weight (att_i) = (entropy of class distrib att_i / max uncertainty)^-bias
- * <p/>
- <!-- globalinfo-end -->
+ * Class implementing the voting feature interval classifier. For numeric
+ * attributes, upper and lower boundaries (intervals)  are constructed 
+ * around each class. Discrete attributes have point intervals. Class counts
+ * are recorded for each interval on each feature. Classification is by
+ * voting. Missing values are ignored. Does not handle numeric class. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Demiroz1997,
- *    author = {G. Demiroz and A. Guvenir},
- *    booktitle = {9th European Conference on Machine Learning},
- *    pages = {85-92},
- *    publisher = {Springer},
- *    title = {Classification by voting feature intervals},
- *    year = {1997}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Have added a simple attribute weighting scheme. Higher weight is assigned
+ * to more confident intervals, where confidence is a function of entropy:
+ * weight (att_i) = (entropy of class distrib att_i / max uncertainty)^-bias.
+ * <p>
  *
  * Faster than NaiveBayes but slower than HyperPipes. <p><p>
  *
@@ -113,28 +95,25 @@ import java.util.Vector;
  * </pre> 					
  * <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * For more information, see <p>
  * 
- * <pre> -C
- *  Don't weight voting intervals by confidence</pre>
- * 
- * <pre> -B &lt;bias&gt;
- *  Set exponential bias towards confident intervals
- *  (default = 1.0)</pre>
- * 
- <!-- options-end -->
+ * Demiroz, G. and Guvenir, A. (1997) "Classification by voting feature 
+ * intervals", <i>ECML-97</i>. <p>
+ *  
+ * Valid options are:<p>
+ *
+ * -C <br>
+ * Don't Weight voting intervals by confidence. <p>
+ *
+ * -B <bias> <br>
+ * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.9 $
  */
-public class VFI 
-  extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+public class VFI extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 8081692166331321866L;
-  
   /** The index of the class attribute */
   protected int m_ClassIndex;
 
@@ -174,33 +153,12 @@ public class VFI
       +"constucted around each class for each attribute ("
       +"basically discretization). Class counts are "
       +"recorded for each interval on each attribute. Classification is by "
-      +"voting. For more info see:\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
+      +"voting. For more info see Demiroz, G. and Guvenir, A. (1997) "
+      +"\"Classification by voting feature intervals\", ECML-97.\n\n"
       +"Have added a simple attribute weighting scheme. Higher weight is "
       +"assigned to more confident intervals, where confidence is a function "
       +"of entropy:\nweight (att_i) = (entropy of class distrib att_i / "
       +"max uncertainty)^-bias";
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "G. Demiroz and A. Guvenir");
-    result.setValue(Field.TITLE, "Classification by voting feature intervals");
-    result.setValue(Field.BOOKTITLE, "9th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1997");
-    result.setValue(Field.PAGES, "85-92");
-    result.setValue(Field.PUBLISHER, "Springer");
-    
-    return result;
   }
 
   /**
@@ -224,22 +182,16 @@ public class VFI
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C
-   *  Don't weight voting intervals by confidence</pre>
-   * 
-   * <pre> -B &lt;bias&gt;
-   *  Set exponential bias towards confident intervals
-   *  (default = 1.0)</pre>
-   * 
-   <!-- options-end -->
+   * -C <br>
+   * Don't weight voting intervals by confidence. <p>
+   *
+   * -B <bias> <br>
+   * Set exponential bias towards confident intervals. default = 1.0 <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String optionString;
@@ -328,35 +280,10 @@ public class VFI
   
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.STRING_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -364,10 +291,12 @@ public class VFI
       TINY = 0.0;
     }
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
+    if (instances.classIndex() == -1) {
+      throw new Exception("No class attribute assigned");
+    }
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("VFI: class attribute needs to be nominal!");
+    }
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
 
@@ -463,11 +392,14 @@ public class VFI
 	    double val = inst.value(j);
 	   
 	    int k;
+	    boolean ok = false;
 	    for (k = m_intervalBounds[j].length-1; k >= 0; k--) {
 	      if (val > m_intervalBounds[j][k]) {
+		ok = true;
 		m_counts[j][k][(int)inst.classValue()] += inst.weight();
 		break;
 	      } else if (val == m_intervalBounds[j][k]) {
+		ok = true;
 		m_counts[j][k][(int)inst.classValue()] += 
 		  (inst.weight() / 2.0);
 		m_counts[j][k-1][(int)inst.classValue()] += 
@@ -531,12 +463,13 @@ public class VFI
    *
    * @param instance the instance to be classified
    * @return the predicted class for the instance 
-   * @throws Exception if the instance can't be classified
+   * @exception Exception if the instance can't be classified
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
     double [] dist = new double[m_NumClasses];
     double [] temp = new double[m_NumClasses];
+    double totalWeight = 0.0;
     double weight = 1.0;
 
 
@@ -630,4 +563,3 @@ public class VFI
     }
   }
 }
-

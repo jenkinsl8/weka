@@ -23,51 +23,29 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.filters.*;
 import weka.clusterers.Clusterer;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
+import weka.core.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * A filter that adds a new nominal attribute representing the cluster assigned to each instance by the specified clustering algorithm.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;clusterer specification&gt;
- *  Full class name of clusterer to use, followed
- *  by scheme options. (required)
- *  eg: "weka.clusterers.SimpleKMeans -N 3"</pre>
- * 
- * <pre> -I &lt;att1,att2-att4,...&gt;
- *  The range of attributes the clusterer should ignore.
- * </pre>
- * 
- <!-- options-end -->
+ * A filter that adds a new nominal attribute representing the cluster assigned
+ * to each instance by the specified clustering algorithm.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -W clusterer string <br>
+ * Full class name of clusterer to use, followed by scheme options. (required)<p>
+ *
+ * -I range string <br>
+ * The range of attributes the clusterer should ignore. Note: if a class index
+ * is set then the class is automatically ignored during clustering.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class AddCluster 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7414280611943807337L;
+public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
   /** The clusterer used to do the cleansing */
   protected Clusterer m_Clusterer = new weka.clusterers.SimpleKMeans();
@@ -85,7 +63,7 @@ public class AddCluster
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -99,7 +77,7 @@ public class AddCluster
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
 
@@ -171,7 +149,7 @@ public class AddCluster
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -197,7 +175,6 @@ public class AddCluster
    * the end of the output queue.
    *
    * @param instance the instance to convert
-   * @throws Exception if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
     Instance original, processed;
@@ -226,10 +203,8 @@ public class AddCluster
     } else {
       processed = new Instance(original.weight(), instanceVals);
     }
-
-    processed.setDataset(instance.dataset());
-    copyValues(processed, false, instance.dataset(), getOutputFormat());
-    processed.setDataset(getOutputFormat());
+    copyStringValues(original, false, original.dataset(), getOutputStringIndex(),
+		     getOutputFormat(), getOutputStringIndex());
       
     push(processed);
   }
@@ -258,24 +233,17 @@ public class AddCluster
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;clusterer specification&gt;
-   *  Full class name of clusterer to use, followed
-   *  by scheme options. (required)
-   *  eg: "weka.clusterers.SimpleKMeans -N 3"</pre>
-   * 
-   * <pre> -I &lt;att1,att2-att4,...&gt;
-   *  The range of attributes the clusterer should ignore.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -W clusterer string <br>
+   * Full class name of clusterer to use, followed by scheme options. (required)<p>
+   *   
+   * -I range string <br>
+   * The range of attributes the clusterer should ignore. Note: if a class index
+   * is set then the class is automatically ignored during clustering<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -409,7 +377,7 @@ public class AddCluster
    *
    * @param rangeList a string representing the list of attributes. 
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setIgnoredAttributeIndices(String rangeList) {
 

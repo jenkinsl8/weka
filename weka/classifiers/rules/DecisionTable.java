@@ -25,87 +25,43 @@ package weka.classifiers.rules;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
+import weka.classifiers.lazy.IB1;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.io.Serializable;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Vector;
-
 /**
- <!-- globalinfo-start -->
- * Class for building and using a simple decision table majority classifier.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
- * Ron Kohavi: The Power of Decision Tables. In: 8th European Conference on Machine Learning, 174-189, 1995.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a simple decision table majority classifier.
+ * For more information see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Kohavi1995,
- *    author = {Ron Kohavi},
- *    booktitle = {8th European Conference on Machine Learning},
- *    pages = {174-189},
- *    publisher = {Springer},
- *    title = {The Power of Decision Tables},
- *    year = {1995}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Kohavi R. (1995).<i> The Power of Decision Tables.</i> In Proc
+ * European Conference on Machine Learning.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
+ *
+ * -S num <br>
+ * Number of fully expanded non improving subsets to consider
+ * before terminating a best first search.
+ * (Default = 5) <p>
+ *
+ * -X num <br>
+ * Use cross validation to evaluate features. Use number of folds = 1 for
+ * leave one out CV. (Default = leave one out CV) <p>
  * 
- * <pre> -S &lt;number of non improving nodes&gt;
- *  Number of fully expanded non improving subsets to consider
- *  before terminating a best first search.
- *  Use in conjunction with -B. (Default = 5)</pre>
- * 
- * <pre> -X &lt;number of folds&gt;
- *  Use cross validation to evaluate features.
- *  Use number of folds = 1 for leave one out CV.
- *  (Default = leave one out CV)</pre>
- * 
- * <pre> -I
- *  Use nearest neighbour instead of global table majority.</pre>
- * 
- * <pre> -R
- *  Display decision table rules.
- * </pre>
- * 
- <!-- options-end -->
+ * -I <br>
+ * Use nearest neighbour instead of global table majority. <p>
+ *
+ * -R <br>
+ * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.29.2.1 $ 
  */
-public class DecisionTable 
-  extends Classifier 
+public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
-	     AdditionalMeasureProducer, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 2788557078165701326L;
+	     AdditionalMeasureProducer {
   
   /** The hashtable used to hold training instances */
   private Hashtable m_entries;
@@ -165,32 +121,10 @@ public class DecisionTable
    */
   public String globalInfo() {
 
-    return  
-        "Class for building and using a simple decision table majority "
-      + "classifier.\n\n"
-      + "For more information see: \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Ron Kohavi");
-    result.setValue(Field.TITLE, "The Power of Decision Tables");
-    result.setValue(Field.BOOKTITLE, "8th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.PAGES, "174-189");
-    result.setValue(Field.PUBLISHER, "Springer");
-    
-    return result;
+    return  "Class for building and using a simple decision table majority "
+      + "classifier. For more information see: \n\n"
+      + "Kohavi R. (1995). \"The Power of Decision Tables.\" In Proc "
+      + "European Conference on Machine Learning.";
   }
 
   /**
@@ -218,8 +152,6 @@ public class DecisionTable
   
     /**
      * Gets the group.
-     * 
-     * @return the group
      */
     public BitSet getGroup() {
 
@@ -228,8 +160,6 @@ public class DecisionTable
   
     /**
      * Gets the merit.
-     * 
-     * @return the merit
      */
     public double getMerit() {
 
@@ -238,8 +168,6 @@ public class DecisionTable
 
     /**
      * Returns string representation.
-     * 
-     * @return a string representation
      */
     public String toString() {
 
@@ -251,17 +179,12 @@ public class DecisionTable
    * Class for handling a linked list. Used in best first search.
    * Extends the Vector class.
    */
-  public class LinkedList 
-    extends FastVector {
+  public class LinkedList extends FastVector {
 
-    /** for serialization */
-    static final long serialVersionUID = -8323010516352768601L;
-    
     /**
      * Removes an element (Link) at a specific index from the list.
      *
      * @param index the index of the element to be removed.
-     * @throws Exception iof index out of range
      */
     public void removeLinkAt(int index) throws Exception {
 
@@ -276,8 +199,6 @@ public class DecisionTable
      * Returns the element (Link) at a specific index from the list.
      *
      * @param index the index of the element to be returned.
-     * @return the link
-     * @throws Exception if index out of range
      */
     public Link getLinkAt(int index) throws Exception {
 
@@ -327,17 +248,16 @@ public class DecisionTable
   /**
    * Class providing keys to the hash table
    */
-  public static class hashKey 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = 5674163500154964602L;
+  public static class hashKey implements Serializable {
     
     /** Array of attribute values for an instance */
     private double [] attributes;
     
     /** True for an index if the corresponding attribute value is missing. */
     private boolean [] missing;
+
+    /** The values */
+    private String [] values;
 
     /** The key */
     private int key;
@@ -348,7 +268,6 @@ public class DecisionTable
      * @param t an instance from which to generate a key
      * @param numAtts the number of attributes
      * @param ignoreClass if true treat the class as a normal attribute
-     * @throws Exception if something goes wrong
      */
     public hashKey(Instance t, int numAtts, boolean ignoreClass) throws Exception {
 
@@ -374,7 +293,6 @@ public class DecisionTable
      *
      * @param t the set of instances
      * @param maxColWidth width to make the fields
-     * @return string representation of the hash entry
      */
     public String toString(Instances t, int maxColWidth) {
 
@@ -454,7 +372,6 @@ public class DecisionTable
      * Tests if two instances are equal
      *
      * @param b a key to compare with
-     * @return true if both objects are equal
      */
     public boolean equals(Object b) {
       
@@ -498,8 +415,7 @@ public class DecisionTable
    * Inserts an instance into the hash table
    *
    * @param inst instance to be inserted
-   * @param instA to create the hash key from
-   * @throws Exception if the instance can't be inserted
+   * @exception Exception if the instance can't be inserted
    */
   private void insertIntoTable(Instance inst, double [] instA)
        throws Exception {
@@ -556,7 +472,6 @@ public class DecisionTable
    * @param instance instance to be "left out" and classified
    * @param instA feature values of the selected features for the instance
    * @return the classification of the instance
-   * @throws Exception if something goes wrong
    */
   double classifyInstanceLeaveOneOut(Instance instance, double [] instA)
        throws Exception {
@@ -622,7 +537,6 @@ public class DecisionTable
    * @param fold set of instances to be "left out" and classified
    * @param fs currently selected feature set
    * @return the accuracy for the fold
-   * @throws Exception if something goes wrong
    */
   double classifyFoldCV(Instances fold, int [] fs) throws Exception {
 
@@ -723,14 +637,16 @@ public class DecisionTable
    * @param feature_set the subset to be evaluated
    * @param num_atts the number of attributes in the subset
    * @return the estimated accuracy
-   * @throws Exception if subset can't be evaluated
+   * @exception Exception if subset can't be evaluated
    */
   private double estimateAccuracy(BitSet feature_set, int num_atts)
     throws Exception {
 
     int i;
+    Instances newInstances;
     int [] fs = new int [num_atts];
     double acc = 0.0;
+    double [][] evalArray;
     double [] instA = new double [num_atts];
     int classI = m_theInstances.classIndex();
     
@@ -812,6 +728,8 @@ public class DecisionTable
    */
   private String printSub(BitSet sub) {
 
+    int i;
+
     String s="";
     for (int jj=0;jj<m_numAttributes;jj++) {
       if (sub.get(jj)) {
@@ -823,12 +741,11 @@ public class DecisionTable
     
   /**
    * Does a best first search 
-   * 
-   * @throws Exception if search fails
    */
   private void best_first() throws Exception {
 
-    int i,j,classI,count=0,fc;
+    int i,j,classI,count=0,fc,tree_count=0;
+    int evals=0;
     BitSet best_group, temp_group;
     int [] stale;
     double [] best_merit;
@@ -992,7 +909,7 @@ public class DecisionTable
               "X", 1, "-X <number of folds>"));
 
      newVector.addElement(new Option(
-              "\tUse nearest neighbour instead of global table majority.",
+              "\tUse nearest neighbour instead of global table majority.\n",
               "I", 0, "-I"));
 
      newVector.addElement(new Option(
@@ -1120,32 +1037,27 @@ public class DecisionTable
   }
 
   /**
-   * Parses the options for this object. <p/>
+   * Parses the options for this object.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
+   *
+   * -S num <br>
+   * Number of fully expanded non improving subsets to consider
+   * before terminating a best first search.
+   * (Default = 5) <p>
+   *
+   * -X num <br>
+   * Use cross validation to evaluate features. Use number of folds = 1 for
+   * leave one out CV. (Default = leave one out CV) <p>
    * 
-   * <pre> -S &lt;number of non improving nodes&gt;
-   *  Number of fully expanded non improving subsets to consider
-   *  before terminating a best first search.
-   *  Use in conjunction with -B. (Default = 5)</pre>
-   * 
-   * <pre> -X &lt;number of folds&gt;
-   *  Use cross validation to evaluate features.
-   *  Use number of folds = 1 for leave one out CV.
-   *  (Default = leave one out CV)</pre>
-   * 
-   * <pre> -I
-   *  Use nearest neighbour instead of global table majority.</pre>
-   * 
-   * <pre> -R
-   *  Display decision table rules.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * -I <br>
+   * Use nearest neighbour instead of global table majority. <p>
+   *
+   * -R <br>
+   * Prints the decision table. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -1191,46 +1103,26 @@ public class DecisionTable
     }
     return options;
   }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
   
   /**
    * Generates the classifier.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    int i;
 
-    // remove instances with missing class
+    m_rr = new Random(1);
     m_theInstances = new Instances(data);
     m_theInstances.deleteWithMissingClass();
-    
-    m_rr = new Random(1);
+    if (m_theInstances.numInstances() == 0) {
+      throw new Exception("No training instances without missing class!");
+    }
+    if (m_theInstances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
 
     if (m_theInstances.classAttribute().isNumeric()) {
       m_disTransform = new weka.filters.unsupervised.attribute.Discretize();
@@ -1280,7 +1172,7 @@ public class DecisionTable
     m_entries = new Hashtable((int)(m_theInstances.numInstances() * 1.5));
     
     // insert instances into the hash table
-    for (int i = 0; i < m_numInstances; i++) {
+    for (i=0;i<m_numInstances;i++) {
       Instance inst = m_theInstances.instance(i);
       insertIntoTable(inst, null);
     }
@@ -1301,7 +1193,7 @@ public class DecisionTable
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed
+   * @exception Exception if distribution can't be computed
    */
   public double [] distributionForInstance(Instance instance)
        throws Exception {
@@ -1390,9 +1282,9 @@ public class DecisionTable
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {

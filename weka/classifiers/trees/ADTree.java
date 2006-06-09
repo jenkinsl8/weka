@@ -22,92 +22,48 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.IterativeClassifier;
-import weka.classifiers.trees.adtree.PredictionNode;
-import weka.classifiers.trees.adtree.ReferenceInstances;
-import weka.classifiers.trees.adtree.Splitter;
-import weka.classifiers.trees.adtree.TwoWayNominalSplit;
-import weka.classifiers.trees.adtree.TwoWayNumericSplit;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.SerializedObject;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.classifiers.trees.adtree.*;
+import weka.classifiers.*;
+import weka.core.*;
+import java.io.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for generating an alternating decision tree. The basic algorithm is based on:<br/>
- * <br/>
- * Freund, Y., Mason, L.: The alternating decision tree learning algorithm. In: Proceeding of the Sixteenth International Conference on Machine Learning, Bled, Slovenia, 124-133, 1999.<br/>
- * <br/>
- * This version currently only supports two-class problems. The number of boosting iterations needs to be manually tuned to suit the dataset and the desired complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic search methods have been introduced to speed learning.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for generating an alternating decision tree. The basic algorithm is based on:<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Freund1999,
- *    address = {Bled, Slovenia},
- *    author = {Freund, Y. and Mason, L.},
- *    booktitle = {Proceeding of the Sixteenth International Conference on Machine Learning},
- *    pages = {124-133},
- *    title = {The alternating decision tree learning algorithm},
- *    year = {1999}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Freund, Y., Mason, L.: The alternating decision tree learning algorithm.
+ * Proceeding of the Sixteenth International Conference on Machine Learning,
+ * Bled, Slovenia, (1999) 124-133.</p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;number of boosting iterations&gt;
- *  Number of boosting iterations.
- *  (Default = 10)</pre>
- * 
- * <pre> -E &lt;-3|-2|-1|&gt;=0&gt;
- *  Expand nodes: -3(all), -2(weight), -1(z_pure), &gt;=0 seed for random walk
- *  (Default = -3)</pre>
- * 
- * <pre> -D
- *  Save the instance data with the model</pre>
- * 
- <!-- options-end -->
+ * This version currently only supports two-class problems. The number of boosting
+ * iterations needs to be manually tuned to suit the dataset and the desired 
+ * complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic
+ * search methods have been introduced to speed learning.<p>
+ *
+ * Valid options are: <p>
+ *
+ * -B num <br>
+ * Set the number of boosting iterations
+ * (default 10) <p>
+ *
+ * -E num <br>
+ * Set the nodes to expand: -3(all), -2(weight), -1(z_pure), >=0 seed for random walk
+ * (default -3) <p>
+ *
+ * -D <br>
+ * Save the instance data with the model <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
 public class ADTree
-  extends Classifier 
-  implements OptionHandler, Drawable, AdditionalMeasureProducer,
-             WeightedInstancesHandler, IterativeClassifier, 
-             TechnicalInformationHandler {
+  extends Classifier implements OptionHandler, Drawable,
+				AdditionalMeasureProducer,
+				WeightedInstancesHandler,
+				IterativeClassifier
+{
 
-  /** for serialization */
-  static final long serialVersionUID = -1532264837167690683L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -117,22 +73,20 @@ public class ADTree
 
     return  "Class for generating an alternating decision tree. The basic "
       + "algorithm is based on:\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
+      + "Freund, Y., Mason, L.: \"The alternating decision tree learning algorithm\". "
+      + "Proceeding of the Sixteenth International Conference on Machine Learning, "
+      + "Bled, Slovenia, (1999) 124-133.\n\n"
       + "This version currently only supports two-class problems. The number of boosting "
       + "iterations needs to be manually tuned to suit the dataset and the desired "
       + "complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic "
       + "search methods have been introduced to speed learning.";
   }
 
-  /** search mode: Expand all paths */
-  public static final int SEARCHPATH_ALL = 0;
-  /** search mode: Expand the heaviest path */
-  public static final int SEARCHPATH_HEAVIEST = 1;
-  /** search mode: Expand the best z-pure path */
-  public static final int SEARCHPATH_ZPURE = 2;
-  /** search mode: Expand a random path */
-  public static final int SEARCHPATH_RANDOM = 3;
   /** The search modes */
+  public static final int SEARCHPATH_ALL = 0;
+  public static final int SEARCHPATH_HEAVIEST = 1;
+  public static final int SEARCHPATH_ZPURE = 2;
+  public static final int SEARCHPATH_RANDOM = 3;
   public static final Tag [] TAGS_SEARCHPATH = {
     new Tag(SEARCHPATH_ALL, "Expand all paths"),
     new Tag(SEARCHPATH_HEAVIEST, "Expand the heaviest path"),
@@ -201,27 +155,6 @@ public class ADTree
   protected boolean m_saveInstanceData = false; 
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Freund, Y. and Mason, L.");
-    result.setValue(Field.YEAR, "1999");
-    result.setValue(Field.TITLE, "The alternating decision tree learning algorithm");
-    result.setValue(Field.BOOKTITLE, "Proceeding of the Sixteenth International Conference on Machine Learning");
-    result.setValue(Field.ADDRESS, "Bled, Slovenia");
-    result.setValue(Field.PAGES, "124-133");
-    
-    return result;
-  }
-
-  /**
    * Sets up the tree ready to be trained, using two-class optimized method.
    *
    * @param instances the instances to train the tree with
@@ -234,11 +167,26 @@ public class ADTree
     m_examplesCounted = 0;
     m_lastAddedSplitNum = 0;
 
+    // make sure training data is suitable
+    if (instances.classIndex() < 0) {
+      throw new UnassignedClassException("ADTree: Needs a class to be assigned");
+    }
+    if (instances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("ADTree: Can't handle string attributes");
+    }
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("ADTree: Class must be nominal");
+    }
+    if (instances.numClasses() != 2) {
+      throw new UnsupportedClassTypeException("ADTree: Must be a two-class problem");
+    }
+
     // prepare the random generator
     m_random = new Random(m_randomSeed);
 
     // create training set
     m_trainInstances = new Instances(instances);
+    m_trainInstances.deleteWithMissingClass();
 
     // create positive/negative subsets
     m_posTrainInstances = new ReferenceInstances(m_trainInstances,
@@ -577,7 +525,6 @@ public class ADTree
    * @param posInstances the positive-class instances that apply at this node
    * @param negInstances the negative-class instances that apply at this node
    * @param allInstances all of the instances the apply at this node (pos+neg combined)
-   * @throws Exception in case of an error
    */
   private void evaluateNumericSplitSingle(int attIndex, PredictionNode currentNode,
 					  Instances posInstances, Instances negInstances,
@@ -722,7 +669,6 @@ public class ADTree
    * @param attIndex the index of the numeric attribute to find a split for
    * @return a double array, index[0] contains the split-point, index[1] contains the
    * Z-value of the split
-   * @throws Exception in case of an error
    */
   private double[] findLowestZNumericSplit(Instances instances, int attIndex)
     throws Exception {
@@ -905,7 +851,6 @@ public class ADTree
    * @param text the string built so far
    * @param splitOrder the order the parent splitter was added to the tree
    * @param predOrder the order this predictor was added to the split
-   * @param instances the data to work on
    * @exception Exception if something goes wrong
    */       
   protected void graphTraverse(PredictionNode currentNode, StringBuffer text,
@@ -1046,7 +991,7 @@ public class ADTree
   /**
    * Sets random seed for a random walk.
    *
-   * @param seed the random seed
+   * @param s the random seed
    */
   public void setRandomSeed(int seed) {
     
@@ -1077,8 +1022,8 @@ public class ADTree
 
   /**
    * Sets whether the tree is to save instance data.
-   * 
-   * @param v true then the tree saves instance data
+   *
+   * @param s the random seed
    */
   public void setSaveInstanceData(boolean v) {
     
@@ -1233,7 +1178,7 @@ public class ADTree
   /**
    * Returns the value of the named measure.
    *
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */
@@ -1343,40 +1288,12 @@ public class ADTree
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.BINARY_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Builds a classifier for a set of instances.
    *
    * @param instances the instances to train the classifier with
    * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances instances) throws Exception {
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
 
     // set up the tree
     initClassifier(instances);
@@ -1492,4 +1409,3 @@ public class ADTree
     }
   }
 }
-

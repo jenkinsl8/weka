@@ -22,40 +22,33 @@
 
 package weka.core.converters;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.Utils;
 import java.io.StreamTokenizer;
 
 /**
- <!-- globalinfo-start -->
- * Reads a file that is C45 format. Can take a filestem or filestem with .names or .data appended. Assumes that path/&lt;filestem&gt;.names and path/&lt;filestem&gt;.data exist and contain the names and data respectively.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * Reads C4.5 input files. Takes a filestem or filestem with .names or .data
+ * appended. Assumes that both <filestem>.names and <filestem>.data exist
+ * in the directory of the supplied filestem.
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
-public class C45Loader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+public class C45Loader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 5454329403218219L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = ".names";
 
-  /** the file */
   protected String m_File = 
     (new File(System.getProperty("user.dir"))).getAbsolutePath();
   
@@ -119,8 +112,6 @@ public class C45Loader
   
   /**
    * Resets the Loader ready to read a new data set
-   * 
-   * @throws Exception if something goes wrong
    */
   public void reset() throws Exception {
     m_structure = null;
@@ -384,12 +375,6 @@ public class C45Loader
     return new Instance(1.0, instance);
   }
 
-  /**
-   * removes the trailing period
-   * 
-   * @param val the string to work on
-   * @return the processed string
-   */
   private String removeTrailingPeriod(String val) {
     // remove trailing period
     if (val.charAt(val.length()-1) == '.') {
@@ -524,7 +509,7 @@ public class C45Loader
   /**
    * Main method for testing this class.
    *
-   * @param args should contain &lt;filestem&gt;[.names | data]
+   * @param args should contain <filestem>[.names | data]
    */
   public static void main (String [] args) {
     if (args.length > 0) {

@@ -21,55 +21,28 @@
 
 package weka.classifiers.functions.pace;
 
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.Maths;
-
 import java.util.Random;
+import weka.core.Statistics;
 
 /**
- * Class for manipulating chi-square mixture distributions. <p/>
+ * Class for manipulating chi-square mixture distributions. <p>
  *
- * For more information see: <p/>
+ * REFERENCES <p>
  * 
- <!-- technical-plaintext-start -->
- * Wang, Y (2000). A new approach to fitting linear models in high dimensional spaces. Hamilton, New Zealand.<br/>
- * <br/>
- * Wang, Y., Witten, I. H.: Modeling for optimal probability prediction. In: Proceedings of the Nineteenth International Conference in Machine Learning, Sydney, Australia, 650-657, 2002.
- <!-- technical-plaintext-end -->
+ * Wang, Y. (2000). "A new approach to fitting linear models in high
+ * dimensional spaces." PhD Thesis. Department of Computer Science,
+ * University of Waikato, New Zealand. <p>
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;phdthesis{Wang2000,
- *    address = {Hamilton, New Zealand},
- *    author = {Wang, Y},
- *    school = {Department of Computer Science, University of Waikato},
- *    title = {A new approach to fitting linear models in high dimensional spaces},
- *    year = {2000}
- * }
- * 
- * &#64;inproceedings{Wang2002,
- *    address = {Sydney, Australia},
- *    author = {Wang, Y. and Witten, I. H.},
- *    booktitle = {Proceedings of the Nineteenth International Conference in Machine Learning},
- *    pages = {650-657},
- *    title = {Modeling for optimal probability prediction},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Wang, Y. and Witten, I. H. (2002). "Modeling for optimal probability
+ * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
- */
-public class ChisqMixture 
-  extends MixtureDistribution {
-  
-  /** the separating threshold value */
+ * @version $Revision: 1.1 $ */
+
+public class  ChisqMixture extends MixtureDistribution
+{
   protected double separatingThreshold = 0.05; 
 
-  /** the triming thresholding */
   protected double trimingThreshold = 0.5;
 
   protected double supportThreshold = 0.5;
@@ -84,52 +57,36 @@ public class ChisqMixture
    */
   public ChisqMixture() {}
 
-  /** 
-   * Gets the separating threshold value. This value is used by the method
-   * separatable
-   * 
-   * @return the separating threshold
-   */
+  /** Gets the separating threshold value. This value is used by the method
+      separatable */
   public double getSeparatingThreshold() {
     return separatingThreshold;
   }
   
-  /**
-   * Sets the separating threshold value 
-   * 
-   * @param t the threshold value 
+  /** Sets the separating threshold value 
+   *  @param t the threshold value 
    */
   public void setSeparatingThreshold( double t ) {
     separatingThreshold = t;
   }
 
-  /** 
-   * Gets the triming thresholding value. This value is usef by the method trim.
-   * 
-   * @return the triming threshold
-   */
+  /** Gets the triming thresholding value. This value is usef by the
+      method trim.  */
   public double getTrimingThreshold() {
     return trimingThreshold;
   }
 
-  /** 
-   * Sets the triming thresholding value.
-   * 
-   * @param t the triming threshold
-   */
+  /** Sets the triming thresholding value. */
   public void setTrimingThreshold( double t ){
     trimingThreshold = t;
   }
 
-  /** 
-   *  Return true if a value can be considered for mixture estimation
+  /** Return true if a value can be considered for mixture estimatino
    *  separately from the data indexed between i0 and i1 
-   *  
    *  @param data the data supposedly generated from the mixture 
    *  @param i0 the index of the first element in the group
    *  @param i1 the index of the last element in the group
    *  @param x the value
-   *  @return true if the value can be considered
    */
   public boolean separable( DoubleVector data, int i0, int i1, double x ) {
 
@@ -141,14 +98,10 @@ public class ChisqMixture
     return m.separable( dataSqrt, i0, i1, xh );
   }
 
-  /** 
-   *  Contructs the set of support points for mixture estimation.
-   *  
+  /** Contructs the set of support points for mixture estimation.
    *  @param data the data supposedly generated from the mixture 
    *  @param ne the number of extra data that are suppposedly discarded
-   *  earlier and not passed into here
-   *  @return the set of support points
-   */
+   *  earlier and not passed into here */
   public DoubleVector  supportPoints( DoubleVector data, int ne ) {
 
     DoubleVector sp = new DoubleVector();
@@ -167,11 +120,8 @@ public class ChisqMixture
     return sp;
   }
     
-  /** 
-   *  Contructs the set of fitting intervals for mixture estimation.
-   *  
+  /** Contructs the set of fitting intervals for mixture estimation.
    *  @param data the data supposedly generated from the mixture 
-   *  @return the set of fitting intervals
    */
   public PaceMatrix  fittingIntervals( DoubleVector data ) {
 
@@ -204,14 +154,10 @@ public class ChisqMixture
     return a;
   }
     
-  /** 
-   *  Contructs the probability matrix for mixture estimation, given a set
+  /** Contructs the probability matrix for mixture estimation, given a set
    *  of support points and a set of intervals.
-   *  
    *  @param s  the set of support points
-   *  @param intervals the intervals
-   *  @return the probability matrix
-   */
+   *  @param intervals the intervals */
   public PaceMatrix  probabilityMatrix(DoubleVector s, PaceMatrix intervals) {
     
     int ns = s.size();
@@ -230,11 +176,8 @@ public class ChisqMixture
   }
     
 
-  /** 
-   *  Returns the pace6 estimate of a single value.
-   *  
+  /** Returns the pace6 estimate of a single value.
    *  @param x the value
-   *  @return the pace6 estimate
    */
   public double  pace6 ( double x ) { 
     
@@ -250,11 +193,8 @@ public class ChisqMixture
     return atilde * atilde;
   }
 
-  /** 
-   *  Returns the pace6 estimate of a vector.
-   *  
+  /** Returns the pace6 estimate of a vector.
    *  @param x the vector
-   *  @return the pace6 estimate
    */
   public DoubleVector pace6( DoubleVector x ) {
 
@@ -265,11 +205,8 @@ public class ChisqMixture
     return pred;
   }
 
-  /** 
-   *  Returns the pace2 estimate of a vector.
-   *  
+  /** Returns the pace2 estimate of a vector.
    *  @param x the vector
-   *  @return the pace2 estimate
    */
   public DoubleVector  pace2( DoubleVector x ) {
     
@@ -286,11 +223,8 @@ public class ChisqMixture
     return copy;
   }
 
-  /** 
-   *  Returns the pace4 estimate of a vector.
-   *  
+  /** Returns the pace4 estimate of a vector.
    *  @param x the vector
-   *  @return the pace4 estimate
    */
   public DoubleVector  pace4( DoubleVector x ) {
     
@@ -302,11 +236,8 @@ public class ChisqMixture
     return copy;
   }
 
-  /** 
-   * Trims the small values of the estaimte
-   * 
-   * @param x the estimate vector
-   */
+  /** Trims the small values of the estaimte
+   * @param x the estimate vector */
   public void trim( DoubleVector x ) {
     
     for(int i = 0; i < x.size(); i++ ) {
@@ -317,10 +248,7 @@ public class ChisqMixture
   /**
    *  Computes the value of h(x) / f(x) given the mixture. The
    *  implementation avoided overflow.
-   *  
-   *  @param AHat the value
-   *  @return the value of h(x) / f(x)
-   */
+   *  @param x the value */
   public double hf( double AHat ) {
     
     DoubleVector points = mixingDistribution.getPointValues();
@@ -345,11 +273,8 @@ public class ChisqMixture
   }
     
   /**
-   *  Computes the value of h(x) given the mixture.
-   *  
-   *  @param AHat the value
-   *  @return the value of h(x)
-   */
+   *  Computes the value of h(x) given the mixture. 
+   *  @param x the value */
   public double h( double AHat ) {
     
     if( AHat == 0.0 ) return 0.0;
@@ -367,10 +292,7 @@ public class ChisqMixture
     
   /**
    *  Computes the value of h(x) given the mixture, where x is a vector.
-   *  
-   *  @param AHat the vector
-   *  @return the value of h(x)
-   */
+   *  @param AHat the vector */
   public DoubleVector h( DoubleVector AHat ) {
     
     DoubleVector h = new DoubleVector( AHat.size() );
@@ -381,10 +303,7 @@ public class ChisqMixture
     
   /**
    *  Computes the value of f(x) given the mixture.
-   *  
-   *  @param x the value
-   *  @return the value of f(x)
-   */
+   *  @param x the value */
   public double f( double x ) {
     
     DoubleVector points = mixingDistribution.getPointValues();
@@ -395,10 +314,7 @@ public class ChisqMixture
     
   /**
    *  Computes the value of f(x) given the mixture, where x is a vector.
-   *  
-   *  @param x the vector
-   *  @return the value of f(x)
-   */
+   *  @param x the vector */
   public DoubleVector f( DoubleVector x ) {
     
     DoubleVector f = new DoubleVector( x.size() );
@@ -407,19 +323,13 @@ public class ChisqMixture
     return f;
   }
     
-  /** 
-   * Converts to a string
-   * 
-   * @return a string representation
+  /** Converts to a string
    */
   public String  toString() {
     return mixingDistribution.toString();
   }
     
-  /** 
-   * Method to test this class 
-   * 
-   * @param args the commandline arguments
+  /** Method to test this class 
    */
   public static void  main(String args[]) {
     
@@ -474,4 +384,6 @@ public class ChisqMixture
     System.out.println( "Quadratic loss = " + 
 			pred.sqrt().times(aNormal.sign()).sum2( means ) );
   }
+
 }
+

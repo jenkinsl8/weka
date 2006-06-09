@@ -23,45 +23,29 @@
 
 package weka.gui;
 
-import weka.core.ClassDiscovery;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-
-import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Insets;
+import java.awt.SystemColor;
+import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.MouseAdapter;
 import java.beans.PropertyEditor;
-
-import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
+import javax.swing.BorderFactory;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 /** 
  * Support for drawing a property value in a component.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.8 $
  */
-public class PropertyPanel 
-  extends JPanel {
-  
-  /** for serialization */
-  static final long serialVersionUID = 5370025273466728904L;
+public class PropertyPanel extends JPanel {
 
   /** The property editor */
   private PropertyEditor m_Editor;
@@ -109,76 +93,14 @@ public class PropertyPanel
   protected void createDefaultPanel() {
 
     setBorder(BorderFactory.createEtchedBorder());
-    setToolTipText("Left-click to edit properties for this object, right-click/Alt+Shift+left-click for menu");
+    setToolTipText("Click to edit properties for this object");
     setOpaque(true);
-    final Component comp = this;
     addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent evt) {
-        if (evt.getClickCount() == 1) {
-          if (    (evt.getButton() == MouseEvent.BUTTON1) && !evt.isAltDown() && !evt.isShiftDown() ) {
-            showPropertyDialog();
-          }
-          else if (    (evt.getButton() == MouseEvent.BUTTON3) 
-              	    || ((evt.getButton() == MouseEvent.BUTTON1) && evt.isAltDown() && evt.isShiftDown()) ) {
-            JPopupMenu menu = new JPopupMenu();
-            JMenuItem item;
+	public void mouseClicked(MouseEvent evt) {
 
-            if (m_Editor.getValue() != null) {
-              item = new JMenuItem("Show properties...");
-              item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                  showPropertyDialog();
-                }
-              });
-              menu.add(item);
-
-              item = new JMenuItem("Copy configuration to clipboard");
-              item.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                  String str = m_Editor.getValue().getClass().getName();
-                  if (m_Editor.getValue() instanceof OptionHandler)
-                    str += " " + Utils.joinOptions(((OptionHandler) m_Editor.getValue()).getOptions());
-                  StringSelection selection = new StringSelection(str.trim());
-                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                  clipboard.setContents(selection, selection);
-                }
-              });
-              menu.add(item);
-            }
-            
-            item = new JMenuItem("Enter configuration...");
-            item.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent e) {
-        	String str = JOptionPane.showInputDialog(
-        	                 comp, 
-        	                 "Configuration (<classname> [<options>])");
-        	if (str != null) {
-        	  try {
-        	    String[] options = Utils.splitOptions(str);
-        	    String classname = options[0];
-        	    options[0] = "";
-        	    m_Editor.setValue(
-        		Utils.forName(
-        		    Object.class, classname, options));
-        	  }
-        	  catch (Exception ex) {
-        	    ex.printStackTrace();
-        	    JOptionPane.showMessageDialog(
-        		comp, 
-        		"Error parsing commandline:\n" + ex, 
-        		"Error...",
-        		JOptionPane.ERROR_MESSAGE);
-        	  }
-        	}
-              }
-            });
-            menu.add(item);
-            
-            menu.show(comp, evt.getX(), evt.getY());
-          }
-        }
-      }
-    });
+	  showPropertyDialog();
+	}
+      });
     Dimension newPref = getPreferredSize();
     newPref.height = getFontMetrics(getFont()).getHeight() * 5 / 4;
     newPref.width = newPref.height * 5;

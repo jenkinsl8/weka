@@ -15,48 +15,40 @@
  */
 
 /*
- *    CSVLoader.java
+ *    CsvToArff.java
  *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StreamTokenizer;
-import java.util.Enumeration;
+import java.io.Reader;
 import java.util.Hashtable;
+import java.util.Enumeration;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import java.io.StreamTokenizer;
+import java.lang.String;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in comma separated or tab separated format. Assumes that the first row in the file determines the number of and names of the attributes.
- * <p/>
- <!-- globalinfo-end -->
+ * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
-public class CSVLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter {
+public class CSVLoader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 5607529739745491340L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = ".csv";
 
-  /** the file */
   protected String m_File = 
     (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
@@ -89,9 +81,6 @@ public class CSVLoader
    */
   private FastVector m_cumulativeInstances;
   
-  /**
-   * default constructor
-   */
   public CSVLoader() {
     // No instances retrieved yet
     setRetrieval(NONE);
@@ -207,12 +196,6 @@ public class CSVLoader
     return m_structure;
   }
 
-  /**
-   * reads the structure
-   * 
-   * @param st the stream tokenizer to read from
-   * @throws IOException if reading fails
-   */
   private void readStructure(StreamTokenizer st) throws IOException {
     readHeader(st);
   }
@@ -557,3 +540,4 @@ public class CSVLoader
     }
   }
 }
+

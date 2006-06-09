@@ -22,77 +22,24 @@
 
 package weka.classifiers.bayes.net;
 
+
+import java.util.*;
+
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.estimators.Estimator;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.*;
+import weka.estimators.*;
 
 /**
- <!-- globalinfo-start -->
- * Bayes Network learning using various search algorithms and quality measures.<br/>
- * Base class for a Bayes Network classifier. Provides datastructures (network structure, conditional probability distributions, etc.) and facilities common to Bayes Network learning algorithms like K2 and B.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * http://www.cs.waikato.ac.nz/~remco/weka.pdf
- * <p/>
- <!-- globalinfo-end -->
+ * BayesNetGenerator offers facilities for generating random
+ * Bayes networks and random instances based on a Bayes network.
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B
- *  Generate network (instead of instances)
- * </pre>
- * 
- * <pre> -N &lt;integer&gt;
- *  Nr of nodes
- * </pre>
- * 
- * <pre> -A &lt;integer&gt;
- *  Nr of arcs
- * </pre>
- * 
- * <pre> -M &lt;integer&gt;
- *  Nr of instances
- * </pre>
- * 
- * <pre> -C &lt;integer&gt;
- *  Cardinality of the variables
- * </pre>
- * 
- * <pre> -S &lt;integer&gt;
- *  Seed for random number generator
- * </pre>
- * 
- * <pre> -F &lt;file&gt;
- *  The BIF file to obtain the structure from.
- * </pre>
- * 
- <!-- options-end -->
- *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.4.2.3 $
  */
 public class BayesNetGenerator extends BayesNet {
-    /** the seed value */
-    int m_nSeed = 1;
-    
-    /** the random number generator */
+	int m_nSeed = 1;
     Random random;
-    
-    /** for serialization */
-    static final long serialVersionUID = -7462571170596157720L;
 
 	/**
 	 * Constructor for BayesNetGenerator.
@@ -101,12 +48,12 @@ public class BayesNetGenerator extends BayesNet {
 		super();
 	} // c'tor
 
-	/** 
-	 * Generate random connected Bayesian network with discrete nodes
+	/* Generate random connected Bayesian network with discrete nodes
 	 * having all the same cardinality.
-	 * 
-	 * @throws Exception if something goes wrong
-	 */
+	 * @param nNodes: number of nodes in the Bayes net to generate
+	 * @param nValues: number of values each of the nodes can take
+	 * @param nArcs: number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
+	 * */
 	public void generateRandomNetwork () throws Exception {
 		if (m_otherBayesNet == null) {
 			// generate from scratch
@@ -140,11 +87,9 @@ public class BayesNetGenerator extends BayesNet {
 		}
 	} // GenerateRandomNetwork
 
-	/** 
-	 * Init defines a minimal Bayes net with no arcs
-	 * @param nNodes number of nodes in the Bayes net 
-	 * @param nValues number of values each of the nodes can take
-	 * @throws Exception if something goes wrong
+	/* Init defines a minimal Bayes net with no arcs
+	 * @param nNodes: number of nodes in the Bayes net 
+	 * @param nValues: number of values each of the nodes can take
 	 */
 	public void Init(int nNodes, int nValues) throws Exception {
 		random = new Random(m_nSeed);
@@ -175,11 +120,9 @@ public class BayesNetGenerator extends BayesNet {
 		}
 	} // DefineNodes
 
-	/** 
-	 * GenerateRandomNetworkStructure generate random connected Bayesian network 
-	 * @param nNodes number of nodes in the Bayes net to generate
-	 * @param nArcs number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
-	 * @throws Exception if number of arcs is incorrect
+	/* GenerateRandomNetworkStructure generate random connected Bayesian network 
+	 * @param nNodes: number of nodes in the Bayes net to generate
+	 * @param nArcs: number of arcs to generate. Must be between nNodes - 1 and nNodes * (nNodes-1) / 2
 	 */
 	public void generateRandomNetworkStructure(int nNodes, int nArcs) 
 		throws Exception
@@ -214,13 +157,12 @@ public class BayesNetGenerator extends BayesNet {
 
 	} // GenerateRandomNetworkStructure
 	
-	/** 
-	 * GenerateTree creates a tree-like network structure (actually a
+	/* GenerateTree creates a tree-like network structure (actually a
 	 * forest) by starting with a randomly selected pair of nodes, add 
 	 * an arc between. Then keep on selecting one of the connected nodes 
 	 * and one of the unconnected ones and add an arrow between them, 
 	 * till all nodes are connected.
-	 * @param nNodes number of nodes in the Bayes net to generate
+	 * @param nNodes: number of nodes in the Bayes net to generate
 	 */
 	void generateTree(int nNodes) {
         boolean [] bConnected = new boolean [nNodes];
@@ -262,11 +204,10 @@ public class BayesNetGenerator extends BayesNet {
 		}
 	} // GenerateTree
 	
-	/** 
-	 * GenerateRandomDistributions generates discrete conditional distribution tables
+	/* GenerateRandomDistributions generates discrete conditional distribution tables
 	 * for all nodes of a Bayes network once a network structure has been determined.
-	 * @param nNodes number of nodes in the Bayes net 
-	 * @param nValues number of values each of the nodes can take
+	 * @param nNodes: number of nodes in the Bayes net 
+	 * @param nValues: number of values each of the nodes can take
 	 */
     void generateRandomDistributions(int nNodes, int nValues) {
 	    // Reserve space for CPTs
@@ -308,21 +249,17 @@ public class BayesNetGenerator extends BayesNet {
         } 
     } // GenerateRandomDistributions
     
-	/**
-	 * GenerateInstances generates random instances sampling from the
+	/* GenerateInstances generates random instances sampling from the
 	 * distribution represented by the Bayes network structure. It assumes
 	 * a Bayes network structure has been initialized
-	 * 
-	 * @throws Exception if something goes wrong
+	 * @param nInstances: nr of isntances to generate
 	 */
-	public void generateInstances () throws Exception {
-	    int [] order = getOrder();
+	public void generateInstances(){
 		for (int iInstance = 0; iInstance < m_nNrOfInstances; iInstance++) {
 		    int nNrOfAtts = m_Instances.numAttributes();
 			Instance instance = new Instance(nNrOfAtts);
 			instance.setDataset(m_Instances);
-			for (int iAtt2 = 0; iAtt2 < nNrOfAtts; iAtt2++) {
-			    int iAtt = order[iAtt2];
+			for (int iAtt = 0; iAtt < nNrOfAtts; iAtt++) {
 
 				double iCPT = 0;
 
@@ -342,51 +279,13 @@ public class BayesNetGenerator extends BayesNet {
 			m_Instances.add(instance);
 		}
 	} // GenerateInstances
-
-    /**
-     * @throws Execption if there's a cycle in the graph
-     */	
-    int [] getOrder() throws Exception {
-	int nNrOfAtts = m_Instances.numAttributes();
-	int [] order = new int[nNrOfAtts];
-	boolean [] bDone = new boolean[nNrOfAtts];
-	for (int iAtt = 0; iAtt < nNrOfAtts; iAtt++) {
-	    int iAtt2 = 0; 
-	    boolean allParentsDone = false;
-	    while (!allParentsDone && iAtt2 < nNrOfAtts) {
-		if (!bDone[iAtt2]) {
-		    allParentsDone = true;
-		    int iParent = 0;
-		    while (allParentsDone && iParent < m_ParentSets[iAtt2].getNrOfParents()) {
-			allParentsDone = bDone[m_ParentSets[iAtt].getParent(iParent++)];
-		    }
-		    if (allParentsDone && iParent == m_ParentSets[iAtt2].getNrOfParents()) {
-			order[iAtt] = iAtt2;
-			bDone[iAtt2] = true;
-		    } else {
-			iAtt2++;
-		    }
-		} else {
-		    iAtt2++;
-		}
-	    }
-	    if (!allParentsDone && iAtt2 == nNrOfAtts) {
-		throw new Exception("There appears to be a cycle in the graph");
-	    }
-	}
-	return order;
-    } // getOrder
-
-    	/**
-    	 * Returns either the net (if BIF format) or the generated instances
-    	 * 
-    	 * @return either the net or the generated instances
-    	 */
+    
   	public String toString() {
-  	  if (m_bGenerateNet) {
-  	    return toXMLBIF03();
-  	  }
-  	  return m_Instances.toString();
+		if (m_bGenerateNet) {
+		   return toXMLBIF03();
+		}
+    	StringBuffer text = new StringBuffer();
+    	return m_Instances.toString();
   	} // toString
   	
 
@@ -423,41 +322,8 @@ public class BayesNetGenerator extends BayesNet {
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. <p/>
+	 * Parses a given list of options. Valid options are:<p>
 	 * 
-	 <!-- options-start -->
-	 * Valid options are: <p/>
-	 * 
-	 * <pre> -B
-	 *  Generate network (instead of instances)
-	 * </pre>
-	 * 
-	 * <pre> -N &lt;integer&gt;
-	 *  Nr of nodes
-	 * </pre>
-	 * 
-	 * <pre> -A &lt;integer&gt;
-	 *  Nr of arcs
-	 * </pre>
-	 * 
-	 * <pre> -M &lt;integer&gt;
-	 *  Nr of instances
-	 * </pre>
-	 * 
-	 * <pre> -C &lt;integer&gt;
-	 *  Cardinality of the variables
-	 * </pre>
-	 * 
-	 * <pre> -S &lt;integer&gt;
-	 *  Seed for random number generator
-	 * </pre>
-	 * 
-	 * <pre> -F &lt;file&gt;
-	 *  The BIF file to obtain the structure from.
-	 * </pre>
-	 * 
-	 <!-- options-end -->
-	 *
 	 * @param options the list of options as an array of strings
 	 * @exception Exception if an option is not supported
 	 */
@@ -560,19 +426,14 @@ public class BayesNetGenerator extends BayesNet {
       }
     }
 
-    /**
-     * Main method
-     * 
-     * @param args the commandline parameters
-     */
-    static public void main(String [] args) {
+    static public void main(String [] Argv) {
 		BayesNetGenerator b = new BayesNetGenerator();
     	try {
-		if ( (args.length == 0) || (Utils.getFlag('h', args)) ) {
+		if ( (Argv.length == 0) || (Utils.getFlag('h', Argv)) ) {
                         printOptions(b);
-                        return;
+			return;
 		}
-	    	b.setOptions(args);
+	    	b.setOptions(Argv);
 	    	
 	    	b.generateRandomNetwork();
 	    	if (!b.m_bGenerateNet) { // skip if not required
@@ -581,7 +442,7 @@ public class BayesNetGenerator extends BayesNet {
 	    	System.out.println(b.toString());
     	} catch (Exception e) {
     		e.printStackTrace();
-    		printOptions(b);
+                printOptions(b);
     	}
     } // main
     

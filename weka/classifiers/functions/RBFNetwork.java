@@ -22,60 +22,55 @@
  */
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.clusterers.MakeDensityBasedClusterer;
-import weka.clusterers.SimpleKMeans;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ClusterMembership;
-import weka.filters.unsupervised.attribute.Standardize;
-
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.Logistic;
+import weka.classifiers.functions.LinearRegression;
+import weka.filters.unsupervised.attribute.ClusterMembership;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Standardize;
+import weka.clusterers.SimpleKMeans;
+import weka.clusterers.MakeDensityBasedClusterer;
 
 /**
- <!-- globalinfo-start -->
- * Class that implements a normalized Gaussian radial basisbasis function network.<br/>
- * It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance.
- * <p/>
- <!-- globalinfo-end -->
+ * Class that implements a normalized Gaussian radial basis function
+ * network.  It uses the k-means clustering algorithm to provide the
+ * basis functions and learns either a logistic regression (discrete
+ * class problems) or linear regression (numeric class problems) on
+ * top of that. Symmetric multivariate Gaussians are fit to the data from
+ * each cluster. If the class is nominal it uses the given number of
+ * clusters per class. It standardizes all numeric attributes to zero
+ * mean and unit variance.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;number&gt;
- *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Set the random seed to be used by K-means. (default = 1).</pre>
- * 
- * <pre> -R &lt;ridge&gt;
- *  Set the ridge value for the logistic or linear regression.</pre>
- * 
- * <pre> -M &lt;number&gt;
- *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
- * 
- * <pre> -W &lt;number&gt;
- *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
  *
+ * -B num <br>
+ * Set the number of clusters (basis functions) to use.<p>
+ *
+ * -R ridge <br>
+ * Set the ridge parameter for the logistic regression or linear regression.<p>
+ * 
+ * -M num <br>
+ * Set the maximum number of iterations for logistic regression.
+ * (default -1, until convergence)<p>
+ *
+ * -S seed <br>
+ * Set the random seed used by K-means when generating clusters. 
+ * (default 1). <p>
+ *
+ * -W num <br>
+ * Set the minimum standard deviation for the clusters.
+ * (default 0.1). <p>
+  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -3669814959712675720L;
-  
   /** The logistic regression for classification problems */
   private Logistic m_logistic;
 
@@ -110,7 +105,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public String globalInfo() {
     return "Class that implements a normalized Gaussian radial basis" 
-      + "basis function network.\n"
+      + "basis function network. "
       + "It uses the k-means clustering algorithm to provide the basis "
       + "functions and learns either a logistic regression (discrete "
       + "class problems) or linear regression (numeric class problems) "
@@ -122,36 +117,18 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   }
 
   /**
-   * Returns default capabilities of the classifier, i.e.,  and "or" of
-   * Logistic and LinearRegression.
-   *
-   * @return      the capabilities of this classifier
-   * @see         Logistic
-   * @see         LinearRegression
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = new Logistic().getCapabilities();
-    result.or(new LinearRegression().getCapabilities());
-    Capabilities classes = result.getClassCapabilities();
-    result.and(new SimpleKMeans().getCapabilities());
-    result.or(classes);
-    return result;
-  }
-
-  /**
    * Builds the classifier
    *
    * @param instances the training data
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
+    if (instances.numInstances() == 0) {
+      throw new Exception("No training instances without a missing class!");
+    }
     
     m_standardize = new Standardize();
     m_standardize.setInputFormat(instances);
@@ -189,7 +166,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    *
    * @param instance the instance for which distribution is computed
    * @return the distribution
-   * @throws Exception if the distribution can't be computed successfully
+   * @exception Exception if the distribution can't be computed successfully
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
@@ -394,30 +371,28 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * -B num <br>
+   * Set the number of clusters (basis functions) to use.<p>
+   *
+   * -R ridge <br>
+   * Set the ridge parameter for the logistic regression or linear regression.<p>
    * 
-   * <pre> -B &lt;number&gt;
-   *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Set the random seed to be used by K-means. (default = 1).</pre>
-   * 
-   * <pre> -R &lt;ridge&gt;
-   *  Set the ridge value for the logistic or linear regression.</pre>
-   * 
-   * <pre> -M &lt;number&gt;
-   *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
-   * 
-   * <pre> -W &lt;number&gt;
-   *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
-   * 
-   <!-- options-end -->
+   * -M num <br>
+   * Set the maximum number of iterations for logistic regression.
+   * (default -1, until convergence)<p>
+   *
+   * -S seed <br>
+   * Set the random seed used by K-means when generating clusters. 
+   * (default 1). <p>
+   *
+   * -W num <br>
+   * Set the minimum standard deviation for the clusters.
+   * (default 0.1). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setDebug(Utils.getFlag('D', options));

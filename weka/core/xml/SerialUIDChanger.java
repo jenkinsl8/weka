@@ -16,7 +16,7 @@
 
 /*
  * SerialUIDChanger.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
@@ -38,7 +38,7 @@ import java.io.ObjectOutputStream;
  * not losing the data stored in the binary format.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 public class SerialUIDChanger {
    /**

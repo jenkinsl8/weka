@@ -22,112 +22,38 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
+import java.io.Serializable;
+import weka.core.*;
 import weka.filters.unsupervised.attribute.MakeIndicator;
-
+import weka.filters.Filter;
+import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Meta classifier that allows standard classification algorithms to be applied to ordinal class problems.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
- * Eibe Frank, Mark Hall: A Simple Approach to Ordinal Classification. In: 12th European Conference on Machine Learning, 145-156, 2001.
- * <p/>
- <!-- globalinfo-end -->
+ * Meta classifier for transforming an ordinal class problem to a series
+ * of binary class problems. For more information see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Frank2001,
- *    author = {Eibe Frank and Mark Hall},
- *    booktitle = {12th European Conference on Machine Learning},
- *    pages = {145-156},
- *    publisher = {Springer},
- *    title = {A Simple Approach to Ordinal Classification},
- *    year = {2001}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Frank, E. and Hall, M. (in press). <i>A simple approach to ordinal 
+ * prediction.</i> 12th European Conference on Machine Learning. 
+ * Freiburg, Germany. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
- * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -W classname <br>
+ * Specify the full class name of a learner as the basis for 
+ * the ordinalclassclassifier (required).<p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision 1.0 $
  * @see OptionHandler
  */
-public class OrdinalClassClassifier 
-  extends SingleClassifierEnhancer 
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -3461971774059603636L;
+public class OrdinalClassClassifier extends SingleClassifierEnhancer 
+implements OptionHandler {
 
   /** The classifiers. (One for each class.) */
   private Classifier [] m_Classifiers;
@@ -135,13 +61,14 @@ public class OrdinalClassClassifier
   /** The filters used to transform the class. */
   private MakeIndicator[] m_ClassFilters;
 
+  /** Internal copy of the class attribute for output purposes */
+  private Attribute m_ClassAttribute;
+
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -161,65 +88,27 @@ public class OrdinalClassClassifier
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Meta classifier that allows standard classification algorithms "
-      +"to be applied to ordinal class problems.\n\n"
-      + "For more information see: \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Eibe Frank and Mark Hall");
-    result.setValue(Field.TITLE, "A Simple Approach to Ordinal Classification");
-    result.setValue(Field.BOOKTITLE, "12th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "2001");
-    result.setValue(Field.PAGES, "145-156");
-    result.setValue(Field.PUBLISHER, "Springer");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NOMINAL_CLASS);
-    
-    return result;
+    return " Meta classifier that allows standard classification algorithms "
+      +"to be applied to ordinal class problems.  For more information see: "
+      +"Frank, E. and Hall, M. (in press). A simple approach to ordinal "
+      +"prediction. 12th European Conference on Machine Learning. Freiburg, "
+      +"Germany.";
   }
 
   /**
    * Builds the classifiers.
    *
    * @param insts the training data.
-   * @throws Exception if a classifier can't be built
+   * @exception Exception if a classifier can't be built
    */
   public void buildClassifier(Instances insts) throws Exception {
 
     Instances newInsts;
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(insts);
-
-    // remove instances with missing class
-    insts = new Instances(insts);
-    insts.deleteWithMissingClass();
+    if (!insts.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("OrdinalClassClassifier: class should " +
+					      "be declared nominal!");
+    }
     
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -248,14 +137,13 @@ public class OrdinalClassClassifier
 	m_Classifiers[i].buildClassifier(newInsts);
       }
     }
+    m_ClassAttribute = insts.classAttribute();
   }
   
   /**
    * Returns the distribution for an instance.
    *
-   * @param inst the instance to compute the distribution for
-   * @return the class distribution for the given instance
-   * @throws Exception if the distribution can't be computed successfully
+   * @exception Exception if the distribution can't be computed successfully
    */
   public double [] distributionForInstance(Instance inst) throws Exception {
     
@@ -315,61 +203,14 @@ public class OrdinalClassClassifier
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.J48)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.J48:
-   * </pre>
-   * 
-   * <pre> -U
-   *  Use unpruned tree.</pre>
-   * 
-   * <pre> -C &lt;pruning confidence&gt;
-   *  Set confidence threshold for pruning.
-   *  (default 0.25)</pre>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.
-   *  (default 2)</pre>
-   * 
-   * <pre> -R
-   *  Use reduced error pruning.</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Set number of folds for reduced error
-   *  pruning. One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -B
-   *  Use binary splits only.</pre>
-   * 
-   * <pre> -S
-   *  Don't perform subtree raising.</pre>
-   * 
-   * <pre> -L
-   *  Do not clean up after the tree has been built.</pre>
-   * 
-   * <pre> -A
-   *  Laplace smoothing for predicted probabilities.</pre>
-   * 
-   * <pre> -Q &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   <!-- options-end -->
+   * -W classname <br>
+   * Specify the full class name of a learner as the basis for 
+   * the ordinalclassclassifier (required).<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
   
@@ -388,8 +229,6 @@ public class OrdinalClassClassifier
   
   /**
    * Prints the classifiers.
-   * 
-   * @return a string representation of this classifier
    */
   public String toString() {
     
@@ -434,4 +273,3 @@ public class OrdinalClassClassifier
     }
   }
 }
-

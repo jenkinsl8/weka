@@ -16,7 +16,7 @@
 
 /*
  * XMLDocument.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
@@ -73,17 +73,15 @@ public class XMLDocument {
    /** the root node as String */
    protected String m_RootNode = null;
    
-   /**
-    * initializes the factory with non-validating parser
-    * 
-    * @throws Exception if the construction fails
-    */
-   public XMLDocument() throws Exception {
-     m_Factory = DocumentBuilderFactory.newInstance();
-     setDocType(null);
-     setRootNode(null);
-     setValidating(false);
-   }
+	/**
+	 * initializes the factory with non-validating parser
+	 */
+	public XMLDocument() throws Exception {
+	    m_Factory = DocumentBuilderFactory.newInstance();
+       setDocType(null);
+       setRootNode(null);
+	    setValidating(false);
+	}
    
    /** 
     * Creates a new instance of XMLDocument 
@@ -204,7 +202,7 @@ public class XMLDocument {
    /**
     * sets the root node to use in the XML output. Performs NO checking with DOCTYPE!
     *  
-    * @param rootNode the root node to use in the XML output
+    * @param docType the DOCTYPE definition to use in XML output 
     */
    public void setRootNode(String rootNode) {
       if (rootNode == null)
@@ -316,7 +314,7 @@ public class XMLDocument {
 	
 	/**
 	 * writes the current DOM document into the given stream
-	 * @param stream the filename to write to
+	 * @param file the filename to write to
 	 * @throws if something goes wrong with the parsing
 	 */
 	public void write(OutputStream stream) throws Exception {
@@ -329,7 +327,7 @@ public class XMLDocument {
 	
 	/**
 	 * writes the current DOM document into the given writer
-	 * @param writer the filename to write to
+	 * @param file the filename to write to
 	 * @throws if something goes wrong with the parsing
 	 */
 	public void write(Writer writer) throws Exception {
@@ -388,7 +386,7 @@ public class XMLDocument {
 	 * turns the given node into a XML-stringbuffer according to the depth
 	 * @param buf the stringbuffer so far
 	 * @param parent the current node
-	 * @param depth the current depth
+	 * @depth the current depth
 	 * @return the new XML-stringbuffer
 	 */
 	protected StringBuffer toString(StringBuffer buf, Node parent, int depth) {
@@ -457,6 +455,7 @@ public class XMLDocument {
 	
 	/**
 	 * returns the current DOM document as XML-string
+	 * @param document the document to return as XML-string
 	 * @return the document as XML-string representation
 	 * @throws Exception if anything goes wrong initializing the parsing
 	 */

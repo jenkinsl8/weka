@@ -37,7 +37,7 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import weka.core.ClassDiscovery;
+import weka.core.RTSI;
 import weka.core.Utils;
 import weka.gui.ExtensionFileFilter;
 
@@ -51,7 +51,7 @@ import weka.gui.ExtensionFileFilter;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.4 $
  */
 public class PrintableComponent implements PrintableHandler {
   /** the parent component of this print dialog */
@@ -236,7 +236,7 @@ public class PrintableComponent implements PrintableHandler {
     m_FileChooserPanel.setAcceptAllFileFilterUsed(false);
 
     // determine all available writers and add them to the filechooser
-    writerNames = ClassDiscovery.find(JComponentWriter.class.getName(), JComponentWriter.class.getPackage().getName());
+    writerNames = RTSI.find(JComponentWriter.class.getPackage().getName(), JComponentWriter.class.getName());
     Collections.sort(writerNames);
     for (i = 0; i < writerNames.size(); i++) {
       try {

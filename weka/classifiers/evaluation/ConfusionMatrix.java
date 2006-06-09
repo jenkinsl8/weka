@@ -32,7 +32,7 @@ import weka.classifiers.CostMatrix;
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class ConfusionMatrix extends Matrix {
 

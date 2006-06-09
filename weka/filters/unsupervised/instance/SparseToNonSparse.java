@@ -23,30 +23,23 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Instance;
+import weka.filters.*;
 import weka.core.Instances;
 import weka.core.SparseInstance;
+import weka.core.Instance;
 import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
+
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that converts all incoming sparse instances into non-sparse format.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * A filter that converts all incoming sparse instances into 
+ * non-sparse format.
+ *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.2 $ 
  */
-public class SparseToNonSparse 
-  extends Filter 
-  implements UnsupervisedFilter, StreamableFilter {
+public class SparseToNonSparse extends Filter implements UnsupervisedFilter,
+							 StreamableFilter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2481634184210236074L;
-  
   /**
    * Returns a string describing this filter
    *
@@ -65,7 +58,6 @@ public class SparseToNonSparse
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if format cannot be processed
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -83,7 +75,7 @@ public class SparseToNonSparse
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean input(Instance instance) {
 
@@ -123,3 +115,11 @@ public class SparseToNonSparse
     }
   }
 }
+
+
+
+
+
+
+
+

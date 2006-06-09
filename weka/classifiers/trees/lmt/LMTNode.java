@@ -22,33 +22,17 @@
 
 package weka.classifiers.trees.lmt;
 
-import weka.classifiers.Evaluation;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.classifiers.trees.j48.*;
 import weka.classifiers.functions.SimpleLinearRegression;
-import weka.classifiers.trees.j48.ClassifierSplitModel;
-import weka.classifiers.trees.j48.ModelSelection;
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Vector;
-
-/** 
- * Auxiliary class for list of LMTNodes
- */
-class CompareNode 
-    implements Comparator {
-
-    /**
-     * Compares its two arguments for order.
-     * 
-     * @param o1 first object
-     * @param o2 second object
-     * @return a negative integer, zero, or a positive integer as the first 
-     *         argument is less than, equal to, or greater than the second.
-     */
+/** Auxiliary class for list of LMTNodes*/
+class CompareNode implements Comparator{    
     public int compare(Object o1, Object o2) {		
 	if ( ((LMTNode)o1).m_alpha < ((LMTNode)o2).m_alpha) return -1;
 	if ( ((LMTNode)o1).m_alpha > ((LMTNode)o2).m_alpha) return 1;
@@ -61,14 +45,10 @@ class CompareNode
  * 
  * 
  * @author Niels Landwehr 
- * @author Marc Sumner 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public class LMTNode 
-    extends LogisticBase {   
-  
-    /** for serialization */
-    static final long serialVersionUID = 1862737145870398755L;
+
+public class LMTNode extends LogisticBase {    
     
     /** Total number of training instances. */
     protected double m_totalInstanceWeight;
@@ -95,7 +75,7 @@ public class LMTNode
     protected ModelSelection m_modelSelection;     
 
     /**Filter to convert nominal attributes to binary*/
-    protected NominalToBinary m_nominalToBinary;  
+    protected NominalToBinary      m_nominalToBinary;  
    
     /**Simple regression functions fit by LogitBoost at higher levels in the tree*/
     protected SimpleLinearRegression[][] m_higherRegressions;
@@ -127,29 +107,23 @@ public class LMTNode
      * @param modelSelection selection method for local splitting model
      * @param numBoostingIterations sets the numBoostingIterations parameter
      * @param fastRegression sets the fastRegression parameter
-     * @param errorOnProbabilities Use error on probabilities for stopping criterion of LogitBoost?
-     * @param minNumInstances minimum number of instances at which a node is considered for splitting
      */
     public LMTNode(ModelSelection modelSelection, int numBoostingIterations, 
 		   boolean fastRegression, 
-                   boolean errorOnProbabilities, int minNumInstances,
-                   double weightTrimBeta, boolean useAIC) {
+		    boolean errorOnProbabilities, int minNumInstances) {
 	m_modelSelection = modelSelection;
 	m_fixedNumIterations = numBoostingIterations;      
 	m_fastRegression = fastRegression;
 	m_errorOnProbabilities = errorOnProbabilities;
 	m_minNumInstances = minNumInstances;
 	m_maxIterations = 200;
-        setWeightTrimBeta(weightTrimBeta);
-        setUseAIC(useAIC);
     }         
     
     /**
      * Method for building a logistic model tree (only called for the root node).
      * Grows an initial logistic model tree and prunes it back using the CART pruning scheme.
      *
-     * @param data the data to train with
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     public void buildClassifier(Instances data) throws Exception{
 	
@@ -170,7 +144,7 @@ public class LMTNode
 	    Instances train = cvData.trainCV(m_numFoldsPruning, i);
 	    Instances test = cvData.testCV(m_numFoldsPruning, i);
 	    
-	    buildTree(train, null, train.numInstances() , 0);	
+	    buildTree(train, null, train.numInstances());	
 	    
 	    int numNodes = getNumInnerNodes();	   
 	    alphas[i] = new double[numNodes + 2];
@@ -181,7 +155,7 @@ public class LMTNode
 	}
 	
 	//build tree using all the data
-	buildTree(data, null, data.numInstances(), 0);
+	buildTree(data, null, data.numInstances());
 	int numNodes = getNumInnerNodes();
 
 	double[] treeAlphas = new double[numNodes + 2];	
@@ -235,12 +209,10 @@ public class LMTNode
      * levels in the tree. They represent a logistic regression model that is refined locally 
      * at this node.
      * @param totalInstanceWeight the total number of training examples
-     * @param higherNumParameters effective number of parameters in the logistic regression model built
-     * in parent nodes
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     public void buildTree(Instances data, SimpleLinearRegression[][] higherRegressions, 
-			  double totalInstanceWeight, double higherNumParameters) throws Exception{
+			  double totalInstanceWeight) throws Exception{
 
 	//save some stuff
 	m_totalInstanceWeight = totalInstanceWeight;
@@ -263,21 +235,15 @@ public class LMTNode
 	else m_higherRegressions = new SimpleLinearRegression[m_numClasses][0];	
 
 	m_numHigherRegressions = m_higherRegressions[0].length;	
-        
-        m_numParameters = higherNumParameters;
-        
-        //build logistic model
-        if (m_numInstances >= m_numFoldsBoosting) {
-            if (m_fixedNumIterations > 0){
-                performBoosting(m_fixedNumIterations);
-            } else if (getUseAIC()) {
-                performBoostingInfCriterion();
-            } else {
-                performBoostingCV();
-            }
-        }
-        
-        m_numParameters += m_numRegressions;
+	
+	//build logistic model
+	if (m_numInstances >= m_numFoldsBoosting) {	    
+	    if (m_fixedNumIterations > 0){
+		performBoosting(m_fixedNumIterations);
+	    } else {
+		performBoostingCV();
+	    }
+	}
 	
 	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
 	m_regressions = selectRegressions(m_regressions);
@@ -310,24 +276,20 @@ public class LMTNode
 	    for (int i = 0; i < m_sons.length; i++) {
 		m_sons[i] = new LMTNode(m_modelSelection, m_fixedNumIterations, 
 					 m_fastRegression,  
-					 m_errorOnProbabilities,m_minNumInstances,
-                                        getWeightTrimBeta(), getUseAIC());
+					 m_errorOnProbabilities,m_minNumInstances);
 		//the "higherRegressions" (partial logistic model fit at higher levels in the tree) passed
 		//on to the children are the "higherRegressions" at this node plus the regressions added
 		//at this node (m_regressions).
 		m_sons[i].buildTree(localInstances[i],
-				  mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight, m_numParameters);		
+				  mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight);		
 		localInstances[i] = null;
 	    }	    
 	} 
     }
 
     /** 
-     * Prunes a logistic model tree using the CART pruning scheme, given a 
-     * cost-complexity parameter alpha.
-     * 
+     * Prunes a logistic model tree using the CART pruning scheme, given a cost-complexity parameter alpha.
      * @param alpha the cost-complexity measure  
-     * @throws Exception if something goes wrong
      */
     public void prune(double alpha) throws Exception {
 	
@@ -371,7 +333,7 @@ public class LMTNode
      * @param alphas array to hold the generated alpha-values
      * @param errors array to hold the corresponding error estimates
      * @param test test set of that fold (to obtain error estimates)
-     * @throws if something goes wrong
+     * @exception if something goes wrong
      */
 
     public int prune(double[] alphas, double[] errors, Instances test) throws Exception {
@@ -454,7 +416,7 @@ public class LMTNode
      *regression function on the training data. Used for the heuristic that avoids cross-validating this
      *number again at every node.
      *@param data training instances for the logistic model
-     *@throws if something goes wrong
+     *@exception if something goes wrong
      */
     protected int tryLogistic(Instances data) throws Exception{
 	
@@ -468,8 +430,6 @@ public class LMTNode
 	
 	//limit LogitBoost to 200 iterations (speed)
 	logistic.setMaxIterations(200);
-        logistic.setWeightTrimBeta(getWeightTrimBeta()); // Not in Marc's code. Added by Eibe.
-        logistic.setUseAIC(getUseAIC());
 	logistic.buildClassifier(filteredData);
 	
 	//return best number of iterations
@@ -586,6 +546,7 @@ public class LMTNode
 	SimpleLinearRegression[][] result =
 	    new SimpleLinearRegression[m_numClasses][numModels1 + numModels2];
 	
+	int k = 0;
 	for (int i = 0; i < m_numClasses; i++)
 	    for (int j = 0; j < numModels1; j++) {
 		result[i][j]  = a1[i][j];
@@ -781,7 +742,7 @@ public class LMTNode
     /**
      * Help method for printing tree structure.
      *
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     protected void dumpTree(int depth,StringBuffer text) 
 	throws Exception {
@@ -875,7 +836,7 @@ public class LMTNode
     /**
      * Returns graph describing the tree.
      *
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     public String graph() throws Exception {
 	
@@ -902,7 +863,7 @@ public class LMTNode
     /**
      * Helper function for graph description of tree
      *
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     private void graphTree(StringBuffer text) throws Exception {
 	

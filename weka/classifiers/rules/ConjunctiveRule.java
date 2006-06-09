@@ -22,82 +22,41 @@
 
 package weka.classifiers.rules;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
- <!-- globalinfo-start -->
- * This class implements a single conjunctive rule learner that can predict for numeric and nominal class labels.<br/>
- * <br/>
- * A rule consists of antecedents "AND"ed together and the consequent (class value) for the classification/regression.  In this case, the consequent is the distribution of the available classes (or mean for a numeric value) in the dataset. If the test instance is not covered by this rule, then it's predicted using the default class distributions/value of the data not covered by the rule in the training data.This learner selects an antecedent by computing the Information Gain of each antecendent and prunes the generated rule using Reduced Error Prunning (REP) or simple pre-pruning based on the number of antecedents.<br/>
- * <br/>
- * For classification, the Information of one antecedent is the weighted average of the entropies of both the data covered and not covered by the rule.<br/>
- * For regression, the Information is the weighted average of the mean-squared errors of both the data covered and not covered by the rule.<br/>
- * <br/>
- * In pruning, weighted average of the accuracy rates on the pruning data is used for classification while the weighted average of the mean-squared errors on the pruning data is used for regression.<br/>
- * <br/>
- * <p/>
- <!-- globalinfo-end -->
+ * This class implements a single conjunctive rule learner that can predict
+ * for numeric and nominal class labels.<p>  
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for REP
- *  One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -R
- *  Set if NOT uses randomization
- *  (default:use randomization)</pre>
- * 
- * <pre> -E
- *  Set whether consider the exclusive
- *  expressions for nominal attributes
- *  (default false)</pre>
- * 
- * <pre> -M &lt;min. weights&gt;
- *  Set the minimal weights of instances
- *  within a split.
- *  (default 2.0)</pre>
- * 
- * <pre> -P &lt;number of antecedents&gt;
- *  Set number of antecedents for pre-pruning
- *  if -1, then REP is used
- *  (default -1)</pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Set the seed of randomization
- *  (default 1)</pre>
- * 
- <!-- options-end -->
+ * A rule consists of antecedents "AND"ed together and the consequent (class value) 
+ * for the classification/regression.  In this case, the consequent is the 
+ * distribution of the available classes (or numeric value) in the dataset.  
+ * If the test instance is not covered by this rule, then it's predicted
+ * using the default class distributions/value of the data not covered by the
+ * rule in the training data. <br>
+ * This learner selects an antecedent by computing the Information Gain of each 
+ * antecendent and prunes the generated rule using Reduced Error Prunning (REP). <p>
  *
- * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * For classification, the Information of one antecedent is the weighted average of
+ * the entropies of both the data covered and not covered by the rule. <br>
+ *
+ * For regression, the Information is the weighted average of the mean-squared errors 
+ * of both the data covered and not covered by the rule. <p>
+ *
+ * In pruning, weighted average of accuracy rate of the pruning data is used 
+ * for classification while the weighted average of the mean-squared errors
+ * of the pruning data is used for regression. <p>
+ *
+ * @author: Xin XU (xx5@cs.waikato.ac.nz)
+ * @version $Revision: 1.10 $ 
  */
-public class ConjunctiveRule 
-  extends Classifier 
+
+public class ConjunctiveRule extends Classifier 
   implements OptionHandler, WeightedInstancesHandler{
     
-  /** for serialization */
-  static final long serialVersionUID = -5938309903225087198L;
-  
   /** The number of folds to split data into Grow and Prune for REP*/
   private int m_Folds = 3;
     
@@ -198,9 +157,7 @@ public class ConjunctiveRule
       uncover = unc;	
     }
 	
-    /** 
-     * Constructor for numeric class
-     */
+    /* Constructor for numeric class */
     public Antd(Attribute a, double uncoveredWtSq, 
 		double uncoveredWtVl, double uncoveredWts){
       att=a;
@@ -266,39 +223,25 @@ public class ConjunctiveRule
   /** 
    * The antecedent with numeric attribute
    */
-  private class NumericAntd 
-    extends Antd {
-    
-    /** for serialization */
-    static final long serialVersionUID = -7957266498918210436L;
+  private class NumericAntd extends Antd{
 	
-    /** The split point for this numeric antecedent */
+    /* The split point for this numeric antecedent */
     private double splitPoint;
 	
-    /** 
-     * Constructor for nominal class
-     */
+    /* Constructor for nominal class */
     public NumericAntd(Attribute a, double[] unc){ 
       super(a, unc);
       splitPoint = Double.NaN;
     }    
 	
-    /** 
-     * Constructor for numeric class
-     */
+    /* Constructor for numeric class */
     public NumericAntd(Attribute a, double sq, double vl, double wts){ 
       super(a, sq, vl, wts);
       splitPoint = Double.NaN;
     }
 	
-    /** 
-     * Get split point of this numeric antecedent
-     * 
-     * @return the split point
-     */
-    public double getSplitPoint(){ 
-      return splitPoint; 
-    }
+    /* Get split point of this numeric antecedent */
+    public double getSplitPoint(){ return splitPoint; }
 	
     /**
      * Implements the splitData function.  
@@ -538,20 +481,14 @@ public class ConjunctiveRule
   /** 
    * The antecedent with nominal attribute
    */
-  class NominalAntd 
-    extends Antd {
+  class NominalAntd extends Antd{
 	
-    /** for serialization */
-    static final long serialVersionUID = -5949864163376447424L;
-    
     /* The parameters of infoGain calculated for each attribute value */
     private double[][] stats;
     private double[] coverage;
     private boolean isIn;
 	
-    /** 
-     * Constructor for nominal class
-     */
+    /* Constructor for nominal class */
     public NominalAntd(Attribute a, double[] unc){ 
       super(a, unc);
       int bag = att.numValues();
@@ -560,9 +497,7 @@ public class ConjunctiveRule
       isIn = true;
     }   
 	
-    /** 
-     * Constructor for numeric class
-     */
+    /* Constructor for numeric class */
     public NominalAntd(Attribute a, double sq, double vl, double wts){ 
       super(a, sq, vl, wts);
       int bag = att.numValues();	    
@@ -846,43 +781,10 @@ public class ConjunctiveRule
   }
     
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Set number of folds for REP
-   *  One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -R
-   *  Set if NOT uses randomization
-   *  (default:use randomization)</pre>
-   * 
-   * <pre> -E
-   *  Set whether consider the exclusive
-   *  expressions for nominal attributes
-   *  (default false)</pre>
-   * 
-   * <pre> -M &lt;min. weights&gt;
-   *  Set the minimal weights of instances
-   *  within a split.
-   *  (default 2.0)</pre>
-   * 
-   * <pre> -P &lt;number of antecedents&gt;
-   *  Set number of antecedents for pre-pruning
-   *  if -1, then REP is used
-   *  (default -1)</pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Set the seed of randomization
-   *  (default 1)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 	
@@ -947,23 +849,8 @@ public class ConjunctiveRule
       + "pruning, the rest for growing the rules.";
   }
 
-  /**
-   * the number of folds to use
-   * 
-   * @param folds the number of folds to use
-   */
-  public void setFolds(int folds) {  
-    m_Folds = folds; 
-  }
-  
-  /**
-   * returns the current number of folds
-   * 
-   * @return the number of folds
-   */
-  public int getFolds() { 
-    return m_Folds; 
-  }
+  public void setFolds(int folds){  m_Folds = folds; }
+  public int getFolds(){ return m_Folds; }
 
   /**
    * Returns the tip text for this property
@@ -974,23 +861,8 @@ public class ConjunctiveRule
     return "The seed used for randomizing the data.";
   }
 
-  /**
-   * sets the seed for randomizing the data
-   * 
-   * @param s the seed value
-   */
-  public void setSeed(long s) { 
-    m_Seed = s;
-  }
-  
-  /**
-   * returns the current seed value for randomizing the data
-   * 
-   * @return the seed value
-   */
-  public long getSeed() { 
-    return m_Seed; 
-  }
+  public void setSeed(long s){ m_Seed = s; }
+  public long getSeed(){ return m_Seed; }
 
   /**
    * Returns the tip text for this property
@@ -1002,27 +874,8 @@ public class ConjunctiveRule
       + "attribute splits.";
   }
 
-  /**
-   * Returns whether exclusive expressions for nominal attributes splits are 
-   * considered
-   * 
-   * @return true if exclusive expressions for nominal attributes splits are
-   *         considered
-   */
-  public boolean getExclusive() { 
-    return m_IsExclude;
-  }
-  
-  /**
-   * Sets whether exclusive expressions for nominal attributes splits are 
-   * considered
-   * 
-   * @param e whether to consider exclusive expressions for nominal attribute
-   *          splits
-   */
-  public void setExclusive(boolean e) { 
-    m_IsExclude = e;
-  }
+  public boolean getExclusive(){ return m_IsExclude;}
+  public void setExclusive(boolean e){ m_IsExclude = e;}
 
   /**
    * Returns the tip text for this property
@@ -1033,23 +886,8 @@ public class ConjunctiveRule
     return "The minimum total weight of the instances in a rule.";
   }
 
-  /**
-   * Sets the minimum total weight of the instances in a rule
-   * 
-   * @param m the minimum total weight of the instances in a rule
-   */
-  public void setMinNo(double m) {  
-    m_MinNo = m; 
-  }
-  
-  /**
-   * Gets the minimum total weight of the instances in a rule
-   * 
-   * @return the minimum total weight of the instances in a rule
-   */
-  public double getMinNo(){ 
-    return m_MinNo; 
-  }
+  public void setMinNo(double m){  m_MinNo = m; }
+  public double getMinNo(){ return m_MinNo; }
 
   /**
    * Returns the tip text for this property
@@ -1063,46 +901,8 @@ public class ConjunctiveRule
       + "pruning.";
   }
 
-  /**
-   * Sets the number of antecedants
-   * 
-   * @param n the number of antecedants
-   */
-  public void setNumAntds(int n) {  
-    m_NumAntds = n; 
-  }
-  
-  /**
-   * Gets the number of antecedants
-   * 
-   * @return the number of antecedants
-   */
-  public int getNumAntds(){ 
-    return m_NumAntds; 
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
+  public void setNumAntds(int n){  m_NumAntds = n; }
+  public int getNumAntds(){ return m_NumAntds; }
     
   /**
    * Builds a single rule learner with REP dealing with nominal classes or
@@ -1112,16 +912,21 @@ public class ConjunctiveRule
    * For numeric classes, this learner predicts a single value.
    *
    * @param instances the training data
-   * @throws Exception if classifier can't be built successfully
+   * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
+    if (instances.checkForStringAttributes())
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+	 
     Instances data = new Instances(instances);
+
+    if(data.numInstances() == 0)
+	throw new Exception("No training data!");
     data.deleteWithMissingClass();
     
+    if(data.numInstances() == 0)
+	throw new Exception("Not training data without missing class values.");
+
     if(data.numInstances() < m_Folds)
       throw new Exception("Not enough data for REP.");
 
@@ -1166,7 +971,6 @@ public class ConjunctiveRule
    *
    * @param instance the instance for which distribution is to be computed
    * @return the class distribution for the given instance
-   * @throws Exception if given instance is null
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
       if(instance == null)
@@ -1181,7 +985,7 @@ public class ConjunctiveRule
   /**
    * Whether the instance covered by this rule
    * 
-   * @param datum the instance in question
+   * @param inst the instance in question
    * @return the boolean value indicating whether the instance is covered by this rule
    */
   public boolean isCover(Instance datum){
@@ -1376,7 +1180,7 @@ public class ConjunctiveRule
   /** 
    * Compute the best information gain for the specified antecedent
    *  
-   * @param instances the data based on which the infoGain is computed
+   * @param data the data based on which the infoGain is computed
    * @param defInfo the default information of data
    * @param antd the specific antecedent
    * @return the data covered and not covered by the antecedent
@@ -1461,6 +1265,7 @@ public class ConjunctiveRule
     /* Calculate accuracy parameters for all the antecedents in this rule */
     for(int x=0; x<size; x++){
       Antd antd=(Antd)m_Antds.elementAt(x);
+      Attribute attr= antd.getAttr();
       Instances newData = new Instances(data);
       if(Utils.eq(newData.sumOfWeights(),0.0))
 	break;

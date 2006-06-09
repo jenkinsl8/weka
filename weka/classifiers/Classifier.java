@@ -26,8 +26,6 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 import weka.core.Instance;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.Attribute;
 import weka.core.SerializedObject;
@@ -42,10 +40,10 @@ import weka.core.Option;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.11.2.1 $
  */
 public abstract class Classifier 
-  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
+  implements Cloneable, Serializable, OptionHandler {
  
   /** Whether the classifier is run in debug mode. */
   protected boolean m_Debug = false;
@@ -267,17 +265,6 @@ public abstract class Classifier
   public String debugTipText() {
     return "If set to true, classifier may output additional info to " +
       "the console.";
-  }
-
-  /** 
-   * Returns the Capabilities of this classifier. Derived classifiers have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    return new Capabilities(this);
   }
 }
 

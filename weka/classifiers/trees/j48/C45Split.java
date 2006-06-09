@@ -29,7 +29,7 @@ import weka.core.*;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class C45Split extends ClassifierSplitModel{
 

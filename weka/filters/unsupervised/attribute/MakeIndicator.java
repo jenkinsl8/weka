@@ -22,54 +22,37 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * A filter that creates a new dataset with a boolean attribute replacing a nominal attribute.  In the new dataset, a value of 1 is assigned to an instance that exhibits a particular range of attribute values, a 0 to an instance that doesn't. The boolean attribute is coded as numeric by default.
- * <p/>
- <!-- globalinfo-end -->
+ * Creates a new dataset with a boolean attribute replacing a nominal
+ * attribute.  In the new dataset, a value of 1 is assigned to an
+ * instance that exhibits a particular range of attribute values, a 0 to an
+ * instance that doesn't. The boolean attribute is coded as numeric by
+ * default.<p>
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index.</pre>
- * 
- * <pre> -V &lt;index1,index2-index4,...&gt;
- *  Specify the list of values to indicate. First and last are
- *  valid indexes (default last)</pre>
- * 
- * <pre> -N &lt;index&gt;
- *  Set if new boolean attribute nominal.</pre>
- * 
- <!-- options-end -->
+ * Valid filter-specific options are: <p>
+ *
+ * -C col <br>
+ * Index of the attribute to be changed. (default "last")<p>
+ *
+ * -V index1,index2-index4,...<br>
+ * Specify list of values to indicate. First and last are valid indices.
+ * (default "last")<p>
+ *
+ * -N <br>
+ * Set if new boolean attribute nominal.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
+ *
  */
-public class MakeIndicator 
-  extends Filter
+public class MakeIndicator extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 766001176862773163L;
-  
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
@@ -79,9 +62,6 @@ public class MakeIndicator
   /** Make boolean attribute numeric. */
   private boolean m_Numeric = true;
 
-  /**
-   * Constructor
-   */
   public MakeIndicator() {
 
       m_ValIndex = new Range("last");
@@ -94,8 +74,8 @@ public class MakeIndicator
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnsupportedAttributeTypeException the selecte attribute is not nominal
-   * @throws UnsupportedAttributeTypeException the selecte attribute has fewer than two values.
+   * @exception UnsupportedAttributeTypeException the selecte attribute is not nominal
+   * @exception UnsupportedAttributeTypeException the selecte attribute has fewer than two values.
    */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
@@ -122,7 +102,7 @@ public class MakeIndicator
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -171,25 +151,20 @@ public class MakeIndicator
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index.</pre>
-   * 
-   * <pre> -V &lt;index1,index2-index4,...&gt;
-   *  Specify the list of values to indicate. First and last are
-   *  valid indexes (default last)</pre>
-   * 
-   * <pre> -N &lt;index&gt;
-   *  Set if new boolean attribute nominal.</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -C col <br>
+   * Index of the attribute to be changed.<p>
+   *
+   * -V index1,index2-index4,...<br>
+   * Specify list of values to indicate. First and last are valid indices.
+   * (default "last")<p>
+   *
+   * -N <br>
+   * Set if new boolean attribute nominal.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -273,7 +248,7 @@ public class MakeIndicator
   /**
    * Sets index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -336,10 +311,10 @@ public class MakeIndicator
   /**
    * Set which attributes are to be deleted (or kept if invert is true)
    *
-   * @param indices an array containing indexes of attributes to select.
+   * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @throws InvalidArgumentException if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setValueIndicesArray(int [] indices) {
     
@@ -438,3 +413,11 @@ public class MakeIndicator
     }
   }
 }
+
+
+
+
+
+
+
+

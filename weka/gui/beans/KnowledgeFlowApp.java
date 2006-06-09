@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.13 $
+ * @version  $Revision: 1.1.2.10 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.1.2.10 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1972,7 +1972,6 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
           Vector v     = (Vector) xml.read(oFile);
           beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-          //connections  = new Vector();
         } /* binary */ else {
           InputStream is = new FileInputStream(oFile);
           ObjectInputStream ois = new ObjectInputStream(is);

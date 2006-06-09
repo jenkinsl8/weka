@@ -17,74 +17,44 @@
 /*
  *    NaiveBayesMultinomial1.java
  *    Copyright (C) 2003 Andrew Golightly
+ *                  -- last updated 30/06/2003
  */
 
 package weka.classifiers.bayes;
 
-import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
 import weka.classifiers.Classifier;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a multinomial Naive Bayes classifier. For more information see,<br/>
- * <br/>
- * Andrew Mccallum, Kamal Nigam: A Comparison of Event Models for Naive Bayes Text Classification. In: AAAI-98 Workshop on 'Learning for Text Categorization', 1998.<br/>
- * <br/>
- * The core equation for this classifier:<br/>
- * <br/>
- * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)<br/>
- * <br/>
- * where Ci is class i and D is a document.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a multinomial Naive Bayes classifier.
+ * For more information see,<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Mccallum1998,
- *    author = {Andrew Mccallum and Kamal Nigam},
- *    booktitle = {AAAI-98 Workshop on 'Learning for Text Categorization'},
- *    title = {A Comparison of Event Models for Naive Bayes Text Classification},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.9.2.1 $ 
  */
-public class NaiveBayesMultinomial 
-  extends Classifier 
-  implements WeightedInstancesHandler,TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 5932177440181257085L;
-  
+
+/**
+ * The core equation for this classifier:
+ * 
+ * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)
+ * 
+ * where Ci is class i and D is a document
+ */
+
+public class NaiveBayesMultinomial extends Classifier 
+  implements WeightedInstancesHandler {
+    
   /**
-   * probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
-   * The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
-   * NOTE: the values are actually the log of Pr[w|H]
-   */
+    probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
+    The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
+    NOTE: the values are actually the log of Pr[w|H]
+  */
   private double[][] probOfWordGivenClass;
     
   /** the probability of a class (i.e. Pr[H]) */
@@ -108,52 +78,11 @@ public class NaiveBayesMultinomial
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Class for building and using a multinomial Naive Bayes classifier. "
-      + "For more information see,\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
-      + "The core equation for this classifier:\n\n"
-      + "P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)\n\n"
-      + "where Ci is class i and D is a document.";
+    return "Class for building and using a multinomial Naive Bayes classifier. "
+      +"For more information see,\n\n"
+      +"Andrew Mccallum, Kamal Nigam (1998) A Comparison of Event Models for Naive "
+      +"Bayes Text Classification";
   }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Andrew Mccallum and Kamal Nigam");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "A Comparison of Event Models for Naive Bayes Text Classification");
-    result.setValue(Field.BOOKTITLE, "AAAI-98 Workshop on 'Learning for Text Categorization'");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
   /**
    * Generates the classifier.
    *
@@ -162,13 +91,6 @@ public class NaiveBayesMultinomial
    */
   public void buildClassifier(Instances instances) throws Exception 
   {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     headerInfo = new Instances(instances, 0);
     numClasses = instances.numClasses();
     numAttributes = instances.numAttributes();
@@ -184,6 +106,18 @@ public class NaiveBayesMultinomial
 	probOfWordGivenClass[c] = new double[numAttributes];
 	for(int att = 0; att<numAttributes; att++)
 	  {
+	    /*
+	      check all attributes (except the class attribute) are numeric and 
+	      that the class attribute in nominal
+	    */
+	    if(instances.classIndex() == att)
+	      {
+		if(!instances.attribute(att).isNominal())
+		  throw new Exception("The class attribute is required to be nominal. This is currently not the case!");
+	      }
+	    else
+	      if(!instances.attribute(att).isNumeric())
+		throw new Exception(("Attribute " + instances.attribute(att).name() + " is not numeric! NaiveBayesMultinomial1 requires that all attributes (except the class attribute) are numeric."));
 	    probOfWordGivenClass[c][att] = 1;
 	  }
       }
@@ -213,6 +147,9 @@ public class NaiveBayesMultinomial
 		  wordsPerClass[classIndex] += numOccurences;
 		  probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
 		}
+	      else {
+		throw new Exception("Cannot handle missing values!");
+	      }
 	    } 
       }
 	
@@ -332,11 +269,6 @@ public class NaiveBayesMultinomial
     return lnFactorialCache[n];
   }
     
-  /**
-   * Returns a string representation of the classifier.
-   * 
-   * @return a string representation of the classifier
-   */
   public String toString()
   {
     StringBuffer result = new StringBuffer("The independent probability of a class\n--------------------------------------\n");
@@ -376,4 +308,5 @@ public class NaiveBayesMultinomial
     }
   }
 }
+    
 

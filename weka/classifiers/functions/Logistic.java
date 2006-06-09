@@ -22,104 +22,68 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Optimization;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.RemoveUseless;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.classifiers.*;
+import java.util.*;
+import java.io.*;
+import weka.core.*;
+import weka.filters.*;
+import weka.filters.unsupervised.attribute.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a multinomial logistic regression model with a ridge estimator.<br/>
- * <br/>
- * There are some modifications, however, compared to the paper of leCessie and van Houwelingen(1992): <br/>
- * <br/>
- * If there are k classes for n instances with m attributes, the parameter matrix B to be calculated will be an m*(k-1) matrix.<br/>
- * <br/>
- * The probability for class j with the exception of the last class is<br/>
- * <br/>
- * Pj(Xi) = exp(XiBj)/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br/>
- * <br/>
- * The last class has probability<br/>
- * <br/>
- * 1-(sum[j=1..(k-1)]Pj(Xi)) <br/>
- * 	= 1/((sum[j=1..(k-1)]exp(Xi*Bj))+1)<br/>
- * <br/>
- * The (negative) multinomial log-likelihood is thus: <br/>
- * <br/>
- * L = -sum[i=1..n]{<br/>
- * 	sum[j=1..(k-1)](Yij * ln(Pj(Xi)))<br/>
- * 	+(1 - (sum[j=1..(k-1)]Yij)) <br/>
- * 	* ln(1 - sum[j=1..(k-1)]Pj(Xi))<br/>
- * 	} + ridge * (B^2)<br/>
- * <br/>
- * In order to find the matrix B for which L is minimised, a Quasi-Newton Method is used to search for the optimized values of the m*(k-1) variables.  Note that before we use the optimization procedure, we 'squeeze' the matrix B into a m*(k-1) vector.  For details of the optimization procedure, please check weka.core.Optimization class.<br/>
- * <br/>
- * Although original Logistic Regression does not deal with instance weights, we modify the algorithm a little bit to handle the instance weights.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * le Cessie, S., van Houwelingen, J.C. (1992). Ridge Estimators in Logistic Regression. Applied Statistics. 41(1):191-201.<br/>
- * <br/>
- * Note: Missing values are replaced using a ReplaceMissingValuesFilter, and nominal attributes are transformed into numeric attributes using a NominalToBinaryFilter.
- * <p/>
- <!-- globalinfo-end -->
+ * Second implementation for building and using a multinomial logistic
+ * regression model with a ridge estimator.  <p>
+ * 
+ * There are some modifications, however, compared to the paper of le
+ * Cessie and van Houwelingen(1992): <br>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{leCessie1992,
- *    author = {le Cessie, S. and van Houwelingen, J.C.},
- *    journal = {Applied Statistics},
- *    number = {1},
- *    pages = {191-201},
- *    title = {Ridge Estimators in Logistic Regression},
- *    volume = {41},
- *    year = {1992}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * If there are k classes for n instances with m attributes, the
+ * parameter matrix B to be calculated will be an m*(k-1) matrix.<br>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * The probability for class j except the last class is <br>
+ * Pj(Xi) = exp(XiBj)/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
+ * The last class has probability <br>
+ * 1-(sum[j=1..(k-1)]Pj(Xi)) = 1/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
+ *
+ * The (negative) multinomial log-likelihood is thus: <br>
+ * L = -sum[i=1..n]{
+ * sum[j=1..(k-1)](Yij * ln(Pj(Xi))) +
+ * (1 - (sum[j=1..(k-1)]Yij)) * ln(1 - sum[j=1..(k-1)]Pj(Xi))
+ * } + ridge * (B^2) <br>
+ *
+ * In order to find the matrix B for which L is minimised, a
+ * Quasi-Newton Method is used to search for the optimized values of
+ * the m*(k-1) variables.  Note that before we use the optimization
+ * procedure, we "squeeze" the matrix B into a m*(k-1) vector.  For
+ * details of the optimization procedure, please check
+ * weka.core.Optimization class. <p>
+ *
+ * Although original Logistic Regression does not deal with instance
+ * weights, we modify the algorithm a little bit to handle the
+ * instance weights. <p>
+ *
+ * Reference: le Cessie, S. and van Houwelingen, J.C. (1992). <i>
+ * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
+ * Vol. 41, No. 1, pp. 191-201. <p>
+ *
+ * Missing values are replaced using a ReplaceMissingValuesFilter, and
+ * nominal attributes are transformed into numeric attributes using a
+ * NominalToBinaryFilter.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -R <ridge> <br>
+ * Set the ridge parameter for the log-likelihood.<p>
  * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
- * <pre> -R &lt;ridge&gt;
- *  Set the ridge in the log-likelihood.</pre>
- * 
- * <pre> -M &lt;number&gt;
- *  Set the maximum number of iterations (default -1, until convergence).</pre>
- * 
- <!-- options-end -->
+ * -M <number of iterations> <br> Set the maximum number of iterations
+ * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
- */
+ * @version $Revision: 1.32 $ */
 public class Logistic extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3932117032546553727L;
+  implements OptionHandler, WeightedInstancesHandler {
   
   /** The coefficients (optimized parameters) of the model */
   protected double [][] m_Par;
@@ -139,7 +103,7 @@ public class Logistic extends Classifier
   /** The ridge parameter. */
   protected double m_Ridge = 1e-8;
     
-  /** An attribute filter */
+  /* An attribute filter */
   private RemoveUseless m_AttFilter;
     
   /** The filter used to make attributes numeric. */
@@ -186,33 +150,12 @@ public class Logistic extends Classifier
       +"Although original Logistic Regression does not deal with instance "
       +"weights, we modify the algorithm a little bit to handle the "
       +"instance weights.\n\n"
-      +"For more information see:\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
+      +"For more information see:\n\nle Cessie, S. and van Houwelingen, J.C. (1992). " 
+      +"Ridge Estimators in Logistic Regression.  Applied Statistics, "
+      +"Vol. 41, No. 1, pp. 191-201. \n\n"
       +"Note: Missing values are replaced using a ReplaceMissingValuesFilter, and "
       +"nominal attributes are transformed into numeric attributes using a "
       +"NominalToBinaryFilter.";
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "le Cessie, S. and van Houwelingen, J.C.");
-    result.setValue(Field.YEAR, "1992");
-    result.setValue(Field.TITLE, "Ridge Estimators in Logistic Regression");
-    result.setValue(Field.JOURNAL, "Applied Statistics");
-    result.setValue(Field.VOLUME, "41");
-    result.setValue(Field.NUMBER, "1");
-    result.setValue(Field.PAGES, "191-201");
-    
-    return result;
   }
 
   /**
@@ -233,24 +176,20 @@ public class Logistic extends Classifier
   }
     
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * -D <br>
+   * Turn on debugging output.<p>
+   *
+   * -R ridge <br>
+   * Set the ridge parameter for the log-likelihood.<p>
    * 
-   * <pre> -D
-   *  Turn on debugging output.</pre>
-   * 
-   * <pre> -R &lt;ridge&gt;
-   *  Set the ridge in the log-likelihood.</pre>
-   * 
-   * <pre> -M &lt;number&gt;
-   *  Set the maximum number of iterations (default -1, until convergence).</pre>
-   * 
-   <!-- options-end -->
+   * -M num <br>
+   * Set the maximum number of iterations.
+   * (default -1, until convergence)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setDebug(Utils.getFlag('D', options));
@@ -373,23 +312,21 @@ public class Logistic extends Classifier
   }    
     
   private class OptEng extends Optimization{
-    /** Weights of instances in the data */
+    // Weights of instances in the data
     private double[] weights;
 
-    /** Class labels of instances */
+    // Class labels of instances
     private int[] cls;
 	
-    /** 
-     * Set the weights of instances
-     * @param w the weights to be set
+    /* Set the weights of instances
+     * @param d the weights to be set
      */ 
     public void setWeights(double[] w) {
       weights = w;
     }
 	
-    /** 
-     * Set the class labels of instances
-     * @param c the class labels to be set
+    /* Set the class labels of instances
+     * @param d the class labels to be set
      */ 
     public void setClassLabels(int[] c) {
       cls = c;
@@ -491,43 +428,27 @@ public class Logistic extends Classifier
       return grad;
     }
   }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
     
   /**
    * Builds the classifier
    *
    * @param train the training data to be used for generating the
    * boosted classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances train) throws Exception {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(train);
-
-    // remove instances with missing class
+    if (train.classAttribute().type() != Attribute.NOMINAL) {
+      throw new UnsupportedClassTypeException("Class attribute must be nominal.");
+    }
+    if (train.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
     train = new Instances(train);
     train.deleteWithMissingClass();
-    
+    if (train.numInstances() == 0) {
+      throw new IllegalArgumentException("No train instances without missing class value!");
+    }
+
     // Replace missing values	
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(train);
@@ -687,7 +608,7 @@ public class Logistic extends Classifier
    *
    * @param instance the instance for which distribution is computed
    * @return the distribution
-   * @throws Exception if the distribution can't be computed successfully
+   * @exception Exception if the distribution can't be computed successfully
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
@@ -749,6 +670,8 @@ public class Logistic extends Classifier
    */
   public String toString() {
 	
+    double CSq;
+    int df = m_NumPredictors;
     String result = "Logistic Regression with ridge parameter of "+m_Ridge;
     if (m_Par == null) {
       return result + ": No model built yet.";

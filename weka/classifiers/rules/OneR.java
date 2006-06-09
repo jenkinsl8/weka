@@ -24,64 +24,27 @@ package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a 1R classifier; in other words, uses the minimum-error attribute for prediction, discretizing numeric attributes. For more information, see:<br/>
- * <br/>
- * R.C. Holte (1993). Very simple classification rules perform well on most commonly used datasets. Machine Learning. 11:63-91.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a 1R classifier. For more information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Holte1993,
- *    author = {R.C. Holte},
- *    journal = {Machine Learning},
- *    pages = {63-91},
- *    title = {Very simple classification rules perform well on most commonly used datasets},
- *    volume = {11},
- *    year = {1993}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * R.C. Holte (1993). <i>Very simple classification rules
+ * perform well on most commonly used datasets</i>. Machine Learning,
+ * Vol. 11, pp. 63-91.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;minimum bucket size&gt;
- *  The minimum number of objects in a bucket (default: 6).</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -B num <br>
+ * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.17 $ 
 */
-public class OneR 
-  extends Classifier 
-  implements OptionHandler, TechnicalInformationHandler {
+public class OneR extends Classifier implements OptionHandler {
     
-  /** for serialization */
-  static final long serialVersionUID = -2459427002147861445L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -91,39 +54,16 @@ public class OneR
 
     return "Class for building and using a 1R classifier; in other words, uses "
       + "the minimum-error attribute for prediction, discretizing numeric "
-      + "attributes. For more information, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "R.C. Holte");
-    result.setValue(Field.YEAR, "1993");
-    result.setValue(Field.TITLE, "Very simple classification rules perform well on most commonly used datasets");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "11");
-    result.setValue(Field.PAGES, "63-91");
-    
-    return result;
+      + "attributes. For more information, see\n\n:"
+      + "R.C. Holte (1993). \"Very simple classification rules "
+      + "perform well on most commonly used datasets\". Machine Learning, "
+      + "Vol. 11, pp. 63-91.";
   }
 
   /**
    * Class for storing store a 1R rule.
    */
-  private class OneRRule 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = 1152814630957092281L;
+  private class OneRRule implements Serializable {
 
     /** The class attribute. */
     private Attribute m_class;
@@ -148,10 +88,6 @@ public class OneR
   
     /**
      * Constructor for nominal attribute.
-     * 
-     * @param data the data to work with
-     * @param attribute the attribute to use
-     * @throws Exception if something goes wrong
      */
     public OneRRule(Instances data, Attribute attribute) throws Exception {
 
@@ -164,11 +100,6 @@ public class OneR
 
     /**
      * Constructor for numeric attribute.
-     * 
-     * @param data the data to work with
-     * @param attribute the attribute to use
-     * @param nBreaks the break point
-     * @throws Exception if something goes wrong
      */
     public OneRRule(Instances data, Attribute attribute, int nBreaks) throws Exception {
 
@@ -182,8 +113,6 @@ public class OneR
     
     /**
      * Returns a description of the rule.
-     * 
-     * @return a string representation of the rule
      */
     public String toString() {
 
@@ -224,7 +153,6 @@ public class OneR
    * Classifies a given instance.
    *
    * @param inst the instance to be classified
-   * @return the classification of the instance
    */
   public double classifyInstance(Instance inst) {
 
@@ -248,43 +176,30 @@ public class OneR
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    return result;
-  }
-
-  /**
    * Generates the classifier.
    *
    * @param instances the instances to be used for building the classifier
-   * @throws Exception if the classifier can't be built successfully
+   * @exception Exception if the classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
     throws Exception {
     
     boolean noRule = true;
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+    if (instances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+    if (instances.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Can't handle numeric class!");
+    }
 
-    // remove instances with missing class
     Instances data = new Instances(instances);
+
+    // new dataset without missing class values
     data.deleteWithMissingClass();
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances with a class value!");
+    }
 
     // for each attribute ...
     Enumeration enu = instances.enumerateAttributes();
@@ -307,8 +222,7 @@ public class OneR
    *
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
-   * @return the generated rule
-   * @throws Exception if the rule can't be built successfully
+   * @exception Exception if the rule can't be built successfully
    */
   public OneRRule newRule(Attribute attr, Instances data) throws Exception {
 
@@ -338,8 +252,7 @@ public class OneR
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
    * @param missingValueCounts to be filled in
-   * @return the generated rule
-   * @throws Exception if the rule can't be built successfully
+   * @exception Exception if the rule can't be built successfully
    */
   public OneRRule newNominalRule(Attribute attr, Instances data,
                                  int[] missingValueCounts) throws Exception {
@@ -374,8 +287,7 @@ public class OneR
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
    * @param missingValueCounts to be filled in
-   * @return the generated rule
-   * @throws Exception if the rule can't be built successfully
+   * @exception Exception if the rule can't be built successfully
    */
   public OneRRule newNumericRule(Attribute attr, Instances data,
                              int[] missingValueCounts) throws Exception {
@@ -473,18 +385,13 @@ public class OneR
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -B &lt;minimum bucket size&gt;
-   *  The minimum number of objects in a bucket (default: 6).</pre>
-   * 
-   <!-- options-end -->
+   * -B num <br>
+   * Specify the minimum number of objects in a bucket (default: 6). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -516,8 +423,6 @@ public class OneR
 
   /**
    * Returns a description of the classifier
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -557,8 +462,6 @@ public class OneR
   
   /**
    * Main method for testing this class
-   * 
-   * @param argv the commandline options
    */
   public static void main(String [] argv) {
 
@@ -569,3 +472,14 @@ public class OneR
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+

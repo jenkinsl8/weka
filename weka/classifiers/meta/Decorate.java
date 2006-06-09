@@ -21,140 +21,56 @@
  */
 
 package weka.classifiers.meta;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.classifiers.*;
+import java.util.*;
+import weka.core.*;
+import weka.experiment.*;
 
 /**
- <!-- globalinfo-start -->
- * DECORATE is a meta-learner for building diverse ensembles of classifiers by using specially constructed artificial training examples. Comprehensive experiments have demonstrated that this technique is consistently more accurate than the base classifier, Bagging and Random Forests.Decorate also obtains higher accuracy than Boosting on small training sets, and achieves comparable performance on larger training sets. <br/>
- * <br/>
- * For more details see: <br/>
- * <br/>
- * P. Melville, R. J. Mooney: Constructing Diverse Classifier Ensembles Using Artificial Training Examples. In: Eighteenth International Joint Conference on Artificial Intelligence, 505-510, 2003.<br/>
- * <br/>
- * P. Melville, R. J. Mooney (2004). Creating Diversity in Ensembles Using Artificial Data. Information Fusion: Special Issue on Diversity in Multiclassifier Systems..
- * <p/>
- <!-- globalinfo-end -->
+ * DECORATE is a meta-learner for building diverse ensembles of
+ * classifiers by using specially constructed artificial training
+ * examples. Comprehensive experiments have demonstrated that this
+ * technique is consistently more accurate than the base classifier, 
+ * Bagging and Random Forests. Decorate also obtains higher accuracy than
+ * Boosting on small training sets, and achieves comparable performance
+ * on larger training sets.  For more
+ * details see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Melville2003,
- *    author = {P. Melville and R. J. Mooney},
- *    booktitle = {Eighteenth International Joint Conference on Artificial Intelligence},
- *    pages = {505-510},
- *    title = {Constructing Diverse Classifier Ensembles Using Artificial Training Examples},
- *    year = {2003}
- * }
- * 
- * &#64;article{Melville2004,
- *    author = {P. Melville and R. J. Mooney},
- *    journal = {Information Fusion: Special Issue on Diversity in Multiclassifier Systems},
- *    note = {submitted},
- *    title = {Creating Diversity in Ensembles Using Artificial Data},
- *    year = {2004}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Prem Melville and Raymond J. Mooney. <i>Constructing diverse
+ * classifier ensembles using artificial training examples.</i>
+ * Proceedings of the Seventeeth International Joint Conference on
+ * Artificial Intelligence 2003.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -E
- *  Desired size of ensemble.
- *  (default 10)</pre>
- * 
- * <pre> -R
- *  Factor that determines number of artificial examples to generate.
- *  Specified proportional to training set size.
- *  (default 1.0)</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  Number of iterations.
- *  (default 10)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
- * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Prem Melville and Raymond J. Mooney. <i>Creating diversity in ensembles using artificial data.</i>
+ * Submitted.<BR><BR>
+ *
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -W classname <br>
+ * Specify the full class name of a weak classifier as the basis for 
+ * Decorate (default weka.classifiers.trees.J48()).<p>
+ *
+ * -E num <br>
+ * Specify the desired size of the committee (default 10). <p>
+ *
+ * -I iterations <br>
+ * Set the maximum number of Decorate iterations (default 10). <p>
+ *
+ * -S seed <br>
+ * Seed for random number generator. (default 0).<p>
+ *
+ * -R factor <br>
+ * Factor that determines number of artificial examples to generate. <p>
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.7 $ 
- */
-public class Decorate 
-    extends RandomizableIteratedSingleClassifierEnhancer
-    implements TechnicalInformationHandler {
+ * @version $Revision: 1.3.2.1 $ */
+public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
       
-    /** for serialization */
-    static final long serialVersionUID = -6020193348750269931L;
-  
     /** Vector of classifiers that make up the committee/ensemble. */
     protected Vector m_Committee = null;
     
@@ -182,8 +98,6 @@ public class Decorate
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -217,80 +131,31 @@ public class Decorate
 
     
     /**
-     * Parses a given list of options. <p/>
+     * Parses a given list of options. Valid options are:<p>
      *   
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -E
-     *  Desired size of ensemble.
-     *  (default 10)</pre>
-     * 
-     * <pre> -R
-     *  Factor that determines number of artificial examples to generate.
-     *  Specified proportional to training set size.
-     *  (default 1.0)</pre>
-     * 
-     * <pre> -S &lt;num&gt;
-     *  Random number seed.
-     *  (default 1)</pre>
-     * 
-     * <pre> -I &lt;num&gt;
-     *  Number of iterations.
-     *  (default 10)</pre>
-     * 
-     * <pre> -D
-     *  If set, classifier is run in debug mode and
-     *  may output additional info to the console</pre>
-     * 
-     * <pre> -W
-     *  Full name of base classifier.
-     *  (default: weka.classifiers.trees.J48)</pre>
-     * 
-     * <pre> 
-     * Options specific to classifier weka.classifiers.trees.J48:
-     * </pre>
-     * 
-     * <pre> -U
-     *  Use unpruned tree.</pre>
-     * 
-     * <pre> -C &lt;pruning confidence&gt;
-     *  Set confidence threshold for pruning.
-     *  (default 0.25)</pre>
-     * 
-     * <pre> -M &lt;minimum number of instances&gt;
-     *  Set minimum number of instances per leaf.
-     *  (default 2)</pre>
-     * 
-     * <pre> -R
-     *  Use reduced error pruning.</pre>
-     * 
-     * <pre> -N &lt;number of folds&gt;
-     *  Set number of folds for reduced error
-     *  pruning. One fold is used as pruning set.
-     *  (default 3)</pre>
-     * 
-     * <pre> -B
-     *  Use binary splits only.</pre>
-     * 
-     * <pre> -S
-     *  Don't perform subtree raising.</pre>
-     * 
-     * <pre> -L
-     *  Do not clean up after the tree has been built.</pre>
-     * 
-     * <pre> -A
-     *  Laplace smoothing for predicted probabilities.</pre>
-     * 
-     * <pre> -Q &lt;seed&gt;
-     *  Seed for random data shuffling (default 1).</pre>
-     * 
-     <!-- options-end -->
+     * -D <br>
+     * Turn on debugging output.<p>
+     *    
+     * -W classname <br>
+     * Specify the full class name of a weak classifier as the basis for 
+     * Decorate (required).<p>
+     *
+     * -E num <br>
+     * Specify the desired size of the committee (default 10). <p>
+     *
+     * -I iterations <br>
+     * Set the maximum number of Decorate iterations (default 10). <p>
+     *
+     * -S seed <br>
+     * Seed for random number generator. (default 0).<p>
+     *
+     * -R factor <br>
+     * Factor that determines number of artificial examples to generate. <p>
      *
      * Options after -- are passed to the designated classifier.<p>
      *
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
 
@@ -381,37 +246,10 @@ public class Decorate
 	  +"examples. Comprehensive experiments have demonstrated that this "
 	  +"technique is consistently more accurate than the base classifier, Bagging and Random Forests."
 	  +"Decorate also obtains higher accuracy than Boosting on small training sets, and achieves "
-	  +"comparable performance on larger training sets. \n\n"
-	  +"For more details see: \n\n"
-	  + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "P. Melville and R. J. Mooney");
-    result.setValue(Field.TITLE, "Constructing Diverse Classifier Ensembles Using Artificial Training Examples");
-    result.setValue(Field.BOOKTITLE, "Eighteenth International Joint Conference on Artificial Intelligence");
-    result.setValue(Field.YEAR, "2003");
-    result.setValue(Field.PAGES, "505-510");
-
-    additional = result.add(Type.ARTICLE);
-    additional.setValue(Field.AUTHOR, "P. Melville and R. J. Mooney");
-    additional.setValue(Field.TITLE, "Creating Diversity in Ensembles Using Artificial Data");
-    additional.setValue(Field.JOURNAL, "Information Fusion: Special Issue on Diversity in Multiclassifier Systems");
-    additional.setValue(Field.YEAR, "2004");
-    additional.setValue(Field.NOTE, "submitted");
-    
-    return result;
+	  +"comparable performance on larger training sets. "
+	  +"For more details see: P. Melville & R. J. Mooney. Constructing diverse classifier ensembles "
+	  +"using artificial training examples (IJCAI 2003).\n"
+	  +"P. Melville & R. J. Mooney. Creating diversity in ensembles using artificial data (submitted).";
   }
 
     /**
@@ -426,7 +264,7 @@ public class Decorate
     /**
      * Sets factor that determines number of artificial examples to generate.
      *
-     * @param newArtSize factor that determines number of artificial examples to generate
+     * @param newwArtSize factor that determines number of artificial examples to generate
      */
     public void setArtificialSize(double newArtSize) {
 	m_ArtSize = newArtSize;
@@ -451,42 +289,24 @@ public class Decorate
     }
 
     /**
-     * Returns default capabilities of the classifier.
-     *
-     * @return      the capabilities of this classifier
-     */
-    public Capabilities getCapabilities() {
-      Capabilities result = super.getCapabilities();
-
-      // class
-      result.disableAllClasses();
-      result.disableAllClassDependencies();
-      result.enable(Capability.NOMINAL_CLASS);
-
-      // instances
-      result.setMinimumNumberInstances(m_DesiredSize);
-
-      return result;
-    }
-
-    /**
      * Build Decorate classifier
      *
      * @param data the training data to be used for generating the classifier
-     * @throws Exception if the classifier could not be built successfully
+     * @exception Exception if the classifier could not be built successfully
      */
     public void buildClassifier(Instances data) throws Exception {
-      if(m_Classifier == null) {
-        throw new Exception("A base classifier has not been specified!");
-      }
-      
-      // can classifier handle the data?
-      getCapabilities().testWithFail(data);
-      
-      // remove instances with missing class
-      data = new Instances(data);
-      data.deleteWithMissingClass();
-  
+	if(m_Classifier == null) {
+	    throw new Exception("A base classifier has not been specified!");
+	}
+	if(data.checkForStringAttributes()) {
+	    throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+	}
+	if(data.classAttribute().isNumeric()) {
+	    throw new UnsupportedClassTypeException("Decorate can't handle a numeric class!");
+	}
+	if(m_NumIterations < m_DesiredSize)
+	    throw new Exception("Max number of iterations must be >= desired ensemble size!");
+	
 	//initialize random number generator
 	if(m_Seed==-1) m_Random = new Random();
 	else m_Random = new Random(m_Seed);
@@ -494,6 +314,7 @@ public class Decorate
 	int i = 1;//current committee size
 	int numTrials = 1;//number of Decorate iterations 
 	Instances divData = new Instances(data);//local copy of data - diversity data
+	divData.deleteWithMissingClass();
 	Instances artData = null;//artificial data
 
 	//compute number of artficial instances to add at each iteration
@@ -543,7 +364,7 @@ public class Decorate
      * Compute and store statistics required for generating artificial data.
      *
      * @param data training instances
-     * @throws Exception if statistics could not be calculated successfully
+     * @exception Exception if statistics could not be calculated successfully
      */
     protected void computeStats(Instances data) throws Exception{
 	int numAttributes = data.numAttributes();
@@ -613,7 +434,7 @@ public class Decorate
      * Labels the artificially generated data.
      *
      * @param artData the artificially generated instances
-     * @throws Exception if instances cannot be labeled successfully 
+     * @exception Exception if instances cannot be labeled successfully 
      */
     protected void labelData(Instances artData) throws Exception {
 	Instance curr;
@@ -635,7 +456,7 @@ public class Decorate
      *
      * @param probs class membership probabilities of instance
      * @return index of class label selected
-     * @throws Exception if instances cannot be labeled successfully 
+     * @exception Exception if instances cannot be labeled successfully 
      */
     protected int inverseLabel(double []probs) throws Exception{
 	double []invProbs = new double[probs.length];
@@ -706,7 +527,7 @@ public class Decorate
      *
      * @param data the instances to be classified
      * @return classification error
-     * @throws Exception if error can not be computed successfully
+     * @exception Exception if error can not be computed successfully
      */
     protected double computeError(Instances data) throws Exception {
 	double error = 0.0;
@@ -726,7 +547,7 @@ public class Decorate
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed successfully
+   * @exception Exception if distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
       if (instance.classAttribute().isNumeric()) {
@@ -781,4 +602,4 @@ public class Decorate
 	}
     }
 }
-
+    

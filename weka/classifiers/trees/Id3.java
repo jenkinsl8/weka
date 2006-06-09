@@ -22,65 +22,23 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.NoSupportForMissingValuesException;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
+import weka.classifiers.*;
+import weka.core.*;
+import java.io.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for constructing an unpruned decision tree based on the ID3 algorithm. Can only deal with nominal attributes. No missing values allowed. Empty leaves may result in unclassified instances. For more information see: <br/>
- * <br/>
- * R. Quinlan (1986). Induction of decision trees. Machine Learning. 1(1):81-106.
- * <p/>
- <!-- globalinfo-end -->
+ * Class implementing an Id3 decision tree classifier. For more
+ * information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Quinlan1986,
- *    author = {R. Quinlan},
- *    journal = {Machine Learning},
- *    number = {1},
- *    pages = {81-106},
- *    title = {Induction of decision trees},
- *    volume = {1},
- *    year = {1986}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * R. Quinlan (1986). <i>Induction of decision
+ * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.14.2.1 $ 
  */
-public class Id3 
-  extends Classifier 
-  implements TechnicalInformationHandler {
+public class Id3 extends Classifier {
 
-  /** for serialization */
-  static final long serialVersionUID = -2693678647096322561L;
-  
   /** The node's successors. */ 
   private Id3[] m_Successors;
 
@@ -106,50 +64,8 @@ public class Id3
       + "algorithm. Can only deal with nominal attributes. No missing values "
       + "allowed. Empty leaves may result in unclassified instances. For more "
       + "information see: \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "R. Quinlan");
-    result.setValue(Field.YEAR, "1986");
-    result.setValue(Field.TITLE, "Induction of decision trees");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "1");
-    result.setValue(Field.NUMBER, "1");
-    result.setValue(Field.PAGES, "81-106");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
+      + " R. Quinlan (1986). \"Induction of decision "
+      + "trees\". Machine Learning. Vol.1, No.1, pp. 81-106";
   }
 
   /**
@@ -160,13 +76,25 @@ public class Id3
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
+    if (!data.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("Id3: nominal class, please.");
+    }
+    Enumeration enumAtt = data.enumerateAttributes();
+    while (enumAtt.hasMoreElements()) {
+      if (!((Attribute) enumAtt.nextElement()).isNominal()) {
+        throw new UnsupportedAttributeTypeException("Id3: only nominal " +
+                                                    "attributes, please.");
+      }
+    }
+    Enumeration enu = data.enumerateInstances();
+    while (enu.hasMoreElements()) {
+      if (((Instance) enu.nextElement()).hasMissingValue()) {
+        throw new NoSupportForMissingValuesException("Id3: no missing values, "
+                                                     + "please.");
+      }
+    }
     data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+    data.deleteWithMissingClass(); 
     makeTree(data);
   }
 
@@ -223,7 +151,6 @@ public class Id3
    *
    * @param instance the instance to be classified
    * @return the classification
-   * @throws NoSupportForMissingValuesException if instance has missing values
    */
   public double classifyInstance(Instance instance) 
     throws NoSupportForMissingValuesException {
@@ -245,7 +172,6 @@ public class Id3
    *
    * @param instance the instance for which distribution is to be computed
    * @return the class distribution for the given instance
-   * @throws NoSupportForMissingValuesException if instance has missing values
    */
   public double[] distributionForInstance(Instance instance) 
     throws NoSupportForMissingValuesException {
@@ -281,7 +207,6 @@ public class Id3
    * @param data the data for which info gain is to be computed
    * @param att the attribute
    * @return the information gain for the given attribute and data
-   * @throws Exception if computation fails
    */
   private double computeInfoGain(Instances data, Attribute att) 
     throws Exception {
@@ -303,7 +228,6 @@ public class Id3
    * 
    * @param data the data for which entropy is to be computed
    * @return the entropy of the data's class distribution
-   * @throws Exception if computation fails
    */
   private double computeEntropy(Instances data) throws Exception {
 
@@ -351,7 +275,6 @@ public class Id3
    * Outputs a tree at a certain level.
    *
    * @param level the level at which the tree is to be printed
-   * @return the tree as string at the given level
    */
   private String toString(int level) {
 
@@ -390,3 +313,4 @@ public class Id3
     }
   }
 }
+    

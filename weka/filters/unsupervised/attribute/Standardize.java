@@ -22,28 +22,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Standardizes all numeric attributes in the given dataset to have zero mean and unit variance (apart from the class attribute, if set).
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * Standardizes all numeric attributes in the given dataset
+ * to have zero mean and unit variance.
+ * intervals.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
-public class Standardize 
-  extends PotentialClassIgnorer 
-  implements UnsupervisedFilter {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6830769026855053281L;
+public class Standardize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
   /** The means */
   private double [] m_Means;
@@ -70,7 +62,7 @@ public class Standardize
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -89,7 +81,7 @@ public class Standardize
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -115,7 +107,7 @@ public class Standardize
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -232,3 +224,11 @@ public class Standardize
     }
   }
 }
+
+
+
+
+
+
+
+

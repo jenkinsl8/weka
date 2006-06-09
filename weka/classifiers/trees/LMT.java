@@ -22,110 +22,53 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.trees.j48.C45ModelSelection;
-import weka.classifiers.trees.j48.ModelSelection;
-import weka.classifiers.trees.lmt.LMTNode;
-import weka.classifiers.trees.lmt.ResidualModelSelection;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
+import weka.classifiers.trees.lmt.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.classifiers.trees.j48.*;
 import weka.filters.Filter;
-import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.supervised.attribute.NominalToBinary;
 
 /**
- <!-- globalinfo-start -->
- * Classifier for building 'logistic model trees', which are classification trees with logistic regression functions at the leaves. The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
- * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.<br/>
- * <br/>
- * Marc Sumner, Eibe Frank, Mark Hall: Speeding up Logistic Model Tree Induction. In: 9th European Conference on Principles and Practice of Knowledge Discovery in Databases, 675-683, 2005.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for "logistic model tree" classifier.
+ * For more information, see master thesis "Logistic Model Trees" (Niels Landwehr, 2003)<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Landwehr2005,
- *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
- *    booktitle = {Machine Learning},
- *    number = {1-2},
- *    pages = {161-205},
- *    title = {Logistic Model Trees},
- *    volume = {95},
- *    year = {2005}
- * }
- * 
- * &#64;inproceedings{Sumner2005,
- *    author = {Marc Sumner and Eibe Frank and Mark Hall},
- *    booktitle = {9th European Conference on Principles and Practice of Knowledge Discovery in Databases},
- *    pages = {675-683},
- *    publisher = {Springer},
- *    title = {Speeding up Logistic Model Tree Induction},
- *    year = {2005}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Valid options are: <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B
- *  Binary splits (convert nominal attributes to binary ones)</pre>
- * 
- * <pre> -R
- *  Split on residuals instead of class values</pre>
- * 
- * <pre> -C
- *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)</pre>
- * 
- * <pre> -P
- *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
- * 
- * <pre> -I &lt;numIterations&gt;
- *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
- * 
- * <pre> -M &lt;numInstances&gt;
- *  Set minimum number of instances at which a node can be split (default 15)</pre>
- * 
- * <pre> -W &lt;beta&gt;
- *  Set beta for weight trimming for LogitBoost. Set to 0 (default) for no weight trimming.</pre>
- * 
- * <pre> -A
- *  The AIC is used to choose the best iteration.</pre>
- * 
- <!-- options-end -->
+ * -B <br>
+ * Binary splits (convert nominal attributes to binary ones).<p>
+ *
+ * -R <br>
+ * Split on residuals instead of class values <p>
+ *
+ * -C <br>
+ *  Use cross-validation for boosting at all nodes (i.e., disable heuristic) <p>
+ *
+ * -P <br>
+ * Use error on probabilities instead of misclassification error for
+ * stopping criterion of LogitBoost. <p>
+ *
+ * -I iterations <br>
+ * Set fixed number of iterations for LogitBoost (instead of using cross-validation). <p>
+ *
+ * -M numInstances <br>
+ *
+ * Set minimum number of instances at which a node can be split (default 15)
+ *
  *
  * @author Niels Landwehr 
- * @author Marc Sumner 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class LMT 
-  extends Classifier 
-  implements OptionHandler, AdditionalMeasureProducer, Drawable,
-             TechnicalInformationHandler {
+
+
+public class LMT extends Classifier implements OptionHandler, AdditionalMeasureProducer,
+					       Drawable{
     
-  /** for serialization */
-  static final long serialVersionUID = -1113212459618104943L;
-  
+  //format of serial: 1**date## (** = algorithm id, ##= version)
+  //static final long serialVersionUID = 1010506200300L;
+    
   /** Filter to replace missing values*/
   protected ReplaceMissingValues m_replaceMissing;
     
@@ -151,63 +94,38 @@ public class LMT
   protected int m_minNumInstances;
 
   /**if non-zero, use fixed number of iterations for LogitBoost*/
-  protected int m_numBoostingIterations;
+  protected int  m_numBoostingIterations;
     
-  /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
-   * of total weights) are not included in the regression fit.
-   **/
-  protected double m_weightTrimBeta;
-  
-  /** If true, the AIC is used to choose the best LogitBoost iteration*/
-  private boolean m_useAIC = false;
-  
   /**
    * Creates an instance of LMT with standard options
    */
+       
   public LMT() {
     m_fastRegression = true;
     m_numBoostingIterations = -1;
     m_minNumInstances = 15;
-    m_weightTrimBeta = 0;
-    m_useAIC = false;
   }    
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
 
   /**
    * Builds the classifier.
    *
-   * @param data the data to train with
-   * @throws Exception if classifier can't be built successfully
+   * @exception Exception if classifier can't be built successfully
    */
+    
   public void buildClassifier(Instances data) throws Exception{
 	
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    // Check for non-nominal classes
+    if (!data.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("Nominal class, please.");
+    }
 
-    // remove instances with missing class
     Instances filteredData = new Instances(data);
     filteredData.deleteWithMissingClass();
-    
+
+    if (filteredData.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
+    }
+
     //replace missing values
     m_replaceMissing = new ReplaceMissingValues();
     m_replaceMissing.setInputFormat(filteredData);	
@@ -232,7 +150,7 @@ public class LMT
 	
     //create tree root
     m_tree = new LMTNode(modSelection, m_numBoostingIterations, m_fastRegression, 
-			 m_errorOnProbabilities, m_minNumInstances, m_weightTrimBeta, m_useAIC);
+			 m_errorOnProbabilities, m_minNumInstances);
     //build tree
     m_tree.buildClassifier(filteredData);
 
@@ -242,10 +160,9 @@ public class LMT
   /** 
    * Returns class probabilities for an instance.
    *
-   * @param instance the instance to compute the distribution for
-   * @return the class probabilities
-   * @throws Exception if distribution can't be computed successfully
+   * @exception Exception if distribution can't be computed successfully
    */
+    
   public double [] distributionForInstance(Instance instance) throws Exception {
 	
     //replace missing values
@@ -264,9 +181,7 @@ public class LMT
   /**
    * Classifies an instance.
    *
-   * @param instance the instance to classify
-   * @return the classification
-   * @throws Exception if instance can't be classified successfully
+   * @exception Exception if instance can't be classified successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
 
@@ -286,8 +201,6 @@ public class LMT
      
   /**
    * Returns a description of the classifier.
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
     if (m_tree!=null) {
@@ -296,7 +209,7 @@ public class LMT
       return "No tree build";
     }
   }    
-    
+
   /**
    * Returns an enumeration describing the available options.
    *
@@ -304,70 +217,34 @@ public class LMT
    */
   public Enumeration listOptions() {
     Vector newVector = new Vector(8);
-    
-    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)",
-                                    "B", 0, "-B"));
-    
-    newVector.addElement(new Option("\tSplit on residuals instead of class values",
-                                    "R", 0, "-R"));
-    
-    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)",
-                                    "C", 0, "-C"));
-    
+  	
+    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)\n", 
+				    "B", 0, "-B"));
+
+    newVector.addElement(new Option("\tSplit on residuals instead of class values\n", 
+				    "R", 0, "-R"));
+
+    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)\n", 
+				    "C", 0, "-C"));
+		
     newVector.addElement(new Option("\tUse error on probabilities instead of misclassification error "+
-                                    "for stopping criterion of LogitBoost.",
-                                    "P", 0, "-P"));
-    
+				    "for stopping criterion of LogitBoost.\n", 
+				    "P", 0, "-P"));
+
     newVector.addElement(new Option("\tSet fixed number of iterations for LogitBoost (instead of using "+
-                                    "cross-validation)",
-                                    "I",1,"-I <numIterations>"));
-    
-    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)",
-                                    "M",1,"-M <numInstances>"));
-    
-    newVector.addElement(new Option("\tSet beta for weight trimming for LogitBoost. Set to 0 (default) for no weight trimming.",
-                                    "W",1,"-W <beta>"));
-    
-    newVector.addElement(new Option("\tThe AIC is used to choose the best iteration.",
-                                    "A", 0, "-A"));
-    
+				    "cross-validation)\n",
+				    "I",1,"-I <numIterations>"));
+	
+    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)\n",
+				    "M",1,"-M <numInstances>"));
     return newVector.elements();
-  }
+  } 
     
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -B
-   *  Binary splits (convert nominal attributes to binary ones)</pre>
-   * 
-   * <pre> -R
-   *  Split on residuals instead of class values</pre>
-   * 
-   * <pre> -C
-   *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)</pre>
-   * 
-   * <pre> -P
-   *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
-   * 
-   * <pre> -I &lt;numIterations&gt;
-   *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
-   * 
-   * <pre> -M &lt;numInstances&gt;
-   *  Set minimum number of instances at which a node can be split (default 15)</pre>
-   * 
-   * <pre> -W &lt;beta&gt;
-   *  Set beta for weight trimming for LogitBoost. Set to 0 (default) for no weight trimming.</pre>
-   * 
-   * <pre> -A
-   *  The AIC is used to choose the best iteration.</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -385,14 +262,7 @@ public class LMT
     if (optionString.length() != 0) {
       setMinNumInstances((new Integer(optionString)).intValue());
     }
-
-    optionString = Utils.getOption('W', options);
-    if (optionString.length() != 0) {
-      setWeightTrimBeta((new Double(optionString)).doubleValue());
-    }
-    
-    setUseAIC(Utils.getFlag('A', options));        
-    
+	
     Utils.checkForRemainingOptions(options);
 	
   } 
@@ -403,7 +273,7 @@ public class LMT
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[11];
+    String[] options = new String[8];
     int current = 0;
 
     if (getConvertNominal()) {
@@ -427,52 +297,13 @@ public class LMT
 
     options[current++] = "-M"; 
     options[current++] = ""+getMinNumInstances();
-        
-    options[current++] = "-W";
-    options[current++] = ""+getWeightTrimBeta();
-    
-    if (getUseAIC()) {
-      options[current++] = "-A";
-    }
-    
+	
     while (current < options.length) {
       options[current++] = "";
     } 
     return options;
   } 
 
-  /**
-   * Get the value of weightTrimBeta.
-   */
-  public double getWeightTrimBeta(){
-    return m_weightTrimBeta;
-  }
-  
-  /**
-   * Get the value of useAIC.
-   *
-   * @return Value of useAIC.
-   */
-  public boolean getUseAIC(){
-    return m_useAIC;
-  }
-    
-  /**
-   * Set the value of weightTrimBeta.
-   */
-  public void setWeightTrimBeta(double n){
-    m_weightTrimBeta = n;
-  }
-  
-  /**
-   * Set the value of useAIC.
-   *
-   * @param c Value to assign to useAIC.
-   */
-  public void setUseAIC(boolean c){
-    m_useAIC = c;
-  }
-  
   /**
    * Get the value of convertNominal.
    *
@@ -593,8 +424,7 @@ public class LMT
   /**
    * Returns graph describing the tree.
    *
-   * @return the graph describing the tree
-   * @throws Exception if graph can't be computed
+   * @exception Exception if graph can't be computed
    */
   public String graph() throws Exception {
 
@@ -634,7 +464,7 @@ public class LMT
    * Returns the value of the named measure
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureTreeSize") == 0) {
@@ -655,41 +485,10 @@ public class LMT
   public String globalInfo() {
     return "Classifier for building 'logistic model trees', which are classification trees with "
       +"logistic regression functions at the leaves. The algorithm can deal with binary and multi-class "
-      +"target variables, numeric and nominal attributes and missing values.\n\n"
-      +"For more information see: \n\n"
-      + getTechnicalInformation().toString();
+      +"target variables, numeric and nominal attributes and missing values. "
+      +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
   }
 
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-      
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
-    result.setValue(Field.TITLE, "Logistic Model Trees");
-    result.setValue(Field.BOOKTITLE, "Machine Learning");
-    result.setValue(Field.YEAR, "2005");
-    result.setValue(Field.VOLUME, "95");
-    result.setValue(Field.PAGES, "161-205");
-    result.setValue(Field.NUMBER, "1-2");
-    
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
-    additional.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
-    additional.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
-    additional.setValue(Field.YEAR, "2005");
-    additional.setValue(Field.PAGES, "675-683");
-    additional.setValue(Field.PUBLISHER, "Springer");
-    
-    return result;
-  }
 
   /**
    * Returns the tip text for this property
@@ -759,41 +558,19 @@ public class LMT
     return "Set the minimum number of instances at which a node is considered for splitting. "
       +"The default value is 15.";
   }  
-    
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String weightTrimBetaTipText() {
-        return "Set the beta value used for weight trimming in LogitBoost. "
-        +"Only instances carrying (1 - beta)% of the weight from previous iteration "
-        +"are used in the next iteration. Set to 0 for no weight trimming. "
-        +"The default value is 0.";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String useAICTipText() {
-        return "The AIC is used to determine when to stop LogitBoost iterations. "
-        +"The default is not to use AIC.";
-    }
 
   /**
    * Main method for testing this class
    *
-   * @param argv the commandline options 
+   * @param String options 
    */
-  public static void main (String [] argv) {	
-    try {
-      System.out.println(Evaluation.evaluateModel(new LMT(), argv));
-    } 
-    catch (Exception e) {
-      System.err.println(e.getMessage());
-    } 
+  public static void main (String [] argv) throws Exception{	
+    System.out.println(Evaluation.evaluateModel(new LMT(), argv));
+
   }  
+
 }
+
+
+
 

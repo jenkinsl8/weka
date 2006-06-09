@@ -22,11 +22,13 @@
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.Classifier;
+import weka.classifiers.functions.Logistic;
+import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.classifiers.Classifier;
 
 /**
  * Generates points illustrating probablity cost tradeoffs that can be 
@@ -36,7 +38,7 @@ import weka.core.Instances;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 
 public class CostCurve {
@@ -44,11 +46,9 @@ public class CostCurve {
   /** The name of the relation used in cost curve datasets */
   public static final String RELATION_NAME = "CostCurve";
 
-  /** attribute name: Probability Cost Function */
   public static final String PROB_COST_FUNC_NAME = "Probability Cost Function";
-  /** attribute name: Normalized Expected Cost */
-  public static final String NORM_EXPECTED_COST_NAME = "Normalized Expected Cost";
-  /** attribute name: Threshold */
+  public static final String NORM_EXPECTED_COST_NAME = 
+    "Normalized Expected Cost";
   public static final String THRESHOLD_NAME = "Threshold";
 
   /**
@@ -62,7 +62,7 @@ public class CostCurve {
    * </ul> <p>
    *
    * @see TwoClassStats
-   * @param predictions the predictions to base the curve on
+   * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances, null if no predictions
    * have been made.
    */
@@ -80,7 +80,6 @@ public class CostCurve {
    * Calculates the performance stats for the desired class and return 
    * results as a set of Instances.
    *
-   * @param predictions the predictions to base the curve on
    * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances.
    */
@@ -117,11 +116,6 @@ public class CostCurve {
     return insts;
   }
 
-  /**
-   * generates the header
-   * 
-   * @return the header
-   */
   private Instances makeHeader() {
 
     FastVector fv = new FastVector();

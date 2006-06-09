@@ -22,86 +22,36 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.classifiers.*;
 import weka.classifiers.meta.Bagging;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for constructing a forest of random trees.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
- * Leo Breiman (2001). Random Forests. Machine Learning. 45(1):5-32.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for constructing random forests.
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Breiman2001,
- *    author = {Leo Breiman},
- *    journal = {Machine Learning},
- *    number = {1},
- *    pages = {5-32},
- *    title = {Random Forests},
- *    volume = {45},
- *    year = {2001}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <p>
+ * Leo Breiman. Random Forests. Machine Learning 45 (1):5-32, October 2001. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -I &lt;number of trees&gt;
- *  Number of trees to build.</pre>
- * 
- * <pre> -K &lt;number of features&gt;
- *  Number of features to consider (&lt;1=int(logM+1)).</pre>
- * 
- * <pre> -S
- *  Seed for random number generator.
- *  (default 1)</pre>
- * 
- * <pre> -depth &lt;num&gt;
- *  The maximum depth of the trees, 0 for unlimited.
- *  (default 0)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -I num <br>
+ * Set the number of trees in the forest
+ * (default 10) <p>
+ *
+ * -K num <br>
+ * Set the number of features to consider.
+ * If < 1 (the default) will use logM+1, where M is the number of inputs. <p>
+ *
+ * -S seed <br>
+ * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.6 $
  */
-public class RandomForest 
-  extends Classifier 
-  implements OptionHandler, Randomizable, WeightedInstancesHandler, 
-             AdditionalMeasureProducer, TechnicalInformationHandler {
+public class RandomForest extends Classifier 
+  implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
 
-  /** for serialization */
-  static final long serialVersionUID = 4216839470751428698L;
-  
   /** Number of trees in forest. */
   protected int m_numTrees = 10;
 
@@ -117,9 +67,6 @@ public class RandomForest
 
   /** The bagger. */
   protected Bagging m_bagger = null;
-  
-  /** The maximum depth of the trees (0 = unlimited) */
-  protected int m_MaxDepth = 0;
 
   /**
    * Returns a string describing classifier
@@ -128,32 +75,9 @@ public class RandomForest
    */
   public String globalInfo() {
 
-    return  
-        "Class for constructing a forest of random trees.\n\n"
-      + "For more information see: \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Leo Breiman");
-    result.setValue(Field.YEAR, "2001");
-    result.setValue(Field.TITLE, "Random Forests");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "45");
-    result.setValue(Field.NUMBER, "1");
-    result.setValue(Field.PAGES, "5-32");
-    
-    return result;
+    return  "Class for constructing a forest of random trees. For more information "
+      + "see: \n\n"
+      + "Leo Breiman. \"Random Forests\". Machine Learning 45 (1):5-32, October 2001.";
   }
   
   /**
@@ -242,34 +166,6 @@ public class RandomForest
 
     return m_randomSeed;
   }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
-   */
-  public String maxDepthTipText() {
-    return "The maximum depth of the trees, 0 for unlimited.";
-  }
-
-  /**
-   * Get the maximum depth of trh tree, 0 for unlimited.
-   *
-   * @return 		the maximum depth.
-   */
-  public int getMaxDepth() {
-    return m_MaxDepth;
-  }
-  
-  /**
-   * Set the maximum depth of the tree, 0 for unlimited.
-   *
-   * @param value 	the maximum depth.
-   */
-  public void setMaxDepth(int value) {
-    m_MaxDepth = value;
-  }
 
   /**
    * Gets the out of bag error that was calculated as the classifier was built.
@@ -298,9 +194,9 @@ public class RandomForest
   /**
    * Returns the value of the named measure.
    *
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     
@@ -319,31 +215,18 @@ public class RandomForest
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector();
+    Vector newVector = new Vector(3);
 
-    newVector.addElement(new Option(
-	"\tNumber of trees to build.",
-	"I", 1, "-I <number of trees>"));
-    
-    newVector.addElement(new Option(
-	"\tNumber of features to consider (<1=int(logM+1)).",
-	"K", 1, "-K <number of features>"));
-    
-    newVector.addElement(new Option(
-	"\tSeed for random number generator.\n"
-	+ "\t(default 1)",
-	"S", 1, "-S"));
-
-    newVector.addElement(new Option(
-	"\tThe maximum depth of the trees, 0 for unlimited.\n"
-	+ "\t(default 0)",
-	"depth", 1, "-depth <num>"));
-
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
-
+    newVector.
+      addElement(new Option("\tNumber of trees to build.",
+			    "I", 1, "-I <number of trees>"));
+    newVector.
+      addElement(new Option("\tNumber of features to consider (<1=int(logM+1)).",
+			    "K", 1, "-K <number of features>"));
+    newVector
+      .addElement(new Option("\tSeed for random number generator.\n"
+			     + "\t(default 1)",
+			     "S", 1, "-S"));
     return newVector.elements();
   }
 
@@ -353,122 +236,57 @@ public class RandomForest
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
     
-    result = new Vector();
-    
-    result.add("-I");
-    result.add("" + getNumTrees());
-    
-    result.add("-K");
-    result.add("" + getNumFeatures());
-    
-    result.add("-S");
-    result.add("" + getSeed());
-    
-    if (getMaxDepth() > 0) {
-      result.add("-depth");
-      result.add("" + getMaxDepth());
+    String [] options = new String [10];
+    int current = 0;
+    options[current++] = "-I"; 
+    options[current++] = "" + getNumTrees();
+    options[current++] = "-K"; 
+    options[current++] = "" + getNumFeatures();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
+    while (current < options.length) {
+      options[current++] = "";
     }
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    return (String[]) result.toArray(new String[result.size()]);
+    return options;
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -I &lt;number of trees&gt;
-   *  Number of trees to build.</pre>
-   * 
-   * <pre> -K &lt;number of features&gt;
-   *  Number of features to consider (&lt;1=int(logM+1)).</pre>
-   * 
-   * <pre> -S
-   *  Seed for random number generator.
-   *  (default 1)</pre>
-   * 
-   * <pre> -depth &lt;num&gt;
-   *  The maximum depth of the trees, 0 for unlimited.
-   *  (default 0)</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
-    String	tmpStr;
     
-    tmpStr = Utils.getOption('I', options);
-    if (tmpStr.length() != 0) {
-      m_numTrees = Integer.parseInt(tmpStr);
+    String numTreesString = Utils.getOption('I', options);
+    if (numTreesString.length() != 0) {
+      m_numTrees = Integer.parseInt(numTreesString);
     } else {
       m_numTrees = 10;
     }
-    
-    tmpStr = Utils.getOption('K', options);
-    if (tmpStr.length() != 0) {
-      m_numFeatures = Integer.parseInt(tmpStr);
+    String numFeaturesString = Utils.getOption('K', options);
+    if (numFeaturesString.length() != 0) {
+      m_numFeatures = Integer.parseInt(numFeaturesString);
     } else {
       m_numFeatures = 0;
     }
-    
-    tmpStr = Utils.getOption('S', options);
-    if (tmpStr.length() != 0) {
-      setSeed(Integer.parseInt(tmpStr));
+    String seed = Utils.getOption('S', options);
+    if (seed.length() != 0) {
+      setSeed(Integer.parseInt(seed));
     } else {
       setSeed(1);
     }
-    
-    tmpStr = Utils.getOption("depth", options);
-    if (tmpStr.length() != 0) {
-      setMaxDepth(Integer.parseInt(tmpStr));
-    } else {
-      setMaxDepth(0);
-    }
-    
-    super.setOptions(options);
-    
     Utils.checkForRemainingOptions(options);
   }  
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    return new RandomTree().getCapabilities();
-  }
-
-  /**
    * Builds a classifier for a set of instances.
    *
-   * @param data the instances to train the classifier with
-   * @throws Exception if something goes wrong
+   * @param instances the instances to train the classifier with
+   * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    
     m_bagger = new Bagging();
     RandomTree rTree = new RandomTree();
 
@@ -476,7 +294,6 @@ public class RandomForest
     m_KValue = m_numFeatures;
     if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
     rTree.setKValue(m_KValue);
-    rTree.setMaxDepth(getMaxDepth());
 
     // set up the bagger and build the forest
     m_bagger.setClassifier(rTree);
@@ -491,7 +308,6 @@ public class RandomForest
    *
    * @param instance the instance to be classified
    * @return the distribution the forest generates for the instance
-   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -505,16 +321,13 @@ public class RandomForest
    */
   public String toString() {
 
-    if (m_bagger == null) 
-      return "Random forest not built yet";
-    else 
-      return "Random forest of " + m_numTrees
+    if (m_bagger == null) return "Random forest not built yet";
+    else return "Random forest of " + m_numTrees
 	   + " trees, each constructed while considering "
 	   + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n"
 	   + "Out of bag error: "
-	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) + "\n"
-	   + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n") : (""))
-	   + "\n";
+	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4)
+	   + "\n\n";
   }
 
   /**
@@ -531,4 +344,5 @@ public class RandomForest
       System.err.println(e.getMessage());
     }
   }
+
 }

@@ -22,24 +22,18 @@
  */
 package weka.classifiers.bayes.net.estimate;
 
-import weka.classifiers.bayes.net.search.local.Scoreable;
-import weka.core.Statistics;
-import weka.core.Utils;
-import weka.estimators.DiscreteEstimator;
-import weka.estimators.Estimator;
+import weka.classifiers.bayes.net.search.local.*;
+import weka.core.*;
+import weka.estimators.*;
 
 /**
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class DiscreteEstimatorBayes 
-  implements Estimator, Scoreable {
+public class DiscreteEstimatorBayes implements Estimator, Scoreable {
 
-  /** for serialization */
-  static final long serialVersionUID = 4215400230843212684L;
-  
   /**
    * Hold the counts
    */
@@ -64,7 +58,7 @@ public class DiscreteEstimatorBayes
    * Constructor
    * 
    * @param nSymbols the number of possible symbols (remember to include 0)
-   * @param fPrior
+   * @param laplace if true, counts will be initialised to 1
    */
   public DiscreteEstimatorBayes(int nSymbols, double fPrior) {
     m_fPrior = fPrior;
@@ -185,8 +179,6 @@ public class DiscreteEstimatorBayes
 
   /**
    * Display a representation of this estimator
-   * 
-   * @return a string representation of the estimator
    */
   public String toString() {
     String result = "Discrete Estimator. Counts = ";

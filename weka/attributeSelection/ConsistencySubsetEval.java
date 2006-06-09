@@ -22,59 +22,24 @@
 
 package  weka.attributeSelection;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-
-import java.io.Serializable;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * ConsistencySubsetEval :<br/>
- * <br/>
- * Evaluates the worth of a subset of attributes by the level of consistency in the class values when the training instances are projected onto the subset of attributes. <br/>
- * <br/>
- * Consistency of any subset can never be lower than that of the full set of attributes, hence the usual practice is to use this subset evaluator in conjunction with a Random or Exhaustive search which looks for the smallest subset with consistency equal to that of the full set of attributes.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * H. Liu, R. Setiono: A probabilistic approach to feature selection - A filter solution. In: 13th International Conference on Machine Learning, 319-327, 1996.
- * <p/>
- <!-- globalinfo-end -->
+ * Consistency attribute subset evaluator. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Liu1996,
- *    author = {H. Liu and R. Setiono},
- *    booktitle = {13th International Conference on Machine Learning},
- *    pages = {319-327},
- *    title = {A probabilistic approach to feature selection - A filter solution},
- *    year = {1996}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <br>
+ * Liu, H., and Setiono, R., (1996). A probabilistic approach to feature 
+ * selection - A filter solution. In 13th International Conference on 
+ * Machine Learning (ICML'96), July 1996, pp. 319-327. Bari, Italy. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10 $
  */
-public class ConsistencySubsetEval 
-  extends SubsetEvaluator
-  implements TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -2880323763295270402L;
+public class ConsistencySubsetEval extends SubsetEvaluator {
   
   /** training instances */
   private Instances m_trainInstances;
@@ -97,17 +62,16 @@ public class ConsistencySubsetEval
   /**
    * Class providing keys to the hash table.
    */
-  public class hashKey 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = 6144138512017017408L;
+  public class hashKey implements Serializable {
     
     /** Array of attribute values for an instance */
     private double [] attributes;
     
     /** True for an index if the corresponding attribute value is missing. */
     private boolean [] missing;
+
+    /** The values */
+    private String [] values;
 
     /** The key */
     private int key;
@@ -117,7 +81,6 @@ public class ConsistencySubsetEval
      *
      * @param t an instance from which to generate a key
      * @param numAtts the number of attributes
-     * @throws Exception if something goes wrong
      */
     public hashKey(Instance t, int numAtts) throws Exception {
 
@@ -143,7 +106,6 @@ public class ConsistencySubsetEval
      *
      * @param t the set of instances
      * @param maxColWidth width to make the fields
-     * @return the hash entry as string
      */
     public String toString(Instances t, int maxColWidth) {
 
@@ -223,7 +185,6 @@ public class ConsistencySubsetEval
      * Tests if two instances are equal
      *
      * @param b a key to compare with
-     * @return true if the objects are equal
      */
     public boolean equals(Object b) {
       
@@ -276,29 +237,7 @@ public class ConsistencySubsetEval
       +"full set of attributes, hence the usual practice is to use this "
       +"subset evaluator in conjunction with a Random or Exhaustive search "
       +"which looks for the smallest subset with consistency equal to that "
-      +"of the full set of attributes.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "H. Liu and R. Setiono");
-    result.setValue(Field.TITLE, "A probabilistic approach to feature selection - A filter solution");
-    result.setValue(Field.BOOKTITLE, "13th International Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1996");
-    result.setValue(Field.PAGES, "319-327");
-    
-    return result;
+      +"of the full set of attributes.\n";
   }
 
   /**
@@ -320,7 +259,7 @@ public class ConsistencySubsetEval
    * evaluator that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data) throws Exception {
@@ -355,7 +294,7 @@ public class ConsistencySubsetEval
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
-   * @throws Exception if the subset could not be evaluated
+   * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset) throws Exception {
     int [] fs;
@@ -430,7 +369,7 @@ public class ConsistencySubsetEval
    * @param inst instance to be inserted
    * @param instA the instance to be inserted as an array of attribute
    * values.
-   * @throws Exception if the instance can't be inserted
+   * @exception Exception if the instance can't be inserted
    */
   private void insertIntoTable(Instance inst, double [] instA)
        throws Exception {
@@ -491,4 +430,3 @@ public class ConsistencySubsetEval
     }
   }
 }
-

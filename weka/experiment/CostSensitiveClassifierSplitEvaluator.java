@@ -23,77 +23,22 @@
 
 package weka.experiment;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Summarizable;
-import weka.core.Utils;
+import java.io.*;
+import java.util.*;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
- <!-- globalinfo-start -->
- * SplitEvaluator that produces results for a classification scheme on a nominal class attribute, including weighted misclassification costs.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of the classifier.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
- * 
- * <pre> -C &lt;index&gt;
- *  The index of the class for which IR statistics
- *  are to be output. (default 1)</pre>
- * 
- * <pre> -I &lt;index&gt;
- *  The index of an attribute to output in the
- *  results. This attribute should identify an
- *  instance in order to know which instances are
- *  in the test set of a cross validation. if 0
- *  no output (default 0).</pre>
- * 
- * <pre> -P
- *  Add target and prediction columns to the result
- *  for each fold.</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -D &lt;directory&gt;
- *  Name of a directory to search for cost files when loading
- *  costs on demand (default current directory).</pre>
- * 
- <!-- options-end -->
- *
- * All options after -- will be passed to the classifier.
+ * A SplitEvaluator that produces results for a classification scheme
+ * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
-
-  /** for serialization */
-  static final long serialVersionUID = -8069566663019501276L;
+  
 
   /** 
    * The directory used when loading cost files on demand, null indicates
@@ -102,7 +47,7 @@ public class CostSensitiveClassifierSplitEvaluator
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 27; //23;
+  private static final int RESULT_SIZE = 23;
 
   /**
    * Returns a string describing this split evaluator
@@ -137,48 +82,17 @@ public class CostSensitiveClassifierSplitEvaluator
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options (in addition to those of
+   * ClassifierSplitEvaluator) are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of the classifier.
-   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
-   * 
-   * <pre> -C &lt;index&gt;
-   *  The index of the class for which IR statistics
-   *  are to be output. (default 1)</pre>
-   * 
-   * <pre> -I &lt;index&gt;
-   *  The index of an attribute to output in the
-   *  results. This attribute should identify an
-   *  instance in order to know which instances are
-   *  in the test set of a cross validation. if 0
-   *  no output (default 0).</pre>
-   * 
-   * <pre> -P
-   *  Add target and prediction columns to the result
-   *  for each fold.</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.rules.ZeroR:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -D &lt;directory&gt;
-   *  Name of a directory to search for cost files when loading
-   *  costs on demand (default current directory).</pre>
-   * 
-   <!-- options-end -->
+   * -D directory <br>
+   * Name of a directory to search for cost files when loading costs on demand
+   * (default current directory). <p>
    *
-   * All options after -- will be passed to the classifier.
+   * All option after -- will be passed to the classifier.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -291,12 +205,6 @@ public class CostSensitiveClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
-    // Timing stats
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -353,12 +261,6 @@ public class CostSensitiveClassifierSplitEvaluator
     resultNames[current++] = "KB_mean_information";
     resultNames[current++] = "KB_relative_information";
 
-    // Timing stats
-    resultNames[current++] = "Elapsed_Time_training";
-    resultNames[current++] = "Elapsed_Time_testing";
-    resultNames[current++] = "UserCPU_Time_training";
-    resultNames[current++] = "UserCPU_Time_testing";
-
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -380,61 +282,41 @@ public class CostSensitiveClassifierSplitEvaluator
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @throws Exception if a problem occurs while getting the results
+   * @exception Exception if a problem occurs while getting the results
    */
-  public Object [] getResult(Instances train, Instances test)
-  throws Exception {
-    
+  public Object [] getResult(Instances train, Instances test) 
+    throws Exception {
+
     if (train.classAttribute().type() != Attribute.NOMINAL) {
       throw new Exception("Class attribute is not nominal!");
     }
     if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
-    ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
-    boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
-      thMonitor.setThreadCpuTimeEnabled(true);
-    
-    int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
+    int addm = (m_AdditionalMeasures != null) 
+      ? m_AdditionalMeasures.length 
+      : 0;
     Object [] result = new Object[RESULT_SIZE+addm];
-    long thID = Thread.currentThread().getId();
-    long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
-         trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
-    
+
     String costName = train.relationName() + CostMatrix.FILE_EXTENSION;
     File costFile = new File(getOnDemandDirectory(), costName);
     if (!costFile.exists()) {
       throw new Exception("On-demand cost file doesn't exist: " + costFile);
     }
     CostMatrix costMatrix = new CostMatrix(new BufferedReader(
-    new FileReader(costFile)));
-    
-    Evaluation eval = new Evaluation(train, costMatrix);    
+                                           new FileReader(costFile)));
+
+    Evaluation eval = new Evaluation(train, costMatrix);
+
     m_Classifier = Classifier.makeCopy(m_Template);
-    
-    trainTimeStart = System.currentTimeMillis();
-    if(canMeasureCPUTime)
-      CPUStartTime = thMonitor.getThreadUserTime(thID);
     m_Classifier.buildClassifier(train);
-    if(canMeasureCPUTime)
-      trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
-    testTimeStart = System.currentTimeMillis();
-    if(canMeasureCPUTime)
-      CPUStartTime = thMonitor.getThreadUserTime(thID);
     eval.evaluateModel(m_Classifier, test);
-    if(canMeasureCPUTime)
-      testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    testTimeElapsed = System.currentTimeMillis() - testTimeStart;
-    thMonitor = null;
-    
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
     result[current++] = new Double(eval.numInstances());
-    
+
     result[current++] = new Double(eval.correct());
     result[current++] = new Double(eval.incorrect());
     result[current++] = new Double(eval.unclassified());
@@ -443,36 +325,24 @@ public class CostSensitiveClassifierSplitEvaluator
     result[current++] = new Double(eval.pctUnclassified());
     result[current++] = new Double(eval.totalCost());
     result[current++] = new Double(eval.avgCost());
-    
+
     result[current++] = new Double(eval.meanAbsoluteError());
     result[current++] = new Double(eval.rootMeanSquaredError());
     result[current++] = new Double(eval.relativeAbsoluteError());
     result[current++] = new Double(eval.rootRelativeSquaredError());
-    
+
     result[current++] = new Double(eval.SFPriorEntropy());
     result[current++] = new Double(eval.SFSchemeEntropy());
     result[current++] = new Double(eval.SFEntropyGain());
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
-    
+
     // K&B stats
     result[current++] = new Double(eval.KBInformation());
     result[current++] = new Double(eval.KBMeanInformation());
     result[current++] = new Double(eval.KBRelativeInformation());
-    
-    // Timing stats
-    result[current++] = new Double(trainTimeElapsed / 1000.0);
-    result[current++] = new Double(testTimeElapsed / 1000.0);
-    if(canMeasureCPUTime) {
-      result[current++] = new Double((trainCPUTimeElapsed/1000000.0) / 1000.0);
-      result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
-    }
-    else {
-      result[current++] = new Double(Instance.missingValue());
-      result[current++] = new Double(Instance.missingValue());
-    }
-    
+
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -481,23 +351,23 @@ public class CostSensitiveClassifierSplitEvaluator
     
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-        try {
-          double dv = ((AdditionalMeasureProducer)m_Classifier).
-          getMeasure(m_AdditionalMeasures[i]);
-          if (!Instance.isMissingValue(dv)) {
-            Double value = new Double(dv);
-            result[current++] = value;
-          } else {
-            result[current++] = null;
-          }
-        } catch (Exception ex) {
-          System.err.println(ex);
-        }
+	try {
+	  double dv = ((AdditionalMeasureProducer)m_Classifier).
+	    getMeasure(m_AdditionalMeasures[i]);
+	  if (!Instance.isMissingValue(dv)) {
+	    Double value = new Double(dv);
+	    result[current++] = value;
+	  } else {
+	    result[current++] = null;
+	  }
+	} catch (Exception ex) {
+	  System.err.println(ex);
+	}
       } else {
-        result[current++] = null;
+	result[current++] = null;
       }
     }
-    
+
     if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }

@@ -22,40 +22,22 @@
 
 package weka.classifiers.trees.lmt;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.functions.SimpleLinearRegression;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.classifiers.functions.*;
+import weka.filters.Filter;
 
 /**
  * Base/helper class for building logistic regression models with the LogitBoost algorithm.
  * Used for building logistic model trees (weka.classifiers.trees.lmt.LMT)
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
- *
  * @author Niels Landwehr
- * @author Marc Sumner
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.2 $
  */
-public class LogisticBase 
-    extends Classifier 
-    implements WeightedInstancesHandler {
 
-    /** for serialization */
-    static final long serialVersionUID = 168765678097825064L;
-  
+public class LogisticBase extends Classifier implements WeightedInstancesHandler{
+
     /** Header-only version of the numeric version of the training data*/
     protected Instances m_numericDataHeader;
     /** 
@@ -98,17 +80,6 @@ public class LogisticBase
 
     /**Threshold on the Z-value for LogitBoost*/
     protected static final double Z_MAX = 3;
-    
-    /** If true, the AIC is used to choose the best iteration*/
-    private boolean m_useAIC = false;
-    
-    /** Effective number of parameters used for AIC / BIC automatic stopping */
-    protected double m_numParameters = 0;
-    
-    /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
-     * of total weights) are not included in the regression fit.
-     **/
-    protected double m_weightTrimBeta = 0;
 
     /**
      * Constructor that creates LogisticBase object with standard options.
@@ -118,8 +89,6 @@ public class LogisticBase
 	m_useCrossValidation = true;
 	m_errorOnProbabilities = false;	
 	m_maxIterations = 500;
-        m_useAIC = false;
-        m_numParameters = 0;
     }
     
     /**
@@ -136,17 +105,15 @@ public class LogisticBase
 	m_useCrossValidation = useCrossValidation;
 	m_errorOnProbabilities = errorOnProbabilities;	
 	m_maxIterations = 500;
-        m_useAIC = false;
-        m_numParameters = 0;
     }    
 
     /**
      * Builds the logistic regression model usiing LogitBoost.
      * 
      * @param data the training data
-     * @throws Exception if something goes wrong
      */
-    public void buildClassifier(Instances data) throws Exception {			
+    
+    public void buildClassifier(Instances data) throws Exception{			
 
 	m_train = new Instances(data);
 	
@@ -166,10 +133,7 @@ public class LogisticBase
 	if (m_fixedNumIterations > 0) {
 	    //run LogitBoost for fixed number of iterations
 	    performBoosting(m_fixedNumIterations);
-	} else if (m_useAIC) { // Marc had this after the test for m_useCrossValidation. Changed by Eibe.
-            //run LogitBoost using information criterion for stopping
-            performBoostingInfCriterion();
-        } else if (m_useCrossValidation) {
+	} else if (m_useCrossValidation) {
 	    //cross-validate number of LogitBoost iterations
 	    performBoostingCV();
 	} else {
@@ -183,8 +147,6 @@ public class LogisticBase
 
     /**
      * Runs LogitBoost, determining the best number of iterations by cross-validation.
-     * 
-     * @throws Exception if something goes wrong
      */
     protected void performBoostingCV() throws Exception{			
 	
@@ -220,61 +182,6 @@ public class LogisticBase
 	m_numRegressions = 0;
 	performBoosting(bestIteration);
     }    
-    
-    /**
-     * Runs LogitBoost, determining the best number of iterations by an information criterion (currently AIC).
-     */
-    protected void performBoostingInfCriterion() throws Exception{
-        
-        double criterion = 0.0;
-        double bestCriterion = Double.MAX_VALUE;
-        int bestIteration = 0;
-        int noMin = 0;
-        
-        // Variable to keep track of criterion values (AIC)
-        double criterionValue = Double.MAX_VALUE;
-        
-        // initialize Ys/Fs/ps
-        double[][] trainYs = getYs(m_train);
-        double[][] trainFs = getFs(m_numericData);
-        double[][] probs = getProbs(trainFs);
-        
-        // Array with true/false if the attribute is included in the model or not
-        boolean[][] attributes = new boolean[m_numClasses][m_numericDataHeader.numAttributes()];
-        
-        int iteration = 0;
-        while (iteration < m_maxIterations) {
-            
-            //perform single LogitBoost iteration
-            boolean foundAttribute = performIteration(iteration, trainYs, trainFs, probs, m_numericData);
-            if (foundAttribute) {
-                iteration++;
-                m_numRegressions = iteration;
-            } else {
-                //could not fit simple linear regression: stop LogitBoost
-                break;
-            }
-            
-            double numberOfAttributes = m_numParameters + iteration;
-            
-            // Fill criterion array values
-            criterionValue = 2.0 * negativeLogLikelihood(trainYs, probs) +
-              2.0 * numberOfAttributes;
-
-            //heuristic: stop LogitBoost if the current minimum has not changed for <m_heuristicStop> iterations
-            if (noMin > m_heuristicStop) break;
-            if (criterionValue < bestCriterion) {
-                bestCriterion = criterionValue;
-                bestIteration = iteration;
-                noMin = 0;
-            } else {
-                noMin++;
-            }
-        }
-
-        m_numRegressions = 0;
-        performBoosting(bestIteration);
-    }
 
     /**
      * Runs LogitBoost on a training set and monitors the error on a test set.
@@ -286,7 +193,7 @@ public class LogisticBase
      * @return the number of completed LogitBoost iterations (can be smaller than maxIterations 
      * if the heuristic for early stopping is active or there is a problem while fitting the regressions 
      * in LogitBoost).
-     * @throws Exception if something goes wrong
+     * 
      */
     protected int performBoosting(Instances train, Instances test, 
 				  double[] error, int maxIterations) throws Exception{
@@ -301,6 +208,8 @@ public class LogisticBase
 
 	int iteration = 0;
 
+	double[] testErrors = new double[maxIterations+1];
+	
  	int noMin = 0;
 	double lastMin = Double.MAX_VALUE;	
 	
@@ -338,7 +247,6 @@ public class LogisticBase
     /**
      * Runs LogitBoost with a fixed number of iterations.
      * @param numIterations the number of iterations to run
-     * @throws Exception if something goes wrong
      */
     protected void performBoosting(int numIterations) throws Exception{
 
@@ -363,7 +271,6 @@ public class LogisticBase
      * Runs LogitBoost using the stopping criterion on the training set.
      * The number of iterations is used that gives the lowest error on the training set, either misclassification
      * or error on probabilities (depending on the errorOnProbabilities option).
-     * @throws Exception if something goes wrong
      */
     protected void performBoosting() throws Exception{
 	
@@ -410,7 +317,6 @@ public class LogisticBase
      * Returns the misclassification error of the current model on a set of instances.
      * @param data the set of instances
      * @return the error rate
-     * @throws Exception if something goes wrong
      */
     protected double getErrorRate(Instances data) throws Exception {
 	Evaluation eval = new Evaluation(data);
@@ -422,7 +328,6 @@ public class LogisticBase
      * Returns the error of the probability estimates for the current model on a set of instances.
      * @param data the set of instances
      * @return the error
-     * @throws Exception if something goes wrong
      */
     protected double getMeanAbsoluteError(Instances data) throws Exception {
 	Evaluation eval = new Evaluation(data);
@@ -432,10 +337,6 @@ public class LogisticBase
 
     /**
      * Helper function to find the minimum in an array of error values.
-     * 
-     * @param errors an array containing errors
-     * @param maxIteration the maximum of iterations
-     * @return the minimum
      */
     protected int getBestIteration(double[] errors, int maxIteration) {
 	double bestError = errors[0];
@@ -459,7 +360,6 @@ public class LogisticBase
      * @param trainNumeric numeric version of the training data
      * @return returns true if iteration performed successfully, false if no simple regression function 
      * could be fitted.
-     * @throws Exception if something goes wrong
      */
     protected boolean performIteration(int iteration, 
 				       double[][] trainYs,
@@ -468,9 +368,6 @@ public class LogisticBase
 				       Instances trainNumeric) throws Exception {
 	
 	for (int j = 0; j < m_numClasses; j++) {
-            // Keep track of sum of weights
-            double[] weights = new double[trainNumeric.numInstances()];
-            double weightSum = 0.0;
 	    
 	    //make copy of data (need to save the weights) 
 	    Instances boostData = new Instances(trainNumeric);
@@ -487,39 +384,10 @@ public class LogisticBase
 		Instance current = boostData.instance(i);
 		current.setValue(boostData.classIndex(), z);
 		current.setWeight(current.weight() * w);				
-                
-                weights[i] = current.weight();
-                weightSum += current.weight();
 	    }
-            
-            Instances instancesCopy = new Instances(boostData);
-            
-            if (weightSum > 0) {
-                // Only the (1-beta)th quantile of instances are sent to the base classifier
-                if (m_weightTrimBeta > 0) {
-                    double weightPercentage = 0.0;
-                    int[] weightsOrder = new int[trainNumeric.numInstances()];
-                    weightsOrder = Utils.sort(weights);
-                    instancesCopy.delete();
-                    
-                    
-                    for (int i = weightsOrder.length-1; (i >= 0) && (weightPercentage < (1-m_weightTrimBeta)); i--) {
-                        instancesCopy.add(boostData.instance(weightsOrder[i]));
-                        weightPercentage += (weights[weightsOrder[i]] / weightSum);
-                        
-                    }
-                }
-                
-                //Scale the weights
-                weightSum = instancesCopy.sumOfWeights();
-                for (int i = 0; i < instancesCopy.numInstances(); i++) {
-                    Instance current = instancesCopy.instance(i);
-                    current.setWeight(current.weight() * (double)instancesCopy.numInstances() / weightSum);
-                }
-            }
 	    
 	    //fit simple regression function
-	    m_regressions[j][iteration].buildClassifier(instancesCopy);
+	    m_regressions[j][iteration].buildClassifier(boostData);
 	    
 	    boolean foundAttribute = m_regressions[j][iteration].foundUsefulAttribute();
 	    if (!foundAttribute) {
@@ -554,8 +422,6 @@ public class LogisticBase
 
     /**
      * Helper function to initialize m_regressions.
-     * 
-     * @return the generated classifiers
      */
     protected SimpleLinearRegression[][] initRegressions(){
 	SimpleLinearRegression[][] classifiers =   
@@ -572,10 +438,6 @@ public class LogisticBase
     /**
      * Converts training data to numeric version. The class variable is replaced by a pseudo-class 
      * used by LogitBoost.
-     * 
-     * @param data the data to convert
-     * @return the converted data
-     * @throws Exception if something goes wrong
      */
     protected Instances getNumericData(Instances data) throws Exception{
 	Instances numericData = new Instances(data);
@@ -589,12 +451,8 @@ public class LogisticBase
     }
     
     /**
-     * Helper function for cutting back m_regressions to the set of classifiers 
-     * (corresponsing to the number of LogitBoost iterations) that gave the 
-     * smallest error.
-     * 
-     * @param classifiers the original set of classifiers
-     * @return the cut back set of classifiers
+     * Helper function for cutting back m_regressions to the set of classifiers (corresponsing to the number of 
+     * LogitBoost iterations) that gave the smallest error.
      */
     protected SimpleLinearRegression[][] selectRegressions(SimpleLinearRegression[][] classifiers){
 	SimpleLinearRegression[][] goodClassifiers = 
@@ -609,12 +467,7 @@ public class LogisticBase
     }		
     
     /**
-     * Computes the LogitBoost response variable from y/p values 
-     * (actual/estimated class probabilities).
-     * 
-     * @param actual the actual class probability
-     * @param p the estimated class probability
-     * @return the LogitBoost response
+     * Computes the LogitBoost response variable from y/p values (actual/estimated class probabilities).
      */
     protected double getZ(double actual, double p) {
 	double z;
@@ -633,12 +486,7 @@ public class LogisticBase
     }
     
     /**
-     * Computes the LogitBoost response for an array of y/p values 
-     * (actual/estimated class probabilities).
-     * 
-     * @param dataYs the actual class probabilities
-     * @param probs the estimated class probabilities
-     * @return the LogitBoost response
+     * Computes the LogitBoost response for an array of y/p values (actual/estimated class probabilities).
      */
     protected double[][] getZs(double[][] probs, double[][] dataYs) {
 	
@@ -649,12 +497,7 @@ public class LogisticBase
     }
     
     /**
-     * Computes the LogitBoost weights from an array of y/p values 
-     * (actual/estimated class probabilities).
-     * 
-     * @param dataYs the actual class probabilities
-     * @param probs the estimated class probabilities
-     * @return the LogitBoost weights
+     * Computes the LogitBoost weights from an array of y/p values (actual/estimated class probabilities).
      */
     protected double[][] getWs(double[][] probs, double[][] dataYs) {
 	
@@ -668,11 +511,7 @@ public class LogisticBase
     }
 
     /**
-     * Computes the p-values (probabilities for the classes) from the F-values 
-     * of the logistic model.
-     * 
-     * @param Fs the F-values
-     * @return the p-values
+     * Computes the p-values (probabilities for the classes) from the F-values of the logistic model.
      */
     protected double[] probs(double[] Fs) {
 	
@@ -695,9 +534,6 @@ public class LogisticBase
 
     /**
      * Computes the Y-values (actual class probabilities) for a set of instances.
-     * 
-     * @param data the data to compute the Y-values from
-     * @return the Y-values
      */
     protected double[][] getYs(Instances data){
 	
@@ -713,10 +549,6 @@ public class LogisticBase
 
     /**
      * Computes the F-values for a single instance.
-     * 
-     * @param instance the instance to compute the F-values for
-     * @return the F-values
-     * @throws Exception if something goes wrong
      */
     protected double[] getFs(Instance instance) throws Exception{
 	
@@ -742,10 +574,6 @@ public class LogisticBase
     
     /**
      * Computes the F-values for a set of instances.
-     * 
-     * @param data the data to work on
-     * @return the F-values
-     * @throws Exception if something goes wrong
      */
     protected double[][] getFs(Instances data) throws Exception{
 	
@@ -759,11 +587,7 @@ public class LogisticBase
     }   
 
     /**
-     * Computes the p-values (probabilities for the different classes) from 
-     * the F-values for a set of instances.
-     * 
-     * @param dataFs the F-values
-     * @return the p-values
+     * Computes the p-values (probabilities for the different classes) from the F-values for a set of instances.
      */
     protected double[][] getProbs(double[][] dataFs){
 	
@@ -777,14 +601,10 @@ public class LogisticBase
     }
     
     /**
-     * Returns the negative loglikelihood of the Y-values (actual class probabilities) given the 
+     * Returns the likelihood of the Y-values (actual class probabilities) given the 
      * p-values (current probability estimates).
-     * 
-     * @param dataYs the Y-values
-     * @param probs the p-values
-     * @return the likelihood
      */
-    protected double negativeLogLikelihood(double[][] dataYs, double[][] probs) {
+    protected double logLikelihood(double[][] dataYs, double[][] probs) {
 	
 	double logLikelihood = 0;
 	for (int i = 0; i < dataYs.length; i++) {
@@ -794,7 +614,7 @@ public class LogisticBase
 		}
 	    }
 	}
-	return logLikelihood;// / (double)dataYs.length;
+	return logLikelihood / (double)dataYs.length;
     }
 
     /**
@@ -839,37 +659,14 @@ public class LogisticBase
     }
 
     /**
-     * The number of LogitBoost iterations performed (= the number of simple 
-     * regression functions fit).
-     * 
-     * @return the number of LogitBoost iterations performed 
+     * The number of LogitBoost iterations performed (= the number of simple regression functions fit).
      */
     public int getNumRegressions() {
 	return m_numRegressions;
     }
-    
-    /**
-     * Get the value of weightTrimBeta.
-     *
-     * @return Value of weightTrimBeta.
-     */
-    public double getWeightTrimBeta(){
-        return m_weightTrimBeta;
-    }
-    
-    /**
-     * Get the value of useAIC.
-     *
-     * @return Value of useAIC.
-     */
-    public boolean getUseAIC(){
-        return m_useAIC;
-    }
 
     /**
      * Sets the parameter "maxIterations".
-     * 
-     * @param maxIterations the maximum iterations
      */
     public void setMaxIterations(int maxIterations) {
 	m_maxIterations = maxIterations;
@@ -877,33 +674,13 @@ public class LogisticBase
     
     /**
      * Sets the option "heuristicStop".
-     * 
-     * @param heuristicStop the heuristic stop to use
      */
     public void setHeuristicStop(int heuristicStop){
 	m_heuristicStop = heuristicStop;
     }
-    
-    /**
-     * Sets the option "weightTrimBeta".
-     */
-    public void setWeightTrimBeta(double w){
-        m_weightTrimBeta = w;
-    }
-    
-    /**
-     * Set the value of useAIC.
-     *
-     * @param c Value to assign to useAIC.
-     */
-    public void setUseAIC(boolean c){
-        m_useAIC = c;
-    }
 
     /**
      * Returns the maxIterations parameter.
-     * 
-     * @return the maximum iteration
      */
     public int getMaxIterations(){
 	return m_maxIterations;
@@ -935,12 +712,8 @@ public class LogisticBase
     }
 
     /**
-     * Returns the fraction of all attributes in the data that are used in the 
-     * logistic model (in percent). 
-     * An attribute is used in the model if it is used in any of the models for 
-     * the different classes.
-     * 
-     * @return the fraction of all attributes that are used
+     * Returns the fraction of all attributes in the data that are used in the logistic model (in percent).
+     * An attribute is used in the model if it is used in any of the models for the different classes.
      */
     public double percentAttributesUsed(){	
 	boolean[] attributes = new boolean[m_numericDataHeader.numAttributes()];
@@ -961,10 +734,7 @@ public class LogisticBase
     }
     
     /**
-     * Returns a description of the logistic model (i.e., attributes and 
-     * coefficients).
-     * 
-     * @return the description of the model
+     * Returns a description of the logistic model (i.e., attributes and coefficients).
      */
     public String toString(){
 	
@@ -994,9 +764,7 @@ public class LogisticBase
     /** 
      * Returns class probabilities for an instance.
      *
-     * @param instance the instance to compute the distribution for
-     * @return the class probabilities
-     * @throws Exception if distribution can't be computed successfully
+     * @exception Exception if distribution can't be computed successfully
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
 	
@@ -1018,3 +786,12 @@ public class LogisticBase
 	m_numericData = null;	
     }
 }
+
+
+
+
+
+
+
+
+

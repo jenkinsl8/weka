@@ -17,75 +17,46 @@
 /*
  *    ComplementNaiveBayes.java
  *    Copyright (C) 2003 Ashraf M. Kibriya
+ *                  -- last updated 27/11/2003
  */
 
 package weka.classifiers.bayes;
 
-import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.OptionHandler;
 import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
 import weka.core.FastVector;
-import weka.core.Capabilities.Capability;
 import weka.classifiers.Classifier;
 
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a Complement class Naive Bayes classifier.<br/>
- * <br/>
- * For more information see, <br/>
- * <br/>
- * Jason D. Rennie, Lawrence Shih, Jaime Teevan, David R. Karger: Tackling the Poor Assumptions of Naive Bayes Text Classifiers. In: ICML, 616-623, 2003.<br/>
- * <br/>
- * P.S.: TF, IDF and length normalization transforms, as described in the paper, can be performed through weka.filters.unsupervised.StringToWordVector.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a Complement class Naive Bayes classifier.
+ * For more information see,<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Rennie2003,
- *    author = {Jason D. Rennie and Lawrence Shih and Jaime Teevan and David R. Karger},
- *    booktitle = {ICML},
- *    pages = {616-623},
- *    publisher = {AAAI Press},
- *    title = {Tackling the Poor Assumptions of Naive Bayes Text Classifiers},
- *    year = {2003}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * ICML-2003 <i>Tackling the poor assumptions of Naive Bayes Text Classifiers</i>
+ * P.S.: TF, IDF and length normalization transforms, as described in the
+ * paper, can be performed through weka.filters.unsupervised.StringToWordVector.
+ * <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N
- *  Normalize the word weights for each class
- * </pre>
- * 
- * <pre> -S
- *  Smoothing value to avoid zero WordGivenClass probabilities (default=1.0).
- * </pre>
- * 
- <!-- options-end -->
+ * Valid options for the classifier are:<p>
+ *
+ * -N <br>
+ * Normalizes word weights for each class.<p>
+ *
+ * -S val <br>
+ * The smoothing value to use to avoid zero WordGivenClass probabilities
+ * (default 1.0).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.2.2.1 $ 
  */
+
 public class ComplementNaiveBayes extends Classifier
-    implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+    implements OptionHandler, WeightedInstancesHandler {
     
-    /** for serialization */
-    static final long serialVersionUID = 7246302925903086397L;
-  
     /**
       Weight of words for each class. The weight is actually the
       log of the probability of a word (w) given a class (c) 
@@ -151,23 +122,17 @@ public class ComplementNaiveBayes extends Classifier
     }        
 
     /**
-     * Parses a given list of options. <p/>
+     * Parses a given list of options. Valid options are:<p>
      *
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -N
-     *  Normalize the word weights for each class
-     * </pre>
-     * 
-     * <pre> -S
-     *  Smoothing value to avoid zero WordGivenClass probabilities (default=1.0).
-     * </pre>
-     * 
-     <!-- options-end -->
+     * -N <br>
+     * Normalizes word weights for each class.<p>
+     *
+     * -S val <br>
+     * The smoothing value to use to avoid zero WordGivenClass probabilities
+     * (default 1.0).
      *
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         
@@ -176,14 +141,10 @@ public class ComplementNaiveBayes extends Classifier
         String val = Utils.getOption('S', options);
         if(val.length()!=0)
           setSmoothingParameter(Double.parseDouble(val));
-        else
-          setSmoothingParameter(1.0);
     }
     
     /**
      * Returns true if the word weights for each class are to be normalized
-     * 
-     * @return true if the word weights are normalized
      */
     public boolean getNormalizeWordWeights() {
         return m_normalizeWordWeights;
@@ -191,8 +152,6 @@ public class ComplementNaiveBayes extends Classifier
     
     /**
      * Sets whether if the word weights for each class should be normalized
-     * 
-     * @param doNormalize whether the word weights are to be normalized
      */
     public void setNormalizeWordWeights(boolean doNormalize) {
         m_normalizeWordWeights = doNormalize;
@@ -210,8 +169,6 @@ public class ComplementNaiveBayes extends Classifier
     /**
      * Gets the smoothing value to be used to avoid zero WordGivenClass
      * probabilities.
-     * 
-     * @return the smoothing value
      */
     public double getSmoothingParameter() {
         return smoothingParameter;
@@ -219,8 +176,6 @@ public class ComplementNaiveBayes extends Classifier
 
     /**
      * Sets the smoothing value used to avoid zero WordGivenClass probabilities
-     * 
-     * @param val the new smooting value
      */
     public void setSmoothingParameter(double val) {
         smoothingParameter = val;
@@ -244,70 +199,48 @@ public class ComplementNaiveBayes extends Classifier
     public String globalInfo() {
         
         return  "Class for building and using a Complement class Naive Bayes "+
-                "classifier.\n\nFor more information see, \n\n"+
-                getTechnicalInformation().toString() + "\n\n" +
+                "classifier. For more information see, \n"+
+                "ICML-2003 \"Tackling the poor assumptions of Naive Bayes "+
+                "Text Classifiers\" \n"+
                 "P.S.: TF, IDF and length normalization transforms, as "+
                 "described in the paper, can be performed through "+
                 "weka.filters.unsupervised.StringToWordVector.";
     }
-
-    /**
-     * Returns an instance of a TechnicalInformation object, containing 
-     * detailed information about the technical background of this class,
-     * e.g., paper reference or book this class is based on.
-     * 
-     * @return the technical information about this class
-     */
-    public TechnicalInformation getTechnicalInformation() {
-      TechnicalInformation 	result;
-      
-      result = new TechnicalInformation(Type.INPROCEEDINGS);
-      result.setValue(Field.AUTHOR, "Jason D. Rennie and Lawrence Shih and Jaime Teevan and David R. Karger");
-      result.setValue(Field.TITLE, "Tackling the Poor Assumptions of Naive Bayes Text Classifiers");
-      result.setValue(Field.BOOKTITLE, "ICML");
-      result.setValue(Field.YEAR, "2003");
-      result.setValue(Field.PAGES, "616-623");
-      result.setValue(Field.PUBLISHER, "AAAI Press");
-      
-      return result;
-    }
-
-    /**
-     * Returns default capabilities of the classifier.
-     *
-     * @return      the capabilities of this classifier
-     */
-    public Capabilities getCapabilities() {
-      Capabilities result = super.getCapabilities();
-
-      // attributes
-      result.enable(Capability.NUMERIC_ATTRIBUTES);
-      result.enable(Capability.MISSING_VALUES);
-
-      // class
-      result.enable(Capability.NOMINAL_CLASS);
-      result.enable(Capability.MISSING_CLASS_VALUES);
-      
-      return result;
-    }
+    
     
     /**
      * Generates the classifier.
      *
      * @param instances set of instances serving as training data 
-     * @throws Exception if the classifier has not been built successfully
+     * @exception Exception if the classifier has not been built successfully
      */
     public void buildClassifier(Instances instances) throws Exception {
 
-      // can classifier handle the data?
-      getCapabilities().testWithFail(instances);
-
-      // remove instances with missing class
-      instances = new Instances(instances);
-      instances.deleteWithMissingClass();
+        if (instances.numInstances() == 0)
+          throw new Exception("Not enough training instances!");
       
         numClasses = instances.numClasses();
 	int numAttributes = instances.numAttributes();
+        
+        //First check that all attributes (except the class attribute) are 
+        //numeric and that the class attribute in nominal
+	for(int c = 0; c<numClasses; c++) {
+            for(int idx = 0; idx<numAttributes; idx++) {
+                if(instances.classIndex() == idx) {
+                    if(!instances.attribute(idx).isNominal())
+                        throw new Exception("ComplementNaiveBayes cannot "+
+                                          "handle non-nominal class attribute");
+                }
+                else
+                    if(!instances.attribute(idx).isNumeric())
+                        throw new Exception("Attribute "+
+                                            instances.attribute(idx).name()+ 
+                                            " is not numeric! "+
+                                            "ComplementNaiveBayes requires "+
+                                            "that all attributes (except the "+
+                                            "class attribute) are numeric.");
+            }
+        }
         
         header = new Instances(instances, 0);
 	double [][] ocrnceOfWordInClass = new double[numClasses][numAttributes];        
@@ -410,9 +343,8 @@ public class ComplementNaiveBayes extends Classifier
      * For more information see section 4.4 of the paper mentioned above
      * in the classifiers description.
      *
-     * @param instance the instance to classify
      * @return the index of the class the instance is most likely to belong.
-     * @throws if the classifier has not been built yet.
+     * @exception if the classifier has not been built yet.
      */
     public double classifyInstance(Instance instance) throws Exception {
 
@@ -489,4 +421,3 @@ public class ComplementNaiveBayes extends Classifier
 	}
     }        
 }
-

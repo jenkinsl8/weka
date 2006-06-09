@@ -20,115 +20,69 @@
 
 package weka.classifiers.functions;
 
+import weka.classifiers.functions.pace.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.pace.ChisqMixture;
-import weka.classifiers.functions.pace.MixtureDistribution;
-import weka.classifiers.functions.pace.NormalMixture;
-import weka.classifiers.functions.pace.PaceMatrix;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.NoSupportForMissingValuesException;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.WekaException;
-import weka.core.Capabilities.Capability;
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.IntVector;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building pace regression linear models and using them for prediction. <br/>
- * <br/>
- * Under regularity conditions, pace regression is provably optimal when the number of coefficients tends to infinity. It consists of a group of estimators that are either overall optimal or optimal under certain conditions.<br/>
- * <br/>
- * The current work of the pace regression theory, and therefore also this implementation, do not handle: <br/>
- * <br/>
- * - missing values <br/>
- * - non-binary nominal attributes <br/>
- * - the case that n - k is small where n is the number of instances and k is the number of coefficients (the threshold used in this implmentation is 20)<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * Wang, Y (2000). A new approach to fitting linear models in high dimensional spaces. Hamilton, New Zealand.<br/>
- * <br/>
- * Wang, Y., Witten, I. H.: Modeling for optimal probability prediction. In: Proceedings of the Nineteenth International Conference in Machine Learning, Sydney, Australia, 650-657, 2002.
- * <p/>
- <!-- globalinfo-end -->
- *  
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;phdthesis{Wang2000,
- *    address = {Hamilton, New Zealand},
- *    author = {Wang, Y},
- *    school = {Department of Computer Science, University of Waikato},
- *    title = {A new approach to fitting linear models in high dimensional spaces},
- *    year = {2000}
- * }
+ * Class for building pace regression linear models and using them for
+ * prediction. <p>
  * 
- * &#64;inproceedings{Wang2002,
- *    address = {Sydney, Australia},
- *    author = {Wang, Y. and Witten, I. H.},
- *    booktitle = {Proceedings of the Nineteenth International Conference in Machine Learning},
- *    pages = {650-657},
- *    title = {Modeling for optimal probability prediction},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Under regularity conditions, pace regression is provably optimal when
+ * the number of coefficients tends to infinity. It consists of a group of
+ * estimators that are either overall optimal or optimal under certain
+ * conditions. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * The current work of the pace regression theory, and therefore also this
+ * implementation, do not handle: <p>
+ *
+ * - missing values <br>
+ * - non-binary nominal attributes <br>
+ * - the case that n - k is small where n is number of instances and k is  
+ *   number of coefficients (the threshold used in this implmentation is 20) 
+ * <p>
+ *  
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Produce debugging output. <p>
+ * -E estimator <br>
+ * The estimator can be one of the following: <br>
+ * <ul>
+ * <li>eb -- Empirical Bayes estimator for noraml mixture (default) <br>
+ * <li>nested -- Optimal nested model selector for normal mixture <br>
+ * <li>subset -- Optimal subset selector for normal mixture <br>
+ * <li>pace2 -- PACE2 for Chi-square mixture <br>
+ * <li>pace4 -- PACE4 for Chi-square mixture<br>
+ * <li>pace6 -- PACE6 for Chi-square mixture <br>
+ * <li>ols -- Ordinary least squares estimator <br>
+ * <li>aic -- AIC estimator <br>
+ * <li>bic -- BIC estimator <br>
+ * <li>ric -- RIC estimator <br>
+ * <li>olsc -- Ordinary least squares subset selector with a threshold <br>
+ * </ul>
+ * -S <threshold value <br>
+ * Threshold for the olsc estimator<p>
+ *
+ * <p>
+ * REFERENCES <p>
  * 
- * <pre> -D
- *  Produce debugging output.
- *  (default no debugging output)</pre>
+ * Wang, Y. (2000). "A new approach to fitting linear models in high
+ * dimensional spaces." PhD Thesis. Department of Computer Science,
+ * University of Waikato, New Zealand. <p>
  * 
- * <pre> -E &lt;estimator&gt;
- *  The estimator can be one of the following:
- *   eb -- Empirical Bayes estimator for noraml mixture (default)
- *   nested -- Optimal nested model selector for normal mixture
- *   subset -- Optimal subset selector for normal mixture
- *   pace2 -- PACE2 for Chi-square mixture
- *   pace4 -- PACE4 for Chi-square mixture
- *   pace6 -- PACE6 for Chi-square mixture
- * 
- *   ols -- Ordinary least squares estimator
- *   aic -- AIC estimator
- *   bic -- BIC estimator
- *   ric -- RIC estimator
- *   olsc -- Ordinary least squares subset selector with a threshold</pre>
- * 
- * <pre> -S &lt;threshold value&gt;
- *  Threshold value for the OLSC estimator</pre>
- * 
- <!-- options-end -->
+ * Wang, Y. and Witten, I. H. (2002). "Modeling for optimal probability
+ * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
- */
-public class PaceRegression 
-  extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+ * @version $Revision: 1.1.2.1 $ */
+public class PaceRegression extends Classifier implements OptionHandler,
+					       WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 7230266976059115435L;
-  
   /** The model used */
   Instances m_Model = null;
 
@@ -141,29 +95,17 @@ public class PaceRegression
   /** True if debug output will be printed */
   private boolean m_Debug;
 
-  /** estimator type: Ordinary least squares */
   private static final int olsEstimator = 0;
-  /** estimator type: Empirical Bayes */
   private static final int ebEstimator = 1;
-  /** estimator type: Nested model selector */
   private static final int nestedEstimator = 2;
-  /** estimator type: Subset selector */
   private static final int subsetEstimator = 3; 
-  /** estimator type:PACE2  */
   private static final int pace2Estimator = 4; 
-  /** estimator type: PACE4 */
   private static final int pace4Estimator = 5; 
-  /** estimator type: PACE6 */
   private static final int pace6Estimator = 6; 
-  /** estimator type: Ordinary least squares selection */
   private static final int olscEstimator = 7;
-  /** estimator type: AIC */
   private static final int aicEstimator = 8;
-  /** estimator type: BIC */
   private static final int bicEstimator = 9;
-  /** estimator type: RIC */
   private static final int ricEstimator = 10;
-  /** estimator types */
   public static final Tag [] TAGS_ESTIMATOR = {
     new Tag(olsEstimator, "Ordinary least squares"),
     new Tag(ebEstimator, "Empirical Bayes"),
@@ -178,9 +120,7 @@ public class PaceRegression
     new Tag(ricEstimator, "RIC")
   };
 
-  /** the estimator */
   private int paceEstimator = ebEstimator;  
-  
   private double olscThreshold = 2;  // AIC
   
   /**
@@ -202,57 +142,11 @@ public class PaceRegression
       +"- the case that n - k is small where n is the number of instances and k is "  
       +"the number of coefficients (the threshold used in this implmentation is 20)\n\n"
       +"For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.PHDTHESIS);
-    result.setValue(Field.AUTHOR, "Wang, Y");
-    result.setValue(Field.YEAR, "2000");
-    result.setValue(Field.TITLE, "A new approach to fitting linear models in high dimensional spaces");
-    result.setValue(Field.SCHOOL, "Department of Computer Science, University of Waikato");
-    result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
-
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Wang, Y. and Witten, I. H.");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.TITLE, "Modeling for optimal probability prediction");
-    additional.setValue(Field.BOOKTITLE, "Proceedings of the Nineteenth International Conference in Machine Learning");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.PAGES, "650-657");
-    additional.setValue(Field.ADDRESS, "Sydney, Australia");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.BINARY_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-
-    // class
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
+      +"Wang, Y. (2000). A new approach to fitting linear models in high "
+      +"dimensional spaces. PhD Thesis. Department of Computer Science, "
+      +"University of Waikato, New Zealand. \n\n"
+      +"Wang, Y. and Witten, I. H. (2002). Modeling for optimal probability "
+      +"prediction. Proceedings of ICML'2002. Sydney.";
   }
 
   /**
@@ -260,18 +154,33 @@ public class PaceRegression
    *
    * @param data the training data to be used for generating the
    * linear regression function
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    Capabilities cap = getCapabilities();
-    cap.setMinimumNumberInstances(20 + data.numAttributes());
-    cap.testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    //  Checks on data model and instances
+    if (!data.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Class attribute has to be numeric"+
+					      " for pace regression!");
+    }
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
+    }
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
+    if (checkForNonBinary(data)) {
+      throw new UnsupportedAttributeTypeException("Can only deal with numeric and binary attributes!");
+    }
+    // check for missing data and throw exception if some are found
+    if (checkForMissing(data)) {
+      throw new NoSupportForMissingValuesException("Can't handle missing values!");
+    }
+    // n - k should be >= 20
+    if (data.numInstances() - data.numAttributes() < 20) {
+      throw new IllegalArgumentException("Not enough instances. Ratio of number of instances (n) to number of "
+                          + "attributes (k) is too small (n - k < 20).");
+    }
     
     /*
      * initialize the following
@@ -296,6 +205,7 @@ public class PaceRegression
    * @param matrix_X matrix with observations
    * @param vector_Y vektor with class values
    * @return vector with coefficients
+   * @exception Exception if pace regression cannot be done successfully
    */
   private double [] pace(double[][] matrix_X, double [] vector_Y) {
     
@@ -308,8 +218,11 @@ public class PaceRegression
     X.lsqrSelection( Y, pvt, 1 );
     X.positiveDiagonal( Y, pvt );
     
+    int k = pvt.size();
+
     PaceMatrix sol = (PaceMatrix) Y.clone();
     X.rsolve( sol, pvt, pvt.size() );
+    DoubleVector betaHat = sol.getColumn(0).unpivoting(pvt, kr); 
     DoubleVector r = Y.getColumn( pvt.size(), n-1, 0);
     double sde = Math.sqrt(r.sum2() / r.size());
     
@@ -365,9 +278,26 @@ public class PaceRegression
   }
 
   /**
+   * Checks if instances have a missing value.
+   * @param data the data set
+   * @return true if missing value is present in data set
+   */
+  public boolean checkForMissing(Instances data) {
+
+    for (int i = 0; i < data.numInstances(); i++) {
+      Instance inst = data.instance(i);
+      for (int j = 0; j < data.numAttributes(); j++) {
+	if (inst.isMissing(j)) {
+	  return true;
+	}
+      }
+    }
+    return false;
+  }
+
+  /**
    * Checks if an instance has a missing value.
    * @param instance the instance
-   * @param model the data 
    * @return true if missing value is present
    */
   public boolean checkForMissing(Instance instance, Instances model) {
@@ -383,11 +313,26 @@ public class PaceRegression
   }
 
   /**
+   * Checks if any of the nominal attributes is non-binary.
+   * @param data the data set
+   * @return true if non binary attribute is present
+   */
+  public boolean checkForNonBinary(Instances data) {
+
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (data.attribute(i).isNominal()) {
+	if (data.attribute(i).numValues() != 2)
+	  return true;
+      }           
+    }
+    return false;
+  }
+
+  /**
    * Transforms dataset into a two-dimensional array.
    *
    * @param data dataset
    * @param classIndex index of the class attribute
-   * @return the transformed data
    */
   private double [][] getTransformedDataMatrix(Instances data, 
 					       int classIndex) {
@@ -422,7 +367,7 @@ public class PaceRegression
    *
    * @param instance the test instance
    * @return the classification
-   * @throws Exception if classification can't be done successfully
+   * @exception Exception if classification can't be done successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
     
@@ -442,8 +387,6 @@ public class PaceRegression
 
   /**
    * Outputs the linear regression model as a string.
-   * 
-   * @return the model as string
    */
   public String toString() {
 
@@ -491,17 +434,17 @@ public class PaceRegression
 				    + "\t(default no debugging output)",
 				    "D", 0, "-D"));
     newVector.addElement(new Option("\tThe estimator can be one of the following:\n" + 
-				    "\t\teb -- Empirical Bayes estimator for noraml mixture (default)\n" +
-				    "\t\tnested -- Optimal nested model selector for normal mixture\n" + 
-				    "\t\tsubset -- Optimal subset selector for normal mixture\n" +
-				    "\t\tpace2 -- PACE2 for Chi-square mixture\n" +
-				    "\t\tpace4 -- PACE4 for Chi-square mixture\n" +
-				    "\t\tpace6 -- PACE6 for Chi-square mixture\n\n" + 
-				    "\t\tols -- Ordinary least squares estimator\n" +  
-				    "\t\taic -- AIC estimator\n" +  
-				    "\t\tbic -- BIC estimator\n" +  
-				    "\t\tric -- RIC estimator\n" +  
-				    "\t\tolsc -- Ordinary least squares subset selector with a threshold", 
+				    "\t\teb\tEmpirical Bayes(default)\n" +
+				    "\t\tnested\tOptimal nested model\n" + 
+				    "\t\tsubset\tOptimal subset\n" +
+				    "\t\tpace2\tPACE2\n" +
+				    "\t\tpace4\tPACE4\n" +
+				    "\t\tpace6\tPACE6\n\n" + 
+				    "\t\tols\tOrdinary least squares\n" +  
+				    "\t\taic\tAIC\n" +  
+				    "\t\tbic\tBIC\n" +  
+				    "\t\tric\tRIC\n" +  
+				    "\t\tolsc\tOLSC", 
 				    "E", 0, "-E <estimator>"));
     newVector.addElement(new Option("\tThreshold value for the OLSC estimator",
 				    "S", 0, "-S <threshold value>"));
@@ -509,37 +452,9 @@ public class PaceRegression
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -D
-   *  Produce debugging output.
-   *  (default no debugging output)</pre>
-   * 
-   * <pre> -E &lt;estimator&gt;
-   *  The estimator can be one of the following:
-   *   eb -- Empirical Bayes estimator for noraml mixture (default)
-   *   nested -- Optimal nested model selector for normal mixture
-   *   subset -- Optimal subset selector for normal mixture
-   *   pace2 -- PACE2 for Chi-square mixture
-   *   pace4 -- PACE4 for Chi-square mixture
-   *   pace6 -- PACE6 for Chi-square mixture
-   * 
-   *   ols -- Ordinary least squares estimator
-   *   aic -- AIC estimator
-   *   bic -- BIC estimator
-   *   ric -- RIC estimator
-   *   olsc -- Ordinary least squares subset selector with a threshold</pre>
-   * 
-   * <pre> -S &lt;threshold value&gt;
-   *  Threshold value for the OLSC estimator</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options. <p>
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -568,8 +483,6 @@ public class PaceRegression
 
   /**
    * Returns the coefficients for this linear model.
-   * 
-   * @return the coefficients for this linear model
    */
   public double[] coefficients() {
 
@@ -661,7 +574,7 @@ public class PaceRegression
   /**
    * Controls whether debugging output will be printed
    *
-   * @return true if debugging output should be printed
+   * @param debug true if debugging output should be printed
    */
   public boolean getDebug() {
 
@@ -722,7 +635,7 @@ public class PaceRegression
   /**
    * Set threshold for the olsc estimator
    *
-   * @param newThreshold the threshold for the olsc estimator
+   * @param threshold the threshold for the olsc estimator
    */
   public void setThreshold(double newThreshold) {
 
@@ -745,10 +658,12 @@ public class PaceRegression
    * given regression model.
    *
    * @param transformedInstance the input instance
+   * @param selectedAttributes an array of flags indicating which 
+   * attributes are included in the regression model
    * @param coefficients an array of coefficients for the regression
    * model
    * @return the regression value for the instance.
-   * @throws Exception if the class attribute of the input instance
+   * @exception Exception if the class attribute of the input instance
    * is not assigned
    */
   private double regressionPrediction(Instance transformedInstance,
@@ -770,7 +685,7 @@ public class PaceRegression
   /**
    * Generates a linear regression function predictor.
    *
-   * @param argv the options
+   * @param String the options
    */
   public static void main(String argv[]) {
     

@@ -23,52 +23,31 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 
 /** 
- <!-- globalinfo-start -->
- * Swaps two values of a nominal attribute.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
- * 
- * <pre> -F &lt;value index&gt;
- *  Sets the first value's index (default first).</pre>
- * 
- * <pre> -S &lt;value index&gt;
- *  Sets the second value's index (default last).</pre>
- * 
- <!-- options-end -->
+ * Swaps two values of a nominal attribute.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -C col <br>
+ * Index of the attribute to be changed. (default last)<p>
+ *
+ * -F index <br>
+ * Index of the first value (default first).<p>
+ *
+ * -S index <br>
+ * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class SwapValues 
-  extends Filter 
+public class SwapValues extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 6155834679414275855L;
 
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
@@ -97,9 +76,9 @@ public class SwapValues
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnsupportedAttributeTypeException if the selected attribute
+   * @exception UnsupportedAttributeTypeException if the selected attribute
    * is not nominal or if it only has one value.
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -129,7 +108,7 @@ public class SwapValues
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined.
+   * @exception IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -179,24 +158,19 @@ public class SwapValues
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
-   * 
-   * <pre> -F &lt;value index&gt;
-   *  Sets the first value's index (default first).</pre>
-   * 
-   * <pre> -S &lt;value index&gt;
-   *  Sets the second value's index (default last).</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -C col <br>
+   * The column containing the values to be merged. (default last)<p>
+   *
+   * -F index <br>
+   * Index of the first value (default first).<p>
+   *
+   * -S index <br>
+   * Index of the second value (default last).<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -271,7 +245,7 @@ public class SwapValues
   /**
    * Sets index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -301,7 +275,7 @@ public class SwapValues
   /**
    * Sets index of the first value used.
    *
-   * @param firstIndex the index of the first value
+   * @param index the index of the first value
    */
   public void setFirstValueIndex(String firstIndex) {
     
@@ -331,7 +305,7 @@ public class SwapValues
   /**
    * Sets index of the second value used.
    *
-   * @param secondIndex the index of the second value
+   * @param index the index of the second value
    */
   public void setSecondValueIndex(String secondIndex) {
     
@@ -398,3 +372,11 @@ public class SwapValues
     }
   }
 }
+
+
+
+
+
+
+
+

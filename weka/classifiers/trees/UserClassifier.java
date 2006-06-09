@@ -22,90 +22,49 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
-import weka.core.Capabilities;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.classifiers.lazy.IB1;
+import java.awt.event.*;
+import java.io.*;
+import javax.swing.*;
+import weka.gui.treevisualizer.*;
+import weka.core.*;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.Filter;
+import weka.classifiers.trees.j48.*;
+import weka.gui.visualize.*;
+/*import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizePanelListener;
+import weka.gui.visualize.VisualizePanelEvent; */
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
-import weka.gui.treevisualizer.PlaceNode1;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeDisplayEvent;
-import weka.gui.treevisualizer.TreeDisplayListener;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.VisualizePanelEvent;
-import weka.gui.visualize.VisualizePanelListener;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.Serializable;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
 
 
 /**
- <!-- globalinfo-start -->
- * Interactively classify through visual means. You are Presented with a scatter graph of the data against two user selectable attributes, as well as a view of the decision tree. You can create binary splits by creating polygons around data plotted on the scatter graph, as well as by allowing another classifier to take over at points in the decision tree should you see fit.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud.. 55(3):281-292.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for generating an user defined decision tree. For more info see <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Ware2001,
- *    author = {Malcolm Ware and Eibe Frank and Geoffrey Holmes and Mark Hall and Ian H. Witten},
- *    journal = {Int. J. Hum.-Comput. Stud.},
- *    number = {3},
- *    pages = {281-292},
- *    title = {Interactive machine learning: letting users build classifiers},
- *    volume = {55},
- *    year = {2001},
- *    PS = {http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Ware M., Frank E., Holmes G., Hall M. and Witten I.H. (2000).
+ * <i>interactive machine learning - letting users build classifiers</i>,
+ * Working Paper 00/4, Department of Computer Science, 
+ * University of Waikato; March. Also available online at
+ * <a href="http://www.cs.waikato.ac.nz/~ml/publications/2000/
+ * 00MW-etal-Interactive-ML.ps">
+ * http://www.cs.waikato.ac.nz/~ml/publications/2000/
+ * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.18.2.1 $
  */
-public class UserClassifier 
-  extends Classifier 
-  implements Drawable, TreeDisplayListener, VisualizePanelListener,
-             TechnicalInformationHandler {
+public class UserClassifier extends Classifier implements Drawable,
+TreeDisplayListener, VisualizePanelListener {
   
-  /** for serialization */
-  static final long serialVersionUID = 6483901103562809843L;
 
   /** I am not sure if these are strictly adhered to in visualizepanel
    * so I am making them private to avoid confusion, (note that they will
@@ -127,6 +86,10 @@ public class UserClassifier
   private TreeClass m_top, m_focus;
   /** The next number that can be used as a unique id for a node. */
   private int m_nextId;
+  /** These two frames aren't used anymore. */
+  private transient JFrame m_treeFrame;
+  private transient JFrame m_visFrame;
+  
   /** The tabbed window for the tree and instances view. */
   private transient JTabbedPane m_reps;
   /** The window. */
@@ -138,9 +101,9 @@ public class UserClassifier
   /** A window for selecting other classifiers. */
   private PropertyDialog m_propertyDialog;
 
-  /** Register the property editors we need */
+  /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   /**
@@ -179,7 +142,10 @@ public class UserClassifier
     }
     
     return text.toString();
+
+
   }
+
 
   /**
    * Receives user choices from the tree view, and then deals with these 
@@ -196,10 +162,10 @@ public class UserClassifier
       if (m_iView == null || m_tView == null) {
 	//throw exception
       }
-      if (e.getCommand() == TreeDisplayEvent.NO_COMMAND) {
+      if (e.getCommand() == e.NO_COMMAND) {
 	//do nothing
       }
-      else if (e.getCommand() == TreeDisplayEvent.ADD_CHILDREN) {
+      else if (e.getCommand() == e.ADD_CHILDREN) {
 	//highlight the particular node and reset the vis panel
 	if (m_top == null) {
 	  //this shouldn't happen , someone elses code would 
@@ -230,7 +196,7 @@ public class UserClassifier
 	  //m_iView.setSIndex(2);
 	}
       }
-      else if (e.getCommand() == TreeDisplayEvent.REMOVE_CHILDREN) {
+      else if (e.getCommand() == e.REMOVE_CHILDREN) {
 	/*if (m_iView == null)
 	  {
 	  m_iView = new VisualizePanel(this);
@@ -261,7 +227,7 @@ public class UserClassifier
 	//tree_frame.getContentPane().doLayout();
 	m_tView.setHighlight(m_focus.m_identity);
       }
-      else if (e.getCommand() == TreeDisplayEvent.CLASSIFY_CHILD) {
+      else if (e.getCommand() == e.CLASSIFY_CHILD) {
 	/*if (m_iView == null)
 	  {
 	  m_iView = new VisualizePanel(this);
@@ -305,7 +271,7 @@ public class UserClassifier
 	TreeClass source = m_top.getNode(e.getID());
 	m_iView.setExtInstances(source.m_training);
 	}*/
-      else if (e.getCommand() == TreeDisplayEvent.ACCEPT) {
+      else if (e.getCommand() == e.ACCEPT) {
 	
 	int well = JOptionPane.showConfirmDialog(m_mainWin, 
 						 "Are You Sure...\n"
@@ -329,6 +295,7 @@ public class UserClassifier
       er.printStackTrace();
     }
   }
+  
 
   /**
    * This receives shapes from the data view. 
@@ -424,7 +391,7 @@ public class UserClassifier
   /**
    * @return A string formatted with a dotty representation of the decision
    * tree.
-   * @throws Exception if String can't be built properly.
+   * @exception Exception if String can't be built properly.
    */
   public String graph() throws Exception {
     //create a dotty rep of the tree from here
@@ -471,76 +438,16 @@ public class UserClassifier
       + " You can create binary splits by creating polygons around data"
       + " plotted on the scatter graph, as well as by allowing another"
       + " classifier to take over at points in the decision tree should you"
-      + " see fit.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Malcolm Ware and Eibe Frank and Geoffrey Holmes and Mark Hall and Ian H. Witten");
-    result.setValue(Field.YEAR, "2001");
-    result.setValue(Field.TITLE, "Interactive machine learning: letting users build classifiers");
-    result.setValue(Field.JOURNAL, "Int. J. Hum.-Comput. Stud.");
-    result.setValue(Field.VOLUME, "55");
-    result.setValue(Field.NUMBER, "3");
-    result.setValue(Field.PAGES, "281-292");
-    result.setValue(Field.PS, "http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.STRING_ATTRIBUTES);
-    result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
+      + " see fit.";
   }
 
   /**
    * Call this function to build a decision tree for the training
    * data provided.
    * @param i The training data.
-   * @throws Exception if can't build classification properly.
+   * @exception Exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(i);
-
-    // remove instances with missing class
-    i = new Instances(i);
-    i.deleteWithMissingClass();
-    
     //construct a visualizer
     //construct a tree displayer and feed both then do nothing
     //note that I will display at the bottom of each split how many 
@@ -605,6 +512,10 @@ public class UserClassifier
     m_reps = new JTabbedPane();
     m_mainWin.getContentPane().add(m_reps);
     
+
+    
+
+    
     //make a backup of the instances so that any changes don't go past here.
     Instances te = new Instances(i, i.numInstances());
     for (int noa = 0; noa < i.numInstances(); noa++) {
@@ -656,9 +567,10 @@ public class UserClassifier
    * of how likely each class type is the class of the instance.
    * @param i The instance to classify.
    * @return A double array filled with the probalities of each class type.
-   * @throws Exception if can't classify instance.
+   * @exception Exception if can't classify instance.
    */
   public double[] distributionForInstance(Instance i) throws Exception {
+    
 
     if (!m_built) {
       return null;
@@ -692,14 +604,14 @@ public class UserClassifier
     return res;
   }
   
+
+  
+  
+  
   /**
    * Inner class used to represent the actual decision tree structure and data.
    */
-  private class TreeClass 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = 595663560871347434L;
+  private class TreeClass implements Serializable {
     
     /**
      * This contains the info for the coords of the shape converted 
@@ -710,25 +622,19 @@ public class UserClassifier
      */
     public FastVector m_ranges;
 
-    /** the first attribute */
     public int m_attrib1;
-    
-    /** the second attribute */
     public int m_attrib2;
     
     public TreeClass m_set1;
     public TreeClass m_set2;
 
-    /** the parent */
     public TreeClass m_parent;
 
     /** A string to uniquely identify this node. */
     public String m_identity;
     
-    /** the weight of this node */
     public double m_weight;
     
-    /** the training instances for this node */
     public Instances m_training;
     
     /** Used instead of the standard leaf if one exists. */
@@ -745,8 +651,7 @@ public class UserClassifier
      * @param id The unique id number for this node.
      * @param w The weight of this node.
      * @param i The instances that make it to this node from the training data.
-     * @param p the parent
-     * @throws Exception if can't use 'i' properly.
+     * @exception Exception if can't use 'i' properly.
      */
     public TreeClass(FastVector r, int a1, int a2, int id, double w, 
 		     Instances i, TreeClass p) throws Exception {
@@ -788,7 +693,7 @@ public class UserClassifier
     /**
      * Call this to set an alternate classifier For this node.
      * @param c The alternative classifier to use.
-     * @throws Exception if alternate classifier can't build classification.
+     * @exception Exception if alternate classifier can't build classification.
      */
     public void setClassifier(Classifier c) throws Exception {
       m_classObject = c;
@@ -798,11 +703,11 @@ public class UserClassifier
     /**
      * Call this to set this node with different information to what
      * it was created with.
-     * @param at1 The first attribute.
-     * @param at2 The second attribute.
+     * @param a1 The first attribute.
+     * @param a2 The second attribute.
      * @param ar The shapes at this node, null if leaf node, or 
      * alternate classifier.
-     * @throws Exception if leaf node and cant't create leaf info.
+     * @exception Exception if leaf node and cant't create leaf info.
      */
     public void setInfo(int at1, int at2, FastVector ar) throws Exception {
       m_classObject = null;
@@ -840,7 +745,7 @@ public class UserClassifier
     /**
      * This sets up the informtion about this node such as the s.d or the
      * number of each class.
-     * @throws Exception if problem with training instances.
+     * @exception Exception if problem with training instances.
      */
     private void setLeaf() throws Exception {
       //this will fill the ranges array with the number of times 
@@ -897,10 +802,14 @@ public class UserClassifier
 	    tmp.addElement(new Double(0));
 	    tmp.addElement(new Double(Double.NaN));
 	  }
+
 	}
       }
+      
+      
     }
 
+    
     /**
      * This will recursively go through the tree and return inside the 
      * array the weightings of each of the class types
@@ -910,7 +819,7 @@ public class UserClassifier
      *
      * @param i The instance to test
      * @return A double array containing the results.
-     * @throws Exception if can't use instance i properly.
+     * @exception Exception if can't use instance i properly.
      */
     public double[] calcClassType(Instance i) throws Exception {
       //note that it will be the same calcs for both numeric and nominal
@@ -932,6 +841,7 @@ public class UserClassifier
 	rt = new double[1];
       }
 
+      
       FastVector tmp;
       if (m_classObject != null) {
 	//then use the classifier.
@@ -976,19 +886,21 @@ public class UserClassifier
 	return rt;
       }
       
+      
+
       for (int noa = 0; noa < m_ranges.size(); noa++) {
 	
 	tmp = (FastVector)m_ranges.elementAt(noa);
 	
 	if (((Double)tmp.elementAt(0)).intValue() 
-	    == VLINE && !Instance.isMissingValue(x)) {
+	    == VLINE && !i.isMissingValue(x)) {
 	  
 	}
 	else if (((Double)tmp.elementAt(0)).intValue() 
-		 == HLINE && !Instance.isMissingValue(y)) {
+		 == HLINE && !i.isMissingValue(y)) {
 	  
 	}
-	else if (Instance.isMissingValue(x) || Instance.isMissingValue(y)) {
+	else if (i.isMissingValue(x) || i.isMissingValue(y)) {
 	  //System.out.println("miss");
 	  //then go down both branches using their weights
 	  rt = m_set1.calcClassType(i);
@@ -1038,10 +950,11 @@ public class UserClassifier
       return rt;
     }
     
+    
     /**
      * This function gets called to set the node to use a linear regression
      * and attribute filter.
-     * @throws If can't set a default linear egression model.
+     * @exception If can't set a default linear egression model.
      */
     private void setLinear() throws Exception {
       //then set default behaviour for node.
@@ -1077,6 +990,7 @@ public class UserClassifier
 	}
       }
       
+      
       //fill an int array with the numbers of those attribs
       int[] attributeList2 = new int[count];
       count = 0;
@@ -1096,7 +1010,11 @@ public class UserClassifier
       temp2.setClassIndex(classind);
       m_classObject = new LinearRegression();
       m_classObject.buildClassifier(temp2);
+      
+      
+      
     }
+    
     
     /**
      * Call to find out if an instance is in a polyline.
@@ -1134,6 +1052,8 @@ public class UserClassifier
 	      countx++;
 	    }
 	  }
+	  
+	  
 	}
 	else if (noa == 1) {
 	  if ((y < y2 && vecy > 0) || (y > y2 && vecy < 0)) {
@@ -1189,13 +1109,17 @@ public class UserClassifier
 	}
       }
       
+      
       if ((countx % 2) == 1) {
 	return true;
       }
       else {
 	return false;
       }
+      
+      
     }
+    
     
     /** 
      * Call this to determine if an instance is in a polygon.
@@ -1243,6 +1167,7 @@ public class UserClassifier
       //System.out.println("WHAT?!?!?!?!!?!??!?!");
       //return false;
     }
+    
 
     /**
      * Goes through the tree structure recursively and returns the node that
@@ -1271,11 +1196,12 @@ public class UserClassifier
       return null;
     }
     
+    
     /**
      * Returns a string containing a bit of information about this node, in 
      * alternate form.
      * @param s The string buffer to fill.
-     * @throws Exception if can't create label.
+     * @exception Exception if can't create label.
      */
     public void getAlternateLabel(StringBuffer s) throws Exception {
       
@@ -1327,10 +1253,12 @@ public class UserClassifier
       //return s.toString();
     }
     
+
+    
     /**
      * Returns a string containing a bit of information about this node.
      * @param s The stringbuffer to fill.
-     * @throws Exception if can't create label.
+     * @exception Exception if can't create label.
      */
     public void getLabel(StringBuffer s) throws Exception {
       //for now just return identity
@@ -1384,7 +1312,7 @@ public class UserClassifier
     /**
      * Converts The tree structure to a dotty string.
      * @param t The stringbuffer to fill with the dotty structure.
-     * @throws Exception if can't convert structure to dotty.
+     * @exception Exception if can't convert structure to dotty.
      */
     public void toDotty(StringBuffer t) throws Exception {
       //this will recursively create all the dotty info for the structure
@@ -1439,9 +1367,11 @@ public class UserClassifier
      * Converts the tree structure to a string. for people to read.
      * @param l How deep this node is in the tree.
      * @param t The stringbuffer to fill with the string.
-     * @throws Exception if can't convert th string.
+     * @exception Exception if can't convert th string.
      */
     public void toString(int l, StringBuffer t) throws Exception {
+      
+
       
       if (((Double)((FastVector)m_ranges.elementAt(0)).elementAt(0)).intValue()
 	  == LEAF) {
@@ -1469,5 +1399,9 @@ public class UserClassifier
       }
       //return t.toString();
     }
+    
   }
+  
+  
+  
 }

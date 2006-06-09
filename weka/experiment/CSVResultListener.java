@@ -23,40 +23,25 @@
 
 package weka.experiment;
 
-import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import weka.core.OptionHandler;
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.Option;
 
 /**
- <!-- globalinfo-start -->
- * Takes results from a result producer and assembles them into comma separated value form.
- * <p/>
- <!-- globalinfo-end -->
+ * CSVResultListener outputs the received results in csv format to
+ * a Writer
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -O &lt;file name&gt;
- *  The filename where output will be stored. Use - for stdout.
- *  (default temp file)</pre>
- * 
- <!-- options-end -->
- * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
-public class CSVResultListener 
-  implements ResultListener, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -623185072785174658L;
+public class CSVResultListener implements ResultListener, OptionHandler {
 
   /** The ResultProducer sending us results */
   protected ResultProducer m_RP;
@@ -116,19 +101,14 @@ public class CSVResultListener
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -O &lt;file name&gt;
-   *  The filename where output will be stored. Use - for stdout.
-   *  (default temp file)</pre>
-   * 
-   <!-- options-end -->
+   * -O filename <br>
+   * The filename where output will be stored. Use - for stdout.
+   * (default temp file)
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -212,7 +192,7 @@ public class CSVResultListener
    * Set the value of OutputFileName. Must be used
    * AFTER setOutputFile.
    *
-   * @param name the name of OutputFile.
+   * @return Value of OutputFile.
    */
   public void setOutputFileName(String name) {
     
@@ -223,7 +203,7 @@ public class CSVResultListener
    * Prepare for the results to be received.
    *
    * @param rp the ResultProducer that will generate the results
-   * @throws Exception if an error occurs during preprocessing.
+   * @exception Exception if an error occurs during preprocessing.
    */
   public void preProcess(ResultProducer rp) throws Exception {
 
@@ -244,7 +224,7 @@ public class CSVResultListener
    * in any way.
    *
    * @param rp the ResultProducer that generated the results
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void postProcess(ResultProducer rp) throws Exception {
     
@@ -262,7 +242,7 @@ public class CSVResultListener
    * @param rp the ResultProducer to which the constraints will apply
    * @return an array of column names to which resutltProducer's
    * results will be restricted.
-   * @throws Exception if an error occurs.
+   * @exception Exception if an error occurs.
    */
   public String [] determineColumnConstraints(ResultProducer rp) throws Exception {
     return null;
@@ -274,7 +254,7 @@ public class CSVResultListener
    * @param rp the ResultProducer that generated the result
    * @param key The key for the results.
    * @param result The actual results.
-   * @throws Exception if the result could not be accepted.
+   * @exception Exception if the result could not be accepted.
    */
   public void acceptResult(ResultProducer rp, Object[] key, Object[] result) 
     throws Exception {
@@ -310,7 +290,7 @@ public class CSVResultListener
    * @param rp the ResultProducer wanting to generate the result
    * @param key The key for which a result may be needed.
    * @return true if the result should be calculated.
-   * @throws Exception if it could not be determined if the result 
+   * @exception Exception if it could not be determined if the result 
    * is needed.
    */
   public boolean isResultRequired(ResultProducer rp, Object[] key) 
@@ -324,7 +304,7 @@ public class CSVResultListener
    * Prints the names of each field out as the first row of the CSV output.
    *
    * @param rp the ResultProducer generating our results.
-   * @throws Exception if the field names could not be determined.
+   * @exception Exception if the field names could not be determined.
    */
   private void printResultNames(ResultProducer rp) throws Exception {
 
@@ -351,3 +331,6 @@ public class CSVResultListener
     m_Out.println("");
   }
 } // CSVResultListener
+
+
+

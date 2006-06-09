@@ -22,87 +22,30 @@
 
 package weka.filters.supervised.attribute;
 
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeEvaluator;
-import weka.attributeSelection.AttributeTransformer;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
-import weka.attributeSelection.Ranker;
-import weka.attributeSelection.UnsupervisedAttributeEvaluator;
-import weka.attributeSelection.UnsupervisedSubsetEvaluator;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.attributeSelection.*;
 
 /** 
- <!-- globalinfo-start -->
- * A supervised attribute filter that can be used to select attributes. It is very flexible and allows various search and evaluation methods to be combined.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -S &lt;"Name of search class [search options]"&gt;
- *  Sets search method for subset evaluators.
- *  eg. -S "weka.attributeSelection.BestFirst -S 8"</pre>
- * 
- * <pre> -E &lt;"Name of attribute/subset evaluation class [evaluator options]"&gt;
- *  Sets attribute/subset evaluator.
- *  eg. -E "weka.attributeSelection.CfsSubsetEval -L"</pre>
- * 
- * <pre> 
- * Options specific to evaluator weka.attributeSelection.CfsSubsetEval:
- * </pre>
- * 
- * <pre> -M
- *  Treat missing values as a seperate
- *  value.</pre>
- * 
- * <pre> -L
- *  Don't include locally predictive attributes.</pre>
- * 
- * <pre> 
- * Options specific to search weka.attributeSelection.BestFirst:
- * </pre>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
- * 
- * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
- *  Direction of search. (default = 1).</pre>
- * 
- * <pre> -N &lt;num&gt;
- *  Number of non-improving nodes to
- *  consider before terminating search.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Size of lookup cache for evaluated subsets.
- *  Expressed as a multiple of the number of
- *  attributes in the data set. (default = 1)</pre>
- * 
- <!-- options-end -->
+ * Filter for doing attribute selection.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -S <"Name of search class [search options]"> <br>
+ * Set search method for subset evaluators. <br>
+ * eg. -S "weka.attributeSelection.BestFirst -S 8" <p>
+ *
+ * -E <"Name of attribute/subset evaluation class [evaluator options]"> <br>
+ * Set the attribute/subset evaluator. <br>
+ * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class AttributeSelection 
-  extends Filter
+public class AttributeSelection extends Filter
   implements SupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -296211247688169716L;
 
   /** the attribute selection evaluation object */
   private weka.attributeSelection.AttributeSelection m_trainSelector;
@@ -148,17 +91,15 @@ public class AttributeSelection
     
     Vector newVector = new Vector(6);
 
-    newVector.addElement(new Option(
-	"\tSets search method for subset evaluators.\n"
-	+ "\teg. -S \"weka.attributeSelection.BestFirst -S 8\"", 
-	"S", 1,
-	"-S <\"Name of search class [search options]\">"));
-
-    newVector.addElement(new Option(
-	"\tSets attribute/subset evaluator.\n"
-	+ "\teg. -E \"weka.attributeSelection.CfsSubsetEval -L\"",
-	"E", 1,
-	"-E <\"Name of attribute/subset evaluation class [evaluator options]\">"));
+    newVector.addElement(new Option("\tSets search method for subset "
+				    + "evaluators.", "S", 1,
+				    "-S <\"Name of search class"
+				    + " [search options]\">"));
+    newVector.addElement(new Option("\tSets attribute/subset evaluator.",
+				    "E", 1,
+				    "-E <\"Name of attribute/subset "
+				    + "evaluation class [evaluator "
+				    + "options]\">"));
     
     if ((m_ASEvaluator != null) && (m_ASEvaluator instanceof OptionHandler)) {
       Enumeration enu = ((OptionHandler)m_ASEvaluator).listOptions();
@@ -183,54 +124,18 @@ public class AttributeSelection
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S &lt;"Name of search class [search options]"&gt;
-   *  Sets search method for subset evaluators.
-   *  eg. -S "weka.attributeSelection.BestFirst -S 8"</pre>
-   * 
-   * <pre> -E &lt;"Name of attribute/subset evaluation class [evaluator options]"&gt;
-   *  Sets attribute/subset evaluator.
-   *  eg. -E "weka.attributeSelection.CfsSubsetEval -L"</pre>
-   * 
-   * <pre> 
-   * Options specific to evaluator weka.attributeSelection.CfsSubsetEval:
-   * </pre>
-   * 
-   * <pre> -M
-   *  Treat missing values as a seperate
-   *  value.</pre>
-   * 
-   * <pre> -L
-   *  Don't include locally predictive attributes.</pre>
-   * 
-   * <pre> 
-   * Options specific to search weka.attributeSelection.BestFirst:
-   * </pre>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.</pre>
-   * 
-   * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
-   *  Direction of search. (default = 1).</pre>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  Number of non-improving nodes to
-   *  consider before terminating search.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Size of lookup cache for evaluated subsets.
-   *  Expressed as a multiple of the number of
-   *  attributes in the data set. (default = 1)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options. Valid options are:<p>
+   *
+   * -S <"Name of search class [search options]"> <br>
+   * Set search method for subset evaluators. <br>
+   * eg. -S "weka.attributeSelection.BestFirst -S 8" <p>
+   *
+   * -E <"Name of attribute/subset evaluation class [evaluator options]"> <br>
+   * Set the attribute/subset evaluator. <br>
+   * eg. -E "weka.attributeSelection.CfsSubsetEval -L" <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -328,9 +233,7 @@ public class AttributeSelection
   }
 
   /**
-   * set attribute/subset evaluator
-   * 
-   * @param evaluator the evaluator to use
+   * set a string holding the name of a attribute/subset evaluator
    */
   public void setEvaluator(ASEvaluation evaluator) {
     m_ASEvaluator = evaluator;
@@ -348,9 +251,7 @@ public class AttributeSelection
   }
 
   /**
-   * Set search class
-   * 
-   * @param search the search class to use
+   * Set as string holding the name of a search class
    */
   public void setSearch(ASSearch search) {
     m_ASSearch = search;
@@ -384,8 +285,8 @@ public class AttributeSelection
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
-   * @throws Exception if the input instance was not of the correct format 
+   * @exception IllegalStateException if no input format has been defined.
+   * @exception Exception if the input instance was not of the correct format 
    * or if there was a problem with the filtering.
    */
   public boolean input(Instance instance) throws Exception {
@@ -414,8 +315,8 @@ public class AttributeSelection
    * to retrieve the filtered instances.
    *
    * @return true if there are instances pending output.
-   * @throws IllegalStateException if no input structure has been defined.
-   * @throws Exception if there is a problem during the attribute selection.
+   * @exception IllegalStateException if no input structure has been defined.
+   * @exception Exception if there is a problem during the attribute selection.
    */
   public boolean batchFinished() throws Exception {
     
@@ -450,8 +351,6 @@ public class AttributeSelection
   /**
    * Set the output format. Takes the currently defined attribute set 
    * m_InputFormat and calls setOutputFormat(Instances) appropriately.
-   * 
-   * @throws Exception if something goes wrong
    */
   protected void setOutputFormat() throws Exception {
     Instances informat;
@@ -493,9 +392,10 @@ public class AttributeSelection
    * the output queue.
    *
    * @param instance the instance to convert
-   * @throws Exception if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
+    int index = 0;
+    Instance newInstance;
     double[] newVals = new double[getOutputFormat().numAttributes()];
 
     if (m_ASEvaluator instanceof AttributeTransformer) {

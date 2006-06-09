@@ -22,36 +22,28 @@
 
 package weka.core.converters;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
+import weka.core.Instance;
+import weka.core.Instances;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in arff (attribute relation file format) format.
- * <p/>
- <!-- globalinfo-end -->
+ * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
-public class ArffLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+public class ArffLoader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2726929550544048587L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
 
   /**
@@ -61,7 +53,6 @@ public class ArffLoader
   //@ protected represents: model_structureDetermined <- (m_structure != null);
   protected transient Instances m_structure = null;
 
-  /** the file */
   protected String m_File = 
     (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
@@ -100,8 +91,6 @@ public class ArffLoader
 
   /**
    * Resets the Loader ready to read a new data set
-   * 
-   * @throws Exception if something goes wrong
    */
   public void reset() throws Exception {
 

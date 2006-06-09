@@ -22,102 +22,46 @@
 
 package weka.classifiers.meta;
 
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeSelection;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.J48;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
+import java.io.*;
+import java.util.*;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.*;
+import weka.attributeSelection.*;
 
 /**
- <!-- globalinfo-start -->
- * Dimensionality of training and test data is reduced by attribute selection before being passed on to a classifier.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for running an arbitrary classifier on data that has been reduced
+ * through attribute selection. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -E &lt;attribute evaluator specification&gt;
- *  Full class name of attribute evaluator, followed
- *  by its options. (required)
- *  eg: "weka.attributeSelection.CfsSubsetEval -L"</pre>
- * 
- * <pre> -S &lt;search method specification&gt;
- *  Full class name of search method, followed
- *  by its options. (required)
- *  eg: "weka.attributeSelection.BestFirst -D 1"</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
- * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Valid options from the command line are:<p>
+ *
+ * -W classifierstring <br>
+ * Classifierstring should contain the full class name of a classifier.
+ * Any options for the classifier should appear at the end of the command line
+ * following a "--".
+ *.<p>
+ *
+ * -E evaluatorstring <br>
+ * Evaluatorstring should contain the full class name of an attribute
+ * evaluator followed by any options.
+ * (required).<p>
+ *
+ * -S searchstring <br>
+ * Searchstring should contain the full class name of a search method
+ * followed by any options.
+ * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.16.2.4 $
  */
-public class AttributeSelectedClassifier 
-  extends SingleClassifierEnhancer
+public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer,
              WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -5951805453487947577L;
-  
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
 
@@ -146,8 +90,6 @@ public class AttributeSelectedClassifier
   
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -199,71 +141,25 @@ public class AttributeSelectedClassifier
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -E &lt;attribute evaluator specification&gt;
-   *  Full class name of attribute evaluator, followed
-   *  by its options. (required)
-   *  eg: "weka.attributeSelection.CfsSubsetEval -L"</pre>
-   * 
-   * <pre> -S &lt;search method specification&gt;
-   *  Full class name of search method, followed
-   *  by its options. (required)
-   *  eg: "weka.attributeSelection.BestFirst -D 1"</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.J48)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.J48:
-   * </pre>
-   * 
-   * <pre> -U
-   *  Use unpruned tree.</pre>
-   * 
-   * <pre> -C &lt;pruning confidence&gt;
-   *  Set confidence threshold for pruning.
-   *  (default 0.25)</pre>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.
-   *  (default 2)</pre>
-   * 
-   * <pre> -R
-   *  Use reduced error pruning.</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Set number of folds for reduced error
-   *  pruning. One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -B
-   *  Use binary splits only.</pre>
-   * 
-   * <pre> -S
-   *  Don't perform subtree raising.</pre>
-   * 
-   * <pre> -L
-   *  Do not clean up after the tree has been built.</pre>
-   * 
-   * <pre> -A
-   *  Laplace smoothing for predicted probabilities.</pre>
-   * 
-   * <pre> -Q &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   <!-- options-end -->
+   * -W classifierstring <br>
+   * Classifierstring should contain the full class name of a classifier.
+   * Any options for the classifier should appear at the end of the command line
+   * following a "--".<p>
+   *
+   * -E evaluatorstring <br>
+   * Evaluatorstring should contain the full class name of an attribute
+   * evaluator followed by any options.
+   * (required).<p>
+   *
+   * -S searchstring <br>
+   * Searchstring should contain the full class name of a search method
+   * followed by any options.
+   * (required). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -418,7 +314,7 @@ public class AttributeSelectedClassifier
    * Build the classifier on the dimensionally reduced data.
    *
    * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
     if (m_Classifier == null) {
@@ -433,13 +329,8 @@ public class AttributeSelectedClassifier
       throw new Exception("No search method has been set!");
     }
    
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    
     if (newData.numInstances() == 0) {
       m_Classifier.buildClassifier(newData);
       return;
@@ -506,8 +397,7 @@ public class AttributeSelectedClassifier
    * Classifies a given instance after attribute selection
    *
    * @param instance the instance to be classified
-   * @return the class distribution
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance)
@@ -527,8 +417,6 @@ public class AttributeSelectedClassifier
   /**
    *  Returns the type of graph this classifier
    *  represents.
-   *  
-   *  @return the type of graph
    */   
   public int graphType() {
     
@@ -542,7 +430,7 @@ public class AttributeSelectedClassifier
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @throws Exception if the classifier cannot be graphed
+   * @exception Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     
@@ -554,8 +442,6 @@ public class AttributeSelectedClassifier
 
   /**
    * Output a representation of this classifier
-   * 
-   * @return a representation of this classifier
    */
   public String toString() {
     if (m_AttributeSelection == null) {
@@ -619,9 +505,9 @@ public class AttributeSelectedClassifier
   
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumAttributesSelected") == 0) {

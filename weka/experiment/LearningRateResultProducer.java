@@ -23,119 +23,28 @@
 
 package weka.experiment;
 
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.util.Enumeration;
 import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Tells a sub-ResultProducer to reproduce the current run for varying sized subsamples of the dataset. Normally used with an AveragingResultProducer and CrossValidationResultProducer combo to generate learning curve results. For non-numeric result fields, the first value is used.
- * <p/>
- <!-- globalinfo-end -->
+ * LearningRateResultProducer takes the results from a ResultProducer
+ * and submits the average to the result listener. For non-numeric
+ * result fields, the first value is used.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -X &lt;num steps&gt;
- *  The number of steps in the learning rate curve.
- *  (default 10)</pre>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of a ResultProducer.
- *  eg: weka.experiment.CrossValidationResultProducer</pre>
- * 
- * <pre> 
- * Options specific to result producer weka.experiment.AveragingResultProducer:
- * </pre>
- * 
- * <pre> -F &lt;field name&gt;
- *  The name of the field to average over.
- *  (default "Fold")</pre>
- * 
- * <pre> -X &lt;num results&gt;
- *  The number of results expected per average.
- *  (default 10)</pre>
- * 
- * <pre> -S
- *  Calculate standard deviations.
- *  (default only averages)</pre>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of a ResultProducer.
- *  eg: weka.experiment.CrossValidationResultProducer</pre>
- * 
- * <pre> 
- * Options specific to result producer weka.experiment.CrossValidationResultProducer:
- * </pre>
- * 
- * <pre> -X &lt;number of folds&gt;
- *  The number of folds to use for the cross-validation.
- *  (default 10)</pre>
- * 
- * <pre> -D
- * Save raw split evaluator output.</pre>
- * 
- * <pre> -O &lt;file/directory name/path&gt;
- *  The filename where raw output will be stored.
- *  If a directory name is specified then then individual
- *  outputs will be gzipped, otherwise all output will be
- *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of a SplitEvaluator.
- *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
- * 
- * <pre> 
- * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
- * </pre>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of the classifier.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
- * 
- * <pre> -C &lt;index&gt;
- *  The index of the class for which IR statistics
- *  are to be output. (default 1)</pre>
- * 
- * <pre> -I &lt;index&gt;
- *  The index of an attribute to output in the
- *  results. This attribute should identify an
- *  instance in order to know which instances are
- *  in the test set of a cross validation. if 0
- *  no output (default 0).</pre>
- * 
- * <pre> -P
- *  Add target and prediction columns to the result
- *  for each fold.</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
- *
- * All options after -- will be passed to the result producer.
- * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
 	     AdditionalMeasureProducer {
 
-  /** for serialization */
-  static final long serialVersionUID = -3841159673490861331L;
-  
   /** The dataset of interest */
   protected Instances m_Instances;
 
@@ -167,7 +76,7 @@ public class LearningRateResultProducer
   /** The current dataset size during stepping */
   protected int m_CurrentSize = 0;
 
-  /** The name of the key field containing the learning rate step number */
+  /* The name of the key field containing the learning rate step number */
   public static String STEP_FIELD_NAME = "Total_instances";
 
   /**
@@ -179,8 +88,7 @@ public class LearningRateResultProducer
     return "Tells a sub-ResultProducer to reproduce the current run for "
       +"varying sized subsamples of the dataset. Normally used with "
       +"an AveragingResultProducer and CrossValidationResultProducer "
-      +"combo to generate learning curve results. For non-numeric "
-      +"result fields, the first value is used.";
+      +"combo to generate learning curve results.";
   }
 
 
@@ -193,7 +101,7 @@ public class LearningRateResultProducer
    * @param rp the ResultProducer to which the constraints will apply
    * @return an array of column names to which resutltProducer's
    * results will be restricted.
-   * @throws Exception if constraints can't be determined
+   * @exception Exception if constraints can't be determined
    */
   public String [] determineColumnConstraints(ResultProducer rp) 
     throws Exception {
@@ -206,7 +114,7 @@ public class LearningRateResultProducer
    * produced should be sent to the current ResultListener
    *
    * @param run the run number to get keys for.
-   * @throws Exception if a problem occurs while getting the keys
+   * @exception Exception if a problem occurs while getting the keys
    */
   public void doRunKeys(int run) throws Exception {
 
@@ -245,7 +153,7 @@ public class LearningRateResultProducer
    * produced should be sent to the current ResultListener
    *
    * @param run the run number to get results for.
-   * @throws Exception if a problem occurs while getting the results
+   * @exception Exception if a problem occurs while getting the results
    */
   public void doRun(int run) throws Exception {
 
@@ -291,7 +199,7 @@ public class LearningRateResultProducer
    * Prepare for the results to be received.
    *
    * @param rp the ResultProducer that will generate the results
-   * @throws Exception if an error occurs during preprocessing.
+   * @exception Exception if an error occurs during preprocessing.
    */
   public void preProcess(ResultProducer rp) throws Exception {
 
@@ -305,7 +213,7 @@ public class LearningRateResultProducer
    * Prepare to generate results. The ResultProducer should call
    * preProcess(this) on the ResultListener it is to send results to.
    *
-   * @throws Exception if an error occurs during preprocessing.
+   * @exception Exception if an error occurs during preprocessing.
    */
   public void preProcess() throws Exception {
     
@@ -322,7 +230,7 @@ public class LearningRateResultProducer
    * will be sent that need to be grouped together in any way.
    *
    * @param rp the ResultProducer that generated the results
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void postProcess(ResultProducer rp) throws Exception {
 
@@ -335,7 +243,7 @@ public class LearningRateResultProducer
    * ResultProducer should call preProcess(this) on the
    * ResultListener it is to send results to.
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void postProcess() throws Exception {
 
@@ -350,7 +258,7 @@ public class LearningRateResultProducer
    * identify a result for a given ResultProducer with given compatibilityState
    * @param result the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @throws Exception if the result could not be accepted.
+   * @exception Exception if the result could not be accepted.
    */
   public void acceptResult(ResultProducer rp, Object [] key, Object [] result)
     throws Exception {
@@ -374,7 +282,7 @@ public class LearningRateResultProducer
    * @param key an array of Objects (Strings or Doubles) that uniquely
    * identify a result for a given ResultProducer with given compatibilityState
    * @return true if the result should be generated
-   * @throws Exception if it could not be determined if the result 
+   * @exception Exception if it could not be determined if the result 
    * is needed.
    */
   public boolean isResultRequired(ResultProducer rp, Object [] key) 
@@ -395,7 +303,7 @@ public class LearningRateResultProducer
    * Gets the names of each of the columns produced for a single run.
    *
    * @return an array containing the name of each column
-   * @throws Exception if key names cannot be generated
+   * @exception Exception if key names cannot be generated
    */
   public String [] getKeyNames() throws Exception {
 
@@ -413,7 +321,7 @@ public class LearningRateResultProducer
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
-   * @throws Exception if the key types could not be determined (perhaps
+   * @exception Exception if the key types could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
   public Object [] getKeyTypes() throws Exception {
@@ -434,7 +342,7 @@ public class LearningRateResultProducer
    * to each result deviation and average field respectively.
    *
    * @return an array containing the name of each column
-   * @throws Exception if the result names could not be determined (perhaps
+   * @exception Exception if the result names could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
   public String [] getResultNames() throws Exception {
@@ -447,7 +355,7 @@ public class LearningRateResultProducer
    *
    * @return an array containing objects of the type of each column. The 
    * objects should be Strings, or Doubles.
-   * @throws Exception if the result types could not be determined (perhaps
+   * @exception Exception if the result types could not be determined (perhaps
    * because of a problem from a nested sub-resultproducer)
    */
   public Object [] getResultTypes() throws Exception {
@@ -519,97 +427,24 @@ public class LearningRateResultProducer
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -X &lt;num steps&gt;
-   *  The number of steps in the learning rate curve.
-   *  (default 10)</pre>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of a ResultProducer.
-   *  eg: weka.experiment.CrossValidationResultProducer</pre>
-   * 
-   * <pre> 
-   * Options specific to result producer weka.experiment.AveragingResultProducer:
-   * </pre>
-   * 
-   * <pre> -F &lt;field name&gt;
-   *  The name of the field to average over.
-   *  (default "Fold")</pre>
-   * 
-   * <pre> -X &lt;num results&gt;
-   *  The number of results expected per average.
-   *  (default 10)</pre>
-   * 
-   * <pre> -S
-   *  Calculate standard deviations.
-   *  (default only averages)</pre>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of a ResultProducer.
-   *  eg: weka.experiment.CrossValidationResultProducer</pre>
-   * 
-   * <pre> 
-   * Options specific to result producer weka.experiment.CrossValidationResultProducer:
-   * </pre>
-   * 
-   * <pre> -X &lt;number of folds&gt;
-   *  The number of folds to use for the cross-validation.
-   *  (default 10)</pre>
-   * 
-   * <pre> -D
-   * Save raw split evaluator output.</pre>
-   * 
-   * <pre> -O &lt;file/directory name/path&gt;
-   *  The filename where raw output will be stored.
-   *  If a directory name is specified then then individual
-   *  outputs will be gzipped, otherwise all output will be
-   *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of a SplitEvaluator.
-   *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
-   * 
-   * <pre> 
-   * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
-   * </pre>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of the classifier.
-   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
-   * 
-   * <pre> -C &lt;index&gt;
-   *  The index of the class for which IR statistics
-   *  are to be output. (default 1)</pre>
-   * 
-   * <pre> -I &lt;index&gt;
-   *  The index of an attribute to output in the
-   *  results. This attribute should identify an
-   *  instance in order to know which instances are
-   *  in the test set of a cross validation. if 0
-   *  no output (default 0).</pre>
-   * 
-   * <pre> -P
-   *  Add target and prediction columns to the result
-   *  for each fold.</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.rules.ZeroR:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * -L num <br>
+   * The lowest number of instances to use. (default 0 = stepsize) <p>
    *
-   * All options after -- will be passed to the result producer.
+   * -U num <br>
+   * The upper number of instances to use. (default -1 = no limit) <p>
+   *
+   * -S num <br>
+   * The number of instances to add at each step. (default 10) <p>
+   *
+   * -W classname <br>
+   * Specify the full class name of the result producer. <p>
+   *
+   * All option after -- will be passed to the result producer.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -727,9 +562,9 @@ public class LearningRateResultProducer
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (m_ResultProducer instanceof AdditionalMeasureProducer) {

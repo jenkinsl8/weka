@@ -25,44 +25,24 @@ package weka.classifiers.trees;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a decision stump. Usually used in conjunction with a boosting algorithm. Does regression (based on mean-squared error) or classification (based on entropy). Missing is treated as a separate value.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a decision stump. Usually used in conjunction
+ * with a boosting algorithm.
  *
  * Typical usage: <p>
  * <code>java weka.classifiers.trees.LogitBoost -I 100 -W weka.classifiers.trees.DecisionStump 
  * -t training_data </code><p>
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.18 $
  */
-public class DecisionStump 
-  extends Classifier 
+public class DecisionStump extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
 
-  /** for serialization */
-  static final long serialVersionUID = 1618384535950391L;
-  
   /** The attribute used for classification. */
   private int m_AttIndex;
 
@@ -89,50 +69,35 @@ public class DecisionStump
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
     double bestVal = Double.MAX_VALUE, currVal;
-    double bestPoint = -Double.MAX_VALUE;
+    double bestPoint = -Double.MAX_VALUE, sum;
     int bestAtt = -1, numClasses;
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+    if (instances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     double[][] bestDist = new double[3][instances.numClasses()];
 
     m_Instances = new Instances(instances);
+    m_Instances.deleteWithMissingClass();
+
+    if (m_Instances.numInstances() == 0) {
+      throw new IllegalArgumentException("No instances without missing " +
+					 "class values in training file!");
+    }
+
+    if (instances.numAttributes() == 1) {
+      throw new IllegalArgumentException("Attribute missing. Need at least one " +
+					 "attribute other than class attribute!");
+    }
 
     if (m_Instances.classAttribute().isNominal()) {
       numClasses = m_Instances.numClasses();
@@ -195,7 +160,7 @@ public class DecisionStump
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed
+   * @exception Exception if distribution can't be computed
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -205,9 +170,8 @@ public class DecisionStump
   /**
    * Returns the decision tree as Java source code.
    *
-   * @param className the classname of the generated code
    * @return the tree as Java source code
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public String toSource(String className) throws Exception {
 
@@ -237,13 +201,6 @@ public class DecisionStump
     return text.toString();
   }
 
-  /**
-   * Returns the value as string out of the given distribution
-   * 
-   * @param c the attribute to get the value for
-   * @param dist the distribution to extract the value
-   * @return the value
-   */
   private String sourceClass(Attribute c, double []dist) {
 
     if (c.isNominal()) {
@@ -315,7 +272,7 @@ public class DecisionStump
    *
    * @param dist the class distribution to print
    * @return the distribution as a string
-   * @throws Exception if distribution can't be printed
+   * @exception Exception if distribution can't be printed
    */
   private String printDist(double[] dist) throws Exception {
 
@@ -340,7 +297,7 @@ public class DecisionStump
    *
    * @param dist the class distribution
    * @return the classificationn as a string
-   * @throws Exception if the classification can't be printed
+   * @exception Exception if the classification can't be printed
    */
   private String printClass(double[] dist) throws Exception {
 
@@ -360,7 +317,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNominal(int index) throws Exception {
 
@@ -377,7 +334,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNominalNominal(int index) throws Exception {
 
@@ -443,7 +400,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNominalNumeric(int index) throws Exception {
 
@@ -522,7 +479,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNumeric(int index) throws Exception {
 
@@ -539,7 +496,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNumericNominal(int index) throws Exception {
 
@@ -604,7 +561,7 @@ public class DecisionStump
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double findSplitNumericNumeric(int index) throws Exception {
 
@@ -674,11 +631,6 @@ public class DecisionStump
 
   /**
    * Computes variance for subsets.
-   * 
-   * @param s
-   * @param sS
-   * @param sumOfWeights
-   * @return the variance
    */
   private double variance(double[][] s,double[] sS,double[] sumOfWeights) {
 
@@ -695,10 +647,6 @@ public class DecisionStump
 
   /**
    * Returns the subset an instance falls into.
-   * 
-   * @param instance the instance to check
-   * @return the subset the instance falls into
-   * @throws Exception if something goes wrong
    */
   private int whichSubset(Instance instance) throws Exception {
 
@@ -736,3 +684,5 @@ public class DecisionStump
     }
   }
 }
+
+

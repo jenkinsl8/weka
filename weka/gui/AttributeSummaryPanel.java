@@ -24,22 +24,31 @@
 package weka.gui;
 
 import weka.core.Attribute;
-import weka.core.AttributeStats;
 import weka.core.Instances;
+import weka.core.AttributeStats;
 import weka.core.Utils;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /** 
@@ -49,13 +58,9 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.7.2.3 $
  */
-public class AttributeSummaryPanel 
-  extends JPanel {
-  
-  /** for serialization */
-  static final long serialVersionUID = -5434987925737735880L;
+public class AttributeSummaryPanel extends JPanel {
 
   /** Message shown when no instances have been loaded and no attribute set */
   protected static final String NO_SOURCE = "None";
@@ -77,9 +82,6 @@ public class AttributeSummaryPanel
 
   /** Displays other stats in a table */
   protected JTable m_StatsTable = new JTable() {
-    /** for serialization */
-    private static final long serialVersionUID = 7165142874670048578L;
-
     /**
      * returns always false, since it's just information for the user
      * 
@@ -248,8 +250,6 @@ public class AttributeSummaryPanel
   /**
    * Sets the gui elements for fields that are stored in the AttributeStats
    * structure.
-   * 
-   * @param index	the index of the attribute
    */
   protected void setDerived(int index) {
     
@@ -264,9 +264,6 @@ public class AttributeSummaryPanel
 
   /**
    * Creates a tablemodel for the attribute being displayed
-   * 
-   * @param as		the attribute statistics
-   * @param index	the index of the attribute
    */
   protected void setTable(AttributeStats as, int index) {
 
@@ -295,8 +292,6 @@ public class AttributeSummaryPanel
   /**
    * Sets the labels for fields we can determine just from the instance
    * header.
-   * 
-   * @param index	the index of the attribute
    */
   protected void setHeader(int index) {
     
@@ -314,9 +309,6 @@ public class AttributeSummaryPanel
       break;
     case Attribute.DATE:
       m_AttributeTypeLab.setText("Date");
-      break;
-    case Attribute.RELATIONAL:
-      m_AttributeTypeLab.setText("Relational");
       break;
     default:
       m_AttributeTypeLab.setText("Unknown");

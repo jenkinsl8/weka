@@ -22,17 +22,9 @@
 
 package weka.core;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
+import java.io.*;
 import java.text.ParseException;
-import java.util.Enumeration;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -63,14 +55,10 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.65 $ 
+ * @version $Revision: 1.58.2.2 $ 
  */
-public class Instances 
-  implements Serializable {
-  
-  /** for serialization */
-  static final long serialVersionUID = -19412345060742748L;
-  
+public class Instances implements Serializable {
+ 
   /** The filename extension that should be used for arff files */
   public static String FILE_EXTENSION = ".arff";
 
@@ -111,7 +99,7 @@ public class Instances
    * attribute be undefined (negative).
    *
    * @param reader the reader
-   * @throws IOException if the ARFF file is not read 
+   * @exception IOException if the ARFF file is not read 
    * successfully
    */
   public Instances(/*@non_null@*/Reader reader) throws IOException {
@@ -134,9 +122,9 @@ public class Instances
    *
    * @param reader the reader
    * @param capacity the capacity
-   * @throws IllegalArgumentException if the header is not read successfully
+   * @exception IllegalArgumentException if the header is not read successfully
    * or the capacity is negative.
-   * @throws IOException if there is a problem with the reader.
+   * @exception IOException if there is a problem with the reader.
    */
   //@ requires capacity >= 0;
   //@ ensures classIndex() == -1;
@@ -159,7 +147,7 @@ public class Instances
    * Constructor copying all instances and references to
    * the header information from the given set of instances.
    *
-   * @param dataset the set to be copied
+   * @param instances the set to be copied
    */
   public Instances(/*@non_null@*/Instances dataset) {
 
@@ -173,7 +161,7 @@ public class Instances
    * to the header information from the given set of instances. Sets
    * the capacity of the set of instances to 0 if its negative.
    *
-   * @param dataset the instances from which the header 
+   * @param instances the instances from which the header 
    * information is to be taken
    * @param capacity the capacity of the new dataset 
    */
@@ -199,7 +187,7 @@ public class Instances
    * is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
-   * @throws IllegalArgumentException if first and toCopy are out of range
+   * @exception IllegalArgumentException if first and toCopy are out of range
    */
   //@ requires 0 <= first;
   //@ requires 0 <= toCopy;
@@ -240,7 +228,6 @@ public class Instances
   /**
    * Create a copy of the structure, but "cleanse" string types (i.e.
    * doesn't contain references to the strings seen in the past).
-   * Also cleanses all relational attributes.
    *
    * @return a copy of the instance structure.
    */
@@ -251,8 +238,6 @@ public class Instances
       Attribute att = (Attribute)atts.elementAt(i);
       if (att.type() == Attribute.STRING) {
         atts.setElementAt(new Attribute(att.name(), (FastVector)null), i);
-      } else if (att.type() == Attribute.RELATIONAL) {
-        atts.setElementAt(new Attribute(att.name(), new Instances(att.relation(), 0)), i);
       }
     }
     Instances result = new Instances(relationName(), atts, 0);
@@ -279,7 +264,7 @@ public class Instances
   /**
    * Returns an attribute.
    *
-   * @param index the attribute's index (index starts with 0)
+   * @param index the attribute's index
    * @return the attribute at the given position
    */
   //@ requires 0 <= index;
@@ -310,30 +295,20 @@ public class Instances
   }
 
   /**
-   * Checks for attributes of the given type in the dataset
-   *
-   * @param attType  the attribute type to look for
-   * @return         true if attributes of the given type are present
-   */
-  public boolean checkForAttributeType(int attType) {
-    
-    int i = 0;
-    
-    while (i < m_Attributes.size()) {
-      if (attribute(i++).type() == attType) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
    * Checks for string attributes in the dataset
    *
    * @return true if string attributes are present, false otherwise
    */
   public /*@pure@*/ boolean checkForStringAttributes() {
-    return checkForAttributeType(Attribute.STRING);
+
+    int i = 0;
+   
+    while (i < m_Attributes.size()) {
+      if (attribute(i++).isString()) {
+	return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -342,7 +317,6 @@ public class Instances
    * the instance and the ranges of the values for 
    * nominal and string attributes.
    *
-   * @param instance the instance to check
    * @return true if the instance is compatible with the dataset 
    */
   public /*@pure@*/ boolean checkInstance(Instance instance) {
@@ -372,7 +346,7 @@ public class Instances
    * Returns the class attribute.
    *
    * @return the class attribute
-   * @throws UnassignedClassException if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
   //@ requires classIndex() >= 0;
   public /*@pure@*/ Attribute classAttribute() {
@@ -415,7 +389,7 @@ public class Instances
   /**
    * Removes an instance at the given position from the set.
    *
-   * @param index the instance's position (index starts with 0)
+   * @param index the instance's position
    */
   //@ requires 0 <= index && index < numInstances();
   public void delete(int index) {
@@ -428,8 +402,8 @@ public class Instances
    * (0 to numAttributes() - 1). A deep copy of the attribute
    * information is performed before the attribute is deleted.
    *
-   * @param position the attribute's position (position starts with 0)
-   * @throws IllegalArgumentException if the given index is out of range 
+   * @param pos the attribute's position
+   * @exception IllegalArgumentException if the given index is out of range 
    *            or the class attribute is being deleted
    */
   //@ requires 0 <= position && position < numAttributes();
@@ -457,42 +431,29 @@ public class Instances
   }
 
   /**
-   * Deletes all attributes of the given type in the dataset. A deep copy of 
-   * the attribute information is performed before an attribute is deleted.
-   *
-   * @param attType the attribute type to delete
-   * @throws IllegalArgumentException if attribute couldn't be 
-   * successfully deleted (probably because it is the class attribute).
-   * @see #deleteStringAttribute(int)
-   */
-  public void deleteAttributeType(int attType) {
-    int i = 0;
-    while (i < m_Attributes.size()) {
-      if (attribute(i).type() == attType) {
-        deleteAttributeAt(i);
-      } else {
-        i++;
-      }
-    }
-  }
-
-  /**
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
    *
-   * @throws IllegalArgumentException if string attribute couldn't be 
+   * @exception IllegalArgumentException if string attribute couldn't be 
    * successfully deleted (probably because it is the class attribute).
-   * @see #deleteAttributeType(int)
    */
   public void deleteStringAttributes() {
-    deleteAttributeType(Attribute.STRING);
+
+    int i = 0;
+    while (i < m_Attributes.size()) {
+      if (attribute(i).isString()) {
+	deleteAttributeAt(i);
+      } else {
+	i++;
+      }
+    }
   }
 
   /**
    * Removes all instances with missing values for a particular
    * attribute from the dataset.
    *
-   * @param attIndex the attribute's index (index starts with 0)
+   * @param attIndex the attribute's index
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
@@ -522,7 +483,7 @@ public class Instances
    * Removes all instances with a missing class value
    * from the dataset.
    *
-   * @throws UnassignedClassException if class is not set
+   * @exception UnassignedClassException if class is not set
    */
   public void deleteWithMissingClass() {
 
@@ -610,8 +571,8 @@ public class Instances
    * a deep copy of the existing attribute information.
    *
    * @param att the attribute to be inserted
-   * @param position the attribute's position (position starts with 0)
-   * @throws IllegalArgumentException if the given index is out of range
+   * @param pos the attribute's position
+   * @exception IllegalArgumentException if the given index is out of range
    */
   //@ requires 0 <= position;
   //@ requires position <= numAttributes();
@@ -640,7 +601,7 @@ public class Instances
   /**
    * Returns the instance at the given position.
    *
-   * @param index the instance's index (index starts with 0)
+   * @param index the instance's index
    * @return the instance at the given position
    */
   //@ requires 0 <= index;
@@ -719,7 +680,7 @@ public class Instances
    * a floating-point value. Returns 0 if the attribute is neither nominal nor 
    * numeric. If all values are missing it returns zero.
    *
-   * @param attIndex the attribute's index (index starts with 0)
+   * @param attIndex the attribute's index
    * @return the mean or the mode
    */
   public /*@pure@*/ double meanOrMode(int attIndex) {
@@ -782,7 +743,7 @@ public class Instances
    *
    * @return the number of class labels as an integer if the class 
    * attribute is nominal, 1 otherwise.
-   * @throws UnassignedClassException if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
   //@ requires classIndex() >= 0;
   public /*@pure@*/ int numClasses() {
@@ -802,7 +763,7 @@ public class Instances
    * Returns the number of instances if the attribute is a
    * string attribute. The value 'missing' is not counted.
    *
-   * @param attIndex the attribute (index starts with 0)
+   * @param attIndex the attribute
    * @return the number of distinct values of a given attribute
    */
   //@ requires 0 <= attIndex;
@@ -875,7 +836,7 @@ public class Instances
    *
    * @param reader the reader 
    * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
+   * @exception IOException if the information is not read 
    * successfully
    */ 
   public boolean readInstance(Reader reader) 
@@ -902,7 +863,7 @@ public class Instances
    * Renames an attribute. This change only affects this
    * dataset.
    *
-   * @param att the attribute's index (index starts with 0)
+   * @param att the attribute's index
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
@@ -936,8 +897,8 @@ public class Instances
    * Renames the value of a nominal (or string) attribute value. This
    * change only affects this dataset.
    *
-   * @param att the attribute's index (index starts with 0)
-   * @param val the value's index (index starts with 0)
+   * @param att the attribute's index
+   * @param val the value's index
    * @param name the new name 
    */
   public void renameAttributeValue(int att, int val, String name) {
@@ -1017,7 +978,7 @@ public class Instances
    * @param random a random number generator
    * @param weights the weight vector
    * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
+   * @exception IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
   public Instances resampleWithWeights(Random random, 
@@ -1073,8 +1034,8 @@ public class Instances
    * If the class index is negative there is assumed to be no class.
    * (ie. it is undefined)
    *
-   * @param classIndex the new class index (index starts with 0)
-   * @throws IllegalArgumentException if the class index is too big or < 0
+   * @param classIndex the new class index
+   * @exception IllegalArgumentException if the class index is too big or < 0
    */
   public void setClassIndex(int classIndex) {
 
@@ -1101,7 +1062,7 @@ public class Instances
    * specified in the header. Instances with missing values for the 
    * attribute are placed at the end of the dataset.
    *
-   * @param attIndex the attribute's index (index starts with 0)
+   * @param attIndex the attribute's index
    */
   public void sort(int attIndex) {
 
@@ -1144,7 +1105,7 @@ public class Instances
    * stratified cross-validation can be performed).
    *
    * @param numFolds the number of folds in the cross-validation
-   * @throws UnassignedClassException if the class is not set
+   * @exception UnassignedClassException if the class is not set
    */
   public void stratify(int numFolds) {
     
@@ -1198,7 +1159,7 @@ public class Instances
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the test set as a set of weighted instances
-   * @throws IllegalArgumentException if the number of folds is less than 2
+   * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1243,22 +1204,6 @@ public class Instances
       text.append(attribute(i)).append("\n");
     }
     text.append("\n").append(ARFF_DATA).append("\n");
-
-    text.append(stringWithoutHeader());
-    return text.toString();
-  }
-
-  /**
-   * Returns the instances in the dataset as a string in ARFF format. Strings
-   * are quoted if they contain whitespace characters, or if they
-   * are a question mark.
-   *
-   * @return the dataset in ARFF format as a string
-   */
-  protected String stringWithoutHeader() {
-    
-    StringBuffer text = new StringBuffer();
-
     for (int i = 0; i < numInstances(); i++) {
       text.append(instance(i));
       if (i < numInstances() - 1) {
@@ -1276,7 +1221,7 @@ public class Instances
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the training set 
-   * @throws IllegalArgumentException if the number of folds is less than 2
+   * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1317,7 +1262,7 @@ public class Instances
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @param random the random number generator
    * @return the training set 
-   * @throws IllegalArgumentException if the number of folds is less than 2
+   * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1332,9 +1277,9 @@ public class Instances
   /**
    * Computes the variance for a numeric attribute.
    *
-   * @param attIndex the numeric attribute (index starts with 0)
+   * @param attIndex the numeric attribute
    * @return the variance if the attribute is numeric
-   * @throws IllegalArgumentException if the attribute is not numeric
+   * @exception IllegalArgumentException if the attribute is not numeric
    */
   public /*@pure@*/ double variance(int attIndex) {
   
@@ -1373,7 +1318,7 @@ public class Instances
    *
    * @param att the numeric attribute
    * @return the variance if the attribute is numeric
-   * @throws IllegalArgumentException if the attribute is not numeric
+   * @exception IllegalArgumentException if the attribute is not numeric
    */
   public /*@pure@*/ double variance(Attribute att) {
     
@@ -1384,7 +1329,7 @@ public class Instances
    * Calculates summary statistics on the values that appear in this
    * set of instances for a specified attribute.
    *
-   * @param index the index of the attribute to summarize (index starts with 0)
+   * @param index the index of the attribute to summarize.
    * @return an AttributeStats object with it's fields calculated.
    */
   //@ requires 0 <= index && index < numAttributes();
@@ -1501,14 +1446,6 @@ public class Instances
 	percent = Math.round(100.0 * as.realCount / as.totalCount);
 	result.append(Utils.padLeft("" + percent, 3)).append("% ");
 	break;
-      case Attribute.RELATIONAL:
-	result.append(Utils.padLeft("Rel", 4)).append(' ');
-	percent = Math.round(100.0 * as.intCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	result.append(Utils.padLeft("" + 0, 3)).append("% ");
-	percent = Math.round(100.0 * as.realCount / as.totalCount);
-	result.append(Utils.padLeft("" + percent, 3)).append("% ");
-	break;
       default:
 	result.append(Utils.padLeft("???", 4)).append(' ');
 	result.append(Utils.padLeft("" + 0, 3)).append("% ");
@@ -1539,7 +1476,7 @@ public class Instances
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
+   * @exception IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstance(StreamTokenizer tokenizer, 
@@ -1574,7 +1511,7 @@ public class Instances
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
+   * @exception IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstanceSparse(StreamTokenizer tokenizer, 
@@ -1591,7 +1528,7 @@ public class Instances
       if (tokenizer.ttype == '}') {
 	break;
       }
- 
+       
       // Is index valid?
       try{
 	m_IndicesBuffer[numValues] = Integer.valueOf(tokenizer.sval).intValue();
@@ -1650,20 +1587,6 @@ public class Instances
             errms(tokenizer,"unparseable date: " + tokenizer.sval);
           }
           break;
-        case Attribute.RELATIONAL:
-          StringReader reader = new StringReader(tokenizer.sval);
-          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
-          initTokenizer(innerTokenizer);
-          Instances data = new Instances(attribute(m_IndicesBuffer[numValues]).relation(), 100);
-
-          // Allocate buffers in case sparse instances have to be read
-          data.m_ValueBuffer = new double[data.numAttributes()];
-          data.m_IndicesBuffer = new int[data.numAttributes()];
-
-          while (data.getInstance(innerTokenizer, true)) {};
-          data.compactify();
-          m_ValueBuffer[numValues] = attribute(m_IndicesBuffer[numValues]).addRelation(data);
-          break;
         default:
           errms(tokenizer,"unknown attribute type in column " + m_IndicesBuffer[numValues]);
 	}
@@ -1692,7 +1615,7 @@ public class Instances
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
+   * @exception IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstanceFull(StreamTokenizer tokenizer, 
@@ -1747,20 +1670,6 @@ public class Instances
             errms(tokenizer,"unparseable date: " + tokenizer.sval);
           }
           break;
-        case Attribute.RELATIONAL:
-          StringReader reader = new StringReader(tokenizer.sval);
-          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
-          initTokenizer(innerTokenizer);
-          Instances data = new Instances(attribute(i).relation(), 100);
-
-          // Allocate buffers in case sparse instances have to be read
-          data.m_ValueBuffer = new double[data.numAttributes()];
-          data.m_IndicesBuffer = new int[data.numAttributes()];
-
-          while (data.getInstance(innerTokenizer, true)) {};
-          data.compactify();
-          instance[i] = attribute(i).addRelation(data);
-          break;
         default:
           errms(tokenizer,"unknown attribute type in column " + i);
 	}
@@ -1779,12 +1688,16 @@ public class Instances
    * Reads and stores header of an ARFF file.
    *
    * @param tokenizer the stream tokenizer
-   * @throws IOException if the information is not read 
+   * @exception IOException if the information is not read 
    * successfully
    */ 
   protected void readHeader(StreamTokenizer tokenizer) 
      throws IOException {
     
+    String attributeName;
+    FastVector attributeValues;
+    int i;
+
     // Get name of relation.
     getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
@@ -1808,7 +1721,74 @@ public class Instances
     }
 
     while (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
-      parseAttribute(tokenizer);
+
+      // Get attribute name.
+      getNextToken(tokenizer);
+      attributeName = tokenizer.sval;
+      getNextToken(tokenizer);
+
+      // Check if attribute is nominal.
+      if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
+
+	// Attribute is real, integer, or string.
+	if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
+	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
+	    tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
+	  m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
+	  readTillEOL(tokenizer);
+	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
+	  m_Attributes.
+	    addElement(new Attribute(attributeName, (FastVector)null,
+				     numAttributes()));
+	  readTillEOL(tokenizer);
+	} else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
+          String format = null;
+          if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+            if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
+                (tokenizer.ttype != '\'') &&
+                (tokenizer.ttype != '\"')) {
+              errms(tokenizer,"not a valid date format");
+            }
+            format = tokenizer.sval;
+            readTillEOL(tokenizer);
+          } else {
+            tokenizer.pushBack();
+          }
+	  m_Attributes.addElement(new Attribute(attributeName, format,
+                                                numAttributes()));
+
+	} else {
+	  errms(tokenizer,"no valid attribute type or invalid "+
+		"enumeration");
+	}
+      } else {
+
+	// Attribute is nominal.
+	attributeValues = new FastVector();
+	tokenizer.pushBack();
+	
+	// Get values for nominal attribute.
+	if (tokenizer.nextToken() != '{') {
+	  errms(tokenizer,"{ expected at beginning of enumeration");
+	}
+	while (tokenizer.nextToken() != '}') {
+	  if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
+	    errms(tokenizer,"} expected at end of enumeration");
+	  } else {
+	    attributeValues.addElement(tokenizer.sval);
+	  }
+	}
+	if (attributeValues.size() == 0) {
+	  errms(tokenizer,"no nominal values found");
+	}
+	m_Attributes.
+	  addElement(new Attribute(attributeName, attributeValues,
+				   numAttributes()));
+      }
+      getLastToken(tokenizer,false);
+      getFirstToken(tokenizer);
+      if (tokenizer.ttype == StreamTokenizer.TT_EOF)
+	errms(tokenizer,"premature end of file");
     }
 
     // Check if data part follows. We can't easily check for EOL.
@@ -1827,125 +1807,10 @@ public class Instances
   }
 
   /**
-   * Parses the attribute declaration.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if the information is not read 
-   * successfully
-   */
-  protected void parseAttribute(StreamTokenizer tokenizer) 
-    throws IOException {
-
-    String attributeName;
-    FastVector attributeValues;
-
-    // Get attribute name.
-    getNextToken(tokenizer);
-    attributeName = tokenizer.sval;
-    getNextToken(tokenizer);
-    
-    // Check if attribute is nominal.
-    if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
-      
-      // Attribute is real, integer, or string.
-      if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
-          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
-          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
-        m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
-        readTillEOL(tokenizer);
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
-        m_Attributes.
-          addElement(new Attribute(attributeName, (FastVector)null,
-                                   numAttributes()));
-        readTillEOL(tokenizer);
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
-        String format = null;
-        if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
-          if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
-              (tokenizer.ttype != '\'') &&
-              (tokenizer.ttype != '\"')) {
-            errms(tokenizer,"not a valid date format");
-          }
-          format = tokenizer.sval;
-          readTillEOL(tokenizer);
-        } else {
-          tokenizer.pushBack();
-        }
-        m_Attributes.addElement(new Attribute(attributeName, format,
-                                              numAttributes()));
-        
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_RELATIONAL)) {
-        readTillEOL(tokenizer);
-        
-        // Read attributes for subrelation
-        // First, save current set of attributes
-        FastVector atts = m_Attributes;
-        m_Attributes = new FastVector();
-        
-        // Now, read attributes until we hit end of declaration of relational value
-        getFirstToken(tokenizer);
-        if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-          errms(tokenizer,"premature end of file");
-        }
-        do {
-          if (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
-            parseAttribute(tokenizer);
-          } else if (Attribute.ARFF_END_SUBRELATION.equalsIgnoreCase(tokenizer.sval)) {
-            getNextToken(tokenizer);
-            if (!attributeName.equalsIgnoreCase(tokenizer.sval)) {
-              errms(tokenizer, "declaration of subrelation " + attributeName + 
-                    " must be terminated by " + "@end " + attributeName);
-            }
-            break;
-          } else {
-            errms(tokenizer, "declaration of subrelation " + attributeName + 
-                  " must be terminated by " + "@end " + attributeName);
-          }
-        } while (true);
-        
-        // Make relation and restore original set of attributes
-        Instances relation = new Instances(attributeName, m_Attributes, 0);
-        m_Attributes = atts;
-        m_Attributes.addElement(new Attribute(attributeName, relation,
-                                              numAttributes()));
-      } else {
-        errms(tokenizer,"no valid attribute type or invalid "+
-              "enumeration");
-      }
-    } else {
-      
-      // Attribute is nominal.
-      attributeValues = new FastVector();
-      tokenizer.pushBack();
-      
-      // Get values for nominal attribute.
-      if (tokenizer.nextToken() != '{') {
-        errms(tokenizer,"{ expected at beginning of enumeration");
-      }
-      while (tokenizer.nextToken() != '}') {
-        if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
-          errms(tokenizer,"} expected at end of enumeration");
-        } else {
-          attributeValues.addElement(tokenizer.sval);
-        }
-      }
-      if (attributeValues.size() == 0) {
-        errms(tokenizer,"no nominal values found");
-      }
-      m_Attributes.
-        addElement(new Attribute(attributeName, attributeValues,
-                                 numAttributes()));
-    }
-    getLastToken(tokenizer,false);
-    getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
-      errms(tokenizer,"premature end of file");
-  }
-
-  /**
    * Copies instances from one set to the end of another 
    * one.
    *
+   * @param source the source of the instances
    * @param from the position of the first instance to be copied
    * @param dest the destination for the instances
    * @param num the number of instances to be copied
@@ -1985,7 +1850,7 @@ public class Instances
    * Gets next token, skipping empty lines.
    *
    * @param tokenizer the stream tokenizer
-   * @throws IOException if reading the next token fails
+   * @exception IOException if reading the next token fails
    */
   protected void getFirstToken(StreamTokenizer tokenizer) 
     throws IOException {
@@ -2004,7 +1869,7 @@ public class Instances
    * Gets index, checking for a premature and of line.
    *
    * @param tokenizer the stream tokenizer
-   * @throws IOException if it finds a premature end of line
+   * @exception IOException if it finds a premature end of line
    */
   protected void getIndex(StreamTokenizer tokenizer) throws IOException {
     
@@ -2020,7 +1885,7 @@ public class Instances
    * Gets token and checks if its end of line.
    *
    * @param tokenizer the stream tokenizer
-   * @throws IOException if it doesn't find an end of line
+   * @exception IOException if it doesn't find an end of line
    */
   protected void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
        throws IOException {
@@ -2035,7 +1900,7 @@ public class Instances
    * Gets next token, checking for a premature and of line.
    *
    * @param tokenizer the stream tokenizer
-   * @throws IOException if it finds a premature end of line
+   * @exception IOException if it finds a premature end of line
    */
   protected void getNextToken(StreamTokenizer tokenizer) 
        throws IOException {
@@ -2096,9 +1961,9 @@ public class Instances
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
    *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset (index starts with 0)
-   * @param right the last index of the subset (index starts with 0)
+   * @param attIndex the attribute's index
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
    *
    * @return the index of the middle element
    */
@@ -2132,9 +1997,9 @@ public class Instances
    * Implements quicksort according to Manber's "Introduction to
    * Algorithms".
    *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset to be sorted (index starts with 0)
-   * @param right the last index of the subset to be sorted (index starts with 0)
+   * @param attIndex the attribute's index
+   * @param left the first index of the subset to be sorted
+   * @param right the last index of the subset to be sorted
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   //@ requires 0 <= first && first <= right && right < numInstances();
@@ -2163,9 +2028,9 @@ public class Instances
    * Implements computation of the kth-smallest element according
    * to Manber's "Introduction to Algorithms".
    *
-   * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset (index starts with 0)
-   * @param right the last index of the subset (index starts with 0)
+   * @param attIndex the attribute's index
+   * @param left the first index of the subset 
+   * @param right the last index of the subset 
    * @param k the value of k
    *
    * @return the index of the kth-smallest element
@@ -2211,8 +2076,8 @@ public class Instances
   /**
    * Swaps two instances in the set.
    *
-   * @param i the first instance's index (index starts with 0)
-   * @param j the second instance's index (index starts with 0)
+   * @param i the first instance's index
+   * @param j the second instance's index
    */
   //@ requires 0 <= i && i < numInstances();
   //@ requires 0 <= j && j < numInstances();
@@ -2229,7 +2094,7 @@ public class Instances
    * @param first the first set of Instances
    * @param second the second set of Instances
    * @return the merged set of Instances
-   * @throws IllegalArgumentException if the datasets are not the same size
+   * @exception IllegalArgumentException if the datasets are not the same size
    */
   public static Instances mergeInstances(Instances first, Instances second) {
 
@@ -2268,10 +2133,12 @@ public class Instances
   //@ requires argv[0] != null;
   public static void test(String [] argv) {
 
-    Instances instances, secondInstances, train, test, empty;
+    Instances instances, secondInstances, train, test, transformed, empty;
+    Instance instance;
     Random random = new Random(2);
     Reader reader;
     int start, num;
+    double newWeight;
     FastVector testAtts, testVals;
     int i,j;
     

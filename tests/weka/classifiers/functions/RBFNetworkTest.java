@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.functions.RBFNetwork
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class RBFNetworkTest 
   extends AbstractClassifierTest {

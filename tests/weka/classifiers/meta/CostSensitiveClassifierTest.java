@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
  * java weka.classifiers.meta.CostSensitiveClassifierTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class CostSensitiveClassifierTest extends AbstractClassifierTest {
 

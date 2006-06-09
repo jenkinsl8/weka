@@ -22,41 +22,31 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.MultipleClassifiersCombiner;
-import weka.core.Instance;
-import weka.core.Instances;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.classifiers.rules.ZeroR;
 
 /**
- <!-- globalinfo-start -->
- * Class for combining classifiers using unweighted average of probability estimates (classification) or numeric predictions (regression).
- * <p/>
- <!-- globalinfo-end -->
+ * Class for combining classifiers using unweighted average of
+ * probability estimates (classification) or numeric predictions 
+ * (regression).
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;classifier specification&gt;
- *  Full class name of classifier to include, followed
- *  by scheme options. May be specified multiple times.
- *  (default: "weka.classifiers.rules.ZeroR")</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options from the command line are:<p>
+ *
+ * -B classifierstring <br>
+ * Classifierstring should contain the full class name of a scheme
+ * included for selection followed by options to the classifier
+ * (required, option should be used once for each classifier).<p>
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {
     
-  /** for serialization */
-  static final long serialVersionUID = -637891196294399624L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -75,17 +65,13 @@ public class Vote extends MultipleClassifiersCombiner {
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    
+
     for (int i = 0; i < m_Classifiers.length; i++) {
       getClassifier(i).buildClassifier(data);
     }
@@ -95,8 +81,7 @@ public class Vote extends MultipleClassifiersCombiner {
    * Classifies a given instance using the selected classifier.
    *
    * @param instance the instance to be classified
-   * @return the distribution
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -116,8 +101,6 @@ public class Vote extends MultipleClassifiersCombiner {
 
   /**
    * Output a representation of this classifier
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -148,4 +131,5 @@ public class Vote extends MultipleClassifiersCombiner {
       System.err.println(e.getMessage());
     }
   }
+
 }

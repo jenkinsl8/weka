@@ -22,59 +22,20 @@
 
 package weka.classifiers.rules;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
- <!-- globalinfo-start -->
- * The implementation of a RIpple-DOwn Rule learner.<br/>
- * <br/>
- * It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/>
- * <br/>
- * For more information about Ripple-Down Rules, see:<br/>
- * <br/>
- * Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst.. 5(3):211-228.
- * <p/>
- <!-- globalinfo-end -->
+ * The implementation of a RIpple-DOwn Rule learner.
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Gaines1995,
- *    author = {Brian R. Gaines and Paul Compton},
- *    journal = {J. Intell. Inf. Syst.},
- *    number = {3},
- *    pages = {211-228},
- *    title = {Induction of Ripple-Down Rules Applied to Modeling Large Databases},
- *    volume = {5},
- *    year = {1995},
- *    PDF = {http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- * 
+ * It generates the default rule first and then the exceptions for the default rule
+ * with the least (weighted) error rate.  Then it generates the "best" exceptions for
+ * each exception and iterates until pure.  Thus it performs a tree-like expansion of
+ * exceptions and the leaf has only default rule but no exceptions. <br>
+ * The exceptions are a set of rules that predict the class other than class in default
+ * rule.  IREP is used to find out the exceptions. <p>
  * There are five inner classes defined in this class. <br>
  * The first is Ridor_node, which implements one node in the Ridor tree.  It's basically
  * composed of a default class and a set of exception rules to the default class.<br>
@@ -87,48 +48,14 @@ import java.util.Vector;
  * implement the functions related to a antecedent with a nominal attribute and a numeric 
  * attribute respectively.<p>
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -F &lt;number of folds&gt;
- *  Set number of folds for IREP
- *  One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -S &lt;number of shuffles&gt;
- *  Set number of shuffles to randomize
- *  the data in order to get better rule.
- *  (default 10)</pre>
- * 
- * <pre> -A
- *  Set flag of whether use the error rate 
- *  of all the data to select the default class
- *  in each step. If not set, the learner will only use the error rate in the pruning data</pre>
- * 
- * <pre> -M
- *   Set flag of whether use the majority class as
- *  the default class in each step instead of 
- *  choosing default class based on the error rate
- *  (if the flag is not set)</pre>
- * 
- * <pre> -N &lt;min. weights&gt;
- *  Set the minimal weights of instances
- *  within a split.
- *  (default 2.0)</pre>
- * 
- <!-- options-end -->
  *
- * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @author: Xin XU (xx5@cs.waikato.ac.nz)
+ * @version $Revision: 1.12 $ 
  */
-public class Ridor 
-  extends Classifier
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
-             TechnicalInformationHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -7261533075088314436L;
-  
+public class Ridor extends Classifier
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
+
   /** The number of folds to split data into Grow and Prune for IREP */
   private int m_Folds = 3;
     
@@ -165,38 +92,13 @@ public class Ridor
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "The implementation of a RIpple-DOwn Rule learner.\n\n" 
+    return "The implementation of a RIpple-DOwn Rule learner. " 
       + "It generates a default rule first and then the exceptions for the default rule "
       + "with the least (weighted) error rate.  Then it generates the \"best\" exceptions for "
       + "each exception and iterates until pure.  Thus it performs a tree-like expansion of "
       + "exceptions."
       + "The exceptions are a set of rules that predict classes other than the default. "
-      + "IREP is used to generate the exceptions.\n\n"
-      + "For more information about Ripple-Down Rules, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Brian R. Gaines and Paul Compton");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.TITLE, "Induction of Ripple-Down Rules Applied to Modeling Large Databases");
-    result.setValue(Field.JOURNAL, "J. Intell. Inf. Syst.");
-    result.setValue(Field.VOLUME, "5");
-    result.setValue(Field.NUMBER, "3");
-    result.setValue(Field.PAGES, "211-228");
-    result.setValue(Field.PDF, "http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf");
-    
-    return result;
+      + "IREP is used to generate the exceptions.";
   }
     
   /** 
@@ -204,11 +106,7 @@ public class Ridor
    * It consists of a default class label, a set of exceptions to the default rule
    * and the exceptions to each exception
    */
-  private class Ridor_node 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = -581370560157467677L;
+  private class Ridor_node implements Serializable {
 	
     /** The default class label */
     private double defClass = Double.NaN;
@@ -224,32 +122,10 @@ public class Ridor
     /** The level of this node */
     private int level;
 
-    /**
-     * Gets the default class label
-     *
-     * @return the default class label
-     */
-    public double getDefClass() { 
-      return defClass; 
-    }
-    
-    /**
-     * Gets the set of exceptions
-     * 
-     * @return the set of exceptions
-     */
-    public RidorRule[] getRules() { 
-      return rules; 
-    }
-    
-    /**
-     * Gets the exceptions of the exceptions rules
-     * 
-     * @return the exceptions of the exceptions rules
-     */
-    public Ridor_node[] getExcepts() { 
-      return excepts; 
-    }
+    /** "Get" member functions */
+    public double getDefClass() { return defClass; }
+    public RidorRule[] getRules() { return rules; }
+    public Ridor_node[] getExcepts() { return excepts; }
 
     /**
      * Builds a ripple-down manner rule learner.
@@ -257,7 +133,7 @@ public class Ridor
      * @param dataByClass the divided data by their class label. The real class
      * labels of the instances are all set to 0
      * @param lvl the level of the parent node
-     * @throws Exception if ruleset of this node cannot be built
+     * @exception Exception if ruleset of this node cannot be built
      */
     public void findRules(Instances[] dataByClass, int lvl) throws Exception {
       Vector finalRules = null;
@@ -377,7 +253,7 @@ public class Ridor
      *                   yet covered by the ruleset
      * @param ruleset the ruleset to be built
      * @return the weighted accuracy rate of the ruleset
-     * @throws if the rules cannot be built properly
+     * @exception if the rules cannot be built properly
      */
     private double buildRuleset(Instances insts, double classCount, Vector ruleset) 
       throws Exception {	    
@@ -561,12 +437,9 @@ public class Ridor
    * an antecedent and Reduced Error Prunning (REP) is used to prune the rule. 
    *
    */
-  private class RidorRule 
-    implements WeightedInstancesHandler, Serializable {
-	
-    /** for serialization */
-    static final long serialVersionUID = 4375199423973848157L;
     
+  private class RidorRule implements WeightedInstancesHandler, Serializable {
+	
     /** The internal representation of the class label to be predicted*/
     private double m_Class = -1;	
 	
@@ -598,7 +471,7 @@ public class Ridor
      * m_Class.
      *
      * @param instances the training data
-     * @throws Exception if classifier can't be built successfully
+     * @exception Exception if classifier can't be built successfully
      */
     public void buildClassifier(Instances instances) throws Exception {
       m_ClassAttribute = instances.classAttribute();
@@ -925,29 +798,28 @@ public class Ridor
    * the corresponding value.  There are two inherited classes, namely NumericAntd
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
-  private abstract class Antd 
-    implements Serializable {
     
-    /** The attribute of the antecedent */
+  private abstract class Antd implements Serializable {
+    /* The attribute of the antecedent */
     protected Attribute att;
 	
-    /** The attribute value of the antecedent.  
+    /* The attribute value of the antecedent.  
        For numeric attribute, value is either 0(1st bag) or 1(2nd bag) */
     protected double value; 
 	
-    /** The maximum infoGain achieved by this antecedent test */
+    /* The maximum infoGain achieved by this antecedent test */
     protected double maxInfoGain;
 	
-    /** The accurate rate of this antecedent test on the growing data */
+    /* The accurate rate of this antecedent test on the growing data */
     protected double accuRate;
 	
-    /** The coverage of this antecedent */
+    /* The coverage of this antecedent */
     protected double cover;
 	
-    /** The accurate data for this antecedent */
+    /* The accurate data for this antecedent */
     protected double accu;
 	
-    /** Constructor*/
+    /* Constructor*/
     public Antd(Attribute a){
       att=a;
       value=Double.NaN; 
@@ -974,22 +846,18 @@ public class Ridor
   /** 
    * The antecedent with numeric attribute
    */
-  private class NumericAntd 
-    extends Antd {
-    
-    /** for serialization */
-    static final long serialVersionUID = 1968761518014492214L;
+  private class NumericAntd extends Antd{
 	
-    /** The split point for this numeric antecedent */
+    /* The split point for this numeric antecedent */
     private double splitPoint;
 	
-    /** Constructor*/
+    /* Constructor*/
     public NumericAntd(Attribute a){ 
       super(a);
       splitPoint = Double.NaN;
     }    
 	
-    /** Get split point of this numeric antecedent */
+    /* Get split point of this numeric antecedent */
     public double getSplitPoint(){ return splitPoint; }
 	
     /**
@@ -1152,18 +1020,14 @@ public class Ridor
   /** 
    * The antecedent with nominal attribute
    */
-  private class NominalAntd 
-    extends Antd {
-    
-    /** for serialization */
-    static final long serialVersionUID = -256386137196078004L;
+  private class NominalAntd extends Antd{
 	
     /* The parameters of infoGain calculated for each attribute value */
     private double[] accurate;
     private double[] coverage;
     private double[] infoGain;
 	
-    /** Constructor*/
+    /* Constructor*/
     public NominalAntd(Attribute a){ 
       super(a);
       int bag = att.numValues();
@@ -1260,44 +1124,31 @@ public class Ridor
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Builds a ripple-down manner rule learner.
    *
    * @param data the training data
-   * @throws Exception if classifier can't be built successfully
+   * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
     Instances data = new Instances(instances);
+    if (data.checkForStringAttributes())
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+	
+    if(Utils.eq(data.sumOfWeights(),0))
+      throw new Exception("No training data.");
+	
     data.deleteWithMissingClass();
-    
+	
+    if(Utils.eq(data.sumOfWeights(),0))
+      throw new Exception("The class labels of all the training data are missing.");	
+	
     int numCl = data.numClasses();
     m_Root = new Ridor_node();
     m_Class = instances.classAttribute();     // The original class label
+	
+    if(!m_Class.isNominal())
+      throw new UnsupportedClassTypeException("Only nominal class, please.");
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
@@ -1412,41 +1263,10 @@ public class Ridor
   }
     
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -F &lt;number of folds&gt;
-   *  Set number of folds for IREP
-   *  One fold is used as pruning set.
-   *  (default 3)</pre>
-   * 
-   * <pre> -S &lt;number of shuffles&gt;
-   *  Set number of shuffles to randomize
-   *  the data in order to get better rule.
-   *  (default 10)</pre>
-   * 
-   * <pre> -A
-   *  Set flag of whether use the error rate 
-   *  of all the data to select the default class
-   *  in each step. If not set, the learner will only use the error rate in the pruning data</pre>
-   * 
-   * <pre> -M
-   *   Set flag of whether use the majority class as
-   *  the default class in each step instead of 
-   *  choosing default class based on the error rate
-   *  (if the flag is not set)</pre>
-   * 
-   * <pre> -N &lt;min. weights&gt;
-   *  Set the minimal weights of instances
-   *  within a split.
-   *  (default 2.0)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 	
@@ -1591,7 +1411,7 @@ public class Ridor
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) 

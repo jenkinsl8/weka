@@ -10,132 +10,73 @@
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    alo0ng with this program; if not, write to the Free Software
+ *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Apriori.java
- *    Copyright (C) 1999 Eibe Frank,Mark Hall, Stefan Mutter
+ *    Copyright (C) 1999 Eibe Frank,Mark Hall
  *
  */
 
 package weka.associations;
 
-import weka.core.AttributeStats;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 /**
- <!-- globalinfo-start -->
- * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum support until it finds the required number of rules with the given minimum confidence.<br/>
- * The algorithm has an option to mine class association rules. It is adapted as explained in the second reference.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * R. Agrawal, R. Srikant: Fast Algorithms for Mining Association Rules in Large Databases. In: 20th International Conference on Very Large Data Bases, 478-499, 1994.<br/>
- * <br/>
- * Bing Liu, Wynne Hsu, Yiming Ma: Integrating Classification and Association Rule Mining. In: Fourth International Conference on Knowledge Discovery and Data Mining, 80-86, 1998.
- * <p/>
- <!-- globalinfo-end -->
+ * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum
+ * support until it finds the required number of rules with the given minimum 
+ * confidence. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Agrawal1994,
- *    author = {R. Agrawal and R. Srikant},
- *    booktitle = {20th International Conference on Very Large Data Bases},
- *    pages = {478-499},
- *    publisher = {Morgan Kaufmann, Los Altos, CA},
- *    title = {Fast Algorithms for Mining Association Rules in Large Databases},
- *    year = {1994}
- * }
- * 
- * &#64;inproceedings{Liu1998,
- *    author = {Bing Liu and Wynne Hsu and Yiming Ma},
- *    booktitle = {Fourth International Conference on Knowledge Discovery and Data Mining},
- *    pages = {80-86},
- *    publisher = {AAAI Press},
- *    title = {Integrating Classification and Association Rule Mining},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Reference: R. Agrawal, R. Srikant (1994). <i>Fast algorithms for
+ * mining association rules in large databases </i>. Proc
+ * International Conference on Very Large Databases,
+ * pp. 478-499. Santiage, Chile: Morgan Kaufmann, Los Altos, CA. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;required number of rules output&gt;
- *  The required number of rules. (default = 10)</pre>
- * 
- * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
- *  The metric type by which to rank rules. (default = confidence)</pre>
- * 
- * <pre> -C &lt;minimum metric score of a rule&gt;
- *  The minimum confidence of a rule. (default = 0.9)</pre>
- * 
- * <pre> -D &lt;delta for minimum support&gt;
- *  The delta by which the minimum support is decreased in
- *  each iteration. (default = 0.05)</pre>
- * 
- * <pre> -U &lt;upper bound for minimum support&gt;
- *  Upper bound for minimum support. (default = 1.0)</pre>
- * 
- * <pre> -M &lt;lower bound for minimum support&gt;
- *  The lower bound for the minimum support. (default = 0.1)</pre>
- * 
- * <pre> -S &lt;significance level&gt;
- *  If used, rules are tested for significance at
- *  the given level. Slower. (default = no significance testing)</pre>
- * 
- * <pre> -I
- *  If set the itemsets found are also output. (default = no)</pre>
- * 
- * <pre> -R
- *  Remove columns that contain all missing values (default = no)</pre>
- * 
- * <pre> -V
- *  Report progress iteratively. (default = no)</pre>
- * 
- * <pre> -A
- *  If set class association rules are mined. (default = no)</pre>
- * 
- * <pre> -c &lt;the class index&gt;
- *  The class index. (default = last)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *   
+ * -N required number of rules <br>
+ * The required number of rules (default: 10). <p>
+ *
+ * -T type of metric by which to sort rules <br>
+ * 0 = confidence | 1 = lift | 2 = leverage | 3 = Conviction. <p>
+ *
+ * -C minimum confidence of a rule <br>
+ * The minimum confidence of a rule (default: 0.9). <p>
+ *
+ * -D delta for minimum support <br>
+ * The delta by which the minimum support is decreased in
+ * each iteration (default: 0.05). <p>
+ *
+ * -U upper bound for minimum support <br>
+ * The upper bound for minimum support. Don't explicitly look for 
+ * rules with more than this level of support. <p>
+ *
+ * -M lower bound for minimum support <br>
+ * The lower bound for the minimum support (default = 0.1). <p>
+ *
+ * -S significance level <br>
+ * If used, rules are tested for significance at
+ * the given level. Slower (default = no significance testing). <p>
+ *
+ * -R <br>
+ * If set then columns that contain all missing values are removed from
+ * the data.
+ *
+ * -I <br>
+ * If set the itemsets found are also output (default = no). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
- */
-public class Apriori 
-  extends Associator 
-  implements OptionHandler, CARuleMiner, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3277498842319212687L;
+ * @version $Revision: 1.19.2.3 $ */
+
+public class Apriori extends Associator implements OptionHandler {
+
   
   /** The minimum support. */
   protected double m_minSupport;
@@ -146,15 +87,11 @@ public class Apriori
   /** The lower bound for the minimum support. */
   protected double m_lowerBoundMinSupport;
 
-  /** Metric type: Confidence */
-  protected static final int CONFIDENCE = 0;
-  /** Metric type: Lift */
-  protected static final int LIFT = 1;
-  /** Metric type: Leverage */
-  protected static final int LEVERAGE = 2;
-  /** Metric type: Conviction */
-  protected static final int CONVICTION = 3;
   /** Metric types. */
+  protected static final int CONFIDENCE = 0;
+  protected static final int LIFT = 1;
+  protected static final int LEVERAGE = 2;
+  protected static final int CONVICTION = 3;
   public static final Tag [] TAGS_SELECTION = {
     new Tag(CONFIDENCE, "Confidence"),
     new Tag(LIFT, "Lift"),
@@ -196,20 +133,10 @@ public class Apriori
   /** Output itemsets found? */
   protected boolean m_outputItemSets;
 
-  /** Remove columns with all missing values */
   protected boolean m_removeMissingCols;
 
   /** Report progress iteratively */
   protected boolean m_verbose;
-  
-  /** Only the class attribute of all Instances.*/
-  protected Instances m_onlyClass;
-  
-  /** The class index. */  
-  protected int m_classIndex;
-  
-  /** Flag indicating whether class association rules are mined. */
-  protected boolean m_car;
 
   /**
    * Returns a string describing this associator
@@ -217,44 +144,7 @@ public class Apriori
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Class implementing an Apriori-type algorithm. Iteratively reduces "
-      + "the minimum support until it finds the required number of rules with "
-      + "the given minimum confidence.\n"
-      + "The algorithm has an option to mine class association rules. It is "
-      + "adapted as explained in the second reference.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-  
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "R. Agrawal and R. Srikant");
-    result.setValue(Field.TITLE, "Fast Algorithms for Mining Association Rules in Large Databases");
-    result.setValue(Field.BOOKTITLE, "20th International Conference on Very Large Data Bases");
-    result.setValue(Field.YEAR, "1994");
-    result.setValue(Field.PAGES, "478-499");
-    result.setValue(Field.PUBLISHER, "Morgan Kaufmann, Los Altos, CA");
-
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Bing Liu and Wynne Hsu and Yiming Ma");
-    additional.setValue(Field.TITLE, "Integrating Classification and Association Rule Mining");
-    additional.setValue(Field.BOOKTITLE, "Fourth International Conference on Knowledge Discovery and Data Mining");
-    additional.setValue(Field.YEAR, "1998");
-    additional.setValue(Field.PAGES, "80-86");
-    additional.setValue(Field.PUBLISHER, "AAAI Press");
-    
-    return result;
+    return "Finds association rules.";
   }
 
   /**
@@ -281,19 +171,15 @@ public class Apriori
     m_upperBoundMinSupport = 1.0;
     m_significanceLevel = -1;
     m_outputItemSets = false;
-    m_car = false;
-    m_classIndex = -1;
   }
 
   /**
    * Removes columns that are all missing from the data
    * @param instances the instances
    * @return a new set of instances with all missing columns removed
-   * @throws Exception if something goes wrong
    */
   protected Instances removeMissingColumns(Instances instances) 
     throws Exception {
-    
     int numInstances = instances.numInstances();
     StringBuffer deleteString = new StringBuffer();
     int removeCount = 0;
@@ -344,30 +230,11 @@ public class Apriori
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Method that generates all large itemsets with a minimum support, and from
    * these all association rules with a minimum confidence.
    *
    * @param instances the instances to be used for generating the associations
-   * @throws Exception if rules can't be built successfully
+   * @exception Exception if rules can't be built successfully
    */
   public void buildAssociations(Instances instances) throws Exception {
 
@@ -376,45 +243,20 @@ public class Apriori
     FastVector[] sortedRuleSet;
     int necSupport=0;
 
+    if (instances.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
+    }
+
     if (m_removeMissingCols) {
       instances = removeMissingColumns(instances);
     }
-    if(m_car && m_metricType != CONFIDENCE)
-      throw new Exception("For CAR-Mining metric type has to be confidence!");
-    
-    if (m_classIndex == -1)
-      instances.setClassIndex(instances.numAttributes()-1);     
-    else if (m_classIndex < instances.numAttributes() && m_classIndex >= 0)
-      instances.setClassIndex(m_classIndex);
-    else
-      throw new Exception("Invalid class index.");
 
-    // can associator handle the data?
-    getCapabilities().testWithFail(instances);
-
+    // Decrease minimum support until desired number of rules found.
     m_cycles = 0;
-    if(m_car){
-        //m_instances does not contain the class attribute
-        m_instances = LabeledItemSet.divide(instances,false);
-    
-        //m_onlyClass contains only the class attribute
-        m_onlyClass = LabeledItemSet.divide(instances,true);
-    }
-    else
-        m_instances = instances;
-    
-    if(m_car && m_numRules == Integer.MAX_VALUE){
-        // Set desired minimum support
-        m_minSupport = m_lowerBoundMinSupport;
-    }
-    else{
-        // Decrease minimum support until desired number of rules found.
-        m_minSupport = m_upperBoundMinSupport - m_delta;
-        m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
-            ? m_lowerBoundMinSupport 
-            : m_minSupport;
-    }
-
+    m_minSupport = m_upperBoundMinSupport - m_delta;
+    m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
+      ? m_lowerBoundMinSupport 
+      : m_minSupport;
     do {
 
       // Reserve space for variables
@@ -438,21 +280,16 @@ public class Apriori
 	sortedRuleSet[4] = new FastVector();
 	sortedRuleSet[5] = new FastVector();
       }
-      if(!m_car){
-        // Find large itemsets and rules
-        findLargeItemSets();
-        if (m_significanceLevel != -1 || m_metricType != CONFIDENCE) 
-            findRulesBruteForce();
-        else
-            findRulesQuickly();
-      }
-      else{
-          findLargeCarItemSets();
-          findCarRulesQuickly();
-      }
+
+      // Find large itemsets and rules
+      findLargeItemSets(instances);
+      if (m_significanceLevel != -1 || m_metricType != CONFIDENCE) 
+	findRulesBruteForce();
+      else
+	findRulesQuickly();
       
       // Sort rules according to their support
-      /*supports = new double[m_allTheRules[2].size()];
+      supports = new double[m_allTheRules[2].size()];
       for (int i = 0; i < m_allTheRules[2].size(); i++) 
 	supports[i] = (double)((AprioriItemSet)m_allTheRules[1].elementAt(i)).support();
       indices = Utils.stableSort(supports);
@@ -464,21 +301,6 @@ public class Apriori
 	  sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[i]));
 	  sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[i]));
 	  sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[i]));
-	}
-      }*/
-      int j = m_allTheRules[2].size()-1;
-      supports = new double[m_allTheRules[2].size()];
-      for (int i = 0; i < (j+1); i++) 
-	supports[j-i] = ((double)((ItemSet)m_allTheRules[1].elementAt(j-i)).support())*(-1);
-      indices = Utils.stableSort(supports);
-      for (int i = 0; i < (j+1); i++) {
-	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[j-i]));
-	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[j-i]));
-	sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[j-i]));
-	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-	  sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[j-i]));
-	  sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[j-i]));
-	  sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[j-i]));
 	}
       }
 
@@ -515,13 +337,13 @@ public class Apriori
 	  System.out.println(toString());
 	}
       }
-      if(m_minSupport == m_lowerBoundMinSupport || m_minSupport - m_delta >  m_lowerBoundMinSupport)
-        m_minSupport -= m_delta;
-      else
-        m_minSupport = m_lowerBoundMinSupport;
-      
-      necSupport = Math.round((float)((m_minSupport * 
-			 (double)m_instances.numInstances())+0.5));
+      m_minSupport -= m_delta;
+      /*      m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
+	? 0 
+	: m_minSupport; */
+
+      necSupport = (int)(m_minSupport * 
+			 (double)instances.numInstances()+0.5);
 
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules) &&
@@ -531,43 +353,6 @@ public class Apriori
 	     (necSupport >= 1));
     m_minSupport += m_delta;
   }
-  
-  
-      /**
-     * Method that mines all class association rules with minimum support and
-     * with a minimum confidence.
-     * @return an sorted array of FastVector (confidence depended) containing the rules and metric information
-     * @param data the instances for which class association rules should be mined
-     * @throws Exception if rules can't be built successfully
-     */
-    public FastVector[] mineCARs(Instances data) throws Exception{
-	 
-        m_car = true;
-	buildAssociations(data);
-	return m_allTheRules;
-    }
-
-   /**
-   * Gets the instances without the class atrribute.
-   *
-   * @return the instances without the class attribute.
-   */ 
-  public Instances getInstancesNoClass() {
-      
-      return m_instances;
-  }  
-  
-  
-  /**
-   * Gets only the class attribute of the instances.
-   *
-   * @return the class attribute of all instances.
-   */ 
-  public Instances getInstancesOnlyClass() {
-      
-      return m_onlyClass;
-  }  
-
 
   /**
    * Returns an enumeration describing the available options.
@@ -587,13 +372,11 @@ public class Apriori
       string6 = "\tIf used, rules are tested for significance at\n",
       string7 = "\tthe given level. Slower. (default = no significance testing)",
       string8 = "\tIf set the itemsets found are also output. (default = no)",
-      string9 = "\tIf set class association rules are mined. (default = no)",
-      string10 = "\tThe class index. (default = last)",
       stringType = "\tThe metric type by which to rank rules. (default = "
       +"confidence)";
     
 
-    FastVector newVector = new FastVector(11);
+    FastVector newVector = new FastVector(9);
 
     newVector.addElement(new Option(string1, "N", 1, 
 				    "-N <required number of rules output>"));
@@ -620,62 +403,49 @@ public class Apriori
     newVector.addElement(new Option("\tReport progress iteratively. (default "
 				    +"= no)", "V", 0,
 				    "-V"));
-    newVector.addElement(new Option(string9, "A", 0,
-				    "-A"));
-    newVector.addElement(new Option(string10, "c", 1,
-				    "-c <the class index>"));
     
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;required number of rules output&gt;
-   *  The required number of rules. (default = 10)</pre>
-   * 
-   * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
-   *  The metric type by which to rank rules. (default = confidence)</pre>
-   * 
-   * <pre> -C &lt;minimum metric score of a rule&gt;
-   *  The minimum confidence of a rule. (default = 0.9)</pre>
-   * 
-   * <pre> -D &lt;delta for minimum support&gt;
-   *  The delta by which the minimum support is decreased in
-   *  each iteration. (default = 0.05)</pre>
-   * 
-   * <pre> -U &lt;upper bound for minimum support&gt;
-   *  Upper bound for minimum support. (default = 1.0)</pre>
-   * 
-   * <pre> -M &lt;lower bound for minimum support&gt;
-   *  The lower bound for the minimum support. (default = 0.1)</pre>
-   * 
-   * <pre> -S &lt;significance level&gt;
-   *  If used, rules are tested for significance at
-   *  the given level. Slower. (default = no significance testing)</pre>
-   * 
-   * <pre> -I
-   *  If set the itemsets found are also output. (default = no)</pre>
-   * 
-   * <pre> -R
-   *  Remove columns that contain all missing values (default = no)</pre>
-   * 
-   * <pre> -V
-   *  Report progress iteratively. (default = no)</pre>
-   * 
-   * <pre> -A
-   *  If set class association rules are mined. (default = no)</pre>
-   * 
-   * <pre> -c &lt;the class index&gt;
-   *  The class index. (default = last)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options. Valid options are:<p>
+   *   
+   * -N required number of rules <br>
+   * The required number of rules (default: 10). <p>
+   *
+   * -T type of metric by which to sort rules <br>
+   * 0 = confidence | 1 = lift | 2 = leverage | 3 = Conviction. <p>
+   *
+   * -C minimum metric score of a rule <br>
+   * The minimum confidence of a rule (default: 0.9). <p>
+   *
+   * -D delta for minimum support <br>
+   * The delta by which the minimum support is decreased in
+   * each iteration (default: 0.05).
+   *
+   * -U upper bound for minimum support <br>
+   * The upper bound for minimum support. Don't explicitly look for 
+   * rules with more than this level of support. <p>
+   *
+   * -M lower bound for minimum support <br>
+   * The lower bound for the minimum support (default = 0.1). <p>
+   *
+   * -S significance level <br>
+   * If used, rules are tested for significance at
+   * the given level. Slower (default = no significance testing). <p>
+   *
+   * -I <br>
+   * If set the itemsets found are also output (default = no). <p>
+   *
+   * -V <br>
+   * If set then progress is reported iteratively during execution. <p>
+   *
+   * -R <br>
+   * If set then columns that contain all missing values are removed from
+   * the data. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported 
+   * @exception Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -685,8 +455,7 @@ public class Apriori
       deltaString = Utils.getOption('D', options),
       maxSupportString = Utils.getOption('U', options),
       minSupportString = Utils.getOption('M', options),
-      significanceLevelString = Utils.getOption('S', options),
-      classIndexString = Utils.getOption('c',options);
+      significanceLevelString = Utils.getOption('S', options);
     String metricTypeString = Utils.getOption('T', options);
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
@@ -695,9 +464,6 @@ public class Apriori
     
     if (numRulesString.length() != 0) {
       m_numRules = Integer.parseInt(numRulesString);
-    }
-    if (classIndexString.length() != 0) {
-      m_classIndex = Integer.parseInt(classIndexString);
     }
     if (minConfidenceString.length() != 0) {
       m_minMetric = (new Double(minConfidenceString)).doubleValue();
@@ -715,7 +481,6 @@ public class Apriori
       m_significanceLevel = (new Double(significanceLevelString)).doubleValue();
     }
     m_outputItemSets = Utils.getFlag('I', options);
-    m_car = Utils.getFlag('A', options);
     m_verbose = Utils.getFlag('V', options);
     setRemoveAllMissingCols(Utils.getFlag('R', options));
   }
@@ -727,7 +492,7 @@ public class Apriori
    */
   public String [] getOptions() {
 
-    String [] options = new String [20];
+    String [] options = new String [17];
     int current = 0;
 
     if (m_outputItemSets) {
@@ -742,15 +507,12 @@ public class Apriori
     options[current++] = "-T"; options[current++] = "" + m_metricType;
     options[current++] = "-C"; options[current++] = "" + m_minMetric;
     options[current++] = "-D"; options[current++] = "" + m_delta;
-    options[current++] = "-U"; options[current++] = "" + m_upperBoundMinSupport;
-    options[current++] = "-M"; options[current++] = "" + m_lowerBoundMinSupport;
+    options[current++] = "-U"; options[current++] = ""+m_upperBoundMinSupport;
+    options[current++] = "-M"; options[current++] = ""+m_lowerBoundMinSupport;
     options[current++] = "-S"; options[current++] = "" + m_significanceLevel;
-    if (m_car)
-      options[current++] = "-A";
     if (m_verbose)
       options[current++] = "-V";
-    options[current++] = "-c"; options[current++] = "" + m_classIndex;
-    
+
     while (current < options.length) {
       options[current++] = "";
     }
@@ -759,8 +521,6 @@ public class Apriori
 
   /**
    * Outputs the size of all the generated sets of itemsets and the rules.
-   * 
-   * @return a string representation of the model
    */
   public String toString() {
 
@@ -796,20 +556,19 @@ public class Apriori
 		  Utils.doubleToString(m_significanceLevel,2)+'\n');
     text.append("Number of cycles performed: " + m_cycles+'\n');
     text.append("\nGenerated sets of large itemsets:\n");
-    if(!m_car){
-        for (int i = 0; i < m_Ls.size(); i++) {
-            text.append("\nSize of set of large itemsets L("+(i+1)+"): "+
+    for (int i = 0; i < m_Ls.size(); i++) {
+      text.append("\nSize of set of large itemsets L("+(i+1)+"): "+
 		  ((FastVector)m_Ls.elementAt(i)).size()+'\n');
-            if (m_outputItemSets) {
-                text.append("\nLarge Itemsets L("+(i+1)+"):\n");
-                for (int j = 0; j < ((FastVector)m_Ls.elementAt(i)).size(); j++)
-                    text.append(((AprioriItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
+      if (m_outputItemSets) {
+	text.append("\nLarge Itemsets L("+(i+1)+"):\n");
+	for (int j = 0; j < ((FastVector)m_Ls.elementAt(i)).size(); j++)
+	  text.append(((AprioriItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
 		      toString(m_instances)+"\n");
-            }
-        }
-        text.append("\nBest rules found:\n\n");
-        for (int i = 0; i < m_allTheRules[0].size(); i++) {
-            text.append(Utils.doubleToString((double)i+1, 
+      }
+    }
+    text.append("\nBest rules found:\n\n");
+    for (int i = 0; i < m_allTheRules[0].size(); i++) {
+      text.append(Utils.doubleToString((double)i+1, 
 		  (int)(Math.log(m_numRules)/Math.log(10)+1),0)+
 		  ". " + ((AprioriItemSet)m_allTheRules[0].elementAt(i)).
 		  toString(m_instances) 
@@ -817,74 +576,27 @@ public class Apriori
 		  toString(m_instances) +"    conf:("+  
 		  Utils.doubleToString(((Double)m_allTheRules[2].
 					elementAt(i)).doubleValue(),2)+")");
-            if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-                text.append((m_metricType == LIFT ? " <" : "")+" lift:("+  
+      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	text.append((m_metricType == LIFT ? " <" : "")+" lift:("+  
 		    Utils.doubleToString(((Double)m_allTheRules[3].
 					  elementAt(i)).doubleValue(),2)
 		    +")"+(m_metricType == LIFT ? ">" : ""));
-                text.append((m_metricType == LEVERAGE ? " <" : "")+" lev:("+  
+	text.append((m_metricType == LEVERAGE ? " <" : "")+" lev:("+  
 		    Utils.doubleToString(((Double)m_allTheRules[4].
 					  elementAt(i)).doubleValue(),2)
 		    +")");
-                text.append(" ["+
+	text.append(" ["+
 		    (int)(((Double)m_allTheRules[4].elementAt(i))
 			  .doubleValue() * (double)m_instances.numInstances())
 		    +"]"+(m_metricType == LEVERAGE ? ">" : ""));
-                text.append((m_metricType == CONVICTION ? " <" : "")+" conv:("+  
+	text.append((m_metricType == CONVICTION ? " <" : "")+" conv:("+  
 		    Utils.doubleToString(((Double)m_allTheRules[5].
 					  elementAt(i)).doubleValue(),2)
 		    +")"+(m_metricType == CONVICTION ? ">" : ""));
-            }
-            text.append('\n');
-        }
-    }
-    else{
-        for (int i = 0; i < m_Ls.size(); i++) {
-            text.append("\nSize of set of large itemsets L("+(i+1)+"): "+
-		  ((FastVector)m_Ls.elementAt(i)).size()+'\n');
-            if (m_outputItemSets) {
-                text.append("\nLarge Itemsets L("+(i+1)+"):\n");
-                for (int j = 0; j < ((FastVector)m_Ls.elementAt(i)).size(); j++){
-                    text.append(((ItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).
-		      toString(m_instances)+"\n");
-                    text.append(((LabeledItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).m_classLabel+"  ");
-                    text.append(((LabeledItemSet)((FastVector)m_Ls.elementAt(i)).elementAt(j)).support()+"\n");
-                }
-            }
-        }
-        text.append("\nBest rules found:\n\n");
-        for (int i = 0; i < m_allTheRules[0].size(); i++) {
-            text.append(Utils.doubleToString((double)i+1, 
-					     (int)(Math.log(m_numRules)/Math.log(10)+1),0)+
-			". " + ((ItemSet)m_allTheRules[0].elementAt(i)).
-			toString(m_instances) 
-			+ " ==> " + ((ItemSet)m_allTheRules[1].elementAt(i)).
-			toString(m_onlyClass) +"    conf:("+  
-			Utils.doubleToString(((Double)m_allTheRules[2].
-					      elementAt(i)).doubleValue(),2)+")");
-	
-            text.append('\n');
-        }
+      }
+      text.append('\n');
     }
     return text.toString();
-  }
-  
-   /**
-   * Returns the metric string for the chosen metric type
-   * @return a string describing the used metric for the interestingness of a class association rule
-   */
-  public String metricString() {
-      
-        switch(m_metricType) {
-	case LIFT:
-	    return "lif";
-	case LEVERAGE:
-	    return "leverage"; 
-	case CONVICTION:
-	    return "conviction";
-        default:
-            return "conf";
-	}
   }
 
   /**
@@ -942,59 +654,6 @@ public class Apriori
     m_upperBoundMinSupport = v;
   }
 
-   /**
-   * Sets the class index
-   * @param index the class index
-   */  
-  public void setClassIndex(int index){
-      
-      m_classIndex = index;
-  }
-  
-  /**
-   * Gets the class index
-   * @return the index of the class attribute
-   */  
-  public int getClassIndex(){
-      
-      return m_classIndex;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String classIndexTipText() {
-    return "Index of the class attribute. If set to -1, the last attribute is taken as class attribute.";
-
-  }
-
-  /**
-   * Sets class association rule mining
-   * @param flag if class association rules are mined, false otherwise
-   */  
-  public void setCar(boolean flag){
-      m_car = flag;
-  }
-  
-  /**
-   * Gets whether class association ruels are mined
-   * @return true if class association rules are mined, false otherwise
-   */  
-  public boolean getCar(){
-      return m_car;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String carTipText() {
-    return "If enabled class association rules are mined instead of (general) association rules.";
-  }
-
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -1041,7 +700,7 @@ public class Apriori
   public String metricTypeTipText() {
     return "Set the type of metric by which to rank rules. Confidence is "
       +"the proportion of the examples covered by the premise that are also "
-      +"covered by the consequence(Class association rules can only be mined using confidence). Lift is confidence divided by the "
+      +"covered by the consequence. Lift is confidence divided by the "
       +"proportion of all examples that are covered by the consequence. This "
       +"is a measure of the importance of the association that is independent "
       +"of support. Leverage is the proportion of additional examples covered "
@@ -1049,8 +708,9 @@ public class Apriori
       +"premise and consequence were independent of each other. The total "
       +"number of examples that this represents is presented in brackets "
       +"following the leverage. Conviction is "
-      +"another measure of departure from independence. Conviction is given "
-      +"by ";
+      +"another measure of departure from independence and furthermore takes into "
+      +"account implicaton. Conviction is given "
+      +"by P(premise)P(!consequence) / P(premise, !consequence).";
   }
 
   /**
@@ -1253,35 +913,36 @@ public class Apriori
   /** 
    * Method that finds all large itemsets for the given set of instances.
    *
-   * @throws Exception if an attribute is numeric
+   * @param the instances to be used
+   * @exception Exception if an attribute is numeric
    */
-  private void findLargeItemSets() throws Exception {
+  private void findLargeItemSets(Instances instances) throws Exception {
     
     FastVector kMinusOneSets, kSets;
     Hashtable hashtable;
     int necSupport, necMaxSupport,i = 0;
     
-    
+    m_instances = instances;
     
     // Find large itemsets
 
     // minimum support
-    necSupport = (int)(m_minSupport * (double)m_instances.numInstances()+0.5);
-    necMaxSupport = (int)(m_upperBoundMinSupport * (double)m_instances.numInstances()+0.5);
+    necSupport = (int)(m_minSupport * (double)instances.numInstances()+0.5);
+    necMaxSupport = (int)(m_upperBoundMinSupport * (double)instances.numInstances()+0.5);
    
-    kSets = AprioriItemSet.singletons(m_instances);
-    AprioriItemSet.upDateCounters(kSets,m_instances);
+    kSets = AprioriItemSet.singletons(instances);
+    AprioriItemSet.upDateCounters(kSets, instances);
     kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
     if (kSets.size() == 0)
       return;
     do {
       m_Ls.addElement(kSets);
       kMinusOneSets = kSets;
-      kSets = AprioriItemSet.mergeAllItemSets(kMinusOneSets, i, m_instances.numInstances());
+      kSets = AprioriItemSet.mergeAllItemSets(kMinusOneSets, i, instances.numInstances());
       hashtable = AprioriItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
       m_hashtables.addElement(hashtable);
       kSets = AprioriItemSet.pruneItemSets(kSets, hashtable);
-      AprioriItemSet.upDateCounters(kSets, m_instances);
+      AprioriItemSet.upDateCounters(kSets, instances);
       kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
       i++;
     } while (kSets.size() > 0);
@@ -1290,7 +951,7 @@ public class Apriori
   /** 
    * Method that finds all association rules and performs significance test.
    *
-   * @throws Exception if an attribute is numeric
+   * @exception Exception if an attribute is numeric
    */
   private void findRulesBruteForce() throws Exception {
 
@@ -1323,7 +984,7 @@ public class Apriori
   /** 
    * Method that finds all association rules.
    *
-   * @throws Exception if an attribute is numeric
+   * @exception Exception if an attribute is numeric
    */
   private void findRulesQuickly() throws Exception {
 
@@ -1345,89 +1006,11 @@ public class Apriori
       }
     }
   }
-  
-      /**
-     *
-     * Method that finds all large itemsets for class association rules for the given set of instances.
-     * @throws Exception if an attribute is numeric
-     */
-    private void findLargeCarItemSets() throws Exception {
-	
-	FastVector kMinusOneSets, kSets;
-	Hashtable hashtable;
-	int necSupport, necMaxSupport,i = 0;
-	
-	// Find large itemsets
-	
-	// minimum support
-        double nextMinSupport = m_minSupport*(double)m_instances.numInstances();
-        double nextMaxSupport = m_upperBoundMinSupport*(double)m_instances.numInstances();
-	if((double)Math.rint(nextMinSupport) == nextMinSupport){
-            necSupport = (int) nextMinSupport;
-        }
-        else{
-            necSupport = Math.round((float)(nextMinSupport+0.5));
-        }
-        if((double)Math.rint(nextMaxSupport) == nextMaxSupport){
-            necMaxSupport = (int) nextMaxSupport;
-        }
-        else{
-            necMaxSupport = Math.round((float)(nextMaxSupport+0.5));
-        }
-	
-	//find item sets of length one
-	kSets = LabeledItemSet.singletons(m_instances,m_onlyClass);
-	LabeledItemSet.upDateCounters(kSets, m_instances,m_onlyClass);
-        
-        //check if a item set of lentgh one is frequent, if not delete it
-	kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
-        if (kSets.size() == 0)
-	    return;
-	do {
-	    m_Ls.addElement(kSets);
-	    kMinusOneSets = kSets;
-	    kSets = LabeledItemSet.mergeAllItemSets(kMinusOneSets, i, m_instances.numInstances());
-	    hashtable = LabeledItemSet.getHashtable(kMinusOneSets, kMinusOneSets.size());
-	    kSets = LabeledItemSet.pruneItemSets(kSets, hashtable);
-	    LabeledItemSet.upDateCounters(kSets, m_instances,m_onlyClass);
-	    kSets = LabeledItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
-	    i++;
-	} while (kSets.size() > 0);
-    } 
-
-   
-
-  /** 
-   * Method that finds all class association rules.
-   *
-   * @throws Exception if an attribute is numeric
-   */
-   private void findCarRulesQuickly() throws Exception {
-
-    FastVector[] rules;
-
-    // Build rules
-    for (int j = 0; j < m_Ls.size(); j++) {
-      FastVector currentLabeledItemSets = (FastVector)m_Ls.elementAt(j);
-      Enumeration enumLabeledItemSets = currentLabeledItemSets.elements();
-      while (enumLabeledItemSets.hasMoreElements()) {
-	LabeledItemSet currentLabeledItemSet = (LabeledItemSet)enumLabeledItemSets.nextElement();
-	rules = currentLabeledItemSet.generateRules(m_minMetric,false);
-	for (int k = 0; k < rules[0].size(); k++) {
-	  m_allTheRules[0].addElement(rules[0].elementAt(k));
-	  m_allTheRules[1].addElement(rules[1].elementAt(k));
-	  m_allTheRules[2].addElement(rules[2].elementAt(k));
-	}
-      }
-    }
-  }
 
   /**
-   * Main method.
-   * 
-   * @param args the commandline options
+   * Main method for testing this class.
    */
-  public static void main(String[] args) {
+  public static void main(String[] options) {
 
     String trainFileString;
     StringBuffer text = new StringBuffer();
@@ -1444,10 +1027,10 @@ public class Apriori
 	text.append(option.synopsis()+'\n');
 	text.append(option.description()+'\n');
       }
-      trainFileString = Utils.getOption('t', args);
+      trainFileString = Utils.getOption('t', options);
       if (trainFileString.length() == 0) 
 	throw new Exception("No training file given!");
-      apriori.setOptions(args);
+      apriori.setOptions(options);
       reader = new BufferedReader(new FileReader(trainFileString));
       apriori.buildAssociations(new Instances(reader));
       System.out.println(apriori);
@@ -1457,4 +1040,6 @@ public class Apriori
     }
   }
 }
+
+
 

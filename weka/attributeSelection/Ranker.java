@@ -21,51 +21,29 @@
  */
 
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.Utils;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Ranker : <br/>
- * <br/>
- * Ranks attributes by their individual evaluations. Use in conjunction with attribute evaluators (ReliefF, GainRatio, Entropy etc).<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for ranking the attributes evaluated by a AttributeEvaluator
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7. 
- * Any starting attributes specified are 
- * ignored during the ranking.</pre>
- * 
- * <pre> -T &lt;threshold&gt;
- *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
- * 
- * <pre> -N &lt;num to select&gt;
- *  Specify number of attributes to select</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -T <threshold> <br>
+ * Specify a threshold by which the AttributeSelection module can. <br>
+ * discard attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.21 $
  */
-public class Ranker 
-  extends ASSearch 
+public class Ranker extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -9086714848510751934L;
 
   /** Holds the starting set as an array of attributes */
   private int[] m_starting;
@@ -236,7 +214,7 @@ public class Ranker
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @throws Exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -279,28 +257,25 @@ public class Ranker
   }
   
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7. 
-   * Any starting attributes specified are 
-   * ignored during the ranking.</pre>
-   * 
-   * <pre> -T &lt;threshold&gt;
-   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
-   * 
-   * <pre> -N &lt;num to select&gt;
-   *  Specify number of attributes to select</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are: <p>
+   *
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
+   * -T <threshold> <br>
+   * Specify a threshold by which the AttributeSelection module can <br>
+   * discard attributes. <p>
+   *
+   * -N <number to retain> <br>
+   * Specify the number of attributes to retain. Overides any threshold. <br>
+   * <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -394,10 +369,10 @@ public class Ranker
    * evaluate each attribute not included in the startSet and then sorts
    * them to produce a ranked list of attributes.
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
@@ -495,7 +470,7 @@ public class Ranker
    * Sorts the evaluated attribute list
    *
    * @return an array of sorted (highest eval to lowest) attribute indexes
-   * @throws Exception of sorting can't be done.
+   * @exception Exception of sorting can't be done.
    */
   public double[][] rankedAttributes ()
     throws Exception {
@@ -619,3 +594,4 @@ public class Ranker
   }
 
 }
+

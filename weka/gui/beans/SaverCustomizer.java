@@ -55,12 +55,12 @@ import weka.core.converters.DatabaseSaver;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

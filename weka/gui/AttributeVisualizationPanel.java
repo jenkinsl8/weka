@@ -69,7 +69,7 @@ import weka.gui.visualize.PrintableComponent;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.18.2.5 $
  */
 
 public class AttributeVisualizationPanel extends PrintablePanel {
@@ -269,9 +269,6 @@ public class AttributeVisualizationPanel extends PrintablePanel {
 	    break;
 	  case Attribute.DATE:
 	    type = "(Dat) ";
-	    break;
-	  case Attribute.RELATIONAL:
-	    type = "(Rel) ";
 	    break;
 	  default:
 	    type = "(???) ";

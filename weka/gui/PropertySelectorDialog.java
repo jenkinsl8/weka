@@ -68,7 +68,7 @@ import javax.swing.tree.TreeSelectionModel;
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5.4.1 $
  */
 public class PropertySelectorDialog extends JDialog {
   
@@ -261,7 +261,7 @@ public class PropertySelectorDialog extends JDialog {
 
     try {
       GenericObjectEditor.registerEditors();
-
+      
       Object rp
 	= new weka.experiment.AveragingResultProducer();
       final PropertySelectorDialog jd = new PropertySelectorDialog(null, rp);

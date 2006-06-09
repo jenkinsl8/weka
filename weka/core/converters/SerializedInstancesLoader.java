@@ -22,9 +22,6 @@
 
 package weka.core.converters;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,29 +29,22 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
- <!-- globalinfo-start -->
  * Reads a source that contains serialized Instances.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
-public class SerializedInstancesLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+public class SerializedInstancesLoader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2391085836269030715L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = 
     Instances.SERIALIZED_OBJ_FILE_EXTENSION;
 
-  /** the file */
   protected String m_File = 
     (new File(System.getProperty("user.dir"))).getAbsolutePath();
   
@@ -63,16 +53,6 @@ public class SerializedInstancesLoader
 
   /** The current index position for incremental reading */
   protected int m_IncrementalIndex = 0;
-  
-  /**
-   * Returns a string describing this object
-   * 
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    return "Reads a source that contains serialized Instances.";
-  }
 
   /** Resets the Loader ready to read a new data set */
   public void reset() {
@@ -112,7 +92,7 @@ public class SerializedInstancesLoader
    * sets the source File
    *
    * @param file the source file
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public void setFile(File file) throws IOException {
     m_File = file.getAbsolutePath();
@@ -124,7 +104,7 @@ public class SerializedInstancesLoader
    * the supplied File object.
    *
    * @param file the source file.
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
 
@@ -146,7 +126,7 @@ public class SerializedInstancesLoader
    * the supplied InputStream.
    *
    * @param in the source InputStream.
-   * @throws IOException if there is a problem with IO
+   * @exception IOException if there is a problem with IO
    */
   public void setSource(InputStream in) throws IOException {
 
@@ -163,7 +143,7 @@ public class SerializedInstancesLoader
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
 
@@ -182,7 +162,7 @@ public class SerializedInstancesLoader
    * the rest of the data set.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if there is no source or parsing fails
+   * @exception IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
 
@@ -202,7 +182,7 @@ public class SerializedInstancesLoader
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @throws IOException if there is an error during parsing
+   * @exception IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 

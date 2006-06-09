@@ -22,69 +22,47 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
+import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.*;
+import java.util.*;
+import java.io.*;
 
 /**
- <!-- globalinfo-start -->
- * Fast decision tree learner. Builds a decision/regression tree using information gain/variance and prunes it using reduced-error pruning (with backfitting).  Only sorts values for numeric attributes once. Missing values are dealt with by splitting the corresponding instances into pieces (i.e. as in C4.5).
- * <p/>
- <!-- globalinfo-end -->
+ * Fast decision tree learner. Builds a decision/regression tree using
+ * information gain/variance reduction and prunes it using reduced-error pruning
+ * (with backfitting).  Only sorts values for numeric attributes
+ * once. Missing values are dealt with by splitting the corresponding
+ * instances into pieces (i.e. as in C4.5).
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf (default 2).</pre>
- * 
- * <pre> -V &lt;minimum variance for split&gt;
- *  Set minimum numeric class variance proportion
- *  of train variance for split (default 1e-3).</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Number of folds for reduced error pruning (default 3).</pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- * <pre> -P
- *  No pruning.</pre>
- * 
- * <pre> -L
- *  Maximum tree depth (default -1, no maximum)</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -M number <br>
+ * Set minimum number of instances per leaf (default 2). <p>
+ *
+ * -V number <br>
+ * Set minimum numeric class variance proportion of train variance for
+ * split (default 1e-3). <p>
+ *			    
+ * -N number <br>
+ * Number of folds for reduced error pruning (default 3). <p>
+ *
+ * -S number <br> 
+ * Seed for random data shuffling (default 1). <p>
+ *
+ * -P <br>
+ * No pruning. <p>
+ *
+ * -L <br>
+ * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.19.2.2 $ 
  */
-public class REPTree 
-  extends Classifier 
+public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
 
-  /** for serialization */
-  static final long serialVersionUID = -8562443428621539458L;
-  
   /** ZeroR model that is used if no attributes are present. */
   protected ZeroR m_zeroR;
 
@@ -103,11 +81,7 @@ public class REPTree
   }
 
   /** An inner class for building and storing the tree structure */
-  protected class Tree 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = -1635481717888437935L;
+  protected class Tree implements Serializable {
     
     /** The header information (for printing the tree). */
     protected Instances m_Info = null;
@@ -145,10 +119,6 @@ public class REPTree
   
     /**
      * Computes class distribution of an instance using the tree.
-     * 
-     * @param instance the instance to compute the distribution for
-     * @return the distribution
-     * @throws Exception if computation fails
      */
     protected double[] distributionForInstance(Instance instance) 
       throws Exception {
@@ -240,7 +210,7 @@ public class REPTree
     * instance is named "i". The results are returned as two stringbuffers: 
     * a section of code for assignment of the class, and a section of
     * code containing support code (eg: other support methods).
-    * <p/>
+    *
     * TODO: If the outputted source code encounters a missing value
     * for the evaluated attribute, it stops branching and uses the 
     * class distribution of the current node to decide the return value. 
@@ -250,7 +220,7 @@ public class REPTree
     * @param parent parent node of the current node 
     * @return an array containing two stringbuffers, the first string containing
     * assignment code, and the second containing source for support code.
-    * @throws Exception if something goes wrong
+    * @exception Exception if something goes wrong
     */
     public StringBuffer [] toSource(String className, Tree parent) 
       throws Exception {
@@ -277,6 +247,7 @@ public class REPTree
 	result[1] = new StringBuffer("");
       } else {
 	StringBuffer text = new StringBuffer("");
+	String nextIndent = "      ";
 	StringBuffer atEnd = new StringBuffer("");
 
 	text.append("  static double N")
@@ -332,12 +303,6 @@ public class REPTree
 	
     /**
      * Outputs one node for graph.
-     * 
-     * @param text the buffer to append the output to
-     * @param num the current node id
-     * @param parent the parent of the nodes
-     * @return the next node id
-     * @throws Exception if something goes wrong
      */
     protected int toGraph(StringBuffer text, int num,
 			Tree parent) throws Exception {
@@ -379,10 +344,6 @@ public class REPTree
 
     /**
      * Outputs description of a leaf node.
-     * 
-     * @param parent the parent of the node
-     * @return the description of the node
-     * @throws Exception if generation fails
      */
     protected String leafString(Tree parent) throws Exception {
     
@@ -432,10 +393,6 @@ public class REPTree
   
     /**
      * Recursively outputs the tree.
-     * 
-     * @param level the current level
-     * @param parent the current parent
-     * @return the generated substree
      */
     protected String toString(int level, Tree parent) {
 
@@ -486,18 +443,6 @@ public class REPTree
 
     /**
      * Recursively generates a tree.
-     * 
-     * @param sortedIndices the sorted indices of the instances
-     * @param weights the weights of the instances
-     * @param data the data to work with
-     * @param totalWeight
-     * @param classProbs the class probabilities
-     * @param header the header of the data
-     * @param minNum the minimum number of instances in a leaf
-     * @param minVariance
-     * @param depth the current depth of the tree
-     * @param maxDepth the maximum allowed depth of the tree
-     * @throws Exception if generation fails
      */
     protected void buildTree(int[][] sortedIndices, double[][] weights,
 			     Instances data, double totalWeight, 
@@ -669,8 +614,6 @@ public class REPTree
 
     /**
      * Computes size of the tree.
-     * 
-     * @return the number of nodes
      */
     protected int numNodes() {
     
@@ -687,15 +630,6 @@ public class REPTree
 
     /**
      * Splits instances into subsets.
-     * 
-     * @param subsetIndices the sorted indices in the subset
-     * @param subsetWeights the weights of the subset
-     * @param att the attribute index
-     * @param splitPoint the split point for numeric attributes
-     * @param sortedIndices the sorted indices of the whole set
-     * @param weights the weights of the whole set
-     * @param data the data to work with
-     * @throws Exception if something goes wrong
      */
     protected void splitData(int[][][] subsetIndices, 
 			     double[][][] subsetWeights,
@@ -785,16 +719,6 @@ public class REPTree
 
     /**
      * Computes class distribution for an attribute.
-     * 
-     * @param props
-     * @param dists
-     * @param att the attribute index
-     * @param sortedIndices the sorted indices of the instances
-     * @param weights the weights of the instances
-     * @param subsetWeights the weights of the subset
-     * @param data the data to work with
-     * @return the split point
-     * @throws Exception if computation fails
      */
     protected double distribution(double[][] props,
 				  double[][][] dists, int att, 
@@ -897,17 +821,6 @@ public class REPTree
 
     /**
      * Computes class distribution for an attribute.
-     * 
-     * @param props
-     * @param dists
-     * @param att the attribute index
-     * @param sortedIndices the sorted indices of the instances
-     * @param weights the weights of the instances
-     * @param subsetWeights the weights of the subset
-     * @param data the data to work with
-     * @param vals
-     * @return the split point
-     * @throws Exception if computation fails
      */
     protected double numericDistribution(double[][] props, 
 					 double[][][] dists, int att, 
@@ -1070,11 +983,6 @@ public class REPTree
 
     /**
      * Computes variance for subsets.
-     * 
-     * @param s
-     * @param sS
-     * @param sumOfWeights
-     * @return the variance
      */
     protected double variance(double[] s, double[] sS, 
 			    double[] sumOfWeights) {
@@ -1092,11 +1000,6 @@ public class REPTree
     
     /** 
      * Computes the variance for a single set
-     * 
-     * @param s
-     * @param sS
-     * @param weight the weight
-     * @return the variance
      */
     protected double singleVariance(double s, double sS, double weight) {
       
@@ -1105,9 +1008,6 @@ public class REPTree
 
     /**
      * Computes value of splitting criterion before split.
-     * 
-     * @param dist
-     * @return the splitting criterion
      */
     protected double priorVal(double[][] dist) {
 
@@ -1116,10 +1016,6 @@ public class REPTree
 
     /**
      * Computes value of splitting criterion after split.
-     * 
-     * @param dist
-     * @param priorVal the splitting criterion
-     * @return the gain after splitting
      */
     protected double gain(double[][] dist, double priorVal) {
 
@@ -1128,9 +1024,6 @@ public class REPTree
 
     /**
      * Prunes the tree using the hold-out data (bottom-up).
-     * 
-     * @return the error
-     * @throws Exception if pruning fails for some reason
      */
     protected double reducedErrorPrune() throws Exception {
 
@@ -1157,9 +1050,6 @@ public class REPTree
 
     /**
      * Inserts hold-out set into tree.
-     * 
-     * @param data the data to insert
-     * @throws Exception if something goes wrong
      */
     protected void insertHoldOutSet(Instances data) throws Exception {
 
@@ -1171,11 +1061,6 @@ public class REPTree
 
     /**
      * Inserts an instance from the hold-out set into the tree.
-     * 
-     * @param inst the instance to insert
-     * @param weight the weight of the instance
-     * @param parent the parent of the node
-     * @throws Exception if insertion fails
      */
     protected void insertHoldOutInstance(Instance inst, double weight, 
 					 Tree parent) throws Exception {
@@ -1242,9 +1127,6 @@ public class REPTree
   
     /**
      * Inserts hold-out set into tree.
-     * 
-     * @param data the data to insert
-     * @throws Exception if insertion fails
      */
     protected void backfitHoldOutSet(Instances data) throws Exception {
       
@@ -1256,11 +1138,6 @@ public class REPTree
     
     /**
      * Inserts an instance from the hold-out set into the tree.
-     * 
-     * @param inst the instance to insert
-     * @param weight the weight of the instance
-     * @param parent the parent node
-     * @throws Exception if insertion fails
      */
     protected void backfitHoldOutInstance(Instance inst, double weight, 
 					  Tree parent) throws Exception {
@@ -1521,8 +1398,6 @@ public class REPTree
   
   /**
    * Lists the command-line options for this classifier.
-   * 
-   * @return an enumeration over all commandline options
    */
   public Enumeration listOptions() {
     
@@ -1555,8 +1430,6 @@ public class REPTree
 
   /**
    * Gets options from this classifier.
-   * 
-   * @return the options for the current setup
    */
   public String[] getOptions() {
     
@@ -1582,34 +1455,9 @@ public class REPTree
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf (default 2).</pre>
-   * 
-   * <pre> -V &lt;minimum variance for split&gt;
-   *  Set minimum numeric class variance proportion
-   *  of train variance for split (default 1e-3).</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Number of folds for reduced error pruning (default 3).</pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   * <pre> -P
-   *  No pruning.</pre>
-   * 
-   * <pre> -L
-   *  Maximum tree depth (default -1, no maximum)</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -1649,8 +1497,6 @@ public class REPTree
   
   /**
    * Computes size of the tree.
-   * 
-   * @return the number of nodes
    */
   public int numNodes() {
 
@@ -1672,9 +1518,9 @@ public class REPTree
   /**
    * Returns the value of the named measure.
    *
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     
@@ -1687,44 +1533,30 @@ public class REPTree
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Builds classifier.
-   * 
-   * @param data the data to train with
-   * @throws Exception if building fails
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    Random random = new Random(m_Seed);
 
-    // remove instances with missing class
+    // Check for non-nominal classes
+    if (!data.classAttribute().isNominal() && !data.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("REPTree: nominal or numeric class!");
+    }
+
+    // Delete instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
-    Random random = new Random(m_Seed);
+
+    // Check for empty datasets
+    if (data.numInstances() == 0) {
+      throw new IllegalArgumentException("REPTree: zero training instances or all " +
+					 "instances have missing class!");
+    }
+
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
 
     m_zeroR = null;
     if (data.numAttributes() == 1) {
@@ -1830,10 +1662,6 @@ public class REPTree
 
   /**
    * Computes class distribution of an instance using the tree.
-   * 
-   * @param instance the instance to compute the distribution for
-   * @return the computed class probabilities
-   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) 
     throws Exception {
@@ -1862,9 +1690,6 @@ public class REPTree
     return PRINTED_NODES ++;
   }
 
-  /**
-   * resets the counter for the nodes
-   */
   protected static void resetID() {
     PRINTED_NODES = 0;
   }
@@ -1872,9 +1697,8 @@ public class REPTree
   /**
    * Returns the tree as if-then statements.
    *
-   * @param className the name for the generated class
    * @return the tree as a Java if-then type statement
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public String toSource(String className) 
     throws Exception {
@@ -1906,9 +1730,6 @@ public class REPTree
 
   /**
    * Outputs the decision tree as a graph
-   * 
-   * @return the tree as a graph
-   * @throws Exception if generation fails
    */
   public String graph() throws Exception {
 
@@ -1924,8 +1745,6 @@ public class REPTree
   
   /**
    * Outputs the decision tree.
-   * 
-   * @return a string representation of the classifier 
    */
   public String toString() {
 
@@ -1942,8 +1761,6 @@ public class REPTree
 
   /**
    * Main method for this class.
-   * 
-   * @param argv the commandline options
    */
   public static void main(String[] argv) {
 

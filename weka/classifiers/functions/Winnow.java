@@ -21,107 +21,55 @@
  */
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.UpdateableClassifier;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.filters.Filter;
+import weka.classifiers.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Implements Winnow and Balanced Winnow algorithms by Littlestone.<br/>
- * <br/>
- * For more information, see<br/>
- * <br/>
- * N. Littlestone (1988). Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm. Machine Learning. 2:285-318.<br/>
- * <br/>
- * N. Littlestone (1989). Mistake bounds and logarithmic linear-threshold learning algorithms. University of California, Santa Cruz.<br/>
- * <br/>
- * Does classification for problems with nominal attributes (which it converts into binary attributes).
- * <p/>
- <!-- globalinfo-end -->
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Littlestone1988,
- *    author = {N. Littlestone},
- *    journal = {Machine Learning},
- *    pages = {285-318},
- *    title = {Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm},
- *    volume = {2},
- *    year = {1988}
- * }
- * 
- * &#64;techreport{Littlestone1989,
- *    address = {University of California, Santa Cruz},
- *    author = {N. Littlestone},
- *    institution = {University of California},
- *    note = {Technical Report UCSC-CRL-89-11},
- *    title = {Mistake bounds and logarithmic linear-threshold learning algorithms},
- *    year = {1989}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Implements Winnow and Balanced Winnow algorithms by
+ * N. Littlestone. For more information, see<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -L
- *  Use the baLanced version
- *  (default false)</pre>
- * 
- * <pre> -I &lt;int&gt;
- *  The number of iterations to be performed.
- *  (default 1)</pre>
- * 
- * <pre> -A &lt;double&gt;
- *  Promotion coefficient alpha.
- *  (default 2.0)</pre>
- * 
- * <pre> -B &lt;double&gt;
- *  Demotion coefficient beta.
- *  (default 0.5)</pre>
- * 
- * <pre> -H &lt;double&gt;
- *  Prediction threshold.
- *  (default -1.0 == number of attributes)</pre>
- * 
- * <pre> -W &lt;double&gt;
- *  Starting weights.
- *  (default 2.0)</pre>
- * 
- * <pre> -S &lt;int&gt;
- *  Default random seed.
- *  (default 1)</pre>
- * 
- <!-- options-end -->
+ * N. Littlestone (1988). <i> Learning quickly when irrelevant
+ * attributes are abound: A new linear threshold algorithm</i>.
+ * Machine Learning 2, pp. 285-318.<p>
  *
- * @author J. Lindgren (jtlindgr at cs.helsinki.fi)
- * @version $Revision: 1.11 $ 
+ * and
+ * 
+ * N. Littlestone (1989). <i> Mistake bounds and logarithmic 
+ * linear-threshold learning algorithms</i>. Technical report
+ * UCSC-CRL-89-11, University of California, Santa Cruz.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -L <br>
+ * Use the baLanced variant (default: false)<p>
+ *
+ * -I num <br>
+ * The number of iterations to be performed. (default 1)<p>
+ *
+ * -A double <br>
+ * Promotion coefficient alpha. (default 2.0)<p>
+ *
+ * -B double <br>
+ * Demotion coefficient beta. (default 0.5)<p>
+ *
+ * -W double <br>
+ * Starting weights of the prediction coeffs. (default 2.0)<p>
+ *
+ * -H double <br>
+ * Prediction threshold. (default -1.0 == number of attributes)<p>
+ *
+ * -S int <br>
+ * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
+ *
+ * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
+ * @version $Revision: 1.8 $ 
 */
-public class Winnow 
-  extends Classifier 
-  implements UpdateableClassifier, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3543770107994321324L;
+public class Winnow extends Classifier implements UpdateableClassifier {
   
   /** Use the balanced variant? **/
   protected boolean m_Balanced;
@@ -147,10 +95,8 @@ public class Winnow
   /** Starting weights for the prediction vector(s) **/
   protected double m_defaultWeight = 2.0;
   
-  /** The weight vector for prediction (pos) */
+  /** The weight vectors for prediction **/
   private double[] m_predPosVector = null;
-  
-  /** The weight vector for prediction (neg) */
   private double[] m_predNegVector = null;
 
   /** The true threshold used for prediction **/
@@ -173,42 +119,16 @@ public class Winnow
   public String globalInfo() {
 
     return  "Implements Winnow and Balanced Winnow algorithms by "
-      + "Littlestone.\n\n"
-      + "For more information, see\n\n"
-      + getTechnicalInformation().toString()
-      + "\n\n"
+      + "Littlestone. For more information, see\n\n"
+      + "N. Littlestone (1988). \"Learning quickly when irrelevant "
+      + "attributes are abound: A new linear threshold algorithm\". "
+      + "Machine Learning 2, pp. 285-318.\n\n"
+      + "and\n\n"
+      + "N. Littlestone (1989). \"Mistake bounds and logarithmic  "
+      + "linear-threshold learning algorithms\". Technical report "
+      + "UCSC-CRL-89-11, University of California, Santa Cruz.\n\n"
       + "Does classification for problems with nominal attributes "
       + "(which it converts into binary attributes).";
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "N. Littlestone");
-    result.setValue(Field.YEAR, "1988");
-    result.setValue(Field.TITLE, "Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "2");
-    result.setValue(Field.PAGES, "285-318");
-    
-    additional = result.add(Type.TECHREPORT);
-    additional.setValue(Field.AUTHOR, "N. Littlestone");
-    additional.setValue(Field.YEAR, "1989");
-    additional.setValue(Field.TITLE, "Mistake bounds and logarithmic linear-threshold learning algorithms");
-    additional.setValue(Field.INSTITUTION, "University of California");
-    additional.setValue(Field.ADDRESS, "University of California, Santa Cruz");
-    additional.setValue(Field.NOTE, "Technical Report UCSC-CRL-89-11");
-    
-    return result;
   }
 
   /**
@@ -246,43 +166,10 @@ public class Winnow
   }
 
   /**
-   * Parses a given list of options.<p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -L
-   *  Use the baLanced version
-   *  (default false)</pre>
-   * 
-   * <pre> -I &lt;int&gt;
-   *  The number of iterations to be performed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -A &lt;double&gt;
-   *  Promotion coefficient alpha.
-   *  (default 2.0)</pre>
-   * 
-   * <pre> -B &lt;double&gt;
-   *  Demotion coefficient beta.
-   *  (default 0.5)</pre>
-   * 
-   * <pre> -H &lt;double&gt;
-   *  Prediction threshold.
-   *  (default -1.0 == number of attributes)</pre>
-   * 
-   * <pre> -W &lt;double&gt;
-   *  Starting weights.
-   *  (default 2.0)</pre>
-   * 
-   * <pre> -S &lt;int&gt;
-   *  Default random seed.
-   *  (default 1)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -341,44 +228,33 @@ public class Winnow
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.BINARY_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Builds the classifier
    *
-   * @param insts the data to train the classifier with
-   * @throws Exception if something goes wrong during building
+   * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(insts);
+    if (insts.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
+    if (insts.numClasses() > 2) {
+      throw new Exception("Can only handle two-class datasets!");
+    }
+    if (insts.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
+    }
+    Enumeration enu = insts.enumerateAttributes();
+    while (enu.hasMoreElements()) {
+      Attribute attr = (Attribute) enu.nextElement();
+      if (!attr.isNominal()) {
+        throw new UnsupportedAttributeTypeException("Winnow: only nominal attributes, "
+						    + "please.");
+      }
+    }
 
-    // remove instances with missing class
-    insts = new Instances(insts);
-    insts.deleteWithMissingClass();
-    
     // Filter data
     m_Train = new Instances(insts);
+    m_Train.deleteWithMissingClass();
     
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);
@@ -437,8 +313,7 @@ public class Winnow
   /**
    * Updates the classifier with a new learning example
    *
-   * @param instance the instance to update the classifier with
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void updateClassifier(Instance instance) throws Exception {
 	
@@ -459,8 +334,7 @@ public class Winnow
   /**
    * Actual update routine for prefiltered instances
    *
-   * @param inst the instance to update the classifier with
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private void actualUpdateClassifier(Instance inst) throws Exception {
     
@@ -496,8 +370,7 @@ public class Winnow
   /**
    * Actual update routine (balanced) for prefiltered instances
    *
-   * @param inst the instance to update the classifier with
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private void actualUpdateClassifierBalanced(Instance inst) throws Exception {
     
@@ -539,7 +412,7 @@ public class Winnow
    *
    * @param inst the instance for which prediction is to be computed
    * @return the prediction
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public double classifyInstance(Instance inst) throws Exception {
 
@@ -562,7 +435,7 @@ public class Winnow
    *
    * @param inst the instance for which prediction is to be computed
    * @return the prediction
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double makePrediction(Instance inst) throws Exception {
 
@@ -588,7 +461,7 @@ public class Winnow
    *
    * @param inst the instance for which prediction is to be computed
    * @return the prediction
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double makePredictionBalanced(Instance inst) throws Exception {
     double total=0;
@@ -609,8 +482,6 @@ public class Winnow
 
   /**
    * Returns textual description of the classifier.
-   * 
-   * @return textual description of the classifier
    */
   public String toString() {
 
@@ -849,8 +720,6 @@ public class Winnow
   
   /**
    * Main method.
-   * 
-   * @param argv the commandline options
    */
   public static void main(String[] argv) {
     

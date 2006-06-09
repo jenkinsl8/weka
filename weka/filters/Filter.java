@@ -24,16 +24,6 @@
 
 package weka.filters;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Queue;
-import weka.core.RelationalLocator;
-import weka.core.SerializedObject;
-import weka.core.StringLocator;
-import weka.core.Utils;
-
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -42,6 +32,13 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.Utils;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -71,9 +68,22 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.24 $
  */
 public abstract class Filter implements Serializable {
+
+  /*
+   * Filter refactoring TODO:
+   *
+   * - Update all filters to use getOutputFormat and setInputFormat
+   * instead of outputFormat, outputFormatPeek and inputFormat.
+   * - Update users of filters to use getOutputFormat and setInputFormat
+   * - remove outputFormat, outputFormatPeek and inputFormat
+   *
+   */
+
+  /** Debugging mode */
+  private boolean m_Debug = false;
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;
@@ -82,16 +92,10 @@ public abstract class Filter implements Serializable {
   private Queue m_OutputQueue = null;
 
   /** Indices of string attributes in the output format */
-  protected StringLocator m_OutputStringAtts = null;
+  private int [] m_OutputStringAtts = null;
 
   /** Indices of string attributes in the input format */
-  protected StringLocator m_InputStringAtts = null;
-
-  /** Indices of relational attributes in the output format */
-  protected RelationalLocator m_OutputRelAtts = null;
-
-  /** Indices of relational attributes in the input format */
-  protected RelationalLocator m_InputRelAtts = null;
+  private int [] m_InputStringAtts = null;
 
   /** The input format for instances */
   private Instances m_InputFormat = null;
@@ -110,9 +114,9 @@ public abstract class Filter implements Serializable {
 
     if (outputFormat != null) {
       m_OutputFormat = outputFormat.stringFreeStructure();
-      initOutputLocators(m_OutputFormat, null);
+      m_OutputStringAtts = getStringIndices(m_OutputFormat);
 
-      // Rename the relation
+      // Rename the attribute
       String relationName = outputFormat.relationName() 
         + "-" + this.getClass().getName();
       if (this instanceof OptionHandler) {
@@ -170,8 +174,7 @@ public abstract class Filter implements Serializable {
   protected void push(Instance instance) {
 
     if (instance != null) {
-      if (instance.dataset() != null)
-	copyValues(instance, false);
+      copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
       instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
@@ -196,113 +199,133 @@ public abstract class Filter implements Serializable {
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      copyValues(instance, true);
+      copyStringValues(instance, m_InputFormat, m_InputStringAtts);
       m_InputFormat.add(instance);
     }
   }
 
   /**
-   * Initializes the input attribute locators. If indices is null then all 
-   * attributes of the data will be considered, otherwise only the ones
-   * that were provided.
-   * 
-   * @param data		the data to initialize the locators with
-   * @param indices		if not null, the indices to which to restrict
-   * 				the locating
+   * Returns an array containing the indices of all string attributes in the
+   * input format. This index is created during setInputFormat()
+   *
+   * @return an array containing the indices of string attributes in the 
+   * input dataset.
    */
-  protected void initInputLocators(Instances data, int[] indices) {
-    if (indices == null) {
-      m_InputStringAtts = new StringLocator(data);
-      m_InputRelAtts    = new RelationalLocator(data);
-    }
-    else {
-      m_InputStringAtts = new StringLocator(data, indices);
-      m_InputRelAtts    = new RelationalLocator(data, indices);
-    }
+  protected int [] getInputStringIndex() {
+
+    return m_InputStringAtts;
   }
 
   /**
-   * Initializes the output attribute locators. If indices is null then all 
-   * attributes of the data will be considered, otherwise only the ones
-   * that were provided.
-   * 
-   * @param data		the data to initialize the locators with
-   * @param indices		if not null, the indices to which to restrict
-   * 				the locating
+   * Returns an array containing the indices of all string attributes in the
+   * output format. This index is created during setOutputFormat()
+   *
+   * @return an array containing the indices of string attributes in the 
+   * output dataset.
    */
-  protected void initOutputLocators(Instances data, int[] indices) {
-    if (indices == null) {
-      m_OutputStringAtts = new StringLocator(data);
-      m_OutputRelAtts    = new RelationalLocator(data);
-    }
-    else {
-      m_OutputStringAtts = new StringLocator(data, indices);
-      m_OutputRelAtts    = new RelationalLocator(data, indices);
-    }
+  protected int [] getOutputStringIndex() {
+
+    return m_OutputStringAtts;
   }
-  
+
   /**
-   * Copies string/relational values contained in the instance copied to a new
+   * Copies string values contained in the instance copied to a new
    * dataset. The Instance must already be assigned to a dataset. This
    * dataset and the destination dataset must have the same structure.
    *
-   * @param instance		the Instance containing the string/relational 
-   * 				values to copy.
-   * @param isInput		if true the input format and input attribute 
-   * 				locators are used otherwise the output format 
-   * 				and output locators
+   * @param instance the Instance containing the string values to copy.
+   * @param destDataset the destination set of Instances
+   * @param strAtts an array containing the indices of any string attributes
+   * in the dataset.  
    */
-  protected void copyValues(Instance instance, boolean isInput) {
+  private void copyStringValues(Instance inst, Instances destDataset, 
+                                int []strAtts) {
 
-    RelationalLocator.copyRelationalValues(
-	instance, 
-	(isInput) ? m_InputFormat : m_OutputFormat, 
-	(isInput) ? m_InputRelAtts : m_OutputRelAtts);
-
-    StringLocator.copyStringValues(
-	instance, 
-	(isInput) ? m_InputFormat : m_OutputFormat, 
-	(isInput) ? m_InputStringAtts : m_OutputStringAtts);
+    if (strAtts.length == 0) {
+      return;
+    }
+    if (inst.dataset() == null) {
+      throw new IllegalArgumentException("Instance has no dataset assigned!!");
+    } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
+      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
+    } 
+    copyStringValues(inst, true, inst.dataset(), strAtts,
+                     destDataset, strAtts);
   }
 
   /**
-   * Takes string/relational values referenced by an Instance and copies them 
-   * from a source dataset to a destination dataset. The instance references are
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
+   * updated to be valid for the destination dataset. The instance may have the 
+   * structure (i.e. number and attribute position) of either dataset (this
+   * affects where references are obtained from). The source dataset must
+   * have the same structure as the filter input format and the destination
+   * must have the same structure as the filter output format.
+   *
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   */
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, Instances destDataset) {
+
+    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts,
+                     destDataset, m_OutputStringAtts);
+  }
+
+  /**
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
    * updated to be valid for the destination dataset. The instance may have the 
    * structure (i.e. number and attribute position) of either dataset (this
    * affects where references are obtained from). Only works if the number
-   * of string/relational attributes is the same in both indices (implicitly 
-   * these string/relational attributes should be semantically same but just 
-   * with shifted positions).
+   * of string attributes is the same in both indices (implicitly these string
+   * attributes should be semantically same but just with shifted positions).
    *
-   * @param instance 		the instance containing references to strings/
-   * 				relational values in the source dataset that 
-   * 				will have references updated to be valid for 
-   * 				the destination dataset.
-   * @param instSrcCompat 	true if the instance structure is the same as 
-   * 				the source, or false if it is the same as the 
-   * 				destination (i.e. which of the string/relational 
-   * 				attribute indices contains the correct locations 
-   * 				for this instance).
-   * @param srcDataset 		the dataset for which the current instance 
-   * 				string/relational value references are valid 
-   * 				(after any position mapping if needed)
-   * @param destDataset 	the dataset for which the current instance 
-   * 				string/relational value references need to be 
-   * 				inserted (after any position mapping if needed)
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination (i.e. which of the
+   * string attribute indices contains the correct locations for this instance).
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param srcStrAtts an array containing the indices of string attributes
+   * in the source datset.
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   * @param destStrAtts an array containing the indices of string attributes
+   * in the destination datset.
    */
-  protected void copyValues(Instance instance, boolean instSrcCompat,
-                         Instances srcDataset, Instances destDataset) {
-
-    RelationalLocator.copyRelationalValues(
-	instance, instSrcCompat, 
-	srcDataset, m_InputRelAtts,
-	destDataset, m_OutputRelAtts);
-
-    StringLocator.copyStringValues(
-	instance, instSrcCompat, 
-	srcDataset, m_InputStringAtts,
-	getOutputFormat(), m_OutputStringAtts);
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, int []srcStrAtts,
+                                  Instances destDataset, int []destStrAtts) {
+    if (srcDataset == destDataset) {
+      return;
+    }
+    if (srcStrAtts.length != destStrAtts.length) {
+      throw new IllegalArgumentException("Src and Dest string indices differ in length!!");
+    }
+    for (int i = 0; i < srcStrAtts.length; i++) {
+      int instIndex = instSrcCompat ? srcStrAtts[i] : destStrAtts[i];
+      Attribute src = srcDataset.attribute(srcStrAtts[i]);
+      Attribute dest = destDataset.attribute(destStrAtts[i]);
+      if (!instance.isMissing(instIndex)) {
+        //System.err.println(instance.value(srcIndex) 
+        //                   + " " + src.numValues()
+        //                   + " " + dest.numValues());
+        int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
+        // setValue here shouldn't be too slow here unless your dataset has
+        // squillions of string attributes
+        instance.setValue(instIndex, (double)valIndex);
+      }
+    }
   }
 
   /**
@@ -311,13 +334,20 @@ public abstract class Filter implements Serializable {
    */
   protected void flushInput() {
 
-    if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
-	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
+    if (m_InputStringAtts.length > 0) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
     }
+  }
+
+  /**
+   * @deprecated use <code>setInputFormat(Instances)</code> instead.
+   */
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
+
+    return setInputFormat(instanceInfo);
   }
 
   /**
@@ -331,16 +361,24 @@ public abstract class Filter implements Serializable {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = instanceInfo.stringFreeStructure();
+    m_InputStringAtts = getStringIndices(instanceInfo);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
-    initInputLocators(instanceInfo, null);
     return false;
+  }
+
+  /**
+   * @deprecated use <code>getOutputFormat()</code> instead.
+   */
+  public Instances outputFormat() {
+
+    return getOutputFormat();
   }
 
   /**
@@ -351,7 +389,7 @@ public abstract class Filter implements Serializable {
    *
    * @return an Instances object containing the output instance
    * structure only.
-   * @throws NullPointerException if no input structure has been
+   * @exception NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
   public Instances getOutputFormat() {
@@ -374,9 +412,9 @@ public abstract class Filter implements Serializable {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws NullPointerException if the input format has not been
+   * @exception NullPointerException if the input format has not been
    * defined.
-   * @throws Exception if the input instance was not of the correct 
+   * @exception Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.  
    */
   public boolean input(Instance instance) throws Exception {
@@ -403,8 +441,8 @@ public abstract class Filter implements Serializable {
    * inputFormat() and input().
    *
    * @return true if there are instances pending output
-   * @throws NullPointerException if no input structure has been defined,
-   * @throws Exception if there was a problem finishing the batch.
+   * @exception NullPointerException if no input structure has been defined,
+   * @exception Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
 
@@ -422,7 +460,7 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @throws NullPointerException if no output structure has been defined
+   * @exception NullPointerException if no output structure has been defined
    */
   public Instance output() {
 
@@ -433,10 +471,9 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    // Clear out references to old strings/relationals occasionally
+    // Clear out references to old strings occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
-      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
-	   || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
+      if (m_OutputStringAtts.length > 0) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
     }
@@ -449,7 +486,7 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @throws NullPointerException if no input structure has been defined 
+   * @exception NullPointerException if no input structure has been defined 
    */
   public Instance outputPeek() {
 
@@ -467,7 +504,7 @@ public abstract class Filter implements Serializable {
    * Returns the number of instances pending output
    *
    * @return the number of instances  pending output
-   * @throws NullPointerException if no input structure has been defined
+   * @exception NullPointerException if no input structure has been defined
    */
   public int numPendingOutput() {
 
@@ -488,36 +525,26 @@ public abstract class Filter implements Serializable {
   }
 
   /**
-   * Creates a deep copy of the given filter using serialization.
+   * Gets an array containing the indices of all string attributes.
    *
-   * @param model 	the filter to copy
-   * @return 		a deep copy of the filter
-   * @throws Exception 	if an error occurs
+   * @param insts the Instances to scan for string attributes. 
+   * @return an array containing the indices of string attributes in
+   * the input structure. Will be zero-length if there are no
+   * string attributes
    */
-  public static Filter makeCopy(Filter model) throws Exception {
-    return (Filter)new SerializedObject(model).getObject();
-  }
-
-  /**
-   * Creates a given number of deep copies of the given filter using 
-   * serialization.
-   * 
-   * @param model 	the filter to copy
-   * @param num 	the number of filter copies to create.
-   * @return 		an array of filters.
-   * @throws Exception 	if an error occurs
-   */
-  public static Filter[] makeCopies(Filter model, int num) throws Exception {
-
-    if (model == null) {
-      throw new Exception("No model filter set");
+  protected int [] getStringIndices(Instances insts) {
+    
+    // Scan through getting the indices of String attributes
+    int [] index = new int [insts.numAttributes()];
+    int indexSize = 0;
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (insts.attribute(i).type() == Attribute.STRING) {
+        index[indexSize++] = i;
+      }
     }
-    Filter[] filters = new Filter[num];
-    SerializedObject so = new SerializedObject(model);
-    for (int i = 0; i < filters.length; i++) {
-      filters[i] = (Filter) so.getObject();
-    }
-    return filters;
+    int [] result = new int [indexSize];
+    System.arraycopy(index, 0, result, 0, indexSize);
+    return result;
   }
   
   /**
@@ -527,7 +554,7 @@ public abstract class Filter implements Serializable {
    * @param data the data to be filtered
    * @param filter the filter to be used
    * @return the filtered set of data
-   * @throws Exception if the filter can't be used successfully
+   * @exception Exception if the filter can't be used successfully
    */
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
@@ -555,13 +582,12 @@ public abstract class Filter implements Serializable {
   /**
    * Method for testing filters.
    *
-   * @param filter the filter to use
-   * @param options should contain the following arguments: <br>
+   * @param argv should contain the following arguments: <br>
    * -i input_file <br>
    * -o output_file <br>
    * -c class_index <br>
    * or -h for help on options
-   * @throws Exception if something goes wrong or the user requests help on
+   * @exception Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void filterFile(Filter filter, String [] options) 
@@ -713,15 +739,14 @@ public abstract class Filter implements Serializable {
   /**
    * Method for testing filters ability to process multiple batches.
    *
-   * @param filter the filter to use
-   * @param options should contain the following arguments:<br>
+   * @param argv should contain the following arguments:<br>
    * -i (first) input file <br>
    * -o (first) output file <br>
    * -r (second) input file <br>
    * -s (second) output file <br>
    * -c class_index <br>
    * or -h for help on options
-   * @throws Exception if something goes wrong or the user requests help on
+   * @exception Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void batchFilterFile(Filter filter, String [] options) 
@@ -888,7 +913,7 @@ public abstract class Filter implements Serializable {
   /**
    * Main method for testing this class.
    *
-   * @param args should contain arguments to the filter: use -h for help
+   * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] args) {
     

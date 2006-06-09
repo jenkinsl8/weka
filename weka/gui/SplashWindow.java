@@ -51,7 +51,7 @@ import java.io.*;
  *
  * @author  Werner Randelshofer
  * @author  Mark Hall
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 public class SplashWindow extends Window {
   /**

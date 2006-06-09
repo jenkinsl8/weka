@@ -22,80 +22,28 @@
 
 package weka.classifiers.functions;
 
+import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.instance.RemoveRange;
+import weka.filters.Filter;
+import weka.core.*;
+import java.io.*;
+import java.util.*;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Implements a least median sqaured linear regression utilising the existing weka LinearRegression class to form predictions. <br/>
- * Least squared regression functions are generated from random subsamples of the data. The least squared regression with the lowest meadian squared error is chosen as the final model.<br/>
- * <br/>
- * The basis of the algorithm is <br/>
- * <br/>
- * Peter J. Rousseeuw, Annick M. Leroy (1987). Robust regression and outlier detection. .
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;book{Rousseeuw1987,
- *    author = {Peter J. Rousseeuw and Annick M. Leroy},
- *    title = {Robust regression and outlier detection},
- *    year = {1987}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -S &lt;sample size&gt;
- *  Set sample size
- *  (default: 4)
- * </pre>
- * 
- * <pre> -G &lt;seed&gt;
- *  Set the seed used to generate samples
- *  (default: 0)
- * </pre>
- * 
- * <pre> -D
- *  Produce debugging output
- *  (default no debugging output)
- * </pre>
- * 
- <!-- options-end -->
+ * Implements a least median sqaured linear regression utilising the
+ * existing weka LinearRegression class to form predictions.
+ * The basis of the algorithm is Robust regression and outlier detection
+ * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.1 $
  */
-public class LeastMedSq 
-  extends Classifier 
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 4288954049987652970L;
+public class LeastMedSq extends Classifier implements OptionHandler {
   
   private double[] m_Residuals;
   
@@ -144,69 +92,32 @@ public class LeastMedSq
    */
   public String globalInfo() {
     return "Implements a least median sqaured linear regression utilising the "
-      +"existing weka LinearRegression class to form predictions. \n"
+      +"existing weka LinearRegression class to form predictions. "
       +"Least squared regression functions are generated from random subsamples of "
       +"the data. The least squared regression with the lowest meadian squared error "
       +"is chosen as the final model.\n\n"
-      +"The basis of the algorithm is \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.BOOK);
-    result.setValue(Field.AUTHOR, "Peter J. Rousseeuw and Annick M. Leroy");
-    result.setValue(Field.YEAR, "1987");
-    result.setValue(Field.TITLE, "Robust regression and outlier detection");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
+      +"The basis of the algorithm is \n\nRobust regression and outlier detection "
+      +"Peter J. Rousseeuw, Annick M. Leroy. c1987";
   }
 
   /**
    * Build lms regression
    *
    * @param data training data
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void buildClassifier(Instances data)throws Exception{
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
+    if (!data.classAttribute().isNumeric())
+      throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
+    if (data.numInstances() == 0)
+      throw new Exception("No instances in training file!");
+    if (data.checkForStringAttributes())
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+
     cleanUpData(data);
 
     getSamples();
@@ -223,7 +134,7 @@ public class LeastMedSq
    *
    * @param instance instance to be classified
    * @return class value
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public double classifyInstance(Instance instance)throws Exception{
 
@@ -240,7 +151,7 @@ public class LeastMedSq
    * Cleans up data
    *
    * @param data data to be cleaned up
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void cleanUpData(Instances data)throws Exception{
 
@@ -256,12 +167,12 @@ public class LeastMedSq
 
   /**
    * Gets the number of samples to use.
-   * 
-   * @throws Exception if an error occurs
+   *
    */
   private void getSamples()throws Exception{
 
     int stuf[] = new int[] {500,50,22,17,15,14};
+    int x = m_samplesize * 500;
     if ( m_samplesize < 7){
       if ( m_Data.numInstances() < stuf[m_samplesize - 1])
 	m_samples = combinations(m_Data.numInstances(), m_samplesize);
@@ -290,7 +201,7 @@ public class LeastMedSq
    * Finds the best regression generated from m_samples
    * random samples from the training data
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void findBestRegression()throws Exception{
 
@@ -317,7 +228,7 @@ public class LeastMedSq
    * Generates a LinearRegression classifier from
    * the current m_SubSample
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void genRegression()throws Exception{
 
@@ -331,7 +242,7 @@ public class LeastMedSq
    * Finds residuals (squared) for the current
    * regression.
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void findResiduals()throws Exception{
 
@@ -349,7 +260,7 @@ public class LeastMedSq
    * finds the median residual squared for the
    * current regression
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void getMedian()throws Exception{
 
@@ -380,7 +291,6 @@ public class LeastMedSq
    * Builds a weight function removing instances with an
    * abnormally high scaled residual
    *
-   * @throws Exception if weight building fails
    */
   private void buildWeight()throws Exception{
 
@@ -397,7 +307,6 @@ public class LeastMedSq
    * Builds a new LinearRegression without the 'bad' data
    * found by buildWeight
    *
-   * @throws if building fails
    */
   private void buildRLSRegression()throws Exception{
 
@@ -477,7 +386,7 @@ public class LeastMedSq
    * in m_SubSample
    *
    * @param data data from which to take sample
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void selectSubSample(Instances data)throws Exception{
 
@@ -616,28 +525,8 @@ public class LeastMedSq
    * will be set (or reset) during this call (i.e. incremental setting
    * of options is not possible).
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S &lt;sample size&gt;
-   *  Set sample size
-   *  (default: 4)
-   * </pre>
-   * 
-   * <pre> -G &lt;seed&gt;
-   *  Set the seed used to generate samples
-   *  (default: 0)
-   * </pre>
-   * 
-   * <pre> -D
-   *  Produce debugging output
-   *  (default no debugging output)
-   * </pre>
-   * 
-   <!-- options-end -->
-   *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -688,9 +577,9 @@ public class LeastMedSq
    * Produces the combination nCr
    *
    * @param n
-   * @param r
+   * @param n
    * @return the combination
-   * @throws Exception if r is greater than n
+   * @exception Exception if r is greater than n
    */
   public static int combinations (int n, int r)throws Exception {
 

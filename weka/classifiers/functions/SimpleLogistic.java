@@ -22,110 +22,45 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import weka.classifiers.*;
 import weka.classifiers.trees.lmt.LogisticBase;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
+import weka.core.*;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.Filter;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Classifier for building linear logistic regression models. LogitBoost with simple regression functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost iterations to perform is cross-validated, which leads to automatic attribute selection. For more information see:<br/>
- * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.<br/>
- * <br/>
- * Marc Sumner, Eibe Frank, Mark Hall: Speeding up Logistic Model Tree Induction. In: 9th European Conference on Principles and Practice of Knowledge Discovery in Databases, 675-683, 2005.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building a logistic regression model using LogitBoost.
+ * Incorporates attribute selection by fitting simple regression functions in LogitBoost.
+ * For more information, see master thesis "Logistic Model Trees" (Niels Landwehr, 2003)<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Landwehr2005,
- *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
- *    booktitle = {Machine Learning},
- *    number = {1-2},
- *    pages = {161-205},
- *    title = {Logistic Model Trees},
- *    volume = {95},
- *    year = {2005}
- * }
- * 
- * &#64;inproceedings{Sumner2005,
- *    author = {Marc Sumner and Eibe Frank and Mark Hall},
- *    booktitle = {9th European Conference on Principles and Practice of Knowledge Discovery in Databases},
- *    pages = {675-683},
- *    publisher = {Springer},
- *    title = {Speeding up Logistic Model Tree Induction},
- *    year = {2005}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Valid options are: <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -I &lt;iterations&gt;
- *  Set fixed number of iterations for LogitBoost</pre>
- * 
- * <pre> -S
- *  Use stopping criterion on training set (instead of
- *  cross-validation)</pre>
- * 
- * <pre> -P
- *  Use error on probabilities (rmse) instead of
- *  misclassification error for stopping criterion</pre>
- * 
- * <pre> -M &lt;iterations&gt;
- *  Set maximum number of boosting iterations</pre>
- * 
- * <pre> -H &lt;iterations&gt;
- *  Set parameter for heuristic for early stopping of
- *  LogitBoost.
- *  If enabled, the minimum is selected greedily, stopping
- *  if the current minimum has not changed for iter iterations.
- *  By default, heuristic is enabled with value 50. Set to
- *  zero to disable heuristic.</pre>
- * 
- * <pre> -W &lt;beta&gt;
- *  Set beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.
- * </pre>
- * 
- * <pre> -A
- *  The AIC is used to choose the best iteration (instead of CV or training error).
- * </pre>
- * 
- <!-- options-end -->
+ * -I iterations <br>
+ * Set fixed number of iterations for LogitBoost (instead of using cross-validation). <p>
+ * -S <br>
+ * Select the number of LogitBoost iterations that gives minimal error on the training set 
+ * (instead of using cross-validation). <p>
+ * -P <br>
+ * Minimize error on probabilities instead of misclassification error. <p>
+ * -M iterations <br>
+ * Set maximum number of iterations for LogitBoost. <p>
+ * -H iter <br>
+ * Set parameter for heuristic for early stopping of LogitBoost.
+ * If enabled, the minimum is selected greedily, stopping if the current minimum has not changed 
+ * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @author Marc Sumner 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.5.2.1 $
  */
-public class SimpleLogistic 
-  extends Classifier 
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
-             TechnicalInformationHandler {
 
-    /** for serialization */
-    static final long serialVersionUID = 7397710626304705059L;
-  
+public class SimpleLogistic extends Classifier 
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
+
+  //format of serial: 1**date## (** = algorithm id, ##= version)
+  //static final long serialVersionUID = 1110506200300L;
+    
     /**The actual logistic regression model */
     protected LogisticBase m_boostedModel;
     
@@ -149,14 +84,6 @@ public class SimpleLogistic
 
     /**If true, use minimize error on probabilities instead of misclassification error*/
     protected boolean m_errorOnProbabilities;
-    
-    /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
-     * of total weights) are not included in the regression fit.
-     */
-    protected double m_weightTrimBeta = 0;
-    
-    /** If true, the AIC is used to choose the best iteration*/
-    private boolean m_useAIC = false;
 
     /**
      * Constructor for creating SimpleLogistic object with standard options.
@@ -165,8 +92,6 @@ public class SimpleLogistic
 	m_numBoostingIterations = 0;
 	m_useCrossValidation = true;
 	m_errorOnProbabilities = false;
-        m_weightTrimBeta = 0;
-        m_useAIC = false;
     }
 
     /**
@@ -180,44 +105,28 @@ public class SimpleLogistic
   	m_numBoostingIterations = numBoostingIterations;
 	m_useCrossValidation = useCrossValidation;
 	m_errorOnProbabilities = errorOnProbabilities;
-        m_weightTrimBeta = 0;
-        m_useAIC = false;
-    }
-
-    /**
-     * Returns default capabilities of the classifier.
-     *
-     * @return      the capabilities of this classifier
-     */
-    public Capabilities getCapabilities() {
-      Capabilities result = super.getCapabilities();
-
-      // attributes
-      result.enable(Capability.NOMINAL_ATTRIBUTES);
-      result.enable(Capability.NUMERIC_ATTRIBUTES);
-      result.enable(Capability.DATE_ATTRIBUTES);
-      result.enable(Capability.MISSING_VALUES);
-
-      // class
-      result.enable(Capability.NOMINAL_CLASS);
-      result.enable(Capability.MISSING_CLASS_VALUES);
-      
-      return result;
     }
 
     /**
      * Builds the logistic regression using LogitBoost.
      * @param data the training data
-     * @throws Exception if something goes wrong 
+     * @exception Exception if something goes wrong 
      */
     public void buildClassifier(Instances data) throws Exception {
 
-      // can classifier handle the data?
-      getCapabilities().testWithFail(data);
+	if (data.classAttribute().type() != Attribute.NOMINAL) {
+	    throw new UnsupportedClassTypeException("Class attribute must be nominal.");
+	}
+	if (data.checkForStringAttributes()) {
+	    throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+	}
 
-      // remove instances with missing class
-      data = new Instances(data);
-      data.deleteWithMissingClass();
+	data = new Instances(data);
+	data.deleteWithMissingClass();
+
+	if (data.numInstances() == 0) {
+	  throw new Exception("No instances without missing class values in training file!");
+	}
 
 	//replace missing values
 	m_ReplaceMissingValues = new ReplaceMissingValues();
@@ -233,8 +142,6 @@ public class SimpleLogistic
 	m_boostedModel = new LogisticBase(m_numBoostingIterations, m_useCrossValidation, m_errorOnProbabilities);
 	m_boostedModel.setMaxIterations(m_maxBoostingIterations);
 	m_boostedModel.setHeuristicStop(m_heuristicStop);
-        m_boostedModel.setWeightTrimBeta(m_weightTrimBeta);
-        m_boostedModel.setUseAIC(m_useAIC);
 	
 	//build logistic model
 	m_boostedModel.buildClassifier(data);
@@ -243,9 +150,7 @@ public class SimpleLogistic
     /** 
      * Returns class probabilities for an instance.
      *
-     * @param inst the instance to compute the probabilities for
-     * @return the probabilities
-     * @throws Exception if distribution can't be computed successfully
+     * @exception Exception if distribution can't be computed successfully
      */
     public double[] distributionForInstance(Instance inst) 
 	throws Exception {
@@ -266,85 +171,36 @@ public class SimpleLogistic
      * @return an enumeration of all the available options.
      */
     public Enumeration listOptions() {
-	Vector newVector = new Vector();
+	Vector newVector = new Vector(5);
 	
-	newVector.addElement(new Option(
-	    "\tSet fixed number of iterations for LogitBoost",
-	    "I",1,"-I <iterations>"));
+	newVector.addElement(new Option("\tSet fixed number of iterations for LogitBoost\n",
+					"I",1,"-I <iterations>"));
 	
-	newVector.addElement(new Option(
-	    "\tUse stopping criterion on training set (instead of\n"
-	    + "\tcross-validation)",
-	    "S",0,"-S"));
+	newVector.addElement(new Option("\tUse stopping criterion on training set (instead of cross-validation)\n",
+					"S",0,"-S"));
 	
-	newVector.addElement(new Option(
-	    "\tUse error on probabilities (rmse) instead of\n"
-	    + "\tmisclassification error for stopping criterion",
-	    "P",0,"-P"));
+	newVector.addElement(new Option("\tUse error on probabilities (rmse) instead of misclassification error " +
+					"for stopping criterion\n",
+					"P",0,"-P"));
 
-	newVector.addElement(new Option(
-	    "\tSet maximum number of boosting iterations",
-	    "M",1,"-M <iterations>"));
+	newVector.addElement(new Option("\tSet maximum number of boosting iterations\n",
+					"M",1,"-M <iterations>"));
 
-	newVector.addElement(new Option(
-	    "\tSet parameter for heuristic for early stopping of\n"
-	    + "\tLogitBoost.\n"
-	    + "\tIf enabled, the minimum is selected greedily, stopping\n"
-	    + "\tif the current minimum has not changed for iter iterations.\n"
-	    + "\tBy default, heuristic is enabled with value 50. Set to\n"
-	    + "\tzero to disable heuristic.",
-	    "H",1,"-H <iterations>"));
-        
-        newVector.addElement(new Option("\tSet beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.\n",
-                                        "W",1,"-W <beta>"));
-        
-        newVector.addElement(new Option("\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
-                                        "A", 0, "-A"));
-	
+	newVector.addElement(new Option("\tSet parameter for heuristic for early stopping of LogitBoost."+
+					"If enabled, the minimum is selected greedily, stopping if the current minimum"+
+					" has not changed for iter iterations. By default, heuristic is enabled with"+
+					"value 50. Set to zero to disable heuristic."+
+					"\n",
+					"H",1,"-H <iterations>"));
 	return newVector.elements();
     } 
     
 
     /**
-     * Parses a given list of options. <p/>
-     *
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -I &lt;iterations&gt;
-     *  Set fixed number of iterations for LogitBoost</pre>
-     * 
-     * <pre> -S
-     *  Use stopping criterion on training set (instead of
-     *  cross-validation)</pre>
-     * 
-     * <pre> -P
-     *  Use error on probabilities (rmse) instead of
-     *  misclassification error for stopping criterion</pre>
-     * 
-     * <pre> -M &lt;iterations&gt;
-     *  Set maximum number of boosting iterations</pre>
-     * 
-     * <pre> -H &lt;iterations&gt;
-     *  Set parameter for heuristic for early stopping of
-     *  LogitBoost.
-     *  If enabled, the minimum is selected greedily, stopping
-     *  if the current minimum has not changed for iter iterations.
-     *  By default, heuristic is enabled with value 50. Set to
-     *  zero to disable heuristic.</pre>
-     * 
-     * <pre> -W &lt;beta&gt;
-     *  Set beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.
-     * </pre>
-     * 
-     * <pre> -A
-     *  The AIC is used to choose the best iteration (instead of CV or training error).
-     * </pre>
-     * 
-     <!-- options-end -->
+     * Parses a given list of options.
      *
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
 
@@ -365,13 +221,6 @@ public class SimpleLogistic
 	if (optionString.length() != 0) {
 	    setHeuristicStop((new Integer(optionString)).intValue());
 	}
-        
-        optionString = Utils.getOption('W', options);
-        if (optionString.length() != 0) {
-            setWeightTrimBeta((new Double(optionString)).doubleValue());
-        }
-        
-        setUseAIC(Utils.getFlag('A', options));        
 
 	Utils.checkForRemainingOptions(options);
     } 
@@ -382,7 +231,7 @@ public class SimpleLogistic
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-	String[] options = new String[11];
+	String[] options = new String[9];
 	int current = 0;
 		
 	options[current++] = "-I"; 
@@ -401,13 +250,6 @@ public class SimpleLogistic
 	
 	options[current++] = "-H"; 
 	options[current++] = ""+getHeuristicStop();
-        
-        options[current++] = "-W";
-        options[current++] = ""+getWeightTrimBeta();
-        
-        if (getUseAIC()) {
-            options[current++] = "-A";
-        }
 
 	while (current < options.length) {
 	    options[current++] = "";
@@ -417,16 +259,12 @@ public class SimpleLogistic
 
     /**
      * Get the value of numBoostingIterations.
-     * 
-     * @return the number of boosting iterations
      */
     public int getNumBoostingIterations(){
 	return m_numBoostingIterations;
     }
     /**
      * Get the value of useCrossValidation.
-     * 
-     * @return true if cross-validation is used
      */
     public boolean getUseCrossValidation(){
 	return m_useCrossValidation;
@@ -434,9 +272,6 @@ public class SimpleLogistic
 
     /**
      * Get the value of errorOnProbabilities.
-     * 
-     * @return 	If true, use minimize error on probabilities instead of 
-     * 		misclassification error
      */
     public boolean getErrorOnProbabilities(){
 	return m_errorOnProbabilities;
@@ -444,8 +279,6 @@ public class SimpleLogistic
     
     /**
      * Get the value of maxBoostingIterations.
-     * 
-     * @return the maximum number of boosting iterations
      */
     public int getMaxBoostingIterations(){
 	return m_maxBoostingIterations;
@@ -453,33 +286,13 @@ public class SimpleLogistic
 
     /**
      * Get the value of heuristicStop.
-     * 
-     * @return the value of heuristicStop
      */
     public int getHeuristicStop(){
 	return m_heuristicStop;
     }
     
     /**
-     * Get the value of weightTrimBeta.
-     */
-    public double getWeightTrimBeta(){
-        return m_weightTrimBeta;
-    }
-    
-    /**
-     * Get the value of useAIC.
-     *
-     * @return Value of useAIC.
-     */
-    public boolean getUseAIC(){
-        return m_useAIC;
-    }
-    
-    /**
      * Set the value of numBoostingIterations.
-     * 
-     * @param n the number of boosting iterations
      */
     public void setNumBoostingIterations(int n){
 	m_numBoostingIterations = n;
@@ -487,8 +300,6 @@ public class SimpleLogistic
 
     /**
      * Set the value of useCrossValidation.
-     * 
-     * @param l whether to use cross-validation
      */
     public void setUseCrossValidation(boolean l){
 	m_useCrossValidation = l;
@@ -496,9 +307,6 @@ public class SimpleLogistic
 
     /**
      * Set the value of errorOnProbabilities.
-     * 
-     * @param l If true, use minimize error on probabilities instead of 
-     * 		misclassification error
      */
     public void setErrorOnProbabilities(boolean l){
 	m_errorOnProbabilities = l;
@@ -506,8 +314,6 @@ public class SimpleLogistic
 
     /**
      * Set the value of maxBoostingIterations.
-     * 
-     * @param n the maximum number of boosting iterations
      */
     public void setMaxBoostingIterations(int n){
 	m_maxBoostingIterations = n;
@@ -515,37 +321,13 @@ public class SimpleLogistic
 
     /**
      * Set the value of heuristicStop.
-     * 
-     * @param n the value of heuristicStop
      */
     public void setHeuristicStop(int n){
-	if (n == 0) 
-	  m_heuristicStop = m_maxBoostingIterations; 
-	else 
-	  m_heuristicStop = n;
-    }
-    
-    /**
-     * Set the value of weightTrimBeta.
-     */
-    public void setWeightTrimBeta(double n){
-        m_weightTrimBeta = n;
-    }
-    
-    /**
-     * Set the value of useAIC.
-     *
-     * @param c Value to assign to useAIC.
-     */
-    public void setUseAIC(boolean c){
-        m_useAIC = c;
+	if (n == 0) m_heuristicStop = m_maxBoostingIterations; else m_heuristicStop = n;
     }
 
     /**
-     * Get the number of LogitBoost iterations performed (= the number of 
-     * regression functions fit by LogitBoost).
-     * 
-     * @return the number of LogitBoost iterations performed
+     * Get the number of LogitBoost iterations performed (= the number of regression functions fit by LogitBoost).
      */
     public int getNumRegressions(){
 	return m_boostedModel.getNumRegressions();
@@ -553,8 +335,6 @@ public class SimpleLogistic
 
     /**
      * Returns a description of the logistic model (attributes/coefficients).
-     * 
-     * @return the model as string
      */
     public String toString(){
 	if (m_boostedModel == null) return "No model built";
@@ -562,11 +342,8 @@ public class SimpleLogistic
     }
 
     /**
-     * Returns the fraction of all attributes in the data that are used in the 
-     * logistic model (in percent). An attribute is used in the model if it is 
-     * used in any of the models for the different classes.
-     * 
-     * @return percentage of attributes used in the model
+     * Returns the fraction of all attributes in the data that are used in the logistic model (in percent).
+     * An attribute is used in the model if it is used in any of the models for the different classes.
      */
     public double measureAttributesUsed(){
 	return m_boostedModel.percentAttributesUsed();
@@ -587,7 +364,7 @@ public class SimpleLogistic
      * Returns the value of the named measure
      * @param additionalMeasureName the name of the measure to query for its value
      * @return the value of the named measure
-     * @throws IllegalArgumentException if the named measure is not supported
+     * @exception IllegalArgumentException if the named measure is not supported
      */
     public double getMeasure(String additionalMeasureName) {
 	if (additionalMeasureName.compareToIgnoreCase("measureAttributesUsed") == 0) {
@@ -610,39 +387,7 @@ public class SimpleLogistic
 	return "Classifier for building linear logistic regression models. LogitBoost with simple regression "
 	    +"functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost "
 	    +"iterations to perform is cross-validated, which leads to automatic attribute selection. "
-	    +"For more information see:\n"
-	    + getTechnicalInformation().toString();
-    }
-
-    /**
-     * Returns an instance of a TechnicalInformation object, containing 
-     * detailed information about the technical background of this class,
-     * e.g., paper reference or book this class is based on.
-     * 
-     * @return the technical information about this class
-     */
-    public TechnicalInformation getTechnicalInformation() {
-      TechnicalInformation 	result;
-      TechnicalInformation 	additional;
-      
-      result = new TechnicalInformation(Type.ARTICLE);
-      result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
-      result.setValue(Field.TITLE, "Logistic Model Trees");
-      result.setValue(Field.BOOKTITLE, "Machine Learning");
-      result.setValue(Field.YEAR, "2005");
-      result.setValue(Field.VOLUME, "95");
-      result.setValue(Field.PAGES, "161-205");
-      result.setValue(Field.NUMBER, "1-2");
-      
-      additional = result.add(Type.INPROCEEDINGS);
-      additional.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
-      additional.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
-      additional.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
-      additional.setValue(Field.YEAR, "2005");
-      additional.setValue(Field.PAGES, "675-683");
-      additional.setValue(Field.PUBLISHER, "Springer");
-      
-      return result;
+	    +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
     }
 
     /**
@@ -700,33 +445,11 @@ public class SimpleLogistic
 	    +"has been reached in the last heuristicStop iterations. It is recommended to use this heuristic, "
 	    +"it gives a large speed-up especially on small datasets. The default value is 50.";
     }    
-    
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String weightTrimBetaTipText() {
-        return "Set the beta value used for weight trimming in LogitBoost. "
-        +"Only instances carrying (1 - beta)% of the weight from previous iteration "
-        +"are used in the next iteration. Set to 0 for no weight trimming. "
-        +"The default value is 0.";
-    }
-
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String useAICTipText() {
-        return "The AIC is used to determine when to stop LogitBoost iterations "
-        +"(instead of cross-validation or training error).";
-    }
 
     /**
      * Main method for testing this class
      *
-     * @param argv commandline options 
+     * @param String options 
      */
     public static void main(String[] argv) {	
 	try {
@@ -736,5 +459,11 @@ public class SimpleLogistic
 	    System.err.println(e.getMessage());
 	}
     }
+
 }
+
+
+
+
+
 

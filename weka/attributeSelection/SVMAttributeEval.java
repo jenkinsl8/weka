@@ -23,106 +23,58 @@
 
 package weka.attributeSelection;
 
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 import weka.classifiers.functions.SMO;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Vector;
+import weka.attributeSelection.*;
 
 /** 
- <!-- globalinfo-start -->
- * SVMAttributeEval :<br/>
- * <br/>
- * Evaluates the worth of an attribute by using an SVM classifier. Attributes are ranked by the square of the weight assigned by the SVM. Attribute selection for multiclass problems is handled by ranking attributes for each class seperately using a one-vs-all method and then "dealing" from the top of each pile to give a final ranking.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer classification using support vector machines. Machine Learning. 46:389-422.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for Evaluating attributes individually by using the SVM
+ * classifier. Attributes are ranked by the square of the weight
+ * assigned by the SVM. Attribute selection for multiclass problems
+ * is handled by ranking attributes for each class seperately
+ * using a one-vs-all method and then "dealing" from the top of 
+ * each pile to give a final ranking.<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Guyon2002,
- *    author = {I. Guyon and J. Weston and S. Barnhill and V. Vapnik},
- *    journal = {Machine Learning},
- *    pages = {389-422},
- *    title = {Gene selection for cancer classification using support vector machines},
- *    volume = {46},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <br/>
+ * Guyon, I., Weston, J., Barnhill, S., &amp; Vapnik, V. (2002).  Gene
+ * selection for cancer classification using support vector machines. Machine
+ * Learning, 46, 389-422 <p/>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
+ *
+ * -X constant rate of elimination <br>
+ * Specify constant rate at which attributes are eliminated per invocation
+ * of the support vector machine. Default = 1.<p>
  * 
- * <pre> -X &lt;constant rate of elimination&gt;
- *  Specify the constant rate of attribute
- *  elimination per invocation of
- *  the support vector machine.
- *  Default = 1.</pre>
+ * -Y percent rate of elimination <br>
+ * Specify the percentage rate at which attributes are eliminated per invocation
+ * of the support vector machine. This setting trumps the constant rate setting. 
+ * Default = 0 (percentage rate ignored).<p>
+ *
+ * -Z threshold for percent elimination <br>
+ * Specify the threshold below which the percentage elimination method
+ * reverts to the constant elimination method.<p>
+ *
+ * -C complexity parameter <br>
+ * Specify the value of C - the complexity parameter to be passed on
+ * to the support vector machine. <p>
  * 
- * <pre> -Y &lt;percent rate of elimination&gt;
- *  Specify the percentage rate of attributes to
- *  elimination per invocation of
- *  the support vector machine.
- *  Trumps constant rate (above threshold).
- *  Default = 0.</pre>
- * 
- * <pre> -Z &lt;threshold for percent elimination&gt;
- *  Specify the threshold below which 
- *  percentage attribute elimination
- *  reverts to the constant method.
- * </pre>
- * 
- * <pre> -P &lt;epsilon&gt;
- *  Specify the value of P (epsilon
- *  parameter) to pass on to the
- *  support vector machine.
- *  Default = 1.0e-25</pre>
- * 
- * <pre> -T &lt;tolerance&gt;
- *  Specify the value of T (tolerance
- *  parameter) to pass on to the
- *  support vector machine.
- *  Default = 1.0e-10</pre>
- * 
- * <pre> -C &lt;complexity&gt;
- *  Specify the value of C (complexity
- *  parameter) to pass on to the
- *  support vector machine.
- *  Default = 1.0</pre>
- * 
- * <pre> -N
- *  Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
- * 
- <!-- options-end -->
+ * -P episilon <br>
+ * Sets the epsilon for round-off error. (default 1.0e-25)<p>
+ *
+ * -T tolerance <br>
+ * Sets the tolerance parameter. (default 1.0e-10)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.17.2.1 $
  */
-public class SVMAttributeEval 
-  extends AttributeEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6489975709033967447L;
+public class SVMAttributeEval extends AttributeEvaluator
+  implements OptionHandler {
 
   /** The attribute scores */
   private double[] m_attScores;
@@ -157,34 +109,11 @@ public class SVMAttributeEval
    */
   public String globalInfo() {
     return "SVMAttributeEval :\n\nEvaluates the worth of an attribute by "
-      + "using an SVM classifier. Attributes are ranked by the square of the "
-      + "weight assigned by the SVM. Attribute selection for multiclass "
-      + "problems is handled by ranking attributes for each class seperately "
-      + "using a one-vs-all method and then \"dealing\" from the top of "
-      + "each pile to give a final ranking.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "I. Guyon and J. Weston and S. Barnhill and V. Vapnik");
-    result.setValue(Field.YEAR, "2002");
-    result.setValue(Field.TITLE, "Gene selection for cancer classification using support vector machines");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "46");
-    result.setValue(Field.PAGES, "389-422");
-    
-    return result;
+      + "using an SVM classifier.\n\n"
+      + "For more information see:\n"
+      + "Guyon, I., Weston, J., Barnhill, S., & Vapnik, V. (2002). "
+      + "Gene selection for cancer classification using support "
+      + "vector machines. Machine Learning, 46, 389-422";
   }
 
   /**
@@ -276,53 +205,37 @@ public class SVMAttributeEval
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
+   *
+   * -X constant rate of elimination <br>
+   * Specify constant rate at which attributes are eliminated per invocation
+   * of the support vector machine. Default = 1.<p>
    * 
-   * <pre> -X &lt;constant rate of elimination&gt;
-   *  Specify the constant rate of attribute
-   *  elimination per invocation of
-   *  the support vector machine.
-   *  Default = 1.</pre>
+   * -Y percent rate of elimination <br>
+   * Specify the percentage rate at which attributes are eliminated per
+   * invocation of the support vector machine. This setting trumps the constant
+   * rate setting.  Default = 0 (percentage rate ignored).<p>
+   *
+   * -Z threshold for percent elimination <br>
+   * Specify the threshold below which the percentage elimination method
+   * reverts to the constant elimination method.<p>
+   *
+   * -C complexity parameter <br>
+   * Specify the value of C - the complexity parameter to be passed on
+   * to the support vector machine. <p>
    * 
-   * <pre> -Y &lt;percent rate of elimination&gt;
-   *  Specify the percentage rate of attributes to
-   *  elimination per invocation of
-   *  the support vector machine.
-   *  Trumps constant rate (above threshold).
-   *  Default = 0.</pre>
-   * 
-   * <pre> -Z &lt;threshold for percent elimination&gt;
-   *  Specify the threshold below which 
-   *  percentage attribute elimination
-   *  reverts to the constant method.
-   * </pre>
-   * 
-   * <pre> -P &lt;epsilon&gt;
-   *  Specify the value of P (epsilon
-   *  parameter) to pass on to the
-   *  support vector machine.
-   *  Default = 1.0e-25</pre>
-   * 
-   * <pre> -T &lt;tolerance&gt;
-   *  Specify the value of T (tolerance
-   *  parameter) to pass on to the
-   *  support vector machine.
-   *  Default = 1.0e-10</pre>
-   * 
-   * <pre> -C &lt;complexity&gt;
-   *  Specify the value of C (complexity
-   *  parameter) to pass on to the
-   *  support vector machine.
-   *  Default = 1.0</pre>
-   * 
-   * <pre> -N
-   *  Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
-   * 
-   <!-- options-end -->
+   * -P episilon <br>
+   * Sets the epsilon for round-off error. (default 1.0e-25)<p>
+   *
+   * -T tolerance <br>
+   * Sets the tolerance parameter. (default 1.0e-10)<p>
+   *
+   * -N 0|1|2 <br>
+   * Whether the SVM should 0=normalize/1=standardize/2=neither. (default
+   * 0=normalize)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void setOptions(String[] options) throws Exception {
     String optionString;
@@ -481,7 +394,7 @@ public class SVMAttributeEval
   /**
    * Set the constant rate of attribute elimination per iteration
    *
-   * @param cRate the constant rate of attribute elimination per iteration
+   * @param X the constant rate of attribute elimination per iteration
    */
   public void setAttsToEliminatePerIteration(int cRate) {
     m_numToEliminate = cRate;
@@ -499,7 +412,7 @@ public class SVMAttributeEval
   /**
    * Set the percentage of attributes to eliminate per iteration
    *
-   * @param pRate percent of attributes to eliminate per iteration
+   * @param Y percent of attributes to eliminate per iteration
    */
   public void setPercentToEliminatePerIteration(int pRate) {
     m_percentToEliminate = pRate;
@@ -518,7 +431,7 @@ public class SVMAttributeEval
    * Set the threshold below which percentage elimination reverts to
    * constant elimination.
    *
-   * @param pThresh percent of attributes to eliminate per iteration
+   * @param thresh percent of attributes to eliminate per iteration
    */
   public void setPercentThreshold(int pThresh) {
     m_percentThreshold = pThresh;
@@ -555,7 +468,7 @@ public class SVMAttributeEval
   /**
    * Set the value of T for SMO
    *
-   * @param svmT the value of T
+   * @param svmC the value of T
    */
   public void setToleranceParameter(double svmT) {
     m_smoTParameter = svmT;
@@ -617,7 +530,7 @@ public class SVMAttributeEval
    * Initializes the evaluator.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator(Instances data) throws Exception {
@@ -773,8 +686,8 @@ public class SVMAttributeEval
    * Evaluates an attribute by returning the rank of the square of its coefficient in a
    * linear support vector machine.
    *
-   * @param attribute the index of the attribute to be evaluated
-   * @throws Exception if the attribute could not be evaluated
+   *@param attribute the index of the attribute to be evaluated
+   * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute(int attribute) throws Exception {
     return m_attScores[attribute];

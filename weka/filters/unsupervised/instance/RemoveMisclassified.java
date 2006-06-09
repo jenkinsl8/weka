@@ -22,64 +22,46 @@
 
 package weka.filters.unsupervised.instance;
 
+import weka.filters.*;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
+import weka.core.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * A filter that removes instances which are incorrectly classified. Useful for removing outliers.
- * <p/>
- <!-- globalinfo-end -->
+ * A filter that removes instances which are incorrectly classified.
+ * Useful for removing outliers. <p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -W classifier string <br>
+ * Full class name of classifier to use, followed by scheme options.
+ * (required)<p>
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;classifier specification&gt;
- *  Full class name of classifier to use, followed
- *  by scheme options. (required)
- *  eg: "weka.classifiers.bayes.NaiveBayes -D"</pre>
- * 
- * <pre> -C &lt;class index&gt;
- *  Attribute on which misclassifications are based.
- *  If &lt; 0 will use any current set class or default to the last attribute.</pre>
- * 
- * <pre> -F &lt;number of folds&gt;
- *  The number of folds to use for cross-validation cleansing.
- *  (&lt;2 = no cross-validation - default).</pre>
- * 
- * <pre> -T &lt;threshold&gt;
- *  Threshold for the max error when predicting numeric class.
- *  (Value should be &gt;= 0, default = 0.1).</pre>
- * 
- * <pre> -I
- *  The maximum number of cleansing iterations to perform.
- *  (&lt;1 = until fully cleansed - default)</pre>
- * 
- * <pre> -V
- *  Invert the match so that correctly classified instances are discarded.
- * </pre>
- * 
- <!-- options-end -->
+ * -C class index <br>
+ * Attribute on which misclassifications are based. If &lt; 0 will use any
+ * current set class or default to the last attribute. <p>
+ *
+ * -F number of folds <br>
+ * The number of folds to use for cross-validation cleansing.
+ * (&lt;2 = no cross-validation - default)<p> 
+ *
+ * -T threshold <br>
+ * Threshold for the max error when predicting numeric class.
+ * (Value should be &gt;= 0, default = 0.1)<p>
+ *
+ * -I max iterations <br>
+ * The maximum number of cleansing iterations to perform.
+ * (&lt;1 = until fully cleansed - default)<p>
+ *
+ * -V <br>
+ * Invert the match so that correctly classified instances are discarded.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class RemoveMisclassified 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 5469157004717663171L;
+public class RemoveMisclassified extends Filter implements UnsupervisedFilter, OptionHandler {
 
   /** The classifier used to do the cleansing */
   protected Classifier m_cleansingClassifier = new weka.classifiers.rules.ZeroR();
@@ -109,7 +91,7 @@ public class RemoveMisclassified
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -123,8 +105,6 @@ public class RemoveMisclassified
    * Cleanses the data based on misclassifications when used training data.
    *
    * @param data the data to train with and cleanse
-   * @return the cleansed data
-   * @throws Exception if something goes wrong
    */
   private Instances cleanseTrain(Instances data) throws Exception {
     
@@ -190,8 +170,6 @@ public class RemoveMisclassified
    * Cleanses the data based on misclassifications when performing cross-validation.
    *
    * @param data the data to train with and cleanse
-   * @return the cleansed data
-   * @throws Exception if something goes wrong
    */
   private Instances cleanseCross(Instances data) throws Exception {
     
@@ -269,9 +247,9 @@ public class RemoveMisclassified
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws NullPointerException if the input format has not been
+   * @exception NullPointerException if the input format has not been
    * defined.
-   * @throws Exception if the input instance was not of the correct 
+   * @exception Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.  
    */
   public boolean input(Instance instance) throws Exception {
@@ -297,7 +275,7 @@ public class RemoveMisclassified
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
 
@@ -364,40 +342,33 @@ public class RemoveMisclassified
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -W classifier string <br>
+   * Full class name of classifier to use, followed by scheme options.
+   * (required)<p>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;classifier specification&gt;
-   *  Full class name of classifier to use, followed
-   *  by scheme options. (required)
-   *  eg: "weka.classifiers.bayes.NaiveBayes -D"</pre>
-   * 
-   * <pre> -C &lt;class index&gt;
-   *  Attribute on which misclassifications are based.
-   *  If &lt; 0 will use any current set class or default to the last attribute.</pre>
-   * 
-   * <pre> -F &lt;number of folds&gt;
-   *  The number of folds to use for cross-validation cleansing.
-   *  (&lt;2 = no cross-validation - default).</pre>
-   * 
-   * <pre> -T &lt;threshold&gt;
-   *  Threshold for the max error when predicting numeric class.
-   *  (Value should be &gt;= 0, default = 0.1).</pre>
-   * 
-   * <pre> -I
-   *  The maximum number of cleansing iterations to perform.
-   *  (&lt;1 = until fully cleansed - default)</pre>
-   * 
-   * <pre> -V
-   *  Invert the match so that correctly classified instances are discarded.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * -C class index <br>
+   * Attribute on which misclassifications are based. If &lt; 0 will use any
+   * current set class or default to the last attribute.
+   *
+   * -F number of folds <br>
+   * The number of folds to use for cross-validation cleansing.
+   * (&lt;2 = no cross-validation - default)<p> 
+   *
+   * -T threshold <br>
+   * Threshold for the max error when predicting numeric class.
+   * (Value should be &gt;= 0, default = 0.1)<p>
+   *
+   * -I max iterations <br>
+   * The maximum number of cleansing iterations to perform.
+   * (&lt;1 = until fully cleansed - default)<p>
+   *
+   * -V <br>
+   * Invert the match so that correctly classified instances are discarded.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -436,8 +407,8 @@ public class RemoveMisclassified
     }
 
     String iString = Utils.getOption('I', options);
-    if (iString.length() != 0) {
-      setMaxIterations((new Double(iString)).intValue());
+    if (tString.length() != 0) {
+      setMaxIterations((new Double(tString)).intValue());
     } else {
       setMaxIterations(0);
     }
@@ -484,9 +455,8 @@ public class RemoveMisclassified
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "A filter that removes instances which are incorrectly classified. "
-      + "Useful for removing outliers.";
+
+    return "A filter that removes instances which are incorrectly classified. Useful for removing outliers.";
   }
 
   /**

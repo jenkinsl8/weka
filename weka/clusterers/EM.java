@@ -22,75 +22,62 @@
 
 package  weka.clusterers;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.estimators.DiscreteEstimator;
-import weka.estimators.Estimator;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import  weka.estimators.*;
 
 /**
- <!-- globalinfo-start -->
- * Simple EM (expectation maximisation) class.<br/>
- * <br/>
- * EM assigns a probability distribution to each instance which indicates the probability of it belonging to each of the clusters. EM can decide how many clusters to create by cross validation, or you may specify apriori how many clusters to generate.<br/>
- * <br/>
- * The cross validation performed to determine the number of clusters is done in the following steps:<br/>
- * 1. the number of clusters is set to 1<br/>
- * 2. the training set is split randomly into 10 folds.<br/>
- * 3. EM is performed 10 times using the 10 folds the usual CV way.<br/>
- * 4. the loglikelihood is averaged over all 10 results.<br/>
- * 5. if loglikelihood has increased the number of clusters is increased by 1 and the program continues at step 2. <br/>
- * <br/>
- * The number of folds is fixed to 10, as long as the number of instances in the training set is not smaller 10. If this is the case the number of folds is set equal to the number of instances.
- * <p/>
- <!-- globalinfo-end -->
+ * Simple EM (expectation maximisation) class. <p>
+ * 
+ * EM assigns a probability distribution to each instance which
+ * indicates the probability of it belonging to each of the clusters.
+ * EM can decide how many clusters to create by cross validation, or you
+ * may specify apriori how many clusters to generate. <p>
+ * <br>
+ * The cross validation performed to determine the number of clusters
+ * is done in the following steps:<br>
+ * 1. the number of clusters is set to 1<br>
+ * 2. the training set is split randomly into 10 folds.<br>
+ * 3. EM is performed 10 times using the 10 folds the usual CV way.<br>
+ * 4. the loglikelihood is averaged over all 10 results.<br>
+ * 5. if loglikelihood has increased the number of clusters is increased by 1
+ * and the program continues at step 2. <br>
+ *<br>
+ * The number of folds is fixed to 10, as long as the number of instances in
+ * the training set is not smaller 10. If this is the case the number of folds
+ * is set equal to the number of instances.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters. If omitted or
- *  -1 specified, then cross validation is used to
- *  select the number of clusters.</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  max iterations.
- * (default 100)</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  random number seed.
- * (default 1)</pre>
- * 
- * <pre> -V
- *  verbose.</pre>
- * 
- * <pre> -M &lt;num&gt;
- *  minimum allowable standard deviation for normal density computation 
- *  (default 1e-6)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -V <br>
+ * Verbose. <p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. If omitted,
+ * EM will use cross validation to select the number of clusters
+ * automatically. <p>
+ *
+ * -I <max iterations> <br>
+ * Terminate after this many iterations if EM has not converged. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
+ *
+ * -M <num> <br>
+ * Set the minimum allowable standard deviation for normal density calculation.
+ * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.30.2.3 $
  */
 public class EM
   extends DensityBasedClusterer
   implements NumberOfClustersRequestable,
 	     OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 8348181483812829475L;
-  
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
 
@@ -136,10 +123,8 @@ public class EM
   /** attribute max values */
   private double [] m_maxValues;
 
-  /** random number generator */
+  /** random numbers and seed */
   private Random m_rr;
-  
-  /** the seed value for the random number generator */
   private int m_rseed;
 
   /** Verbose? */
@@ -154,30 +139,36 @@ public class EM
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "Simple EM (expectation maximisation) class.\n\n"
-      + "EM assigns a probability distribution to each instance which "
-      + "indicates the probability of it belonging to each of the clusters. "
-      + "EM can decide how many clusters to create by cross validation, or you "
-      + "may specify apriori how many clusters to generate.\n\n"
-      + "The cross validation performed to determine the number of clusters "
-      + "is done in the following steps:\n"
-      + "1. the number of clusters is set to 1\n"
-      + "2. the training set is split randomly into 10 folds.\n"
-      + "3. EM is performed 10 times using the 10 folds the usual CV way.\n"
-      + "4. the loglikelihood is averaged over all 10 results.\n"
-      + "5. if loglikelihood has increased the number of clusters is increased "
-      + "by 1 and the program continues at step 2. \n\n"
-      + "The number of folds is fixed to 10, as long as the number of "
-      + "instances in the training set is not smaller 10. If this is the case "
-      + "the number of folds is set equal to the number of instances.";
+    return "Cluster data using expectation maximization";
   }
 
+
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options.. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -V <br>
+   * Verbose. <p>
+   *
+   * -N <number of clusters> <br>
+   * Specify the number of clusters to generate. If omitted,
+   * EM will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -I <max iterations> <br>
+   * Terminate after this many iterations if EM has not converged. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
+   *
+   * -M <num> <br>
+   *  Set the minimum allowable standard deviation for normal density 
+   * calculation. <p>
    *
    * @return an enumeration of all the available options.
-   */
+   *
+   **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(6);
     newVector.addElement(new Option("\tnumber of clusters. If omitted or" 
@@ -199,36 +190,11 @@ public class EM
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters. If omitted or
-   *  -1 specified, then cross validation is used to
-   *  select the number of clusters.</pre>
-   * 
-   * <pre> -I &lt;num&gt;
-   *  max iterations.
-   * (default 100)</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  random number seed.
-   * (default 1)</pre>
-   * 
-   * <pre> -V
-   *  verbose.</pre>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  minimum allowable standard deviation for normal density computation 
-   *  (default 1e-6)</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     resetOptions();
@@ -333,7 +299,7 @@ public class EM
    * Set the number of clusters (-1 to select by CV).
    *
    * @param n the number of clusters
-   * @throws Exception if n is 0
+   * @exception Exception if n is 0
    */
   public void setNumClusters (int n)
     throws Exception {
@@ -376,7 +342,7 @@ public class EM
    * Set the maximum number of iterations to perform
    *
    * @param i the number of iterations
-   * @throws Exception if i is less than 1
+   * @exception Exception if i is less than 1
    */
   public void setMaxIterations (int i)
     throws Exception {
@@ -451,7 +417,6 @@ public class EM
    * Initialise estimators and storage.
    *
    * @param inst the instances
-   * @throws Exception if initialization fails
    **/
   private void EM_Init (Instances inst)
     throws Exception {
@@ -535,7 +500,7 @@ public class EM
    * calculate prior probabilites for the clusters
    *
    * @param inst the instances
-   * @throws Exception if priors can't be calculated
+   * @exception Exception if priors can't be calculated
    **/
   private void estimate_priors (Instances inst)
     throws Exception {
@@ -562,7 +527,6 @@ public class EM
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
-   * @return the density
    */
   private double logNormalDens (double x, double mean, double stdDev) {
 
@@ -575,6 +539,8 @@ public class EM
 
   /**
    * New probability estimators for an iteration
+   *
+   * @param num_cl the numbe of clusters
    */
   private void new_estimators () {
     for (int i = 0; i < m_num_clusters; i++) {
@@ -596,7 +562,6 @@ public class EM
   /**
    * The M step of the EM algorithm.
    * @param inst the training instances
-   * @throws Exception if something goes wrong
    */
   private void M (Instances inst)
     throws Exception {
@@ -680,9 +645,7 @@ public class EM
    * probabilities.
    *
    * @param inst the training instances
-   * @param change_weights whether to change the weights
    * @return the average log likelihood
-   * @throws Exception if computation fails
    */
   private double E (Instances inst, boolean change_weights)
     throws Exception {
@@ -750,8 +713,6 @@ public class EM
 
   /**
    * Outputs the generated clusters into a string.
-   * 
-   * @return the clusterer in string representation
    */
   public String toString () {
     if (m_priors == null) {
@@ -839,7 +800,6 @@ public class EM
    * estimate the number of clusters by cross validation on the training
    * data.
    *
-   * @throws Exception if something goes wrong
    */
   private void CVClusters ()
     throws Exception {
@@ -949,7 +909,7 @@ public class EM
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters ()
@@ -986,31 +946,21 @@ public class EM
       }
     }
   }
-
-  /**
-   * Returns default capabilities of the clusterer (i.e., the ones of 
-   * SimpleKMeans).
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    return new SimpleKMeans().getCapabilities();
-  }
   
   /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer (Instances data)
     throws Exception {
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
     
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_replaceMissing = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);
@@ -1038,8 +988,6 @@ public class EM
 
   /**
    * Returns the cluster priors.
-   * 
-   * @return the cluster priors
    */
   public double[] clusterPriors() {
 
@@ -1052,9 +1000,10 @@ public class EM
   /**
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
-   * @param inst the instance to compute the density for
+   * @param instance the instance to compute the density for
+   * @return the density.
    * @return an array containing the estimated densities
-   * @throws Exception if the density could not be computed
+   * @exception Exception if the density could not be computed
    * successfully
    */
   public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
@@ -1095,12 +1044,9 @@ public class EM
 
   /**
    * Perform the EM algorithm
-   * 
-   * @throws Exception if something goes wrong
    */
   private void doEM ()
     throws Exception {
-    
     if (m_verbose) {
       System.out.println("Seed: " + m_rseed);
     }
@@ -1145,13 +1091,12 @@ public class EM
    * converges.
    *
    * @param inst the training instances.
+   * @param num_cl the number of clusters.
    * @param report be verbose.
    * @return the log likelihood of the data
-   * @throws Exception if something goes wrong
    */
   private double iterate (Instances inst, boolean report)
     throws Exception {
-    
     int i;
     double llkold = 0.0;
     double llk = 0.0;

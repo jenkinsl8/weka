@@ -62,15 +62,12 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffViewerMainPanel 
   extends JPanel 
   implements ActionListener, ChangeListener {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8763161167586738753L;
   
   /** the default for width */
   public final static int    DEFAULT_WIDTH     = -1;
@@ -104,14 +101,12 @@ public class ArffViewerMainPanel
   protected JMenuItem             menuEditDeleteAttribute;
   protected JMenuItem             menuEditDeleteAttributes;
   protected JMenuItem             menuEditRenameAttribute;
-  protected JMenuItem             menuEditAttributeAsClass;
   protected JMenuItem             menuEditDeleteInstance;
   protected JMenuItem             menuEditDeleteInstances;
   protected JMenuItem             menuEditSortInstances;
   protected JMenu                 menuView;
   protected JMenuItem             menuViewAttributes;
   protected JMenuItem             menuViewValues;
-  protected JMenuItem             menuViewOptimalColWidths;
   
   protected FileChooser           fileChooser;
   protected ExtensionFileFilter   arffFilter;
@@ -126,8 +121,6 @@ public class ArffViewerMainPanel
   
   /**
    * initializes the object
-   * 
-   * @param parentFrame		the parent frame
    */
   public ArffViewerMainPanel(JFrame parentFrame) {
     parent     = parentFrame;
@@ -203,8 +196,6 @@ public class ArffViewerMainPanel
     menuEditClearSearch.addActionListener(this);
     menuEditRenameAttribute = new JMenuItem("Rename attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditRenameAttribute.addActionListener(this);
-    menuEditAttributeAsClass = new JMenuItem("Attribute as class", ComponentHelper.getImageIcon("empty.gif"));
-    menuEditAttributeAsClass.addActionListener(this);
     menuEditDeleteAttribute = new JMenuItem("Delete attribute", ComponentHelper.getImageIcon("empty.gif"));
     menuEditDeleteAttribute.addActionListener(this);
     menuEditDeleteAttributes = new JMenuItem("Delete attributes", ComponentHelper.getImageIcon("empty.gif"));
@@ -223,7 +214,6 @@ public class ArffViewerMainPanel
     menuEdit.add(menuEditClearSearch);
     menuEdit.addSeparator();
     menuEdit.add(menuEditRenameAttribute);
-    menuEdit.add(menuEditAttributeAsClass);
     menuEdit.add(menuEditDeleteAttribute);
     menuEdit.add(menuEditDeleteAttributes);
     menuEdit.addSeparator();
@@ -239,12 +229,8 @@ public class ArffViewerMainPanel
     menuViewValues   = new JMenuItem("Values...", ComponentHelper.getImageIcon("properties.gif"));
     menuViewValues.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuViewValues.addActionListener(this);
-    menuViewOptimalColWidths = new JMenuItem("Optimal column width (all)", ComponentHelper.getImageIcon("resize.gif"));
-    menuViewOptimalColWidths.addActionListener(this);
     menuView.add(menuViewAttributes);
     menuView.add(menuViewValues);
-    menuView.addSeparator();
-    menuView.add(menuViewOptimalColWidths);
     menuBar.add(menuView);
     
     // tabbed pane
@@ -258,8 +244,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the menu bar to be added in a frame
-   * 
-   * @return		the menu bar
    */
   public JMenuBar getMenu() {
     return menuBar;
@@ -267,8 +251,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the tabbedpane instance
-   * 
-   * @return		the tabbed pane
    */
   public JTabbedPane getTabbedPane() {
     return tabbedPane;
@@ -294,8 +276,6 @@ public class ArffViewerMainPanel
 
   /**
    * whether to do a System.exit(0) on close
-   * 
-   * @param value	enables/disables a System.exit(0) on close
    */
   public void setExitOnClose(boolean value) {
     exitOnClose = value;
@@ -303,8 +283,6 @@ public class ArffViewerMainPanel
 
   /**
    * returns TRUE if a System.exit(0) is done on a close
-   * 
-   * @return		true if a System.exit(0) is done on close
    */
   public boolean getExitOnClose() {
     return exitOnClose;
@@ -320,8 +298,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the title (incl. filename) for the frame
-   * 
-   * @return		the frame title
    */
   public String getFrameTitle() {
     if (getCurrentFilename().equals(""))
@@ -363,7 +339,6 @@ public class ArffViewerMainPanel
     menuEditCopy.setEnabled(fileOpen);
     menuEditSearch.setEnabled(fileOpen);
     menuEditClearSearch.setEnabled(fileOpen);
-    menuEditAttributeAsClass.setEnabled(fileOpen);
     menuEditRenameAttribute.setEnabled(fileOpen);
     menuEditDeleteAttribute.setEnabled(fileOpen);
     menuEditDeleteAttributes.setEnabled(fileOpen);
@@ -373,13 +348,10 @@ public class ArffViewerMainPanel
     // View
     menuViewAttributes.setEnabled(fileOpen);
     menuViewValues.setEnabled(fileOpen);
-    menuViewOptimalColWidths.setEnabled(fileOpen);
   }
   
   /**
    * sets the title of the tab that contains the given component
-   * 
-   * @param component		the component to set the title for
    */
   protected void setTabTitle(JComponent component) {
     int            index;
@@ -397,8 +369,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the number of panels currently open
-   * 
-   * @return		the number of open panels
    */
   public int getPanelCount() {
     return tabbedPane.getTabCount();
@@ -406,9 +376,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the specified panel, <code>null</code> if index is out of bounds  
-   * 
-   * @param index	the index of the panel
-   * @return		the panel
    */
   public ArffPanel getPanel(int index) {
     if ((index >= 0) && (index < getPanelCount()))
@@ -419,8 +386,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the currently selected tab index
-   * 
-   * @return		the index of the currently selected tab
    */
   public int getCurrentIndex() {
     return tabbedPane.getSelectedIndex();
@@ -428,8 +393,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the currently selected panel
-   * 
-   * @return		the currently selected panel
    */
   public ArffPanel getCurrentPanel() {
     return getPanel(getCurrentIndex());
@@ -437,8 +400,6 @@ public class ArffViewerMainPanel
   
   /**
    * checks whether a panel is currently selected
-   * 
-   * @return		true if a panel is currently selected
    */
   public boolean isPanelSelected() {
     return (getCurrentPanel() != null);
@@ -446,9 +407,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the filename of the specified panel 
-   * 
-   * @param index	the index of the panel
-   * @return		the filename for the panel
    */
   public String getFilename(int index) {
     String            result;
@@ -465,8 +423,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns the filename of the current tab
-   * 
-   * @return		the current filename
    */
   public String getCurrentFilename() {
     return getFilename(getCurrentIndex());
@@ -474,9 +430,6 @@ public class ArffViewerMainPanel
   
   /**
    * sets the filename of the specified panel
-   * 
-   * @param index	the index of the panel
-   * @param filename	the new filename
    */
   public void setFilename(int index, String filename) {
     ArffPanel         panel;
@@ -491,8 +444,6 @@ public class ArffViewerMainPanel
   
   /**
    * sets the filename of the current tab
-   * 
-   * @param filename	the new filename
    */
   public void setCurrentFilename(String filename) {
     setFilename(getCurrentIndex(), filename);
@@ -501,8 +452,6 @@ public class ArffViewerMainPanel
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
-   * 
-   * @return 		true if project wasn't changed or saved
    */
   protected boolean saveChanges() {
     return saveChanges(true);
@@ -511,9 +460,7 @@ public class ArffViewerMainPanel
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
-   * 
-   * @param showCancel	whether we have YES/NO/CANCEL or only YES/NO
-   * @return 		true if project wasn't changed or saved
+   * @param showCancel           whether we have YES/NO/CANCEL or only YES/NO
    */
   protected boolean saveChanges(boolean showCancel) {
     int            button;
@@ -564,8 +511,6 @@ public class ArffViewerMainPanel
 
   /**
    * loads the specified file
-   * 
-   * @param filename	the file to load
    */
   public void loadFile(String filename) {
     ArffPanel         panel;
@@ -803,20 +748,7 @@ public class ArffViewerMainPanel
   }
   
   /**
-   * sets the current selected Attribute as class attribute, i.e. it moves it
-   * to the end of the attributes
-   */
-  public void attributeAsClass() {
-    if (!isPanelSelected())
-      return;
-    
-    getCurrentPanel().attributeAsClass();
-  }
-  
-  /**
    * deletes the current selected Attribute or several chosen ones
-   * 
-   * @param multiple	whether to delete myultiple attributes
    */
   public void deleteAttribute(boolean multiple) {
     if (!isPanelSelected())
@@ -830,8 +762,6 @@ public class ArffViewerMainPanel
   
   /**
    * deletes the current selected Instance or several chosen ones
-   * 
-   * @param multiple		whether to delete multiple instances
    */
   public void deleteInstance(boolean multiple) {
     if (!isPanelSelected())
@@ -855,11 +785,9 @@ public class ArffViewerMainPanel
   
   /**
    * displays all the attributes, returns the selected item or NULL if canceled
-   * 
-   * @return		the name of the selected attribute
    */
   public String showAttributes() {
-    ArffSortedTableModel     model;
+    ArffTableSorter     model;
     ListSelectorDialog  dialog;
     int                 i;
     JList               list;
@@ -874,7 +802,7 @@ public class ArffViewerMainPanel
     result = dialog.showDialog();
     
     if (result == ListSelectorDialog.APPROVE_OPTION) {
-      model = (ArffSortedTableModel) getCurrentPanel().getTable().getModel();
+      model = (ArffTableSorter) getCurrentPanel().getTable().getModel();
       name  = list.getSelectedValue().toString();
       i     = model.getAttributeColumn(name);
       JTableHelper.scrollToVisible(getCurrentPanel().getTable(), 0, i);
@@ -891,7 +819,7 @@ public class ArffViewerMainPanel
    */
   public void showValues() {
     String                attribute;
-    ArffSortedTableModel       model;
+    ArffTableSorter       model;
     ArffTable             table;
     HashSet               values;
     Vector                items;
@@ -906,7 +834,7 @@ public class ArffViewerMainPanel
       return;
     
     table  = (ArffTable) getCurrentPanel().getTable();
-    model  = (ArffSortedTableModel) table.getModel();
+    model  = (ArffTableSorter) table.getModel();
     
     // get column index
     col    = -1;
@@ -937,19 +865,7 @@ public class ArffViewerMainPanel
   }
   
   /**
-   * sets the optimal column width for all columns
-   */
-  public void setOptimalColWidths() {
-    if (!isPanelSelected())
-      return;
-    
-    getCurrentPanel().setOptimalColWidths();
-  }
-  
-  /**
    * invoked when an action occurs
-   * 
-   * @param e		the action event
    */
   public void actionPerformed(ActionEvent e) {
     Object          o;
@@ -984,8 +900,6 @@ public class ArffViewerMainPanel
       deleteAttribute(true);
     else if (o == menuEditRenameAttribute)
       renameAttribute();
-    else if (o == menuEditAttributeAsClass)
-      attributeAsClass();
     else if (o == menuEditDeleteInstance)
       deleteInstance(false);
     else if (o == menuEditDeleteInstances)
@@ -996,16 +910,12 @@ public class ArffViewerMainPanel
       showAttributes();
     else if (o == menuViewValues)
       showValues();
-    else if (o == menuViewOptimalColWidths)
-      setOptimalColWidths();
     
     updateMenu();
   }
   
   /**
    * Invoked when the target of the listener has changed its state.
-   * 
-   * @param e		the change event
    */
   public void stateChanged(ChangeEvent e) {
     updateFrameTitle();
@@ -1018,8 +928,6 @@ public class ArffViewerMainPanel
   
   /**
    * returns only the classname
-   * 
-   * @return		the classname
    */
   public String toString() {
     return this.getClass().getName();

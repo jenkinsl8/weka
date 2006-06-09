@@ -23,55 +23,35 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.filters.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * This filter takes a dataset and outputs a specified fold for cross validation. If you want the folds to be stratified use the supervised version.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -V
- *  Specifies if inverse of selection is to be output.
- * </pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Specifies number of folds dataset is split into. 
- *  (default 10)
- * </pre>
- * 
- * <pre> -F &lt;fold&gt;
- *  Specifies which fold is selected. (default 1)
- * </pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Specifies random number seed. (default 0, no randomizing)
- * </pre>
- * 
- <!-- options-end -->
+ * This filter takes a dataset and outputs a specified fold for cross validation.
+ * If you want the folds to be stratified use the supervised version.
+ *
+ * Valid options are: <p>
+ *
+ * -V <br>
+ * Specifies if inverse of selection is to be output.<p>
+ *
+ * -N number of folds <br>
+ * Specifies number of folds dataset is split into (default 10). <p>
+ *
+ * -F fold <br>
+ * Specifies which fold is selected. (default 1)<p>
+ *
+ * -S seed <br>
+ * Specifies a random number seed for shuffling the dataset.
+ * (default 0, don't randomize)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1 $ 
 */
-public class RemoveFolds 
-  extends Filter
+public class RemoveFolds extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 8220373305559055700L;
-  
   /** Indicates if inverse of selection is to be output. */
   private boolean m_Inverse = false;
 
@@ -114,32 +94,23 @@ public class RemoveFolds
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -V
-   *  Specifies if inverse of selection is to be output.
-   * </pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Specifies number of folds dataset is split into. 
-   *  (default 10)
-   * </pre>
-   * 
-   * <pre> -F &lt;fold&gt;
-   *  Specifies which fold is selected. (default 1)
-   * </pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Specifies random number seed. (default 0, no randomizing)
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -V <br>
+   * Specifies if inverse of selection is to be output.<p>
+   *
+   * -N number of folds <br>
+   * Specifies number of folds dataset is split into (default 10). <p>
+   *
+   * -F fold <br>
+   * Specifies which fold is selected. (default 1)<p>
+   *
+   * -S seed <br>
+   * Specifies a random number seed for shuffling the dataset.
+   * (default 0, no randomizing)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -196,10 +167,8 @@ public class RemoveFolds
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "This filter takes a dataset and outputs a specified fold for "
-      + "cross validation. If you want the folds to be stratified use the "
-      + "supervised version.";
+
+    return "This filter takes a dataset and outputs a specified fold for cross validation. If you want the folds to be stratified use the supervised version.";
   }
 
   /**
@@ -259,7 +228,7 @@ public class RemoveFolds
    * of folds is zero, it won't split it into folds. 
    *
    * @param numFolds number of folds dataset is to be split into
-   * @throws IllegalArgumentException if number of folds is negative
+   * @exception IllegalArgumentException if number of folds is negative
    */
   public void setNumFolds(int numFolds) {
 
@@ -294,7 +263,7 @@ public class RemoveFolds
    * Selects a fold.
    *
    * @param fold the fold to be selected.
-   * @throws IllegalArgumentException if fold's index is smaller than 1
+   * @exception IllegalArgumentException if fold's index is smaller than 1
    */
   public void setFold(int fold) {
 
@@ -343,7 +312,7 @@ public class RemoveFolds
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true because outputFormat can be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */  
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -362,7 +331,7 @@ public class RemoveFolds
    * instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
   public boolean batchFinished() {
 

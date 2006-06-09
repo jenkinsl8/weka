@@ -22,73 +22,34 @@
 
 package  weka.attributeSelection;
 
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * CfsSubsetEval :<br/>
- * <br/>
- * Evaluates the worth of a subset of attributes by considering the individual predictive ability of each feature along with the degree of redundancy between them.<br/>
- * <br/>
- * Subsets of features that are highly correlated with the class while having low intercorrelation are preferred.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * M. A. Hall (1998). Correlation-based Feature Subset Selection for Machine Learning. Hamilton, New Zealand.
- * <p/>
- <!-- globalinfo-end -->
+ * CFS attribute subset evaluator.
+ * For more information see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;phdthesis{Hall1998,
- *    address = {Hamilton, New Zealand},
- *    author = {M. A. Hall},
- *    school = {University of Waikato},
- *    title = {Correlation-based Feature Subset Selection for Machine Learning},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Hall, M. A. (1998). Correlation-based Feature Subset Selection for Machine 
+ * Learning. Thesis submitted in partial fulfilment of the requirements of the
+ * degree of Doctor of Philosophy at the University of Waikato. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are:
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <p>
  * 
- * <pre> -M
- *  Treat missing values as a seperate
- *  value.</pre>
- * 
- * <pre> -L
- *  Don't include locally predictive attributes.</pre>
- * 
- <!-- options-end -->
+ * -L <br>
+ * Don't include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.19.2.1 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 747878400813276317L;
+  implements OptionHandler
+{
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -124,29 +85,7 @@ public class CfsSubsetEval
       +"by considering the individual predictive ability of each feature "
       +"along with the degree of redundancy between them.\n\n"
       +"Subsets of features that are highly correlated with the class "
-      +"while having low intercorrelation are preferred.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.PHDTHESIS);
-    result.setValue(Field.AUTHOR, "M. A. Hall");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "Correlation-based Feature Subset Selection for Machine Learning");
-    result.setValue(Field.SCHOOL, "University of Waikato");
-    result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
-    
-    return result;
+      +"while having low intercorrelation are preferred.\n";
   }
 
   /**
@@ -173,27 +112,23 @@ public class CfsSubsetEval
 
 
   /**
-   * Parses and sets a given list of options. <p/>
+   * Parses and sets a given list of options. <p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are:
+   *
+   * -M <br>
+   * Treat missing values as a seperate value. <p>
    * 
-   * <pre> -M
-   *  Treat missing values as a seperate
-   *  value.</pre>
-   * 
-   * <pre> -L
-   *  Don't include locally predictive attributes.</pre>
-   * 
-   <!-- options-end -->
+   * -L <br>
+   * Don't include locally predictive attributes. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
     throws Exception {
-
+    String optionString;
     resetOptions();
     setMissingSeperate(Utils.getFlag('M', options));
     setLocallyPredictive(!Utils.getFlag('L', options));
@@ -294,7 +229,7 @@ public class CfsSubsetEval
    * the correlation matrix.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -341,8 +276,7 @@ public class CfsSubsetEval
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
-   * @return the merit
-   * @throws Exception if the subset could not be evaluated
+   * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
@@ -439,7 +373,7 @@ public class CfsSubsetEval
 
   private double symmUncertCorr (int att1, int att2) {
     int i, j, k, ii, jj;
-    int ni, nj;
+    int nnj, nni, ni, nj;
     double sum = 0.0;
     double sumi[], sumj[];
     double counts[][];
@@ -644,7 +578,7 @@ public class CfsSubsetEval
       meanOrMode(m_trainInstances.attribute(att2));
     double stdv_num = 0.0;
     double diff1, diff2;
-    double r = 0.0, rr;
+    double r = 0.0, rr, max_corr = 0.0;
     int nx = (!m_missingSeperate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
@@ -762,7 +696,7 @@ public class CfsSubsetEval
     int my = (int)m_trainInstances.
       meanOrMode(m_trainInstances.attribute(att2));
     double diff1, diff2;
-    double r = 0.0, rr;
+    double r = 0.0, rr, max_corr = 0.0;
     int nx = (!m_missingSeperate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
@@ -1046,7 +980,7 @@ public class CfsSubsetEval
    *
    * @param attributeSet the set of attributes found by the search
    * @return a possibly ranked list of postprocessed attributes
-   * @throws Exception if postprocessing fails for some reason
+   * @exception Exception if postprocessing fails for some reason
    */
   public int[] postProcess (int[] attributeSet)
     throws Exception {
@@ -1110,3 +1044,4 @@ public class CfsSubsetEval
     }
   }
 }
+

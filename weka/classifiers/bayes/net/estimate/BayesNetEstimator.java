@@ -15,46 +15,31 @@
  */
 
 /*
- * BayesNetEstimator.java
+ * BayesNet.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
 
 package weka.classifiers.bayes.net.estimate;
 
-import weka.classifiers.bayes.BayesNet;
-import weka.core.Instance;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-/** 
- <!-- globalinfo-start -->
- * BayesNetEstimator is the base class for estimating the conditional probability tables of a Bayes network once the structure has been learned.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -A &lt;alpha&gt;
- *  Initial count (alpha)
- * </pre>
- * 
- <!-- options-end -->
+import weka.core.OptionHandler;
+import weka.classifiers.bayes.BayesNet;
+import weka.core.Instance;
+import weka.core.Option;
+import weka.core.Utils;
+
+/** BayesNetEstimator is the base class for estimating the conditional probability
+ * tables of a Bayes network once the structure has been learned.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class BayesNetEstimator 
-    implements OptionHandler, Serializable {
-  
-    /** for serialization */
-    static final long serialVersionUID = 2184330197666253884L;
+
+public class BayesNetEstimator implements OptionHandler, Serializable {
     
     /**
      * Holds prior on count
@@ -64,9 +49,6 @@ public class BayesNetEstimator
     /**
      * estimateCPTs estimates the conditional probability tables for the Bayes
      * Net using the network structure.
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception always throws an exception, since subclass needs to be used
      */
     public void estimateCPTs(BayesNet bayesNet) throws Exception {
         throw new Exception("Incorrect BayesNetEstimator: use subclass instead.");
@@ -75,9 +57,9 @@ public class BayesNetEstimator
     /**
      * Updates the classifier with the given instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the new training instance to include in the model
-     * @throws Exception always throws an exception, since subclass needs to be used
+     * @exception Exception if the instance could not be incorporated in
+     * the model.
      */
     public void updateClassifier(BayesNet bayesNet, Instance instance) throws Exception {
         throw new Exception("Incorrect BayesNetEstimator: use subclass instead.");
@@ -87,20 +69,15 @@ public class BayesNetEstimator
      * Calculates the class membership probabilities for the given test
      * instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the instance to be classified
      * @return predicted class probability distribution
-     * @throws Exception always throws an exception, since subclass needs to be used
+     * @exception Exception if there is a problem generating the prediction
      */
     public double[] distributionForInstance(BayesNet bayesNet, Instance instance) throws Exception {
         throw new Exception("Incorrect BayesNetEstimator: use subclass instead.");
     }
 
-    /** 
-     * initCPTs reserves space for CPTs and set all counts to zero
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception always throws an exception, since subclass needs to be used
+    /** initCPTs reserves space for CPTs and set all counts to zero
      */
     public void initCPTs(BayesNet bayesNet) throws Exception {
         throw new Exception("Incorrect BayesNetEstimator: use subclass instead.");
@@ -120,19 +97,10 @@ public class BayesNetEstimator
     } // listOptions
 
     /**
-     * Parses a given list of options. <p/>
-     *
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -A &lt;alpha&gt;
-     *  Initial count (alpha)
-     * </pre>
-     * 
-     <!-- options-end -->
+     * Parses a given list of options. Valid options are:<p>
      * 
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         String sAlpha = Utils.getOption('A', options);
@@ -191,10 +159,8 @@ public class BayesNetEstimator
      * @return The string.
      */
     public String globalInfo() {
-        return 
-            "BayesNetEstimator is the base class for estimating the "
-          + "conditional probability tables of a Bayes network once the "
-          + "structure has been learned.";
+        return "An Estimator is an algorithm for finding the conditional probability tables"
+            + " of the Bayes Network.";
     }
 
 } // BayesNetEstimator

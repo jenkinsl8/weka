@@ -22,181 +22,101 @@
 
 package weka.classifiers.functions;
 
+import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.PolyKernel;
-import weka.classifiers.functions.supportVector.SMOset;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.SerializedObject;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
+import weka.classifiers.functions.Logistic;
 import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Standardize;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.filters.Filter;
+import java.util.*;
+import java.io.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Implements John Platt's sequential minimal optimization algorithm for training a support vector classifier.<br/>
- * <br/>
- * This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (In that case the coefficients in the output are based on the normalized data, not the original data --- this is important for interpreting the classifier.)<br/>
- * <br/>
- * Multi-class problems are solved using pairwise classification (1-vs-1 and if logistic models are built pairwise coupling according to Hastie and Tibshirani, 1998).<br/>
- * <br/>
- * To obtain proper probability estimates, use the option that fits logistic regression models to the outputs of the support vector machine. In the multi-class case the predicted probabilities are coupled using Hastie and Tibshirani's pairwise coupling method.<br/>
- * <br/>
- * Note: for improved speed normalization should be turned off when operating on SparseInstances.<br/>
- * <br/>
- * For more information on the SMO algorithm, see<br/>
- * <br/>
- * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
- * <br/>
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.<br/>
- * <br/>
- * Trevor Hastie, Robert Tibshirani: Classification by Pairwise Coupling. In: Advances in Neural Information Processing Systems, 1998.
- * <p/>
- <!-- globalinfo-end -->
+ * Implements John C. Platt's sequential minimal optimization
+ * algorithm for training a support vector classifier using polynomial
+ * or RBF kernels. 
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;incollection{Platt1998,
- *    author = {J. Platt},
- *    booktitle = {Advances in Kernel Methods - Support Vector Learning},
- *    editor = {B. Schoelkopf and C. Burges and A. Smola},
- *    publisher = {MIT Press},
- *    title = {Machines using Sequential Minimal Optimization},
- *    year = {1998},
- *    URL = {http://research.microsoft.com/~jplatt/smo.html},
- *    PS = {http://research.microsoft.com/~jplatt/smo-book.ps.gz},
- *    PDF = {http://research.microsoft.com/~jplatt/smo-book.pdf}
- * }
- * 
- * &#64;article{Keerthi2001,
- *    author = {S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy},
- *    journal = {Neural Computation},
- *    number = {3},
- *    pages = {637-649},
- *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
- *    volume = {13},
- *    year = {2001},
- *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/smo_mod_nc.ps.gz}
- * }
- * 
- * &#64;inproceedings{Hastie1998,
- *    author = {Trevor Hastie and Robert Tibshirani},
- *    booktitle = {Advances in Neural Information Processing Systems},
- *    editor = {Michael I. Jordan and Michael J. Kearns and Sara A. Solla},
- *    publisher = {MIT Press},
- *    title = {Classification by Pairwise Coupling},
- *    volume = {10},
- *    year = {1998},
- *    PS = {http://www-stat.stanford.edu/~hastie/Papers/2class.ps}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * This implementation globally replaces all missing values and
+ * transforms nominal attributes into binary ones. It also
+ * normalizes all attributes by default. (Note that the coefficients
+ * in the output are based on the normalized/standardized data, not the
+ * original data.)
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  Turning them off assumes that data is purely numeric, doesn't
- *  contain any missing values, and has a nominal class. Turning them
- *  off also means that no header information will be stored if the
- *  machine is linear. Finally, it also assumes that no instance has
- *  a weight equal to 0.
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;double&gt;
- *  The complexity constant C. (default 1)</pre>
- * 
- * <pre> -N
- *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
- * 
- * <pre> -L &lt;double&gt;
- *  The tolerance parameter. (default 1.0e-3)</pre>
- * 
- * <pre> -P &lt;double&gt;
- *  The epsilon for round-off error. (default 1.0e-12)</pre>
- * 
- * <pre> -M
- *  Fit logistic models to SVM outputs. </pre>
- * 
- * <pre> -V &lt;double&gt;
- *  The number of folds for the internal
- *  cross-validation. (default -1, use training data)</pre>
- * 
- * <pre> -W &lt;double&gt;
- *  The random number seed. (default 1)</pre>
- * 
- * <pre> -K &lt;classname and parameters&gt;
- *  The Kernel to use.
- *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
- * 
- * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
- * </pre>
- * 
- * <pre> -D
- *  Enables debugging output (if available) to be printed.
- *  (default: off)</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
- *  (default: 250007)</pre>
- * 
- * <pre> -E &lt;num&gt;
- *  The Exponent to use.
- *  (default: 1.0)</pre>
- * 
- * <pre> -L
- *  Use lower-order terms.
- *  (default: no)</pre>
- * 
- <!-- options-end -->
+ * Multi-class problems are solved using pairwise classification.
+ *
+ * To obtain proper probability estimates, use the option that fits
+ * logistic regression models to the outputs of the support vector
+ * machine. In the multi-class case the predicted probabilities
+ * will be coupled using Hastie and Tibshirani's pairwise coupling
+ * method.
+ *
+ * Note: for improved speed standardization should be turned off when
+ * operating on SparseInstances.<p>
+ *
+ * For more information on the SMO algorithm, see<p>
+ *
+ * J. Platt (1998). <i>Fast Training of Support Vector
+ * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
+ * Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and
+ * A. Smola, eds., MIT Press. <p>
+ *
+ * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy, 
+ * <i>Improvements to Platt's SMO Algorithm for SVM Classifier Design</i>. 
+ * Neural Computation, 13(3), pp 637-649, 2001. <p>
+ *
+ * Valid options are:<p>
+ *
+ * -C num <br>
+ * The complexity constant C. (default 1)<p>
+ *
+ * -E num <br>
+ * The exponent for the polynomial kernel. (default 1)<p>
+ *
+ * -G num <br>
+ * Gamma for the RBF kernel. (default 0.01)<p>
+ *
+ * -N <0|1|2> <br>
+ * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
+ *
+ * -F <br>
+ * Feature-space normalization (only for non-linear polynomial kernels). <p>
+ *
+ * -O <br>
+ * Use lower-order terms (only for non-linear polynomial kernels). <p>
+ *
+ * -R <br>
+ * Use the RBF kernel. (default poly)<p>
+ *
+ * -A num <br>
+ * Sets the size of the kernel cache. Should be a prime number. 
+ * (default 250007, use 0 for full cache) <p>
+ *
+ * -L num <br>
+ * Sets the tolerance parameter. (default 1.0e-3)<p>
+ *
+ * -P num <br>
+ * Sets the epsilon for round-off error. (default 1.0e-12)<p>
+ *
+ * -M <br>
+ * Fit logistic models to SVM outputs.<p>
+ *
+ * -V num <br>
+ * Number of folds for cross-validation used to generate data
+ * for logistic models. (default -1, use training data)
+ *
+ * -W num <br>
+ * Random number seed for cross-validation. (default 1)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.61 $
- */
-public class SMO 
-  extends Classifier 
-  implements WeightedInstancesHandler, TechnicalInformationHandler {
+ * @version $Revision: 1.53.2.2 $ */
+public class SMO extends Classifier implements WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -6585883636378691736L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -211,9 +131,7 @@ public class SMO
       + "normalizes all attributes by default. (In that case the coefficients "
       + "in the output are based on the normalized data, not the "
       + "original data --- this is important for interpreting the classifier.)\n\n"
-      + "Multi-class problems are solved using pairwise classification "
-      + "(1-vs-1 and if logistic models are built pairwise coupling "
-      + "according to Hastie and Tibshirani, 1998).\n\n"
+      + "Multi-class problems are solved using pairwise classification.\n\n"
       + "To obtain proper probability estimates, use the option that fits "
       + "logistic regression models to the outputs of the support vector "
       + "machine. In the multi-class case the predicted probabilities "
@@ -222,62 +140,19 @@ public class SMO
       + "Note: for improved speed normalization should be turned off when "
       + "operating on SparseInstances.\n\n"
       + "For more information on the SMO algorithm, see\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.INCOLLECTION);
-    result.setValue(Field.AUTHOR, "J. Platt");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "Machines using Sequential Minimal Optimization");
-    result.setValue(Field.BOOKTITLE, "Advances in Kernel Methods - Support Vector Learning");
-    result.setValue(Field.EDITOR, "B. Schoelkopf and C. Burges and A. Smola");
-    result.setValue(Field.PUBLISHER, "MIT Press");
-    result.setValue(Field.URL, "http://research.microsoft.com/~jplatt/smo.html");
-    result.setValue(Field.PDF, "http://research.microsoft.com/~jplatt/smo-book.pdf");
-    result.setValue(Field.PS, "http://research.microsoft.com/~jplatt/smo-book.ps.gz");
-    
-    additional = result.add(Type.ARTICLE);
-    additional.setValue(Field.AUTHOR, "S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy");
-    additional.setValue(Field.YEAR, "2001");
-    additional.setValue(Field.TITLE, "Improvements to Platt's SMO Algorithm for SVM Classifier Design");
-    additional.setValue(Field.JOURNAL, "Neural Computation");
-    additional.setValue(Field.VOLUME, "13");
-    additional.setValue(Field.NUMBER, "3");
-    additional.setValue(Field.PAGES, "637-649");
-    additional.setValue(Field.PS, "http://guppy.mpe.nus.edu.sg/~mpessk/svm/smo_mod_nc.ps.gz");
-    
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Trevor Hastie and Robert Tibshirani");
-    additional.setValue(Field.YEAR, "1998");
-    additional.setValue(Field.TITLE, "Classification by Pairwise Coupling");
-    additional.setValue(Field.BOOKTITLE, "Advances in Neural Information Processing Systems");
-    additional.setValue(Field.VOLUME, "10");
-    additional.setValue(Field.PUBLISHER, "MIT Press");
-    additional.setValue(Field.EDITOR, "Michael I. Jordan and Michael J. Kearns and Sara A. Solla");
-    additional.setValue(Field.PS, "http://www-stat.stanford.edu/~hastie/Papers/2class.ps");
-    
-    return result;
+      + "J. Platt (1998). \"Fast Training of Support Vector "
+      + "Machines using Sequential Minimal Optimization\". Advances in Kernel "
+      + "Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and "
+      + "A. Smola, eds., MIT Press. \n\n"
+      + "S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy,  "
+      + "\"Improvements to Platt's SMO Algorithm for SVM Classifier Design\".  "
+      + "Neural Computation, 13(3), pp 637-649, 2001.";
   }
 
   /**
    * Class for building a binary support vector machine.
    */
-  public class BinarySMO 
-    implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = -8246163625699362456L;
+  protected class BinarySMO implements Serializable {
     
     /** The Lagrange multipliers. */
     protected double[] m_alpha;
@@ -308,17 +183,12 @@ public class SMO
     /** The current set of errors for all non-bound examples. */
     protected double[] m_errors;
 
-    /* The five different sets used by the algorithm. */
-    /** {i: 0 < m_alpha[i] < C} */
-    protected SMOset m_I0;
-    /**  {i: m_class[i] = 1, m_alpha[i] = 0} */
-    protected SMOset m_I1; 
-    /**  {i: m_class[i] = -1, m_alpha[i] =C} */
-    protected SMOset m_I2; 
-    /** {i: m_class[i] = 1, m_alpha[i] = C} */
-    protected SMOset m_I3;
-    /**  {i: m_class[i] = -1, m_alpha[i] = 0} */
-    protected SMOset m_I4; 
+    /** The five different sets used by the algorithm. */
+    protected SMOset m_I0; // {i: 0 < m_alpha[i] < C}
+    protected SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
+    protected SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
+    protected SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
+    protected SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
 
     /** The set of support vectors */
     protected SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
@@ -336,9 +206,7 @@ public class SMO
      * @param insts the set of training instances
      * @param cl1 the first class' index
      * @param cl2 the second class' index
-     * @param numFolds the number of folds for cross-validation
-     * @param random for randomizing the data
-     * @throws Exception if the sigmoid can't be fit successfully
+     * @exception Exception if the sigmoid can't be fit successfully
      */
     protected void fitLogistic(Instances insts, int cl1, int cl2,
 			     int numFolds, Random random) 
@@ -402,24 +270,6 @@ public class SMO
       m_logistic = new Logistic();
       m_logistic.buildClassifier(data);
     }
-    
-    /**
-     * sets the kernel to use
-     * 
-     * @param value	the kernel to use
-     */
-    public void setKernel(Kernel value) {
-      m_kernel = value;
-    }
-    
-    /**
-     * Returns the kernel to use
-     * 
-     * @return 		the current kernel
-     */
-    public Kernel getKernel() {
-      return m_kernel;
-    }
 
     /**
      * Method for building the binary classifier.
@@ -429,8 +279,8 @@ public class SMO
      * @param cl2 the second class' index
      * @param fitLogistic true if logistic model is to be fit
      * @param numFolds number of folds for internal cross-validation
-     * @param randomSeed random number generator for cross-validation
-     * @throws Exception if the classifier can't be built successfully
+     * @param random random number generator for cross-validation
+     * @exception Exception if the classifier can't be built successfully
      */
     protected void buildClassifier(Instances insts, int cl1, int cl2,
 				 boolean fitLogistic, int numFolds,
@@ -468,7 +318,7 @@ public class SMO
 	  m_class = null;
 	  return;
 	}
-	if (m_KernelIsLinear) {
+	if (!m_useRBF && m_exponent == 1.0) {
 	  m_sparseWeights = new double[0];
 	  m_sparseIndices = new int[0];
 	  m_class = null;
@@ -489,7 +339,7 @@ public class SMO
       m_data = insts;
 
       // If machine is linear, reserve space for weights
-      if (m_KernelIsLinear) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	m_weights = new double[m_data.numAttributes()];
       } else {
 	m_weights = null;
@@ -510,13 +360,22 @@ public class SMO
       m_sparseWeights = null;
       m_sparseIndices = null;
       
-      // init kernel
-      m_kernel.buildKernel(m_data);
-      
       // Initialize error cache
       m_errors = new double[m_data.numInstances()];
       m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
      
+      // Initialize kernel
+      if(m_useRBF) {
+	m_kernel = new RBFKernel(m_data, m_cacheSize, m_gamma);
+      } else {
+	if (m_featureSpaceNormalization) {
+	  m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, 
+					      m_lowerOrder);
+	} else {
+	  m_kernel = new PolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
+	}
+      }
+      
       // Build up I1 and I4
       for (int i = 0; i < m_class.length; i++ ) {
 	if (m_class[i] == 1) {
@@ -581,7 +440,7 @@ public class SMO
       
       // If machine is linear, delete training data
       // and store weight vector in sparse format
-      if (m_KernelIsLinear) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	
 	// We don't need to store the set of support vectors
 	m_supportVectors = null;
@@ -632,14 +491,13 @@ public class SMO
      * @param index the instance for which output is to be computed
      * @param inst the instance 
      * @return the output of the SVM for the given instance
-     * @throws Exception in case of an error
      */
-    public double SVMOutput(int index, Instance inst) throws Exception {
+    protected double SVMOutput(int index, Instance inst) throws Exception {
       
       double result = 0;
       
       // Is the machine linear?
-      if (m_KernelIsLinear) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	
 	// Is weight vector stored in sparse format?
 	if (m_sparseWeights == null) {
@@ -694,7 +552,7 @@ public class SMO
 	text.append("BinarySMO\n\n");
 
 	// If machine linear, print weight vector
-	if (m_KernelIsLinear) {
+	if (!m_useRBF && m_exponent == 1.0) {
 	  text.append("Machine linear: showing attribute weights, ");
 	  text.append("not support vectors.\n\n");
 
@@ -755,20 +613,22 @@ public class SMO
 	  text.append(" + " + Utils.doubleToString(-m_b, 12, 4));
 	}
 
-	if (!m_KernelIsLinear) {
+	if (m_useRBF || m_exponent != 1.0) {
 	  text.append("\n\nNumber of support vectors: " + 
 		      m_supportVectors.numElements());
 	}
 	int numEval = 0;
 	int numCacheHits = -1;
-	if (m_kernel != null) {
+	if(m_kernel != null)
+	{
 	  numEval = m_kernel.numEvals();
 	  numCacheHits = m_kernel.numCacheHits();
 	}
 	text.append("\n\nNumber of kernel evaluations: " + numEval);
-	if (numCacheHits >= 0 && numEval > 0) {
-	  double hitRatio = 1 - numEval*1.0/(numCacheHits+numEval);
-	  text.append(" (" + Utils.doubleToString(hitRatio*100, 7, 3).trim() + "% cached)");
+	if (numCacheHits >= 0 && numEval > 0)
+	{
+		double hitRatio = 1 - numEval*1.0/(numCacheHits+numEval);
+		text.append(" (" + Utils.doubleToString(hitRatio*100, 7, 3).trim() + "% cached)");
 	}
 
       } catch (Exception e) {
@@ -785,14 +645,15 @@ public class SMO
      *
      * @param i2 index of instance to examine
      * @return true if examination was successfull
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     protected boolean examineExample(int i2) throws Exception {
     
-      double y2, F2;
+      double y2, alph2, F2;
       int i1 = -1;
     
       y2 = m_class[i2];
+      alph2 = m_alpha[i2];
       if (m_I0.contains(i2)) {
 	F2 = m_errors[i2];
       } else {
@@ -845,14 +706,13 @@ public class SMO
      *
      * @param i1 index of the first instance
      * @param i2 index of the second instance
-     * @param F2
      * @return true if multipliers could be found
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     protected boolean takeStep(int i1, int i2, double F2) throws Exception {
 
       double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
-	a1, a2, f1, f2, v1, v2, Lobj, Hobj;
+	a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
       double C1 = m_C * m_data.instance(i1).weight();
       double C2 = m_C * m_data.instance(i2).weight();
 
@@ -1003,7 +863,7 @@ public class SMO
       }
       
       // Update weight vector to reflect change a1 and a2, if linear SVM
-      if (m_KernelIsLinear) {
+      if (!m_useRBF && m_exponent == 1.0) {
 	Instance inst1 = m_data.instance(i1);
 	for (int p1 = 0; p1 < inst1.numValues(); p1++) {
 	  if (inst1.index(p1) != m_data.classIndex()) {
@@ -1080,8 +940,6 @@ public class SMO
   
     /**
      * Quick and dirty check whether the quadratic programming problem is solved.
-     * 
-     * @throws Exception if checking fails
      */
     protected void checkClassifier() throws Exception {
 
@@ -1115,13 +973,10 @@ public class SMO
     }  
   }
 
-  /** filter: Normalize training data */
-  public static final int FILTER_NORMALIZE = 0;
-  /** filter: Standardize training data */
-  public static final int FILTER_STANDARDIZE = 1;
-  /** filter: No normalization/standardization */
-  public static final int FILTER_NONE = 2;
   /** The filter to apply to the training data */
+  public static final int FILTER_NORMALIZE = 0;
+  public static final int FILTER_STANDARDIZE = 1;
+  public static final int FILTER_NONE = 2;
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -1130,6 +985,15 @@ public class SMO
 
   /** The binary classifier(s) */
   protected BinarySMO[][] m_classifiers = null;
+
+  /** The exponent for the polynomial kernel. */
+  protected double m_exponent = 1.0;
+ 
+  /** Use lower-order terms? */
+  protected boolean m_lowerOrder = false;
+  
+  /** Gamma for the RBF kernel. */
+  protected double m_gamma = 0.01;
   
   /** The complexity parameter. */
   protected double m_C = 1.0;
@@ -1142,6 +1006,15 @@ public class SMO
 
   /** Whether to normalize/standardize/neither */
   protected int m_filterType = FILTER_NORMALIZE;
+  
+  /** Feature-space normalization? */
+  protected boolean m_featureSpaceNormalization = false;
+  
+  /** Use RBF kernel? (default: poly) */
+  protected boolean m_useRBF = false;
+  
+  /** The size of the cache (a prime number) */
+  protected int m_cacheSize = 250007;
 
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
@@ -1152,14 +1025,14 @@ public class SMO
   /** The filter used to get rid of missing values. */
   protected ReplaceMissingValues m_Missing;
 
+  /** Only numeric attributes in the dataset? */
+  protected boolean m_onlyNumeric;
+
   /** The class index from the training data */
   protected int m_classIndex = -1;
 
   /** The class attribute */
   protected Attribute m_classAttribute;
-  
-  /** whether the kernel is a linear one */
-  protected boolean m_KernelIsLinear = false;
 
   /** Turn off all checks and conversions? Turning them off assumes
       that data is purely numeric, doesn't contain any missing values,
@@ -1180,9 +1053,6 @@ public class SMO
   /** The random number seed  */
   protected int m_randomSeed = 1;
 
-  /** the kernel to use */
-  protected Kernel m_kernel = new PolyKernel();
-  
   /**
    * Turns off checks for missing values, etc. Use with caution.
    */
@@ -1200,61 +1070,55 @@ public class SMO
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = getKernel().getCapabilities();
-    result.setOwner(this);
-    
-    // attribute
-    result.enableAllAttributeDependencies();
-    // with NominalToBinary we can also handle nominal attributes, but only
-    // if the kernel can handle numeric attributes
-    if (result.handles(Capability.NUMERIC_ATTRIBUTES))
-      result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Method for building the classifier. Implements a one-against-one
    * wrapper for multi-class problems.
    *
    * @param insts the set of training instances
-   * @throws Exception if the classifier can't be built successfully
+   * @exception Exception if the classifier can't be built successfully
    */
   public void buildClassifier(Instances insts) throws Exception {
 
     if (!m_checksTurnedOff) {
-      // can classifier handle the data?
-      getCapabilities().testWithFail(insts);
-
-      // remove instances with missing class
+      if (insts.checkForStringAttributes()) {
+	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+      }
+      if (insts.classAttribute().isNumeric()) {
+	throw new UnsupportedClassTypeException("SMO can't handle a numeric class! Use"
+						+ "SMOreg for performing regression.");
+      }
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
+      if (insts.numInstances() == 0) {
+	throw new Exception("No training instances without a missing class!");
+      }
+
       
       /* Removes all the instances with weight equal to 0.
-       MUST be done since condition (8) of Keerthi's paper 
-       is made with the assertion Ci > 0 (See equation (3a). */
+	 MUST be done since condition (8) of Keerthi's paper 
+	 is made with the assertion Ci > 0 (See equation (3a). */
       Instances data = new Instances(insts, insts.numInstances());
       for(int i = 0; i < insts.numInstances(); i++){
-        if(insts.instance(i).weight() > 0)
-          data.add(insts.instance(i));
+	if(insts.instance(i).weight() > 0)
+	  data.add(insts.instance(i));
       }
       if (data.numInstances() == 0) {
-        throw new Exception("No training instances left after removing " + 
-        "instances with weight 0!");
+	throw new Exception("No training instances left after removing " + 
+			    "instance with either a weight null or a missing class!");
       }
       insts = data;
+      
+    }
+
+    m_onlyNumeric = true;
+    if (!m_checksTurnedOff) {
+      for (int i = 0; i < insts.numAttributes(); i++) {
+	if (i != insts.classIndex()) {
+	  if (!insts.attribute(i).isNumeric()) {
+	    m_onlyNumeric = false;
+	    break;
+	  }
+	}
+      }
     }
 
     if (!m_checksTurnedOff) {
@@ -1265,29 +1129,11 @@ public class SMO
       m_Missing = null;
     }
 
-    if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
-      boolean onlyNumeric = true;
-      if (!m_checksTurnedOff) {
-	for (int i = 0; i < insts.numAttributes(); i++) {
-	  if (i != insts.classIndex()) {
-	    if (!insts.attribute(i).isNumeric()) {
-	      onlyNumeric = false;
-	      break;
-	    }
-	  }
-	}
-      }
-      
-      if (!onlyNumeric) {
-	m_NominalToBinary = new NominalToBinary();
-	m_NominalToBinary.setInputFormat(insts);
-	insts = Filter.useFilter(insts, m_NominalToBinary);
-      } 
-      else {
-	m_NominalToBinary = null;
-      }
-    }
-    else {
+    if (!m_onlyNumeric) {
+      m_NominalToBinary = new NominalToBinary();
+      m_NominalToBinary.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_NominalToBinary);
+    } else {
       m_NominalToBinary = null;
     }
 
@@ -1305,8 +1151,7 @@ public class SMO
 
     m_classIndex = insts.classIndex();
     m_classAttribute = insts.classAttribute();
-    m_KernelIsLinear = (m_kernel instanceof PolyKernel) && (((PolyKernel) m_kernel).getExponent() == 1.0);
-    
+
     // Generate subsets representing each class
     Instances[] subsets = new Instances[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
@@ -1326,7 +1171,6 @@ public class SMO
     for (int i = 0; i < insts.numClasses(); i++) {
       for (int j = i + 1; j < insts.numClasses(); j++) {
 	m_classifiers[i][j] = new BinarySMO();
-	m_classifiers[i][j].setKernel(Kernel.makeCopy(getKernel()));
 	Instances data = new Instances(insts, insts.numInstances());
 	for (int k = 0; k < subsets[i].numInstances(); k++) {
 	  data.add(subsets[i].instance(k));
@@ -1345,9 +1189,6 @@ public class SMO
 
   /**
    * Estimates class probabilities for given instance.
-   * 
-   * @param inst the instance to compute the probabilities for
-   * @throws Execption in case of an error
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
 
@@ -1358,7 +1199,7 @@ public class SMO
       inst = m_Missing.output();
     }
 
-    if (m_NominalToBinary != null) {
+    if (!m_onlyNumeric) {
       m_NominalToBinary.input(inst);
       m_NominalToBinary.batchFinished();
       inst = m_NominalToBinary.output();
@@ -1487,7 +1328,7 @@ public class SMO
    * Returns an array of votes for the given instance.
    * @param inst the instance
    * @return array of votex
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public int[] obtainVotes(Instance inst) throws Exception {
 
@@ -1498,7 +1339,7 @@ public class SMO
       inst = m_Missing.output();
     }
 
-    if (m_NominalToBinary != null) {
+    if (!m_onlyNumeric) {
       m_NominalToBinary.input(inst);
       m_NominalToBinary.batchFinished();
       inst = m_NominalToBinary.output();
@@ -1627,200 +1468,167 @@ public class SMO
    */
   public Enumeration listOptions() {
 
-    Vector result = new Vector();
+    Vector newVector = new Vector(13);
 
-    Enumeration enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
+    newVector.addElement(new Option("\tThe complexity constant C. (default 1)",
+				    "C", 1, "-C <double>"));
+    newVector.addElement(new Option("\tThe exponent for the "
+				    + "polynomial kernel. (default 1)",
+				    "E", 1, "-E <double>"));
+    newVector.addElement(new Option("\tGamma for the RBF kernel. (default 0.01)",
+				    "G", 1, "-G <double>"));
+    newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
+				    "(default 0=normalize)",
+				    "N", 1, "-N"));
+    newVector.addElement(new Option("\tFeature-space normalization (only for\n" +
+				    "\tnon-linear polynomial kernels).",
+				    "F", 0, "-F"));
+    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear\n" +
+				    "\tpolynomial kernels).",
+				    "O", 0, "-O"));
+    newVector.addElement(new Option("\tUse RBF kernel. " +
+    				    "(default poly)",
+				    "R", 0, "-R"));
+    newVector.addElement(new Option("\tThe size of the kernel cache. " +
+				    "(default 250007, use 0 for full cache)",
+				    "A", 1, "-A <int>"));
+    newVector.addElement(new Option("\tThe tolerance parameter. " +
+				    "(default 1.0e-3)",
+				    "L", 1, "-L <double>"));
+    newVector.addElement(new Option("\tThe epsilon for round-off error. " +
+				    "(default 1.0e-12)",
+				    "P", 1, "-P <double>"));
+    newVector.addElement(new Option("\tFit logistic models to SVM outputs. ",
+				    "M", 0, "-M"));
+    newVector.addElement(new Option("\tThe number of folds for the internal\n" +
+				    "\tcross-validation. " +
+				    "(default -1, use training data)",
+				    "V", 1, "-V <double>"));
+    newVector.addElement(new Option("\tThe random number seed. " +
+				    "(default 1)",
+				    "W", 1, "-W <double>"));
 
-    result.addElement(new Option(
-	"\tTurns off all checks - use with caution!\n"
-	+ "\tTurning them off assumes that data is purely numeric, doesn't\n"
-	+ "\tcontain any missing values, and has a nominal class. Turning them\n"
-	+ "\toff also means that no header information will be stored if the\n"
-	+ "\tmachine is linear. Finally, it also assumes that no instance has\n"
-	+ "\ta weight equal to 0.\n"
-	+ "\t(default: checks on)",
-	"no-checks", 0, "-no-checks"));
-
-    result.addElement(new Option(
-	"\tThe complexity constant C. (default 1)",
-	"C", 1, "-C <double>"));
-    
-    result.addElement(new Option(
-	"\tWhether to 0=normalize/1=standardize/2=neither. " +
-	"(default 0=normalize)",
-	"N", 1, "-N"));
-    
-    result.addElement(new Option(
-	"\tThe tolerance parameter. " +
-	"(default 1.0e-3)",
-	"L", 1, "-L <double>"));
-    
-    result.addElement(new Option(
-	"\tThe epsilon for round-off error. " +
-	"(default 1.0e-12)",
-	"P", 1, "-P <double>"));
-    
-    result.addElement(new Option(
-	"\tFit logistic models to SVM outputs. ",
-	"M", 0, "-M"));
-    
-    result.addElement(new Option(
-	"\tThe number of folds for the internal\n" +
-	"\tcross-validation. " +
-	"(default -1, use training data)",
-	"V", 1, "-V <double>"));
-    
-    result.addElement(new Option(
-	"\tThe random number seed. " +
-	"(default 1)",
-	"W", 1, "-W <double>"));
-    
-    result.addElement(new Option(
-	"\tThe Kernel to use.\n"
-	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
-	"K", 1, "-K <classname and parameters>"));
-
-    result.addElement(new Option(
-	"",
-	"", 0, "\nOptions specific to kernel "
-	+ getKernel().getClass().getName() + ":"));
-    
-    enm = ((OptionHandler) getKernel()).listOptions();
-    while (enm.hasMoreElements())
-      result.addElement(enm.nextElement());
-
-    return result.elements();
+    return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * -C num <br>
+   * The complexity constant C. (default 1)<p>
+   *
+   * -E num <br>
+   * The exponent for the polynomial kernel. (default 1) <p>
+   *
+   * -G num <br>
+   * Gamma for the RBF kernel. (default 0.01) <p>
+   *
+   * -N <0|1|2> <br>
+   * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
+   *
+   * -F <br>
+   * Feature-space normalization (only for  non-linear polynomial kernels). <p>
+   *
+   * -O <br>
+   * Use lower-order terms (only for non-linear polynomial kernels). <p>
+   *
+   * -R <br>
+   * Use RBF kernel (default poly). <p>
    * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  Turning them off assumes that data is purely numeric, doesn't
-   *  contain any missing values, and has a nominal class. Turning them
-   *  off also means that no header information will be stored if the
-   *  machine is linear. Finally, it also assumes that no instance has
-   *  a weight equal to 0.
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;double&gt;
-   *  The complexity constant C. (default 1)</pre>
-   * 
-   * <pre> -N
-   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
-   * 
-   * <pre> -L &lt;double&gt;
-   *  The tolerance parameter. (default 1.0e-3)</pre>
-   * 
-   * <pre> -P &lt;double&gt;
-   *  The epsilon for round-off error. (default 1.0e-12)</pre>
-   * 
-   * <pre> -M
-   *  Fit logistic models to SVM outputs. </pre>
-   * 
-   * <pre> -V &lt;double&gt;
-   *  The number of folds for the internal
-   *  cross-validation. (default -1, use training data)</pre>
-   * 
-   * <pre> -W &lt;double&gt;
-   *  The random number seed. (default 1)</pre>
-   * 
-   * <pre> -K &lt;classname and parameters&gt;
-   *  The Kernel to use.
-   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
-   * 
-   * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
-   * </pre>
-   * 
-   * <pre> -D
-   *  Enables debugging output (if available) to be printed.
-   *  (default: off)</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
-   *  (default: 250007)</pre>
-   * 
-   * <pre> -E &lt;num&gt;
-   *  The Exponent to use.
-   *  (default: 1.0)</pre>
-   * 
-   * <pre> -L
-   *  Use lower-order terms.
-   *  (default: no)</pre>
-   * 
-   <!-- options-end -->
+   * -A num <br> Sets the size of the kernel cache. Should be a prime
+   * number. (default 250007, use 0 for full cache) <p>
+   *
+   * -L num <br>
+   * Sets the tolerance parameter. (default 1.0e-3)<p>
+   *
+   * -P num <br> 
+   * Sets the epsilon for round-off error. (default 1.0e-12)<p>
+   *
+   * -M <br>
+   * Fit logistic models to SVM outputs.<p>
+   *
+   * -V num <br>
+   * Number of folds for cross-validation used to generate data
+   * for logistic models. (default -1, use training data)
+   *
+   * -W num <br>
+   * Random number seed. (default 1)
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported 
+   * @exception Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
-    String 	tmpStr;
-    String[]	tmpOptions;
     
-    setChecksTurnedOff(Utils.getFlag("no-checks", options));
-
-    tmpStr = Utils.getOption('C', options);
-    if (tmpStr.length() != 0)
-      setC(Double.parseDouble(tmpStr));
-    else
-      setC(1.0);
-
-    tmpStr = Utils.getOption('L', options);
-    if (tmpStr.length() != 0)
-      setToleranceParameter(Double.parseDouble(tmpStr));
-    else
-      setToleranceParameter(1.0e-3);
-    
-    tmpStr = Utils.getOption('P', options);
-    if (tmpStr.length() != 0)
-      setEpsilon(Double.parseDouble(tmpStr));
-    else
-      setEpsilon(1.0e-12);
-    
-    tmpStr = Utils.getOption('N', options);
-    if (tmpStr.length() != 0)
-      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
-    else
-      setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
-    
-    setBuildLogisticModels(Utils.getFlag('M', options));
-    
-    tmpStr = Utils.getOption('V', options);
-    if (tmpStr.length() != 0)
-      setNumFolds(Integer.parseInt(tmpStr));
-    else
-      setNumFolds(-1);
-    
-    tmpStr = Utils.getOption('W', options);
-    if (tmpStr.length() != 0)
-      setRandomSeed(Integer.parseInt(tmpStr));
-    else
-      setRandomSeed(1);
-
-    tmpStr     = Utils.getOption('K', options);
-    tmpOptions = Utils.splitOptions(tmpStr);
-    if (tmpOptions.length != 0) {
-      tmpStr        = tmpOptions[0];
-      tmpOptions[0] = "";
-      setKernel(Kernel.forName(tmpStr, tmpOptions));
+    String complexityString = Utils.getOption('C', options);
+    if (complexityString.length() != 0) {
+      m_C = (new Double(complexityString)).doubleValue();
+    } else {
+      m_C = 1.0;
     }
-    
-    super.setOptions(options);
+    String exponentsString = Utils.getOption('E', options);
+    if (exponentsString.length() != 0) {
+      m_exponent = (new Double(exponentsString)).doubleValue();
+    } else {
+      m_exponent = 1.0;
+    }
+    String gammaString = Utils.getOption('G', options);
+    if (gammaString.length() != 0) {
+      m_gamma = (new Double(gammaString)).doubleValue();
+    } else {
+      m_gamma = 0.01;
+    }
+    String cacheString = Utils.getOption('A', options);
+    if (cacheString.length() != 0) {
+      m_cacheSize = Integer.parseInt(cacheString);
+    } else {
+      m_cacheSize = 250007;
+    }
+    String toleranceString = Utils.getOption('L', options);
+    if (toleranceString.length() != 0) {
+      m_tol = (new Double(toleranceString)).doubleValue();
+    } else {
+      m_tol = 1.0e-3;
+    }
+    String epsilonString = Utils.getOption('P', options);
+    if (epsilonString.length() != 0) {
+      m_eps = (new Double(epsilonString)).doubleValue();
+    } else {
+      m_eps = 1.0e-12;
+    }
+    m_useRBF = Utils.getFlag('R', options);
+    String nString = Utils.getOption('N', options);
+    if (nString.length() != 0) {
+      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
+    } else {
+      setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
+    }
+    m_featureSpaceNormalization = Utils.getFlag('F', options);
+    if ((m_useRBF) && (m_featureSpaceNormalization)) {
+      throw new Exception("RBF machine doesn't require feature-space normalization.");
+    }
+    if ((m_exponent == 1.0) && (m_featureSpaceNormalization)) {
+      throw new Exception("Can't use feature-space normalization with linear machine.");
+    }
+    m_lowerOrder = Utils.getFlag('O', options);
+    if ((m_useRBF) && (m_lowerOrder)) {
+      throw new Exception("Can't use lower-order terms with RBF machine.");
+    }
+    if ((m_exponent == 1.0) && (m_lowerOrder)) {
+      throw new Exception("Can't use lower-order terms with linear machine.");
+    }
+    m_fitLogisticModels = Utils.getFlag('M', options);
+    String foldsString = Utils.getOption('V', options);
+    if (foldsString.length() != 0) {
+      m_numFolds = Integer.parseInt(foldsString);
+    } else {
+      m_numFolds = -1;
+    }
+    String randomSeedString = Utils.getOption('W', options);
+    if (randomSeedString.length() != 0) {
+      m_randomSeed = Integer.parseInt(randomSeedString);
+    } else {
+      m_randomSeed = 1;
+    }
   }
 
   /**
@@ -1828,104 +1636,101 @@ public class SMO
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String[] getOptions() {
-    int       i;
-    Vector    result;
-    String[]  options;
+  public String [] getOptions() {
 
-    result = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    String [] options = new String [21];
+    int current = 0;
 
-    if (getChecksTurnedOff())
-      result.add("-no-checks");
+    options[current++] = "-C"; options[current++] = "" + m_C;
+    options[current++] = "-E"; options[current++] = "" + m_exponent;
+    options[current++] = "-G"; options[current++] = "" + m_gamma;
+    options[current++] = "-A"; options[current++] = "" + m_cacheSize;
+    options[current++] = "-L"; options[current++] = "" + m_tol;
+    options[current++] = "-P"; options[current++] = "" + m_eps;
+    options[current++] = "-N"; options[current++] = "" + m_filterType;
+    if (m_featureSpaceNormalization) {
+      options[current++] = "-F";
+    }
+    if (m_lowerOrder) {
+      options[current++] = "-O";
+    }
+    if (m_useRBF) {
+      options[current++] = "-R";
+    }
+    if (m_fitLogisticModels) {
+      options[current++] = "-M";
+    }
+    options[current++] = "-V"; options[current++] = "" + m_numFolds;
+    options[current++] = "-W"; options[current++] = "" + m_randomSeed;    
 
-    result.add("-C");
-    result.add("" + getC());
-    
-    result.add("-L");
-    result.add("" + getToleranceParameter());
-    
-    result.add("-P");
-    result.add("" + getEpsilon());
-    
-    result.add("-N");
-    result.add("" + m_filterType);
-    
-    if (getBuildLogisticModels())
-      result.add("-M");
-    
-    result.add("-V");
-    result.add("" + getNumFolds());
-    
-    result.add("-W");
-    result.add("" + getRandomSeed());
-
-    result.add("-K");
-    result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
-    
-    return (String[]) result.toArray(new String[result.size()]);	  
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
-
-  /**
-   * Disables or enables the checks (which could be time-consuming). Use with
-   * caution!
-   * 
-   * @param value	if true turns off all checks
-   */
-  public void setChecksTurnedOff(boolean value) {
-    if (value)
-      turnChecksOff();
-    else
-      turnChecksOn();
-  }
-  
-  /**
-   * Returns whether the checks are turned off or not.
-   * 
-   * @return		true if the checks are turned off
-   */
-  public boolean getChecksTurnedOff() {
-    return m_checksTurnedOff;
-  }
-
+     
   /**
    * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public String checksTurnedOffTipText() {
-    return "Turns time-consuming checks off - use with caution.";
+  public String exponentTipText() {
+    return "The exponent for the polynomial kernel.";
   }
   
+  /**
+   * Get the value of exponent. 
+   *
+   * @return Value of exponent.
+   */
+  public double getExponent() {
+    
+    return m_exponent;
+  }
+  
+  /**
+   * Set the value of exponent. If linear kernel
+   * is used, rescaling and lower-order terms are
+   * turned off.
+   *
+   * @param v  Value to assign to exponent.
+   */
+  public void setExponent(double v) {
+    
+    if (v == 1.0) {
+      m_featureSpaceNormalization = false;
+      m_lowerOrder = false;
+    }
+    m_exponent = v;
+  }
+     
   /**
    * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public String kernelTipText() {
-    return "The kernel to use.";
+  public String gammaTipText() {
+    return "The value of the gamma parameter for RBF kernels.";
   }
   
   /**
-   * sets the kernel to use
-   * 
-   * @param value	the kernel to use
+   * Get the value of gamma. 
+   *
+   * @return Value of gamma.
    */
-  public void setKernel(Kernel value) {
-    m_kernel = value;
+  public double getGamma() {
+    
+    return m_gamma;
   }
   
   /**
-   * Returns the kernel to use
-   * 
-   * @return 		the current kernel
+   * Set the value of gamma. 
+   *
+   * @param v  Value to assign to gamma.
    */
-  public Kernel getKernel() {
-    return m_kernel;
+  public void setGamma(double v) {
+    
+    m_gamma = v;
   }
      
   /**
@@ -2016,6 +1821,33 @@ public class SMO
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String cacheSizeTipText() {
+    return "The size of the kernel cache (should be a prime number). Use 0 for full cache.";
+  }
+  
+  /**
+   * Get the size of the kernel cache
+   * @return Size of kernel cache.
+   */
+  public int getCacheSize() {
+    
+    return m_cacheSize;
+  }
+  
+  /**
+   * Set the value of the kernel cache.
+   * @param v  Size of kernel cache.
+   */
+  public void setCacheSize(int v) {
+    
+    m_cacheSize = v;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String filterTypeTipText() {
     return "Determines how/if the data will be transformed.";
   }
@@ -2041,6 +1873,102 @@ public class SMO
     
     if (newType.getTags() == TAGS_FILTER) {
       m_filterType = newType.getSelectedTag().getID();
+    }
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useRBFTipText() {
+    return "Whether to use an RBF kernel instead of a polynomial one.";
+  }
+
+  /**
+   * Check if the RBF kernel is to be used.
+   * @return true if RBF
+   */
+  public boolean getUseRBF() {
+    
+    return m_useRBF;
+  }
+  
+  /**
+   * Set if the RBF kernel is to be used.
+   * @param v  true if RBF
+   */
+  public void setUseRBF(boolean v) {
+
+    if (v) {
+      m_featureSpaceNormalization = false;
+      m_lowerOrder = false;
+    }
+    m_useRBF = v;
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String featureSpaceNormalizationTipText() {
+    return "Whether feature-space normalization is performed (only "
+      + "available for non-linear polynomial kernels).";
+  }
+  
+  /**
+   * Check whether feature spaces is being normalized.
+   * @return true if feature space is normalized.
+   */
+  public boolean getFeatureSpaceNormalization() throws Exception {
+
+    return m_featureSpaceNormalization;
+  }
+  
+  /**
+   * Set whether feature space is normalized.
+   * @param v  true if feature space is to be normalized.
+   */
+  public void setFeatureSpaceNormalization(boolean v) throws Exception {
+    
+    if ((m_useRBF) || (m_exponent == 1.0)) {
+      m_featureSpaceNormalization = false;
+    } else {
+      m_featureSpaceNormalization = v;
+    }
+  }
+     
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String lowerOrderTermsTipText() {
+    return "Whether lower order polyomials are also used (only "
+      + "available for non-linear polynomial kernels).";
+  }
+  
+  /**
+   * Check whether lower-order terms are being used.
+   * @return Value of lowerOrder.
+   */
+  public boolean getLowerOrderTerms() {
+    
+    return m_lowerOrder;
+  }
+  
+  /**
+   * Set whether lower-order terms are to be used. Defaults
+   * to false if a linear machine is built.
+   * @param v  Value to assign to lowerOrder.
+   */
+  public void setLowerOrderTerms(boolean v) {
+    
+    if (m_exponent == 1.0 || m_useRBF) {
+      m_lowerOrder = false;
+    } else {
+      m_lowerOrder = v;
     }
   }
      
@@ -2141,14 +2069,13 @@ public class SMO
   public String toString() {
     
     StringBuffer text = new StringBuffer();
+    int printed = 0;
     
     if ((m_classAttribute == null)) {
       return "SMO: No model built yet.";
     }
     try {
       text.append("SMO\n\n");
-      text.append("Kernel used:\n  " + m_kernel.toString() + "\n\n");
-      
       for (int i = 0; i < m_classAttribute.numValues(); i++) {
 	for (int j = i + 1; j < m_classAttribute.numValues(); j++) {
 	  text.append("Classifier for classes: " + 

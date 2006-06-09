@@ -22,63 +22,28 @@
 
 package weka.clusterers;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.estimators.DiscreteEstimator;
+import weka.core.*;
+import weka.estimators.*;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Class for wrapping a Clusterer to make it return a distribution and density. Fits normal distributions and discrete distributions within each cluster produced by the wrapped clusterer. Supports the NumberOfClustersRequestable interface only if the wrapped Clusterer does.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M &lt;num&gt;
- *  minimum allowable standard deviation for normal density computation 
- *  (default 1e-6)</pre>
- * 
- * <pre> -W &lt;clusterer name&gt;
- *  Clusterer to wrap. (required)
- * </pre>
- * 
- * <pre> 
- * Options specific to clusterer weka.clusterers.SimpleKMeans:
- * </pre>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  random number seed.
- *  (default 10)</pre>
- * 
- <!-- options-end -->
+ * Class for wrapping a Clusterer to make it return a distribution and density. Fits
+ * normal distributions and discrete distributions within each cluster produced by
+ * the wrapped clusterer. Supports the NumberOfClustersRequestable interface only
+ * if the wrapped Clusterer does.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5.2.1 $
  */
-public class MakeDensityBasedClusterer 
-  extends DensityBasedClusterer
+public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
 	     OptionHandler, 
 	     WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -5643302427972186631L;
-  
   /** holds training instances header information */
   private Instances m_theInstances;
   /** prior probabilities for the fitted clusters */
@@ -99,6 +64,7 @@ public class MakeDensityBasedClusterer
    * 
    */  
   public MakeDensityBasedClusterer() {
+
   }
    
   /**
@@ -110,26 +76,12 @@ public class MakeDensityBasedClusterer
 
     setClusterer(toWrap);
   }
-  
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    return 
-        "Class for wrapping a Clusterer to make it return a distribution "
-      + "and density. Fits normal distributions and discrete distributions "
-      + "within each cluster produced by the wrapped clusterer. Supports the "
-      + "NumberOfClustersRequestable interface only if the wrapped Clusterer "
-      + "does.";
-  }
 
   /**
    * Set the number of clusters to generate.
    *
    * @param n the number of clusters to generate
-   * @throws Exception if the wrapped clusterer has not been set, or if
+   * @exception Exception if the wrapped clusterer has not been set, or if
    * the wrapped clusterer does not implement this facility.
    */
   public void setNumClusters(int n) throws Exception {
@@ -144,30 +96,14 @@ public class MakeDensityBasedClusterer
 
     ((NumberOfClustersRequestable)m_wrappedClusterer).setNumClusters(n);
   }
-
-  /**
-   * Returns default capabilities of the clusterer (i.e., of the wrapper
-   * clusterer).
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    if (m_wrappedClusterer != null)
-      return m_wrappedClusterer.getCapabilities();
-    else
-      return super.getCapabilities();
-  }
   
   /**
    * Builds a clusterer for a set of instances.
    *
-   * @param data the instances to train the clusterer with
-   * @throws Exception if the clusterer hasn't been set or something goes wrong
+   * @param instances the instances to train the clusterer with
+   * @exception Exception if the clusterer hasn't been set or something goes wrong
    */  
   public void buildClusterer(Instances data) throws Exception {
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_replaceMissing = new ReplaceMissingValues();
     m_replaceMissing.setInputFormat(data);
     data = weka.filters.Filter.useFilter(data, m_replaceMissing);
@@ -260,8 +196,6 @@ public class MakeDensityBasedClusterer
 
   /**
    * Returns the cluster priors.
-   * 
-   * @return the cluster priors
    */
   public double[] clusterPriors() {
 
@@ -274,9 +208,10 @@ public class MakeDensityBasedClusterer
   /**
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
-   * @param inst the instance to compute the density for
+   * @param instance the instance to compute the density for
+   * @return the density.
    * @return an array containing the estimated densities
-   * @throws Exception if the density could not be computed
+   * @exception Exception if the density could not be computed
    * successfully
    */
   public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
@@ -314,7 +249,6 @@ public class MakeDensityBasedClusterer
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
-   * @return the density
    */
   private double logNormalDens (double x, double mean, double stdDev) {
 
@@ -327,7 +261,7 @@ public class MakeDensityBasedClusterer
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned successfully
+   * @exception Exception if number of clusters could not be returned successfully
    */
   public int numberOfClusters() throws Exception {
 
@@ -451,34 +385,17 @@ public class MakeDensityBasedClusterer
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  minimum allowable standard deviation for normal density computation 
-   *  (default 1e-6)</pre>
-   * 
-   * <pre> -W &lt;clusterer name&gt;
-   *  Clusterer to wrap. (required)
-   * </pre>
-   * 
-   * <pre> 
-   * Options specific to clusterer weka.clusterers.SimpleKMeans:
-   * </pre>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  random number seed.
-   *  (default 10)</pre>
-   * 
-   <!-- options-end -->
+   * -W clusterer name <br>
+   * Clusterer to wrap. (required) <p>
+   *
+   * -M <num> <br>
+   *  Set the minimum allowable standard deviation for normal density 
+   * calculation. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 

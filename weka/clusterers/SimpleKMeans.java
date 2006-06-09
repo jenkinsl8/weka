@@ -21,56 +21,35 @@
  */
 package weka.clusterers;
 
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.experiment.Stats;
 import weka.classifiers.rules.DecisionTable;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the k means algorithm
- * <p/>
- <!-- globalinfo-end -->
+ * Simple k means clustering class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  random number seed.
- *  (default 10)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.19.2.4 $
  * @see Clusterer
  * @see OptionHandler
  */
-public class SimpleKMeans 
-  extends Clusterer 
+public class SimpleKMeans extends Clusterer 
   implements NumberOfClustersRequestable,
 	     OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -3235809600124455376L;
-  
   /**
    * replace missing values in training instances
    */
@@ -135,35 +114,19 @@ public class SimpleKMeans
   }
 
   /**
-   * Returns default capabilities of the clusterer.
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    return result;
-  }
-
-  /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_Iterations = 0;
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);
@@ -302,7 +265,7 @@ public class SimpleKMeans
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an interger
    * if the class is enumerated, otherwise the predicted value
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -316,8 +279,8 @@ public class SimpleKMeans
   /**
    * Calculates the distance between two instances
    *
-   * @param first the first instance
-   * @param second the second instance
+   * @param test the first instance
+   * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   private double distance(Instance first, Instance second) {  
@@ -368,11 +331,6 @@ public class SimpleKMeans
   /**
    * Computes the difference between two given attribute
    * values.
-   * 
-   * @param index the attribute index
-   * @param val1 the first value
-   * @param val2 the second value
-   * @return the difference
    */
   private double difference(int index, double val1, double val2) {
 
@@ -420,7 +378,6 @@ public class SimpleKMeans
    *
    * @param x the value to be normalized
    * @param i the attribute's index
-   * @return the normalized value
    */
   private double norm(double x, int i) {
 
@@ -461,7 +418,7 @@ public class SimpleKMeans
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters() throws Exception {
@@ -473,12 +430,12 @@ public class SimpleKMeans
    *
    * Valid options are:<p>
    *
-   * -N number of clusters <br>
+   * -N <number of clusters> <br>
    * Specify the number of clusters to generate. If omitted,
    * EM will use cross validation to select the number of clusters
    * automatically. <p>
    *
-   * -S seed <br>
+   * -S <seed> <br>
    * Specify random number seed. <p>
    *
    * @return an enumeration of all the available options.
@@ -508,7 +465,6 @@ public class SimpleKMeans
    * set the number of clusters to generate
    *
    * @param n the number of clusters to generate
-   * @throws Exception if number of clusters is negative
    */
   public void setNumClusters(int n) throws Exception {
     if (n <= 0) {
@@ -556,23 +512,11 @@ public class SimpleKMeans
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  random number seed.
-   *  (default 10)</pre>
-   * 
-   <!-- options-end -->
-   *
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
 

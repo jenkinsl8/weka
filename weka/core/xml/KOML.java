@@ -16,7 +16,7 @@
 
 /*
  * KOML.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
@@ -75,7 +75,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from the given file
-    * @param filename the file to deserialize the object from
+    * @filename the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -85,7 +85,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from the given file
-    * @param file the file to deserialize the object from
+    * @file the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -95,7 +95,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from a stream
-    * @param stream the stream to deserialize the object from
+    * @stream the stream to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the stream
     */
@@ -148,8 +148,8 @@ public class KOML {
    
    /**
     * writes the XML-serialized object to the given file
-    * @param filename the file to serialize the object to
-    * @param o the object to write to the file
+    * @filename the file to serialize the object to
+    * @o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -159,8 +159,8 @@ public class KOML {
    
    /**
     * write the XML-serialized object to the given file
-    * @param file the file to serialize the object to
-    * @param o the object to write to the file
+    * @file the file to serialize the object to
+    * @o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -170,8 +170,8 @@ public class KOML {
    
    /**
     * writes the XML-serialized object to a stream
-    * @param stream the stream to serialize the object to
-    * @param o the object to write to the stream
+    * @stream the stream to serialize the object to
+    * @o the object to write to the stream
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the stream
     */

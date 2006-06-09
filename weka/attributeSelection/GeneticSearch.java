@@ -22,96 +22,47 @@
 
 package  weka.attributeSelection;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-
-import java.io.Serializable;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * GeneticSearch:<br/>
- * <br/>
- * Performs a search using the simple genetic algorithm described in Goldberg (1989).<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * David E. Goldberg (1989). Genetic algorithms in search, optimization and machine learning. Addison-Wesley.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing a genetic based search. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;book{Goldberg1989,
- *    author = {David E. Goldberg},
- *    publisher = {Addison-Wesley},
- *    title = {Genetic algorithms in search, optimization and machine learning},
- *    year = {1989},
- *    ISBN = {0201157675}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <p>
+ * David E. Goldberg (1989). Genetic algorithms in search, optimization and
+ * machine learning. Addison-Wesley. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.If supplied, the starting set becomes
- *  one member of the initial random
- *  population.</pre>
- * 
- * <pre> -Z &lt;population size&gt;
- *  Set the size of the population.
- *  (default = 10).</pre>
- * 
- * <pre> -G &lt;number of generations&gt;
- *  Set the number of generations.
- *  (default = 20)</pre>
- * 
- * <pre> -C &lt;probability of crossover&gt;
- *  Set the probability of crossover.
- *  (default = 0.6)</pre>
- * 
- * <pre> -M &lt;probability of mutation&gt;
- *  Set the probability of mutation.
- *  (default = 0.033)</pre>
- * 
- * <pre> -R &lt;report frequency&gt;
- *  Set frequency of generation reports.
- *  e.g, setting the value to 5 will 
- *   report every 5th generation
- *  (default = number of generations)</pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Set the random number seed.
- *  (default = 1)</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -Z <size of the population> <br>
+ * Sets the size of the population. (default = 20). <p>
+ *
+ * -G <number of generations> <br>
+ * Sets the number of generations to perform.
+ * (default = 5). <p>
+ *
+ * -C <probability of crossover> <br>
+ * Sets the probability that crossover will occur.
+ * (default = .6). <p>
+ *
+ * -M <probability of mutation> <br>
+ * Sets the probability that a feature will be toggled on/off. <p>
+ *
+ * -R <report frequency> <br>
+ * Sets how frequently reports will be generated. Eg, setting the value
+ * to 5 will generate a report every 5th generation. <p>
+ * (default = number of generations). <p>
+ *
+ * -S <seed> <br>
+ * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  */
-public class GeneticSearch 
-  extends ASSearch 
-  implements StartSetHandler, OptionHandler, TechnicalInformationHandler {
+public class GeneticSearch extends ASSearch implements 
+  StartSetHandler, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -1618264232838472679L;
-  
   /** 
    * holds a starting set as an array of attributes. Becomes one member of the
    * initial random population
@@ -177,22 +128,12 @@ public class GeneticSearch
   private StringBuffer m_generationReports;
 
   // Inner class
-  /**
-   * A bitset for the genetic algorithm
-   */
-  protected class GABitSet 
-    implements Cloneable, Serializable {
+  protected class GABitSet implements Cloneable, Serializable {
     
-    /** for serialization */
-    static final long serialVersionUID = -2930607837482622224L;
-    
-    /** the bitset */
     private BitSet m_chromosome;
 
     /** holds raw merit */
     private double m_objective = -Double.MAX_VALUE;
-    
-    /** the fitness */
     private double m_fitness;
     
     /**
@@ -205,7 +146,7 @@ public class GeneticSearch
     /**
      * makes a copy of this GABitSet
      * @return a copy of the object
-     * @throws CloneNotSupportedException if something goes wrong
+     * @exception Exception if something goes wrong
      */
     public Object clone() throws CloneNotSupportedException {
       GABitSet temp = new GABitSet();
@@ -235,7 +176,7 @@ public class GeneticSearch
 
     /**
      * sets the scaled fitness
-     * @param fitness the scaled fitness of this population member
+     * @param the scaled fitness of this population member
      */
     public void setFitness(double fitness) {
       m_fitness = fitness;
@@ -259,7 +200,7 @@ public class GeneticSearch
 
     /**
      * set the chromosome
-     * @param c the chromosome to be set for this population member
+     * @param the chromosome to be set for this population member
      */
     public void setChromosome(BitSet c) {
       m_chromosome = c;
@@ -332,47 +273,34 @@ public class GeneticSearch
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.If supplied, the starting set becomes
-   *  one member of the initial random
-   *  population.</pre>
-   * 
-   * <pre> -Z &lt;population size&gt;
-   *  Set the size of the population.
-   *  (default = 10).</pre>
-   * 
-   * <pre> -G &lt;number of generations&gt;
-   *  Set the number of generations.
-   *  (default = 20)</pre>
-   * 
-   * <pre> -C &lt;probability of crossover&gt;
-   *  Set the probability of crossover.
-   *  (default = 0.6)</pre>
-   * 
-   * <pre> -M &lt;probability of mutation&gt;
-   *  Set the probability of mutation.
-   *  (default = 0.033)</pre>
-   * 
-   * <pre> -R &lt;report frequency&gt;
-   *  Set frequency of generation reports.
-   *  e.g, setting the value to 5 will 
-   *   report every 5th generation
-   *  (default = number of generations)</pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Set the random number seed.
-   *  (default = 1)</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are: <p>
+   *
+   * -Z <size of the population> <br>
+   * Sets the size of the population. (default = 20). <p>
+   *
+   * -G <number of generations> <br>
+   * Sets the number of generations to perform.
+   * (default = 5). <p>
+   *
+   * -C <probability of crossover> <br>
+   * Sets the probability that crossover will occur.
+   * (default = .6). <p>
+   *
+   * -M <probability of mutation> <br>
+   * Sets the probability that a feature will be toggled on/off. <p>
+   *
+   * -R <report frequency> <br>
+   * Sets how frequently reports will be generated. Eg, setting the value
+   * to 5 will generate a report every 5th generation. <p>
+   * (default = number of generations). <p>
+   *
+   * -S <seed> <br>
+   * Sets the seed for random number generation. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
@@ -467,7 +395,7 @@ public class GeneticSearch
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @throws Exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -643,31 +571,8 @@ public class GeneticSearch
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "GeneticSearch:\n\nPerforms a search using the simple genetic "
-      + "algorithm described in Goldberg (1989).\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.BOOK);
-    result.setValue(Field.AUTHOR, "David E. Goldberg");
-    result.setValue(Field.YEAR, "1989");
-    result.setValue(Field.TITLE, "Genetic algorithms in search, optimization and machine learning");
-    result.setValue(Field.ISBN, "0201157675");
-    result.setValue(Field.PUBLISHER, "Addison-Wesley");
-    
-    return result;
+    return "GeneticSearch :\n\nPerforms a search using the simple genetic "
+      +"algorithm described in Goldberg (1989).\n";
   }
 
   /**
@@ -745,10 +650,10 @@ public class GeneticSearch
   /**
    * Searches the attribute subset space using a genetic algorithm.
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
    public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
@@ -845,10 +750,10 @@ public class GeneticSearch
    * to see if the search has converged---that is there is no difference
    * in fitness between the best and worse population member
    * @return true is the search has converged
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private boolean checkBest() throws Exception {
-    int i,count,lowestCount = m_numAttribs;
+    int i,j,count,lowestCount = m_numAttribs;
     double b = -Double.MAX_VALUE;
     GABitSet localbest = null;
     BitSet temp;
@@ -926,7 +831,7 @@ public class GeneticSearch
 
   /**
    * performs a single generation---selection, crossover, and mutation
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   private void generation () throws Exception {
     int i,j=0;
@@ -1055,7 +960,7 @@ public class GeneticSearch
    * ASEvaluator.
    * @param ASEvaluator the subset evaluator to use for evaluating population
    * members
-   * @throws Exception if something goes wrong during evaluation
+   * @exception Exception if something goes wrong during evaluation
    */
   private void evaluatePopulation (SubsetEvaluator ASEvaluator)
     throws Exception {
@@ -1081,7 +986,7 @@ public class GeneticSearch
    * creates random population members for the initial population. Also
    * sets the first population member to be a start set (if any) 
    * provided by the user
-   * @throws Exception if the population can't be created
+   * @exception Exception if the population can't be created
    */
   private void initPopulation () throws Exception {
     int i,j,bit;
@@ -1276,3 +1181,4 @@ public class GeneticSearch
     m_seed = 1;
   }
 }
+

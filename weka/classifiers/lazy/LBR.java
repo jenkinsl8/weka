@@ -25,10 +25,8 @@
  *    a highly efficient and accurate classification algorithm when small
  *    numbers of objects are to be classified.
  *
- *    For more information, see
- <!-- technical-plaintext-start -->
- * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. 4(1):53-84.
- <!-- technical-plaintext-end -->
+ *    For more information, see<p>
+ *    Zijian Zheng & G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84. 
  *
  *    http://www.cm.deakin.edu.au/webb
  *
@@ -45,67 +43,30 @@ package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Statistics;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
-import java.util.ArrayList;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Lazy Bayesian Rules Classifier. The naive Bayesian classifier provides a simple and effective approach to classifier learning, but its attribute independence assumption is often violated in the real world. Lazy Bayesian Rules selectively relaxes the independence assumption, achieving lower error rates over a range of learning tasks. LBR defers processing to classification time, making it a highly efficient and accurate classification algorithm when small numbers of objects are to be classified.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
- * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. 4(1):53-84.
- * <p/>
- <!-- globalinfo-end -->
+ * Lazy Bayesian Rules implement a lazy learning approach to lessening the
+ * attribute-independence assumption of naive Bayes.  For each object to be
+ * classified, LBR selects a set of attributes for which the attribute
+ * independence assumption should not be made.  All remaining attributes are
+ * treated as independent of each other given the class and the selected set of
+ * attributes.  LBR has demonstrated very high accuracy.  Its training time is
+ * low but its classification time is high due to the use of a lazy
+ * methodology.  This implementation does not include caching, that can
+ * substantially reduce classification time when multiple classifications are
+ * performed for a single training set.
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Zheng2000,
- *    author = {Zijian Zheng and G. Webb},
- *    journal = {Machine Learning},
- *    number = {1},
- *    pages = {53-84},
- *    title = {Lazy Learning of Bayesian Rules},
- *    volume = {4},
- *    year = {2000}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
- *
+ * For more information, see<p>
+ * Zijian Zheng &amp; G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.4.2.2 $
  */
-public class LBR 
-  extends Classifier
-  implements TechnicalInformationHandler {
+public class LBR extends Classifier {
 
-  /** for serialization */
-  static final long serialVersionUID = 5648559277738985156L;
-  
   /**
    * Class for handling instances and the associated attributes. <p>
    * Enables a set of indexes to a given dataset to be created and used
@@ -130,7 +91,7 @@ public class LBR
     public int [] m_SequentialInstIndexes;
     
     /** an array of attribute indexes that are set to either true or false **/
-    public int [] m_SequentialAttIndexes;
+   public int [] m_SequentialAttIndexes;
     
     /** flag to check if sequential array must be rebuilt due to changes to the instance index*/
     private boolean m_SequentialInstanceIndex_valid = false;
@@ -151,14 +112,14 @@ public class LBR
     public int m_NumSeqAttsSet;
     
     /** the Class Index for the data set **/
-    public int m_ClassIndex;
+   public int m_ClassIndex;
     
     /**
      * constructor
      * @param numInstances the number of instances in dataset
      * @param numAtts the number of attributes in dataset
      * @param value either true or false
-     * @param classIndex  Set to -1 if you want class attribute switched on or the value of the instances 
+     * @param classIndex.  Set to -1 if you want class attribute switched on or the value of the instances 
      * class index will be switched of and the class attibute will not be considered.
      */
     public Indexes(int numInstances, int numAtts, boolean value, int classIndex) {
@@ -253,7 +214,7 @@ public class LBR
      * 
      * Changes the boolean value at the specified index in the InstIndexes array
      *
-     * @param Attributes array of attributes
+     * @param index the index of the instance
      * @param value the value to set at the specified index
      *
      */
@@ -272,7 +233,7 @@ public class LBR
      * 
      * Changes the boolean value at the specified index in the InstIndexes array
      *
-     * @param Instances array of instances
+     * @param index the index of the instance
      * @param value the value to set at the specified index
      *
      */
@@ -319,7 +280,7 @@ public class LBR
      * Returns the boolean value at the specified index in the Instance Index array
      *
      * @param index the index of the instance
-     * @return the boolean value at the specified index
+     * 
      */
     public boolean getInstanceIndex(int index) {
       
@@ -334,7 +295,7 @@ public class LBR
      * Returns the boolean value at the specified index in the Sequential Instance Indexes array
      *
      * @param index the index of the instance
-     * @return the requested value
+     * 
      */
     public int getSequentialInstanceIndex(int index) {
       
@@ -411,7 +372,7 @@ public class LBR
      * Returns the boolean value at the specified index in the Attribute Indexes array
      *
      * @param index the index of the Instance
-     * @return the boolean value
+     * 
      */
     public boolean getAttIndex(int index) {
       
@@ -426,7 +387,7 @@ public class LBR
      * Returns the boolean value at the specified index in the Sequential Attribute Indexes array
      *
      * @param index the index of the Attribute
-     * @return the requested value
+     * 
      */
     public int getSequentialAttIndex(int index) {
       
@@ -440,7 +401,6 @@ public class LBR
      * 
      * Returns the number of instances "in use"
      * 
-     * @return the number of instances "in use"
      */
     public int getNumInstancesSet() {
       
@@ -451,7 +411,6 @@ public class LBR
      * 
      * Returns the number of instances in the dataset
      * 
-     * @return the number of instances in the dataset
      */
     public int getNumInstances() {
       
@@ -462,7 +421,6 @@ public class LBR
      * 
      * Returns the number of instances in the Sequential array
      * 
-     * @return the number of instances in the sequential array
      */
     public int getSequentialNumInstances() {
       // will always be the number set as the sequential array is for referencing only
@@ -473,7 +431,6 @@ public class LBR
      * 
      * Returns the number of attributes in the dataset
      * 
-     * @return the number of attributes
      */
     public int getNumAttributes() {
       
@@ -484,7 +441,6 @@ public class LBR
      * 
      * Returns the number of attributes "in use"
      * 
-     * @return the number of attributes "in use"
      */
     public int getNumAttributesSet() {
       
@@ -495,7 +451,6 @@ public class LBR
      * 
      * Returns the number of attributes in the Sequential array
      * 
-     * @return the number of attributes in the sequentual array
      */
     public int getSequentialNumAttributes() {
       // will always be the number set as the sequential array is for referencing only
@@ -506,7 +461,6 @@ public class LBR
      * 
      * Returns whether or not the Sequential Instance Index requires rebuilding due to a change 
      * 
-     * @return true if the sequential instance index needs rebuilding
      */
     public boolean isSequentialInstanceIndexValid() {
       
@@ -517,7 +471,6 @@ public class LBR
      * 
      * Returns whether or not the Sequential Attribute Index requires rebuilding due to a change 
      * 
-     * @return true if the sequential attribute index needs rebuilding
      */
     public boolean isSequentialAttIndexValid() {
       
@@ -528,7 +481,6 @@ public class LBR
      * 
      * Sets both the Instance and Attribute indexes to a specified value
      * 
-     * @param value the value for the Instance and Attribute indices
      */
     public void setSequentialDataset(boolean value) {
       setSequentialInstanceIndex(value);
@@ -540,7 +492,6 @@ public class LBR
      * A Sequential Instance index is all those Instances that are set to the specified value placed in a sequential array.
      * Each value in the sequential array contains the Instance index within the Indexes.
      *
-     * @param value the sequential instance index
      */
     public void setSequentialInstanceIndex(boolean value) {
       
@@ -570,7 +521,6 @@ public class LBR
      * A Sequential Attribute index is all those Attributes that are set to the specified value placed in a sequential array.
      * Each value in the sequential array contains the Attribute index within the Indexes
      * 
-     * @param value the sequential attribute index
      */
     public void setSequentialAttIndex(boolean value) {
       
@@ -618,43 +568,43 @@ public class LBR
   /** The set of instances used for current training. */
   protected Instances m_Instances = null;
   
-  /** leave-one-out errors on the training dataset. */
+  // leave-one-out errors on the training dataset.
   protected int m_Errors;
   
-  /** leave-one-out error flags on the training dataaet. */
+  // leave-one-out error flags on the training dataaet.
   protected boolean [] m_ErrorFlags;
   
-  /** best attribute's index list. maybe as output result */
+  // best attribute's index list. maybe as output result
   protected ArrayList leftHand = new ArrayList();
   
-  /** significantly lower */
+  // significantly lower
   protected static final double SIGNLOWER = 0.05;
   
-  /** following is defined by wangzh, 
-   * the number of instances to be classified incorrectly
-   * on the subset. */
+  // following is defined by wangzh
+  // the number of instances to be classified incorrectly
+  // on the subset.
   protected boolean [] m_subOldErrorFlags;
   
-  /** the number of instances to be classified incorrectly
-   * besides the subset. */
+  // the number of instances to be classified incorrectly
+  // besides the subset.
   protected int m_RemainderErrors = 0;
   
-  /** the number of instance to be processed */
+  // the number of instance to be processed
   protected int m_Number = 0;
   
-  /** the Number of Instances to be used in building a classifiers */
+  // the Number of Instances to be used in building a classifiers
   protected int m_NumberOfInstances = 0;
   
-  /** for printing in n-fold cross validation */
+  // for printing in n-fold cross validation
   protected boolean m_NCV = false;
   
-  /** index of instances and attributes for the given dataset */
+  // index of instances and attributes for the given dataset
   protected Indexes m_subInstances;
   
-  /** index of instances and attributes for the given dataset */
+  // index of instances and attributes for the given dataset
   protected Indexes tempSubInstances;
   
-  /** probability values array */
+  // probability values array
   protected double [] posteriorsArray;
   protected int bestCnt;
   protected int tempCnt;
@@ -667,61 +617,7 @@ public class LBR
    */
   public String globalInfo() {
 
-    return 
-        "Lazy Bayesian Rules Classifier. The naive Bayesian classifier "
-      + "provides a simple and effective approach to classifier learning, "
-      + "but its attribute independence assumption is often violated in the "
-      + "real world. Lazy Bayesian Rules selectively relaxes the independence "
-      + "assumption, achieving lower error rates over a range of learning "
-      + "tasks. LBR defers processing to classification time, making it a "
-      + "highly efficient and accurate classification algorithm when small "
-      + "numbers of objects are to be classified.\n\n"
-      + "For more information, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Zijian Zheng and G. Webb");
-    result.setValue(Field.YEAR, "2000");
-    result.setValue(Field.TITLE, "Lazy Learning of Bayesian Rules");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "4");
-    result.setValue(Field.NUMBER, "1");
-    result.setValue(Field.PAGES, "53-84");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-
-    return result;
+    return "Lazy Bayesian Rules Classifier. The naive Bayesian classifier provides a simple and effective approach to classifier learning, but its attribute independence assumption is often violated in the real world. Lazy Bayesian Rules selectively relaxes the independence assumption, achieving lower error rates over a range of learning tasks.  LBR defers processing to classification time, making it a highly efficient and accurate classification algorithm when small numbers of objects are to be classified.";
   }
 
   /**
@@ -729,7 +625,7 @@ public class LBR
    * until classification time.
    *
    * @param instances set of instances serving as training data
-   * @throws Exception if the preparation has not been generated.
+   * @exception Exception if the preparation has not been generated.
    */
   public void buildClassifier(Instances instances) throws Exception {
     int attIndex, i, j;
@@ -738,15 +634,27 @@ public class LBR
     forCnt = 0;
     whileCnt = 0;
     
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
+    if (instances.classAttribute().isNumeric()) {
+      throw new Exception("LBR: Class is numeric!");
+    }
     
+    // LBR requires nominal attibutes
+    if (instances.checkForStringAttributes())
+      throw new Exception("Can't handle string attributes!");
+
     m_numAtts = instances.numAttributes();
+    for (attIndex = 0; attIndex < m_numAtts; attIndex++) {
+      Attribute attribute = (Attribute) instances.attribute(attIndex);
+      if (attribute.isNumeric()) {
+        throw new Exception("Can't handle numeric attributes!  Discretize the dataset prior to using Lazy Bayesian Rules or use the Filtered Classifier");
+      }
+    }
+
     m_numClasses = instances.numClasses();
+    if (m_numClasses < 0) {
+      throw new Exception ("Dataset has no class attribute");
+    }
+
     m_numInsts = instances.numInstances();
 
     // Reserve space
@@ -805,23 +713,28 @@ public class LBR
    * for the given test instance.
    * This is the most important method for Lazy Bayesian Rule algorithm.
    *
-   * @param testInstance the instance to be classified
+   * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed
+   * @exception Exception if distribution can't be computed
    */
   public double[] distributionForInstance(Instance testInstance)
   throws Exception {
     
+    int AIndex, attIndex;
     int inst;
     int subAttrIndex = 0;
     int subInstIndex = 0;
     int tempInstIndex = 0;
+    int tempAttrIndex = 0;
     int attributeBest;
+    Instance instance;
     int subLocalErrors = 0;
+    Instance tempInstance;
     int tempErrorsBest = 0;
     boolean [] tempErrorFlagBest = null;
     int [] tempD_subsetBestInsts = null;
     int [] tempD_subsetBestAtts = null;
+    Indexes tempD_subsetBest = null;
     Indexes subInstances = new Indexes(m_numInsts, m_numAtts, true, m_Instances.classIndex());
     
     boolean [] subLocalErrorFlags = new  boolean [(int)subInstances.getNumInstances()+1];
@@ -1003,13 +916,12 @@ public class LBR
    * The final "Error" is the sum of the instances to be classified
    * incorrectly.
    *
-   * @param instanceIndex set of instances serving as training data.
+   * @param instances set of instances serving as training data.
    * @param counts serving as all the counts of training data.
    * @param priors serving as the number of instances in each class.
-   * @param errorFlags for the errors
    *
    * @return error flag array about each instance.
-   * @throws Exception if something goes wrong
+   *
    **/
   public int leaveOneOut(Indexes instanceIndex, int [][][] counts, int [] priors, boolean [] errorFlags)  throws Exception {
     
@@ -1025,6 +937,7 @@ public class LBR
     int inst;
     int errors = 0;
     int instIndex;
+    Instance instance;
     
     instanceIndex.setSequentialDataset(true);
     int tempInstanceClassValue;
@@ -1072,7 +985,7 @@ public class LBR
       if (max > 0) {
         tempClassValue = maxIndex;
       } else {
-        tempClassValue = (int)Instance.missingValue();
+        tempClassValue = (int)tempInstance.missingValue();
       }
       // ###### END LOCAL CLASSIFY INSTANCE ###########
       
@@ -1107,13 +1020,13 @@ public class LBR
    *
    * This method only get m_Counts and m_Priors.
    *
-   * @param instanceIndex set of instances serving as training data
-   * @throws Exception if m_Counts and m_Priors have not been
+   * @param instances set of instances serving as training data
+   * @exception Exception if m_Counts and m_Priors have not been
    *  generated successfully
    */
   public void localNaiveBayes(Indexes instanceIndex) throws Exception {
     int attIndex = 0;
-    int i, AIndex;
+    int i, v, AIndex;
     int attVal = 0;
     int classVal = 0;
     Instance instance;
@@ -1150,10 +1063,11 @@ public class LBR
    * for the given test instance.
    *
    * @param instance the instance to be classified
-   * @param instanceIndex 
+   * @param counts serving as all the counts of training data.
+   * @param priors serving as the number of instances in each class.
    *
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed
+   * @exception Exception if distribution can't be computed
    */
   public double[] localDistributionForInstance(Instance instance, Indexes instanceIndex) throws Exception {
     
@@ -1190,12 +1104,10 @@ public class LBR
    * Significance test
    * binomp:
    *
-   * @param r
-   * @param n
-   * @param p
+   * @param double  r, double  n, double p.
    * @return returns the probability of obtaining r or fewer out of n
    * if the probability of an event is p.
-   * @throws Exception if computation fails
+   *
    */
   public double binomP(double r, double n, double p) throws Exception {
     

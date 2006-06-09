@@ -39,66 +39,38 @@ import java.util.Vector;
 
 
 /**
- <!-- globalinfo-start -->
- * Reads Instances from a Database. Can read a database in batch or incremental mode.<br/>
- * In inremental mode MySQL and HSQLDB are supported.<br/>
- * For all other DBMS set a pseudoincremental mode is used:<br/>
- * In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.<br/>
- * For incremental loading the rows in the database table have to be ordered uniquely.<br/>
- * The reason for this is that every time only a single row is fetched by extending the user query by a LIMIT clause.<br/>
- * If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.<br/>
- * Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.<br/>
- * If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option).<br/>
- * In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.<br/>
+ * Reads from a database.
+ * Can read a database in batch or incremental mode.
+ * In inremental mode MySQL and HSQLDB are supported.
+ * For all other DBMS set a pseudoincremental mode is used:
+ * In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.
+ * For incremental loading the rows in the database table have to be ordered uniquely.
+ * The reason for this is that every time only a single row is fetched by extending the user" query by a LIMIT clause.
+ * If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.
+ * Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.
+ * If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will
+ * be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option). 
+ * In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.  
  * In batch mode no string attributes will be created.
- * <p/>
- <!-- globalinfo-end -->
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -url &lt;JDBC URL&gt;
- *  The JDBC URL to connect to.
- *  (default: from DatabaseUtils.props file)</pre>
- * 
- * <pre> -user &lt;name&gt;
- *  The user to connect with to the database.
- *  (default: none)</pre>
- * 
- * <pre> -password &lt;password&gt;
- *  The password to connect with to the database.
- *  (default: none)</pre>
- * 
- * <pre> -Q &lt;query&gt;
- *  SQL query of the form
- *   SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
- *  to execute.
- *  (default: Select * From Results0)</pre>
- * 
- * <pre> -P &lt;list of column names&gt;
- *  List of column names uniquely defining a DB row
- *  (separated by ', ').
- *  Used for incremental loading.
- *  If not specified, the key will be determined automatically,
- *  if possible with the used JDBC driver.
- *  The auto ID column created by the DatabaseSaver won't be loaded.</pre>
- * 
- * <pre> -I
- *  Sets incremental loading</pre>
- * 
- <!-- options-end -->
+ * Available options are: 
+ * -Q the query to specify which tuples to load<br>
+ * The query must have the form:
+ * SELECT *|<column-list> FROM <table> [WHERE}
+ * (default: SELECT * FROM Results0).<p>
+ *
+ * -P comma separted list of columns that are a unqiue key <br>
+ * Only needed for incremental loading, if it cannot be detected automatically<p>
+ *
+ * -I <br>
+ * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1.2.2 $
  * @see Loader
  */
-public class DatabaseLoader 
-  extends AbstractLoader 
-  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
+public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -7936159015338318659L;
-  
   /** The header information that is retrieved in the beginning of incremental loading */
   protected Instances m_structure;
   
@@ -111,7 +83,7 @@ public class DatabaseLoader
   /** The database connection */
   private DatabaseConnection m_DataBaseConnection;
   
-  /** The user defined query to load instances. (form: SELECT *|&ltcolumn-list&gt; FROM &lttable&gt; [WHERE &lt;condition&gt;]) */
+  /** The user defined query to load instances. (form: SELECT *|<column-list> FROM <table> [WHERE <condition>]) */
   private String m_query = "Select * from Results0";;
   
   /** Flag indicating that pseudo incremental mode is used (all instances load at once into main memeory and then incrementally from main memory instead of the database) */
@@ -147,6 +119,17 @@ public class DatabaseLoader
   /** Name of the primary key column that will allow unique ordering necessary for incremental loading. The name is specified in the DatabaseUtils file.*/
   private String m_idColumn;
   
+  /* Type mapping used for reading*/
+  public static final int STRING = 0;
+  public static final int BOOL = 1;
+  public static final int DOUBLE = 2;
+  public static final int BYTE = 3;
+  public static final int SHORT = 4;
+  public static final int INTEGER = 5;
+  public static final int LONG = 6;
+  public static final int FLOAT = 7;
+  public static final int DATE = 8; 
+  
   /** The property file for the database connection */
   protected static String PROPERTY_FILE
     = "weka/experiment/DatabaseUtils.props";
@@ -168,8 +151,6 @@ public class DatabaseLoader
   
   /**
    * Constructor
-   * 
-   * @throws Exception if initialization fails
    */
   public DatabaseLoader() throws Exception{
   
@@ -182,25 +163,11 @@ public class DatabaseLoader
 
   /**
    * Returns a string describing this Loader
-   * 
    * @return a description of the Loader suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Reads Instances from a Database. "
-      + "Can read a database in batch or incremental mode.\n"
-      + "In inremental mode MySQL and HSQLDB are supported.\n"
-      + "For all other DBMS set a pseudoincremental mode is used:\n"
-      + "In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.\n"
-      + "For incremental loading the rows in the database table have to be ordered uniquely.\n"
-      + "The reason for this is that every time only a single row is fetched by extending the user query by a LIMIT clause.\n"
-      + "If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.\n"
-      + "Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.\n"
-      + "If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will "
-      + "be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option).\n"
-      + "In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.\n"
-      + "In batch mode no string attributes will be created.";
+    return "Reads Instances from a Database";
   }
 
   
@@ -221,9 +188,7 @@ public class DatabaseLoader
   }
   
   
-  /** 
-   * Resets the structure of instances
-   */
+  /** Resets the structure of instances*/
   public void resetStructure(){
   
       m_structure = null;
@@ -239,7 +204,6 @@ public class DatabaseLoader
   
   /**
    * Sets the query to execute against the database
-   * 
    * @param q the query to execute
    */
   public void setQuery(String q) {
@@ -250,7 +214,6 @@ public class DatabaseLoader
 
   /**
    * Gets the query to execute against the database
-   * 
    * @return the query
    */
   public String getQuery() {
@@ -259,7 +222,6 @@ public class DatabaseLoader
   
   /**
    * the tip text for this property
-   * 
    * @return the tip text
    */
   public String queryTipText(){
@@ -270,7 +232,6 @@ public class DatabaseLoader
   
   /**
    * Sets the key columns of a database table
-   * 
    * @param keys a String containing the key columns in a comma separated list.
    */
   public void setKeys(String keys){
@@ -286,7 +247,6 @@ public class DatabaseLoader
   
    /**
    * Gets the key columns' name
-   * 
    * @return name of the key columns'
    */
   public String getKeys(){
@@ -302,7 +262,6 @@ public class DatabaseLoader
   
   /**
    * the tip text for this property
-   * 
    * @return the tip text
    */
   public String keysTipText(){
@@ -315,8 +274,7 @@ public class DatabaseLoader
   
   /**
    * Sets the database URL
-   * 
-   * @param url string with the database URL
+   * @param string with the database URL
    */
   public void setUrl(String url){
       
@@ -326,7 +284,6 @@ public class DatabaseLoader
   
   /**
    * Gets the URL
-   * 
    * @return the URL
    */
   public String getUrl(){
@@ -336,7 +293,6 @@ public class DatabaseLoader
   
   /**
    * the tip text for this property
-   * 
    * @return the tip text
    */
   public String urlTipText(){
@@ -346,8 +302,7 @@ public class DatabaseLoader
   
   /**
    * Sets the database user
-   * 
-   * @param user the database user name
+   * @param the database user name
    */
   public void setUser(String user){
    
@@ -356,7 +311,6 @@ public class DatabaseLoader
   
   /**
    * Gets the user name
-   * 
    * @return name of database user
    */
   public String getUser(){
@@ -366,7 +320,6 @@ public class DatabaseLoader
   
   /**
    * the tip text for this property
-   * 
    * @return the tip text
    */
   public String userTipText(){
@@ -376,26 +329,15 @@ public class DatabaseLoader
   
   /**
    * Sets user password for the database
-   * 
-   * @param password the password
+   * @param the password
    */
   public void setPassword(String password){
    
       m_DataBaseConnection.setPassword(password);
   }
-
-  /**
-   * Returns the database password
-   *
-   * @return the database password
-   */
-  public String getPassword() {
-    return m_DataBaseConnection.getPassword();
-  }
   
   /**
    * the tip text for this property
-   * 
    * @return the tip text
    */
   public String passwordTipText(){
@@ -404,9 +346,7 @@ public class DatabaseLoader
   }
   
   
-  /** 
-   * Sets the database url, user and pw
-   * 
+  /** Sets the database url
    * @param url the database url
    * @param userName the user name
    * @param password the password
@@ -423,9 +363,7 @@ public class DatabaseLoader
       }    
   }
   
-  /** 
-   * Sets the database url
-   * 
+  /** Sets the database url
    * @param url the database url
    */  
   public void setSource(String url){
@@ -438,11 +376,7 @@ public class DatabaseLoader
        }    
   }
   
-  /** 
-   * Sets the database url using the DatabaseUtils file
-   * 
-   * @throws Exception if something goes wrong
-   */  
+  /** Sets the database url using the DatabaseUtils file */  
   public void setSource() throws Exception{
   
         m_DataBaseConnection = new DatabaseConnection();
@@ -450,6 +384,7 @@ public class DatabaseLoader
   
   /**
    * Opens a connection to the database
+   *
    */
   public void connectToDatabase() {
    
@@ -463,10 +398,8 @@ public class DatabaseLoader
   }
   
   
-  /** 
-   * Returns the table name or all after the FROM clause of the user specified query
+  /** Returns the table name or all after the FROM clause of the user specified query
    * to retrieve instances.
-   * 
    * @param onlyTableName true if only the table name should be returned, false otherwise
    * @return the end of the query
    */  
@@ -487,13 +420,11 @@ public class DatabaseLoader
       return table;
   }
   
-  /** 
-   * Checks for a unique key using the JDBC driver's method:
+  /** Checks for a unique key using the JDBC driver's method:
    * getPrimaryKey(), getBestRowIdentifier().
    * Depending on their implementation a key can be detected.
    * The key is needed to order the instances uniquely for an inremental loading.
    * If an existing key cannot be detected, use -P option.
-   * 
    * @throws Exception if database error occurs
    * @return true, if a key could have been detected, false otherwise
    */  
@@ -537,10 +468,8 @@ public class DatabaseLoader
       return false;
   }
   
-  /** 
-   * Converts string attribute into nominal ones for an instance read during
+  /** Converts string attribute into nominal ones for an instance read during
    * incremental loading
-   * 
    * @param rs The result set
    * @param i the index of the nominal value
    * @throws Exception exception if it cannot be converted
@@ -560,11 +489,9 @@ public class DatabaseLoader
       }
   }
   
-  /** 
-   * Used in incremental loading. Modifies the SQL statement,
+  /** Used in incremental loading. Modifies the SQL statement,
    * so that only one instance per time is tretieved and the instances are ordered
    * uniquely.
-   * 
    * @param query the query to modify for incremental loading
    * @param offset sets which tuple out of the uniquely ordered ones should be returned
    * @param choice the kind of query that is suitable for the used DBMS
@@ -605,9 +532,7 @@ public class DatabaseLoader
       return limitedQuery;
   }
   
-  /** 
-   * Counts the number of rows that are loaded from the database
-   * 
+  /** Counts the number of rows that are loaded from the database
    * @throws Exception if the number of rows cannot be calculated
    * @return the entire number of rows
    */  
@@ -630,7 +555,7 @@ public class DatabaseLoader
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
 
@@ -683,7 +608,7 @@ public class DatabaseLoader
         m_nominalStrings = new FastVector [numAttributes];
         for (int i = 1; i <= numAttributes; i++) {
             switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-                case DatabaseConnection.STRING :
+                case STRING :
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
                     String columnName = md.getColumnName(i);
@@ -712,7 +637,7 @@ public class DatabaseLoader
                     stringToNominal(rs1,i);
                     rs1.close();
                     break;
-                case DatabaseConnection.BOOL:
+                case BOOL:
                     //System.err.println("boolean --> nominal");
                     attributeTypes[i - 1] = Attribute.NOMINAL;
                     m_nominalIndexes[i - 1] = new Hashtable();
@@ -722,31 +647,31 @@ public class DatabaseLoader
                     m_nominalStrings[i - 1].addElement("false");
                     m_nominalStrings[i - 1].addElement("true");
                     break;
-                case DatabaseConnection.DOUBLE:
+                case DOUBLE:
                     //System.err.println("BigDecimal --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.BYTE:
+                case BYTE:
                     //System.err.println("byte --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.SHORT:
+                case SHORT:
                     //System.err.println("short --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.INTEGER:
+                case INTEGER:
                     //System.err.println("int --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.LONG:
+                case LONG:
                     //System.err.println("long --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.FLOAT:
+                case FLOAT:
                     //System.err.println("float --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DatabaseConnection.DATE:
+                case DATE:
                     attributeTypes[i - 1] = Attribute.DATE;
                     break;
                 default:
@@ -809,7 +734,7 @@ public class DatabaseLoader
    * Return the full data set in batch mode (header and all intances at once).
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if there is no source or parsing fails
+   * @exception IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
 
@@ -837,7 +762,7 @@ public class DatabaseLoader
     for (int i = 1; i <= numAttributes; i++) {
       switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
 	
-      case DatabaseConnection.STRING :
+      case STRING :
         ResultSet rs1;
         String columnName = md.getColumnName(i);
         if(m_DataBaseConnection.getUpperCase())
@@ -853,7 +778,7 @@ public class DatabaseLoader
         stringToNominal(rs1,i);
         rs1.close();  
 	break;
-      case DatabaseConnection.BOOL:
+      case BOOL:
 	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
 	m_nominalIndexes[i - 1] = new Hashtable();
@@ -863,31 +788,31 @@ public class DatabaseLoader
 	m_nominalStrings[i - 1].addElement("false");
 	m_nominalStrings[i - 1].addElement("true");
 	break;
-      case DatabaseConnection.DOUBLE:
+      case DOUBLE:
 	//System.err.println("BigDecimal --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.BYTE:
+      case BYTE:
 	//System.err.println("byte --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.SHORT:
+      case SHORT:
 	//System.err.println("short --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.INTEGER:
+      case INTEGER:
 	//System.err.println("int --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.LONG:
+      case LONG:
 	//System.err.println("long --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.FLOAT:
+      case FLOAT:
 	//System.err.println("float --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DatabaseConnection.DATE:
+      case DATE:
 	attributeTypes[i - 1] = Attribute.DATE;
 	break;
       default:
@@ -903,7 +828,7 @@ public class DatabaseLoader
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
 	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	case DatabaseConnection.STRING :
+	case STRING :
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
@@ -916,7 +841,7 @@ public class DatabaseLoader
                 vals[i - 1] = index.doubleValue();
             }
 	  break;
-	case DatabaseConnection.BOOL:
+	case BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -924,7 +849,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
-	case DatabaseConnection.DOUBLE:
+	case DOUBLE:
 	  double dd = rs.getDouble(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -932,7 +857,7 @@ public class DatabaseLoader
 	    vals[i - 1] =  dd;
 	  }
 	  break;
-	case DatabaseConnection.BYTE:
+	case BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -940,7 +865,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)by;
 	  }
 	  break;
-	case DatabaseConnection.SHORT:
+	case SHORT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -948,7 +873,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)sh;
 	  }
 	  break;
-	case DatabaseConnection.INTEGER:
+	case INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -956,7 +881,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)in;
 	  }
 	  break;
-	case DatabaseConnection.LONG:
+	case LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -964,7 +889,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)lo;
 	  }
 	  break;
-	case DatabaseConnection.FLOAT:
+	case FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -972,7 +897,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)fl;
 	  }
 	  break;
-	case DatabaseConnection.DATE:
+	case DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1047,22 +972,21 @@ public class DatabaseLoader
     return result;
   }
   
-  /** 
-   * Reads an instance from a database.
-   * 
+  /** Reads an instance from a database.
    * @param rs the ReusltSet to load
    * @throws Exception if instance cannot be read
    * @return an instance read from the database
    */  
   private Instance readInstance(ResultSet rs) throws Exception{
   
+      FastVector instances = new FastVector();
       ResultSetMetaData md = rs.getMetaData();
       int numAttributes = md.getColumnCount();
       double[] vals = new double[numAttributes];
       m_structure.delete();
       for(int i = 1; i <= numAttributes; i++) {
 	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	case DatabaseConnection.STRING :
+	case STRING :
 	  String str = rs.getString(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1074,7 +998,7 @@ public class DatabaseLoader
 	    vals[i - 1] = index.doubleValue();
 	  }
 	  break;
-	case DatabaseConnection.BOOL:
+	case BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1082,7 +1006,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
-	case DatabaseConnection.DOUBLE:
+	case DOUBLE:
 	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
@@ -1093,7 +1017,7 @@ public class DatabaseLoader
 	    vals[i - 1] =  dd;
 	  }
 	  break;
-	case DatabaseConnection.BYTE:
+	case BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1101,7 +1025,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)by;
 	  }
 	  break;
-	case DatabaseConnection.SHORT:
+	case SHORT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1109,7 +1033,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)sh;
 	  }
 	  break;
-	case DatabaseConnection.INTEGER:
+	case INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1117,7 +1041,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)in;
 	  }
 	  break;
-	case DatabaseConnection.LONG:
+	case LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1125,7 +1049,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)lo;
 	  }
 	  break;
-	case DatabaseConnection.FLOAT:
+	case FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1133,7 +1057,7 @@ public class DatabaseLoader
 	    vals[i - 1] = (double)fl;
 	  }
 	  break;
-	case DatabaseConnection.DATE:
+	case DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1175,7 +1099,7 @@ public class DatabaseLoader
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @throws IOException if there is an error during parsing
+   * @exception IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 
@@ -1244,30 +1168,13 @@ public class DatabaseLoader
   
   
   
-  /** 
-   * Gets the setting
-   * 
+  /** Gets the setting
    * @return the current setting
    */  
   public String[] getOptions() {
       
     Vector options = new Vector();
-
-    if ( (getUrl() != null) && (getUrl().length() != 0) ) {
-      options.add("-url");
-      options.add(getUrl());
-    }
     
-    if ( (getUser() != null) && (getUser().length() != 0) ) {
-      options.add("-user");
-      options.add(getUser());
-    }
-    
-    if ( (getPassword() != null) && (getPassword().length() != 0) ) {
-      options.add("-password");
-      options.add(getPassword());
-    }
-
     options.add("-Q"); 
     options.add(getQuery());
     
@@ -1286,122 +1193,51 @@ public class DatabaseLoader
     return (String[]) options.toArray(new String[options.size()]);
   }
   
-  /** 
-   * Lists the available options
-   * 
+  /** Lists the available options
    * @return an enumeration of the available options
    */  
   public java.util.Enumeration listOptions() {
       
-     FastVector newVector = new FastVector();
+     FastVector newVector = new FastVector(3);
 
-     newVector.addElement(new Option(
-           "\tThe JDBC URL to connect to.\n"
-           + "\t(default: from DatabaseUtils.props file)",
-           "url", 1, "-url <JDBC URL>"));
-     
-     newVector.addElement(new Option(
-           "\tThe user to connect with to the database.\n"
-           + "\t(default: none)",
-           "user", 1, "-user <name>"));
-     
-     newVector.addElement(new Option(
-           "\tThe password to connect with to the database.\n"
-           + "\t(default: none)",
-           "password", 1, "-password <password>"));
-     
-     newVector.addElement(new Option(
-	 "\tSQL query of the form\n"
-	 + "\t\tSELECT <list of columns>|* FROM <table> [WHERE]\n"
-	 + "\tto execute.\n"
-         + "\t(default: Select * From Results0)",
-	 "Q",1,"-Q <query>"));
-     
-     newVector.addElement(new Option(
-	 "\tList of column names uniquely defining a DB row\n"
-	 + "\t(separated by ', ').\n"
-         + "\tUsed for incremental loading.\n"
-	 + "\tIf not specified, the key will be determined automatically,\n"
-	 + "\tif possible with the used JDBC driver.\n"
-	 + "\tThe auto ID column created by the DatabaseSaver won't be loaded.",
-	 "P",1,"-P <list of column names>"));
-
-     newVector.addElement(new Option(
-	 "\tSets incremental loading", 
-	 "I", 0, "-I"));
+     newVector.addElement(new Option("\tSQL query of the form SELECT <list of columns>|* FROM <table> [WHERE] to execute (default Select * From Results0).",
+				     "Q",1,"-Q <query>"));
+     newVector.addElement(new Option("\tList of column names uniquely defining a DB row (separated by ', ').\n\tUsed for incremental loading."
+        +"\n\tIf not specified, the key will be determined automatically, if possible with the used JDBC driver.\n\tThe auto ID column created by the DatabaseSaver won't be loaded.",
+				     "P",1,"-P<list of column names>"));
+     newVector.addElement(new Option("\tSets incremental loading", "I", 0,
+				    "-I"));
      
      return  newVector.elements();
   }
   
-  /** 
-   * Sets the options.
+  /** Sets the options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -url &lt;JDBC URL&gt;
-   *  The JDBC URL to connect to.
-   *  (default: from DatabaseUtils.props file)</pre>
-   * 
-   * <pre> -user &lt;name&gt;
-   *  The user to connect with to the database.
-   *  (default: none)</pre>
-   * 
-   * <pre> -password &lt;password&gt;
-   *  The password to connect with to the database.
-   *  (default: none)</pre>
-   * 
-   * <pre> -Q &lt;query&gt;
-   *  SQL query of the form
-   *   SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
-   *  to execute.
-   *  (default: Select * From Results0)</pre>
-   * 
-   * <pre> -P &lt;list of column names&gt;
-   *  List of column names uniquely defining a DB row
-   *  (separated by ', ').
-   *  Used for incremental loading.
-   *  If not specified, the key will be determined automatically,
-   *  if possible with the used JDBC driver.
-   *  The auto ID column created by the DatabaseSaver won't be loaded.</pre>
-   * 
-   * <pre> -I
-   *  Sets incremental loading</pre>
-   * 
-   <!-- options-end -->
+   * Available options are:
+   * -Q the query to specify which tuples to load<br>
+   * The query must have the form:
+   * SELECT *|<column-list> FROM <table> [WHERE}
+   * (default: SELECT * FROM Results0).<p>
+   *
+   * -P comma separted list of columns that are a unqiue key <br>
+   * Only needed for incremental loading, if it cannot be detected automatically<p>
+   *
+   * -I <br>
+   * Sets incremental loading
    *
    * @param options the options
    * @throws Exception if options cannot be set
    */  
   public void setOptions(String[] options) throws Exception {
       
-    String optionString, keyString, tmpStr;
-    
-    optionString = Utils.getOption('Q', options);
-    
-    keyString = Utils.getOption('P', options);
-    
+    String optionString, keyString;
+    optionString = Utils.getOption('Q',options);
+    keyString = Utils.getOption('P',options);
     reset();
-    
-    tmpStr = Utils.getOption("url", options);
-    if (tmpStr.length() != 0)
-      setUrl(tmpStr);
-
-    tmpStr = Utils.getOption("user", options);
-    if (tmpStr.length() != 0)
-      setUser(tmpStr);
-    
-    tmpStr = Utils.getOption("password", options);
-    if (tmpStr.length() != 0)
-      setPassword(tmpStr);
-    
     if (optionString.length() != 0)
       setQuery(optionString);
-    
     m_orderBy.removeAllElements();
-    
     m_inc = Utils.getFlag('I', options);
-    
     if(m_inc){
         StringTokenizer st = new StringTokenizer(keyString, ",");
         while (st.hasMoreTokens()) {
@@ -1462,6 +1298,9 @@ public class DatabaseLoader
 	e.printStackTrace();
         System.out.println("\n"+e.getMessage());
       }
+    
   }
+  
+  
+  
 }
-

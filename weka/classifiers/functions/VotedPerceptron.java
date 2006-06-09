@@ -25,81 +25,40 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.filters.Filter;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Implementation of the voted perceptron algorithm by Freund and Schapire. Globally replaces all missing values, and transforms nominal attributes into binary ones.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
- * Y. Freund, R. E. Schapire: Large margin classification using the perceptron algorithm. In: 11th Annual Conference on Computational Learning Theory, New York, NY, 209-217, 1998.
- * <p/>
- <!-- globalinfo-end -->
+ * Implements the voted perceptron algorithm by Freund and
+ * Schapire. Globally replaces all missing values, and transforms
+ * nominal attributes into binary ones. For more information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Freund1998,
- *    address = {New York, NY},
- *    author = {Y. Freund and R. E. Schapire},
- *    booktitle = {11th Annual Conference on Computational Learning Theory},
- *    pages = {209-217},
- *    publisher = {ACM Press},
- *    title = {Large margin classification using the perceptron algorithm},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Y. Freund and R. E. Schapire (1998). <i> Large margin
+ * classification using the perceptron algorithm</i>.  Proc. 11th
+ * Annu. Conf. on Comput. Learning Theory, pp. 209-217, ACM Press, New
+ * York, NY. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -I &lt;int&gt;
- *  The number of iterations to be performed.
- *  (default 1)</pre>
- * 
- * <pre> -E &lt;double&gt;
- *  The exponent for the polynomial kernel.
- *  (default 1)</pre>
- * 
- * <pre> -S &lt;int&gt;
- *  The seed for the random number generation.
- *  (default 1)</pre>
- * 
- * <pre> -M &lt;int&gt;
- *  The maximum number of alterations allowed.
- *  (default 10000)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -I num <br>
+ * The number of iterations to be performed. (default 1)<p>
+ *
+ * -E num <br>
+ * The exponent for the polynomial kernel. (default 1)<p>
+ *
+ * -S num <br>
+ * The seed for the random number generator. (default 1)<p>
+ *
+ * -M num <br>
+ * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
- */
-public class VotedPerceptron 
-  extends Classifier 
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -1072429260104568698L;
+ * @version $Revision: 1.17 $ 
+*/
+public class VotedPerceptron extends Classifier implements OptionHandler {
   
   /** The maximum number of alterations to the perceptron */
   private int m_MaxK = 10000;
@@ -140,34 +99,13 @@ public class VotedPerceptron
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Implementation of the voted perceptron algorithm by Freund and "
-      + "Schapire. Globally replaces all missing values, and transforms "
-      + "nominal attributes into binary ones.\n\n"
-      + "For more information, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Y. Freund and R. E. Schapire");
-    result.setValue(Field.TITLE, "Large margin classification using the perceptron algorithm");
-    result.setValue(Field.BOOKTITLE, "11th Annual Conference on Computational Learning Theory");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.PAGES, "209-217");
-    result.setValue(Field.PUBLISHER, "ACM Press");
-    result.setValue(Field.ADDRESS, "New York, NY");
-    
-    return result;
+    return "Implementation of the voted perceptron algorithm by Freund and "
+      +"Schapire. Globally replaces all missing values, and transforms "
+      +"nominal attributes into binary ones. For more information, see:\n\n"
+      +"Y. Freund and R. E. Schapire (1998). Large margin "
+      +"classification using the perceptron algorithm.  Proc. 11th "
+      +"Annu. Conf. on Comput. Learning Theory, pp. 209-217, ACM Press, New "
+      +"York, NY.";
   }
 
   /**
@@ -196,31 +134,22 @@ public class VotedPerceptron
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -I &lt;int&gt;
-   *  The number of iterations to be performed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -E &lt;double&gt;
-   *  The exponent for the polynomial kernel.
-   *  (default 1)</pre>
-   * 
-   * <pre> -S &lt;int&gt;
-   *  The seed for the random number generation.
-   *  (default 1)</pre>
-   * 
-   * <pre> -M &lt;int&gt;
-   *  The maximum number of alterations allowed.
-   *  (default 10000)</pre>
-   * 
-   <!-- options-end -->
+   * -I num <br>
+   * The number of iterations to be performed. (default 1)<p>
+   *
+   * -E num <br>
+   * The exponent for the polynomial kernel. (default 1)<p>
+   *
+   * -S num <br>
+   * The seed for the random number generator. (default 1)<p>
+   *
+   * -M num <br>
+   * The maximum number of alterations allowed. (default 10000) <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -271,46 +200,25 @@ public class VotedPerceptron
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.BINARY_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Builds the ensemble of perceptrons.
    *
-   * @param insts the data to train the classifier with
-   * @throws Exception if something goes wrong during building
+   * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
  
-    // can classifier handle the data?
-    getCapabilities().testWithFail(insts);
+    if (insts.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+    if (insts.numClasses() > 2) {
+      throw new Exception("Can only handle two-class datasets!");
+    }
+    if (insts.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
+    }
 
-    // remove instances with missing class
-    insts = new Instances(insts);
-    insts.deleteWithMissingClass();
-    
     // Filter data
     m_Train = new Instances(insts);
+    m_Train.deleteWithMissingClass();
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
@@ -358,7 +266,7 @@ public class VotedPerceptron
    * Pipes output of SVM through sigmoid function.
    * @param inst the instance for which distribution is to be computed
    * @return the distribution
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
 
@@ -396,8 +304,6 @@ public class VotedPerceptron
 
   /**
    * Returns textual description of classifier.
-   * 
-   * @return the model as string
    */
   public String toString() {
 
@@ -522,11 +428,6 @@ public class VotedPerceptron
 
   /** 
    * Computes the inner product of two instances
-   * 
-   * @param i1 first instance
-   * @param i2 second instance
-   * @return the inner product
-   * @throws Exception if computation fails
    */
   private double innerProduct(Instance i1, Instance i2) throws Exception {
 
@@ -560,11 +461,6 @@ public class VotedPerceptron
 
   /** 
    * Compute a prediction from a perceptron
-   * 
-   * @param k
-   * @param inst the instance to make a prediction for
-   * @return the prediction
-   * @throws Exception if computation fails
    */
   private int makePrediction(int k, Instance inst) throws Exception {
 
@@ -585,8 +481,6 @@ public class VotedPerceptron
 
   /**
    * Main method.
-   * 
-   * @param argv the commandline options
    */
   public static void main(String[] argv) {
     
@@ -597,4 +491,5 @@ public class VotedPerceptron
     }
   }
 }
-
+    
+  

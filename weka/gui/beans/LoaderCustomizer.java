@@ -45,13 +45,13 @@ import weka.core.converters.FileSourcedConverter;
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class LoaderCustomizer extends JPanel
   implements Customizer, CustomizerCloseRequester {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

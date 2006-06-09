@@ -23,6 +23,9 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.filters.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -31,51 +34,37 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.UnsupportedAttributeTypeException;
 
 /** 
- <!-- globalinfo-start -->
- * This instance filter takes a range of N numeric attributes and replaces them with N-1 numeric attributes, the values of which are the difference between consecutive attribute values from the original instance. eg: <br/>
- * <br/>
- * Original attribute values<br/>
- * <br/>
- *    0.1, 0.2, 0.3, 0.1, 0.3<br/>
- * <br/>
- * New attribute values<br/>
- * <br/>
- *    0.1, 0.1, -0.2, 0.2<br/>
- * <br/>
- * The range of attributes used is taken in numeric order. That is, a range spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the differences, NOT 7,8,9,10,11,3,4,5.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to take the differences between.
- *  First and last are valid indexes.
- *  (default none)</pre>
- * 
- <!-- options-end -->
+ * This instance filter takes a range of N numeric attributes and replaces
+ * them with N-1 numeric attributes, the values of which are the difference 
+ * between consecutive attribute values from the original instance. eg: <P>
+ *
+ * Original attribute values <BR>
+ * <code> 0.1, 0.2, 0.3, 0.1, 0.3 </code> <P>
+ *
+ * New attribute values <BR>
+ * <code> 0.1, 0.1, -0.2, 0.2 </code> <P>
+ *
+ * The range of attributes used is taken in numeric order. That is, a range
+ * spec of 7-11,3-5 will use the attribute ordering 3,4,5,7,8,9,10,11 for the
+ * differences, <i>not</i> 7,8,9,10,11,3,4,5.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -R index1,index2-index4,...<br>
+ * Specify list of columns to take the differences between. 
+ * First and last are valid indexes.
+ * (default none)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class FirstOrder 
-  extends Filter
+public class FirstOrder extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -7500464545400454179L;
-  
   /** Stores which columns to take differences between */
   protected Range m_DeltaCols = new Range();
 
@@ -119,20 +108,16 @@ public class FirstOrder
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of columns to take the differences between.
-   *  First and last are valid indexes.
-   *  (default none)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options controlling the behaviour of this object.
+   * Valid options are:<p>
+   *
+   * -R index1,index2-index4,...<br>
+   * Specify list of columns to take the differences between. 
+   * First and last are valid indexes.
+   * (default none)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -175,9 +160,9 @@ public class FirstOrder
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnsupportedAttributeTypeException if any of the
+   * @exception UnsupportedAttributeTypeException if any of the
    * selected attributes are not numeric 
-   * @throws Exception if only one attribute has been selected.
+   * @exception Exception if only one attribute has been selected.
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -232,7 +217,7 @@ public class FirstOrder
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -272,8 +257,8 @@ public class FirstOrder
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
@@ -310,7 +295,7 @@ public class FirstOrder
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @throws Exception if an invalid range list is supplied
+   * @exception Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
 
@@ -323,7 +308,7 @@ public class FirstOrder
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @throws Exception if an invalid set of ranges is supplied
+   * @exception Exception if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
@@ -348,3 +333,4 @@ public class FirstOrder
     }
   }
 }
+

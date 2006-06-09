@@ -23,28 +23,23 @@
 
 package weka.experiment;
 
-import weka.core.FastVector;
-import weka.core.Utils;
+import java.io.*;
+import java.util.*;
+import java.sql.*;
+import java.net.*;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
+import weka.core.FastVector;
 
 /**
- <!-- globalinfo-start -->
- * Takes results from a result producer and sends them to a database.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * DatabaseResultListener takes the results from a ResultProducer
+ * and submits them to a central database.
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8 $
  */
-public class DatabaseResultListener 
-  extends DatabaseUtils
+public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
 
-  /** for serialization */
-  static final long serialVersionUID = 7388014746954652818L;  
-  
   /** The ResultProducer to listen to */
   protected ResultProducer m_ResultProducer;
   
@@ -80,7 +75,7 @@ public class DatabaseResultListener
   /**
    * Sets up the database drivers
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public DatabaseResultListener() throws Exception {
 
@@ -91,7 +86,7 @@ public class DatabaseResultListener
    * Prepare for the results to be received.
    *
    * @param rp the ResultProducer that will generate the results
-   * @throws Exception if an error occurs during preprocessing.
+   * @exception Exception if an error occurs during preprocessing.
    */
   public void preProcess(ResultProducer rp) throws Exception {
 
@@ -107,7 +102,7 @@ public class DatabaseResultListener
    * in any way.
    *
    * @param rp the ResultProducer that generated the results
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void postProcess(ResultProducer rp) throws Exception {
 
@@ -128,7 +123,7 @@ public class DatabaseResultListener
    * @param rp the ResultProducer to which the constraints will apply
    * @return an array of column names to which resutltProducer's
    * results will be restricted.
-   * @throws Exception if an error occurs.
+   * @exception Exception if an error occurs.
    */
   public String [] determineColumnConstraints(ResultProducer rp) 
     throws Exception {
@@ -174,7 +169,7 @@ public class DatabaseResultListener
    * @param rp the ResultProducer that generated the result
    * @param key The key for the results.
    * @param result The actual results.
-   * @throws Exception if the result couldn't be sent to the database
+   * @exception Exception if the result couldn't be sent to the database
    */
   public void acceptResult(ResultProducer rp, Object[] key, Object[] result) 
     throws Exception {
@@ -196,7 +191,7 @@ public class DatabaseResultListener
    * @param rp the ResultProducer wanting to generate the result
    * @param key The key for which a result may be needed.
    * @return true if the result should be calculated.
-   * @throws Exception if the database couldn't be queried
+   * @exception Exception if the database couldn't be queried
    */
   public boolean isResultRequired(ResultProducer rp, Object[] key)
     throws Exception {
@@ -240,7 +235,7 @@ public class DatabaseResultListener
    * and the results table created.
    *
    * @param rp the ResultProducer
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   protected void updateResultsTableName(ResultProducer rp) throws Exception {
 
@@ -323,7 +318,7 @@ public class DatabaseResultListener
    * @param rp the ResultProducer the key belongs to.
    * @param key the result key
    * @return true if the key is in the key cache
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   protected boolean isKeyInCache(ResultProducer rp, Object[] key)
     throws Exception {
@@ -341,7 +336,7 @@ public class DatabaseResultListener
    *
    * @param rp the ResultProducer the key belongs to
    * @param key the key
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   protected void loadCache(ResultProducer rp, Object[] key)
     throws Exception {
@@ -377,7 +372,7 @@ public class DatabaseResultListener
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
+	  query += '\'' + key[i].toString() + '\'';
 	} else {
 	  query += key[i].toString();
 	}

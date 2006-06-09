@@ -55,7 +55,7 @@ import weka.core.Instance;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class StripChart 
   extends JPanel 

@@ -22,65 +22,21 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.classifiers.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -K &lt;number of attributes&gt;
- *  Number of attributes to randomly investigate
- *  (&lt;1 = int(log(#attributes)+1)).</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Seed for random number generator.
- *  (default 1)</pre>
- * 
- * <pre> -depth &lt;num&gt;
- *  The maximum depth of the tree, 0 for unlimited.
- *  (default 0)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Class for constructing a tree that considers K random features at each node.
+ * Performs no pruning.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.8.2.2 $
  */
-public class RandomTree 
-  extends Classifier 
+public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
-  /** for serialization */
-  static final long serialVersionUID = 8934314652175299374L;
-  
   /** The subtrees appended to this tree. */ 
   protected RandomTree[] m_Successors;
     
@@ -104,15 +60,15 @@ public class RandomTree
     
   /** Minimum number of instances for leaf. */
   protected double m_MinNum = 1.0;
+    
+  /** Debug info */
+  protected boolean m_Debug = false;
   
   /** The number of attributes considered for a split. */
   protected int m_KValue = 1;
 
   /** The random seed to use. */
   protected int m_randomSeed = 1;
-  
-  /** The maximum depth of the tree (0 = unlimited) */
-  protected int m_MaxDepth = 0;
 
   /**
    * Returns a string describing classifier
@@ -182,6 +138,35 @@ public class RandomTree
     
     m_KValue = k;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Whether debug information is output to the console.";
+  }
+
+  /**
+   * Get the value of Debug.
+   *
+   * @return Value of Debug.
+   */
+  public boolean getDebug() {
+    
+    return m_Debug;
+  }
+  
+  /**
+   * Set the value of Debug.
+   *
+   * @param newDebug Value to assign to Debug.
+   */
+  public void setDebug(boolean newDebug) {
+    
+    m_Debug = newDebug;
+  }
 
   /**
    * Returns the tip text for this property
@@ -213,194 +198,86 @@ public class RandomTree
   }
   
   /**
-   * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
-   */
-  public String maxDepthTipText() {
-    return "The maximum depth of the tree, 0 for unlimited.";
-  }
-
-  /**
-   * Get the maximum depth of trh tree, 0 for unlimited.
-   *
-   * @return 		the maximum depth.
-   */
-  public int getMaxDepth() {
-    return m_MaxDepth;
-  }
-  
-  /**
-   * Set the maximum depth of the tree, 0 for unlimited.
-   *
-   * @param value 	the maximum depth.
-   */
-  public void setMaxDepth(int value) {
-    m_MaxDepth = value;
-  }
-  
-  /**
    * Lists the command-line options for this classifier.
-   * 
-   * @return an enumeration over all possible options
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector();
+    Vector newVector = new Vector(6);
 
-    newVector.addElement(new Option(
-	"\tNumber of attributes to randomly investigate\n"
-	+"\t(<1 = int(log(#attributes)+1)).",
-	"K", 1, "-K <number of attributes>"));
+    newVector.
+      addElement(new Option("\tNumber of attributes to randomly investigate\n"
+                            +"\t(<1 = int(log(#attributes)+1)).",
+			    "K", 1, "-K <number of attributes>"));
 
-    newVector.addElement(new Option(
-	"\tSet minimum number of instances per leaf.",
-	"M", 1, "-M <minimum number of instances>"));
+    newVector.
+      addElement(new Option("\tSet minimum number of instances per leaf.",
+			    "M", 1, "-M <minimum number of instances>"));
 
-    newVector.addElement(new Option(
-	"\tSeed for random number generator.\n"
-	+ "\t(default 1)",
-	"S", 1, "-S <num>"));
+    newVector.
+      addElement(new Option("\tTurns debugging info on.",
+			    "D", 0, "-D"));
 
-    newVector.addElement(new Option(
-	"\tThe maximum depth of the tree, 0 for unlimited.\n"
-	+ "\t(default 0)",
-	"depth", 1, "-depth <num>"));
-
-    Enumeration enu = super.listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+    newVector
+      .addElement(new Option("\tSeed for random number generator.\n"
+			     + "\t(default 1)",
+			     "S", 1, "-S"));
 
     return newVector.elements();
   } 
 
   /**
    * Gets options from this classifier.
-   * 
-   * @return the options for the current setup
    */
   public String[] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
     
-    result = new Vector();
-    
-    result.add("-K");
-    result.add("" + getKValue());
-    
-    result.add("-M");
-    result.add("" + getMinNum());
-    
-    result.add("-S");
-    result.add("" + getSeed());
-    
-    if (getMaxDepth() > 0) {
-      result.add("-depth");
-      result.add("" + getMaxDepth());
+    String [] options = new String [10];
+    int current = 0;
+    options[current++] = "-K"; 
+    options[current++] = "" + getKValue();
+    options[current++] = "-M"; 
+    options[current++] = "" + getMinNum();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
+    if (getDebug()) {
+      options[current++] = "-D";
     }
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    return (String[]) result.toArray(new String[result.size()]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -K &lt;number of attributes&gt;
-   *  Number of attributes to randomly investigate
-   *  (&lt;1 = int(log(#attributes)+1)).</pre>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Seed for random number generator.
-   *  (default 1)</pre>
-   * 
-   * <pre> -depth &lt;num&gt;
-   *  The maximum depth of the tree, 0 for unlimited.
-   *  (default 0)</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
-    String	tmpStr;
     
-    tmpStr = Utils.getOption('K', options);
-    if (tmpStr.length() != 0) {
-      m_KValue = Integer.parseInt(tmpStr);
+    String kValueString = Utils.getOption('K', options);
+    if (kValueString.length() != 0) {
+      m_KValue = Integer.parseInt(kValueString);
     } else {
       m_KValue = 1;
     }
-    
-    tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0) {
-      m_MinNum = Double.parseDouble(tmpStr);
+    String minNumString = Utils.getOption('M', options);
+    if (minNumString.length() != 0) {
+      m_MinNum = Double.parseDouble(minNumString);
     } else {
       m_MinNum = 1;
     }
-    
-    tmpStr = Utils.getOption('S', options);
-    if (tmpStr.length() != 0) {
-      setSeed(Integer.parseInt(tmpStr));
+    String seed = Utils.getOption('S', options);
+    if (seed.length() != 0) {
+      setSeed(Integer.parseInt(seed));
     } else {
       setSeed(1);
     }
-    
-    tmpStr = Utils.getOption("depth", options);
-    if (tmpStr.length() != 0) {
-      setMaxDepth(Integer.parseInt(tmpStr));
-    } else {
-      setMaxDepth(0);
-    }
-    
-    super.setOptions(options);
-    
+    m_Debug = Utils.getFlag('D', options);
     Utils.checkForRemainingOptions(options);
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
-  /**
    * Builds classifier.
-   * 
-   * @param data the data to train with
-   * @throws Exception if something goes wrong or the data doesn't fit
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -408,13 +285,29 @@ public class RandomTree
     if (m_KValue > data.numAttributes()-1) m_KValue = data.numAttributes()-1;
     if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    // Check for non-nominal classes
+    if (!data.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("RandomTree: Nominal class, please.");
+    }
 
-    // remove instances with missing class
+    // Delete instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
+
+    if (data.numInstances() == 0) {
+      throw new IllegalArgumentException("RandomTree: zero training instances or all " +
+					 "instances have missing class!");
+    }
+
+    if (data.numAttributes() == 1) {
+      throw new IllegalArgumentException("RandomTree: Attribute missing. Need at least " +
+					 "one attribute other than class attribute!");
+    }
+
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+
     Instances train = data;
 
     // Create array of sorted indices and weights
@@ -479,16 +372,12 @@ public class RandomTree
     // Build tree
     buildTree(sortedIndices, weights, train, classProbs,
 	      new Instances(train, 0), m_MinNum, m_Debug,
-	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed), 0);
+	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed));
 
   }
   
   /**
    * Computes class distribution of an instance using the decision tree.
-   * 
-   * @param instance the instance to compute the distribution for
-   * @return the computed class distribution
-   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
@@ -536,8 +425,6 @@ public class RandomTree
 
   /**
    * Outputs the decision tree as a graph
-   * 
-   * @return the tree as a graph
    */
   public String toGraph() {
 
@@ -554,11 +441,6 @@ public class RandomTree
   
   /**
    * Outputs one node for graph.
-   * 
-   * @param text the buffer to append the output to
-   * @param num unique node id
-   * @return the next node id
-   * @throws Exception if generation fails
    */
   public int toGraph(StringBuffer text, int num) throws Exception {
     
@@ -599,8 +481,6 @@ public class RandomTree
   
   /**
    * Outputs the decision tree.
-   * 
-   * @return a string representation of the classifier
    */
   public String toString() {
     
@@ -609,16 +489,12 @@ public class RandomTree
     } else {
       return     
 	"\nRandomTree\n==========\n" + toString(0) + "\n" +
-	"\nSize of the tree : " + numNodes() +
-	(getMaxDepth() > 0 ? ("\nMax depth of tree: " + getMaxDepth()) : (""));
+	"\nSize of the tree : " + numNodes();
     }
   }
 
   /**
    * Outputs a leaf.
-   * 
-   * @return the leaf as string
-   * @throws Exception if generation fails
    */
   protected String leafString() throws Exception {
     
@@ -632,9 +508,6 @@ public class RandomTree
   
   /**
    * Recursively outputs the tree.
-   * 
-   * @param level the current level of the tree
-   * @return the generated subtree
    */
   protected String toString(int level) {
 
@@ -685,23 +558,11 @@ public class RandomTree
 
   /**
    * Recursively generates a tree.
-   * 
-   * @param sortedIndices the indices of the instances
-   * @param weights the weights of the instances
-   * @param data the data to work with
-   * @param classProbs the class distribution
-   * @param header the header of the data
-   * @param minNum the minimum number of instances per leaf
-   * @param debug whether debugging is on
-   * @param attIndicesWindow the attribute window to choose attributes from
-   * @param random random number generator for choosing random attributes
-   * @param depth the current depth
-   * @throws Exception if generation fails
    */
   protected void buildTree(int[][] sortedIndices, double[][] weights,
 			 Instances data, double[] classProbs, 
 			 Instances header, double minNum, boolean debug,
-			 int[] attIndicesWindow, Random random, int depth) 
+			 int[] attIndicesWindow, Random random) 
     throws Exception {
 
     // Store structure of dataset, set minimum number of instances
@@ -717,14 +578,12 @@ public class RandomTree
       return;
     }
 
-    // Check if node doesn't contain enough instances or is pure 
-    // or maximum depth reached
+    // Check if node doesn't contain enough instances or is pure
     m_ClassProbs = new double[classProbs.length];
     System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
     if (Utils.sm(Utils.sum(m_ClassProbs), 2 * m_MinNum) ||
 	Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)],
-		 Utils.sum(m_ClassProbs)) || 
-        ((getMaxDepth() > 0) && (depth >= getMaxDepth()))) {
+		 Utils.sum(m_ClassProbs))) {
 
       // Make leaf
       m_Attribute = -1;
@@ -786,10 +645,9 @@ public class RandomTree
       for (int i = 0; i < m_Distribution.length; i++) {
 	m_Successors[i] = new RandomTree();
 	m_Successors[i].setKValue(m_KValue);
-	m_Successors[i].setMaxDepth(getMaxDepth());
 	m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i], data, 
 				  m_Distribution[i], header, m_MinNum, m_Debug,
-				  attIndicesWindow, random, depth + 1);
+				  attIndicesWindow, random);
       }
     } else {
       
@@ -807,8 +665,6 @@ public class RandomTree
 
   /**
    * Computes size of the tree.
-   * 
-   * @return the number of nodes
    */
   public int numNodes() {
     
@@ -825,16 +681,6 @@ public class RandomTree
 
   /**
    * Splits instances into subsets.
-   * 
-   * @param subsetIndices the sorted indices of the subset
-   * @param subsetWeights the weights of the subset
-   * @param att the attribute index
-   * @param splitPoint the splitpoint for numeric attributes
-   * @param sortedIndices the sorted indices of the whole set
-   * @param weights the weights of the whole set
-   * @param dist the distribution
-   * @param data the data to work with
-   * @throws Exception if something goes wrong
    */
   protected void splitData(int[][][] subsetIndices, double[][][] subsetWeights,
 			 int att, double splitPoint, 
@@ -918,13 +764,6 @@ public class RandomTree
 
   /**
    * Computes class distribution for an attribute.
-   * 
-   * @param probs
-   * @param dists
-   * @param att the attribute index
-   * @param sortedIndices the sorted indices of the data
-   * @param data the data to work with
-   * @throws Exception if something goes wrong
    */
   protected double distribution(double[][] props, double[][][] dists, int att, 
 			      int[] sortedIndices,
@@ -1023,9 +862,6 @@ public class RandomTree
 
   /**
    * Computes value of splitting criterion before split.
-   * 
-   * @param dist the distributions
-   * @return the splitting criterion
    */
   protected double priorVal(double[][] dist) {
 
@@ -1034,10 +870,6 @@ public class RandomTree
 
   /**
    * Computes value of splitting criterion after split.
-   * 
-   * @param dist the distributions
-   * @param priorVal the splitting criterion
-   * @return the gain after the split
    */
   protected double gain(double[][] dist, double priorVal) {
 
@@ -1046,8 +878,6 @@ public class RandomTree
 
   /**
    * Main method for this class.
-   * 
-   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 

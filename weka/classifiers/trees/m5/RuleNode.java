@@ -1,4 +1,7 @@
 /*
+ *    RuleNode.java
+ *    Copyright (C) 2000 Mark Hall
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -13,37 +16,24 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*
- *    RuleNode.java
- *    Copyright (C) 2000 Mark Hall
- *
- */
-
 package weka.classifiers.trees.m5;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 import weka.classifiers.functions.LinearRegression;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.Filter;
 
 /**
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.8.2.1 $
  */
-public class RuleNode 
-  extends Classifier {
+public class RuleNode extends Classifier {
 
-  /** for serialization */
-  static final long serialVersionUID = 1979807611124337144L;
-  
   /**
    * instances reaching this node
    */
@@ -99,13 +89,9 @@ public class RuleNode
   private double	   m_rootMeanSquaredError;
 
   /**
-   * left child node
+   * child nodes
    */
   protected RuleNode	   m_left;
-
-  /**
-   * right child node
-   */
   protected RuleNode	   m_right;
 
   /**
@@ -191,7 +177,7 @@ public class RuleNode
    * Build this node (find an attribute and split point)
    *
    * @param data the instances on which to build this node
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -222,9 +208,13 @@ public class RuleNode
    *
    * @param inst the instance to classify
    * @return the prediction for this instance
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public double classifyInstance(Instance inst) throws Exception {
+    double   pred;
+    double   n = 0;
+    Instance tempInst;
+
     if (m_isLeaf) {
       if (m_nodeModel == null) {
 	throw new Exception("Classifier has not been built correctly.");
@@ -248,7 +238,7 @@ public class RuleNode
    * @param supportPred the prediction of the linear model at this node
    * @return the current prediction smoothed with the prediction of the
    * linear model at this node
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   protected static double smoothingOriginal(double n, double pred, 
 					    double supportPred) 
@@ -266,7 +256,7 @@ public class RuleNode
   /**
    * Finds an attribute and split point for this node
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void split() throws Exception {
     int		  i;
@@ -380,7 +370,6 @@ public class RuleNode
    *
    * @param indices an array of attribute indices to include in the linear
    * model
-   * @throws Exception if something goes wrong
    */
   private void buildLinearModel(int [] indices) throws Exception {
     // copy the training instances and remove all but the tested
@@ -498,8 +487,6 @@ public class RuleNode
 
   /**
    * print the linear model at this node
-   * 
-   * @return the linear model
    */
   public String toString() {
     return printNodeLinearModel();
@@ -507,8 +494,6 @@ public class RuleNode
 
   /**
    * print the linear model at this node
-   * 
-   * @return the linear model at this node
    */
   public String printNodeLinearModel() {
     return m_nodeModel.toString();
@@ -516,8 +501,6 @@ public class RuleNode
 
   /**
    * print all leaf models
-   * 
-   * @return the leaf models
    */
   public String printLeafModels() {
     StringBuffer text = new StringBuffer();
@@ -633,7 +616,7 @@ public class RuleNode
    * Traverses the tree and installs linear models at each node.
    * This method must be called if pruning is not to be performed.
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void installLinearModels() throws Exception {
     Evaluation nodeModelEval;
@@ -658,10 +641,6 @@ public class RuleNode
     }
   }
 
-  /**
-   * 
-   * @throws Exception
-   */
   public void installSmoothedModels() throws Exception {
 
     if (m_isLeaf) {
@@ -681,6 +660,7 @@ public class RuleNode
 
       do {
 	if (current.m_parent != null) {
+	  PreConstructedLinearModel thisL = current.m_parent.getModel();
 	  double n = current.m_numInstances;
 	  // contribution of the model below
 	  for (int i = 0; i < coefficients.length; i++) {
@@ -721,7 +701,7 @@ public class RuleNode
   /**
    * Recursively prune the tree
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void prune() throws Exception {
     Evaluation nodeModelEval = null;
@@ -941,6 +921,9 @@ public class RuleNode
    *
    * @return the linear model at this node
    */
+  /*  public LinearRegression getModel() {
+    return m_nodeModel;
+    } */
   public PreConstructedLinearModel getModel() {
     return m_nodeModel;
   }

@@ -22,91 +22,36 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
-import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Discretize;
+import weka.classifiers.*;
+import weka.classifiers.rules.ZeroR;
+import java.io.*;
+import java.util.*;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.*;
+import weka.estimators.*;
+import weka.filters.unsupervised.attribute.Discretize;
+import weka.filters.Filter;
 
 /**
- <!-- globalinfo-start -->
- * A regression scheme that employs any classifier on a copy of the data that has the class attribute (equal-width) discretized. The predicted value is the expected value of the mean class value for each discretized interval (based on the predicted probabilities for each interval).
- * <p/>
- <!-- globalinfo-end -->
+ * Class for a regression scheme that employs any distribution
+ * classifier on a copy of the data that has the class attribute (equal-width)
+ * discretized. The predicted value is the expected value of the 
+ * mean class value for each discretized interval (based on the 
+ * predicted probabilities for each interval).<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -B &lt;int&gt;
- *  Number of bins for equal-width discretization
- *  (default 10).
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
- * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
- * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Produce debugging output. <p>
+ *
+ * -B <int> <br>
+ * Number of bins for equal-width discretization (default 10).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.30 $
  */
-public class RegressionByDiscretization 
-  extends SingleClassifierEnhancer {
-  
-  /** for serialization */
-  static final long serialVersionUID = 5066426153134050375L;
+public class RegressionByDiscretization extends SingleClassifierEnhancer {
   
   /** The discretization filter. */
   protected Discretize m_Discretizer = new Discretize();
@@ -133,8 +78,6 @@ public class RegressionByDiscretization
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -150,37 +93,17 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // class
-    result.disableAllClasses();
-    result.disableAllClassDependencies();
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    
-    return result;
-  }
-
-  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+    if (!instances.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException ("Class attribute has to be numeric");
+    }
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     // Discretize the training data
     m_Discretizer.setIgnoreClass(true);
     m_Discretizer.setAttributeIndices("" + (instances.classIndex() + 1));
@@ -226,7 +149,7 @@ public class RegressionByDiscretization
    *
    * @param instance the instance to be classified
    * @return predicted class value
-   * @throws Exception if the prediction couldn't be made
+   * @exception Exception if the prediction couldn't be made
    */
   public double classifyInstance(Instance instance) throws Exception {  
 
@@ -278,9 +201,8 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-end -->
    * -D <br>
    * Produce debugging output. <p>
    *
@@ -289,12 +211,11 @@ public class RegressionByDiscretization
    * followed by options to the classifier
    * (default: weka.classifiers.rules.ZeroR).<p>
    *
-   * -B int <br>
+   * -B <int> <br>
    * Number of bins for equal-width discretization (default 10).<p>
-   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -367,6 +288,7 @@ public class RegressionByDiscretization
   public String toString() {
 
     StringBuffer text = new StringBuffer();
+    int attIndex;
 
     text.append("Regression by discretization");
     if (m_ClassMeans == null) {
@@ -397,3 +319,6 @@ public class RegressionByDiscretization
     }
   }
 }
+
+
+

@@ -23,56 +23,34 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Converts all nominal attributes into binary numeric attributes. An attribute with k values is transformed into k binary attributes if the class is nominal (using the one-attribute-per-value approach). Binary attributes are left binary, if option '-A' is not given.If the class is numeric, you might want to use the supervised version of this filter.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N
- *  Sets if binary attributes are to be coded as nominal ones.</pre>
- * 
- * <pre> -A
- *  For each nominal value a new attribute is created, 
- *  not only if there are more than 2 values.</pre>
- * 
- * <pre> -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to act on. First and last are 
- *  valid indexes.
- *  (default: first-last)</pre>
- * 
- * <pre> -V
- *  Invert matching sense of column indexes.</pre>
- * 
- <!-- options-end -->
+ * Converts all nominal attributes into binary numeric attributes. An
+ * attribute with k values is transformed into k binary attributes
+ * (using the one-attribute-per-value approach).
+ * Binary attributes are left binary.
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -N <br>
+ * If binary attributes are to be coded as nominal ones.<p>
+ *
+ * -R col1,col2-col4,... <br>
+ * Specifies list of columns to convert. First
+ * and last are valid indexes. (default: first-last) <p>
+ *
+ * -V <br>
+ * Invert matching sense.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.6 $ 
  */
-public class NominalToBinary 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -1130642825710549138L;
+public class NominalToBinary extends Filter implements UnsupervisedFilter,
+						       OptionHandler {
 
   /** Stores which columns to act on */
   protected Range m_Columns = new Range();
@@ -82,9 +60,6 @@ public class NominalToBinary
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
-
-  /** Are all values transformed into new attributes? */
-  private boolean m_TransformAll = false;
 
   /** Constructor - initialises the filter */
   public NominalToBinary() {
@@ -103,7 +78,7 @@ public class NominalToBinary
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary, if option '-A' is not given."
+      + "Binary attributes are left binary."
       + "If the class is numeric, you might want to use the supervised version of "
       + "this filter.";
   }
@@ -115,7 +90,7 @@ public class NominalToBinary
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -137,7 +112,7 @@ public class NominalToBinary
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set
+   * @exception IllegalStateException if no input format has been set
    */
   public boolean input(Instance instance) {
 
@@ -163,60 +138,43 @@ public class NominalToBinary
     Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-	"\tSets if binary attributes are to be coded as nominal ones.",
-	"N", 0, "-N"));
+	      "\tSets if binary attributes are to be coded as nominal ones.",
+	      "N", 0, "-N"));
 
     newVector.addElement(new Option(
-	"\tFor each nominal value a new attribute is created, \n"
-	+ "\tnot only if there are more than 2 values.",
-	"A", 0, "-A"));
+              "\tSpecifies list of columns to act on. First"
+	      + " and last are valid indexes.\n"
+	      + "\t(default: first-last)",
+              "R", 1, "-R <col1,col2-col4,...>"));
 
     newVector.addElement(new Option(
-	"\tSpecifies list of columns to act on. First and last are \n"
-	+ "\tvalid indexes.\n"
-	+ "\t(default: first-last)",
-	"R", 1, "-R <col1,col2-col4,...>"));
-
-    newVector.addElement(new Option(
-	"\tInvert matching sense of column indexes.",
-	"V", 0, "-V"));
+              "\tInvert matching sense of column indexes.",
+              "V", 0, "-V"));
 
     return newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N
-   *  Sets if binary attributes are to be coded as nominal ones.</pre>
-   * 
-   * <pre> -A
-   *  For each nominal value a new attribute is created, 
-   *  not only if there are more than 2 values.</pre>
-   * 
-   * <pre> -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of columns to act on. First and last are 
-   *  valid indexes.
-   *  (default: first-last)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense of column indexes.</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -N <br>
+   * If binary attributes are to be coded as nominal ones.<p>
+   *
+   * -R col1,col2-col4,... <br>
+   * Specifies list of columns to convert. First
+   * and last are valid indexes. (default none) <p>
+   *
+   * -V <br>
+   * Invert matching sense.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     setBinaryAttributesNominal(Utils.getFlag('N', options));
-
-    setTransformAllValues(Utils.getFlag('A', options));
-
+    
     String convertList = Utils.getOption('R', options);
     if (convertList.length() != 0) {
       setAttributeIndices(convertList);
@@ -243,10 +201,6 @@ public class NominalToBinary
       options[current++] = "-N";
     }
 
-    if (getTransformAllValues()) {
-      options[current++] = "-A";
-    }
-
     if (!getAttributeIndices().equals("")) {
       options[current++] = "-R"; options[current++] = getAttributeIndices();
     }
@@ -259,7 +213,7 @@ public class NominalToBinary
     }
     return options;
   }
-
+    
   /**
    * Returns the tip text for this property
    *
@@ -288,38 +242,6 @@ public class NominalToBinary
   public void setBinaryAttributesNominal(boolean bool) {
 
     m_Numeric = !bool;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String transformAllValuesTipText() {
-    return "Whether all nominal values are turned into new attributes, not only if there are more than 2.";
-  }
-
-  /**
-   * Gets if all nominal values are turned into new attributes, not only if
-   * there are more than 2.
-   *
-   * @return true all nominal values are transformed into new attributes
-   */
-  public boolean getTransformAllValues() {
-
-    return m_TransformAll;
-  }
-
-  /**
-   * Sets whether all nominal values are transformed into new attributes, not
-   * just if there are more than 2.
-   *
-   * @param bool true if all nominal value are transformed into new attributes
-   */
-  public void setTransformAllValues(boolean bool) {
-
-    m_TransformAll = bool;
   }
 
   /**
@@ -387,7 +309,7 @@ public class NominalToBinary
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -415,7 +337,7 @@ public class NominalToBinary
 	  !m_Columns.isInRange(j)) {
 	newAtts.addElement(att.copy());
       } else {
-	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
+	if (att.numValues() <= 2) {
 	  if (m_Numeric) {
 	    newAtts.addElement(new Attribute(att.name()));
 	  } else {
@@ -458,7 +380,7 @@ public class NominalToBinary
    * @param instance the instance to convert
    */
   private void convertInstance(Instance instance) {
-
+  
     double [] vals = new double [outputFormatPeek().numAttributes()];
     int attSoFar = 0;
 
@@ -469,7 +391,7 @@ public class NominalToBinary
 	vals[attSoFar] = instance.value(j);
 	attSoFar++;
       } else {
-	if ( (att.numValues() <= 2) && (!m_TransformAll) ) {
+	if (att.numValues() <= 2) {
 	  vals[attSoFar] = instance.value(j);
 	  attSoFar++;
 	} else {
@@ -496,8 +418,8 @@ public class NominalToBinary
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
   }
@@ -521,3 +443,11 @@ public class NominalToBinary
     }
   }
 }
+
+
+
+
+
+
+
+

@@ -23,95 +23,106 @@
 
 package weka.gui.explorer;
 
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.FastVector;
+import weka.core.OptionHandler;
+import weka.core.Attribute;
+import weka.core.Utils;
+import weka.core.Drawable;
+import weka.core.SerializedObject;
 import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
-import weka.classifiers.evaluation.CostCurve;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Attribute;
-import weka.core.ClassDiscovery;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.gui.CostMatrixEditor;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
+import weka.classifiers.evaluation.CostCurve;
+import weka.filters.Filter;
 import weka.gui.Logger;
-import weka.gui.PropertyDialog;
+import weka.gui.TaskLogger;
+import weka.gui.SysErrLog;
+import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.Plot2D;
-import weka.gui.visualize.PlotData2D;
+import weka.gui.CostMatrixEditor;
+import weka.gui.PropertyDialog;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.SaveBuffer;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.VisualizePlugin;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.Plot2D;
+import weka.gui.ExtensionFileFilter;
 
+import weka.gui.treevisualizer.*;
+
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.graphvisualizer.BIFFormatException;
+
+import java.util.Random;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.Font;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
+import java.awt.Window;
+import java.awt.Dimension;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
+
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import java.io.OutputStream;
+import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
+import java.util.zip.GZIPOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
-import java.util.Vector;
+import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import javax.swing.JCheckBox;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.JPopupMenu;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 /** 
@@ -125,13 +136,9 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.90 $
+ * @version $Revision: 1.79.2.5 $
  */
-public class ClassifierPanel 
-  extends JPanel {
-   
-  /** for serialization */
-  static final long serialVersionUID = 6959973704963624003L;
+public class ClassifierPanel extends JPanel {
 
   /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
@@ -280,7 +287,7 @@ public class ClassifierPanel
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
   
   /**
@@ -378,7 +385,6 @@ public class ClassifierPanel
 	m_SetCostsBut.setEnabled(false);
 	if (m_SetCostsFrame == null) {
 	  m_SetCostsFrame = new PropertyDialog(m_CostMatrixEditor, 100, 100);
-	  m_SetCostsFrame.setTitle("Cost Matrix Editor");
 	  //	pd.setSize(250,150);
 	  m_SetCostsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	    public void windowClosing(java.awt.event.WindowEvent p) {
@@ -390,13 +396,6 @@ public class ClassifierPanel
 	    }
 	  });
 	}
-	
-	// do we need to change the size of the matrix?
-	int classIndex = m_ClassCombo.getSelectedIndex();
-	int numClasses = m_Instances.attribute(classIndex).numValues();
-	if (numClasses != ((CostMatrix) m_CostMatrixEditor.getValue()).numColumns())
-	  m_CostMatrixEditor.setValue(new CostMatrix(numClasses));
-	
 	m_SetCostsFrame.setVisible(true);
       }
     });
@@ -704,9 +703,6 @@ public class ClassifierPanel
       case Attribute.DATE:
 	type = "(Dat) ";
 	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
       default:
 	type = "(???) ";
       }
@@ -746,7 +742,6 @@ public class ClassifierPanel
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
-      sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
@@ -766,6 +761,7 @@ public class ClassifierPanel
    * @param classifier the classifier
    * @param eval the evaluation object to use for evaluating the classifier on
    * the instance to predict
+   * @param predictions a fastvector to add the prediction to
    * @param plotInstances a set of plottable instances
    * @param plotShape additional plotting information (shape)
    * @param plotSize additional plotting information (size)
@@ -773,12 +769,27 @@ public class ClassifierPanel
   public static void processClassifierPrediction(Instance toPredict,
                                            Classifier classifier,
 					   Evaluation eval,
+					   FastVector predictions,
 					   Instances plotInstances,
 					   FastVector plotShape,
 					   FastVector plotSize) {
     try {
-      double pred = eval.evaluateModelOnceAndRecordPrediction(classifier, 
-							      toPredict);
+      double pred;
+      // classifier is a distribution classifier and class is nominal
+      if (predictions != null) {
+	Instance classMissing = (Instance)toPredict.copy();
+	classMissing.setDataset(toPredict.dataset());
+	classMissing.setClassMissing();
+	Classifier dc = classifier;
+	double [] dist = 
+	  dc.distributionForInstance(classMissing);
+	pred = eval.evaluateModelOnce(dist, toPredict);
+	predictions.addElement(new 
+	  NominalPrediction(toPredict.classValue(), dist, toPredict.weight()));
+      } else {
+	pred = eval.evaluateModelOnce(classifier, 
+				      toPredict);
+      }
 
       double [] values = new double[plotInstances.numAttributes()];
       for (int i = 0; i < plotInstances.numAttributes(); i++) {
@@ -927,6 +938,9 @@ public class ClassifierPanel
 	  FastVector plotShape = new FastVector();
 	  FastVector plotSize = new FastVector();
 	  Instances predInstances = null;
+
+	  // will hold the prediction objects if the class is nominal
+	  FastVector predictions = null;
 	 
 	  // for timing
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
@@ -968,7 +982,6 @@ public class ClassifierPanel
 	  } else {
 	    name += cname;
 	  }
-	  Evaluation eval = null;
 	  try {
 	    if (m_CVBut.isSelected()) {
 	      testMode = 1;
@@ -1003,6 +1016,10 @@ public class ClassifierPanel
 	    // visualization
 	    predInstances = setUpVisualizableInstances(inst);
 	    predInstances.setClassIndex(inst.classIndex()+1);
+	    
+	    if (inst.classAttribute().isNominal()) {
+	      predictions = new FastVector();
+	    }
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
@@ -1081,6 +1098,7 @@ public class ClassifierPanel
 	      fullClassifier = (Classifier) so.getObject();
 	    }
 	    
+	    Evaluation eval = null;
 	    switch (testMode) {
 	      case 3: // Test on training
 	      m_Log.statusMessage("Evaluating on training data...");
@@ -1097,7 +1115,8 @@ public class ClassifierPanel
 
 	      for (int jj=0;jj<inst.numInstances();jj++) {
 		processClassifierPrediction(inst.instance(jj), classifier,
-					    eval, predInstances, plotShape, 
+					    eval, predictions,
+					    predInstances, plotShape, 
 					    plotSize);
 		
 		if (outputPredictionsText) { 
@@ -1161,7 +1180,8 @@ public class ClassifierPanel
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
 		  processClassifierPrediction(test.instance(jj), current,
-					      eval, predInstances, plotShape,
+					      eval, predictions,
+					      predInstances, plotShape,
 					      plotSize);
 		  if (outputPredictionsText) { 
 		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
@@ -1213,7 +1233,8 @@ public class ClassifierPanel
      
 	      for (int jj=0;jj<test.numInstances();jj++) {
 		processClassifierPrediction(test.instance(jj), current,
-					    eval, predInstances, plotShape,
+					    eval, predictions,
+					    predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
 		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
@@ -1244,7 +1265,8 @@ public class ClassifierPanel
 
 	      for (int jj=0;jj<userTest.numInstances();jj++) {
 		processClassifierPrediction(userTest.instance(jj), classifier,
-					    eval, predInstances, plotShape,
+					    eval, predictions,
+					    predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
 		  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
@@ -1322,8 +1344,8 @@ public class ClassifierPanel
 		  if (grph != null) {
 		    vv.addElement(grph);
 		  }
-		  if ((eval != null) && (eval.predictions() != null)) {
-		    vv.addElement(eval.predictions());
+		  if (predictions != null) {
+		    vv.addElement(predictions);
 		    vv.addElement(inst.classAttribute());
 		  }
 		  m_History.addObject(name, vv);
@@ -1466,18 +1488,6 @@ public class ClassifierPanel
     }
     resultListMenu.add(saveOutput);
     
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
-      deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
-      });
-    } else {
-      deleteOutput.setEnabled(false);
-    }
-    resultListMenu.add(deleteOutput);
-
     resultListMenu.addSeparator();
     
     JMenuItem loadModel = new JMenuItem("Load model");
@@ -1635,7 +1645,7 @@ public class ClassifierPanel
 		//VisualizePanel vmc = new VisualizePanel();
 		ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
 		vmc.setROCString("(Area under ROC = " + 
-				 Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
+				 Utils.doubleToString(tc.getROCArea(result), 4) + ")");
 		vmc.setLog(m_Log);
 		vmc.setName(result.relationName()+". (Class value "+
 			    classAtt.value(classValue)+")");
@@ -1693,41 +1703,6 @@ public class ClassifierPanel
       visCost.setEnabled(false);
     }
     resultListMenu.add(visCost);
-    
-    JMenu visPlugins = new JMenu("Plugins");
-    Vector pluginsVector = ClassDiscovery.find(VisualizePlugin.class, "weka.gui.visualize.plugins");
-    boolean availablePlugins = false;
-    for (int i=0; i<pluginsVector.size(); i++) {
-      String className = (String)(pluginsVector.elementAt(i));
-      try {
-        if (className.matches(".*\\.VisualizePlugin"))
-          continue;
-        VisualizePlugin plugin = (VisualizePlugin)(Class.forName(className).newInstance());
-        if (plugin==null)
-          continue;
-        availablePlugins = true;
-        JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
-        Version version = new Version();
-        if (pluginMenuItem != null) {
-          if (version.compareTo(plugin.getMinVersion()) < 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-          if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
-          visPlugins.add(pluginMenuItem);
-        }
-      }
-      catch (ClassNotFoundException cnfe) {
-        //System.out.println("Visualize plugin ClassNotFoundException " + cnfe.getMessage());
-      }
-      catch (InstantiationException ie) {
-        //System.out.println("Visualize plugin InstantiationException " + ie.getMessage());
-      }
-      catch (IllegalAccessException iae) {
-        //System.out.println("Visualize plugin IllegalAccessException " + iae.getMessage());
-      }
-    }
-    if (availablePlugins)
-      resultListMenu.add(visPlugins);
 
     resultListMenu.show(m_History.getList(), x, y);
   }
@@ -1795,7 +1770,7 @@ public class ClassifierPanel
       String plotName = sp.getName(); 
 	final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
-	jf.setSize(600,400);
+	jf.setSize(500,400);
 	jf.getContentPane().setLayout(new BorderLayout());
 
 	jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1979,7 +1954,9 @@ public class ClassifierPanel
     FastVector plotShape = new FastVector();
     FastVector plotSize = new FastVector();
     Instances predInstances = null;
-
+    
+    // will hold the prediction objects if the class is nominal
+    FastVector predictions = null;
     CostMatrix costMatrix = null;
     if (m_EvalWRTCostsBut.isSelected()) {
       costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
@@ -1992,8 +1969,7 @@ public class ClassifierPanel
     boolean saveVis = m_StorePredictionsBut.isSelected();
     boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
     String grph = null;    
-    Evaluation eval = null;
-
+    
     try {
 
       if (m_TestInstances != null) {
@@ -2015,12 +1991,16 @@ public class ClassifierPanel
       }
       m_Log.statusMessage("Evaluating on test data...");
       m_Log.logMessage("Re-evaluating classifier (" + name + ") on test set");
-      eval = new Evaluation(userTest, costMatrix);
+      Evaluation eval = new Evaluation(userTest, costMatrix);
       
       // set up the structure of the plottable instances for 
       // visualization
       predInstances = setUpVisualizableInstances(userTest);
       predInstances.setClassIndex(userTest.classIndex()+1);
+      
+      if (userTest.classAttribute().isNominal()) {
+	predictions = new FastVector();
+      }
       
       outBuff.append("\n=== Re-evaluation on test set ===\n\n");
       outBuff.append("User supplied test set\n");  
@@ -2042,7 +2022,8 @@ public class ClassifierPanel
 
       for (int jj=0;jj<userTest.numInstances();jj++) {
 	processClassifierPrediction(userTest.instance(jj), classifier,
-				    eval, predInstances, plotShape,
+				    eval, predictions,
+				    predInstances, plotShape,
 				    plotSize);
 	if (outputPredictionsText) { 
 	  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
@@ -2122,8 +2103,8 @@ public class ClassifierPanel
 	    if (grph != null) {
 	      vv.addElement(grph);
 	    }
-	    if ((eval != null) && (eval.predictions() != null)) {
-	      vv.addElement(eval.predictions());
+	    if (predictions != null) {
+	      vv.addElement(predictions);
 	      vv.addElement(userTest.classAttribute());
 	    }
 	    m_History.addObject(name, vv);

@@ -21,12 +21,9 @@
 
 package weka.classifiers.functions.pace;
 
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.IntVector;
+import java.util.Random;
+import weka.core.Statistics;
+
 
 /**
  * Abtract class for manipulating mixture distributions. <p>
@@ -41,11 +38,10 @@ import weka.core.matrix.IntVector;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.1 $ */
 
-public abstract class MixtureDistribution
-  implements TechnicalInformationHandler {
-  
+public abstract class  MixtureDistribution 
+{
   protected DiscreteFunction mixingDistribution;
 
   /** The nonnegative-measure-based method */
@@ -59,57 +55,27 @@ public abstract class MixtureDistribution
     
   // The method based on the Kolmogrov and von Mises measure
   // public static final int ModifiedCDFMethod = 4; 
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
+    
+  /** Gets the mixing distribution
    */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.PHDTHESIS);
-    result.setValue(Field.AUTHOR, "Wang, Y");
-    result.setValue(Field.YEAR, "2000");
-    result.setValue(Field.TITLE, "A new approach to fitting linear models in high dimensional spaces");
-    result.setValue(Field.SCHOOL, "Department of Computer Science, University of Waikato");
-    result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
-
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Wang, Y. and Witten, I. H.");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.TITLE, "Modeling for optimal probability prediction");
-    additional.setValue(Field.BOOKTITLE, "Proceedings of the Nineteenth International Conference in Machine Learning");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.PAGES, "650-657");
-    additional.setValue(Field.ADDRESS, "Sydney, Australia");
-    
-    return result;
-  }
-    
-  /** 
-   * Gets the mixing distribution
-   * 
-   * @return the mixing distribution
-   */
-  public DiscreteFunction getMixingDistribution() {
+  public DiscreteFunction getMixingDistribution() 
+  {
     return mixingDistribution;
   }
 
   /** Sets the mixing distribution
    *  @param d the mixing distribution
    */
-  public void  setMixingDistribution( DiscreteFunction d ) {
+  public void  setMixingDistribution( DiscreteFunction d ) 
+  {
     mixingDistribution = d;
   }
 
   /** Fits the mixture (or mixing) distribution to the data. The default
    *  method is the nonnegative-measure-based method.
    * @param data the data, supposedly generated from the mixture model */
-  public void fit( DoubleVector data ) {
+  public void fit( DoubleVector data ) 
+  {
     fit( data, NNMMethod );
   }
 
@@ -117,7 +83,8 @@ public abstract class MixtureDistribution
    *  @param data the data supposedly generated from the mixture 
    *  @param method the method to be used. Refer to the static final
    *  variables of this class. */
-  public void fit( DoubleVector data, int method ) {
+  public void fit( DoubleVector data, int method ) 
+  {
     DoubleVector data2 = (DoubleVector) data.clone();
     if( data2.unsorted() ) data2.sort();
 
@@ -142,18 +109,14 @@ public abstract class MixtureDistribution
     mixingDistribution = d;
   }
     
-  /** 
-   *  Fits the mixture (or mixing) distribution to the data. The data is
+  /** Fits the mixture (or mixing) distribution to the data. The data is
    *  not pre-clustered for computational efficiency.
-   *  
    *  @param data the data supposedly generated from the mixture 
    *  @param method the method to be used. Refer to the static final
-   *  variables of this class.
-   *  @return the generated distribution
-   */
+   *  variables of this class. */
   public DiscreteFunction fitForSingleCluster( DoubleVector data, 
-					       int method ) {
-    
+					       int method )
+  {
     if( data.size() < 2 ) return new DiscreteFunction( data );
     DoubleVector sp = supportPoints( data, 0 );
     PaceMatrix fi = fittingIntervals( data );
@@ -187,55 +150,38 @@ public abstract class MixtureDistribution
     return d;
   }
     
-  /** 
-   *  Return true if a value can be considered for mixture estimatino
+  /** Return true if a value can be considered for mixture estimatino
    *  separately from the data indexed between i0 and i1 
-   *  
    *  @param data the data supposedly generated from the mixture 
    *  @param i0 the index of the first element in the group
    *  @param i1 the index of the last element in the group
    *  @param x the value
-   *  @return true if a value can be considered
    */
   public abstract boolean separable( DoubleVector data, 
 				     int i0, int i1, double x );
     
-  /** 
-   *  Contructs the set of support points for mixture estimation.
-   *  
+  /** Contructs the set of support points for mixture estimation.
    *  @param data the data supposedly generated from the mixture 
    *  @param ne the number of extra data that are suppposedly discarded
-   *  earlier and not passed into here
-   *  @return the set of support points
-   */
+   *  earlier and not passed into here */
   public abstract DoubleVector  supportPoints( DoubleVector data, int ne );
     
-  /** 
-   *  Contructs the set of fitting intervals for mixture estimation.
-   *  
+  /** Contructs the set of fitting intervals for mixture estimation.
    *  @param data the data supposedly generated from the mixture 
-   *  @return the set of fitting intervals
    */
   public abstract PaceMatrix  fittingIntervals( DoubleVector data );
   
-  /** 
-   *  Contructs the probability matrix for mixture estimation, given a set
+  /** Contructs the probability matrix for mixture estimation, given a set
    *  of support points and a set of intervals.
-   *  
    *  @param s  the set of support points
-   *  @param intervals the intervals
-   *  @return the probability matrix
-   */
+   *  @param intervals the intervals */
   public abstract PaceMatrix  probabilityMatrix( DoubleVector s, 
 						 PaceMatrix intervals );
     
-  /** 
-   *  Computes the empirical probabilities of the data over a set of
+  /** Computes the empirical probabilities of the data over a set of
    *  intervals.
-   *  
    *  @param data the data
    *  @param intervals the intervals 
-   *  @return the empirical probabilities
    */
   public PaceMatrix  empiricalProbability( DoubleVector data, 
 					   PaceMatrix intervals )
@@ -258,10 +204,7 @@ public abstract class MixtureDistribution
     return epm;
   }
   
-  /** 
-   * Converts to a string
-   * 
-   * @return a string representation
+  /** Converts to a string
    */
   public String  toString() 
   {
