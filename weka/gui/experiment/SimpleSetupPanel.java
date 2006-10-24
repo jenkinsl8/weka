@@ -98,7 +98,7 @@ import javax.swing.event.DocumentEvent;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.6.2.4 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -271,7 +271,6 @@ public class SimpleSetupPanel extends JPanel {
     } catch (Exception e) {}
 
     // create action listeners
-    m_NewBut.setMnemonic('N');
     m_NewBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  Experiment newExp = new Experiment();
@@ -321,13 +320,11 @@ public class SimpleSetupPanel extends JPanel {
 	}
       });
     m_SaveBut.setEnabled(false);
-    m_SaveBut.setMnemonic('S');
     m_SaveBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  saveExperiment();
 	}
       });
-    m_OpenBut.setMnemonic('O');
     m_OpenBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  openExperiment();
@@ -1243,7 +1240,7 @@ public class SimpleSetupPanel extends JPanel {
     ((DatabaseResultListener)m_Exp.getResultListener()).setUsername(dbd.getUsername());
     ((DatabaseResultListener)m_Exp.getResultListener()).setPassword(dbd.getPassword());
     ((DatabaseResultListener)m_Exp.getResultListener()).setDatabaseURL(dbd.getURL());
-    ((DatabaseResultListener)m_Exp.getResultListener()).setDebug(dbd.getDebug());
+   
   }
   /**
    * Lets user browse for a destination file..

@@ -22,13 +22,14 @@
 
 package weka.gui.arffviewer;
 
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
 import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
-
+import weka.gui.arffviewer.ArffTable;
+import weka.gui.arffviewer.ArffTableCellRenderer;
+import weka.gui.arffviewer.ArffTableSorter;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Undoable;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -43,7 +44,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
-
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -60,16 +60,13 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 
 public class ArffPanel 
-  extends JPanel
-  implements ActionListener, ChangeListener, MouseListener, Undoable {
-  
-  /** for serialization */
-  static final long serialVersionUID = -4697041150989513939L;
-  
+extends    JPanel
+implements ActionListener, ChangeListener, MouseListener, Undoable
+{
   /** the name of the tab for instances that were set directly */
   public final static String       TAB_INSTANCES     = "Instances";
   
@@ -83,7 +80,6 @@ public class ArffPanel
   private JMenuItem             menuItemSetMissingValues;
   private JMenuItem             menuItemReplaceValues;
   private JMenuItem             menuItemRenameAttribute;
-  private JMenuItem             menuItemAttributeAsClass;
   private JMenuItem             menuItemDeleteAttribute;
   private JMenuItem             menuItemDeleteAttributes;
   private JMenuItem             menuItemSortInstances;
@@ -93,8 +89,6 @@ public class ArffPanel
   private JMenuItem             menuItemClearSearch;
   private JMenuItem             menuItemUndo;
   private JMenuItem             menuItemCopy;
-  private JMenuItem             menuItemOptimalColWidth;
-  private JMenuItem             menuItemOptimalColWidths;
   
   private String                filename;
   private String                title;
@@ -116,8 +110,6 @@ public class ArffPanel
   
   /**
    * initializes the panel and loads the specified file
-   * 
-   * @param filename	the file to load
    */
   public ArffPanel(String filename) {
     this();
@@ -127,8 +119,6 @@ public class ArffPanel
   
   /**
    * initializes the panel with the given data
-   * 
-   * @param data	the data to use
    */
   public ArffPanel(Instances data) {
     this();
@@ -179,9 +169,6 @@ public class ArffPanel
     menuItemRenameAttribute = new JMenuItem("Rename attribute...");
     menuItemRenameAttribute.addActionListener(this);
     popupHeader.add(menuItemRenameAttribute);
-    menuItemAttributeAsClass = new JMenuItem("Attribute as class");
-    menuItemAttributeAsClass.addActionListener(this);
-    popupHeader.add(menuItemAttributeAsClass);
     menuItemDeleteAttribute = new JMenuItem("Delete attribute");
     menuItemDeleteAttribute.addActionListener(this);
     popupHeader.add(menuItemDeleteAttribute);
@@ -191,13 +178,6 @@ public class ArffPanel
     menuItemSortInstances = new JMenuItem("Sort data (ascending)");
     menuItemSortInstances.addActionListener(this);
     popupHeader.add(menuItemSortInstances);
-    popupHeader.addSeparator();
-    menuItemOptimalColWidth = new JMenuItem("Optimal column width (current)");
-    menuItemOptimalColWidth.addActionListener(this);
-    popupHeader.add(menuItemOptimalColWidth);
-    menuItemOptimalColWidths = new JMenuItem("Optimal column width (all)");
-    menuItemOptimalColWidths.addActionListener(this);
-    popupHeader.add(menuItemOptimalColWidths);
     
     // row popup
     popupRows = new JPopupMenu();
@@ -248,9 +228,9 @@ public class ArffPanel
     boolean            hasColumns;
     boolean            hasRows;
     boolean            attSelected;
-    ArffSortedTableModel    model;
+    ArffTableSorter    model;
     
-    model       = (ArffSortedTableModel) tableArff.getModel();
+    model       = (ArffTableSorter) tableArff.getModel();
     hasColumns  = (model.getInstances().numAttributes() > 0);
     hasRows     = (model.getInstances().numInstances() > 0);
     attSelected = hasColumns && (currentCol > 0);
@@ -274,8 +254,6 @@ public class ArffPanel
   
   /**
    * returns the table component
-   * 
-   * @return 		the table
    */
   public ArffTable getTable() {
     return tableArff;
@@ -283,8 +261,6 @@ public class ArffPanel
   
   /**
    * returns the title for the Tab, i.e. the filename
-   * 
-   * @return 		the title for the tab
    */
   public String getTitle() {
     return title;
@@ -292,8 +268,6 @@ public class ArffPanel
   
   /**
    * returns the filename
-   * 
-   * @return		the filename
    */
   public String getFilename() {
     return filename;
@@ -301,8 +275,6 @@ public class ArffPanel
   
   /**
    * sets the filename
-   * 
-   * @param filename	the new filename
    */
   public void setFilename(String filename) {
     this.filename = filename;
@@ -311,8 +283,6 @@ public class ArffPanel
   
   /**
    * returns the instances of the panel, if none then NULL
-   * 
-   * @return		the instances of the panel
    */
   public Instances getInstances() {
     Instances            result;
@@ -320,7 +290,7 @@ public class ArffPanel
     result = null;
     
     if (tableArff.getModel() != null)
-      result = ((ArffSortedTableModel) tableArff.getModel()).getInstances();
+      result = ((ArffTableSorter) tableArff.getModel()).getInstances();
     
     return result;
   }
@@ -331,12 +301,11 @@ public class ArffPanel
    * if a different instances object is used here, don't forget to clear
    * the undo-history by calling <code>clearUndo()</code>
    * 
-   * @param data	the instances to display
    * @see               #TAB_INSTANCES
    * @see               #clearUndo()
    */
   public void setInstances(Instances data) {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
     this.filename = TAB_INSTANCES;
     
@@ -344,7 +313,7 @@ public class ArffPanel
     if (data == null)   
       model = null;
     else
-      model = new ArffSortedTableModel(data);
+      model = new ArffTableSorter(data);
     
     tableArff.setModel(model);
     clearUndo();
@@ -354,8 +323,6 @@ public class ArffPanel
   
   /**
    * returns a list with the attributes
-   * 
-   * @return		a list of the attributes
    */
   public Vector getAttributes() {
     Vector               result;
@@ -371,8 +338,6 @@ public class ArffPanel
   
   /**
    * can only reset the changed state to FALSE
-   * 
-   * @param changed		if false, resets the changed state
    */
   public void setChanged(boolean changed) {
     if (!changed)
@@ -384,8 +349,6 @@ public class ArffPanel
   
   /**
    * returns whether the content of the panel was changed
-   * 
-   * @return		true if the content was changed
    */
   public boolean isChanged() {
     return changed;
@@ -393,36 +356,30 @@ public class ArffPanel
 
   /**
    * returns whether undo support is enabled
-   * 
-   * @return 		true if undo is enabled
    */
   public boolean isUndoEnabled() {
-    return ((ArffSortedTableModel) tableArff.getModel()).isUndoEnabled();
+    return ((ArffTableSorter) tableArff.getModel()).isUndoEnabled();
   }
   
   /**
    * sets whether undo support is enabled
-   * 
-   * @param enabled		whether to enable/disable undo support
    */
   public void setUndoEnabled(boolean enabled) {
-    ((ArffSortedTableModel) tableArff.getModel()).setUndoEnabled(enabled);
+    ((ArffTableSorter) tableArff.getModel()).setUndoEnabled(enabled);
   }
   
   /**
    * removes the undo history
    */
   public void clearUndo() {
-    ((ArffSortedTableModel) tableArff.getModel()).clearUndo();
+    ((ArffTableSorter) tableArff.getModel()).clearUndo();
   }
   
   /**
    * returns whether an undo is possible 
-   * 
-   * @return		true if undo is possible
    */
   public boolean canUndo() {
-    return ((ArffSortedTableModel) tableArff.getModel()).canUndo();
+    return ((ArffTableSorter) tableArff.getModel()).canUndo();
   }
   
   /**
@@ -430,7 +387,7 @@ public class ArffPanel
    */
   public void undo() {
     if (canUndo()) {
-      ((ArffSortedTableModel) tableArff.getModel()).undo();
+      ((ArffTableSorter) tableArff.getModel()).undo();
       
       // notify about update
       notifyListener();
@@ -441,7 +398,7 @@ public class ArffPanel
    * adds the current state of the instances to the undolist 
    */
   public void addUndoPoint() {
-    ((ArffSortedTableModel) tableArff.getModel()).addUndoPoint();
+    ((ArffTableSorter) tableArff.getModel()).addUndoPoint();
         
     // update menu
     setMenu();
@@ -477,9 +434,9 @@ public class ArffPanel
    * sets the relation name
    */
   private void createName() {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     if (model != null)
       labelName.setText("Relation: " + model.getInstances().relationName());
     else
@@ -488,11 +445,9 @@ public class ArffPanel
   
   /**
    * loads the specified file into the table
-   * 
-   * @param filename		the file to load
    */
   private void loadFile(String filename) {
-    ArffSortedTableModel         model;
+    ArffTableSorter         model;
     
     this.filename = filename;
     
@@ -501,7 +456,7 @@ public class ArffPanel
     if (filename.equals(""))   
       model = null;
     else
-      model = new ArffSortedTableModel(filename);
+      model = new ArffTableSorter(filename);
     
     tableArff.setModel(model);
     setChanged(false);
@@ -512,7 +467,7 @@ public class ArffPanel
    * calculates the mean of the given numeric column
    */
   private void calcMean() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     int               i;
     double            mean;
     
@@ -520,7 +475,7 @@ public class ArffPanel
     if (currentCol == -1)
       return;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     
     // not numeric?
     if (!model.getAttributeAt(currentCol).isNumeric())
@@ -544,8 +499,6 @@ public class ArffPanel
   
   /**
    * sets the specified values in a column to a new value
-   * 
-   * @param o		the menu item
    */
   private void setValues(Object o) {
     String                     msg;
@@ -553,7 +506,7 @@ public class ArffPanel
     String                     value;
     String                     valueNew;
     int                        i;
-    ArffSortedTableModel      model;
+    ArffTableSorter      model;
     
     value    = "";
     valueNew = "";
@@ -589,7 +542,7 @@ public class ArffPanel
       lastReplace = valueNew;
     }
     
-    model = (ArffSortedTableModel) tableArff.getModel();
+    model = (ArffTableSorter) tableArff.getModel();
     model.setNotificationEnabled(false);
 
     // undo
@@ -620,14 +573,14 @@ public class ArffPanel
    * deletes the currently selected attribute
    */
   public void deleteAttribute() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     
     // no column selected?
     if (currentCol == -1)
       return;
     
-    model = (ArffSortedTableModel) tableArff.getModel();
-
+    model = (ArffTableSorter) tableArff.getModel();
+    
     // really an attribute column?
     if (model.getAttributeAt(currentCol) == null)
       return;
@@ -652,7 +605,7 @@ public class ArffPanel
    */
   public void deleteAttributes() {
     ListSelectorDialog    dialog;
-    ArffSortedTableModel       model;
+    ArffTableSorter       model;
     Object[]              atts;
     int[]                 indices;
     int                   i;
@@ -678,7 +631,7 @@ public class ArffPanel
         JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
       return;
     
-    model   = (ArffSortedTableModel) tableArff.getModel();
+    model   = (ArffTableSorter) tableArff.getModel();
     indices = new int[atts.length];
     for (i = 0; i < atts.length; i++)
       indices[i] = model.getAttributeColumn(atts[i].toString());
@@ -689,39 +642,17 @@ public class ArffPanel
   }
   
   /**
-   * sets the current attribute as class attribute, i.e. it moves it to the end
-   * of the attributes
-   */
-  public void attributeAsClass() {
-    ArffSortedTableModel   model;
-    
-    // no column selected?
-    if (currentCol == -1)
-      return;
-    
-    model   = (ArffSortedTableModel) tableArff.getModel();
-
-    // really an attribute column?
-    if (model.getAttributeAt(currentCol) == null)
-      return;
-    
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    model.attributeAsClassAt(currentCol);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-  
-  /**
    * renames the current attribute
    */
   public void renameAttribute() {
-    ArffSortedTableModel   model;
+    ArffTableSorter   model;
     String            newName;
     
     // no column selected?
     if (currentCol == -1)
       return;
-    
-    model   = (ArffSortedTableModel) tableArff.getModel();
+
+    model   = (ArffTableSorter) tableArff.getModel();
 
     // really an attribute column?
     if (model.getAttributeAt(currentCol) == null)
@@ -746,7 +677,7 @@ public class ArffPanel
     if (index == -1)
       return;
     
-    ((ArffSortedTableModel) tableArff.getModel()).deleteInstanceAt(index);
+    ((ArffTableSorter) tableArff.getModel()).deleteInstanceAt(index);
   }
   
   /**
@@ -759,7 +690,7 @@ public class ArffPanel
       return;
     
     indices = tableArff.getSelectedRows();
-    ((ArffSortedTableModel) tableArff.getModel()).deleteInstances(indices);
+    ((ArffTableSorter) tableArff.getModel()).deleteInstances(indices);
   }
   
   /**
@@ -769,7 +700,7 @@ public class ArffPanel
     if (currentCol == -1)
       return;
     
-    ((ArffSortedTableModel) tableArff.getModel()).sortInstances(currentCol);
+    ((ArffTableSorter) tableArff.getModel()).sortInstances(currentCol);
   }
   
   /**
@@ -791,7 +722,8 @@ public class ArffPanel
    * searches for a string in the cells
    */
   public void search() {
-    String              searchString;
+    ArffTable            table;
+    String               searchString;
     
     // display dialog
     searchString = ComponentHelper.showInputBox(getParent(), "Search...", "Enter the string to search for", lastSearch);
@@ -809,27 +741,7 @@ public class ArffPanel
   }
   
   /**
-   * calculates the optimal column width for the current column
-   */
-  public void setOptimalColWidth() {
-    // no column selected?
-    if (currentCol == -1)
-      return;
-
-    JTableHelper.setOptimalColumnWidth(getTable(), currentCol);
-  }
-  
-  /**
-   * calculates the optimal column widths for all columns
-   */
-  public void setOptimalColWidths() {
-    JTableHelper.setOptimalColumnWidth(getTable());
-  }
-  
-  /**
    * invoked when an action occurs
-   * 
-   * @param e		the action event
    */
   public void actionPerformed(ActionEvent e) {
     Object          o;
@@ -846,8 +758,6 @@ public class ArffPanel
       setValues(menuItemReplaceValues);
     else if (o == menuItemRenameAttribute)
       renameAttribute();
-    else if (o == menuItemAttributeAsClass)
-      attributeAsClass();
     else if (o == menuItemDeleteAttribute)
       deleteAttribute();
     else if (o == menuItemDeleteAttributes)
@@ -866,19 +776,13 @@ public class ArffPanel
       undo();
     else if (o == menuItemCopy)
       copyContent();
-    else if (o == menuItemOptimalColWidth)
-      setOptimalColWidth();
-    else if (o == menuItemOptimalColWidths)
-      setOptimalColWidths();
   }
   
   /**
    * Invoked when a mouse button has been pressed and released on a component
-   * 
-   * @param e		the mouse event
    */
   public void mouseClicked(MouseEvent e) {
-    int		col;
+    int         col;
     boolean	popup;
     
     col   = tableArff.columnAtPoint(e.getPoint());
@@ -906,49 +810,39 @@ public class ArffPanel
     
     // highlihgt column
     if (    (e.getButton() == MouseEvent.BUTTON1)  
-         && (e.getClickCount() == 1) 
-         && (!e.isAltDown())
-         && (col > -1) ) {
+        && (e.getClickCount() == 1) 
+        && (!e.isAltDown())
+        && (col > -1) ) {
       tableArff.setSelectedColumn(col);
     }
   }
   
   /**
    * Invoked when the mouse enters a component.
-   * 
-   * @param e		the mouse event
    */
   public void mouseEntered(MouseEvent e) {
   }
   
   /**
    * Invoked when the mouse exits a component
-   * 
-   * @param e		the mouse event
    */
   public void mouseExited(MouseEvent e) {
   }
   
   /**
    * Invoked when a mouse button has been pressed on a component
-   * 
-   * @param e		the mouse event
    */
   public void mousePressed(MouseEvent e) {
   }
   
   /**
    * Invoked when a mouse button has been released on a component.
-   * 
-   * @param e		the mouse event
    */
   public void mouseReleased(MouseEvent e) {
   }
   
   /**
    * Invoked when the target of the listener has changed its state.
-   * 
-   * @param e		the change event
    */
   public void stateChanged(ChangeEvent e) {
     changed = true;
@@ -969,8 +863,6 @@ public class ArffPanel
   
   /**
    * Adds a ChangeListener to the panel
-   * 
-   * @param l		the listener to add
    */
   public void addChangeListener(ChangeListener l) {
     changeListeners.add(l);
@@ -978,8 +870,6 @@ public class ArffPanel
   
   /**
    * Removes a ChangeListener from the panel
-   * 
-   * @param l		the listener to remove
    */
   public void removeChangeListener(ChangeListener l) {
     changeListeners.remove(l);

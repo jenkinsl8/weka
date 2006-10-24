@@ -30,7 +30,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 
 public class CholeskyDecomposition 
@@ -57,7 +57,8 @@ public class CholeskyDecomposition
   /** 
    * Cholesky algorithm for symmetric and positive definite matrix.
    *
-   * @param  Arg   Square, symmetric matrix.
+   * @param  A   Square, symmetric matrix.
+   * @return     Structure to access L and isspd flag.
    */
   public CholeskyDecomposition(Matrix Arg) {
     // Initialize.

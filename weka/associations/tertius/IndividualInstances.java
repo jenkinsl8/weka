@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class IndividualInstances extends Instances {
     

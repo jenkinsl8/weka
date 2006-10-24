@@ -18,17 +18,17 @@
  */
 package weka.classifiers.trees.m5;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.filters.*;
 
 /**
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class Rule implements Serializable {
 
@@ -211,9 +211,9 @@ public class Rule implements Serializable {
    * Calculates a prediction for an instance using this rule
    * or M5 model tree
    * 
-   * @param instance the instance whos class value is to be predicted
+   * @param inst the instance whos class value is to be predicted
    * @return the prediction
-   * @exception Exception if a prediction can't be made.
+   * @exception if a prediction can't be made.
    */
   public double classifyInstance(Instance instance) throws Exception {
     if (m_useTree) {
@@ -251,7 +251,7 @@ public class Rule implements Serializable {
   /**
    * Make the single best rule from a pruned m5 model tree
    * 
-   * @exception Exception if something goes wrong.
+   * @exception if something goes wrong.
    */
   private void makeRule() throws Exception {
     RuleNode[] best_leaf = new RuleNode[1];

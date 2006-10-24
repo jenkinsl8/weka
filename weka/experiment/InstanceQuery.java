@@ -20,23 +20,17 @@
  *
  */
 
+
 package weka.experiment;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
+import java.io.*;
+import java.math.*;
+import java.net.InetAddress;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import weka.core.*;
 
 /**
  * Convert the results of a database query into instances. The jdbc
@@ -50,37 +44,12 @@ import java.util.Vector;
  * jdbcURL=jdbc:idb=experiments.prp
  * </pre></code><p>
  *
- * Command line use just outputs the instances to System.out. <p/>
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -Q &lt;query&gt;
- *  SQL query to execute.</pre>
- * 
- * <pre> -S
- *  Return sparse rather than normal instances.</pre>
- * 
- * <pre> -U &lt;username&gt;
- *  The username to use for connecting.</pre>
- * 
- * <pre> -P &lt;password&gt;
- *  The password to use for connecting.</pre>
- * 
- * <pre> -D
- *  Enables debug output.</pre>
- * 
- <!-- options-end -->
+ * Command line use just outputs the instances to System.out.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.15.2.1 $
  */
-public class InstanceQuery 
-  extends DatabaseUtils 
-  implements OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 718158370917782584L;
+public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
   /** Determines whether sparse data is created */
   boolean m_CreateSparseData = false;
@@ -91,7 +60,7 @@ public class InstanceQuery
   /**
    * Sets up the database drivers
    *
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public InstanceQuery() throws Exception {
 
@@ -101,7 +70,6 @@ public class InstanceQuery
   /**
    * Returns an enumeration describing the available options <p>
    *
-   * @return an enumeration of all options
    */
    public Enumeration listOptions () {
      Vector result = new Vector();
@@ -122,42 +90,32 @@ public class InstanceQuery
          new Option("\tThe password to use for connecting.", 
                     "P", 1, "-P <password>"));
      
-     result.addElement(
-         new Option("\tEnables debug output.", 
-                    "D", 0, "-D"));
-     
      return result.elements();
    }
 
   /**
    * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are:<p>
    * 
-   * <pre> -Q &lt;query&gt;
-   *  SQL query to execute.</pre>
+   * -Q query<br>
+   * The query to execute.<p>
    * 
-   * <pre> -S
-   *  Return sparse rather than normal instances.</pre>
+   * -S <br>
+   * Return a set of sparse instances rather than normal instances.<p>
    * 
-   * <pre> -U &lt;username&gt;
-   *  The username to use for connecting.</pre>
+   * -U username <br>
+   * The username to connect with.<p>
    * 
-   * <pre> -P &lt;password&gt;
-   *  The password to use for connecting.</pre>
-   * 
-   * <pre> -D
-   *  Enables debug output.</pre>
-   * 
-   <!-- options-end -->
+   * -P password <br>
+   * The password to connect with.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception {
-
+    
     String      tmpStr;
     
     setSparseData(Utils.getFlag('S',options));
@@ -173,8 +131,6 @@ public class InstanceQuery
     tmpStr = Utils.getOption('P',options);
     if (tmpStr.length() != 0)
       setPassword(tmpStr);
-
-    setDebug(Utils.getFlag('D',options));
   }
 
   /**
@@ -252,9 +208,6 @@ public class InstanceQuery
       options.add(getPassword());
     }
 
-    if (getDebug())
-      options.add("-D");
-
     return (String[]) options.toArray(new String[options.size()]);
   }
 
@@ -263,7 +216,7 @@ public class InstanceQuery
    * to convert a table into a set of instances
    *
    * @return the instances contained in the result of the query
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public Instances retrieveInstances() throws Exception {
     return retrieveInstances(m_Query);
@@ -275,30 +228,26 @@ public class InstanceQuery
    * @param query the query to convert to instances
    * @return the instances contained in the result of the query, NULL if the
    *         SQL query doesn't return a ResultSet, e.g., DELETE/INSERT/UPDATE
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public Instances retrieveInstances(String query) throws Exception {
 
-    if (m_Debug) 
-      System.err.println("Executing query: " + query);
+    System.err.println("Executing query: " + query);
     connectToDatabase();
     if (execute(query) == false) {
       if (m_PreparedStatement.getUpdateCount() == -1) {
         throw new Exception("Query didn't produce results");
       }
       else {
-        if (m_Debug) 
-          System.err.println(m_PreparedStatement.getUpdateCount() 
-              + " rows affected.");
+        System.err.println(m_PreparedStatement.getUpdateCount() 
+            + " rows affected.");
         return null;
       }
     }
     ResultSet rs = getResultSet();
-    if (m_Debug) 
-      System.err.println("Getting metadata...");
+    System.err.println("Getting metadata...");
     ResultSetMetaData md = rs.getMetaData();
-    if (m_Debug) 
-      System.err.println("Completed getting metadata...");
+    System.err.println("Completed getting metadata...");
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
@@ -365,16 +314,13 @@ public class InstanceQuery
     }
 
     // Step through the tuples
-    if (m_Debug) 
-      System.err.println("Creating instances...");
+    System.err.println("Creating instances...");
     FastVector instances = new FastVector();
     int rowCount = 0;
     while(rs.next()) {
       if (rowCount % 100 == 0) {
-        if (m_Debug)  {
-	  System.err.print("read " + rowCount + " instances \r");
-	  System.err.flush();
-        }
+	System.err.print("read " + rowCount + " instances \r");
+	System.err.flush();
       }
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
@@ -485,8 +431,7 @@ public class InstanceQuery
     //disconnectFromDatabase();  (perhaps other queries might be made)
     
     // Create the header and add the instances to the dataset
-    if (m_Debug) 
-      System.err.println("Creating header...");
+    System.err.println("Creating header...");
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
@@ -565,4 +510,3 @@ public class InstanceQuery
     }
   }
 }
-

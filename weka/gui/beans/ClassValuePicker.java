@@ -39,7 +39,7 @@ import java.beans.EventSetDescriptor;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class ClassValuePicker extends JPanel
   implements Visible, DataSourceListener, BeanCommon,

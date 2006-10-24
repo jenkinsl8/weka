@@ -23,48 +23,27 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * A filter that removes a given range of instances of a dataset.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;inst1,inst2-inst4,...&gt;
- *  Specifies list of instances to select. First and last
- *  are valid indexes. (required)
- * </pre>
- * 
- * <pre> -V
- *  Specifies if inverse of selection is to be output.
- * </pre>
- * 
- <!-- options-end -->
+ * This filter takes a dataset and removes a subset of it.
+ *
+ * Valid options are: <p>
+ *
+ * -R inst1,inst2-inst4,... <br>
+ * Specifies list of instances to select. First
+ * and last are valid indexes. (required)<p>
+ *
+ * -V <br>
+ * Specifies if inverse of selection is to be output.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
- */
-public class RemoveRange 
-  extends Filter
+ * @version $Revision: 1.3 $ 
+*/
+public class RemoveRange extends Filter
   implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -3064641215340828695L;
 
   /** Range of instances requested by the user. */
   private Range m_Range = new Range("first-last");
@@ -91,24 +70,17 @@ public class RemoveRange
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;inst1,inst2-inst4,...&gt;
-   *  Specifies list of instances to select. First and last
-   *  are valid indexes. (required)
-   * </pre>
-   * 
-   * <pre> -V
-   *  Specifies if inverse of selection is to be output.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -R inst1,inst2-inst4,... <br>
+   * Specifies list of instances to select. First
+   * and last are valid indexes. (required)<p>
+   *
+   * -V <br>
+   * Specifies if inverse of selection is to be output.<p>
    *
    * @param options the list of options as an array of string.s
-   * @throws Exception if an option is not supported.
+   * @exception Exception if an option is not supported.
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -183,7 +155,7 @@ public class RemoveRange
    *
    * @param rangeList a string representing the list of instances. 
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setInstancesIndices(String rangeList) {
 
@@ -221,27 +193,6 @@ public class RemoveRange
     m_Range.setInvert(inverse);
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -249,7 +200,7 @@ public class RemoveRange
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true because outputFormat can be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */  
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -264,7 +215,7 @@ public class RemoveRange
    * instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
   public boolean batchFinished() {
 
@@ -288,6 +239,15 @@ public class RemoveRange
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new RemoveRange(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new RemoveRange(), argv);
+      } else {
+	Filter.filterFile(new RemoveRange(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

@@ -22,46 +22,36 @@
 
 package weka.gui.beans;
 
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.FileEditor;
+
+import java.io.File;
+import java.beans.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.FlowLayout;
+import java.awt.event.*;
+import java.awt.Font;
+import javax.swing.*;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
-
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import weka.gui.ExtensionFileFilter;
+import weka.core.converters.Loader;
+import weka.core.converters.DatabaseLoader;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.FileSourcedConverter;
 
 
 /**
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class LoaderCustomizer extends JPanel
   implements Customizer, CustomizerCloseRequester {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
@@ -258,21 +248,14 @@ public class LoaderCustomizer extends JPanel
 
   public void setUpFile() {
     removeAll();
-    m_fileChooser.setSelectedFile(
-	((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile());
-    FileSourcedConverter loader = (FileSourcedConverter) m_dsLoader.getLoader();
-    String[] ext = loader.getFileExtensions();
-    ExtensionFileFilter firstFilter = null;
-    for (int i = 0; i < ext.length; i++) {
-      ExtensionFileFilter ff =
-	new ExtensionFileFilter(
-	    ext[i], loader.getFileDescription() + " (*" + ext[i] + ")");
-      if (i == 0)
-	firstFilter = ff;
-      m_fileChooser.addChoosableFileFilter(ff);
-    }
-    if (firstFilter != null)
-      m_fileChooser.setFileFilter(firstFilter);
+    m_fileChooser.
+      setSelectedFile(((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile());
+    ExtensionFileFilter ff = 
+      new ExtensionFileFilter(((FileSourcedConverter)m_dsLoader.getLoader()).
+			      getFileExtension(),
+			      ((FileSourcedConverter)m_dsLoader.getLoader()).
+			      getFileDescription());
+    m_fileChooser.addChoosableFileFilter(ff);
     JPanel about = m_LoaderEditor.getAboutPanel();
     if (about != null) {
       add(about, BorderLayout.NORTH);

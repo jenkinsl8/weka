@@ -22,6 +22,8 @@
 
 package weka.gui.visualize;
 
+import com.sun.image.codec.jpeg.*;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -32,16 +34,13 @@ import java.io.FileOutputStream;
 
 import javax.swing.JComponent;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 /** 
  * This class takes any JComponent and outputs it to a JPEG-file.
  * Scaling is by default disabled, since we always take a screenshot.
  *
+ * @see #setScalingEnabled()
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class JPEGWriter extends JComponentWriter {
   /** the quality of the image */
@@ -92,8 +91,6 @@ public class JPEGWriter extends JComponentWriter {
   /**
    * returns the name of the writer, to display in the FileChooser.
    * must be overridden in the derived class.
-   * 
-   * @return the name of the writer
    */
   public String getDescription() {
     return "JPEG-Image";
@@ -103,8 +100,6 @@ public class JPEGWriter extends JComponentWriter {
    * returns the extension (incl. ".") of the output format, to use in the
    * FileChooser. 
    * must be overridden in the derived class.
-   * 
-   * @return the file extension
    */
   public String getExtension() {
     return ".jpg";
@@ -112,8 +107,6 @@ public class JPEGWriter extends JComponentWriter {
   
   /**
    * returns the current background color
-   * 
-   * @return the current background color
    */
   public Color getBackground() {
     return background;
@@ -121,8 +114,6 @@ public class JPEGWriter extends JComponentWriter {
   
   /**
    * sets the background color to use in creating the JPEG
-   * 
-   * @param c the color to use for background
    */
   public void setBackground(Color c) {
     background = c;
@@ -130,8 +121,6 @@ public class JPEGWriter extends JComponentWriter {
   
   /**
    * returns the quality the JPEG will be stored in
-   * 
-   * @return the quality
    */
   public float getQuality() {
     return quality;
@@ -139,8 +128,6 @@ public class JPEGWriter extends JComponentWriter {
   
   /**
    * sets the quality the JPEG is saved in 
-   * 
-   * @param q the quality to use
    */
   public void setQuality(float q) {
     quality = q;
@@ -192,9 +179,6 @@ public class JPEGWriter extends JComponentWriter {
   
   /**
    * for testing only 
-   * 
-   * @param args the commandline arguments
-   * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     System.out.println("building TreeVisualizer...");

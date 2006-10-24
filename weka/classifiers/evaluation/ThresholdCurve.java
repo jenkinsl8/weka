@@ -22,12 +22,13 @@
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.Classifier;
+import weka.classifiers.functions.VotedPerceptron;
+import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
+import weka.classifiers.Classifier;
 
 /**
  * Generates points illustrating prediction tradeoffs that can be obtained
@@ -38,34 +39,23 @@ import weka.core.Utils;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.18 $
  */
 public class ThresholdCurve {
 
   /** The name of the relation used in threshold curve datasets */
   public static final String RELATION_NAME = "ThresholdCurve";
 
-  /** attribute name: True Positives */
   public static final String TRUE_POS_NAME  = "True Positives";
-  /** attribute name: False Negatives */
   public static final String FALSE_NEG_NAME = "False Negatives";
-  /** attribute name: False Positives */
   public static final String FALSE_POS_NAME = "False Positives";
-  /** attribute name: True Negatives */
   public static final String TRUE_NEG_NAME  = "True Negatives";
-  /** attribute name: False Positive Rate" */
   public static final String FP_RATE_NAME   = "False Positive Rate";
-  /** attribute name: True Positive Rate */
   public static final String TP_RATE_NAME   = "True Positive Rate";
-  /** attribute name: Precision */
   public static final String PRECISION_NAME = "Precision";
-  /** attribute name: Recall */
   public static final String RECALL_NAME    = "Recall";
-  /** attribute name: Fallout */
   public static final String FALLOUT_NAME   = "Fallout";
-  /** attribute name: FMeasure */
   public static final String FMEASURE_NAME  = "FMeasure";
-  /** attribute name: Threshold */
   public static final String THRESHOLD_NAME = "Threshold";
 
   /**
@@ -87,7 +77,7 @@ public class ThresholdCurve {
    * For the definitions of these measures, see TwoClassStats <p>
    *
    * @see TwoClassStats
-   * @param predictions the predictions to base the curve on
+   * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances, null if no predictions
    * have been made.
    */
@@ -105,7 +95,6 @@ public class ThresholdCurve {
    * Calculates the performance stats for the desired class and return 
    * results as a set of Instances.
    *
-   * @param predictions the predictions to base the curve on
    * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances.
    */
@@ -248,7 +237,8 @@ public class ThresholdCurve {
   }
 
   /**
-   * Calculates the area under the ROC curve as the Wilcoxon-Mann-Whitney statistic.
+   * Calculates the area under the ROC curve.  This is normalised so
+   * that 0.5 is random, 1.0 is perfect and 0.0 is bizarre.
    *
    * @param tcurve a previously extracted threshold curve Instances.
    * @return the ROC area, or Double.NaN if you don't pass in 
@@ -265,24 +255,37 @@ public class ThresholdCurve {
     final int fpInd = tcurve.attribute(FALSE_POS_NAME).index();
     final double [] tpVals = tcurve.attributeToDoubleArray(tpInd);
     final double [] fpVals = tcurve.attributeToDoubleArray(fpInd);
+    final double tp0 = tpVals[0];
+    final double fp0 = fpVals[0];
+    double area = 0.0;
+    //starts at high values and goes down
+    double xlast = 1.0;
+    double ylast = 1.0;
+    for (int i = 1; i < n; i++) {
+      final double x = fpVals[i] / fp0;
+      final double y = tpVals[i] / tp0;
+      final double areaDelta = (y + ylast) * (xlast - x) / 2.0;
+      /*
+      System.err.println("[" + i + "]"
+                         + " x=" + x
+                         + " y'=" + y
+                         + " xl=" + xlast
+                         + " yl=" + ylast
+                         + " a'=" + areaDelta);
+      */
 
-    double area = 0.0, cumNeg = 0.0;
-    final double totalPos = tpVals[0];
-    final double totalNeg = fpVals[0];
-    for (int i = 0; i < n; i++) {
-	double cip, cin;
-	if (i < n - 1) {
-	    cip = tpVals[i] - tpVals[i + 1];
-	    cin = fpVals[i] - fpVals[i + 1];
-	} else {
-	    cip = tpVals[n - 1];
-	    cin = fpVals[n - 1];
-	}
-	area += cip * (cumNeg + (0.5 * cin));
-	cumNeg += cin;
+      area += areaDelta;
+      xlast = x;
+      ylast = y;
     }
-    area /= (totalNeg * totalPos);
 
+    //make sure ends at 0,0
+    if (xlast > 0.0) {
+      final double areaDelta = ylast * xlast / 2.0;
+      //System.err.println(" a'=" + areaDelta);
+      area += areaDelta;
+    }
+    //System.err.println(" area'=" + area);
     return area;
   }
 
@@ -312,14 +315,7 @@ public class ThresholdCurve {
     return binarySearch(sorted, tvals, threshold);
   }
 
-  /**
-   * performs a binary search
-   * 
-   * @param index the indices
-   * @param vals the values
-   * @param target the target to look for
-   * @return the index of the target
-   */
+
   private static int binarySearch(int [] index, double [] vals, double target) {
     
     int lo = 0, hi = index.length - 1;
@@ -340,12 +336,7 @@ public class ThresholdCurve {
     return lo;
   }
 
-  /**
-   * 
-   * @param predictions the predictions to use
-   * @param classIndex the class index
-   * @return the probabilities
-   */
+
   private double [] getProbabilities(FastVector predictions, int classIndex) {
 
     // sort by predicted probability of the desired class.
@@ -357,11 +348,6 @@ public class ThresholdCurve {
     return probs;
   }
 
-  /**
-   * generates the header
-   * 
-   * @return the header
-   */
   private Instances makeHeader() {
 
     FastVector fv = new FastVector();
@@ -379,13 +365,6 @@ public class ThresholdCurve {
     return new Instances(RELATION_NAME, fv, 100);
   }
   
-  /**
-   * generates an instance out of the given data
-   * 
-   * @param tc the statistics
-   * @param prob the probability
-   * @return the generated instance
-   */
   private Instance makeInstance(TwoClassStats tc, double prob) {
 
     int count = 0;

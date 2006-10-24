@@ -23,33 +23,38 @@
 
 package weka.gui.experiment;
 
-import weka.core.ClassDiscovery;
+import weka.core.Instances;
+import weka.core.RTSI;
 import weka.experiment.Experiment;
-import weka.gui.ConverterFileChooser;
-import weka.gui.JListHelper;
 
+import weka.gui.ExtensionFileFilter;
+import java.io.File;
+import java.util.Vector;
+import java.util.Collections;
+import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.util.Collections;
-import java.util.Vector;
+import java.awt.event.ActionListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
+import javax.swing.JTextField;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.JList;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JCheckBox;
 
 
 /** 
@@ -57,7 +62,7 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.13.4.3 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -72,22 +77,20 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 
   /** Click to remove the selected dataset from the list */
   protected JButton m_DeleteBut = new JButton("Delete selected");
-  
-  /** Click to move the selected dataset(s) one up */
-  protected JButton m_UpBut = new JButton("Up");
-  
-  /** Click to move the selected dataset(s) one down */
-  protected JButton m_DownBut = new JButton("Down");
 
   /** Make file paths relative to the user (start) directory */
   protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
+
+  /** A filter to ensure only arff files get selected */
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** The user (start) directory */
   protected File m_UserDir = new File(System.getProperty("user.dir"));
 
   /** The file chooser component */
-  protected ConverterFileChooser m_FileChooser = 
-    new ConverterFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
+  protected JFileChooser m_FileChooser = new
+    JFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
 
   
   /**
@@ -107,25 +110,15 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   public DatasetListPanel() {
     
     m_List = new JList();
-    m_List.addListSelectionListener(new ListSelectionListener() {
-        public void valueChanged(ListSelectionEvent e) {
-          setButtons(e);
-        }
-      });
-    
+    m_FileChooser.setFileFilter(m_ArffFilter);
     // Multiselection isn't handled by the current implementation of the
     // swing look and feels.
     // m_FileChooser.setMultiSelectionEnabled(true);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    m_FileChooser.setCoreConvertersOnly(true);
     m_DeleteBut.setEnabled(false);
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
     m_AddBut.addActionListener(this);
-    m_UpBut.setEnabled(false);
-    m_UpBut.addActionListener(this);
-    m_DownBut.setEnabled(false);
-    m_DownBut.addActionListener(this);
     m_relativeCheck.setSelected(ExperimenterDefaults.getUseRelativePaths());
     m_relativeCheck.setToolTipText("Store file paths relative to "
 				   +"the start directory");
@@ -153,36 +146,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     constraints.insets = new Insets(0,2,0,2);
     topLab.add(m_relativeCheck,constraints);
 
-    JPanel bottomLab = new JPanel();
-    gb = new GridBagLayout();
-    constraints = new GridBagConstraints();
-    bottomLab.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-    bottomLab.setLayout(gb);
-   
-    constraints.gridx=0;constraints.gridy=0;constraints.weightx=5;
-    constraints.fill = GridBagConstraints.HORIZONTAL;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    constraints.insets = new Insets(0,2,0,2);
-    bottomLab.add(m_UpBut,constraints);
-    constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    bottomLab.add(m_DownBut,constraints);
-
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
-    add(bottomLab, BorderLayout.SOUTH);
-  }
-  
-  /**
-   * sets the state of the buttons according to the selection state of the
-   * JList
-   */
-  private void setButtons(ListSelectionEvent e) {
-    if ( (e == null) || (e.getSource() == m_List) ) {
-      m_DeleteBut.setEnabled(m_List.getSelectedIndex() > -1);
-      m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
-      m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
-    }
   }
 
   /**
@@ -193,9 +158,11 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   public void setExperiment(Experiment exp) {
 
     m_Exp = exp;
-    m_List.setModel(m_Exp.getDatasets());
     m_AddBut.setEnabled(true);
-    setButtons(null);
+    m_List.setModel(m_Exp.getDatasets());
+    if (m_Exp.getDatasets().size() > 0) {
+      m_DeleteBut.setEnabled(true);
+    }
   }
   
   /**
@@ -293,7 +260,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     //    System.err.println("new path : "+relativePath.toString());
     return new File(relativePath.toString());
   }
-
+  
   /**
    * Converts a File's absolute path to a path relative to the user
    * (ie start) directory. Includes an additional workaround for Cygwin, which
@@ -349,7 +316,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	      getFilesRecursively(selected[i], files);
     
 	      // sort the result
-	      Collections.sort(files, new ClassDiscovery().new StringCompare());
+	      RTSI r = new RTSI();
+	      Collections.sort(files, r.new StringCompare());
 
 	      for (int j = 0; j < files.size(); j++) {
 		File temp = (File)files.elementAt(j);
@@ -374,14 +342,15 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	      m_Exp.getDatasets().addElement(temp);
 	    }
 	  }
-          setButtons(null);
+	  m_DeleteBut.setEnabled(true);
 	} else {
 	  if (m_FileChooser.getSelectedFile().isDirectory()) {
 	    Vector files = new Vector();
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
     
 	    // sort the result
-	    Collections.sort(files, new ClassDiscovery().new StringCompare());
+	    RTSI r = new RTSI();
+	    Collections.sort(files, r.new StringCompare());
 
 	    for (int j = 0; j < files.size(); j++) {
 	      File temp = (File)files.elementAt(j);
@@ -405,7 +374,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	    }
 	    m_Exp.getDatasets().addElement(temp);
 	  }
-          setButtons(null);
+	  m_DeleteBut.setEnabled(true);
 	}
       }
     } else if (e.getSource() == m_DeleteBut) {
@@ -422,11 +391,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	  }
 	}
       }
-      setButtons(null);
-    } else if (e.getSource() == m_UpBut) {
-      JListHelper.moveUp(m_List);
-    } else if (e.getSource() == m_DownBut) {
-      JListHelper.moveDown(m_List);
+      if (m_List.getSelectedIndex() == -1) {
+	m_DeleteBut.setEnabled(false);
+      }
     }
   }
 

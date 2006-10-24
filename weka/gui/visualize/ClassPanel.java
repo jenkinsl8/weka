@@ -23,24 +23,29 @@
 
 package weka.gui.visualize;
 
-import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Utils;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.Random;
 
+import javax.swing.JPanel;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * This panel displays coloured labels for nominal attributes and a spectrum
@@ -50,7 +55,7 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
 public class ClassPanel extends JPanel {
     
@@ -276,7 +281,7 @@ public class ClassPanel extends JPanel {
 
   /**
    * Set a list of colours to use for colouring labels
-   * @param cols a list containing java.awt.Colors
+   * @param a list containing java.awt.Colors
    */
   public void setColours(FastVector cols) {
     m_colorList = cols;
@@ -284,6 +289,8 @@ public class ClassPanel extends JPanel {
     
   /**
    * Sets the legend to be for a nominal variable
+   * @param plotInstances the instances currently being plotted
+   * @param cIndex the index of the colouring attribute
    */
   protected void setNominal() {
     m_isNumeric = false;
@@ -296,6 +303,8 @@ public class ClassPanel extends JPanel {
 
   /**
    * Sets the legend to be for a numeric variable
+   * @param mxC the maximum value of the colouring attribute
+   * @param mnC the minimum value of the colouring attribute
    */
   protected void setNumeric() {
     m_isNumeric = true;

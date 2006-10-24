@@ -24,43 +24,35 @@
 package weka.gui;
 
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.FileSourcedConverter;
-import weka.core.converters.IncrementalConverter;
-import weka.core.converters.URLSourcedLoader;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.net.URL;
+import java.io.File;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.net.URL;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.BorderFactory;
 
 /** 
  * A panel that displays an instance summary for a set of instances and
  * lets the user open a set of instances from either a file or URL.
  *
- * Instances may be obtained either in a batch or incremental fashion.
- * If incremental reading is used, then
- * the client should obtain the Loader object (by calling
- * getLoader()) and read the instances one at a time. If
- * batch loading is used, then SetInstancesPanel will load
- * the data into memory inside of a separate thread and notify
- * the client when the operation is complete. The client can
- * then retrieve the instances by calling getInstances().
- *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.7 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -70,15 +62,16 @@ public class SetInstancesPanel extends JPanel {
   /** Click to open instances from a URL */
   protected JButton m_OpenURLBut = new JButton("Open URL...");
 
-  /** Click to close the dialog */
-  protected JButton m_CloseBut = new JButton("Close");
-
   /** The instance summary component */
   protected InstancesSummaryPanel m_Summary = new InstancesSummaryPanel();
+  
+  /** Filter to ensure only arff files are selected */  
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** The file chooser for selecting arff files */
-  protected ConverterFileChooser m_FileChooser
-    = new ConverterFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooser
+    = new JFileChooser(new File(System.getProperty("user.dir")));
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
@@ -94,17 +87,6 @@ public class SetInstancesPanel extends JPanel {
 
   /** The current set of instances loaded */
   protected Instances m_Instances;
-
-  /** The current loader used to obtain the current instances */
-  protected weka.core.converters.Loader m_Loader;
-  
-  /** the parent frame. if one is provided, the close-button is displayed */
-  protected JFrame m_ParentFrame = null;
-
-  /** the panel the Close-Button is located in */
-  protected JPanel m_CloseButPanel = null;
-
-  protected boolean m_readIncrementally = true;
   
   /**
    * Create the panel.
@@ -113,7 +95,7 @@ public class SetInstancesPanel extends JPanel {
 
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
-    m_CloseBut.setToolTipText("Closes the dialog");
+    m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -125,11 +107,6 @@ public class SetInstancesPanel extends JPanel {
 	setInstancesFromFileQ();
       }
     });
-    m_CloseBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        closeFrame();
-      }
-    });
     m_Summary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
     JPanel buttons = new JPanel();
@@ -137,46 +114,9 @@ public class SetInstancesPanel extends JPanel {
     buttons.add(m_OpenFileBut);
     buttons.add(m_OpenURLBut);
     
-    m_CloseButPanel = new JPanel();
-    m_CloseButPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-    m_CloseButPanel.add(m_CloseBut);
-    m_CloseButPanel.setVisible(false);
-    
-    JPanel buttonsAll = new JPanel();
-    buttonsAll.setLayout(new BorderLayout());
-    buttonsAll.add(buttons, BorderLayout.CENTER);
-    buttonsAll.add(m_CloseButPanel, BorderLayout.SOUTH);
-    
     setLayout(new BorderLayout());
     add(m_Summary, BorderLayout.CENTER);
-    add(buttonsAll, BorderLayout.SOUTH);
-  }
-
-  /**
-   * Sets the frame, this panel resides in. Used for displaying the close 
-   * button, i.e., the close-button is visible if the given frame is not null.
-   * @param parent        the parent frame
-   */
-  public void setParentFrame(JFrame parent) {
-    m_ParentFrame = parent;
-    m_CloseButPanel.setVisible(m_ParentFrame != null);
-  }
-  
-  /**
-   * Returns the current frame the panel knows of, that it resides in. Can be
-   * null.
-   * @return the current parent frame
-   */
-  public JFrame getParentFrame() {
-    return m_ParentFrame;
-  }
-
-  /**
-   * closes the frame, i.e., the visibility is set to false
-   */
-  public void closeFrame() {
-    if (m_ParentFrame != null)
-      m_ParentFrame.setVisible(false);
+    add(buttons, BorderLayout.SOUTH);
   }
 
   /**
@@ -262,21 +202,9 @@ public class SetInstancesPanel extends JPanel {
   protected void setInstancesFromFile(File f) {
       
     try {
-      m_Loader = ConverterUtils.getLoaderForFile(f);
-      if (m_Loader == null)
-	throw new Exception("No suitable FileSourcedConverter found for file!\n" + f);
-      
-      // not an incremental loader?
-      if (!(m_Loader instanceof IncrementalConverter))
-	m_readIncrementally = false;
-
-      // load
-      ((FileSourcedConverter) m_Loader).setFile(f);
-      if (m_readIncrementally) {
-	setInstances(m_Loader.getStructure());
-      } else {
-	setInstances(m_Loader.getDataSet());
-      }
+      Reader r = new BufferedReader(new FileReader(f));
+      setInstances(new Instances(r));
+      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from file:\n"
@@ -294,21 +222,9 @@ public class SetInstancesPanel extends JPanel {
   protected void setInstancesFromURL(URL u) {
 
     try {
-      m_Loader = ConverterUtils.getURLLoaderForFile(u.toString());
-      if (m_Loader == null)
-	throw new Exception("No suitable URLSourcedLoader found for URL!\n" + u);
-      
-      // not an incremental loader?
-      if (!(m_Loader instanceof IncrementalConverter))
-	m_readIncrementally = false;
-
-      // load
-      ((URLSourcedLoader) m_Loader).setURL(u.toString());
-      if (m_readIncrementally) {
-	setInstances(m_Loader.getStructure());
-      } else {
-	setInstances(m_Loader.getDataSet());
-      }
+      Reader r = new BufferedReader(new InputStreamReader(u.openStream()));
+      setInstances(new Instances(r));
+      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from URL:\n"
@@ -342,47 +258,12 @@ public class SetInstancesPanel extends JPanel {
   }
 
   /**
-   * Gets the currently used Loader
-   *
-   * @return a value of type 'Loader'
-   */
-  public weka.core.converters.Loader getLoader() {
-    return m_Loader;
-  }
-
-  /**
    * Gets the instances summary panel associated with
    * this panel
    * @return the instances summary panel
    */
   public InstancesSummaryPanel getSummary() {
     return m_Summary;
-  }
-
-  /**
-   * Sets whether or not instances should be read incrementally
-   * by the Loader. If incremental reading is used, then
-   * the client should obtain the Loader object (by calling
-   * getLoader()) and read the instances one at a time. If
-   * batch loading is used, then SetInstancesPanel will load
-   * the data into memory inside of a separate thread and notify
-   * the client when the operation is complete. The client can
-   * then retrieve the instances by calling getInstances().
-   *
-   * @param incremental true if instances are to be read incrementally
-   * 
-   */
-  public void setReadIncrementally(boolean incremental) {
-    m_readIncrementally = incremental;
-  }
-
-  /**
-   * Gets whether instances are to be read incrementally or not
-   *
-   * @return true if instances are to be read incrementally
-   */
-  public boolean getReadIncrementally() {
-    return m_readIncrementally;
   }
   
   /**

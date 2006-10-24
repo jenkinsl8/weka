@@ -40,7 +40,7 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.18.2.2 $
  * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
  * backwards compatibility. 
  */
@@ -341,7 +341,7 @@ public class Matrix
     int nr = numRows();    // num of rows
     int nc = numColumns(); // num of columns
     double[][] ud = new double[nr][nc];
-
+    
     for (int i = 0; i < nr; i++) {
       for (int j = i; j < nc ; j++) {
         ud[i][j] = getElement(i, j);
@@ -382,7 +382,7 @@ public class Matrix
 
     u = null;
     l = null;
-    
+
     return lu.getPivot();
   }
   
@@ -437,7 +437,7 @@ public class Matrix
 
     for (int i = 0; i < d2.length; i++)
       d[i] = d2[i];
-  } 
+  }   
 
   /**
    * Returns sqrt(a^2 + b^2) without under/overflow.

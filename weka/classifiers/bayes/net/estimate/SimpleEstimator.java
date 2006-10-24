@@ -23,55 +23,25 @@
 package weka.classifiers.bayes.net.estimate;
 
 import weka.classifiers.bayes.BayesNet;
+import java.util.Enumeration;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.estimators.Estimator;
 
-import java.util.Enumeration;
-
-/** 
- <!-- globalinfo-start -->
- * SimpleEstimator is used for estimating the conditional probability tables of a Bayes network once the structure has been learned. Estimates probabilities directly from data.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -A &lt;alpha&gt;
- *  Initial count (alpha)
- * </pre>
- * 
- <!-- options-end -->
+/** SimpleEstimator is used for estimating the conditional probability
+ * tables of a Bayes network once the structure has been learned. Estimates
+ * probabilities directly from data.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class SimpleEstimator 
-    extends BayesNetEstimator {
 
-    /** for serialization */
-    static final long serialVersionUID = 5874941612331806172L;
-    
-    /**
-     * Returns a string describing this object
-     * @return a description of the classifier suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String globalInfo() {
-      return 
-          "SimpleEstimator is used for estimating the conditional probability "
-      	+ "tables of a Bayes network once the structure has been learned. "
-      	+ "Estimates probabilities directly from data.";
-    }
-  
+public class SimpleEstimator extends BayesNetEstimator {
+
     /**
      * estimateCPTs estimates the conditional probability tables for the Bayes
      * Net using the network structure.
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception if something goes wrong
      */
     public void estimateCPTs(BayesNet bayesNet) throws Exception {
             initCPTs(bayesNet);
@@ -88,9 +58,8 @@ public class SimpleEstimator
     /**
      * Updates the classifier with the given instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the new training instance to include in the model
-     * @throws Exception if the instance could not be incorporated in
+     * @exception Exception if the instance could not be incorporated in
      * the model.
      */
     public void updateClassifier(BayesNet bayesNet, Instance instance) throws Exception {
@@ -108,11 +77,7 @@ public class SimpleEstimator
     } // updateClassifier
 
 
-    /** 
-     * initCPTs reserves space for CPTs and set all counts to zero
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception if something goes wrong
+    /** initCPTs reserves space for CPTs and set all counts to zero
      */
     public void initCPTs(BayesNet bayesNet) throws Exception {
         Instances instances = bayesNet.m_Instances;
@@ -141,10 +106,9 @@ public class SimpleEstimator
      * Calculates the class membership probabilities for the given test
      * instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the instance to be classified
      * @return predicted class probability distribution
-     * @throws Exception if there is a problem generating the prediction
+     * @exception Exception if there is a problem generating the prediction
      */
     public double[] distributionForInstance(BayesNet bayesNet, Instance instance) throws Exception {
         Instances instances = bayesNet.m_Instances;

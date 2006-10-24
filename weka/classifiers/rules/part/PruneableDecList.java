@@ -22,18 +22,18 @@
 
 package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
-import weka.core.Instances;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Class for handling a partial tree structure that
  * can be pruned using a pruning set.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class PruneableDecList extends ClassifierDecList{
   
@@ -52,7 +52,7 @@ public class PruneableDecList extends ClassifierDecList{
   /**
    * Method for building a pruned partial tree.
    *
-   * @throws Exception if tree can't be built successfully
+   * @exception Exception if tree can't be built successfully
    */
   public void buildRule(Instances train,
 			Instances test) throws Exception { 
@@ -65,7 +65,7 @@ public class PruneableDecList extends ClassifierDecList{
   /**
    * Builds the partial tree with hold out set
    *
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void buildDecList(Instances train, Instances test, 
 			   boolean leaf) throws Exception {
@@ -136,10 +136,8 @@ public class PruneableDecList extends ClassifierDecList{
   /**
    * Returns a newly created tree.
    *
-   * @param train train data
-   * @param test test data
-   * @param leaf
-   * @throws Exception if something goes wrong
+   * @param data and selection method for local models.
+   * @exception Exception if something goes wrong
    */
   protected ClassifierDecList getNewDecList(Instances train, Instances test, 
 					    boolean leaf) throws Exception {

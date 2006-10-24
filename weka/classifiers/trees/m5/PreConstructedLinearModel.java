@@ -1,4 +1,7 @@
 /*
+ *    RuleNode.java
+ *    Copyright (C) 2000 Mark Hall
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -13,21 +16,11 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*
- *    RuleNode.java
- *    Copyright (C) 2000 Mark Hall
- *
- */
-
 package weka.classifiers.trees.m5;
 
-import weka.classifiers.Classifier;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
 import java.io.Serializable;
+import weka.core.*;
+import weka.classifiers.Classifier;
 
 /**
  * This class encapsulates a linear regression function. It is a classifier
@@ -37,25 +30,20 @@ import java.io.Serializable;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class PreConstructedLinearModel 
-  extends Classifier 
-  implements Serializable {
+public class PreConstructedLinearModel extends Classifier implements Serializable {
   
-  /** for serialization */
-  static final long serialVersionUID = 2030974097051713247L;
-  
-  /** The coefficients */
+  // The coefficients
   private double [] m_coefficients;
 
-  /** The intercept */
+  // The intercept
   private double m_intercept;
 
-  /** Holds the instances header for printing the model */
+  // Holds the instances header for printing the model
   private Instances m_instancesHeader;
 
-  /** number of coefficients in the model */
+  // number of coefficients in the model
   private int m_numParameters;
 
   /**

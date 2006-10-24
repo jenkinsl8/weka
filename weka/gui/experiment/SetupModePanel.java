@@ -62,7 +62,7 @@ import javax.swing.ButtonGroup;
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class SetupModePanel extends JPanel {
 
@@ -87,14 +87,12 @@ public class SetupModePanel extends JPanel {
 
     m_simplePanel.setModePanel(this);
 
-    m_SimpleSetupRBut.setMnemonic('S');
     m_SimpleSetupRBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  switchToSimple(null);
 	}
       });
 
-    m_AdvancedSetupRBut.setMnemonic('A');
     m_AdvancedSetupRBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  switchToAdvanced(null);

@@ -23,40 +23,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Replaces all missing values for nominal and numeric attributes in a dataset with the modes and means from the training data.
- * <p/>
- <!-- globalinfo-end -->
+ * Replaces all missing values for nominal and numeric attributes in a 
+ * dataset with the modes and means from the training data.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- <!-- options-end -->
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public class ReplaceMissingValues 
-  extends PotentialClassIgnorer
+public class ReplaceMissingValues extends PotentialClassIgnorer
   implements UnsupervisedFilter {
 
-  /** for serialization */
-  static final long serialVersionUID = 8349568310991609867L;
-  
   /** The modes and means */
   private double[] m_ModesAndMeans = null;
 
@@ -72,27 +53,6 @@ public class ReplaceMissingValues
       + "dataset with the modes and means from the training data.";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -100,7 +60,7 @@ public class ReplaceMissingValues
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -119,7 +79,7 @@ public class ReplaceMissingValues
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -145,7 +105,7 @@ public class ReplaceMissingValues
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -276,6 +236,23 @@ public class ReplaceMissingValues
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new ReplaceMissingValues(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new ReplaceMissingValues(), argv);
+      } else {
+	Filter.filterFile(new ReplaceMissingValues(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

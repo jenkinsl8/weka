@@ -23,79 +23,65 @@
 
 package weka.gui.experiment;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.xml.XMLClassifier;
 import weka.core.OptionHandler;
-import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.experiment.Experiment;
+
+import weka.classifiers.Classifier;
+
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
-import weka.gui.JListHelper;
 import weka.gui.PropertyDialog;
 
-import java.awt.BorderLayout;
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.Instances;
+import weka.core.SerializedObject;
+import weka.experiment.Experiment;
+
+import java.util.Vector;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
+import java.awt.event.ActionListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.JTextField;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JButton;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.filechooser.FileFilter;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyEditor;
+import java.io.File;
 
 /** 
  * This panel controls setting a list of algorithms for an experiment to
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.7.2.7 $
  */
-public class AlgorithmListPanel
-  extends JPanel
-  implements ActionListener {
+public class AlgorithmListPanel extends JPanel implements ActionListener {
 
-  /**
-   * Class required to show the Classifiers nicely in the list
-   */
-  public class ObjectCellRenderer
-    extends DefaultListCellRenderer {
-    
-    /**
-     * Return a component that has been configured to display the specified 
-     * value. That component's paint method is then called to "render" the 
-     * cell. If it is necessary to compute the dimensions of a list because 
-     * the list cells do not have a fixed size, this method is called to 
-     * generate a component on which getPreferredSize can be invoked.
-     * 
-     * @param list 		The JList we're painting.
-     * @param value		The value returned by 
-     * 				list.getModel().getElementAt(index).
-     * @param index		The cells index.
-     * @param isSelected	True if the specified cell was selected.
-     * @param cellHasFocus	True if the specified cell has the focus.
-     * @return			A component whose paint() method will render 
-     * 				the specified value.
-     */
+  /* Class required to show the Classifiers nicely in the list */
+  public class ObjectCellRenderer extends DefaultListCellRenderer {
     public Component getListCellRendererComponent(JList list,
 						  Object value,
 						  int index,
@@ -138,12 +124,6 @@ public class AlgorithmListPanel
   /** Click to edit the save the options from selected algorithm */
   protected JButton m_SaveOptionsBut = new JButton("Save options...");
   
-  /** Click to move the selected algorithm(s) one up */
-  protected JButton m_UpBut = new JButton("Up");
-  
-  /** Click to move the selected algorithm(s) one down */
-  protected JButton m_DownBut = new JButton("Down");
-  
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser =
     new JFileChooser(new File(System.getProperty("user.dir")));
@@ -168,7 +148,7 @@ public class AlgorithmListPanel
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   /**
@@ -188,20 +168,6 @@ public class AlgorithmListPanel
   public AlgorithmListPanel() {
     
     m_List = new JList();
-    MouseListener mouseListener = new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-          // unfortunately, locationToIndex only returns the nearest entry
-          // and not the exact one, i.e. if there's one item in the list and
-          // one doublelclicks somewhere in the list, this index will be
-          // returned
-          int index = m_List.locationToIndex(e.getPoint());
-          if (index > -1)
-            actionPerformed(new ActionEvent(m_EditBut, 0, ""));
-        }
-      }
-    };
-    m_List.addMouseListener(mouseListener);
   
     m_ClassifierEditor.setClassType(Classifier.class);
     m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
@@ -228,10 +194,6 @@ public class AlgorithmListPanel
     m_LoadOptionsBut.addActionListener(this);
     m_SaveOptionsBut.setEnabled(false);
     m_SaveOptionsBut.addActionListener(this);
-    m_UpBut.setEnabled(false);
-    m_UpBut.addActionListener(this);
-    m_DownBut.setEnabled(false);
-    m_DownBut.addActionListener(this);
     
     m_List.addListSelectionListener(new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
@@ -276,12 +238,6 @@ public class AlgorithmListPanel
     constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
     constraints.gridwidth=1;constraints.gridheight=1;
     bottomLab.add(m_SaveOptionsBut,constraints);
-    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    bottomLab.add(m_UpBut,constraints);
-    constraints.gridx=3;constraints.gridy=0;constraints.weightx=5;
-    constraints.gridwidth=1;constraints.gridheight=1;
-    bottomLab.add(m_DownBut,constraints);
 
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
@@ -310,14 +266,10 @@ public class AlgorithmListPanel
     m_DeleteBut.setEnabled((m_AlgorithmListModel.size() > 0));
     m_LoadOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
     m_SaveOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
-    m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
-    m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
   }
 
   /**
    * Add a new algorithm to the list.
-   * 
-   * @param newScheme	the new scheme to add
    */
   private void addNewAlgorithm(Classifier newScheme) {
 
@@ -336,8 +288,6 @@ public class AlgorithmListPanel
   /**
    * sets the state of the buttons according to the selection state of the
    * JList
-   * 
-   * @param e		the event
    */
   private void setButtons(ListSelectionEvent e) {
     if (e.getSource() == m_List) {
@@ -346,8 +296,6 @@ public class AlgorithmListPanel
       m_EditBut.setEnabled(m_List.getSelectedIndices().length == 1);
       m_LoadOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
       m_SaveOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
-      m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
-      m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
     }
   }
 
@@ -400,8 +348,6 @@ public class AlgorithmListPanel
         m_DeleteBut.setEnabled(false);
         m_LoadOptionsBut.setEnabled(false);
         m_SaveOptionsBut.setEnabled(false);
-        m_UpBut.setEnabled(false);
-        m_DownBut.setEnabled(false);
       }
 
       Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
@@ -442,24 +388,6 @@ public class AlgorithmListPanel
           }
         }
       }
-    } 
-    else if (e.getSource() == m_UpBut) {
-      JListHelper.moveUp(m_List);
-      
-      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
-      for (int i=0; i<cArray.length; i++) {
-	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
-      }
-      m_Exp.setPropertyArray(cArray); 
-    }
-    else if (e.getSource() == m_DownBut) {
-      JListHelper.moveDown(m_List);
-
-      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
-      for (int i=0; i<cArray.length; i++) {
-	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
-      }
-      m_Exp.setPropertyArray(cArray); 
     }
   }
 

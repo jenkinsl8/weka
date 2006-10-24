@@ -36,7 +36,7 @@ import java.io.*;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class SparseInstance extends Instance {
 
@@ -487,18 +487,6 @@ public class SparseInstance extends Instance {
 			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
 				      value((int)valueSparse(i))));
 	    } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));
-	      throw new Error("This should never happen!");
-	    }
-	  } else if (m_Dataset.attribute(m_Indices[i]).isRelationValued()) {
-	    try {
-	      text.append(m_Indices[i] + " " +
-			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
-				      relation((int)valueSparse(i)).
-                                      stringWithoutHeader()));
-            } catch (Exception e) {
               e.printStackTrace();
               System.err.println(new Instances(m_Dataset, 0));
               System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));

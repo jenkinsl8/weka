@@ -21,54 +21,35 @@
  */
 package weka.clusterers;
 
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.experiment.Stats;
 import weka.classifiers.rules.DecisionTable;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the k means algorithm
- * <p/>
- <!-- globalinfo-end -->
+ * Simple k means clustering class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 10)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
- * @see RandomizableClusterer
+ * @version $Revision: 1.19.2.4 $
+ * @see Clusterer
+ * @see OptionHandler
  */
-public class SimpleKMeans 
-  extends RandomizableClusterer 
-  implements NumberOfClustersRequestable, WeightedInstancesHandler {
+public class SimpleKMeans extends Clusterer 
+  implements NumberOfClustersRequestable,
+	     OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -3235809600124455376L;
-  
   /**
    * replace missing values in training instances
    */
@@ -102,6 +83,11 @@ public class SimpleKMeans
   private int [] m_ClusterSizes;
 
   /**
+   * random seed
+   */
+  private int m_Seed = 10;
+
+  /**
    * attribute min values
    */
   private double [] m_Min;
@@ -116,21 +102,8 @@ public class SimpleKMeans
    */
   private int m_Iterations = 0;
 
-  /**
-   * Holds the squared errors for all clusters
-   */
   private double [] m_squaredErrors;
 
-  /**
-   * the default constructor
-   */
-  public SimpleKMeans() {
-    super();
-    
-    m_SeedDefault = 10;
-    setSeed(m_SeedDefault);
-  }
-  
   /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
@@ -141,35 +114,19 @@ public class SimpleKMeans
   }
 
   /**
-   * Returns default capabilities of the clusterer.
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    return result;
-  }
-
-  /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_Iterations = 0;
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);
@@ -190,7 +147,7 @@ public class SimpleKMeans
       updateMinMax(instances.instance(i));
     }
     
-    Random RandomO = new Random(getSeed());
+    Random RandomO = new Random(m_Seed);
     int instIndex;
     HashMap initC = new HashMap();
     DecisionTable.hashKey hk = null;
@@ -308,7 +265,7 @@ public class SimpleKMeans
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an interger
    * if the class is enumerated, otherwise the predicted value
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -322,8 +279,8 @@ public class SimpleKMeans
   /**
    * Calculates the distance between two instances
    *
-   * @param first the first instance
-   * @param second the second instance
+   * @param test the first instance
+   * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   private double distance(Instance first, Instance second) {  
@@ -374,11 +331,6 @@ public class SimpleKMeans
   /**
    * Computes the difference between two given attribute
    * values.
-   * 
-   * @param index the attribute index
-   * @param val1 the first value
-   * @param val2 the second value
-   * @return the difference
    */
   private double difference(int index, double val1, double val2) {
 
@@ -426,7 +378,6 @@ public class SimpleKMeans
    *
    * @param x the value to be normalized
    * @param i the attribute's index
-   * @return the normalized value
    */
   private double norm(double x, int i) {
 
@@ -467,7 +418,7 @@ public class SimpleKMeans
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters() throws Exception {
@@ -475,23 +426,30 @@ public class SimpleKMeans
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options.. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -N <number of clusters> <br>
+   * Specify the number of clusters to generate. If omitted,
+   * EM will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
    *
    * @return an enumeration of all the available options.
-   */
+   *
+   **/
   public Enumeration listOptions () {
-    Vector result = new Vector();
+    Vector newVector = new Vector(2);
 
-    result.addElement(new Option(
-	"\tnumber of clusters.\n"
-	+ "\t(default 2).", 
-	"N", 1, "-N <num>"));
+     newVector.addElement(new Option("\tnumber of clusters. (default = 2)." 
+				    , "N", 1, "-N <num>"));
+     newVector.addElement(new Option("\trandom number seed.\n (default 10)"
+				     , "S", 1, "-S <num>"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
-
-     return  result.elements();
+     return  newVector.elements();
   }
 
   /**
@@ -507,7 +465,6 @@ public class SimpleKMeans
    * set the number of clusters to generate
    *
    * @param n the number of clusters to generate
-   * @throws Exception if number of clusters is negative
    */
   public void setNumClusters(int n) throws Exception {
     if (n <= 0) {
@@ -524,26 +481,42 @@ public class SimpleKMeans
   public int getNumClusters() {
     return m_NumClusters;
   }
+    
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "random number seed";
+  }
+
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 10)</pre>
-   * 
-   <!-- options-end -->
+   * Set the random number seed
    *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @param s the seed
    */
+  public void setSeed (int s) {
+    m_Seed = s;
+  }
+
+
+  /**
+   * Get the random number seed
+   *
+   * @return the seed
+   */
+  public int getSeed () {
+    return  m_Seed;
+  }
+
+  /**
+   * Parses a given list of options.
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
 
@@ -552,8 +525,12 @@ public class SimpleKMeans
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
     }
+
+    optionString = Utils.getOption('S', options);
     
-    super.setOptions(options);
+    if (optionString.length() != 0) {
+      setSeed(Integer.parseInt(optionString));
+    }
   }
 
   /**
@@ -562,20 +539,19 @@ public class SimpleKMeans
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
+    String[] options = new String[4];
+    int current = 0;
+    
+    options[current++] = "-N";
+    options[current++] = "" + getNumClusters();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
+    
+    while (current < options.length) {
+      options[current++] = "";
+    }
 
-    result = new Vector();
-
-    result.add("-N");
-    result.add("" + getNumClusters());
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return  options;
   }
 
   /**
@@ -633,49 +609,22 @@ public class SimpleKMeans
     return temp.toString();
   }
 
-  /**
-   * Gets the the cluster centroids
-   * 
-   * @return		the cluster centroids
-   */
   public Instances getClusterCentroids() {
     return m_ClusterCentroids;
   }
 
-  /**
-   * Gets the standard deviations of the numeric attributes in each cluster
-   * 
-   * @return		the standard deviations of the numeric attributes 
-   * 			in each cluster
-   */
   public Instances getClusterStandardDevs() {
     return m_ClusterStdDevs;
   }
 
-  /**
-   * Returns for each cluster the frequency counts for the values of each 
-   * nominal attribute
-   * 
-   * @return		the counts
-   */
   public int [][][] getClusterNominalCounts() {
     return m_ClusterNominalCounts;
   }
 
-  /**
-   * Gets the squared error for all clusters
-   * 
-   * @return		the squared error
-   */
   public double getSquaredError() {
     return Utils.sum(m_squaredErrors);
   }
 
-  /**
-   * Gets the number of instances in each cluster
-   * 
-   * @return		The number of instances in each cluster
-   */
   public int [] getClusterSizes() {
     return m_ClusterSizes;
   }
@@ -687,6 +636,13 @@ public class SimpleKMeans
    * -t training file [-N number of clusters]
    */
   public static void main (String[] argv) {
-    runClusterer(new SimpleKMeans(), argv);
+    try {
+      System.out.println(ClusterEvaluation.
+			 evaluateClusterer(new SimpleKMeans(), argv));
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
   }
 }

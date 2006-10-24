@@ -33,7 +33,7 @@ import weka.filters.AbstractTimeSeriesFilterTest;
  * java weka.filters.unsupervised.attribute.TimeSeriesDeltaTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class TimeSeriesDeltaTest extends AbstractTimeSeriesFilterTest {
 

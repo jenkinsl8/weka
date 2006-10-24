@@ -51,7 +51,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.18.2.7 $
  */
 public class DatabaseUtils
   implements Serializable {
@@ -155,10 +155,10 @@ public class DatabaseUtils
 
     try {
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-
+      
       // Register the drivers in jdbc DriverManager
       String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
-
+      
       if (drivers == null) {
         throw new Exception("No jdbc drivers specified");
       }
@@ -176,7 +176,7 @@ public class DatabaseUtils
         catch (Exception e) {
           result = false;
         }
-        if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
+        if (!result && !DRIVERS_ERRORS.contains(driver))
           System.err.println(
               "Trying to add JDBC driver: " + driver 
               + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));

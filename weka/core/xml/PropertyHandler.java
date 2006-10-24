@@ -30,7 +30,7 @@ import java.util.Hashtable;
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class PropertyHandler {
    /** 
