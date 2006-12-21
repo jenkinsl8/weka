@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class DatabaseConnection 
   extends DatabaseUtils {

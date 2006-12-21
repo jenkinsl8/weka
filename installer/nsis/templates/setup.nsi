@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.7 $
+# Version: $Revision: 1.3.2.3 $
 
 Name Weka
 
@@ -130,16 +130,10 @@ SectionEnd
 # associate .arff with WEKA
 Section "Associate Files" SectionAssociations
     SectionIn 1
-    # ARFF
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
     WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
-    # XRFF
-    WriteRegStr HKCR ".xrff" "" "XRFFDataFile"
-    WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
-    WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
 SectionEnd
 
 # Start: JRE
@@ -214,8 +208,6 @@ Section /o un.Main UNSEC0000
     DeleteRegValue HKLM "${REGKEY}\Components" Main
     DeleteRegKey HKCR ".arff"
     DeleteRegKey HKCR "ARFFDataFile"
-    DeleteRegKey HKCR ".xrff"
-    DeleteRegKey HKCR "XRFFDataFile"
 SectionEnd
 
 Section un.post UNSEC0001

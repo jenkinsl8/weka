@@ -15,7 +15,7 @@
  */
 
 /*
- * HillClimber.java
+ * TabuSearch.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
@@ -24,76 +24,29 @@ package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
-
+import weka.core.*;
+import java.util.*;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
-/** 
- <!-- globalinfo-start -->
- * This Bayes Network learning algorithm uses a hill climbing algorithm adding, deleting and reversing arcs. The search is not restricted by an order on the variables (unlike K2). The difference with B and B2 is that this hill climber also considers arrows part of the naive Bayes structure for deletion.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;nr of parents&gt;
- *  Maximum number of parents</pre>
- * 
- * <pre> -R
- *  Use arc reversal operation.
- *  (default false)</pre>
- * 
- * <pre> -N
- *  Initial structure is empty (instead of Naive Bayes)</pre>
- * 
- * <pre> -mbc
- *  Applies a Markov Blanket correction to the network structure, 
- *  after a network structure is learned. This ensures that all 
- *  nodes in the network are part of the Markov blanket of the 
- *  classifier node.</pre>
- * 
- * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
- *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
- * 
- * <pre> -Q
- *  Use probabilistic or 0/1 scoring.
- *  (default probabilistic scoring)</pre>
- * 
- <!-- options-end -->
+/** HillClimber implements hill climbing using local search 
+ * for learning Bayesian network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * Version: $Revision: 1.4.2.1 $
  */
-public class HillClimber 
-    extends GlobalScoreSearchAlgorithm {
+public class HillClimber extends GlobalScoreSearchAlgorithm {
 
-    /** for serialization */
-    static final long serialVersionUID = -3885042888195820149L;
-  
-  /** 
-   * the Operation class contains info on operations performed
-   * on the current Bayesian network.
-   */
-    class Operation 
-    	implements Serializable {
-      
-      	/** for serialization */
-        static final long serialVersionUID = -2934970456587374967L;
-      
+	/** the Operation class contains info on operations performed
+	 * on the current Bayesian network.
+	 */
+    class Operation implements Serializable {
     	// constants indicating the type of an operation
     	final static int OPERATION_ADD = 0;
     	final static int OPERATION_DEL = 1;
     	final static int OPERATION_REVERSE = 2;
-
     	/** c'tor **/
         public Operation() {
         }
-        
 		/** c'tor + initializers
 		 * 
 		 * @param nTail
@@ -106,7 +59,7 @@ public class HillClimber
 			m_nOperation = nOperation;
 		}
 		/** compare this operation with another
-		 * @param other operation to compare with
+		 * @param other: operation to compare with
 		 * @return true if operation is the same
 		 */
 		public boolean equals(Operation other) {
@@ -130,14 +83,10 @@ public class HillClimber
     /** use the arc reversal operator **/
     boolean m_bUseArcReversal = false;
 
-    /**
-     * search determines the network structure/graph of the network
-     * with the Taby algorithm.
-     * 
-     * @param bayesNet the network to search
-     * @param instances the instances to work with
-     * @throws Exception if something goes wrong
-     */
+	/**
+	* search determines the network structure/graph of the network
+	* with the Taby algorithm.
+	**/
     protected void search(BayesNet bayesNet, Instances instances) throws Exception {
     	m_BayesNet = bayesNet;
 		double fScore = calcScore(bayesNet);
@@ -155,21 +104,19 @@ public class HillClimber
 	/** check whether the operation is not in the forbidden.
 	 * For base hill climber, there are no restrictions on operations,
 	 * so we always return true.
-	 * @param oOperation operation to be checked
+	 * @param oOperation: operation to be checked
 	 * @return true if operation is not in the tabu list
 	 */
 	boolean isNotTabu(Operation oOperation) {
 		return true;
 	} // isNotTabu
 
-	/** 
-	 * getOptimalOperation finds the optimal operation that can be performed
+	/** getOptimalOperation finds the optimal operation that can be performed
 	 * on the Bayes network that is not in the tabu list.
-	 * 
-	 * @param bayesNet Bayes network to apply operation on
-	 * @param instances data set to learn from
+	 * @param bayesNet: Bayes network to apply operation on
+	 * @param instances: data set to learn from
 	 * @return optimal operation found
-	 * @throws Exception if something goes wrong
+	 * @throws Exception
 	 */
     Operation getOptimalOperation(BayesNet bayesNet, Instances instances) throws Exception {
         Operation oBestOperation = new Operation();
@@ -193,11 +140,10 @@ public class HillClimber
 
 	/** performOperation applies an operation 
 	 * on the Bayes network and update the cache.
-	 * 
-	 * @param bayesNet Bayes network to apply operation on
-	 * @param instances data set to learn from
-	 * @param oOperation operation to perform
-	 * @throws Exception if something goes wrong
+	 * @param bayesNet: Bayes network to apply operation on
+	 * @param instances: data set to learn from
+	 * @param oOperation: operation to perform
+	 * @throws Exception
 	 */
 	void performOperation(BayesNet bayesNet, Instances instances, Operation oOperation) throws Exception {
 		// perform operation
@@ -224,41 +170,24 @@ public class HillClimber
 		}
 	} // performOperation
 
-	/**
-	 * 
-	 * @param bayesNet
-	 * @param iHead
-	 * @param iTail
-	 * @param instances
-	 */
+
 	void applyArcAddition(BayesNet bayesNet, int iHead, int iTail, Instances instances) {
 		ParentSet bestParentSet = bayesNet.getParentSet(iHead);
 		bestParentSet.addParent(iTail, instances);
 	} // applyArcAddition
 
-	/**
-	 * 
-	 * @param bayesNet
-	 * @param iHead
-	 * @param iTail
-	 * @param instances
-	 */
 	void applyArcDeletion(BayesNet bayesNet, int iHead, int iTail, Instances instances) {
 		ParentSet bestParentSet = bayesNet.getParentSet(iHead);
 		bestParentSet.deleteParent(iTail, instances);
 	} // applyArcAddition
 
 
-	/** 
-	 * find best (or least bad) arc addition operation
-	 * 
-	 * @param bayesNet Bayes network to add arc to
-	 * @param instances data set
-	 * @param oBestOperation
+	/** find best (or least bad) arc addition operation
+	 * @param bayesNet: Bayes network to add arc to
+	 * @param instances: data set
 	 * @return Operation containing best arc to add, or null if no arc addition is allowed 
 	 * (this can happen if any arc addition introduces a cycle, or all parent sets are filled
 	 * up to the maximum nr of parents).
-	 * @throws Exception if something goes wrong
 	 */
 	Operation findBestArcToAdd(BayesNet bayesNet, Instances instances, Operation oBestOperation) throws Exception {
 		int nNrOfAtts = instances.numAttributes();
@@ -282,15 +211,11 @@ public class HillClimber
 		return oBestOperation;
 	} // findBestArcToAdd
 
-	/** 
-	 * find best (or least bad) arc deletion operation
-	 * 
-	 * @param bayesNet Bayes network to delete arc from
-	 * @param instances data set
-	 * @param oBestOperation
+	/** find best (or least bad) arc deletion operation
+	 * @param bayesNet: Bayes network to delete arc from
+	 * @param instances: data set
 	 * @return Operation containing best arc to delete, or null if no deletion can be made 
 	 * (happens when there is no arc in the network yet).
-	 * @throws Exception of something goes wrong
 	 */
 	Operation findBestArcToDelete(BayesNet bayesNet, Instances instances, Operation oBestOperation) throws Exception {
 		int nNrOfAtts = instances.numAttributes();
@@ -311,16 +236,12 @@ public class HillClimber
 		return oBestOperation;
 	} // findBestArcToDelete
 
-	/** 
-	 * find best (or least bad) arc reversal operation
-	 * 
-	 * @param bayesNet Bayes network to reverse arc in
-	 * @param instances data set
-	 * @param oBestOperation
+	/** find best (or least bad) arc reversal operation
+	 * @param bayesNet: Bayes network to reverse arc in
+	 * @param instances: data set
 	 * @return Operation containing best arc to reverse, or null if no reversal is allowed
 	 * (happens if there is no arc in the network yet, or when any such reversal introduces
 	 * a cycle).
-	 * @throws Exception if something goes wrong
 	 */
 	Operation findBestArcToReverse(BayesNet bayesNet, Instances instances, Operation oBestOperation) throws Exception {
 		int nNrOfAtts = instances.numAttributes();
@@ -349,18 +270,20 @@ public class HillClimber
 	
 
 	/**
-	 * Sets the max number of parents
+	 * Method declaration
 	 *
-	 * @param nMaxNrOfParents the max number of parents
+	 * @param nMaxNrOfParents
+	 *
 	 */
 	public void setMaxNrOfParents(int nMaxNrOfParents) {
 	  m_nMaxNrOfParents = nMaxNrOfParents;
 	} 
 
 	/**
-	 * Gets the max number of parents.
+	 * Method declaration
 	 *
-	 * @return the max number of parents
+	 * @return
+	 *
 	 */
 	public int getMaxNrOfParents() {
 	  return m_nMaxNrOfParents;
@@ -374,9 +297,9 @@ public class HillClimber
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(2);
 
-		newVector.addElement(new Option("\tMaximum number of parents", "P", 1, "-P <nr of parents>"));
+		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
-		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)", "N", 0, "-N"));
+		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", "N", 0, "-N"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -386,38 +309,12 @@ public class HillClimber
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. <p/>
+	 * Parses a given list of options. Valid options are:<p>
 	 *
-	 <!-- options-start -->
-	 * Valid options are: <p/>
-	 * 
-	 * <pre> -P &lt;nr of parents&gt;
-	 *  Maximum number of parents</pre>
-	 * 
-	 * <pre> -R
-	 *  Use arc reversal operation.
-	 *  (default false)</pre>
-	 * 
-	 * <pre> -N
-	 *  Initial structure is empty (instead of Naive Bayes)</pre>
-	 * 
-	 * <pre> -mbc
-	 *  Applies a Markov Blanket correction to the network structure, 
-	 *  after a network structure is learned. This ensures that all 
-	 *  nodes in the network are part of the Markov blanket of the 
-	 *  classifier node.</pre>
-	 * 
-	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
-	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
-	 * 
-	 * <pre> -Q
-	 *  Use probabilistic or 0/1 scoring.
-	 *  (default probabilistic scoring)</pre>
-	 * 
-	 <!-- options-end -->
+	 * For other options see search algorithm.
 	 *
 	 * @param options the list of options as an array of strings
-	 * @throws Exception if an option is not supported
+	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		setUseArcReversal(Utils.getFlag('R', options));
@@ -467,18 +364,20 @@ public class HillClimber
 	} // getOptions
 
 	/**
-	 * Sets whether to init as naive bayes
+	 * Method declaration
 	 *
-	 * @param bInitAsNaiveBayes whether to init as naive bayes
+	 * @param bInitAsNaiveBayes
+	 *
 	 */
 	public void setInitAsNaiveBayes(boolean bInitAsNaiveBayes) {
 	  m_bInitAsNaiveBayes = bInitAsNaiveBayes;
 	} 
 
 	/**
-	 * Gets whether to init as naive bayes
+	 * Method declaration
 	 *
-	 * @return whether to init as naive bayes
+	 * @return
+	 *
 	 */
 	public boolean getInitAsNaiveBayes() {
 	  return m_bInitAsNaiveBayes;
@@ -505,8 +404,7 @@ public class HillClimber
 	public String globalInfo() {
 	  return "This Bayes Network learning algorithm uses a hill climbing algorithm " +
 	  "adding, deleting and reversing arcs. The search is not restricted by an order " +
-	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +	  
-          "climber also considers arrows part of the naive Bayes structure for deletion.";
+	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +	  "climber also considers arrows part of the naive Bayes structure for deletion.";
 	} // globalInfo
 
 	/**

@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
  * java weka.filters.RemoveFoldsTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class RemoveFoldsTest extends AbstractFilterTest {
   

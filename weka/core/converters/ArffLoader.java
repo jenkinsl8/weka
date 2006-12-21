@@ -22,45 +22,39 @@
 
 package weka.core.converters;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
-import java.util.zip.GZIPInputStream;
+import weka.core.Instance;
+import weka.core.Instances;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in arff (attribute relation file format) format.
- * <p/>
- <!-- globalinfo-end -->
+ * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
-public class ArffLoader 
-  extends AbstractFileLoader 
-  implements BatchConverter, IncrementalConverter, URLSourcedLoader {
+public class ArffLoader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2726929550544048587L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
 
-  /** the extension for compressed files */
-  public static String FILE_EXTENSION_COMPRESSED = FILE_EXTENSION + ".gz";
+  /**
+   * Holds the determined structure (header) of the data set.
+   */
+  //@ protected depends: model_structureDetermined -> m_structure;
+  //@ protected represents: model_structureDetermined <- (m_structure != null);
+  protected transient Instances m_structure = null;
 
-  /** the url */
-  protected String m_URL = "http://";
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
   /**
    * The reader for the source file.
@@ -87,15 +81,6 @@ public class ArffLoader
   }
 
   /**
-   * Gets all the file extensions used for this type of file
-   *
-   * @return the file extensions
-   */
-  public String[] getFileExtensions() {
-    return new String[]{FILE_EXTENSION, FILE_EXTENSION_COMPRESSED};
-  }
-
-  /**
    * Returns a description of the file type.
    *
    * @return a short file description
@@ -106,34 +91,39 @@ public class ArffLoader
 
   /**
    * Resets the Loader ready to read a new data set
-   * 
-   * @throws IOException if something goes wrong
    */
-  public void reset() throws IOException {
+  public void reset() throws Exception {
+
     m_structure = null;
+    //    m_sourceReader = null;
     setRetrieval(NONE);
-    
-    if (m_File != null && (new File(m_File)).isFile()) {
+    if (m_File != null) {
       setFile(new File(m_File));
-    } else if (m_URL != null & !m_URL.equals("http://")) {
-      setURL(m_URL);
     }
   }
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
-   * the supplied url.
+   * the supplied File object.
    *
-   * @param url the source url.
-   * @throws IOException if an error occurs
+   * @param file the source file.
+   * @exception IOException if an error occurs
    */
-  public void setSource(URL url) throws IOException {
+  public void setSource(File file) throws IOException {
+    
     m_structure = null;
     setRetrieval(NONE);
-    
-    setSource(url.openStream());
 
-    m_URL = url.toString();
+    if (file == null) {
+      throw new IOException("Source file object is null!");
+    }
+
+    try {
+      setSource(new FileInputStream(file));
+    } catch (FileNotFoundException ex) {
+      throw new IOException("File not found");
+    }
+    m_File = file.getAbsolutePath();
   }
   
 
@@ -150,7 +140,7 @@ public class ArffLoader
    * sets the source File
    *
    * @param file the source file
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public void setFile(File file) throws IOException {
     m_File = file.getAbsolutePath();
@@ -159,66 +149,13 @@ public class ArffLoader
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
-   *
-   * @param file 		the source file.
-   * @throws IOException 	if an error occurs
-   */
-  public void setSource(File file) throws IOException {
-    m_structure    = null;
-    
-    setRetrieval(NONE);
-
-    if (file == null)
-      throw new IOException("Source file object is null!");
-
-    try {
-      if (file.getName().endsWith(FILE_EXTENSION_COMPRESSED))
-	setSource(new GZIPInputStream(new FileInputStream(file)));
-      else
-	setSource(new FileInputStream(file));
-    }
-    catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
-    
-    m_sourceFile = file;
-    m_File       = file.getAbsolutePath();
-  }
-
-  /**
-   * Set the url to load from
-   *
-   * @param url the url to load from
-   * @throws IOException if the url can't be set.
-   */
-  public void setURL(String url) throws IOException {
-    m_URL = url;
-    setSource(new URL(url));
-  }
-
-  /**
-   * Return the current url
-   *
-   * @return the current url
-   */
-  public String retrieveURL() {
-    return m_URL;
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
    * the supplied InputStream.
    *
    * @param in the source InputStream.
-   * @throws IOException always thrown.
+   * @exception IOException always thrown.
    */
   public void setSource(InputStream in) throws IOException {
-    // m_File = null;
-    m_File = (new File(System.getProperty("user.dir"))).
-      getAbsolutePath();
-    m_URL = "http://";
-
+    m_File = null;
     m_sourceReader = new BufferedReader(new InputStreamReader(in));
   }
 
@@ -227,7 +164,7 @@ public class ArffLoader
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
 
@@ -239,7 +176,7 @@ public class ArffLoader
       try {
 	m_structure = new Instances(m_sourceReader, 1);
       } catch (Exception ex) {
-	throw new IOException("Unable to determine structure as arff (Reason: " + ex.toString() + ").");
+	throw new IOException("Unable to determine structure as arff.");
       }
     }
 
@@ -252,7 +189,7 @@ public class ArffLoader
    * the rest of the data set.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if there is no source or parsing fails
+   * @exception IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
 
@@ -293,7 +230,7 @@ public class ArffLoader
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @throws IOException if there is an error during parsing
+   * @exception IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 
@@ -334,6 +271,25 @@ public class ArffLoader
    * @param args should contain the name of an input file.
    */
   public static void main(String [] args) {
-    runFileLoader(new ArffLoader(), args);
+    if (args.length > 0) {
+      File inputfile;
+      inputfile = new File(args[0]);
+      try {
+	ArffLoader atf = new ArffLoader();
+	atf.setSource(inputfile);
+	System.out.println(atf.getStructure());
+	Instance temp;
+	do {
+	  temp = atf.getNextInstance();
+	  if (temp != null) {
+	    System.out.println(temp);
+	  }
+	} while (temp != null);
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	}
+    } else {
+      System.err.println("Usage:\n\tArffLoader <file.arff>\n");
+    }
   }
 }

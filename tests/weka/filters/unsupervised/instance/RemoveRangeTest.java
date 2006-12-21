@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
  * java weka.filters.RemoveRangeTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class RemoveRangeTest extends AbstractFilterTest {
   

@@ -22,8 +22,8 @@
 
 package weka.core;
 
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
  * Implements a fast vector class without synchronized
@@ -31,7 +31,7 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ */
+ * @version $Revision: 1.11 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -382,7 +382,7 @@ public class FastVector implements Copyable, Serializable {
   /** 
    * Returns all the elements of this vector as an array
    *
-   * @return an array containing all the elements of this vector
+   * @param an array containing all the elements of this vector
    */
   public final Object [] toArray() {
 

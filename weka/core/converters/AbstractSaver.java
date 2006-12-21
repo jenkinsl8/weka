@@ -22,24 +22,24 @@
 
 package weka.core.converters;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.OptionHandler;
+import weka.core.FastVector;
+import weka.core.Option;
+import weka.core.Utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Enumeration;
+import java.io.*;
 
 /**
  * Abstract class for Saver
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public abstract class AbstractSaver
-  implements Saver, CapabilitiesHandler {
+public abstract class AbstractSaver implements Saver {
   
   
   /** The write modes */
@@ -126,11 +126,7 @@ public abstract class AbstractSaver
    * @param instances the instances
    */
   public void setInstances(Instances instances){
-
-      Capabilities cap = getCapabilities();
-      if (!cap.test(instances))
-	throw new IllegalArgumentException(cap.getFailReason());
-    
+   
       if(m_retrieval == INCREMENTAL){
           if(setStructure(instances) == CANCEL)
               cancel();
@@ -172,21 +168,6 @@ public abstract class AbstractSaver
 
     throw new IOException("Writing to an outputstream not supported");
   }
-
-  /** 
-   * Returns the Capabilities of this saver. Derived savers have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
   
   /** Sets the strcuture of the instances for the first step of incremental saving.
    * The instances only need to have a header.
@@ -194,10 +175,6 @@ public abstract class AbstractSaver
    * @return the appropriate write mode
    */  
   public int setStructure(Instances headerInfo){
-  
-      Capabilities cap = getCapabilities();
-      if (!cap.test(headerInfo))
-	throw new IllegalArgumentException(cap.getFailReason());
   
       if(m_writeMode == WAIT && headerInfo != null){
         m_instances = headerInfo;

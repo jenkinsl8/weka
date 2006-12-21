@@ -22,36 +22,16 @@
 
 
 package weka.attributeSelection;
-import weka.clusterers.Clusterer;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * Abstract unsupervised attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public abstract class UnsupervisedSubsetEvaluator 
   extends SubsetEvaluator{
-
-  /**
-   * Return the number of clusters used by the subset evaluator
-   *
-   * @return the number of clusters used
-   * @exception Exception if an error occurs
-   */
-  public abstract int getNumClusters() throws Exception;
-
-  /**
-   * Get the clusterer
-   *
-   * @return the clusterer
-   */
-  public abstract Clusterer getClusterer();
-
-  /**
-   * Set the clusterer to use
-   *
-   * @param d the clusterer to use
-   */
-  public abstract void setClusterer(Clusterer d);
 }

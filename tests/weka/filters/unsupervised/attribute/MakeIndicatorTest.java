@@ -4,6 +4,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
@@ -17,7 +18,7 @@ import junit.framework.TestSuite;
  * java weka.filters.MakeIndicatorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class MakeIndicatorTest extends AbstractFilterTest {
   
@@ -31,6 +32,19 @@ public class MakeIndicatorTest extends AbstractFilterTest {
     return f;
   }
 
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    ((MakeIndicator) result.getFilter()).setAttributeIndex("3");
+    
+    return result;
+  }
 
   public void testInvalidAttributeTypes() {
     Instances icopy = new Instances(m_Instances);
@@ -105,30 +119,6 @@ public class MakeIndicatorTest extends AbstractFilterTest {
              ==
              (result.instance(i).value(1) == 1));
     }
-  }
-  
-  /**
-   * tests the filter in conjunction with the FilteredClassifier
-   */
-  public void testFilteredClassifier() {
-    try {
-      Instances data = getFilteredClassifierData();
-
-      for (int i = 0; i < data.numAttributes(); i++) {
-	if (data.classIndex() == i)
-	  continue;
-	if (data.attribute(i).isNominal()) {
-	  ((MakeIndicator) m_FilteredClassifier.getFilter()).setAttributeIndex(
-	      "" + (i + 1));
-	  break;
-	}
-      }
-    }
-    catch (Exception e) {
-      fail("Problem setting up test for FilteredClassifier: " + e.toString());
-    }
-    
-    super.testFilteredClassifier();
   }
 
   public static Test suite() {

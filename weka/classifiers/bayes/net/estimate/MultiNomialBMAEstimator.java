@@ -17,66 +17,29 @@
 package weka.classifiers.bayes.net.estimate;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.search.local.K2;
-import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Attribute;
 import weka.core.Option;
-import weka.core.Statistics;
 import weka.core.Utils;
+import weka.core.Statistics;
 import weka.estimators.Estimator;
+import weka.classifiers.bayes.net.search.local.K2;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Multinomial BMA Estimator.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -k2
- *  Whether to use K2 prior.
- * </pre>
- * 
- * <pre> -A &lt;alpha&gt;
- *  Initial count (alpha)
- * </pre>
- * 
- <!-- options-end -->
- * 
- * @version $Revision: 1.7 $
- * @author Remco Bouckaert (rrb@xm.co.nz)
+ * @version $Revision: 1.3.2.3 $
  */
-public class MultiNomialBMAEstimator 
-    extends BayesNetEstimator {
+public class MultiNomialBMAEstimator extends BayesNetEstimator {
 
-    /** for serialization */
-    static final long serialVersionUID = 8330705772601586313L;
-    
-    /** whether to use K2 prior */
     protected boolean m_bUseK2Prior = true;
-    
-    /**
-     * Returns a string describing this object
-     * @return a description of the classifier suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String globalInfo() {
-      return 
-      	  "Multinomial BMA Estimator.";
-    }
 
     /**
      * estimateCPTs estimates the conditional probability tables for the Bayes
      * Net using the network structure.
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception if number of parents doesn't fit (more than 1)
      */
     public void estimateCPTs(BayesNet bayesNet) throws Exception {
         initCPTs(bayesNet);
@@ -210,20 +173,15 @@ public class MultiNomialBMAEstimator
     /**
      * Updates the classifier with the given instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the new training instance to include in the model
-     * @throws Exception if the instance could not be incorporated in
+     * @exception Exception if the instance could not be incorporated in
      * the model.
      */
     public void updateClassifier(BayesNet bayesNet, Instance instance) throws Exception {
         throw new Exception("updateClassifier does not apply to BMA estimator");
     } // updateClassifier
 
-    /** 
-     * initCPTs reserves space for CPTs and set all counts to zero
-     * 
-     * @param bayesNet the bayes net to use
-     * @throws Exception doesn't apply
+    /** initCPTs reserves space for CPTs and set all counts to zero
      */
     public void initCPTs(BayesNet bayesNet) throws Exception {
         // Reserve sufficient memory
@@ -240,7 +198,6 @@ public class MultiNomialBMAEstimator
 
     /**
      * Sets the UseK2Prior.
-     * 
      * @param bUseK2Prior The bUseK2Prior to set
      */
     public void setUseK2Prior(boolean bUseK2Prior) {
@@ -251,10 +208,9 @@ public class MultiNomialBMAEstimator
      * Calculates the class membership probabilities for the given test
      * instance.
      * 
-     * @param bayesNet the bayes net to use
      * @param instance the instance to be classified
      * @return predicted class probability distribution
-     * @throws Exception if there is a problem generating the prediction
+     * @exception Exception if there is a problem generating the prediction
      */
     public double[] distributionForInstance(BayesNet bayesNet, Instance instance) throws Exception {
         Instances instances = bayesNet.m_Instances;
@@ -331,23 +287,10 @@ public class MultiNomialBMAEstimator
     } // listOptions
 
     /**
-     * Parses a given list of options. <p/>
-     *
-     <!-- options-start -->
-     * Valid options are: <p/>
-     * 
-     * <pre> -k2
-     *  Whether to use K2 prior.
-     * </pre>
-     * 
-     * <pre> -A &lt;alpha&gt;
-     *  Initial count (alpha)
-     * </pre>
-     * 
-     <!-- options-end -->
+     * Parses a given list of options. Valid options are:<p>
      * 
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         setUseK2Prior(Utils.getFlag("k2", options));

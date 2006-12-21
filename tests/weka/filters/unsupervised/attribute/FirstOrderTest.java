@@ -4,10 +4,9 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
@@ -19,7 +18,7 @@ import junit.framework.TestSuite;
  * java weka.filters.FirstOrderTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class FirstOrderTest extends AbstractFilterTest {
   
@@ -46,24 +45,22 @@ public class FirstOrderTest extends AbstractFilterTest {
     }
     return null;
   }
-  
+
   /**
-   * returns data generated for the FilteredClassifier test
+   * returns the configured FilteredClassifier.
    * 
-   * @return		the dataset for the FilteredClassifier
-   * @throws Exception	if generation of data fails
+   * @return the configured FilteredClassifier
    */
-  protected Instances getFilteredClassifierData() throws Exception{
-    TestInstances	test;
-    Instances		result;
-
-    test = new TestInstances();
-    test.setNumNominal(0);
-    test.setNumNumeric(6);
-    test.setClassType(Attribute.NOMINAL);
-    test.setClassIndex(TestInstances.CLASS_IS_LAST);
-
-    result = test.generate();
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    try {
+      ((FirstOrder) result.getFilter()).setAttributeIndices("2,4");
+    }
+    catch (Exception e) {
+      fail("Problem setting up FilteredClassifier");
+    }
     
     return result;
   }

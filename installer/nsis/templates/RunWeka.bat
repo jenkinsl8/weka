@@ -5,7 +5,7 @@ REM   RunWeka.bat <command>
 REM Run with option "-h" to see available commands
 REM
 REM Author:  FracPete (fracpete at waikato dot ac dot nz)
-REM Version: $Revision: 1.4 $
+REM Version: $Revision: 1.1.2.2 $
 
 set _cmd=%1
 set _java=javaw

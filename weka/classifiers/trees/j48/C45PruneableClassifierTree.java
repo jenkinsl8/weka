@@ -22,25 +22,18 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
+import weka.core.*;
 
 /**
  * Class for handling a tree structure that can
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.11 $
  */
 
-public class C45PruneableClassifierTree 
-  extends ClassifierTree {
+public class C45PruneableClassifierTree extends ClassifierTree{
 
-  /** for serialization */
-  static final long serialVersionUID = -4813820170260388194L;
-  
   /** True if the tree is to be pruned. */
   boolean m_pruneTheTree = false;
 
@@ -60,9 +53,7 @@ public class C45PruneableClassifierTree
    * @param toSelectLocModel selection method for local splitting model
    * @param pruneTree true if the tree is to be pruned
    * @param cf the confidence factor for pruning
-   * @param raiseTree
-   * @param cleanup
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public C45PruneableClassifierTree(ModelSelection toSelectLocModel,
 				    boolean pruneTree,float cf,
@@ -79,44 +70,19 @@ public class C45PruneableClassifierTree
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Method for building a pruneable classifier tree.
    *
-   * @param data the data for building the tree
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+   if (data.classAttribute().isNumeric())
+     throw new UnsupportedClassTypeException("Class is numeric!");
+   if (data.checkForStringAttributes()) {
+     throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+   }
+   data = new Instances(data);
+   data.deleteWithMissingClass();
    buildTree(data, m_subtreeRaising);
    collapse();
    if (m_pruneTheTree) {
@@ -156,7 +122,7 @@ public class C45PruneableClassifierTree
   /**
    * Prunes a tree using C4.5's pruning procedure.
    *
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void prune() throws Exception {
 
@@ -218,9 +184,7 @@ public class C45PruneableClassifierTree
   /**
    * Returns a newly created tree.
    *
-   * @param data the data to work with
-   * @return the new tree
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances data) throws Exception {
     
@@ -234,8 +198,6 @@ public class C45PruneableClassifierTree
 
   /**
    * Computes estimated errors for tree.
-   * 
-   * @return the estimated errors
    */
   private double getEstimatedErrors(){
 
@@ -254,9 +216,7 @@ public class C45PruneableClassifierTree
   /**
    * Computes estimated errors for one branch.
    *
-   * @param data the data to work with
-   * @return the estimated errors
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private double getEstimatedErrorsForBranch(Instances data) 
        throws Exception {
@@ -281,9 +241,6 @@ public class C45PruneableClassifierTree
 
   /**
    * Computes estimated errors for leaf.
-   * 
-   * @param theDistribution the distribution to use
-   * @return the estimated errors
    */
   private double getEstimatedErrorsForDistribution(Distribution 
 						   theDistribution){
@@ -298,8 +255,6 @@ public class C45PruneableClassifierTree
 
   /**
    * Computes errors of tree on training data.
-   * 
-   * @return the training errors
    */
   private double getTrainingErrors(){
 
@@ -317,8 +272,6 @@ public class C45PruneableClassifierTree
 
   /**
    * Method just exists to make program easier to read.
-   * 
-   * @return the local split model
    */
   private ClassifierSplitModel localModel(){
     
@@ -329,8 +282,7 @@ public class C45PruneableClassifierTree
    * Computes new distributions of instances for nodes
    * in tree.
    *
-   * @param data the data to compute the distributions for
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private void newDistribution(Instances data) throws Exception {
 

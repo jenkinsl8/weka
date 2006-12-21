@@ -23,89 +23,97 @@
 
 package weka.gui.explorer;
 
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.OptionHandler;
-import weka.core.SerializedObject;
+import weka.core.Attribute;
 import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.ListSelectorDialog;
+import weka.core.FastVector;
+import weka.core.SerializedObject;
+import weka.core.Drawable;
+import weka.clusterers.Clusterer;
+import weka.clusterers.ClusterEvaluation;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
+import weka.gui.SysErrLog;
+import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.Plot2D;
-import weka.gui.visualize.PlotData2D;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.SaveBuffer;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.Plot2D;
+import weka.gui.treevisualizer.*;
+import weka.gui.ListSelectorDialog;
+import weka.gui.ExtensionFileFilter;
 
+import java.util.Random;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
+import java.awt.Font;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
+
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import java.io.OutputStream;
+import java.io.ObjectOutputStream;
 import java.io.FileOutputStream;
+import java.util.zip.GZIPOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
+import java.io.FileInputStream;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextField;
-import javax.swing.JViewport;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JFrame;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import javax.swing.JCheckBox;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.Point;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
 import javax.swing.filechooser.FileFilter;
 
 /** 
@@ -117,15 +125,10 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.45.2.5 $
  */
-public class ClustererPanel
-  extends JPanel
-  implements CapabilitiesFilterChangeListener {
+public class ClustererPanel extends JPanel {
 
-  /** for serialization */
-  static final long serialVersionUID = -2474932792950820990L;
-  
   /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
 
@@ -237,7 +240,7 @@ public class ClustererPanel
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
   
   /**
@@ -259,7 +262,7 @@ public class ClustererPanel
     });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_ClustererEditor.setClassType(Clusterer.class);
-    m_ClustererEditor.setValue(ExplorerDefaults.getClusterer());
+    m_ClustererEditor.setValue(new weka.clusterers.EM());
     m_ClustererEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
@@ -290,11 +293,8 @@ public class ClustererPanel
     m_ClassCombo.setMinimumSize(COMBO_SIZE);
     m_ClassCombo.setEnabled(false);
 
-    m_PercentBut.setSelected(ExplorerDefaults.getClustererTestMode() == 2);
-    m_TrainBut.setSelected(ExplorerDefaults.getClustererTestMode() == 3);
-    m_TestSplitBut.setSelected(ExplorerDefaults.getClustererTestMode() == 4);
-    m_ClassesToClustersBut.setSelected(ExplorerDefaults.getClustererTestMode() == 5);
-    m_StorePredictionsBut.setSelected(ExplorerDefaults.getClustererStoreClustersForVis());
+    m_TrainBut.setSelected(true);
+    m_StorePredictionsBut.setSelected(true);
     updateRadioLinks();
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_TrainBut);
@@ -347,12 +347,6 @@ public class ClustererPanel
 	  }
 	}
       });
-    
-    m_ClassCombo.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	updateCapabilitiesFilter(m_ClustererEditor.getCapabilitiesFilter());
-      }
-    });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -552,9 +546,6 @@ public class ClustererPanel
       case Attribute.DATE:
 	type = "(Dat) ";
 	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
       default:
 	type = "(???) ";
       }
@@ -568,10 +559,7 @@ public class ClustererPanel
     m_StopBut.setEnabled(m_RunThread != null);
     m_ignoreBut.setEnabled(true);
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
-    if (inst.classIndex() == -1)
-      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
-    else
-      m_ClassCombo.setSelectedIndex(inst.classIndex());
+    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
     updateRadioLinks();
   }
 
@@ -585,7 +573,6 @@ public class ClustererPanel
 
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
-      sp.setReadIncrementally(false);
       m_Summary = sp.getSummary();
       if (m_TestInstances != null) {
 	sp.setInstances(m_TestInstances);
@@ -593,13 +580,11 @@ public class ClustererPanel
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
 	  m_TestInstances = sp.getInstances();
-	  m_TestInstances.setClassIndex(-1);  // make sure that no class attribute is set!
 	}
       });
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
-      sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
@@ -610,8 +595,7 @@ public class ClustererPanel
   /**
    * Sets up the structure for the visualizable instances. This dataset
    * contains the original attributes plus the clusterer's cluster assignments
-   * @param testInstances the instances that the clusterer has clustered
-   * @param eval the evaluation to use
+   * @param testInstancs the instances that the clusterer has clustered
    * @return a PlotData2D object encapsulating the visualizable instances. The    
    * instances contain one more attribute (predicted
    * cluster) than the testInstances
@@ -716,12 +700,8 @@ public class ClustererPanel
 	  } else {
 	    name += cname;
 	  }
-          String cmd = m_ClustererEditor.getValue().getClass().getName();
-          if (m_ClustererEditor.getValue() instanceof OptionHandler)
-            cmd += " " + Utils.joinOptions(((OptionHandler) m_ClustererEditor.getValue()).getOptions());
 	  try {
 	    m_Log.logMessage("Started " + cname);
-	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
@@ -1140,18 +1120,6 @@ public class ClustererPanel
     }
     resultListMenu.add(saveOutput);
     
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
-      deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
-      });
-    } else {
-      deleteOutput.setEnabled(false);
-    }
-    resultListMenu.add(deleteOutput);
-
     resultListMenu.addSeparator();
 
     JMenuItem loadModel = new JMenuItem("Load model");
@@ -1437,156 +1405,95 @@ public class ClustererPanel
    * things will happen if the data set is not compatible with the clusterer.
    *
    * @param name the name of the clusterer entry
-   * @param clusterer the clusterer to evaluate
-   * @param trainHeader the header of the training set
-   * @param ignoredAtts ignored attributes
+   * @param classifier the clusterer to evaluate
    */
-  protected void reevaluateModel(final String name, 
-                                 final Clusterer clusterer,
-				 final Instances trainHeader, 
-                                 final int[] ignoredAtts) {
+  protected void reevaluateModel(String name, Clusterer clusterer,
+				 Instances trainHeader, int[] ignoredAtts) {
 
-    if (m_RunThread == null) {
-      m_StartBut.setEnabled(false);
-      m_StopBut.setEnabled(true);
-      m_ignoreBut.setEnabled(false);
-      m_RunThread = new Thread() {
-          public void run() {
-            // Copy the current state of things
-            m_Log.statusMessage("Setting up...");
+    StringBuffer outBuff = m_History.getNamedBuffer(name);
+    Instances userTest = null;
 
-            StringBuffer outBuff = m_History.getNamedBuffer(name);
-            Instances userTest = null;
-
-            PlotData2D predData = null;
-            if (m_TestInstances != null) {
-              userTest = new Instances(m_TestInstances);
-            }
+    PlotData2D predData = null;
+    if (m_TestInstances != null) {
+      userTest = new Instances(m_TestInstances);
+    }
     
-            boolean saveVis = m_StorePredictionsBut.isSelected();
-            String grph = null;
+    boolean saveVis = m_StorePredictionsBut.isSelected();
+    String grph = null;
 
-            try {
-              if (userTest == null) {
-                throw new Exception("No user test set has been opened");
-              }
-              if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
-                throw new Exception("Train and test set are not compatible");
-              }
+    try {
+      if (userTest == null) {
+	throw new Exception("No user test set has been opened");
+      }
+      if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
+	throw new Exception("Train and test set are not compatible");
+      }
 
-              m_Log.statusMessage("Evaluating on test data...");
-              m_Log.logMessage("Re-evaluating clusterer (" + name + ") on test set");
-
-              m_Log.logMessage("Started reevaluate model");
-              if (m_Log instanceof TaskLogger) {
-                ((TaskLogger)m_Log).taskStarted();
-              }
-              ClusterEvaluation eval = new ClusterEvaluation();
-              eval.setClusterer(clusterer);
+      m_Log.statusMessage("Evaluating on test data...");
+      m_Log.logMessage("Re-evaluating clusterer (" + name + ") on test set");
+      ClusterEvaluation eval = new ClusterEvaluation();
+      eval.setClusterer(clusterer);
     
-              Instances userTestT = new Instances(userTest);
-              if (ignoredAtts != null) {
-                userTestT = removeIgnoreCols(userTestT, ignoredAtts);
-              }
+      Instances userTestT = new Instances(userTest);
+      if (ignoredAtts != null) {
+	userTestT = removeIgnoreCols(userTestT, ignoredAtts);
+      }
 
-              eval.evaluateClusterer(userTestT);
+      eval.evaluateClusterer(userTestT);
       
-              predData = setUpVisualizableInstances(userTest, eval);
+      predData = setUpVisualizableInstances(userTest, eval);
 
-              outBuff.append("\n=== Re-evaluation on test set ===\n\n");
-              outBuff.append("User supplied test set\n");  
-              outBuff.append("Relation:     " + userTest.relationName() + '\n');
-              outBuff.append("Instances:    " + userTest.numInstances() + '\n');
-              outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
-              if (trainHeader == null)
-                outBuff.append("NOTE - if test set is not compatible then results are "
-                               + "unpredictable\n\n");
+      outBuff.append("\n=== Re-evaluation on test set ===\n\n");
+      outBuff.append("User supplied test set\n");  
+      outBuff.append("Relation:     " + userTest.relationName() + '\n');
+      outBuff.append("Instances:    " + userTest.numInstances() + '\n');
+      outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
+      if (trainHeader == null)
+	outBuff.append("NOTE - if test set is not compatible then results are "
+		       + "unpredictable\n\n");
       
-              outBuff.append(eval.clusterResultsToString());
-              outBuff.append("\n");
-              m_History.updateResult(name);
-              m_Log.logMessage("Finished re-evaluation");
-              m_Log.statusMessage("OK");
-            } catch (Exception ex) {
-              ex.printStackTrace();
-              m_Log.logMessage(ex.getMessage());
-              JOptionPane.showMessageDialog(ClustererPanel.this,
-                                            "Problem evaluating clusterer:\n"
-                                            + ex.getMessage(),
-                                            "Evaluate clusterer",
-                                            JOptionPane.ERROR_MESSAGE);
-              m_Log.statusMessage("Problem evaluating clusterer");
+      outBuff.append(eval.clusterResultsToString());
+      outBuff.append("\n");
+      m_History.updateResult(name);
+      m_Log.logMessage("Finished re-evaluation");
+      m_Log.statusMessage("OK");
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      m_Log.logMessage(ex.getMessage());
+      JOptionPane.showMessageDialog(this,
+				    "Problem evaluating clusterer:\n"
+				    + ex.getMessage(),
+				    "Evaluate clusterer",
+				    JOptionPane.ERROR_MESSAGE);
+      m_Log.statusMessage("Problem evaluating clusterer");
 
-            } finally {
-              if (predData != null) {
-                m_CurrentVis = new VisualizePanel();
-                m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
-                m_CurrentVis.setLog(m_Log);
-                predData.setPlotName(name+" ("+userTest.relationName()+")");
+    } finally {
+      if (predData != null) {
+	m_CurrentVis = new VisualizePanel();
+	m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
+	m_CurrentVis.setLog(m_Log);
+	predData.setPlotName(name+" ("+userTest.relationName()+")");
 	
-                try {
-                  m_CurrentVis.addPlot(predData);
-                } catch (Exception ex) {
-                  System.err.println(ex);
-                }
+	try {
+	  m_CurrentVis.addPlot(predData);
+	} catch (Exception ex) {
+	  System.err.println(ex);
+	}
 	
-                FastVector vv = new FastVector();
-                vv.addElement(clusterer);
-                if (trainHeader != null) vv.addElement(trainHeader);
-                if (ignoredAtts != null) vv.addElement(ignoredAtts);
-                if (saveVis) {
-                  vv.addElement(m_CurrentVis);
-                  if (grph != null) {
-                    vv.addElement(grph);
-                  }
+	FastVector vv = new FastVector();
+	vv.addElement(clusterer);
+	if (trainHeader != null) vv.addElement(trainHeader);
+	if (ignoredAtts != null) vv.addElement(ignoredAtts);
+	if (saveVis) {
+	  vv.addElement(m_CurrentVis);
+	  if (grph != null) {
+	    vv.addElement(grph);
+	  }
 	  
-                }
-                m_History.addObject(name, vv);
-
-              }
-              if (isInterrupted()) {
-                m_Log.logMessage("Interrupted reevaluate model");
-                m_Log.statusMessage("See error log");
-              }
-              m_RunThread = null;
-              m_StartBut.setEnabled(true);
-              m_StopBut.setEnabled(false);
-              m_ignoreBut.setEnabled(true);
-              if (m_Log instanceof TaskLogger) {
-                ((TaskLogger)m_Log).taskFinished();
-              }
-            }
-          }
-      
-        };
-      m_RunThread.setPriority(Thread.MIN_PRIORITY);
-      m_RunThread.start();
+	}
+	m_History.addObject(name, vv);
+      }
     }
-  }
-  
-  /**
-   * updates the capabilities filter of the GOE
-   * 
-   * @param filter	the new filter to use
-   */
-  protected void updateCapabilitiesFilter(Capabilities filter) {
-    if (filter == null) {
-      m_ClustererEditor.setCapabilitiesFilter(new Capabilities(null));
-      return;
-    }
-    
-    // clusterer don't need the class attribute, so we can skip that here
-    
-    m_ClustererEditor.setCapabilitiesFilter(filter);
-  }
-  
-  /**
-   * method gets called in case of a change event
-   * 
-   * @param e		the associated change event
-   */
-  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

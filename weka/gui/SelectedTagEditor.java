@@ -40,7 +40,7 @@ import javax.swing.JLabel;
  * weka.core.SelectedTag object.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class SelectedTagEditor extends PropertyEditorSupport {
 

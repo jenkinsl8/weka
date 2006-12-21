@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 1.28 $
+ * @version  $Revision: 1.23.2.4 $
  */
 public class KnowledgeFlow {
 

@@ -29,7 +29,7 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class RemoteExperimentSubTask implements Task {
 

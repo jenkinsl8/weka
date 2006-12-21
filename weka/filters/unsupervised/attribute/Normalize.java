@@ -22,38 +22,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Capabilities.Capability;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Normalizes all numeric values in the given dataset (apart from the class attribute, if set). The resulting values are in [0,1] for the data used to compute the normalization intervals.
- * <p/>
- <!-- globalinfo-end -->
+ * Normalizes all numeric values in the given dataset. The resulting
+ * values are in [0,1] for the data used to compute the normalization
+ * intervals.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- <!-- options-end -->
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public class Normalize 
-  extends PotentialClassIgnorer 
-  implements UnsupervisedFilter {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8158531150984362898L;
+public class Normalize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
   /** The minimum values for numeric attributes. */
   private double [] m_MinArray;
@@ -74,27 +56,6 @@ public class Normalize
       + "are in [0,1] for the data used to compute the normalization intervals. ";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -102,7 +63,7 @@ public class Normalize
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -121,7 +82,7 @@ public class Normalize
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -147,7 +108,7 @@ public class Normalize
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -269,6 +230,23 @@ public class Normalize
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Normalize(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Normalize(), argv);
+      } else {
+	Filter.filterFile(new Normalize(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

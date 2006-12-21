@@ -22,101 +22,34 @@
 
 package weka.classifiers.bayes.net;
 
+import java.io.*;
+import java.util.*;
+
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.estimators.Estimator;
-
-import java.io.File;
-import java.util.StringTokenizer;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import weka.core.*;
+import weka.estimators.*;
 
 /**
- <!-- globalinfo-start -->
- * Builds a description of a Bayes Net classifier stored in XML BIF 0.3 format.<br/>
- * <br/>
- * For more details on XML BIF see:<br/>
- * <br/>
- * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/.
- * <p/>
- <!-- globalinfo-end -->
+ * Builds a description of a Bayes Net classifier stored in XML BIF 0.3 format.
+ * See http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/
+ * for details on XML BIF.
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;misc{Cozman1998,
- *    author = {Fabio Cozman and Marek Druzdzel and Daniel Garcia},
- *    title = {XML BIF version 0.3},
- *    year = {1998},
- *    URL = {http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  Do not use ADTree data structure
- * </pre>
- * 
- * <pre> -B &lt;BIF file&gt;
- *  BIF file to compare with
- * </pre>
- * 
- * <pre> -Q weka.classifiers.bayes.net.search.SearchAlgorithm
- *  Search algorithm
- * </pre>
- * 
- * <pre> -E weka.classifiers.bayes.net.estimate.SimpleEstimator
- *  Estimator algorithm
- * </pre>
- * 
- <!-- options-end -->
- *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.7.2.1 $
  */
-public class BIFReader 
-    extends BayesNet
-    implements TechnicalInformationHandler {
-  
+
+
+public class BIFReader extends BayesNet {
     private int [] m_nPositionX;
     private int [] m_nPositionY;
     private int [] m_order;
-    
-    /** for serialization */
-    static final long serialVersionUID = -8358864680379881429L;
-
-    /**
-     * This will return a string describing the classifier.
-     * @return The string.
-     */
-    public String globalInfo() {
-        return 
-            "Builds a description of a Bayes Net classifier stored in XML "
-        + "BIF 0.3 format.\n\n"
-        + "For more details on XML BIF see:\n\n"
-        + getTechnicalInformation().toString();
-    }
 
 	/** processFile reads a BIFXML file and initializes a Bayes Net
-	 * @param sFile name of the file to parse
-	 * @return the BIFReader
-	 * @throws Exception if processing fails
+	 * @param sFile: name of the file to parse
 	 */
 	public BIFReader processFile(String sFile) throws Exception {
 		m_sFile = sFile;
@@ -130,44 +63,15 @@ public class BIFReader
         return this;
 	} // processFile
 
-	/** the current filename */
 	String m_sFile;
-	
-	/**
-	 * returns the current filename
-	 * 
-	 * @return the current filename
-	 */
-	public String getFileName() {
-	  return m_sFile;
-	}
-	
-	
-	/**
-	 * Returns an instance of a TechnicalInformation object, containing 
-	 * detailed information about the technical background of this class,
-	 * e.g., paper reference or book this class is based on.
-	 * 
-	 * @return the technical information about this class
-	 */
-	public TechnicalInformation getTechnicalInformation() {
-	  TechnicalInformation 	result;
-	  
-	  result = new TechnicalInformation(Type.MISC);
-	  result.setValue(Field.AUTHOR, "Fabio Cozman and Marek Druzdzel and Daniel Garcia");
-	  result.setValue(Field.YEAR, "1998");
-	  result.setValue(Field.TITLE, "XML BIF version 0.3");
-	  result.setValue(Field.URL, "http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/");
-	  
-	  return result;
-	}
-	
+	public String getFileName() {return m_sFile;}
+
+
 	/** buildStructure parses the BIF document in the DOM tree contained
 	 * in the doc parameter and specifies the the network structure and 
 	 * probability tables.
 	 * It assumes that buildInstances has been called before
-	 * @param doc DOM document containing BIF document in DOM tree
-	 * @throws Exception if building of structure fails
+	 * @param doc: DOM document containing BIF document in DOM tree
 	 */
     void buildStructure(Document doc)  throws Exception {
         // Get the name of the network
@@ -228,7 +132,7 @@ public class BIFReader
 
     /** synchronizes the node ordering of this Bayes network with
      * those in the other network (if possible).
-     * @param other Bayes network to synchronize with
+     * @param other: Bayes network to synchronize with
      * @throws Exception if nr of attributes differs or not all of the variables have the same name.
      */
     public void Sync(BayesNet other) throws Exception {
@@ -245,9 +149,8 @@ public class BIFReader
 
 	/** getNode finds the index of the node with name sNodeName
 	 * and throws an exception if no such node can be found.
-	 * @param sNodeName name of the node to get the index from
+	 * @param sNodeName: name of the node to get the index from
 	 * @return index of the node with name sNodeName
-	 * @throws Exception if node cannot be found
 	 */
     public int getNode(String sNodeName) throws Exception {
     	int iNode = 0;
@@ -263,9 +166,6 @@ public class BIFReader
     /**
      * Returns all TEXT children of the given node in one string. Between
      * the node values new lines are inserted.
-     * 
-     * @param node the node to return the content for
-     * @return the content of the node
      */
     public String getContent(Element node) {
       NodeList       list;
@@ -288,9 +188,8 @@ public class BIFReader
 
 	/** buildInstances parses the BIF document and creates a Bayes Net with its 
 	 * nodes specified, but leaves the network structure and probability tables empty.
-	 * @param doc DOM document containing BIF document in DOM tree
-	 * @param sName default name to give to the Bayes Net. Will be overridden if specified in the BIF document.
-	 * @throws Exception if building fails
+	 * @param doc: DOM document containing BIF document in DOM tree
+	 * @param name: default name to give to the Bayes Net. Will be overridden if specified in the BIF document.
 	 */
 	void buildInstances(Document doc, String sName) throws Exception {
 		NodeList nodelist;
@@ -456,7 +355,7 @@ public class BIFReader
   } // selectElements
 	/** Count nr of arcs missing from other network compared to current network
 	 * Note that an arc is not 'missing' if it is reversed.
-	 * @param other network to compare with
+	 * @param other: network to compare with
 	 * @return nr of missing arcs
 	 */
 	public int missingArcs(BayesNet other) {
@@ -480,7 +379,7 @@ public class BIFReader
 
 	/** Count nr of exta arcs  from other network compared to current network
 	 * Note that an arc is not 'extra' if it is reversed.
-	 * @param other network to compare with
+	 * @param other: network to compare with
 	 * @return nr of missing arcs
 	 */
 	public int extraArcs(BayesNet other) {
@@ -509,7 +408,7 @@ public class BIFReader
 	 * where X is the set of values the nodes in the network can take,
 	 * P(x) the probability of this network for configuration x
 	 * Q(x) the probability of the other network for configuration x
-	 * @param other network to compare with
+	 * @param other: network to compare with
 	 * @return divergence between this and other Bayes Network
 	 */
 	public double divergence(BayesNet other) {
@@ -573,7 +472,7 @@ public class BIFReader
 	} // divergence
 
 	/** Count nr of reversed arcs from other network compared to current network
-	 * @param other network to compare with
+	 * @param other: network to compare with
 	 * @return nr of missing arcs
 	 */
 	public int reversedArcs(BayesNet other) {
@@ -595,17 +494,8 @@ public class BIFReader
 		}
 	} // reversedArcs
 
-	/**
-	 * the default constructor
-	 */
-	public BIFReader() {
-	}
-
-    /**
-     * Loads the file specified as first parameter and prints it to stdout.
-     * 
-     * @param args the command line parameters
-     */
+	public BIFReader() {}
+		
     public static void main(String[] args) {
         try {
             BIFReader br = new BIFReader();
@@ -617,4 +507,4 @@ public class BIFReader
             t.printStackTrace();
         }
     } // main
-} // class BIFReader
+} // class BIFReader 

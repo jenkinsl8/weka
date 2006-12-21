@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.33 $
+   $Revision: 1.19.2.10 $
   ===========================================================================
 -->
 
@@ -21,7 +21,6 @@
   <property name="reports"  value="reports"/>
   <property name="path_modifier" value=""/>
   <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
-  <property name="javac_max_memory" value="256m"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -47,9 +46,8 @@
   <target name="compile_inline" depends="init_all"
    description="Compile weka and leave class files in the source tree">
      <javac srcdir="${path_modifier}weka"
-       fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}"
-       source="1.5" target="1.5"/>
+       source="1.4" target="1.4"/>
       <rmic base="${path_modifier}" 
        classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -66,8 +64,7 @@
      <javac srcdir="${path_modifier}weka"
       destdir="${path_modifier}"
       deprecation="on" 
-      fork="yes" memoryMaximumSize="${javac_max_memory}"
-      source="1.5" target="1.5"/>
+      source="1.4" target="1.4"/>
      <rmic base="${path_modifier}" 
       classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -76,13 +73,11 @@
   <target name="compile" depends="init_compile" 
    description="Compile weka and deposit class files in ${path_modifier}/build/classes">
     <javac srcdir="${path_modifier}weka" 
-      fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${path_modifier}${build}/classes"
-      source="1.5" target="1.5"/>
+      source="1.4" target="1.4"/>
     <copy todir="${path_modifier}${build}/classes" >
        <fileset dir="${path_modifier}.">
           <include name="weka/**/*.props"/>
-          <include name="weka/**/*.excludes"/>
           <include name="weka/**/DatabaseUtils.props.*"/>
 	  <include name="weka/**/*.gif"/>
 	  <include name="weka/**/*.jpg"/>
@@ -129,9 +124,8 @@
   <target name="compile_tests" depends="init_tests, compile" 
    description="Compile unit tests into ${path_modifier}/build/testcases">
      <javac srcdir="${path_modifier}tests" 
-       fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}${build}/testcases"
-       source="1.5" target="1.5">
+       source="1.4" target="1.4">
         <classpath>
 	   <pathelement location="${path_modifier}${build}/classes"/>
 	   <pathelement path="${path_modifier}${java.class.path}"/>
@@ -203,7 +197,7 @@
   <!-- Put everything in ${path_modifier}${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ${path_modifier}/dist">
-    <echo message="Main-Class: weka.gui.Main" 
+    <echo message="Main-Class: weka.gui.GUIChooser" 
      file="${path_modifier}${build}/classes/manifest.tmp"/>
     <jar jarfile="${path_modifier}${dist}/weka.jar" 
      basedir="${path_modifier}${build}/classes"
@@ -216,7 +210,7 @@
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
     basedir="${path_modifier}."
-    includes="weka/**/*.java,weka/**/*.props,weka/**/DatabaseUtils.props.*,weka/**/*.gif,weka/**/*.jpeg,weka/**/*.jpg,weka/**/*.txt,weka/**/*.xml,weka/**/*.excludes"/>
+    includes="weka/**/*.java,weka/**/*.props,weka/**/DatabaseUtils.props.*,weka/**/*.gif,weka/**/*.jpeg,weka/**/*.jpg,weka/**/*.txt,weka/**/*.xml"/>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
@@ -241,7 +235,7 @@
 
    <target name="changelog"
     description="Create a changelog file for a release of Weka. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changes (eg. 20 Aug 2004)&gt;, -Dtag=&lt;REVISION_FOR_CHANGELOG&gt;.">
-    <cvschangelog cvsroot="${cvsroot_anon}" 
+   <cvschangelog cvsroot="${cvsroot_anon}" 
                 tag="${tag}"
                 dir="${path_modifier}weka"
                 destfile="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"

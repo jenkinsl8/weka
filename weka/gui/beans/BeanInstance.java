@@ -38,7 +38,7 @@ import java.io.Serializable;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.3.2.1 $
  * @since 1.0
  */
 public class BeanInstance implements Serializable {

@@ -39,13 +39,13 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

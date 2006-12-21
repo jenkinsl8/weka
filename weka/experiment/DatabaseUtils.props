@@ -71,8 +71,6 @@ CREATE_DOUBLE=DOUBLE
 
 #database flags
 checkUpperCaseNames=false
-checkLowerCaseNames=false
-checkForTable=true
 setAutoCommit=true
 createIndex=false
 

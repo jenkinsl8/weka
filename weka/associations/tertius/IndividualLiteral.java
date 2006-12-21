@@ -28,7 +28,7 @@ package weka.associations.tertius;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class IndividualLiteral extends AttributeValueLiteral {
 

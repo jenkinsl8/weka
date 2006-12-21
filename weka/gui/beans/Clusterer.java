@@ -56,7 +56,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible

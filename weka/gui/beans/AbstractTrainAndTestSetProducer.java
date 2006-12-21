@@ -39,7 +39,7 @@ import java.beans.EventSetDescriptor;
  * visual representation.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public abstract class AbstractTrainAndTestSetProducer 
   extends JPanel

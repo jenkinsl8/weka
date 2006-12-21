@@ -43,13 +43,12 @@ import weka.gui.arffviewer.ArffPanel;
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.1 $ 
  */
 
 public class ViewerDialog 
-  extends JDialog 
-  implements  ChangeListener { 
-  
+extends JDialog 
+implements  ChangeListener { 
   /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;
 
@@ -144,15 +143,6 @@ public class ViewerDialog
     m_OkButton.setEnabled(true); 
     m_CancelButton.setEnabled(true); 
     m_UndoButton.setEnabled(m_ArffPanel.canUndo()); 
-  }
-  
-  /**
-   * returns whether the data has been changed
-   * 
-   * @return true if the data has been changed
-   */
-  public boolean isChanged() {
-    return m_ArffPanel.isChanged();
   }
   
   /**

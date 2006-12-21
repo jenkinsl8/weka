@@ -22,24 +22,20 @@
 
 package weka.clusterers;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
+import java.io.Serializable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
 
 
 /** 
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.10 $
  */
-public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
+public abstract class Clusterer implements Cloneable, Serializable {
 
   // ===============
   // Public methods.
@@ -114,7 +110,7 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
    * clusterer implements OptionHandler and the options parameter is
    * non-null, the clusterer will have it's options set.
    *
-   * @param clustererName the fully qualified class name of the clusterer
+   * @param searchName the fully qualified class name of the clusterer
    * @param options an array of options suitable for passing to setOptions. May
    * be null.
    * @return the newly created search object, ready for use.
@@ -126,17 +122,6 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
     return (Clusterer)Utils.forName(Clusterer.class,
 				    clustererName,
 				    options);
-  }
-
-  /**
-   * Creates a deep copy of the given clusterer using serialization.
-   *
-   * @param model the clusterer to copy
-   * @return a deep copy of the clusterer
-   * @exception Exception if an error occurs
-   */
-  public static Clusterer makeCopy(Clusterer model) throws Exception {
-    return (Clusterer) new SerializedObject(model).getObject();
   }
 
   /**
@@ -162,40 +147,6 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
     }
     return clusterers;
   }
-
-  /** 
-   * Returns the Capabilities of this clusterer. Derived classifiers have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities 	result;
-    
-    result = new Capabilities(this);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-  
-  /**
-   * runs the clusterer instance with the given options.
-   * 
-   * @param clusterer		the clusterer to run
-   * @param options	the commandline options
-   */
-  protected static void runClusterer(Clusterer clusterer, String[] options) {
-    try {
-      System.out.println(ClusterEvaluation.evaluateClusterer(clusterer, options));
-    } 
-    catch (Exception e) {
-      if (    (e.getMessage() == null)
-	   || (    (e.getMessage() != null)
-	        && (e.getMessage().indexOf("General options") == -1) ) )
-	e.printStackTrace();
-      else
-	System.err.println(e.getMessage());
-    }
-  }
 }
+
+
