@@ -23,52 +23,46 @@
 
 package weka.filters.supervised.instance;
 
-import weka.core.Capabilities;
+import weka.filters.*;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Option;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
 
-import java.util.Enumeration;
 import java.util.Random;
+import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * Produces a random subsample of a dataset using sampling with replacement.The original dataset must fit entirely in memory. The number of instances in the generated dataset may be specified. The dataset must have a nominal class attribute. If not, use the unsupervised version. The filter can be made to maintain the class distribution in the subsample, or to bias the class distribution toward a uniform distribution. When used in batch mode (i.e. in the FilteredClassifier), subsequent batches are NOTE resampled.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -S &lt;num&gt;
- *  Specify the random number seed (default 1)</pre>
- * 
- * <pre> -Z &lt;num&gt;
- *  The size of the output dataset, as a percentage of
- *  the input dataset (default 100)</pre>
- * 
- * <pre> -B &lt;num&gt;
- *  Bias factor towards uniform class distribution.
- *  0 = distribution in input data -- 1 = uniform distribution.
- *  (default 0)</pre>
- * 
- <!-- options-end -->
+ * Produces a random subsample of a dataset using sampling with
+ * replacement. The original dataset must fit entirely in memory. The
+ * number of instances in the generated dataset may be specified. The
+ * dataset must have a nominal class attribute. If not, use the
+ * unsupervised version. The filter can be made to maintain the class
+ * distribution in the subsample, or to bias the class distribution
+ * toward a uniform distribution. When used in batch mode, subsequent
+ * batches are <b>not</b> resampled.
+ *
+ * Valid options are:<p>
+ *
+ * -S num <br>
+ * Specify the random number seed (default 1).<p>
+ *
+ * -B num <br>
+ * Specify a bias towards uniform class distribution. 0 = distribution
+ * in input data, 1 = uniform class distribution (default 0). <p>
+ *
+ * -Z percent <br>
+ * Specify the size of the output dataset, as a percentage of the input
+ * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.4.2.1 $ 
+ *
  */
-public class Resample
-  extends Filter 
-  implements SupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7079064953548300681L;
+public class Resample extends Filter implements SupervisedFilter,
+						OptionHandler {
 
   /** The subsample size, percent of original set, default 100% */
   private double m_SampleSizePercent = 100;
@@ -124,27 +118,21 @@ public class Resample
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Specify the random number seed (default 1)</pre>
-   * 
-   * <pre> -Z &lt;num&gt;
-   *  The size of the output dataset, as a percentage of
-   *  the input dataset (default 100)</pre>
-   * 
-   * <pre> -B &lt;num&gt;
-   *  Bias factor towards uniform class distribution.
-   *  0 = distribution in input data -- 1 = uniform distribution.
-   *  (default 0)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a list of options for this object. Valid options are:<p>
+   *
+   * -S num <br>
+   * Specify the random number seed (default 1).<p>
+   *
+   * -B num <br>
+   * Specify a bias towards uniform class distribution. 0 = distribution
+   * in input data, 1 = uniform class distribution (default 0). <p>
+   *
+   * -Z percent <br>
+   * Specify the size of the output dataset, as a percentage of the input
+   * dataset (default 100). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -292,25 +280,6 @@ public class Resample
 
     m_SampleSizePercent = newSampleSizePercent;
   }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    
-    return result;
-  }
   
   /**
    * Sets the format of the input instances.
@@ -319,11 +288,15 @@ public class Resample
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
+
+    if (instanceInfo.classIndex() < 0 || !instanceInfo.classAttribute().isNominal()) {
+      throw new IllegalArgumentException("Supervised resample requires nominal class");
+    }
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -337,7 +310,7 @@ public class Resample
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean input(Instance instance) {
 
@@ -348,7 +321,7 @@ public class Resample
       resetQueue();
       m_NewBatch = false;
     }
-    if (isFirstBatchDone()) {
+    if (m_FirstBatchDone) {
       push(instance);
       return true;
     } else {
@@ -363,7 +336,7 @@ public class Resample
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -371,7 +344,7 @@ public class Resample
       throw new IllegalStateException("No input instance format defined");
     }
 
-    if (!isFirstBatchDone()) {
+    if (!m_FirstBatchDone) {
       // Do the subsample, and clear the input instances.
       createSubsample();
     }
@@ -460,6 +433,23 @@ public class Resample
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Resample(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Resample(), argv);
+      } else {
+	Filter.filterFile(new Resample(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

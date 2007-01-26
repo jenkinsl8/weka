@@ -23,62 +23,77 @@
 
 package weka.gui.explorer;
 
-import weka.associations.Associator;
-import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Attribute;
 import weka.core.Utils;
-import weka.gui.GenericObjectEditor;
+import weka.associations.Associator;
+import weka.filters.Filter;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
+import weka.gui.SysErrLog;
+import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
+import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 
+import java.util.Random;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JMenuItem;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
 import javax.swing.JTextArea;
-import javax.swing.JViewport;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import java.awt.Point;
 
 /** 
  * This panel allows the user to select, configure, and run a scheme
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.17.2.2 $
  */
-public class AssociationsPanel 
-  extends JPanel
-  implements CapabilitiesFilterChangeListener {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6867871711865476971L;
+public class AssociationsPanel extends JPanel {
 
   /** Lets the user configure the associator */
   protected GenericObjectEditor m_AssociatorEditor =
@@ -116,7 +131,7 @@ public class AssociationsPanel
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
   
   /**
@@ -155,7 +170,7 @@ public class AssociationsPanel
       });
 
     m_AssociatorEditor.setClassType(Associator.class);
-    m_AssociatorEditor.setValue(ExplorerDefaults.getAssociator());
+    m_AssociatorEditor.setValue(new weka.associations.Apriori());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
@@ -276,9 +291,6 @@ public class AssociationsPanel
       case Attribute.DATE:
 	type = "(Dat) ";
 	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
       default:
 	type = "(???) ";
       }
@@ -315,14 +327,10 @@ public class AssociationsPanel
 	  } else {
 	    name += cname;
 	  }
-          String cmd = m_AssociatorEditor.getValue().getClass().getName();
-          if (m_AssociatorEditor.getValue() instanceof OptionHandler)
-            cmd += " " + Utils.joinOptions(((OptionHandler) m_AssociatorEditor.getValue()).getOptions());
 	  try {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
-	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
@@ -451,37 +459,7 @@ public class AssociationsPanel
     }
     resultListMenu.add(saveOutput);
 
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
-      deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
-      });
-    } else {
-      deleteOutput.setEnabled(false);
-    }
-    resultListMenu.add(deleteOutput);
-
     resultListMenu.show(m_History.getList(), x, y);
-  }
-  
-  /**
-   * updates the capabilities filter of the GOE
-   * 
-   * @param filter	the new filter to use
-   */
-  protected void updateCapabilitiesFilter(Capabilities filter) {
-    m_AssociatorEditor.setCapabilitiesFilter(filter);
-  }
-  
-  /**
-   * method gets called in case of a change event
-   * 
-   * @param e		the associated change event
-   */
-  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

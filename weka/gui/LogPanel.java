@@ -55,7 +55,7 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class LogPanel extends JPanel implements Logger, TaskLogger {
 

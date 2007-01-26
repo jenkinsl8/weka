@@ -22,7 +22,8 @@
 
 package weka.estimators;
 
- 
+import java.util.*;
+
 /** 
  * Interface for conditional probability estimators. Example code: <p>
  *
@@ -50,7 +51,7 @@ package weka.estimators;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public interface ConditionalEstimator {
 

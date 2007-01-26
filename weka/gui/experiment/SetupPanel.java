@@ -92,7 +92,7 @@ import javax.swing.ButtonGroup;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.23.2.4 $
  */
 public class SetupPanel extends JPanel {
 
@@ -223,20 +223,17 @@ public class SetupPanel extends JPanel {
 	  }
 	});	      
 
-    m_NewBut.setMnemonic('N');
     m_NewBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setExperiment(new Experiment());
       }
     });
-    m_SaveBut.setMnemonic('S');
     m_SaveBut.setEnabled(false);
     m_SaveBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	saveExperiment();
       }
     });
-    m_OpenBut.setMnemonic('O');
     m_OpenBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	openExperiment();

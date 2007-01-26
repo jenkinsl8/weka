@@ -22,38 +22,50 @@
 
 package weka.core.converters;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.Utils;
 import java.io.StreamTokenizer;
 
 /**
- <!-- globalinfo-start -->
- * Reads a file that is C45 format. Can take a filestem or filestem with .names or .data appended. Assumes that path/&lt;filestem&gt;.names and path/&lt;filestem&gt;.data exist and contain the names and data respectively.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * Reads C4.5 input files. Takes a filestem or filestem with .names or .data
+ * appended. Assumes that both <filestem>.names and <filestem>.data exist
+ * in the directory of the supplied filestem.
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
-public class C45Loader 
-  extends AbstractFileLoader 
-  implements BatchConverter, IncrementalConverter {
+public class C45Loader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 5454329403218219L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = ".names";
+
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
+  
+  /**
+   * Holds the determined structure (header) of the data set.
+   */
+  //@ protected depends: model_structureDetermined -> m_structure;
+  //@ protected represents: model_structureDetermined <- (m_structure != null);
+  protected Instances m_structure = null;
+
+  /**
+   * Holds the source of the data set. In this case the names file of the
+   * data set. m_sourceFileData is the data file.
+   */
+  //@ protected depends: model_sourceSupplied -> m_sourceFile;
+  //@ protected represents: model_sourceSupplied <- (m_sourceFile != null);
+  protected File m_sourceFile = null;
 
   /**
    * Describe variable <code>m_sourceFileData</code> here.
@@ -100,13 +112,10 @@ public class C45Loader
   
   /**
    * Resets the Loader ready to read a new data set
-   * 
-   * @throws IOException if something goes wrong
    */
-  public void reset() throws IOException {
+  public void reset() throws Exception {
     m_structure = null;
     setRetrieval(NONE);
-    
     if (m_File != null) {
       setFile(new File(m_File));
     }
@@ -122,21 +131,32 @@ public class C45Loader
   }
 
   /**
-   * Gets all the file extensions used for this type of file
-   *
-   * @return the file extensions
-   */
-  public String[] getFileExtensions() {
-    return new String[]{".names", ".data"};
-  }
-
-  /**
    * Returns a description of the file type.
    *
    * @return a short file description
    */
   public String getFileDescription() {
     return "C4.5 data files";
+  }
+
+  /**
+   * get the File specified as the source
+   *
+   * @return the source file
+   */
+  public File retrieveFile() {
+    return new File(m_File);
+  }
+
+  /**
+   * sets the source File
+   *
+   * @param file the source file
+   * @exception IOException if an error occurs
+   */
+  public void setFile(File file) throws IOException {
+    m_File = file.getAbsolutePath();
+    setSource(file);
   }
 
   /**
@@ -147,6 +167,7 @@ public class C45Loader
    * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
+    
     m_structure = null;
     setRetrieval(NONE);
 
@@ -354,12 +375,6 @@ public class C45Loader
     return new Instance(1.0, instance);
   }
 
-  /**
-   * removes the trailing period
-   * 
-   * @param val the string to work on
-   * @return the processed string
-   */
   private String removeTrailingPeriod(String val) {
     // remove trailing period
     if (val.charAt(val.length()-1) == '.') {
@@ -494,9 +509,26 @@ public class C45Loader
   /**
    * Main method for testing this class.
    *
-   * @param args should contain &lt;filestem&gt;[.names | data]
+   * @param args should contain <filestem>[.names | data]
    */
   public static void main (String [] args) {
-    runFileLoader(new C45Loader(), args);
+    if (args.length > 0) {
+      File inputfile;
+      inputfile = new File(args[0]);
+      try {
+	C45Loader cta = new C45Loader();
+	cta.setSource(inputfile);
+	System.out.println(cta.getStructure());
+	Instance temp = cta.getNextInstance();
+	while (temp != null) {
+	  System.out.println(temp);
+	  temp = cta.getNextInstance();
+	}
+      } catch (Exception ex) {
+	ex.printStackTrace();
+      }
+    } else {
+      System.err.println("Usage:\n\tC45Loader <filestem>[.names | data]\n");
+    }
   }
 }

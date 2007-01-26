@@ -23,92 +23,23 @@
 package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
+import weka.core.*;
+import java.util.*;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-/** 
- <!-- globalinfo-start -->
- * This Bayes Network learning algorithm uses tabu search for finding a well scoring Bayes network structure. Tabu search is hill climbing till an optimum is reached. The following step is the least worst possible step. The last X steps are kept in a list and none of the steps in this so called tabu list is considered in taking the next step. The best network found in this traversal is returned.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * R.R. Bouckaert (1995). Bayesian Belief Networks: from Construction to Inference. Utrecht, Netherlands.
- * <p/>
- <!-- globalinfo-end -->
+/** TabuSearch implements tabu search for learning Bayesian network
+ * structures. For details, see for example 
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;phdthesis{Bouckaert1995,
- *    address = {Utrecht, Netherlands},
- *    author = {R.R. Bouckaert},
- *    institution = {University of Utrecht},
- *    title = {Bayesian Belief Networks: from Construction to Inference},
- *    year = {1995}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * R.R. Bouckaert. 
+ * Bayesian Belief Networks: from Construction to Inference. 
+ * Ph.D. thesis, 
+ * University of Utrecht, 
+ * 1995
  * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -L &lt;integer&gt;
- *  Tabu list length</pre>
- * 
- * <pre> -U &lt;integer&gt;
- *  Number of runs</pre>
- * 
- * <pre> -P &lt;nr of parents&gt;
- *  Maximum number of parents</pre>
- * 
- * <pre> -R
- *  Use arc reversal operation.
- *  (default false)</pre>
- * 
- * <pre> -P &lt;nr of parents&gt;
- *  Maximum number of parents</pre>
- * 
- * <pre> -R
- *  Use arc reversal operation.
- *  (default false)</pre>
- * 
- * <pre> -N
- *  Initial structure is empty (instead of Naive Bayes)</pre>
- * 
- * <pre> -mbc
- *  Applies a Markov Blanket correction to the network structure, 
- *  after a network structure is learned. This ensures that all 
- *  nodes in the network are part of the Markov blanket of the 
- *  classifier node.</pre>
- * 
- * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
- *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
- * 
- * <pre> -Q
- *  Use probabilistic or 0/1 scoring.
- *  (default probabilistic scoring)</pre>
- * 
- <!-- options-end -->
- *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * Version: $Revision: 1.2 $
  */
-public class TabuSearch 
-    extends HillClimber
-    implements TechnicalInformationHandler {
+public class TabuSearch extends HillClimber {
 
-    /** for serialization */
-    static final long serialVersionUID = 1176705618756672292L;
-  
     /** number of runs **/
     int m_nRuns = 10;
 	    	
@@ -119,33 +50,9 @@ public class TabuSearch
 	Operation[] m_oTabuList = null;
 
 	/**
-	 * Returns an instance of a TechnicalInformation object, containing 
-	 * detailed information about the technical background of this class,
-	 * e.g., paper reference or book this class is based on.
-	 * 
-	 * @return the technical information about this class
-	 */
-	public TechnicalInformation getTechnicalInformation() {
-	  TechnicalInformation 	result;
-	  
-	  result = new TechnicalInformation(Type.PHDTHESIS);
-	  result.setValue(Field.AUTHOR, "R.R. Bouckaert");
-	  result.setValue(Field.YEAR, "1995");
-	  result.setValue(Field.TITLE, "Bayesian Belief Networks: from Construction to Inference");
-	  result.setValue(Field.INSTITUTION, "University of Utrecht");
-	  result.setValue(Field.ADDRESS, "Utrecht, Netherlands");
-	  
-	  return result;
-	}
-
-	/**
-	 * search determines the network structure/graph of the network
-	 * with the Tabu search algorithm.
-	 * 
-	 * @param bayesNet the network to use
-	 * @param instances the instances to use
-	 * @throws Exception if something goes wrong
-	 */
+	* search determines the network structure/graph of the network
+	* with the Tabu search algorithm.
+	**/
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         m_oTabuList = new Operation[m_nTabuList];
         int iCurrentTabuList = 0;
@@ -198,8 +105,8 @@ public class TabuSearch
 
 
 	/** copyParentSets copies parent sets of source to dest BayesNet
-	 * @param dest destination network
-	 * @param source source network
+	 * @param dest: destination network
+	 * @param source: source network
 	 */
 	void copyParentSets(BayesNet dest, BayesNet source) {
 		int nNodes = source.getNrOfNodes();
@@ -210,7 +117,7 @@ public class TabuSearch
 	} // CopyParentSets
 
 	/** check whether the operation is not in the tabu list
-	 * @param oOperation operation to be checked
+	 * @param oOperation: operation to be checked
 	 * @return true if operation is not in the tabu list
 	 */
 	boolean isNotTabu(Operation oOperation) {
@@ -273,9 +180,9 @@ public class TabuSearch
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(4);
 
-		newVector.addElement(new Option("\tTabu list length", "L", 1, "-L <integer>"));
-		newVector.addElement(new Option("\tNumber of runs", "U", 1, "-U <integer>"));
-		newVector.addElement(new Option("\tMaximum number of parents", "P", 1, "-P <nr of parents>"));
+		newVector.addElement(new Option("\tTabu list length\n", "L", 1, "-L <integer>"));
+		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
 
 		Enumeration enu = super.listOptions();
@@ -286,51 +193,12 @@ public class TabuSearch
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. <p/>
+	 * Parses a given list of options. Valid options are:<p>
 	 *
-	 <!-- options-start -->
-	 * Valid options are: <p/>
-	 * 
-	 * <pre> -L &lt;integer&gt;
-	 *  Tabu list length</pre>
-	 * 
-	 * <pre> -U &lt;integer&gt;
-	 *  Number of runs</pre>
-	 * 
-	 * <pre> -P &lt;nr of parents&gt;
-	 *  Maximum number of parents</pre>
-	 * 
-	 * <pre> -R
-	 *  Use arc reversal operation.
-	 *  (default false)</pre>
-	 * 
-	 * <pre> -P &lt;nr of parents&gt;
-	 *  Maximum number of parents</pre>
-	 * 
-	 * <pre> -R
-	 *  Use arc reversal operation.
-	 *  (default false)</pre>
-	 * 
-	 * <pre> -N
-	 *  Initial structure is empty (instead of Naive Bayes)</pre>
-	 * 
-	 * <pre> -mbc
-	 *  Applies a Markov Blanket correction to the network structure, 
-	 *  after a network structure is learned. This ensures that all 
-	 *  nodes in the network are part of the Markov blanket of the 
-	 *  classifier node.</pre>
-	 * 
-	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
-	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
-	 * 
-	 * <pre> -Q
-	 *  Use probabilistic or 0/1 scoring.
-	 *  (default probabilistic scoring)</pre>
-	 * 
-	 <!-- options-end -->
+	 * For other options see search algorithm.
 	 *
 	 * @param options the list of options as an array of strings
-	 * @throws Exception if an option is not supported
+	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		String sTabuList = Utils.getOption('L', options);
@@ -382,9 +250,7 @@ public class TabuSearch
 		"Bayes network structure. Tabu search is hill climbing till an optimum is reached. The " +
 		"following step is the least worst possible step. The last X steps are kept in a list and " +
 		"none of the steps in this so called tabu list is considered in taking the next step. " +
-		"The best network found in this traversal is returned.\n\n"
-		+ "For more information see:\n\n"
-		+ getTechnicalInformation().toString();
+		"The best network found in this traversal is returned.";
 	} // globalInfo
 	
 	/**

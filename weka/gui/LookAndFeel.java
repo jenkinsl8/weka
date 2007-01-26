@@ -33,14 +33,14 @@ import javax.swing.UIManager.LookAndFeelInfo;
 /**
  * A little helper class for setting the Look and Feel of the user interface.
  * Was necessary, since Java 1.5 sometimes crashed the WEKA GUI (e.g. under 
- * Linux/Gnome). Running this class from the commandline will print all
- * available Look and Feel themes.
+ * Linux/Gnome).
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.3 $
  */
+
 public class LookAndFeel {
-  
+
   /** The name of the properties file */
   public static String PROPERTY_FILE = "weka/gui/LookAndFeel.props";
 
@@ -66,7 +66,7 @@ public class LookAndFeel {
 
   /**
    * sets the look and feel to the specified class
-   * 
+   *
    * @param classname      the look and feel to use
    * @return               whether setting was successful   
    */
@@ -88,7 +88,7 @@ public class LookAndFeel {
   /**
    * sets the look and feel to the one in the props-file or if not set the 
    * default one of the system
-   * 
+   *
    * @return               whether setting was successful
    */
   public static boolean setLookAndFeel() {
@@ -112,7 +112,7 @@ public class LookAndFeel {
 
   /**
    * returns the system LnF classname
-   * 
+   *
    * @return               the name of the System LnF class
    */
   public static String getSystemLookAndFeel() {
@@ -121,7 +121,7 @@ public class LookAndFeel {
 
   /**
    * returns an array with the classnames of all the installed LnFs
-   * 
+   *
    * @return               the installed LnFs
    */
   public static String[] getInstalledLookAndFeels() {

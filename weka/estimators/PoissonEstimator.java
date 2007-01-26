@@ -22,33 +22,32 @@
 
 package weka.estimators;
 
-import weka.core.Capabilities.Capability;
-import weka.core.Capabilities;
-import weka.core.Utils;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * Simple probability estimator that places a single Poisson distribution
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 
-public class PoissonEstimator extends Estimator implements IncrementalEstimator {
-  
+public class PoissonEstimator implements Estimator {
+
   /** The number of values seen */
   private double m_NumValues;
-  
+
   /** The sum of the values seen */
   private double m_SumOfValues;
-  
+
   /** 
    * The average number of times
    * an event occurs in an interval.
    */
   private double m_Lambda;
-  
-  
+
+
   /**
    * Calculates the log factorial of a number.
    *
@@ -56,14 +55,14 @@ public class PoissonEstimator extends Estimator implements IncrementalEstimator 
    * @return log factorial of x.
    */
   private double logFac(double x) {
-    
+
     double result = 0;
     for (double i = 2; i <= x; i++) {
       result += Math.log(i);
     }
     return result;
   }
-  
+
   /**
    * Returns value for Poisson distribution
    *
@@ -89,7 +88,7 @@ public class PoissonEstimator extends Estimator implements IncrementalEstimator 
       m_Lambda = m_SumOfValues / m_NumValues;
     }
   }
-  
+
   /**
    * Get a probability estimate for a value
    *
@@ -100,26 +99,13 @@ public class PoissonEstimator extends Estimator implements IncrementalEstimator 
     
     return Poisson(data);
   }
-  
+
   /** Display a representation of this estimator */
   public String toString() {
     
     return "Poisson Lambda = " + Utils.doubleToString(m_Lambda, 4, 2) + "\n";
   }
-  
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    return result;
-  }
-  
+
   /**
    * Main method for testing this class.
    *
@@ -129,18 +115,18 @@ public class PoissonEstimator extends Estimator implements IncrementalEstimator 
     
     try {
       if (argv.length == 0) {
-        System.out.println("Please specify a set of instances.");
-        return;
+	System.out.println("Please specify a set of instances.");
+	return;
       }
       PoissonEstimator newEst = new PoissonEstimator();
       for(int i = 0; i < argv.length; i++) {
-        double current = Double.valueOf(argv[i]).doubleValue();
-        System.out.println(newEst);
-        System.out.println("Prediction for " + current 
-            + " = " + newEst.getProbability(current));
-        newEst.addValue(current, 1);
+	double current = Double.valueOf(argv[i]).doubleValue();
+	System.out.println(newEst);
+	System.out.println("Prediction for " + current 
+			   + " = " + newEst.getProbability(current));
+	newEst.addValue(current, 1);
       }
-      
+
     } catch (Exception e) {
       System.out.println(e.getMessage());
     }

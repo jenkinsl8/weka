@@ -22,167 +22,45 @@
 
 package weka.gui.arffviewer;
 
-import weka.core.Attribute;
-import weka.core.Instances;
 import weka.gui.ComponentHelper;
 import weka.gui.JTableHelper;
-import weka.gui.ViewerDialog;
-
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import weka.core.Attribute;
 import java.awt.datatransfer.StringSelection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-
-import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableModel;
 
 /**
  * A specialized JTable for the Arff-Viewer.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.2.2.2 $ 
  */
-public class ArffTable
-  extends JTable {
-  
-  /** for serialization */
-  static final long serialVersionUID = -2016200506908637967L;
 
-  /**
-   * a special Editor for editing the relation attribute.
-   */
-  protected class RelationalCellEditor
-    extends AbstractCellEditor
-    implements TableCellEditor {
-
-    /** for serialization */
-    private static final long serialVersionUID = 657969163293205963L;
-    
-    /** the button for opening the dialog */
-    protected JButton m_Button;
-    
-    /** the current instances */
-    protected Instances m_CurrentInst;
-    
-    /** the row index this editor is for */
-    protected int m_RowIndex;
-    
-    /** the column index this editor is for */
-    protected int m_ColumnIndex;
-    
-    /**
-     * initializes the editor
-     * 
-     * @param rowIndex		the row index
-     * @param columnIndex	the column index
-     */
-    public RelationalCellEditor(int rowIndex, int columnIndex) {
-      super();
-
-      m_CurrentInst = getInstancesAt(rowIndex, columnIndex);
-      m_RowIndex    = rowIndex;
-      m_ColumnIndex = columnIndex;
-      
-      m_Button = new JButton("...");
-      m_Button.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-          ViewerDialog        dialog;
-          int                 result;
-          
-          dialog = new ViewerDialog(null);
-          dialog.setTitle(
-              "Relational attribute Viewer - " 
-              + ((ArffSortedTableModel) getModel()).getInstances().attribute(m_ColumnIndex - 1).name());
-          result = dialog.showDialog(m_CurrentInst);
-          if (result == ViewerDialog.APPROVE_OPTION) {
-            m_CurrentInst = dialog.getInstances();
-            fireEditingStopped();
-          }
-          else {
-            fireEditingCanceled();
-          }
-        }
-      });
-    }
-
-    /**
-     * returns the underlying instances at the given position
-     * 
-     * @param rowIndex		the row index
-     * @param columnIndex	the column index
-     * @return 			the corresponding instances
-     */
-    protected Instances getInstancesAt(int rowIndex, int columnIndex) {
-      Instances			result;
-      ArffSortedTableModel	model;
-      double			value;
-      
-      model = (ArffSortedTableModel) getModel();
-      value = model.getInstancesValueAt(rowIndex, columnIndex);
-      result = model.getInstances().attribute(columnIndex - 1).relation((int) value);
-      
-      return result;
-    }
-    
-    /**
-     * Sets an initial value for the editor. This will cause the editor to 
-     * stopEditing and lose any partially edited value if the editor is 
-     * editing when this method is called.
-     * 
-     * @param table		the table this editor belongs to
-     * @param value		the value to edit
-     * @param isSelected	whether the cell is selected
-     * @param row		the row index
-     * @param column		the column index
-     * @return			the 
-     */
-    public Component getTableCellEditorComponent(JTable table,
-                                                 Object value,
-                                                 boolean isSelected,
-                                                 int row,
-                                                 int column) {
-      return m_Button;
-    }
-
-    /**
-     * Returns the value contained in the editor.
-     * 
-     * @return		the value contained in the editor
-     */
-    public Object getCellEditorValue() {
-      return m_CurrentInst;
-    }
-  }
-  
-  /** the search string */
-  private String m_SearchString;
-  /** the listeners for changes */
-  private HashSet m_ChangeListeners;
+public class ArffTable extends JTable {
+  // the search string
+  private String                   searchString;
+  // the listeners for changes
+  private HashSet                  changeListeners;
   
   /**
    * initializes with no model
    */
   public ArffTable() {
-    this(new ArffSortedTableModel(""));
+    this(new ArffTableSorter(""));
   }
   
   /**
    * initializes with the given model
-   * 
-   * @param model		the model to use
    */
   public ArffTable(TableModel model) {
     super(model);
@@ -192,88 +70,43 @@ public class ArffTable
   
   /**
    * sets the new model
-   * 
-   * @param model		the model to use
    */
   public void setModel(TableModel model) {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     
     // initialize the search
-    m_SearchString = null;
+    searchString = null;
     
     // init the listeners
-    if (m_ChangeListeners == null)
-      m_ChangeListeners = new HashSet();
+    if (changeListeners == null)
+      changeListeners = new HashSet();
     
     super.setModel(model);
     
     if (model == null)
       return;
     
-    if (!(model instanceof ArffSortedTableModel))
+    if (!(model instanceof ArffTableSorter))
       return;
     
-    arffModel = (ArffSortedTableModel) model;
-    arffModel.addMouseListenerToHeader(this);
+    arffModel = (ArffTableSorter) model;
+    arffModel.addMouseListenerToHeaderInTable(this);
     arffModel.addTableModelListener(this);
-    arffModel.sort(0);
+    arffModel.sortByColumn(0);
     setLayout();
     setSelectedColumn(0);
-    
-    // disable column moving
-    if (getTableHeader() != null)
-      getTableHeader().setReorderingAllowed(false);
-  }
-
-  /**
-   * returns the cell editor for the given cell
-   * 
-   * @param row		the row index
-   * @param column	the column index
-   * @return		the cell editor
-   */
-  public TableCellEditor getCellEditor(int row, int column) {
-    TableCellEditor		result;
-    
-    // relational attribute?
-    if (    (getModel() instanceof ArffSortedTableModel) 
-	 && (((ArffSortedTableModel) getModel()).getType(column) == Attribute.RELATIONAL) )
-      result = new RelationalCellEditor(row, column);
-    // default
-    else
-      result = super.getCellEditor(row, column);
-    
-    return result;
-  }
-
-  /**
-   * returns whether the model is read-only
-   * 
-   * @return 		true if model is read-only
-   */
-  public boolean isReadOnly() {
-    return ((ArffSortedTableModel) getModel()).isReadOnly();
-  }
-  
-  /**
-   * sets whether the model is read-only
-   * 
-   * @param value	if true the model is set to read-only
-   */
-  public void setReadOnly(boolean value) {
-    ((ArffSortedTableModel) getModel()).setReadOnly(value);
   }
   
   /**
    * sets the cell renderer and calcs the optimal column width
    */
   private void setLayout() {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     int                  i;
     JComboBox            combo;
     Enumeration          enm;
     
-    arffModel = (ArffSortedTableModel) getModel();
+    arffModel = (ArffTableSorter) getModel();
     
     for (i = 0; i < getColumnCount(); i++) {
       // optimal colwidths (only according to header!)
@@ -303,22 +136,19 @@ public class ArffTable
   /**
    * returns the basically the attribute name of the column and not the
    * HTML column name via getColumnName(int)
-   * 
-   * @param columnIndex		the column index
-   * @return 			the plain name
    */
   public String getPlainColumnName(int columnIndex) {
-    ArffSortedTableModel      arffModel;
+    ArffTableSorter      arffModel;
     String               result;
     
     result = "";
     
     if (getModel() == null)
       return result;
-    if (!(getModel() instanceof ArffSortedTableModel))  
+    if (!(getModel() instanceof ArffTableSorter))  
       return result;
     
-    arffModel = (ArffSortedTableModel) getModel();
+    arffModel = (ArffTableSorter) getModel();
     
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)
@@ -334,8 +164,6 @@ public class ArffTable
    * returns the selected content in a StringSelection that can be copied to
    * the clipboard and used in Excel, if nothing is selected the whole table
    * is copied to the clipboard
-   * 
-   * @return			the current selection
    */
   public StringSelection getStringSelection() {
     StringSelection         result;
@@ -392,27 +220,21 @@ public class ArffTable
   /**
    * sets the search string to look for in the table, NULL or "" disables
    * the search
-   * 
-   * @param searchString	the search string to use
    */
   public void setSearchString(String searchString) {
-    this.m_SearchString = searchString;
+    this.searchString = searchString;
     repaint();
   }
   
   /**
    * returns the search string, can be NULL if no search string is set
-   * 
-   * @return			the current search string
    */
   public String getSearchString() {
-    return m_SearchString;
+    return searchString;
   }
   
   /**
    * sets the selected column
-   * 
-   * @param index		the column to select
    */
   public void setSelectedColumn(int index) {
     getColumnModel().getSelectionModel().clearSelection();
@@ -425,8 +247,6 @@ public class ArffTable
   /**
    * This fine grain notification tells listeners the exact range of cells, 
    * rows, or columns that changed.
-   * 
-   * @param e		the table event
    */
   public void tableChanged(TableModelEvent e) {
     super.tableChanged(e);
@@ -441,26 +261,22 @@ public class ArffTable
   private void notifyListener() {
     Iterator                iter;
     
-    iter = m_ChangeListeners.iterator();
+    iter = changeListeners.iterator();
     while (iter.hasNext())
       ((ChangeListener) iter.next()).stateChanged(new ChangeEvent(this));
   }
   
   /**
    * Adds a ChangeListener to the panel
-   * 
-   * @param l			the listener to add
    */
   public void addChangeListener(ChangeListener l) {
-    m_ChangeListeners.add(l);
+    changeListeners.add(l);
   }
   
   /**
    * Removes a ChangeListener from the panel
-   * 
-   * @param l			the listener to remove
    */
   public void removeChangeListener(ChangeListener l) {
-    m_ChangeListeners.remove(l);
+    changeListeners.remove(l);
   }
 }

@@ -23,8 +23,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -34,6 +32,9 @@ import weka.core.Range;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  * An abstract instance filter that assumes instances form time-series data and
@@ -59,11 +60,11 @@ import weka.filters.UnsupervisedFilter;
  *
  * -M <br>
  * For instances at the beginning or end of the dataset where the translated
- * values are not known, remove those instances (default is to use missing 
+ * values are not known, remove those instances (default is to use missing
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.2 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -111,7 +112,7 @@ public abstract class AbstractTimeSeries extends Filter
 	      "\tFor instances at the beginning or end of the dataset where\n"
 	      + "\tthe translated values are not known, remove those instances\n"
 	      + "\t(default is to use missing values).",
-	      "M", 0, "-M"));
+              "M", 0, "-M"));
 
     return newVector.elements();
   }
@@ -134,11 +135,11 @@ public abstract class AbstractTimeSeries extends Filter
    *
    * -M <br>
    * For instances at the beginning or end of the dataset where the translated
-   * values are not known, remove those instances (default is to use missing 
+   * values are not known, remove those instances (default is to use missing
    * values). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -199,7 +200,7 @@ public abstract class AbstractTimeSeries extends Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the format couldn't be set successfully
+   * @exception Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -218,7 +219,7 @@ public abstract class AbstractTimeSeries extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws Exception if the input instance was not of the correct 
+   * @exception Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.
    */
   public boolean input(Instance instance) throws Exception {
@@ -247,7 +248,7 @@ public abstract class AbstractTimeSeries extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 

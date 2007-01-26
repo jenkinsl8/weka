@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  *
  */
 public class Saver extends AbstractDataSink implements WekaWrapper {

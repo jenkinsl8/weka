@@ -35,13 +35,13 @@ import weka.filters.Filter;
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class FilterCustomizer extends JPanel
   implements Customizer {
   
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

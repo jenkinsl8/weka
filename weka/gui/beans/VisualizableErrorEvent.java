@@ -30,7 +30,7 @@ import weka.gui.visualize.PlotData2D;
  * that can be visualized in the DataVisualizer
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  * @see EventObject
  */
 public class VisualizableErrorEvent extends EventObject {

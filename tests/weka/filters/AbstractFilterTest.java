@@ -4,13 +4,8 @@
 
 package weka.filters;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.meta.FilteredClassifier;
-import weka.core.CheckOptionHandler;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.TestInstances;
-import weka.core.Capabilities.Capability;
 import weka.test.Regression;
 
 import java.io.BufferedReader;
@@ -23,18 +18,9 @@ import junit.framework.TestCase;
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5.2.1 $
  */
-public abstract class AbstractFilterTest
-  extends TestCase {
-
-  // TODO: 
-  // * Check that results between incremental and batch use are
-  //   the same
-  // * Check batch operation is OK
-  // * Check memory use between subsequent runs
-  // * Check memory use when multiplying data?
+public abstract class AbstractFilterTest extends TestCase {
 
   /** Set to true to print out extra info during testing */
   protected static boolean VERBOSE = false;
@@ -45,9 +31,6 @@ public abstract class AbstractFilterTest
   /** A set of instances to test with */
   protected Instances m_Instances;
   
-  /** the OptionHandler tester */
-  protected CheckOptionHandler m_OptionTester;
-  
   /** the FilteredClassifier instance used for tests */
   protected FilteredClassifier m_FilteredClassifier;
 
@@ -56,20 +39,17 @@ public abstract class AbstractFilterTest
    *
    * @param name the name of the test class
    */
-  public AbstractFilterTest(String name) {
-    super(name);
-  }
+  public AbstractFilterTest(String name) { super(name); }
 
   /**
    * Called by JUnit before each test method. This implementation creates
    * the default filter to test and loads a test set of Instances.
    *
-   * @throws Exception if an error occurs reading the example instances.
+   * @exception Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
     m_Filter = getFilter();
     m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
-    m_OptionTester = getOptionTester();
     m_FilteredClassifier = getFilteredClassifier();
   }
 
@@ -77,86 +57,8 @@ public abstract class AbstractFilterTest
   protected void tearDown() {
     m_Filter = null;
     m_Instances = null;
-    m_OptionTester = null;
-    m_FilteredClassifier = null;
-  }
-  
-  /**
-   * Configures the CheckOptionHandler uses for testing the optionhandling.
-   * Sets the scheme to test.
-   * 
-   * @return	the fully configured CheckOptionHandler
-   */
-  protected CheckOptionHandler getOptionTester() {
-    CheckOptionHandler		result;
-    
-    result = new CheckOptionHandler();
-    if (getFilter() instanceof OptionHandler)
-      result.setOptionHandler((OptionHandler) getFilter());
-    else
-      result.setOptionHandler(null);
-    result.setUserOptions(new String[0]);
-    result.setSilent(true);
-    
-    return result;
   }
 
-  /**
-   * returns the configured FilteredClassifier. Since the base classifier is
-   * determined heuristically, derived tests might need to adjust it.
-   * 
-   * @return the configured FilteredClassifier
-   */
-  protected FilteredClassifier getFilteredClassifier() {
-    FilteredClassifier	result;
-    Filter		filter;
-    Classifier		cls;
-    
-    result = new FilteredClassifier();
-    
-    // set filter
-    filter = getFilter();
-    result.setFilter(filter);
-    
-    // set classifier
-    if (filter.getCapabilities().handles(Capability.NOMINAL_CLASS))
-      cls = new weka.classifiers.trees.J48();
-    else if (filter.getCapabilities().handles(Capability.BINARY_CLASS))
-      cls = new weka.classifiers.trees.J48();
-    else if (filter.getCapabilities().handles(Capability.UNARY_CLASS))
-      cls = new weka.classifiers.trees.J48();
-    else if (filter.getCapabilities().handles(Capability.NUMERIC_CLASS))
-      cls = new weka.classifiers.trees.M5P();
-    else if (filter.getCapabilities().handles(Capability.DATE_CLASS))
-      cls = new weka.classifiers.trees.M5P();
-    else
-      throw new IllegalStateException("Cannot determine base classifier for FilteredClassifier!");
-    result.setClassifier(cls);
-    
-    return result;
-  }
-  
-  /**
-   * returns data generated for the FilteredClassifier test
-   * 
-   * @return		the dataset for the FilteredClassifier
-   * @throws Exception	if generation of data fails
-   */
-  protected Instances getFilteredClassifierData() throws Exception {
-    TestInstances	test;
-    Instances		result;
-
-    // NB: in order to make sure that the classifier can handle the data,
-    //     we're using the classifier's capabilities to generate the data.
-    test = TestInstances.forCapabilities(
-  	m_FilteredClassifier.getClassifier().getCapabilities());
-    test.setClassIndex(TestInstances.CLASS_IS_LAST);
-
-    result = test.generate();
-    
-    return result;
-  }
-  
   /**
    * Used to create an instance of a specific filter. The filter
    * should be configured to operate on a dataset that contains
@@ -178,6 +80,44 @@ public abstract class AbstractFilterTest
    * @return a suitably configured <code>Filter</code> value
    */
   public abstract Filter getFilter();
+
+  /**
+   * returns the configured FilteredClassifier. Derived tests might have to 
+   * adjust the base classifier (default is J48).
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = new FilteredClassifier();
+    result.setFilter(getFilter());
+    result.setClassifier(new weka.classifiers.trees.J48());
+    
+    return result;
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception {
+    Instances	result;
+    int		i;
+
+    result = new Instances(m_Instances);
+    result.deleteStringAttributes();
+    for (i = 0; i < result.numAttributes(); i++) {
+      if (result.attribute(i).isNominal()) {
+	result.setClassIndex(i);
+	break;
+      }
+    }
+    
+    return result;
+  }
 
   /**
    * Simple method to return the filtered set of test instances after
@@ -361,7 +301,7 @@ public abstract class AbstractFilterTest
     // Run the filter using deprecated calls to check it still works the same
     Instances icopy = new Instances(m_Instances);
     try {
-      m_Filter.setInputFormat(icopy);
+      m_Filter.inputFormat(icopy);
     } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
@@ -371,7 +311,7 @@ public abstract class AbstractFilterTest
         m_Filter.input(icopy.instance(i));
       }
       m_Filter.batchFinished();
-      result = m_Filter.getOutputFormat();
+      result = m_Filter.outputFormat();
       weka.core.Instance processed;
       while ((processed = m_Filter.output()) != null) {
         result.add(processed);
@@ -469,68 +409,14 @@ public abstract class AbstractFilterTest
   }
   
   /**
-   * tests the listing of the options
-   */
-  public void testListOptions() {
-    if (m_OptionTester.getOptionHandler() != null) {
-      if (!m_OptionTester.checkListOptions())
-	fail("Options cannot be listed via listOptions.");
-    }
-  }
-  
-  /**
-   * tests the setting of the options
-   */
-  public void testSetOptions() {
-    if (m_OptionTester.getOptionHandler() != null) {
-      if (!m_OptionTester.checkSetOptions())
-	fail("setOptions method failed.");
-    }
-  }
-  
-  /**
-   * tests whether there are any remaining options
-   */
-  public void testRemainingOptions() {
-    if (m_OptionTester.getOptionHandler() != null) {
-      if (!m_OptionTester.checkRemainingOptions())
-	fail("There were 'left-over' options.");
-    }
-  }
-  
-  /**
-   * tests the whether the user-supplied options stay the same after setting.
-   * getting, and re-setting again.
-   * 
-   * @see 	#getOptionTester()
-   */
-  public void testCanonicalUserOptions() {
-    if (m_OptionTester.getOptionHandler() != null) {
-      if (!m_OptionTester.checkCanonicalUserOptions())
-	fail("setOptions method failed");
-    }
-  }
-  
-  /**
-   * tests the resetting of the options to the default ones
-   */
-  public void testResettingOptions() {
-    if (m_OptionTester.getOptionHandler() != null) {
-      if (!m_OptionTester.checkSetOptions())
-	fail("Resetting of options failed");
-    }
-  }
-  
-  /**
    * tests the filter in conjunction with the FilteredClassifier
    */
   public void testFilteredClassifier() {
-    Instances		data;
-    int			i;
-    double 		cls;
+    Instances	data;
+    int		i;
+    double 	cls;
     
     try {
-      // generate data
       data = getFilteredClassifierData();
       
       // build classifier
@@ -545,4 +431,12 @@ public abstract class AbstractFilterTest
       fail("Problem with FilteredClassifier: " + e.toString());
     }
   }
+
+  // TODO: 
+  // * Check that results between incremental and batch use are
+  //   the same
+  // * Check batch operation is OK
+  // * Check memory use between subsequent runs
+  // * Check memory use when multiplying data?
+
 }

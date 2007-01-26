@@ -45,7 +45,7 @@ import javax.swing.JOptionPane;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class Experimenter extends JPanel {
 

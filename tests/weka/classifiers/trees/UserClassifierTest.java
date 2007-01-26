@@ -17,7 +17,7 @@ import weka.core.Instances;
  * command line with:<p> java weka.classifiers.UserClassifierTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class UserClassifierTest extends AbstractClassifierTest {
 

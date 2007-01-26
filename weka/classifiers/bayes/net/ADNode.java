@@ -21,52 +21,23 @@
  */
 
 package weka.classifiers.bayes.net;
-
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-
+import weka.core.*;
 import java.io.FileReader;
 import java.io.Serializable;
 
 /**
  * The ADNode class implements the ADTree datastructure which increases
  * the speed with which sub-contingency tables can be constructed from
- * a data set in an Instances object. For details, see: <p/>
+ * a data set in an Instances object. For details, see
  *
- <!-- technical-plaintext-start -->
- * Andrew W. Moore, Mary S. Lee (1998). Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets. Journal of Artificial Intelligence Research. 8:67-91.
- <!-- technical-plaintext-end -->
- * <p/>
- *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Moore1998,
- *    author = {Andrew W. Moore and Mary S. Lee},
- *    journal = {Journal of Artificial Intelligence Research},
- *    pages = {67-91},
- *    title = {Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets},
- *    volume = {8},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets
+ * Andrew Moore, and Mary Soon Lee
+ * Journal of Artificial Intelligence Research 8 (1998) 67-91
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class ADNode 
-	implements Serializable, TechnicalInformationHandler {
-  
-  	/** for serialization */
-  	static final long serialVersionUID = 397409728366910204L;
-  
+public class ADNode implements Serializable {
         final static int MIN_RECORD_SIZE = 0;
 	
 	/** list of VaryNode children **/
@@ -84,31 +55,10 @@ public class ADNode
         public ADNode() {
         }
 
-        /**
-         * Returns an instance of a TechnicalInformation object, containing 
-         * detailed information about the technical background of this class,
-         * e.g., paper reference or book this class is based on.
-         * 
-         * @return the technical information about this class
-         */
-        public TechnicalInformation getTechnicalInformation() {
-          TechnicalInformation 	result;
-          
-          result = new TechnicalInformation(Type.ARTICLE);
-          result.setValue(Field.AUTHOR, "Andrew W. Moore and Mary S. Lee");
-          result.setValue(Field.YEAR, "1998");
-          result.setValue(Field.TITLE, "Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets");
-          result.setValue(Field.JOURNAL, "Journal of Artificial Intelligence Research");
-          result.setValue(Field.VOLUME, "8");
-          result.setValue(Field.PAGES, "67-91");
-          
-          return result;
-        }
-
 	/** create sub tree
-	 * @param iNode index of the lowest node in the tree
-	 * @param nRecords set of records in instances to be considered
-	 * @param instances data set
+	 * @param iNode: index of the lowest node in the tree
+	 * @param nRecords: set of records in instances to be considered
+	 * @param instances: data set
          * @return VaryNode representing part of an ADTree
  	 **/
 	public static VaryNode makeVaryNode(int iNode, FastVector nRecords, Instances instances) {
@@ -150,14 +100,12 @@ public class ADNode
 		return _VaryNode;
 	} // MakeVaryNode
 
-	/** 
-	 * create sub tree
-	 * 
-	 * @param iNode index of the lowest node in the tree
-	 * @param nRecords set of records in instances to be considered
-	 * @param instances data set
+	/** create sub tree
+	 * @param iNode: index of the lowest node in the tree
+	 * @param nRecords: set of records in instances to be considered
+	 * @param instances: data set
          * @return ADNode representing an ADTree
-	 */
+	 **/
 	public static ADNode makeADTree(int iNode, FastVector nRecords, Instances instances) {
 		ADNode _ADNode = new ADNode();
                 _ADNode.m_nCount = nRecords.size();
@@ -176,12 +124,10 @@ public class ADNode
 		return _ADNode;
 	} // MakeADTree
 
-	/** 
-	 * create AD tree from set of instances
-	 * 
-	 * @param instances data set
+	/** create AD tree from set of instances
+	 * @param instances: data set
          * @return ADNode representing an ADTree
-	 */
+	 **/
 	public static ADNode makeADTree(Instances instances) {
           FastVector nRecords = new FastVector(instances.numInstances());
           for (int iRecord = 0; iRecord < instances.numInstances(); iRecord++) {
@@ -190,9 +136,7 @@ public class ADNode
           return makeADTree(0, nRecords, instances);
         } // MakeADTree
         
-          /** 
-           * get counts for specific instantiation of a set of nodes
-           * 
+          /** get counts for specific instantiation of a set of nodes
            * @param nCounts - array for storing counts
            * @param nNodes - array of node indexes 
            * @param nOffsets - offset for nodes in nNodes in nCounts
@@ -240,9 +184,8 @@ public class ADNode
         } // getCounts
 
 
-        /** 
-         * print is used for debugging only and shows the ADTree in ASCII graphics
-         */
+          /* print is used for debugging only and shows the ADTree in ASCII graphics
+           */
         public void print() {
           String sTab = new String();for (int i = 0; i < m_nStartNode; i++) {
               sTab = sTab + "  ";
@@ -258,11 +201,6 @@ public class ADNode
           }
         }
         
-        /**
-         * for testing only
-         * 
-         * @param argv the commandline options
-         */
         public static void main(String [] argv) {
             try {
                 Instances instances = new Instances(new FileReader("\\iris.2.arff"));

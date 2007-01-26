@@ -45,7 +45,7 @@ import java.beans.beancontext.*;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class ModelPerformanceChart extends JPanel
   implements ThresholdDataListener, VisualizableErrorListener, 

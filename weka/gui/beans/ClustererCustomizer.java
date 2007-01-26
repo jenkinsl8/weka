@@ -39,12 +39,12 @@ import weka.clusterers.Clusterer;
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class ClustererCustomizer extends JPanel implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

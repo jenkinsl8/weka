@@ -4,6 +4,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
@@ -16,7 +17,7 @@ import junit.framework.TestSuite;
  * java weka.filters.SwapValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class SwapValuesTest extends AbstractFilterTest {
   
@@ -28,6 +29,20 @@ public class SwapValuesTest extends AbstractFilterTest {
     // Ensure the filter we return can run on the test dataset
     f.setAttributeIndex("2"); 
     return f;
+  }
+
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    ((SwapValues) result.getFilter()).setAttributeIndex("1");
+    
+    return result;
   }
 
   public void testInvalidAttributeTypes() {
@@ -120,30 +135,6 @@ public class SwapValuesTest extends AbstractFilterTest {
         assertTrue("Value should be swapped", result.instance(i).value(4) == first);
       }
     }
-  }
-  
-  /**
-   * tests the filter in conjunction with the FilteredClassifier
-   */
-  public void testFilteredClassifier() {
-    try {
-      Instances data = getFilteredClassifierData();
-
-      for (int i = 0; i < data.numAttributes(); i++) {
-	if (data.classIndex() == i)
-	  continue;
-	if (data.attribute(i).isNominal()) {
-	  ((SwapValues) m_FilteredClassifier.getFilter()).setAttributeIndex(
-	      "" + (i + 1));
-	  break;
-	}
-      }
-    }
-    catch (Exception e) {
-      fail("Problem setting up test for FilteredClassifier: " + e.toString());
-    }
-    
-    super.testFilteredClassifier();
   }
 
   public static Test suite() {

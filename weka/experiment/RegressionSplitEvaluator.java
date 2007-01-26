@@ -23,56 +23,31 @@
 
 package weka.experiment;
 
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.Attribute;
+import weka.core.Summarizable;
+import weka.core.AdditionalMeasureProducer;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Summarizable;
-import weka.core.Utils;
-
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.io.Serializable;
+import java.io.ObjectStreamClass;
 
 /**
- <!-- globalinfo-start -->
- * A SplitEvaluator that produces results for a classification scheme on a numeric class attribute.
- * <p/>
- <!-- globalinfo-end -->
+ * A SplitEvaluator that produces results for a classification scheme
+ * on a numeric class attribute.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;class name&gt;
- *  The full class name of the classifier.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
- * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.17.2.2 $
  */
-public class RegressionSplitEvaluator 
-  implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
-  
-  /** for serialization */
-  static final long serialVersionUID = -328181640503349202L;
+public class RegressionSplitEvaluator implements SplitEvaluator, 
+  OptionHandler, AdditionalMeasureProducer {
 
   /** The template classifier */
   protected Classifier m_Template = new ZeroR();
@@ -101,7 +76,7 @@ public class RegressionSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 17; //15;
+  private static final int RESULT_SIZE = 15;
 
   /**
    * No args constructor.
@@ -151,29 +126,15 @@ public class RegressionSplitEvaluator
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;class name&gt;
-   *  The full class name of the classifier.
-   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.rules.ZeroR:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
+   * -W classname <br>
+   * Specify the full class name of the classifier to evaluate. <p>
    *
    * All option after -- will be passed to the classifier.
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -277,9 +238,9 @@ public class RegressionSplitEvaluator
   
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (m_Template instanceof AdditionalMeasureProducer) {
@@ -381,8 +342,6 @@ public class RegressionSplitEvaluator
     // Timing stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
 
     resultTypes[current++] = "";
 
@@ -427,11 +386,9 @@ public class RegressionSplitEvaluator
     resultNames[current++] = "SF_mean_entropy_gain";
 
     // Timing stats
-    resultNames[current++] = "Elapsed_Time_training";
-    resultNames[current++] = "Elapsed_Time_testing";
-    resultNames[current++] = "UserCPU_Time_training";
-    resultNames[current++] = "UserCPU_Time_testing";
-    
+    resultNames[current++] = "Time_training";
+    resultNames[current++] = "Time_testing";
+
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -453,7 +410,7 @@ public class RegressionSplitEvaluator
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @throws Exception if a problem occurs while getting the results
+   * @exception Exception if a problem occurs while getting the results
    */
   public Object [] getResult(Instances train, Instances test) 
     throws Exception {
@@ -464,35 +421,18 @@ public class RegressionSplitEvaluator
     if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
-    ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
-    boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if(!thMonitor.isThreadCpuTimeEnabled())
-      thMonitor.setThreadCpuTimeEnabled(true);
-    
-    int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
+    int addm = (m_AdditionalMeasures != null) 
+      ? m_AdditionalMeasures.length 
+      : 0;
     Object [] result = new Object[RESULT_SIZE+addm];
-    long thID = Thread.currentThread().getId();
-    long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
-         trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
     Evaluation eval = new Evaluation(train);
     m_Classifier = Classifier.makeCopy(m_Template);
-
-    trainTimeStart = System.currentTimeMillis();
-    if(canMeasureCPUTime)
-      CPUStartTime = thMonitor.getThreadUserTime(thID);
+    long trainTimeStart = System.currentTimeMillis();
     m_Classifier.buildClassifier(train);
-    if(canMeasureCPUTime)
-      trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
-    testTimeStart = System.currentTimeMillis();
-    if(canMeasureCPUTime)
-      CPUStartTime = thMonitor.getThreadUserTime(thID);
+    long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    long testTimeStart = System.currentTimeMillis();
     eval.evaluateModel(m_Classifier, test);
-    if(canMeasureCPUTime)
-      testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    testTimeElapsed = System.currentTimeMillis() - testTimeStart;
-    thMonitor = null;
-    
+    long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -511,44 +451,36 @@ public class RegressionSplitEvaluator
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
-    
+
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
-    if(canMeasureCPUTime) {
-      result[current++] = new Double((trainCPUTimeElapsed/1000000.0) / 1000.0);
-      result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
-    }
-    else {
-      result[current++] = new Double(Instance.missingValue());
-      result[current++] = new Double(Instance.missingValue());
-    }
-    
+
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
       result[current++] = null;
     }
-    
+
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-        try {
-          double dv = ((AdditionalMeasureProducer)m_Classifier).
-          getMeasure(m_AdditionalMeasures[i]);
-          if (!Instance.isMissingValue(dv)) {
-            Double value = new Double(dv);
-            result[current++] = value;
-          } else {
-            result[current++] = null;
-          }
-        } catch (Exception ex) {
-          System.err.println(ex);
-        }
+	try {
+	  double dv = ((AdditionalMeasureProducer)m_Classifier).
+	    getMeasure(m_AdditionalMeasures[i]);
+	  if (!Instance.isMissingValue(dv)) {
+	    Double value = new Double(dv);
+	    result[current++] = value;
+	  } else {
+	    result[current++] = null;
+	  }
+	} catch (Exception ex) {
+	  System.err.println(ex);
+	}
       } else {
-        result[current++] = null;
+	result[current++] = null;
       }
     }
-    
+	
     if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
@@ -611,8 +543,8 @@ public class RegressionSplitEvaluator
    * Set the Classifier to use, given it's class name. A new classifier will be
    * instantiated.
    *
-   * @param newClassifierName the Classifier class name.
-   * @throws Exception if the class name is invalid.
+   * @param newClassifier the Classifier class name.
+   * @exception Exception if the class name is invalid.
    */
   public void setClassifierName(String newClassifierName) throws Exception {
 

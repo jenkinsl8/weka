@@ -4,18 +4,18 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.AbstractFilterTest;
-import weka.filters.Filter;
-
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import weka.filters.Filter;
+import weka.filters.AbstractFilterTest;
 
 /**
  * Tests Add. Run from the command line with:<p>
  * java weka.filters.AddTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class AddTest extends AbstractFilterTest {
   
