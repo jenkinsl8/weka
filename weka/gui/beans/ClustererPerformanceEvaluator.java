@@ -16,32 +16,40 @@
 
 /*
  *    ClustererPerformanceEvaluator.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
-import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
+import weka.clusterers.ClusterEvaluation;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.FastVector;
+import weka.gui.Logger;
+import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import java.awt.*;
+import javax.swing.JScrollPane;
 
 /**
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class ClustererPerformanceEvaluator
-  extends AbstractEvaluator
-  implements BatchClustererListener, Serializable, UserRequestAcceptor, 
-             EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8041163601333978584L;
+public class ClustererPerformanceEvaluator extends AbstractEvaluator implements BatchClustererListener, Serializable, UserRequestAcceptor, EventConstraints {
 
   /**
    * Evaluation object used for evaluating a clusterer

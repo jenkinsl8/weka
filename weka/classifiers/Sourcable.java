@@ -16,7 +16,7 @@
 
 /*
  *    Sourcable.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -26,7 +26,7 @@ package weka.classifiers;
  * Interface for classifiers that can be converted to Java source.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public interface Sourcable {
 

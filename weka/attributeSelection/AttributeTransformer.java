@@ -16,19 +16,20 @@
 
 /*
  *    AttributeTransformer.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
+import java.io.*;
 import weka.core.*;
 
 /** 
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6 $
  */
 public interface AttributeTransformer {
     // ===============

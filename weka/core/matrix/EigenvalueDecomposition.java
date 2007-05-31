@@ -35,13 +35,11 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  */
+
 public class EigenvalueDecomposition 
   implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 4011654467211422319L;
 
   /** 
    * Row and column dimension (square matrix).
@@ -881,7 +879,8 @@ public class EigenvalueDecomposition
   /** 
    * Check for symmetry, then construct the eigenvalue decomposition
    *
-   * @param Arg    Square matrix
+   * @param A    Square matrix
+   * @return     Structure to access D and V.
    */
   public EigenvalueDecomposition(Matrix Arg) {
     double[][] A = Arg.getArray();

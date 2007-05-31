@@ -16,7 +16,7 @@
 
 /*
  *    SaverBeanInfo.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class SaverBeanInfo extends AbstractDataSinkBeanInfo {
   

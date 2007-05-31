@@ -16,22 +16,14 @@
 
 /*
  *    SerializedObject.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Richard Kirkby
  *
  */
 
 package weka.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.io.*;
+import java.util.zip.*;
 
 /**
  * Class for storing an object in serialized form in memory. It can be used 
@@ -39,13 +31,9 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.7 $ 
  */
-public class SerializedObject
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6635502953928860434L;
+public class SerializedObject implements Serializable {
 
   /** The array storing the object. */
   private byte[] m_storedObjectArray;
@@ -57,6 +45,7 @@ public class SerializedObject
    * Creates a new serialized object (without compression).
    *
    * @param toStore the object to store
+   * @param compress whether or not to use compression
    * @exception Exception if the object couldn't be serialized
    */ 
   public SerializedObject(Object toStore) throws Exception {

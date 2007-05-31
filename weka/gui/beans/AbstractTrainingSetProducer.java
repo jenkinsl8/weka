@@ -16,18 +16,21 @@
 
 /*
  *    AbstractTrainingSetProducer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 import java.util.Vector;
-
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 /**
  * Abstract class for TrainingSetProducers that contains default
@@ -35,17 +38,14 @@ import javax.swing.JPanel;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.2.2.1 $
  * @since 1.0
  * @see TrainingSetProducer
+ * @see DataSetListener
  */
-public abstract class AbstractTrainingSetProducer
-  extends JPanel
+public abstract class AbstractTrainingSetProducer extends JPanel
   implements TrainingSetProducer, Visible, 
 	     BeanCommon, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -7842746199524591125L;
 
   /**
    * Objects listening for training set events

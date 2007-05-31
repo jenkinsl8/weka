@@ -16,58 +16,51 @@
 
 /*
  *    SaverCustomizer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
+import weka.gui.FileEditor;
 
+import java.io.File;
+import java.beans.*;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-
+import java.awt.event.*;
+import javax.swing.SwingConstants;
+import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFrame;
+import javax.swing.JDialog;
+import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.filechooser.FileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+import weka.gui.ExtensionFileFilter;
+import weka.core.converters.Loader;
+import weka.core.converters.FileSourcedConverter;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseSaver;
 
 /**
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.1.2.2 $
  */
-public class SaverCustomizer
-  extends JPanel
-  implements Customizer, CustomizerCloseRequester {
-
-  /** for serialization */
-  private static final long serialVersionUID = -4874208115942078471L;
+public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

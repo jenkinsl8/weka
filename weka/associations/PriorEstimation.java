@@ -16,19 +16,19 @@
 
 /*
  * PriorEstimation.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.associations;
 
 import weka.core.Instances;
-import weka.core.SpecialFunctions;
+import weka.core.FastVector;
 import weka.core.Utils;
-
-import java.io.Serializable;
-import java.util.Hashtable;
+import weka.core.SpecialFunctions;
 import java.util.Random;
+import java.util.Hashtable;
+import java.io.Serializable;
 
 /**
  * Class implementing the prior estimattion of the predictive apriori algorithm 
@@ -40,13 +40,10 @@ import java.util.Random;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ */
+ * @version $Revision: 1.4 $ */
 
  public class PriorEstimation implements Serializable{
     
-    /** for serialization */
-    private static final long serialVersionUID = 5570863216522496271L;
-
     /** The number of rnadom rules. */
     protected int m_numRandRules;
     

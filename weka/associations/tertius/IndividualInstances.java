@@ -25,22 +25,20 @@
 
 package weka.associations.tertius;
 
-import weka.core.Attribute;
-import weka.core.Instance;
 import weka.core.Instances;
-
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.Utils;
 import java.util.Enumeration;
+import java.io.IOException;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class IndividualInstances extends Instances {
     
-  /** for serialization */
-  private static final long serialVersionUID = -7355054814895636733L;
-
   public IndividualInstances(Instances individuals, Instances parts) 
     throws Exception {
 	

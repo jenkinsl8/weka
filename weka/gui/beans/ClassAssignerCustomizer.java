@@ -16,40 +16,33 @@
 
 /*
  *    ClassAssignerCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.PropertySheetPanel;
-
+import java.io.File;
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
+import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import weka.gui.PropertySheetPanel;
+import weka.core.Instances;
+import weka.core.Attribute;
 
 /**
  * GUI customizer for the class assigner bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class ClassAssignerCustomizer
-  extends JPanel
+public class ClassAssignerCustomizer extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = 476539385765301907L;
 
   private boolean m_displayColNames = false;
 
@@ -76,7 +69,7 @@ public class ClassAssignerCustomizer
     m_ClassCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classAssigner != null && m_displayColNames == true) {
-	    m_classAssigner.setClassColumn(""+(m_ClassCombo.getSelectedIndex()));
+	    m_classAssigner.setClassColumn(""+(m_ClassCombo.getSelectedIndex()+1));
 	  }
 	}
       });
@@ -101,11 +94,10 @@ public class ClassAssignerCustomizer
     if (existingClassCol < 0) {
       existingClassCol = 0;
     }
-    String [] attribNames = new String [format.numAttributes()+1];
-    attribNames[0] = "NO CLASS";
-    for (int i = 1; i < attribNames.length; i++) {
+    String [] attribNames = new String [format.numAttributes()];
+    for (int i = 0; i < attribNames.length; i++) {
       String type = "";
-      switch (format.attribute(i-1).type()) {
+      switch (format.attribute(i).type()) {
       case Attribute.NOMINAL:
 	type = "(Nom) ";
 	break;
@@ -118,17 +110,14 @@ public class ClassAssignerCustomizer
       case Attribute.DATE:
 	type = "(Dat) ";
 	break;
-      case Attribute.RELATIONAL:
-	type = "(Rel) ";
-	break;
       default:
 	type = "(???) ";
       }
-      attribNames[i] = type + format.attribute(i-1).name();
+      attribNames[i] = type + format.attribute(i).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
     if (attribNames.length > 0) {
-      m_ClassCombo.setSelectedIndex(existingClassCol+1);
+      m_ClassCombo.setSelectedIndex(existingClassCol);
     }
     if (m_displayColNames == false) {
       add(m_holderP, BorderLayout.CENTER);

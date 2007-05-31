@@ -16,7 +16,7 @@
 
 /*
  *    Compute.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -30,7 +30,7 @@ import java.rmi.RemoteException;
  * a task.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public interface Compute extends Remote {
   

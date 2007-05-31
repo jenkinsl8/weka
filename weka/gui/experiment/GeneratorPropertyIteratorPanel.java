@@ -16,53 +16,61 @@
 
 /*
  *    GeneratorPropertyIteratorPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg, Mark Hall
  *
  */
+
 
 package weka.gui.experiment;
 
 import weka.core.FastVector;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
 import weka.gui.GenericArrayEditor;
 import weka.gui.PropertySelectorDialog;
-
+import weka.experiment.PropertyNode;
+import weka.experiment.Experiment;
+import weka.experiment.ResultProducer;
+import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.GridLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Array;
+import java.awt.event.ActionListener;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
+import javax.swing.JTextField;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import java.awt.FlowLayout;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.awt.Dimension;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+
 
 /** 
  * This panel controls setting a list of values for an arbitrary
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8 $
  */
-public class GeneratorPropertyIteratorPanel
-  extends JPanel
+public class GeneratorPropertyIteratorPanel extends JPanel
   implements ActionListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6026938995241632139L;
 
   /** Click to select the property to iterate over */
   protected JButton m_ConfigureBut = new JButton("Select property...");

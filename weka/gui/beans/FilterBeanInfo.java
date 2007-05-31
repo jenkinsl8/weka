@@ -16,7 +16,7 @@
 
 /*
  *    FilterBeanInfo.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the Filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class FilterBeanInfo extends SimpleBeanInfo {
    

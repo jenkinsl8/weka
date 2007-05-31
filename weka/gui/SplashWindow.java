@@ -25,17 +25,10 @@
 
 package weka.gui;
 
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.net.URL;
+import java.awt.*;
+import java.awt.event.*;
+import java.net.*;
+import java.io.*;
 
 /**
  * A Splash window.
@@ -58,14 +51,9 @@ import java.net.URL;
  *
  * @author  Werner Randelshofer
  * @author  Mark Hall
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
-public class SplashWindow
-  extends Window {
-
-  /** for serialization */
-  private static final long serialVersionUID = -2685134277041307795L;
-  
+public class SplashWindow extends Window {
   /**
    * The current instance of the splash window.
    * (Singleton design pattern).

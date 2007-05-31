@@ -16,31 +16,30 @@
 
 /*
  *    RandomizableClassifier.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Option;
-import weka.core.Randomizable;
+import weka.classifiers.Classifier;
+import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.util.Enumeration;
+import weka.core.Option;
+import weka.core.Instances;
+import weka.core.Randomizable;
 import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Abstract utility class for handling settings common to randomizable
  * classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 public abstract class RandomizableClassifier
   extends Classifier implements Randomizable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8816375798262351903L;
   
   /** The random number seed. */
   protected int m_Seed = 1;

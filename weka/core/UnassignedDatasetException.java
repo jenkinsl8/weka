@@ -16,7 +16,7 @@
 
 /*
  *    UnassignedDatasetException.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -27,13 +27,9 @@ package weka.core;
  * reference to a dataset, when one is required.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class UnassignedDatasetException
-  extends RuntimeException {
-
-  /** for serialization */
-  private static final long serialVersionUID = -9000116786626328854L;
+public class UnassignedDatasetException extends RuntimeException {
 
   /**
    * Creates a new UnassignedDatasetException with no message.

@@ -16,46 +16,52 @@
 
 /*
  *    Filter.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.filters.AllFilter;
-import weka.filters.StreamableFilter;
-import weka.filters.SupervisedFilter;
-import weka.gui.Logger;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.Vector;
 import java.util.EventObject;
 import java.util.Hashtable;
-import java.util.Vector;
-
+import java.util.Enumeration;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.beans.EventSetDescriptor;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.*;
+import weka.gui.Logger;
 
 /**
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.11.2.2 $
  */
-public class Filter
-  extends JPanel
+public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
 	     InstanceListener, EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8249759470189439321L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Filter",
@@ -146,21 +152,13 @@ public class Filter
 				      indexOf('.')+1, 
 				      filterName.length());
     if (loadImages) {
-      if (m_Filter instanceof Visible) {
-        m_visual = ((Visible) m_Filter).getVisual();
-      } else {
-        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
-                                BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
-          useDefaultVisual();
-        }
+      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
+		       BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
+	useDefaultVisual();
       }
     }
     m_visual.setText(filterName.substring(filterName.lastIndexOf('.')+1,
 					  filterName.length()));
-
-    if (m_Filter instanceof LogWriter && m_log != null) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
 
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
@@ -684,10 +682,6 @@ public class Filter
 						  Object source) {
     if (connectionAllowed(eventName)) {
       m_listenees.put(eventName, source);
-      if (m_Filter instanceof ConnectionNotificationConsumer) {
-        ((ConnectionNotificationConsumer) m_Filter).
-          connectionNotification(eventName, source);
-      }
     }
   }
 
@@ -701,10 +695,6 @@ public class Filter
    */
   public synchronized void disconnectionNotification(String eventName,
 						     Object source) {
-    if (m_Filter instanceof ConnectionNotificationConsumer) {
-      ((ConnectionNotificationConsumer) m_Filter).
-        disconnectionNotification(eventName, source);
-    }
     m_listenees.remove(eventName);
   }
 
@@ -754,10 +744,6 @@ public class Filter
    */
   public void setLog(Logger logger) {
     m_log = logger;
-
-    if (m_Filter != null && m_Filter instanceof LogWriter) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
   }
 
   /**

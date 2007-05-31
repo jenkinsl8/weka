@@ -16,7 +16,7 @@
 
 /*
  *    RemoteExperimentSubTask.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -29,7 +29,7 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class RemoteExperimentSubTask implements Task {
 

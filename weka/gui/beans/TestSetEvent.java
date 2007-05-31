@@ -16,27 +16,22 @@
 
 /*
  *    TestSetEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
 import java.util.EventObject;
+import weka.core.Instances;
 
 /**
  * Event encapsulating a test set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class TestSetEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8780718708498854231L;
+public class TestSetEvent extends EventObject {
   
   /**
    * The test set instances

@@ -16,7 +16,7 @@
 
 /*
  *    SetupModePanel.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -24,28 +24,47 @@ package weka.gui.experiment;
 
 import weka.experiment.Experiment;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
+
+import java.awt.Component;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JLabel;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.Insets;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
+import javax.swing.JTextField;
+import javax.swing.Box;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
 import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+
 
 /** 
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.1 $
  */
-public class SetupModePanel
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3758035565520727822L;
+public class SetupModePanel extends JPanel {
 
   /** The button for choosing simple setup mode */
   protected JRadioButton m_SimpleSetupRBut = 
@@ -68,14 +87,12 @@ public class SetupModePanel
 
     m_simplePanel.setModePanel(this);
 
-    m_SimpleSetupRBut.setMnemonic('S');
     m_SimpleSetupRBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  switchToSimple(null);
 	}
       });
 
-    m_AdvancedSetupRBut.setMnemonic('A');
     m_AdvancedSetupRBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  switchToAdvanced(null);

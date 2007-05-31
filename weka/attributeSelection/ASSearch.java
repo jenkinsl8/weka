@@ -16,29 +16,23 @@
 
 /*
  *    ASSearch.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
-import weka.core.Instances;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import java.io.*;
+import weka.core.*;
 
 /** 
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.8 $
  */
 public abstract class ASSearch implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = 7591673350342236548L;
-  
   // ===============
   // Public methods.
   // ===============
@@ -49,7 +43,7 @@ public abstract class ASSearch implements Serializable {
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
   public abstract int [] search(ASEvaluation ASEvaluator,
 				Instances data) throws Exception;
@@ -64,7 +58,7 @@ public abstract class ASSearch implements Serializable {
    * @param options an array of options suitable for passing to setOptions. May
    * be null.
    * @return the newly created search object, ready for use.
-   * @throws Exception if the search class name is invalid, or the options
+   * @exception Exception if the search class name is invalid, or the options
    * supplied are not acceptable to the search class.
    */
   public static ASSearch forName(String searchName,
@@ -72,29 +66,5 @@ public abstract class ASSearch implements Serializable {
     return (ASSearch)Utils.forName(ASSearch.class,
 				   searchName,
 				   options);
-  }
-
-  /**
-   * Creates copies of the current search scheme. Note that this method
-   * now uses Serialization to perform a deep copy, so the search
-   * object must be fully Serializable. Any currently built model will
-   * now be copied as well.
-   *
-   * @param model an example search scheme to copy
-   * @param num the number of search scheme copies to create.
-   * @return an array of search schemes.
-   * @throws Exception if an error occurs 
-   */
-  public static ASSearch[] makeCopies(ASSearch model, int num) throws Exception {
-
-    if (model == null)
-      throw new Exception("No model search scheme set");
-      
-    ASSearch[] result = new ASSearch[num];
-    SerializedObject so = new SerializedObject(model);
-    for (int i = 0; i < result.length; i++)
-      result[i] = (ASSearch) so.getObject();
-
-    return result;
   }
 }

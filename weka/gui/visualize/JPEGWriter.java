@@ -16,11 +16,13 @@
 
  /*
   *    JPEGWriter.java
-  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 Fracpete
   *
   */
 
 package weka.gui.visualize;
+
+import com.sun.image.codec.jpeg.*;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -32,25 +34,19 @@ import java.io.FileOutputStream;
 
 import javax.swing.JComponent;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
-
 /** 
  * This class takes any JComponent and outputs it to a JPEG-file.
  * Scaling is by default disabled, since we always take a screenshot.
  *
+ * @see #setScalingEnabled()
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.1 $
  */
-public class JPEGWriter
-  extends JComponentWriter {
-  
+public class JPEGWriter extends JComponentWriter {
   /** the quality of the image */
-  protected float m_Quality;
-  
+  private float quality;
   /** the background color */
-  protected Color m_Background;
+  private Color background;
   
   /**
    * initializes the object 
@@ -77,8 +73,8 @@ public class JPEGWriter
   public JPEGWriter(JComponent c, File f) {
     super(c, f);
     
-    m_Quality    = 1.0f;
-    m_Background = Color.WHITE;
+    quality    = 1.0f;
+    background = Color.WHITE;
   }
   
   /**
@@ -87,16 +83,14 @@ public class JPEGWriter
   public void initialize() {
     super.initialize();
     
-    m_Quality    = 1.0f;
-    m_Background = Color.WHITE;
+    quality    = 1.0f;
+    background = Color.WHITE;
     setScalingEnabled(false);
   }
 
   /**
    * returns the name of the writer, to display in the FileChooser.
    * must be overridden in the derived class.
-   * 
-   * @return the name of the writer
    */
   public String getDescription() {
     return "JPEG-Image";
@@ -106,8 +100,6 @@ public class JPEGWriter
    * returns the extension (incl. ".") of the output format, to use in the
    * FileChooser. 
    * must be overridden in the derived class.
-   * 
-   * @return the file extension
    */
   public String getExtension() {
     return ".jpg";
@@ -115,51 +107,57 @@ public class JPEGWriter
   
   /**
    * returns the current background color
-   * 
-   * @return the current background color
    */
   public Color getBackground() {
-    return m_Background;
+    return background;
   }
   
   /**
    * sets the background color to use in creating the JPEG
-   * 
-   * @param c the color to use for background
    */
   public void setBackground(Color c) {
-    m_Background = c;
+    background = c;
   }
   
   /**
    * returns the quality the JPEG will be stored in
-   * 
-   * @return the quality
    */
   public float getQuality() {
-    return m_Quality;
+    return quality;
   }
   
   /**
    * sets the quality the JPEG is saved in 
-   * 
-   * @param q the quality to use
    */
   public void setQuality(float q) {
-    m_Quality = q;
+    quality = q;
   }
   
   /**
-   * generates the actual output
+   * outputs the given component as JPEG in the specified file
    * 
-   * @throws Exception	if something goes wrong
+   * @param c           the component to output as PS
+   * @param f           the file to store the PS in 
+   * @throws Exception  if component of file are <code>null</code>
    */
-  public void generateOutput() throws Exception {
-    BufferedImage		bi;
-    JPEGImageEncoder		encoder;
-    JPEGEncodeParam		param;
-    Graphics			g;
-    BufferedOutputStream	ostream;
+  public static void toOutput(JComponent c, File f) throws Exception {
+    JComponentWriter        writer;
+    
+    writer = new JPEGWriter(c, f);
+    writer.toOutput();
+  }
+  
+  /**
+   * saves the current component to the currently set file
+   *
+   * @throws Exception  if component of file are <code>null</code>
+   */
+  public void toOutput() throws Exception {
+    BufferedImage                bi;
+    JPEGImageEncoder             encoder;
+    JPEGEncodeParam              param;
+    Graphics                     g;
+    BufferedOutputStream         ostream;
 
     ostream = new BufferedOutputStream(new FileOutputStream(getFile()));
     bi      = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -181,9 +179,6 @@ public class JPEGWriter
   
   /**
    * for testing only 
-   * 
-   * @param args the commandline arguments
-   * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     System.out.println("building TreeVisualizer...");
@@ -193,9 +188,9 @@ public class JPEGWriter
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
-    String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.jpg";
+    String filename = System.getProperty("java.io.tmpdir") + "test.jpg";
     System.out.println("outputting to '" + filename + "'...");
-    toOutput(new JPEGWriter(), tv, new File(filename));
+    toOutput(tv, new File(filename));
 
     System.out.println("done!");
   }

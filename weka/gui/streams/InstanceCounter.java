@@ -16,32 +16,32 @@
 
 /*
  *    InstanceCounter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui.streams;
+
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.Serializable;
 
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.awt.Color;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 /** 
  * A bean that counts instances streamed to it.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class InstanceCounter
-  extends JPanel
-  implements InstanceListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6084967152645935934L;
+public class InstanceCounter extends JPanel
+  implements Serializable, InstanceListener {
   
   private JLabel m_Count_Lab;
   private int m_Count;

@@ -16,49 +16,52 @@
 
 /*
  *    StripChart.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
+import javax.swing.JPanel;
+import java.awt.Image;
+import java.awt.Graphics;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.util.Random;
+import java.awt.image.CropImageFilter;
+import java.awt.image.FilteredImageSource;
+import javax.swing.JFrame;
+import java.util.Vector;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.beans.EventSetDescriptor;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Vector;
-
+import javax.swing.JLabel;
+import java.awt.Dimension;
 import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.swing.border.EtchedBorder;
+import java.util.LinkedList;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.io.Serializable;
+import java.beans.EventSetDescriptor;
+
+import weka.core.Queue;
+import weka.core.Instances;
+import weka.core.Instance;
 
 /**
  * Bean that can display a horizontally scrolling strip chart. Can
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class StripChart 
   extends JPanel 
   implements ChartListener, InstanceListener, Visible, 
-	     BeanCommon, UserRequestAcceptor {
-
-  /** for serialization */
-  private static final long serialVersionUID = 1483649041577695019L;
+	     BeanCommon, UserRequestAcceptor, 
+	     Serializable {
   
   /** default colours for colouring lines */
   protected Color [] m_colorList = {Color.green,
@@ -72,15 +75,8 @@ public class StripChart
 				    new Color(0, 255, 0),
 				    Color.white};
 
-  /** 
-   * Class providing a panel for the plot
-   */
-  private class StripPlotter
-    extends JPanel {
-
-    /** for serialization */
-    private static final long serialVersionUID = -7056271598761675879L;
-    
+  // Class providing a panel for the plot
+  private class StripPlotter extends JPanel {
     public void paintComponent(Graphics g) {
       super.paintComponent(g);
       if (m_osi != null) {
@@ -131,11 +127,7 @@ public class StripChart
    * Class providing a panel for displaying the y axis
    */
   private JPanel m_scalePanel = new JPanel() {
-
-    /** for serialization */
-    private static final long serialVersionUID = 6416998474984829434L;
-    
-    public void paintComponent(Graphics gx) {
+      public void paintComponent(Graphics gx) {
 	super.paintComponent(gx);
 	if (m_labelMetrics == null) {
 	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
@@ -156,10 +148,6 @@ public class StripChart
    * Class providing a panel for the legend
    */
   private JPanel m_legendPanel = new JPanel() {
-
-      /** for serialization */
-      private static final long serialVersionUID = 7713986576833797583L;
-
       public void paintComponent(Graphics gx) {
 	super.paintComponent(gx);
 

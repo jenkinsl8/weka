@@ -16,30 +16,36 @@
 
 /*
  *    ClassPanel.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall, Malcolm Ware
  *
  */
 
+
 package weka.gui.visualize;
 
-import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Utils;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.util.Random;
 
+import javax.swing.JPanel;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * This panel displays coloured labels for nominal attributes and a spectrum
@@ -49,13 +55,9 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.12.2.1 $
  */
-public class ClassPanel
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -7969401840501661430L;
+public class ClassPanel extends JPanel {
     
   /** True when the panel has been enabled (ie after 
       setNumeric or setNominal has been called */
@@ -128,12 +130,7 @@ public class ClassPanel
   /** Inner Inner class used to create labels for nominal attributes
    * so that there color can be changed.
    */
-  private class NomLabel
-    extends JLabel {
-
-    /** for serialization */
-    private static final long serialVersionUID = -4686613106474820655L;
-
+  private class NomLabel extends JLabel {
     private int m_index = 0;
 
     /** 
@@ -284,7 +281,7 @@ public class ClassPanel
 
   /**
    * Set a list of colours to use for colouring labels
-   * @param cols a list containing java.awt.Colors
+   * @param a list containing java.awt.Colors
    */
   public void setColours(FastVector cols) {
     m_colorList = cols;
@@ -292,6 +289,8 @@ public class ClassPanel
     
   /**
    * Sets the legend to be for a nominal variable
+   * @param plotInstances the instances currently being plotted
+   * @param cIndex the index of the colouring attribute
    */
   protected void setNominal() {
     m_isNumeric = false;
@@ -304,6 +303,8 @@ public class ClassPanel
 
   /**
    * Sets the legend to be for a numeric variable
+   * @param mxC the maximum value of the colouring attribute
+   * @param mnC the minimum value of the colouring attribute
    */
   protected void setNumeric() {
     m_isNumeric = true;

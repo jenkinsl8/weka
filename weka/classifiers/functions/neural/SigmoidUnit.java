@@ -16,23 +16,23 @@
 
 /*
  *    SigmoidUnit.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Malcolm Ware
  */
 
+
 package weka.classifiers.functions.neural;
+
+
 
 /**
  * This can be used by the 
  * neuralnode to perform all it's computations (as a sigmoid unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class SigmoidUnit
-  implements NeuralMethod {
+public class SigmoidUnit implements NeuralMethod {
 
-  /** for serialization */
-  private static final long serialVersionUID = -5162958458177475652L;
   
   /**
    * This function calculates what the output value should be.
@@ -113,4 +113,10 @@ public class SigmoidUnit
       cWeights[noa] = c; 
     }
   }
+    
 }
+
+
+
+
+

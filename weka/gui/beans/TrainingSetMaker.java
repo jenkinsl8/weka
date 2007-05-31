@@ -16,7 +16,7 @@
 
 /*
  *    TrainingSetMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,19 +24,24 @@ package weka.gui.beans;
 
 import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
   implements DataSourceListener, EventConstraints, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -6152577265471535786L;
 
   public TrainingSetMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH

@@ -16,7 +16,7 @@
 
 /*
  *    VisualizeUtils.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -34,7 +34,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 
 public class VisualizeUtils {

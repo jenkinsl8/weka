@@ -16,7 +16,7 @@
 
 /*
  *    NoSupportForMissingValuesException.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Eibe Frank
  *
  */
 
@@ -27,13 +27,9 @@ package weka.core;
  * data with missing values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class NoSupportForMissingValuesException
-  extends WekaException {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5161175307725893973L;
+public class NoSupportForMissingValuesException extends WekaException {
 
   /**
    * Creates a new NoSupportForMissingValuesException with no message.

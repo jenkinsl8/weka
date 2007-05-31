@@ -1,3 +1,4 @@
+
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +17,12 @@
 
 /*
  * ParentSet.java
- * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2001 Remco Bouckaert
  * 
  */
 package weka.classifiers.bayes.net;
 
-import weka.core.Instances;
-
+import weka.core.*;
 import java.io.Serializable;
 
 /**
@@ -30,13 +30,9 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class ParentSet 
-  implements Serializable {
-  
-  /** for serialization */
-  static final long serialVersionUID = 4155021284407181838L;
+public class ParentSet implements Serializable {
 
   /**
    * Holds indexes of parents
@@ -47,7 +43,6 @@ public class ParentSet
    * returns index parent of parent specified by index
    * 
    * @param iParent Index of parent
-   * @return index of parent
    */
   public int getParent(int iParent) {
     return m_nParents[iParent];
@@ -57,7 +52,7 @@ public class ParentSet
    * sets index parent of parent specified by index
    * 
    * @param iParent Index of parent
-   * @param nNode index of the node that becomes parent
+   * @param nNode: index of the node that becomes parent
    */
   public void SetParent(int iParent, int nNode) {
 	m_nParents[iParent] = nNode;
@@ -79,7 +74,7 @@ public class ParentSet
 
   /**
    * test if node is contained in parent set
-   * @param iNode node to test for
+   * @param iNode: node to test for
    * @return number of parents
    */
 	public boolean contains(int iNode) {
@@ -97,8 +92,6 @@ public class ParentSet
 
   /**
    * returns cardinality of parents
-   * 
-   * @return the cardinality
    */
   public int getCardinalityOfParents() {
     return m_nCardinalityOfParents;
@@ -170,8 +163,8 @@ public class ParentSet
    * Add parent to parent set at specific location 
    * and update internals (specifically the cardinality of the parent set)
    * 
-   * @param nParent parent to add
-   * @param iParent location to add parent in parent set
+   * @param nParent: parent to add
+   * @param iParent: location to add parent in parent set
    * @param _Instances used for updating the internals
    */
   public void addParent(int nParent, int iParent, Instances _Instances) {
@@ -192,8 +185,8 @@ public class ParentSet
   } // AddParent
 
   /** delete node from parent set
-   * @param nParent node number of the parent to delete
-   * @param _Instances data set
+   * @param nParent: node number of the parent to delete
+   * @param _Instances: data set
    * @return location of the parent in the parent set. This information can be 
    * used to restore the parent set using the addParent method.
    */

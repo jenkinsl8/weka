@@ -16,29 +16,23 @@
 
 /*
  *    BinC45Split.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.util.Enumeration;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.1 $
  */
-public class BinC45Split
-  extends ClassifierSplitModel {
 
-  /** for serialization */
-  private static final long serialVersionUID = -1278776919563022474L;
+public class BinC45Split extends ClassifierSplitModel{
 
   /** Attribute to split on. */
   private int m_attIndex;        
@@ -319,10 +313,8 @@ public class BinC45Split
   }
 
   /**
-   * Prints left side of condition.
-   * 
-   * @param data the data to get the attribute name from.
-   * @return the attribute name
+   * Prints left side of condition..
+   * @param index of subset and training set.
    */
   public final String leftSide(Instances data){
 

@@ -16,36 +16,32 @@
 
 /*
  *    BeanInstance.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.beans.Beans;
-import java.io.Serializable;
 import java.util.Vector;
-
+import java.beans.Beans;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.Point;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.FontMetrics;
+import java.awt.Font;
 import javax.swing.JComponent;
+import java.io.Serializable;
 
 /**
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.8 $
+ * @version  $Revision: 1.3.2.1 $
  * @since 1.0
  */
-public class BeanInstance
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -7575653109025406342L;
+public class BeanInstance implements Serializable {
 
   /**
    * class variable holding all the beans
@@ -226,81 +222,22 @@ public class BeanInstance
 
   /**
    * Looks for all beans (if any) located within
-   * the supplied bounding box. Also adjusts the
-   * bounding box to be a tight fit around all
-   * contained beans
+   * the supplied bounding box
    *
    * @param boundingBox the bounding rectangle
    * @return a Vector of BeanInstances
    */
   public static Vector findInstances(Rectangle boundingBox) {
-    Graphics gx = null;
-    FontMetrics fm = null;
-    
     int centerX, centerY;
-    int startX, startY, endX, endY;
-    startX = (int)boundingBox.getX();
-    startY = (int)boundingBox.getY();
-    endX = (int)boundingBox.getMaxX();
-    endY = (int)boundingBox.getMaxY();
-    int minX = Integer.MAX_VALUE;
-    int minY = Integer.MAX_VALUE;
-    int maxX = Integer.MIN_VALUE;
-    int maxY = Integer.MIN_VALUE;
     Vector result = new Vector();
     for (int i = 0; i < COMPONENTS.size(); i++) {
       BeanInstance t = (BeanInstance)COMPONENTS.elementAt(i);
       centerX = t.getX() + (t.getWidth()/2);
       centerY = t.getY() + (t.getHeight()/2);
       if (boundingBox.contains(centerX, centerY)) {
-	result.addElement(t);
-
-
-	// adjust bounding box stuff
-	int hf = 0;
-	if (gx == null) {
-	  gx = ((JComponent)t.getBean()).getGraphics();
-	  gx.setFont(new Font("Monospaced", Font.PLAIN, 10));
-	  fm = gx.getFontMetrics();
-	  hf = fm.getAscent();
-	}
-	String label = "";
-	if (t.getBean() instanceof Visible) {
-	  label = ((Visible)t.getBean()).getVisual().getText();
-	}
-	int labelwidth = fm.stringWidth(label);
-	int heightMultiplier = (labelwidth > t.getWidth())
-	? 2
-	: 1;
-	/*if (label.length() == 0) {
-	  heightMultiplier = 0;
-	}*/
-	int brx = 0;
-	int blx = 0;
-	if (centerX - (labelwidth / 2) - 2 < t.getX()) {
-	  blx = (centerX - (labelwidth / 2) - 2);
-	  brx = centerX + (labelwidth / 2) + 2;
-	} else {
-	  blx = t.getX() - 2;
-	  brx = t.getX() + t.getWidth() + 2;
-	}
-
-	if (blx < minX) {
-	  minX = blx;
-	}
-	if (brx > maxX) {
-	  maxX = brx;
-	}
-	if (t.getY() - 2 < minY) {
-	  minY = t.getY() - 2;
-	}
-	if (t.getY() + t.getHeight() + 2 > maxY) {
-	  maxY = t.getY() + t.getHeight()  + 2;
-	}
+        result.addElement(t);
       }
     }
-    boundingBox.setBounds(minX, minY, maxX - minX, maxY - minY);
-    
     return result;
   }
 
