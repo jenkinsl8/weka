@@ -16,7 +16,7 @@
 
 /*
  *    Drawable.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
@@ -26,7 +26,7 @@ package weka.core;
  * Interface to something that can be drawn as a graph.
  *
  * @author Ashraf M. Kibriya(amk14@cs.waikato.ac.nz), Eibe Frank(eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public interface Drawable {
 

@@ -16,7 +16,7 @@
 
 /*
  *    DatabaseConnection.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Len Trigg, Stefan Mutter
  *
  */
 
@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class DatabaseConnection 
   extends DatabaseUtils {

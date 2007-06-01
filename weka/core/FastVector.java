@@ -16,14 +16,14 @@
 
 /*
  *    FastVector.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.core;
 
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
  * Implements a fast vector class without synchronized
@@ -31,13 +31,8 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
- */
-public class FastVector
-  implements Copyable, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -2173635135622930169L;
+ * @version $Revision: 1.11 $ */
+public class FastVector implements Copyable, Serializable {
 
   /**
    * Class for enumerating the vector's elements.
@@ -387,7 +382,7 @@ public class FastVector
   /** 
    * Returns all the elements of this vector as an array
    *
-   * @return an array containing all the elements of this vector
+   * @param an array containing all the elements of this vector
    */
   public final Object [] toArray() {
 

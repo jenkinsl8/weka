@@ -16,7 +16,7 @@
 
 /*
  *    VisualizableErrorListener.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 Mark Hall
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can accept VisualizableErrorEvents
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  * @since 1.0
  * @see EventListener
  */

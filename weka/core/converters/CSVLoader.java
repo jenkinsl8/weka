@@ -15,46 +15,61 @@
  */
 
 /*
- *    CSVLoader.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    CsvToArff.java
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StreamTokenizer;
-import java.util.Enumeration;
+import java.io.Reader;
 import java.util.Hashtable;
+import java.util.Enumeration;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import java.io.StreamTokenizer;
+import java.lang.String;
 
 /**
- <!-- globalinfo-start -->
- * Reads a source that is in comma separated or tab separated format. Assumes that the first row in the file determines the number of and names of the attributes.
- * <p/>
- <!-- globalinfo-end -->
+ * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
-public class CSVLoader 
-  extends AbstractFileLoader 
-  implements BatchConverter {
+public class CSVLoader extends AbstractLoader 
+implements FileSourcedConverter, BatchConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 5607529739745491340L;
-  
-  /** the file extension */
   public static String FILE_EXTENSION = ".csv";
+
+  protected String m_File = 
+    (new File(System.getProperty("user.dir"))).getAbsolutePath();
+
+  /**
+   * Holds the determined structure (header) of the data set.
+   */
+  //@ protected depends: model_structureDetermined -> m_structure;
+  //@ protected represents: model_structureDetermined <- (m_structure != null);
+  protected Instances m_structure = null;
+
+  /**
+   * Holds the source of the data set.
+   */
+  //@ protected depends: model_sourceSupplied -> m_sourceFile;
+  //@ protected represents: model_sourceSupplied <- (m_sourceFile != null);
+  protected File m_sourceFile = null;
+
+  /**
+   * Describe variable <code>m_tokenizer</code> here.
+   */
+  //  private StreamTokenizer m_tokenizer = null;
 
   /**
    * A list of hash tables for accumulating nominal values during parsing.
@@ -66,9 +81,6 @@ public class CSVLoader
    */
   private FastVector m_cumulativeInstances;
   
-  /**
-   * default constructor
-   */
   public CSVLoader() {
     // No instances retrieved yet
     setRetrieval(NONE);
@@ -93,12 +105,23 @@ public class CSVLoader
   }
 
   /**
-   * Gets all the file extensions used for this type of file
+   * get the File specified as the source
    *
-   * @return the file extensions
+   * @return the source file
    */
-  public String[] getFileExtensions() {
-    return new String[]{getFileExtension()};
+  public File retrieveFile() {
+    return new File(m_File);
+  }
+
+  /**
+   * sets the source File
+   *
+   * @param file the source file
+   * @exception IOException if an error occurs
+   */
+  public void setFile(File file) throws IOException {
+    m_File = file.getAbsolutePath();
+    setSource(file);
   }
 
   /**
@@ -113,13 +136,34 @@ public class CSVLoader
   }
   
   /**
-   * Is ignored and doesn't throw an Exception.
-   *
-   * @param input the input stream - ignored
-   * @exception IOException always
+   * Resets the loader ready to read a new data set
    */
-  public void setSource(InputStream input) throws IOException {
-    // ignored
+  public void reset() {
+    m_structure = null;
+    setRetrieval(NONE);
+  }
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied File object.
+   *
+   * @param file the source file.
+   * @exception IOException if an error occurs
+   */
+  public void setSource(File file) throws IOException {
+    reset();
+
+    if (file == null) {
+      throw new IOException("Source file object is null!");
+    }
+
+    m_sourceFile = file;
+    try {
+      BufferedReader br = new BufferedReader(new FileReader(file));
+      br.close();
+    } catch (FileNotFoundException ex) {
+      throw new IOException("File not found");
+    }
   }
 
   /**
@@ -152,12 +196,6 @@ public class CSVLoader
     return m_structure;
   }
 
-  /**
-   * reads the structure
-   * 
-   * @param st the stream tokenizer to read from
-   * @throws IOException if reading fails
-   */
   private void readStructure(StreamTokenizer st) throws IOException {
     readHeader(st);
   }
@@ -488,6 +526,19 @@ public class CSVLoader
    * @param args should contain the name of an input file.
    */
   public static void main(String [] args) {
-    runFileLoader(new CSVLoader(), args);
+    if (args.length > 0) {
+      File inputfile;
+      inputfile = new File(args[0]);
+      try {
+	CSVLoader atf = new CSVLoader();
+	atf.setSource(inputfile);
+	System.out.println(atf.getDataSet());
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	}
+    } else {
+      System.err.println("Usage:\n\tCSVLoader <file.csv>\n");
+    }
   }
 }
+

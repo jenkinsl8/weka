@@ -16,96 +16,48 @@
 
 /*
  *    FarthestFirst.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Bernhard Pfahringer
+ *    based on SimpleKMeans which is 
+ *     Copyright (C) 2000 Mark Hall (mhall@cs.waikato.ac.nz)
  *
  */
 package weka.clusterers;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the FarthestFirst algorithm.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem. Mathematics of Operations Research. 10(2):180-184.<br/>
- * <br/>
- * Sanjoy Dasgupta: Performance Guarantees for Hierarchical Clustering. In: 15th Annual Conference on Computational Learning Theory, 351-363, 2002.<br/>
- * <br/>
- * Notes:<br/>
- * - works as a fast simple approximate clusterer<br/>
- * - modelled after SimpleKMeans, might be a useful initializer for it
- * <p/>
- <!-- globalinfo-end -->
+ * Implements the "Farthest First Traversal Algorithm" by 
+ * Hochbaum and Shmoys 1985: A best possible heuristic for the
+ * k-center problem, Mathematics of Operations Research, 10(2):180-184,
+ * as cited by Sanjoy Dasgupta "performance guarantees for hierarchical
+ * clustering", colt 2002, sydney
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Hochbaum1985,
- *    author = {Hochbaum and Shmoys},
- *    journal = {Mathematics of Operations Research},
- *    number = {2},
- *    pages = {180-184},
- *    title = {A best possible heuristic for the k-center problem},
- *    volume = {10},
- *    year = {1985}
- * }
- * 
- * &#64;inproceedings{Dasgupta2002,
- *    author = {Sanjoy Dasgupta},
- *    booktitle = {15th Annual Conference on Computational Learning Theory},
- *    pages = {351-363},
- *    publisher = {Springer},
- *    title = {Performance Guarantees for Hierarchical Clustering},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * works as a fast simple approximate clusterer
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- <!-- options-end -->
+ * modelled after SimpleKMeans, might be a useful initializer for it
+ *
+ * Valid options are:<p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
- * @see RandomizableClusterer
+ * @version $Revision: 1.2 $
+ * @see Clusterer
+ * @see OptionHandler
  */
-public class FarthestFirst 
-  extends RandomizableClusterer 
-  implements TechnicalInformationHandler {
 
-  //Todo: rewrite to be fully incremental
-  //      cleanup, like deleting m_instances 
+// Todo: rewrite to be fully incremental
+//       cleanup, like deleting m_instances 
+public class FarthestFirst extends Clusterer implements OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 7499838100631329509L;
-  
   /**
    * training instances, not necessary to keep, 
    * could be replaced by m_ClusterCentroids where needed for header info
@@ -138,65 +90,17 @@ public class FarthestFirst
   private double [] m_Max;
 
   /**
+   * random seed
+   */
+  protected int m_Seed = 1;
+
+  /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Cluster data using the FarthestFirst algorithm.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
-      + "Notes:\n"
-      + "- works as a fast simple approximate clusterer\n"
-      + "- modelled after SimpleKMeans, might be a useful initializer for it";
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Hochbaum and Shmoys");
-    result.setValue(Field.YEAR, "1985");
-    result.setValue(Field.TITLE, "A best possible heuristic for the k-center problem");
-    result.setValue(Field.JOURNAL, "Mathematics of Operations Research");
-    result.setValue(Field.VOLUME, "10");
-    result.setValue(Field.NUMBER, "2");
-    result.setValue(Field.PAGES, "180-184");
-    
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Sanjoy Dasgupta");
-    additional.setValue(Field.TITLE, "Performance Guarantees for Hierarchical Clustering");
-    additional.setValue(Field.BOOKTITLE, "15th Annual Conference on Computational Learning Theory");
-    additional.setValue(Field.YEAR, "2002");
-    additional.setValue(Field.PAGES, "351-363");
-    additional.setValue(Field.PUBLISHER, "Springer");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the clusterer.
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    return result;
+    return "Cluster data using the FarthestFirst algorithm";
   }
 
   /**
@@ -204,15 +108,15 @@ public class FarthestFirst
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     //long start = System.currentTimeMillis();
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
@@ -223,7 +127,7 @@ public class FarthestFirst
     m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
 
     int n = m_instances.numInstances();
-    Random r = new Random(getSeed());
+    Random r = new Random(m_Seed);
     boolean[] selected = new boolean[n];
     double[] minDistance = new double[n];
 
@@ -335,7 +239,7 @@ public class FarthestFirst
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an integer
    * if the class is enumerated, otherwise the predicted value
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -349,8 +253,8 @@ public class FarthestFirst
   /**
    * Calculates the distance between two instances
    *
-   * @param first the first instance
-   * @param second the second instance
+   * @param test the first instance
+   * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   protected double distance(Instance first, Instance second) {  
@@ -447,7 +351,6 @@ public class FarthestFirst
    *
    * @param x the value to be normalized
    * @param i the attribute's index
-   * @return the normalized value
    */
   protected double norm(double x, int i) {
 
@@ -462,7 +365,7 @@ public class FarthestFirst
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters() throws Exception {
@@ -470,22 +373,30 @@ public class FarthestFirst
   }
 
   /**
-   * Returns an enumeration describing the available options.
-   * 
+   * Returns an enumeration describing the available options.. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -N <number of clusters> <br>
+   * Specify the number of clusters to generate. If omitted,
+   * FarthestFirst will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
+   *
    * @return an enumeration of all the available options.
-   */
+   *
+   **/
   public Enumeration listOptions () {
-    Vector result = new Vector();
-    
-    result.addElement(new Option(
-	"\tnumber of clusters. (default = 2).", 
-	"N", 1, "-N <num>"));
-    
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
-    
-    return  result.elements();
+    Vector newVector = new Vector(2);
+
+     newVector.addElement(new Option("\tnumber of clusters. (default = 2)." 
+				    , "N", 1, "-N <num>"));
+     newVector.addElement(new Option("\trandom number seed.\n (default 10)"
+				     , "S", 1, "-S <num>"));
+
+     return  newVector.elements();
   }
 
   /**
@@ -501,7 +412,6 @@ public class FarthestFirst
    * set the number of clusters to generate
    *
    * @param n the number of clusters to generate
-   * @throws Exception if number of clusters is negative
    */
   public void setNumClusters(int n) throws Exception {
     if (n < 0) {
@@ -518,25 +428,42 @@ public class FarthestFirst
   public int getNumClusters() {
     return m_NumClusters;
   }
+    
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "random number seed";
+  }
+
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   <!-- options-end -->
+   * Set the random number seed
    *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @param s the seed
    */
+  public void setSeed (int s) {
+    m_Seed = s;
+  }
+
+
+  /**
+   * Get the random number seed
+   *
+   * @return the seed
+   */
+  public int getSeed () {
+    return  m_Seed;
+  }
+
+  /**
+   * Parses a given list of options.
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
 
@@ -545,8 +472,12 @@ public class FarthestFirst
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
     }
+
+    optionString = Utils.getOption('S', options);
     
-    super.setOptions(options);
+    if (optionString.length() != 0) {
+      setSeed(Integer.parseInt(optionString));
+    }
   }
 
   /**
@@ -555,20 +486,19 @@ public class FarthestFirst
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
+    String[] options = new String[4];
+    int current = 0;
+    
+    options[current++] = "-N";
+    options[current++] = "" + getNumClusters();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
+    
+    while (current < options.length) {
+      options[current++] = "";
+    }
 
-    result = new Vector();
-
-    result.add("-N");
-    result.add("" + getNumClusters());
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return  options;
   }
 
   /**
@@ -604,6 +534,13 @@ public class FarthestFirst
    * -t training file [-N number of clusters]
    */
   public static void main (String[] argv) {
-    runClusterer(new FarthestFirst(), argv);
+    try {
+      System.out.println(ClusterEvaluation.
+			 evaluateClusterer(new FarthestFirst(), argv));
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
   }
 }

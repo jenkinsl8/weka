@@ -1,37 +1,26 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-/*
  * Copyright 2001 Malcolm Ware. 
  */
 
 package weka.classifiers.functions;
 
-import weka.classifiers.AbstractClassifierTest;
-import weka.classifiers.Classifier;
-
+import java.util.Random;
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SelectedTag;
+import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.*;
 
 /**
  * Tests NeuralNetwork. Run from the command line with:<p>
- * java weka.classifiers.functions.MultilayerPerceptronTest
+ * java weka.classifiers.nn.NeuralNetworkTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class MultilayerPerceptronTest extends AbstractClassifierTest {
 

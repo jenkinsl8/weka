@@ -16,42 +16,43 @@
 
 /*
  *    ResultHistoryPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 
 package weka.gui;
 
-import weka.gui.visualize.PrintableComponent;
-
+import java.util.Hashtable;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.Serializable;
-import java.util.Hashtable;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.DefaultListModel;
 import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ChangeEvent;
+import javax.swing.text.JTextComponent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.JTextComponent;
+import javax.swing.BorderFactory;
+import java.io.Serializable;
+
+import weka.gui.visualize.PrintableComponent;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -61,13 +62,9 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.18.2.3 $
  */
-public class ResultHistoryPanel
-  extends JPanel {
-  
-  /** for serialization */
-  static final long serialVersionUID = 4297069440135326829L;
+public class ResultHistoryPanel extends JPanel {
   
   /** An optional component for single-click display */
   protected JTextComponent m_SingleText;
@@ -101,22 +98,14 @@ public class ResultHistoryPanel
    * Extension of MouseAdapter that implements Serializable.
    */
   public static class RMouseAdapter 
-    extends MouseAdapter implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = -8991922650552358669L;    
-  }
+    extends MouseAdapter implements Serializable {}
  
   
   /**
    * Extension of KeyAdapter that implements Serializable.
    */
   public static class RKeyAdapter 
-    extends KeyAdapter implements Serializable {
-    
-    /** for serialization */
-    static final long serialVersionUID = -8675332541861828079L;
-  }
+    extends KeyAdapter implements Serializable {}
 
   /**
    * Create the result history object
@@ -128,10 +117,7 @@ public class ResultHistoryPanel
     if (text != null) {
       m_Printer = new PrintableComponent(m_SingleText);
     }
-    m_List.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     m_List.addMouseListener(new RMouseAdapter() {
-      private static final long serialVersionUID = -9015397020486290479L;
-      
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	    == InputEvent.BUTTON1_MASK) {
@@ -157,8 +143,6 @@ public class ResultHistoryPanel
     });
 
     m_List.addKeyListener(new RKeyAdapter() {
-      private static final long serialVersionUID = 7910681776999302344L;
-      
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
           int selected = m_List.getSelectedIndex();
@@ -168,7 +152,8 @@ public class ResultHistoryPanel
         }
       }
     });
-    m_List.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    m_List.getSelectionModel()
+      .addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
 	if (!e.getValueIsAdjusting()) {
 	  ListSelectionModel lm = (ListSelectionModel) e.getSource();
@@ -244,7 +229,7 @@ public class ResultHistoryPanel
 
   /**
    * Get the named object from the list
-   * @param name the name of the item to retrieve the stored object
+   * @param index the index of the item to retrieve the stored object
    * for
    * @return the object or null if there is no object at this index
    */

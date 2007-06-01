@@ -16,7 +16,7 @@
 
 /*
  *    ReferenceInstances.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Richard Kirkby
  *
  */
 
@@ -31,13 +31,9 @@ import weka.core.Instances;
  * make reweighting of instances easy to manage.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class ReferenceInstances
-  extends Instances {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8022666381920252997L;
+public class ReferenceInstances extends Instances {
 
   /**
    * Creates an empty set of instances.

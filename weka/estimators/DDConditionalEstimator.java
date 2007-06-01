@@ -16,19 +16,21 @@
 
 /*
  *    DDConditionalEstimator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.estimators;
 
- 
+import java.util.*;
+import weka.core.*;
+
 /** 
  * Conditional probability estimator for a discrete domain conditional upon
  * a discrete domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
 public class DDConditionalEstimator implements ConditionalEstimator {
 
@@ -66,6 +68,7 @@ public class DDConditionalEstimator implements ConditionalEstimator {
   /**
    * Get a probability estimator for a value
    *
+   * @param data the value to estimate the probability of
    * @param given the new value that data is conditional upon 
    * @return the estimator for the supplied value given the condition
    */

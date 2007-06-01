@@ -16,7 +16,7 @@
 
 /*
  *    RuleGeneration.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
@@ -37,19 +37,16 @@ import weka.associations.ItemSet;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * The implementation follows the paper expect for adding a rule to the output of the
- * <i>n</i> best rules. A rule is added if:
- * the expected predictive accuracy of this rule is among the <i>n</i> best and it is 
+ * <i>n<\i> best rules. A rule is added if:
+ * the expected predictive accuracy of this rule is among the <i>n<\i> best and it is 
  * not subsumed by a rule with at least the same expected predictive accuracy
  * (out of an unpublished manuscript from T. Scheffer). 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.1 $ */
 public class RuleGeneration implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -8927041669872491432L;
-
-  /** The items stored as an array of of integer. */
+   /** The items stored as an array of of integer. */
   protected int[] m_items;
 
   /** Counter for how many transactions contain this item set. */
@@ -76,7 +73,7 @@ public class RuleGeneration implements Serializable {
   /** Hashtable conatining the estimated prior probabilities. */
   protected Hashtable m_priors;
   
-  /** The list of the actual <i>n</i> best rules. */
+  /** The list of the actual <i>n<\i> best rules. */
   protected TreeSet m_best;
   
   /** Integer indicating the generation time of a rule. */
@@ -152,14 +149,14 @@ public class RuleGeneration implements Serializable {
   /**
    * Generates all rules for an item set. The item set is the premise.
    * @param numRules the number of association rules the use wants to mine.
-   * This number equals the size <i>n</i> of the list of the
+   * This number equals the size <i>n<\i> of the list of the
    * best rules.
    * @param midPoints the mid points of the intervals
    * @param priors Hashtable that contains the prior probabilities
    * @param expectation the minimum value of the expected predictive accuracy
    * that is needed to get into the list of the best rules
    * @param instances the instances for which association rules are generated
-   * @param best the list of the <i>n</i> best rules.
+   * @param best the list of the <i>n<\i> best rules.
    * The list is implemented as a TreeSet
    * @param genTime the maximum time of generation
    * @return all the rules with minimum confidence for the given item set

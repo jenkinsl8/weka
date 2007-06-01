@@ -39,7 +39,7 @@ import java.util.Vector;
  * target="_blank">NSIS</a>.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.5 $
+ * @version   $Revision: 1.3.2.2 $
  */
 public class GenerateSetup {
 

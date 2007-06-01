@@ -16,36 +16,32 @@
 
 /*
  *    WekaTaskMonitor.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
+
 
 package weka.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Toolkit;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.BorderFactory;
 import javax.swing.SwingConstants;
+import javax.swing.ImageIcon;
+import java.awt.*;
+import java.awt.image.*;
 
 /** 
  * This panel records the number of weka tasks running and displays a
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6 $
  */
-public class WekaTaskMonitor
-  extends JPanel
-  implements TaskLogger {
-
-  /** for serialization */
-  private static final long serialVersionUID = 508309816292197578L;
+public class WekaTaskMonitor extends JPanel implements TaskLogger {
 
   /** The number of running weka threads */
   private int m_ActiveTasks = 0;

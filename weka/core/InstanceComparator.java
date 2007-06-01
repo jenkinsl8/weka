@@ -35,16 +35,11 @@ import java.util.Comparator;
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.2 $
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */
-public class InstanceComparator
-  implements Comparator, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6589278678230949683L;
-  
+public class InstanceComparator implements Comparator, Serializable {
   /** whether to include the class in the comparison */
   protected boolean m_IncludeClass;
   

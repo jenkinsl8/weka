@@ -15,30 +15,24 @@
  */
 
 /*
- *    NBTreeModelSelection.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    C45ModelSelection.java
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.util.Enumeration;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class for selecting a NB tree split.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class NBTreeModelSelection
-  extends ModelSelection {
+public class NBTreeModelSelection extends ModelSelection {
 
-  /** for serialization */
-  private static final long serialVersionUID = 990097748931976704L;
 
   /** Minimum number of objects in interval. */
   private int m_minNoObj;               

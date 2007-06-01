@@ -16,7 +16,7 @@
 
 /*
  *    TestSetMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,19 +24,22 @@ package weka.gui.beans;
 
 import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class TestSetMaker
-  extends AbstractTestSetProducer 
+public class TestSetMaker extends AbstractTestSetProducer 
   implements DataSourceListener, EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8473882857628061841L;
 
   public TestSetMaker() {
      m_visual.loadIcons(BeanVisual.ICON_PATH

@@ -16,15 +16,13 @@
 
 /*
  *    DensityBasedClusterer.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.clusterers;
 
-import weka.core.Instance;
-import weka.core.SerializedObject;
-import weka.core.Utils;
+import weka.core.*;
 
 /** 
  * Abstract clustering model that produces (for each test instance)
@@ -33,13 +31,9 @@ import weka.core.Utils;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.4 $
  */
-public abstract class DensityBasedClusterer
-  extends Clusterer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5950728041704213845L;
+public abstract class DensityBasedClusterer extends Clusterer {
 
   // ===============
   // Public methods.
@@ -59,6 +53,7 @@ public abstract class DensityBasedClusterer
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
    * @param instance the instance to compute the density for
+   * @return the density.
    * @return an array containing the estimated densities
    * @exception Exception if the density could not be computed
    * successfully
@@ -91,7 +86,6 @@ public abstract class DensityBasedClusterer
    *
    * @param instance the instance to be clustered
    * @return the probability distribution
-   * @throws Exception if computation fails
    */  
   public double[] distributionForInstance(Instance instance) throws Exception {
     

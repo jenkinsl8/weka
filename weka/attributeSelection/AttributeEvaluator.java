@@ -16,24 +16,22 @@
 
 /*
  *    AttributeEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
+import java.io.*;
+import weka.core.*;
 
 /** 
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.7 $
  */
 public abstract class AttributeEvaluator extends ASEvaluation {
-  
-    /** for serialization */
-    private static final long serialVersionUID = -5389991923744272762L;
-  
     // ===============
     // Public methods.
     // ===============

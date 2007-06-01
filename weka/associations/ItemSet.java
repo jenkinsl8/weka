@@ -16,19 +16,15 @@
 
 /*
  *    ItemSet.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.associations;
 
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -39,14 +35,10 @@ import java.util.Hashtable;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10 $
  */
-public class ItemSet
-  implements Serializable {
+public class ItemSet implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = 2724000045282835791L;
-  
   /** The items stored as an array of of ints. */
   protected int[] m_items;
 
@@ -55,6 +47,11 @@ public class ItemSet
 
   /** The total number of transactions */
   protected int m_totalTransactions;
+
+ 
+    
+
+    
 
   /**
    * Constructor
@@ -91,7 +88,7 @@ public class ItemSet
    * @param instance the instance to be tested
    * @return true if the given instance contains this item set
    */
-  public boolean containedBy(Instance instance) {
+  public final boolean containedBy(Instance instance) {
     
     for (int i = 0; i < instance.numAttributes(); i++) 
       if (m_items[i] > -1) {
@@ -166,7 +163,7 @@ public class ItemSet
    *
    * @return a hash code for a set of items
    */
-  public int hashCode() {
+  public final int hashCode() {
 
     long result = 0;
 
@@ -287,6 +284,10 @@ public class ItemSet
     rules[1] = newConsequences;
     rules[2] = newConf;
   }
+  
+  
+ 
+  
 
   /**
    * Converts the header info of the given set of instances into a set 
@@ -346,6 +347,8 @@ public class ItemSet
     text.append(m_counter);
     return text.toString();
   }
+
+
 
   /**
    * Updates counter of item set with respect to given transaction.
@@ -422,4 +425,14 @@ public class ItemSet
       
       m_items[k] = value;
   }
+  
 }
+
+
+
+
+
+
+
+
+

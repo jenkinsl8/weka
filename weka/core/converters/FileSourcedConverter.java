@@ -16,7 +16,7 @@
 
 /*
  *    FileSourcedConverter.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 package weka.core.converters;
@@ -28,7 +28,7 @@ import java.io.IOException;
  * Interface to a loader/saver that loads/saves from a file source.
  *
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 public interface FileSourcedConverter {
 
@@ -37,21 +37,14 @@ public interface FileSourcedConverter {
    *
    * @return the file extension
    */
-  public String getFileExtension();
-
-  /**
-   * Gets all the file extensions used for this type of file
-   *
-   * @return the file extensions
-   */
-  public String[] getFileExtensions();
+  String getFileExtension();
 
   /**
    * Get a one line description of the type of file
    *
    * @return a description of the file type
    */
-  public String getFileDescription();
+  String getFileDescription();
 
   /**
    * Set the file to load from/ to save in
@@ -59,13 +52,13 @@ public interface FileSourcedConverter {
    * @param file the file to load from
    * @exception IOException if an error occurs
    */
-  public void setFile(File file) throws IOException;
+   void setFile(File file) throws IOException;
 
   /**
    * Return the current source file/ destination file
    *
    * @return a <code>File</code> value
    */
-  public File retrieveFile();
+  File retrieveFile();
 
 }

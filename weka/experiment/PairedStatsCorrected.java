@@ -16,7 +16,7 @@
 
 /*
  *    PairedStatsCorrected.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Richard Kirkby
  *
  */
 
@@ -36,7 +36,7 @@ import weka.core.Statistics;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 public class PairedStatsCorrected extends PairedStats {
 
@@ -48,7 +48,7 @@ public class PairedStatsCorrected extends PairedStats {
    * significance level and train/test ratio.
    *
    * @param sig the significance level for comparisons
-   * @param testTrainRatio the number test examples/training examples
+   * @param trainTestRatio the number test examples/training examples
    */
   public PairedStatsCorrected(double sig, double testTrainRatio) {
       

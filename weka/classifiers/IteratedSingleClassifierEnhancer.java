@@ -16,31 +16,29 @@
 
 /*
  *    IteratedSingleClassifierEnhancer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Instances;
-import weka.core.Option;
+import weka.classifiers.Classifier;
+import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.util.Enumeration;
+import weka.core.Option;
+import weka.core.Instances;
 import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Abstract utility class for handling settings common to
  * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 public abstract class IteratedSingleClassifierEnhancer 
   extends SingleClassifierEnhancer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6217979135443319724L;
   
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;

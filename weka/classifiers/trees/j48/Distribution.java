@@ -16,30 +16,23 @@
 
 /*
  *    Distribution.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.8.2.1 $
  */
-public class Distribution
-  implements Cloneable, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8526859638230806576L;
+public class Distribution implements Cloneable, Serializable {
 
   /** Weight of instances per class per bag. */
   private double m_perClassPerBag[][]; 
@@ -637,12 +630,12 @@ public class Distribution
    */
   public final double laplaceProb(int classIndex, int intIndex) {
 
-	  if (Utils.gr(m_perBag[intIndex],0))
-		return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
-	           (m_perBag[intIndex] + (double) m_perClass.length);
-	  else
-	    return laplaceProb(classIndex);
-	  
+    if (Utils.gr(m_perBag[intIndex],0))
+      return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
+        (m_perBag[intIndex] + (double) m_perClass.length);
+    else
+      return laplaceProb(classIndex);
+      
   }
 
   /**

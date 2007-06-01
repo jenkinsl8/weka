@@ -16,12 +16,12 @@
 
 /*
  *    Stats.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
-package weka.experiment;
 
+package weka.experiment;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -30,13 +30,9 @@ import java.io.Serializable;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.9 $
  */
-public class Stats
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8610544539090024102L;
+public class Stats implements Serializable {
   
   /** The number of values seen */
   public double count = 0;

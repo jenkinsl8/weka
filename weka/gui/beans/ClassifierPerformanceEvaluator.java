@@ -16,37 +16,44 @@
 
 /*
  *    ClassifierPerformanceEvaluator.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.FastVector;
-import weka.core.Instance;
+import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.FastVector;
+import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import java.awt.*;
+import javax.swing.JScrollPane;
 
 /**
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.9.2.3 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
   implements BatchClassifierListener, 
 	     Serializable, UserRequestAcceptor, EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3511801418192148690L;
 
   /**
    * Evaluation object used for evaluating a classifier
@@ -86,6 +93,7 @@ public class ClassifierPerformanceEvaluator
   // Plottable Instances with predictions appended
   private Instances m_predInstances = null;
   // Actual predictions
+  private FastVector m_preds = null;
   private FastVector m_plotShape = null;
   private FastVector m_plotSize = null;
 
@@ -111,6 +119,7 @@ public class ClassifierPerformanceEvaluator
 		  m_predInstances = 
 		    weka.gui.explorer.ClassifierPanel.
 		    setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
+		  m_preds = new FastVector();
 		  m_plotShape = new FastVector();
 		  m_plotSize = new FastVector();
 		}
@@ -129,7 +138,8 @@ public class ClassifierPerformanceEvaluator
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
 		    weka.gui.explorer.ClassifierPanel.
 		    processClassifierPrediction(temp, ce.getClassifier(),
-						m_eval, m_predInstances, m_plotShape,
+						m_eval, m_preds,
+						m_predInstances, m_plotShape,
 						m_plotSize);
 		  }
 		}
@@ -177,7 +187,7 @@ public class ClassifierPerformanceEvaluator
 
 		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
 		    ThresholdCurve tc = new ThresholdCurve();
-		    Instances result = tc.getCurve(m_eval.predictions(), 0);
+		    Instances result = tc.getCurve(m_preds, 0);
 		    result.
 		      setRelationName(ce.getTestSet().getDataSet().relationName());
 		    PlotData2D pd = new PlotData2D(result);

@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests LBR. Run from the command line with:<p/>
- * java weka.classifiers.lazy.LBRTest
+ * java weka.classifiers.lazy.LBR
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class LBRTest 
   extends AbstractClassifierTest {

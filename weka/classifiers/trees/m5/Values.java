@@ -16,19 +16,22 @@
 
 /*
  *    Values.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 
  *
  */
 
 
 package weka.classifiers.trees.m5;
 
-import weka.core.Instances;
+import java.io.*;
+import java.util.*;
+
+import weka.core.*;
 
 /**
  * Stores some statistics.
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public final class Values {
   int  numInstances;        // number of the instances

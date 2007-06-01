@@ -16,7 +16,7 @@
 
 /*
  *    Stats.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
@@ -29,7 +29,7 @@ import weka.core.*;
  * compute its error estimate.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class Stats {
 

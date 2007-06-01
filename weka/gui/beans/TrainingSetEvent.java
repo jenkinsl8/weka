@@ -16,27 +16,22 @@
 
 /*
  *    TrainingSetEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
 import java.util.EventObject;
+import weka.core.Instances;
 
 /**
  * Event encapsulating a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class TrainingSetEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5872343811810872662L;
+public class TrainingSetEvent extends EventObject {
   
   /**
    * The training instances

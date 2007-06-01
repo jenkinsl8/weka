@@ -16,113 +16,116 @@
 
 /*
  *    KnowledgeFlowApp.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Copyright;
 import weka.core.Memory;
-import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.SerializedObject;
 import weka.core.xml.KOML;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.ListSelectorDialog;
+import weka.gui.LogPanel;
+import weka.gui.LookAndFeel;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
-import weka.gui.LogPanel;
-import weka.gui.LookAndFeel;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.image.BufferedImage;
-import java.beans.BeanInfo;
-import java.beans.Beans;
-import java.beans.Customizer;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.beancontext.BeanContextChild;
-import java.beans.beancontext.BeanContextSupport;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectInputStream;
+import java.io.LineNumberReader;
+import java.io.InputStreamReader;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.Vector;
-
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
+import java.util.Enumeration;
+import java.util.Date;
+import java.util.Hashtable;
+import java.text.SimpleDateFormat;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
+import javax.swing.Box;
+import javax.swing.JFrame;
 import javax.swing.JWindow;
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
+import javax.swing.JButton;
+import javax.swing.DefaultListModel;
+import javax.swing.JList;
+import javax.swing.JLabel;
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
+import javax.swing.JScrollPane;
+import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
+import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
+import javax.swing.JFileChooser;
+import javax.swing.JTextArea;
 import javax.swing.filechooser.FileFilter;
+
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.Point;
+import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.Insets;
+import java.awt.Component;
+import java.awt.FontMetrics;
+
+import java.beans.Customizer;
+import java.beans.EventSetDescriptor;
+import java.beans.Beans;
+import java.beans.PropertyDescriptor;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.beancontext.*;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.IntrospectionException;
 
 /**
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.18 $
+ * @version  $Revision: 1.1.2.11 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
  */
-public class KnowledgeFlowApp
-  extends JPanel
-  implements PropertyChangeListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = -7064906770289728431L;
+public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
 
   /**
    * Location of the property file for the KnowledgeFlowApp
@@ -296,16 +299,11 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18 $
+   * @version $Revision: 1.1.2.11 $
    * @since 1.0
    * @see PrintablePanel
    */
-  protected class BeanLayout
-    extends PrintablePanel {
-
-    /** for serialization */
-    private static final long serialVersionUID = -146377012429662757L;
-
+  protected class BeanLayout extends PrintablePanel {
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
       BeanInstance.paintLabels(gx);
@@ -461,10 +459,10 @@ public class KnowledgeFlowApp
   public KnowledgeFlowApp() {
     // Grab a fontmetrics object
     JWindow temp = new JWindow();
-    temp.setVisible(true);
+    temp.show();
     temp.getGraphics().setFont(new Font("Monospaced", Font.PLAIN, 10));
     m_fontM = temp.getGraphics().getFontMetrics();
-    temp.setVisible(false);
+    temp.hide();
 
     // some GUI defaults
     try {
@@ -553,7 +551,6 @@ public class KnowledgeFlowApp
             revalidate();
             m_beanLayout.repaint();
             m_mode = NONE;
-                        
             checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
           }
 	}
@@ -670,9 +667,8 @@ public class KnowledgeFlowApp
        .format(new Date());
      m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
      m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
-	 + Copyright.getOwner() + ", " + Copyright.getAddress());
-     m_logPanel.logMessage("web: " + Copyright.getURL());
+     m_logPanel.logMessage("(c) 2002-2005 Mark Hall");
+     m_logPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
      m_logPanel.logMessage( date);
      m_logPanel.statusMessage("Welcome to the Weka Knowledge Flow");
     
@@ -1819,9 +1815,8 @@ public class KnowledgeFlowApp
                              (startY < endY) ? startY: endY,
                              Math.abs(startX - endX),
                              Math.abs(startY - endY));
-    System.err.println(r);
     Vector selected = BeanInstance.findInstances(r);
-    System.err.println(r);
+
     // check if sub flow is valid
     Vector inputs = BeanConnection.inputs(selected);
     Vector outputs = BeanConnection.outputs(selected);
@@ -1865,14 +1860,6 @@ public class KnowledgeFlowApp
           setDisplayConnectors(true, java.awt.Color.green);
       }
     }
-    
-    BufferedImage subFlowPreview = null; 
-    try {
-      	subFlowPreview = createImage(m_beanLayout, r);              
-    } catch (IOException ex) {
-      ex.printStackTrace();
-      // drop through quietly
-    }
 
     // Confirmation pop-up
     int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
@@ -1892,7 +1879,6 @@ public class KnowledgeFlowApp
         group.setAssociatedConnections(associatedConnections);
         group.setInputs(inputs);
         group.setOutputs(outputs);
-        group.setSubFlowPreview(new ImageIcon(subFlowPreview));
         if (name.length() > 0) {
           group.getVisual().setText(name);
         }
@@ -1986,7 +1972,6 @@ public class KnowledgeFlowApp
           Vector v     = (Vector) xml.read(oFile);
           beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
-          //connections  = new Vector();
         } /* binary */ else {
           InputStream is = new FileInputStream(oFile);
           ObjectInputStream ois = new ObjectInputStream(is);
@@ -2030,29 +2015,6 @@ public class KnowledgeFlowApp
     }
     m_loadB.setEnabled(true);
     m_saveB.setEnabled(true);
-  }
-  
-  /**
-   * Utility method to create an image of a region of the given component
-   * @param component the component to create an image of
-   * @param region the region of the component to put into the image
-   * @return the image
-   * @throws IOException
-   */
-  protected static BufferedImage createImage(JComponent component, Rectangle region)
-  throws IOException {
-    boolean opaqueValue = component.isOpaque();
-    component.setOpaque( true );
-    BufferedImage image = new BufferedImage(region.width, 
-	region.height, BufferedImage.TYPE_INT_RGB);
-    Graphics2D g2d = image.createGraphics();
-    g2d.translate(-region.getX(), -region.getY());
-    //g2d.setClip( region );
-    component.paint( g2d );
-    g2d.dispose();
-    component.setOpaque( opaqueValue );
-    
-    return image;
   }
 
 

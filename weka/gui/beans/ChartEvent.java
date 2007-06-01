@@ -16,7 +16,7 @@
 
 /*
  *    ChartEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -29,14 +29,9 @@ import java.util.Vector;
  * Event encapsulating info for plotting a data point on the StripChart
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class ChartEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7812460715499569390L;
-
+public class ChartEvent extends EventObject {
   private Vector m_legendText;
   private double m_max;
   private double m_min;

@@ -16,7 +16,7 @@
 
 /*
  *    UnassignedClassException.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -27,13 +27,9 @@ package weka.core;
  * class assigned to it, but a class is needed to perform the operation.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class UnassignedClassException
-  extends RuntimeException {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6268278694768818235L;
+public class UnassignedClassException extends RuntimeException {
 
   /**
    * Creates a new UnassignedClassException with no message.
