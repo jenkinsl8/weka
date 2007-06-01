@@ -16,10 +16,9 @@
 
 /*
  *    TaskStatusInfo.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Mark Hall
  *
  */
-
 package weka.experiment;
 
 import java.io.Serializable;
@@ -33,13 +32,9 @@ import java.io.Serializable;
  * execute.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class TaskStatusInfo
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6129343303703560015L;
+public class TaskStatusInfo implements Serializable {
   
   public static final int TO_BE_RUN = 0;
   public static final int PROCESSING=1;

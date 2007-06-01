@@ -16,44 +16,34 @@
 
 /*
  *   BoundaryPanel.java
- *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
-import weka.classifiers.Classifier;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.util.Random;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
+import java.util.Vector;
+import java.util.Random;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+import com.sun.image.codec.jpeg.*;
+import java.awt.image.*;
+import java.io.*;
+
+import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayesSimple;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.J48;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.functions.Logistic;
+import weka.clusterers.EM;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.Add;
 
 /**
  * BoundaryPanel. A class to handle the plotting operations
@@ -61,17 +51,13 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.19 $
  * @since 1.0
  * @see JPanel
  */
-public class BoundaryPanel
-  extends JPanel {
+public class BoundaryPanel extends JPanel {
 
-  /** for serialization */
-  private static final long serialVersionUID = -8499445518744770458L;
-  
-  /** default colours for classes */
+  // default colours for classes
   public static final Color [] DEFAULT_COLORS = {
     Color.red,
     Color.green,
@@ -81,22 +67,19 @@ public class BoundaryPanel
     new Color(255, 255, 0), // yellow
     new Color(255, 255, 255), //white
     new Color(0, 0, 0)};
-    
-  /** The distance we can click away from a point in the GUI and still remove it. */
-  public static final double REMOVE_POINT_RADIUS = 7.0;
 
   protected FastVector m_Colors = new FastVector();
 
-  /** training data */
+  // training data
   protected Instances m_trainingData;
 
-  /** distribution classifier to use */
+  // distribution classifier to use
   protected Classifier m_classifier;
 
-  /** data generator to use */
+  // data generator to use
   protected DataGenerator m_dataGenerator;
 
-  /** index of the class attribute */
+  // index of the class attribute
   private int m_classIndex = -1;
 
   // attributes for visualizing on
@@ -115,7 +98,7 @@ public class BoundaryPanel
   protected double m_pixHeight;
   protected double m_pixWidth;
 
-  /** used for offscreen drawing */
+  // used for offscreen drawing
   protected Image m_osi = null;
 
   // width and height of the display area
@@ -129,18 +112,11 @@ public class BoundaryPanel
   protected int m_numOfSamplesPerGenerator;
   protected double m_samplesBase = 2.0;
 
-  /** listeners to be notified when plot is complete */
+  // listeners to be notified when plot is complete
   private Vector m_listeners = new Vector();
 
-  /**
-   * small inner class for rendering the bitmap on to
-   */
-  private class PlotPanel
-    extends JPanel {
-
-    /** for serialization */
-    private static final long serialVersionUID = 743629498352235060L;
-    
+  // small inner class for rendering the bitmap on to
+  private class PlotPanel extends JPanel {
     public PlotPanel() {
       this.setToolTipText("");
     }
@@ -176,33 +152,33 @@ public class BoundaryPanel
     }
   }
 
-  /** the actual plotting area */
+  // the actual plotting area
   private PlotPanel m_plotPanel = new PlotPanel();
 
-  /** thread for running the plotting operation in */
+  // thread for running the plotting operation in
   private Thread m_plotThread = null;
 
-  /** Stop the plotting thread */
+  // Stop the plotting thread
   protected boolean m_stopPlotting = false;
 
-  /** Stop any replotting threads */
+  // Stop any replotting threads
   protected boolean m_stopReplotting = false;
 
   // Used by replotting threads to pause and resume the main plot thread
   private Double m_dummy = new Double(1.0);
   private boolean m_pausePlotting = false;
-  /** what size of tile is currently being plotted */
+  // what size of tile is currently being plotted
   private int m_size = 1;
-  /** is the main plot thread performing the initial coarse tiling */
+  // is the main plot thread performing the initial coarse tiling
   private boolean m_initialTiling;
 
-  /** A random number generator  */
+  // A random number generator 
   private Random m_random = null;
 
-  /** cache of probabilities for fast replotting */
+  // cache of probabilities for fast replotting
   protected double [][][] m_probabilityCache;
 
-  /** plot the training data */
+  // plot the training data
   protected boolean m_plotTrainingData = true;
 
   /**
@@ -231,7 +207,6 @@ public class BoundaryPanel
 				    DEFAULT_COLORS[i].getBlue()));
     }
     m_probabilityCache = new double[m_panelHeight][m_panelWidth][];
-    
   }
 
   /**
@@ -290,74 +265,37 @@ public class BoundaryPanel
    */
   public void stopPlotting() {
     m_stopPlotting = true;
-    try {
-    	m_plotThread.join(100);
-    } catch (Exception e){};
   }
 
-  /** Set up the bounds of our graphic based by finding the smallest reasonable
-      area in the instance space to surround our data points.
-  */
-  public void computeMinMaxAtts() {
+  protected void computeMinMaxAtts() {
     m_minX = Double.MAX_VALUE;
     m_minY = Double.MAX_VALUE;
     m_maxX = Double.MIN_VALUE;
     m_maxY = Double.MIN_VALUE;
-    
-    boolean allPointsLessThanOne = true;
-    
-    if (m_trainingData.numInstances() == 0) {
-      m_minX = m_minY = 0.0;
-      m_maxX = m_maxY = 1.0;
-    }
-    else
-    {
-	for (int i = 0; i < m_trainingData.numInstances(); i++) {
-		Instance inst = m_trainingData.instance(i);
-		double x = inst.value(m_xAttribute);
-		double y = inst.value(m_yAttribute);
-		if (x != Instance.missingValue() && y != Instance.missingValue()) {
-			if (x < m_minX) {
-			m_minX = x;
-			}
-			if (x > m_maxX) {
-			m_maxX = x;
-			}
-		
-			if (y < m_minY) {
-			m_minY = y;
-			}
-			if (y > m_maxY) {
-			m_maxY = y;
-			}
-			if (x > 1.0 || y > 1.0)
-				allPointsLessThanOne = false;
-		}
+
+    for (int i = 0; i < m_trainingData.numInstances(); i++) {
+      Instance inst = m_trainingData.instance(i);
+      double x = inst.value(m_xAttribute);
+      double y = inst.value(m_yAttribute);
+      if (x != Instance.missingValue()) {
+	if (x < m_minX) {
+	  m_minX = x;
 	}
+	if (x > m_maxX) {
+	  m_maxX = x;
+	}
+      }
+      if (y != Instance.missingValue()) {
+	if (y < m_minY) {
+	  m_minY = y;
+	}
+	if (y > m_maxY) {
+	  m_maxY = y;
+	}
+      }
     }
-    
-    if (m_minX == m_maxX)
-    	m_minX = 0;
-    if (m_minY == m_maxY)
-    	m_minY = 0;
-    if (m_minX == Double.MAX_VALUE)
-    	m_minX = 0;
-    if (m_minY == Double.MAX_VALUE)
-    	m_minY = 0;
-    if (m_maxX == Double.MIN_VALUE)
-    	m_maxX = 1;
-    if (m_maxY == Double.MIN_VALUE)
-    	m_maxY = 1;
-    if (allPointsLessThanOne) {
-    	m_minX = m_minY = 0.0;
-    	m_maxX = m_maxY = 1.0;
-    }
-    
-    
-    
     m_rangeX = (m_maxX - m_minX);
     m_rangeY = (m_maxY - m_minY);
-    
     m_pixWidth = m_rangeX / (double)m_panelWidth;
     m_pixHeight = m_rangeY / (double) m_panelHeight;
   }
@@ -417,12 +355,11 @@ public class BoundaryPanel
     
     computeMinMaxAtts();
     
-    startPlotThread();
-    /*if (m_plotThread == null) {
+    if (m_plotThread == null) {
       m_plotThread = new PlotThread();
       m_plotThread.setPriority(Thread.MIN_PRIORITY);
       m_plotThread.start();
-    }*/
+    }
   }
   
   // Thread for main plotting operation
@@ -541,7 +478,6 @@ public class BoundaryPanel
 	      
       } catch (Exception ex) {
         ex.printStackTrace();
-	JOptionPane.showMessageDialog(null,"Error while plotting: \"" + ex.getMessage() + "\"");
       } finally {
         m_plotThread = null;
         // notify any listeners that we are finished
@@ -631,23 +567,16 @@ public class BoundaryPanel
     }
   }
 
-  /** Render the training points on-screen.
-  */
-  public void plotTrainingData() {
-    
+  protected void plotTrainingData() {
     Graphics2D osg = (Graphics2D)m_osi.getGraphics();
     Graphics g = m_plotPanel.getGraphics();
     osg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                          RenderingHints.VALUE_ANTIALIAS_ON);
     double xval = 0; double yval = 0;
-    
     for (int i = 0; i < m_trainingData.numInstances(); i++) {
       if (!m_trainingData.instance(i).isMissing(m_xAttribute) &&
           !m_trainingData.instance(i).isMissing(m_yAttribute)) {
-	  
-	if (m_trainingData.instance(i).isMissing(m_classIndex)) //jimmy.
-		continue; //don't plot if class is missing. TODO could we plot it differently instead?
-	
+
         xval = m_trainingData.instance(i).value(m_xAttribute);
         yval = m_trainingData.instance(i).value(m_yAttribute);
        
@@ -656,7 +585,7 @@ public class BoundaryPanel
         Color ColorToPlotWith = 
           ((Color)m_Colors.elementAt((int)m_trainingData.instance(i).
                                      value(m_classIndex) % m_Colors.size()));
-	
+
         if (ColorToPlotWith.equals(Color.white)) {
           osg.setColor(Color.black);
         } else {
@@ -669,9 +598,7 @@ public class BoundaryPanel
     }
     g.drawImage(m_osi,0,0,m_plotPanel);
   }
-  
-  /** Convert an X coordinate from the instance space to the panel space.
-  */
+
   private int convertToPanelX(double xval) {
     double temp = (xval - m_minX) / m_rangeX;
     temp = temp * (double) m_panelWidth;
@@ -679,8 +606,6 @@ public class BoundaryPanel
     return (int)temp;
   }
 
-  /** Convert a Y coordinate from the instance space to the panel space.
-  */
   private int convertToPanelY(double yval) {
     double temp = (yval - m_minY) / m_rangeY;
     temp = temp * (double) m_panelHeight;
@@ -689,16 +614,13 @@ public class BoundaryPanel
     return (int)temp;
   }
   
-  /** Convert an X coordinate from the panel space to the instance space.
-  */
   private double convertFromPanelX(double pX) {
     pX /= (double) m_panelWidth;
+    
     pX *= m_rangeX;
     return pX + m_minX;
   }
 
-  /** Convert a Y coordinate from the panel space to the instance space.
-  */
   private double convertFromPanelY(double pY) {
     pY  = m_panelHeight - pY;
     pY /= (double) m_panelHeight;
@@ -708,14 +630,10 @@ public class BoundaryPanel
   }
 
 
-  /** Plot a point in our visualization on-screen.
-  */
   protected  void plotPoint(int x, int y, double [] probs, boolean update) {
     plotPoint(x, y, 1, 1, probs, update);
   }
   
-  /** Plot a point in our visualization on-screen.
-  */
   private void plotPoint(int x, int y, int width, int height, 
 			 double [] probs, boolean update) {
 
@@ -756,8 +674,6 @@ public class BoundaryPanel
     osg.fillRect(x, y, width, height);
   }
   
-  /** Update the rendered image.
-  */
   private void update() {
     Graphics g = m_plotPanel.getGraphics();
     g.drawImage(m_osi, 0, 0, m_plotPanel);
@@ -776,18 +692,6 @@ public class BoundaryPanel
       throw new Exception("No class attribute set (BoundaryPanel)");
     }
     m_classIndex = m_trainingData.classIndex();
-  }
-  
-  /** Adds a training instance to the visualization dataset.
-  */
-  public void addTrainingInstance(Instance instance) {
-  	
-  	if (m_trainingData == null) {
-		//TODO
-		System.err.println("Trying to add to a null training set (BoundaryPanel)");
-	}
-  	
-  	m_trainingData.add(instance);
   }
 
   /**
@@ -844,10 +748,10 @@ public class BoundaryPanel
       throw new Exception("Visualization dimensions must be numeric "
                           +"(BoundaryPanel)");
     }
-    /*if (m_trainingData.numDistinctValues(xatt) < 2) {
+    if (m_trainingData.numDistinctValues(xatt) < 2) {
       throw new Exception("Too few distinct values for X attribute "
                           +"(BoundaryPanel)");
-    }*/ //removed by jimmy. TESTING!
+    }
     m_xAttribute = xatt;
   }
 
@@ -869,10 +773,10 @@ public class BoundaryPanel
       throw new Exception("Visualization dimensions must be numeric "
                           +"(BoundaryPanel)");
     }
-    /*if (m_trainingData.numDistinctValues(yatt) < 2) {
+    if (m_trainingData.numDistinctValues(yatt) < 2) {
       throw new Exception("Too few distinct values for Y attribute "
                           +"(BoundaryPanel)");
-    }*/ //removed by jimmy. TESTING!
+    }
     m_yAttribute = yatt;
   }
   
@@ -885,8 +789,7 @@ public class BoundaryPanel
     synchronized (m_Colors) {
       m_Colors = colors;
     }
-    //replot(); //commented by jimmy
-    update(); //added by jimmy
+    replot();
   }
 
   /**
@@ -1007,120 +910,6 @@ public class BoundaryPanel
     } catch (Exception ex) {
       ex.printStackTrace();
     }
-  }
-  
-  /** Adds a training instance to our dataset, based on the coordinates of the mouse on the panel.
-      This method sets the x and y attributes and the class (as defined by classAttIndex), and sets
-      all other values as Missing.
-   *  @param mouseX the x coordinate of the mouse, in pixels.
-   *  @param mouseY the y coordinate of the mouse, in pixels.
-   *  @param classAttIndex the index of the attribute that is currently selected as the class attribute.
-   *  @param classValue the value to set the class to in our new point.
-   */
-  public void addTrainingInstanceFromMouseLocation(int mouseX, int mouseY, int classAttIndex, double classValue) {
-  	//convert to coordinates in the training instance space.
-	double x = convertFromPanelX(mouseX);
-	double y = convertFromPanelY(mouseY);
-	
-	//build the training instance
-	Instance newInstance = new Instance(m_trainingData.numAttributes());
-	for (int i = 0; i < newInstance.numAttributes(); i++) {
-		if (i == classAttIndex) {
-			newInstance.setValue(i,classValue);
-		}
-		else if (i == m_xAttribute)
-			newInstance.setValue(i,x);
-		else if (i == m_yAttribute)
-			newInstance.setValue(i,y);
-		else newInstance.setMissing(i);
-	}
-	
-	//add it to our data set.
-	addTrainingInstance(newInstance);
-  }
-  
-  /** Deletes all training instances from our dataset.
-  */
-  public void removeAllInstances() {
-  	if (m_trainingData != null)
-	{
-  		m_trainingData.delete();
-		try { initialize();} catch (Exception e) {};
-	}
-	
-  }
-  
-  /** Removes a single training instance from our dataset, if there is one that is close enough
-      to the specified mouse location.
-  */
-  public void removeTrainingInstanceFromMouseLocation(int mouseX, int mouseY) {
-  	
-	//convert to coordinates in the training instance space.
-	double x = convertFromPanelX(mouseX);
-	double y = convertFromPanelY(mouseY);
-	
-	int bestIndex = -1;
-	double bestDistanceBetween = Integer.MAX_VALUE;
-	
-	//find the closest point.
-	for (int i = 0; i < m_trainingData.numInstances(); i++) {
-		Instance current = m_trainingData.instance(i);
-		double distanceBetween = (current.value(m_xAttribute) - x) * (current.value(m_xAttribute) - x) + (current.value(m_yAttribute) - y) * (current.value(m_yAttribute) - y); // won't bother to sqrt, just used square values.
-		
-		if (distanceBetween < bestDistanceBetween)
-		{
-			bestIndex = i;
-			bestDistanceBetween = distanceBetween;
-		}
-	}
-	if (bestIndex == -1)
-		return;
-	Instance best = m_trainingData.instance(bestIndex);
-	double panelDistance = (convertToPanelX(best.value(m_xAttribute)) - mouseX) * (convertToPanelX(best.value(m_xAttribute)) - mouseX)
-		+ (convertToPanelY(best.value(m_yAttribute)) - mouseY) * (convertToPanelY(best.value(m_yAttribute)) - mouseY);
-	if (panelDistance < REMOVE_POINT_RADIUS * REMOVE_POINT_RADIUS) {//the best point is close enough. (using squared distances)
-		m_trainingData.delete(bestIndex);
-	}
-  }
-  
-  /** Starts the plotting thread.  Will also create it if necessary.
-  */
-  public void startPlotThread() {
-  	if (m_plotThread == null) { //jimmy
-      		m_plotThread = new PlotThread();
-      		m_plotThread.setPriority(Thread.MIN_PRIORITY);
-      		m_plotThread.start();
-    	}
-  }
-  
-  /** Adds a mouse listener.
-  */
-  public void addMouseListener(MouseListener l) {
-  	m_plotPanel.addMouseListener(l);
-  }
-  
-  /** Gets the minimum x-coordinate bound, in training-instance units (not mouse coordinates).
-  */
-  public double getMinXBound() {
-  	return m_minX;
-  }
-  
-  /** Gets the minimum y-coordinate bound, in training-instance units (not mouse coordinates).
-  */
-  public double getMinYBound() {
-  	return m_minY;
-  }
-  
-  /** Gets the maximum x-coordinate bound, in training-instance units (not mouse coordinates).
-  */
-  public double getMaxXBound() {
-  	return m_maxX;
-  }
-  
-  /** Gets the maximum x-coordinate bound, in training-instance units (not mouse coordinates).
-  */
-  public double getMaxYBound() {
-  	return m_maxY;
   }
 
   /**

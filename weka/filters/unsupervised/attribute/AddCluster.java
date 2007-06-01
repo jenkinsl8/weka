@@ -14,9 +14,10 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    AddCluster.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -24,7 +25,6 @@ package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,35 +40,22 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * A filter that adds a new nominal attribute representing the cluster assigned to each instance by the specified clustering algorithm.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;clusterer specification&gt;
- *  Full class name of clusterer to use, followed
- *  by scheme options. eg:
- *   "weka.clusterers.SimpleKMeans -N 3"
- *  (default: weka.clusterers.SimpleKMeans)</pre>
- * 
- * <pre> -I &lt;att1,att2-att4,...&gt;
- *  The range of attributes the clusterer should ignore.
- * </pre>
- * 
- <!-- options-end -->
+ * A filter that adds a new nominal attribute representing the cluster assigned
+ * to each instance by the specified clustering algorithm.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -W clusterer string <br>
+ * Full class name of clusterer to use, followed by scheme options. (required)<p>
+ *
+ * -I range string <br>
+ * The range of attributes the clusterer should ignore. Note: if a class index
+ * is set then the class is automatically ignored during clustering.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class AddCluster 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7414280611943807337L;
+public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
   /** The clusterer used to do the cleansing */
   protected Clusterer m_Clusterer = new weka.clusterers.SimpleKMeans();
@@ -79,47 +66,6 @@ public class AddCluster
   /** Filter for removing attributes */
   protected Filter m_removeAttributes = new Remove();
 
-  /** 
-   * Returns the Capabilities of this filter, makes sure that the class is
-   * never set (for the clusterer).
-   *
-   * @param data	the data to use for customization
-   * @return            the capabilities of this object, based on the data
-   * @see               #getCapabilities()
-   */
-  public Capabilities getCapabilities(Instances data) {
-    Instances	newData;
-    
-    newData = new Instances(data, 0);
-    newData.setClassIndex(-1);
-    
-    return super.getCapabilities(newData);
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = m_Clusterer.getCapabilities();
-    
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-  
-  /**
-   * tests the data whether the filter can actually handle it
-   * 
-   * @param instanceInfo	the data to test
-   * @throws Exception		if the test fails
-   */
-  protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities(instanceInfo).testWithFail(removeIgnored(instanceInfo));
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -127,7 +73,7 @@ public class AddCluster
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -136,44 +82,12 @@ public class AddCluster
 
     return false;
   }
-
-  /**
-   * filters all attributes that should be ignored
-   * 
-   * @param data	the data to filter
-   * @return		the filtered data
-   * @throws Exception	if filtering fails
-   */
-  protected Instances removeIgnored(Instances data) throws Exception {
-    Instances result = data;
-    
-    if (m_IgnoreAttributesRange != null || data.classIndex() >= 0) {
-      m_removeAttributes = new Remove();
-      String rangeString = "";
-      if (m_IgnoreAttributesRange != null) {
-	rangeString += m_IgnoreAttributesRange.getRanges();
-      }
-      if (data.classIndex() >= 0) {
-	if (rangeString.length() > 0) {
-	  rangeString += "," + (data.classIndex() + 1);
-	} else {
-	  rangeString = "" + (data.classIndex() + 1);
-	}
-      }
-      ((Remove) m_removeAttributes).setAttributeIndices(rangeString);
-      ((Remove) m_removeAttributes).setInvertSelection(false);
-      m_removeAttributes.setInputFormat(data);
-      result = Filter.useFilter(data, m_removeAttributes);
-    }
-    
-    return result;
-  }
   
   /**
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
 
@@ -183,9 +97,37 @@ public class AddCluster
 
     Instances toFilter = getInputFormat();
     
-    if (!isFirstBatchDone()) {
+    if (!m_FirstBatchDone) {
+      Instances toFilterIgnoringAttributes = toFilter;
+
       // filter out attributes if necessary
-      Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
+      if (m_IgnoreAttributesRange != null || toFilter.classIndex() >=0) {
+	toFilterIgnoringAttributes = new Instances(toFilter);
+	m_removeAttributes = new Remove();
+	String rangeString = "";
+	if (m_IgnoreAttributesRange != null) {
+	  rangeString += m_IgnoreAttributesRange.getRanges();
+	}
+	if (toFilter.classIndex() >= 0) {
+	  if (rangeString.length() > 0) {
+	    rangeString += (","+(toFilter.classIndex()+1));	  
+	  } else {
+	    rangeString = ""+(toFilter.classIndex()+1);
+	  }
+	}
+	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
+	((Remove)m_removeAttributes).setInvertSelection(false);
+	m_removeAttributes.setInputFormat(toFilter);
+	for (int i = 0; i < toFilter.numInstances(); i++) {
+	  m_removeAttributes.input(toFilter.instance(i));
+	}
+	m_removeAttributes.batchFinished();
+	toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
+	Instance tempInst;
+	while ((tempInst = m_removeAttributes.output()) != null) {
+	  toFilterIgnoringAttributes.add(tempInst);
+	}
+      }
 
       // build the clusterer
       m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
@@ -206,7 +148,6 @@ public class AddCluster
     for (int i=0; i<toFilter.numInstances(); i++) {
       convertInstance(toFilter.instance(i));
     }
-    
     flushInput();
     m_NewBatch = true;
     m_FirstBatchDone = true;
@@ -222,7 +163,7 @@ public class AddCluster
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -248,7 +189,6 @@ public class AddCluster
    * the end of the output queue.
    *
    * @param instance the instance to convert
-   * @throws Exception if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
     Instance original, processed;
@@ -277,10 +217,8 @@ public class AddCluster
     } else {
       processed = new Instance(original.weight(), instanceVals);
     }
-
-    processed.setDataset(instance.dataset());
-    copyValues(processed, false, instance.dataset(), getOutputFormat());
-    processed.setDataset(getOutputFormat());
+    copyStringValues(original, false, original.dataset(), getOutputStringIndex(),
+		     getOutputFormat(), getOutputStringIndex());
       
     push(processed);
   }
@@ -296,9 +234,8 @@ public class AddCluster
     
     newVector.addElement(new Option(
 	      "\tFull class name of clusterer to use, followed\n"
-	      + "\tby scheme options. eg:\n"
-	      + "\t\t\"weka.clusterers.SimpleKMeans -N 3\"\n"
-	      + "\t(default: weka.clusterers.SimpleKMeans)",
+	      + "\tby scheme options. (required)\n"
+	      + "\teg: \"weka.clusterers.SimpleKMeans -N 3\"",
 	      "W", 1, "-W <clusterer specification>"));
     
     newVector.addElement(new Option(
@@ -310,31 +247,25 @@ public class AddCluster
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;clusterer specification&gt;
-   *  Full class name of clusterer to use, followed
-   *  by scheme options. eg:
-   *   "weka.clusterers.SimpleKMeans -N 3"
-   *  (default: weka.clusterers.SimpleKMeans)</pre>
-   * 
-   * <pre> -I &lt;att1,att2-att4,...&gt;
-   *  The range of attributes the clusterer should ignore.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -W clusterer string <br>
+   * Full class name of clusterer to use, followed by scheme options. (required)<p>
+   *   
+   * -I range string <br>
+   * The range of attributes the clusterer should ignore. Note: if a class index
+   * is set then the class is automatically ignored during clustering<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
     String clustererString = Utils.getOption('W', options);
-    if (clustererString.length() == 0)
-      clustererString = weka.clusterers.SimpleKMeans.class.getName();
+    if (clustererString.length() == 0) {
+      throw new Exception("A clusterer must be specified"
+			  + " with the -W option.");
+    }
     String[] clustererSpec = Utils.splitOptions(clustererString);
     if (clustererSpec.length == 0) {
       throw new Exception("Invalid clusterer specification string");
@@ -460,7 +391,7 @@ public class AddCluster
    *
    * @param rangeList a string representing the list of attributes. 
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setIgnoredAttributeIndices(String rangeList) {
 
@@ -478,6 +409,15 @@ public class AddCluster
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new AddCluster(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new AddCluster(), argv); 
+      } else {
+	Filter.filterFile(new AddCluster(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

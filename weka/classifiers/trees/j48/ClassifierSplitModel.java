@@ -16,30 +16,24 @@
 
 /*
  *    ClassifierSplitModel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * Abstract class for classification models that can be used 
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8 $
  */
-public abstract class ClassifierSplitModel
-  implements Cloneable, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 4280730118393457457L;
+public abstract class ClassifierSplitModel implements Cloneable, Serializable {
 
   /** Distribution of class values. */  
   protected Distribution m_distribution;  

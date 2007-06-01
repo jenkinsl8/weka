@@ -16,19 +16,21 @@
 
 /*
  *    StartSetHandler.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 
 package weka.attributeSelection;
+import java.io.*;
+import weka.core.*;
 
 /** 
  * Interface for search methods capable of doing something sensible
  * given a starting set of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6 $
  */
 public interface StartSetHandler {
 

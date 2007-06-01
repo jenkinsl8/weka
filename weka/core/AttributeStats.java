@@ -16,7 +16,7 @@
 
 /*
  *    AttributeStats.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -29,13 +29,9 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
-public class AttributeStats
-  implements Serializable {    
-
-  /** for serialization */
-  private static final long serialVersionUID = 4434688832743939380L;
+public class AttributeStats implements Serializable {    
   
   /** The number of int-like values */
   public int intCount = 0;

@@ -16,79 +16,62 @@
 
 /*
  *    RemoveWithValues.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 
 package weka.filters.unsupervised.instance;
 
+import weka.filters.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
+import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.SingleIndex;
 
 /** 
- <!-- globalinfo-start -->
- * Filters instances according to the value of an attribute.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;num&gt;
- *  Choose attribute to be used for selection.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Numeric value to be used for selection on numeric
- *  attribute.
- *  Instances with values smaller than given value will
- *  be selected. (default 0)</pre>
- * 
- * <pre> -L &lt;index1,index2-index4,...&gt;
- *  Range of label indices to be used for selection on
- *  nominal attribute.
- *  First and last are valid indexes. (default all values)</pre>
- * 
- * <pre> -M
- *  Missing values count as a match. This setting is
- *  independent of the -V option.
- *  (default missing values don't match)</pre>
- * 
- * <pre> -V
- *  Invert matching sense.</pre>
- * 
- * <pre> -H
- *  When selecting on nominal attributes, removes header
- *  references to excluded values.</pre>
- * 
- <!-- options-end -->
+ * Filters instances according to the value of an attribute.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -C num<br>
+ * Choose attribute to be used for selection (default last).<p>
+ *
+ * -S num<br>
+ * Numeric value to be used for selection on numeric attribute.
+ * Instances with values smaller than given value will be selected.
+ * (default 0) <p>
+ *
+ * -L index1,index2-index4,...<br>
+ * Range of label indices to be used for selection on nominal attribute.
+ * First and last are valid indexes. (default all values)<p>
+ *
+ * -M <br>
+ * Missing values count as a match. This setting is independent of
+ * the -V option. (default missing values don't match)<p>
+ *
+ * -V<br>
+ * Invert matching sense.<p>
+ *
+ * -H<br>
+ * When selecting on nominal attributes, removes header references to
+ * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.7.2.1 $
  */
-public class RemoveWithValues 
-  extends Filter
+public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 4752870193679263361L;
-  
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
   
@@ -164,41 +147,34 @@ public class RemoveWithValues
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;num&gt;
-   *  Choose attribute to be used for selection.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Numeric value to be used for selection on numeric
-   *  attribute.
-   *  Instances with values smaller than given value will
-   *  be selected. (default 0)</pre>
-   * 
-   * <pre> -L &lt;index1,index2-index4,...&gt;
-   *  Range of label indices to be used for selection on
-   *  nominal attribute.
-   *  First and last are valid indexes. (default all values)</pre>
-   * 
-   * <pre> -M
-   *  Missing values count as a match. This setting is
-   *  independent of the -V option.
-   *  (default missing values don't match)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense.</pre>
-   * 
-   * <pre> -H
-   *  When selecting on nominal attributes, removes header
-   *  references to excluded values.</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options.
+   * Valid options are:<p>
+   *
+   * -C num<br>
+   * Choose attribute to be used for selection (default last).<p>
+   *
+   * -S num<br>
+   * Numeric value to be used for selection on numeric attribute.
+   * Instances with values smaller than given value will be selected.
+   * (default 0) <p>
+   *
+   * -L index1,index2-index4,...<br>
+   * Range of label indices to be used for selection on nominal attribute.
+   * First and last are valid indexes. (default all values)<p>
+   *
+   * -M <br>
+   * Missing values count as a match. This setting is independent of
+   * the -V option. (default missing values don't match)<p>
+   *
+   * -V<br>
+   * Invert matching sense.<p>
+   *
+   * -H<br>
+   * When selecting on nominal attributes, removes header references to
+   * excluded values. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -263,36 +239,14 @@ public class RemoveWithValues
     return options;
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
    * @param instanceInfo an Instances object containing the input instance
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
-   * @throws UnsupportedAttributeTypeException if the specified attribute
+   * @exception UnsupportedAttributeTypeException if the specified attribute
    * is neither numeric or nominal.
-   * @return true because outputFormat can be collected immediately
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -342,7 +296,7 @@ public class RemoveWithValues
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -470,7 +424,7 @@ public class RemoveWithValues
   /**
    * Sets index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -592,7 +546,7 @@ public class RemoveWithValues
    *
    * @param rangeList a string representing the list of nominal indices.
    * eg: first-3,5,6-last
-   * @throws InvalidArgumentException if an invalid range list is supplied
+   * @exception InvalidArgumentException if an invalid range list is supplied
    */
   public void setNominalIndices(String rangeList) {
     
@@ -605,7 +559,7 @@ public class RemoveWithValues
    *
    * @param values an array containing indexes of values to be
    * used for selection
-   * @throws InvalidArgumentException if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setNominalIndicesArr(int [] values) {
 
@@ -627,6 +581,24 @@ public class RemoveWithValues
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new RemoveWithValues(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new RemoveWithValues(), argv);
+      } else {
+	Filter.filterFile(new RemoveWithValues(), argv);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

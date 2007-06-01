@@ -16,7 +16,7 @@
 
 /*
  *    SerialInstanceListener.java
- *    Copyright (C) 1998  University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1998  Eibe Frank, Leonard Trigg
  *
  */
 
@@ -29,7 +29,7 @@ package weka.gui.streams;
  * instances.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public interface SerialInstanceListener extends java.util.EventListener {
   

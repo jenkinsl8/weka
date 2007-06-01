@@ -21,7 +21,6 @@
 
 package weka.gui.beans.xml;
 
-import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.gui.beans.BeanConnection;
@@ -34,10 +33,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.beans.beancontext.BeanContextSupport;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
 import java.beans.Introspector;
-import java.beans.beancontext.BeanContextSupport;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -58,7 +57,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -89,12 +88,6 @@ public class XMLBeans
   
   /** the value of the file property */
   public final static String VAL_FILE = "file";
-  
-  /** the value of the dir property */
-  public final static String VAL_DIR = "dir";
-  
-  /** the value of the prefix property */
-  public final static String VAL_PREFIX = "prefix";
   
   /** the value of the options property */
   public final static String VAL_OPTIONS = "options";
@@ -248,7 +241,7 @@ public class XMLBeans
     m_BeanContextSupport = context;
     setDataType(datatype);
   }
-  
+
   /**
    * sets what kind of data is to be read/written
    * @param value       the type of data
@@ -275,13 +268,8 @@ public class XMLBeans
   /**
    * generates internally a new XML document and clears also the IgnoreList and
    * the mappings for the Read/Write-Methods
-   * 
-   * @throws Exception if something goes wrong
    */
   public void clear() throws Exception {
-    Vector<String>	classnames;
-    int			i;
-    
     super.clear();
     
     // ignore: suppress unnecessary GUI stuff 
@@ -338,12 +326,11 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
-    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");    
+    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
     m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
-    m_Properties.addAllowed(weka.core.converters.TextDirectoryLoader.class, "options");
 
     // we assume that classes implementing SplitEvaluator also implement OptionHandler
     m_Properties.addAllowed(weka.experiment.SplitEvaluator.class, "options");
@@ -363,13 +350,15 @@ public class XMLBeans
     m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class, "BeanVisual");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
     m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
-
-    classnames = ConverterUtils.getFileLoaders();
-    for (i = 0; i < classnames.size(); i++)
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Loader");
-    classnames = ConverterUtils.getFileSavers();
-    for (i = 0; i < classnames.size(); i++)
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Saver");
+    
+    m_CustomMethods.register(this, weka.core.converters.ArffLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.ArffSaver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.C45Loader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.C45Saver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.CSVLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.CSVSaver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesSaver.class, "Saver");
     
     // other variables
     m_BeanInstances          = null;
@@ -382,7 +371,7 @@ public class XMLBeans
   /**
    * traverses over all BeanInstances (or MetaBeans) and stores them in a vector 
    * (recurses into MetaBeans, since the sub-BeanInstances are not visible)
-   * @param list       the BeanInstances/MetaBeans to traverse
+   * @param beaninsts       the BeanInstances/MetaBeans to traverse
    */
   protected void addBeanInstances(Vector list) {
     int             i;
@@ -406,7 +395,7 @@ public class XMLBeans
       }
     }
   }
-  
+
   /**
    * enables derived classes to due some pre-processing on the objects, that's
    * about to be serialized. Right now it only returns the object.
@@ -416,6 +405,8 @@ public class XMLBeans
    * @throws Exception if post-processing fails
    */
   protected Object writePreProcess(Object o) throws Exception {
+    int           i;
+    
     o = super.writePreProcess(o);
     
     // gather all BeanInstances, also the ones in MetaBeans
@@ -476,7 +467,7 @@ public class XMLBeans
    * BeanInstances and reads the IDs for the BeanInstances, s.t. the correct
    * references can be set again
    * 
-   * @param document the document to pre-process
+   * @param o the object to perform some additional processing on
    * @return the processed object
    * @throws Exception if post-processing fails
    * @see #m_BeanInstances
@@ -556,12 +547,7 @@ public class XMLBeans
   
   /**
    * generates a connection based on the given parameters
-   * @param sourcePos the source position in the m_BeanInstances vector
-   * @param targetPos the target position in the m_BeanInstances vector
-   * @param event the name of the event, i.e., the connection
-   * @param hidden true if the connection is hidden
-   * @return the generated BeanConnection
-   * @throws Exception if something goes wrong
+   * @param  
    */
   protected BeanConnection createBeanConnection(int sourcePos, int targetPos, String event, boolean hidden) throws Exception {
     BeanConnection          result;
@@ -600,7 +586,6 @@ public class XMLBeans
    * the reference to the actual BeanConnection set.
    * @param deserialized    the deserialized knowledgeflow
    * @param key             the key of the hashtable to rebuild all connections for
-   * @throws Exception if something goes wrong
    */
   protected void rebuildBeanConnections(Vector deserialized, Object key) throws Exception {
     int                     i;
@@ -609,6 +594,8 @@ public class XMLBeans
     int                     targetPos;
     String                  event;
     boolean                 hidden;
+    BeanInstance            instSource;
+    BeanInstance            instTarget;
     Vector                  conns;
     BeanConnection          conn;
     StringTokenizer         tok;
@@ -747,9 +734,9 @@ public class XMLBeans
   /**
    * adds the given connection-relation for the specified MetaBean (or null in 
    * case of regular connections)
-   * @param meta        the MetaBean (or null for regular connections) to add
-   *                    the relationship for
-   * @param connection  the connection relation to add
+   * @param meta      the MetaBean (or null for regular connections) to add
+   *                  the relationship for
+   * @param relation  the connection relation to add
    */
   protected void addBeanConnectionRelation(MetaBean meta, String connection) {
     Vector      relations;
@@ -802,6 +789,7 @@ public class XMLBeans
   /**
    * builds the Color from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -819,7 +807,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -881,6 +869,7 @@ public class XMLBeans
   /**
    * builds the Dimension from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -897,7 +886,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -958,6 +947,7 @@ public class XMLBeans
   /**
    * builds the Font from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -975,7 +965,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1037,6 +1027,7 @@ public class XMLBeans
   /**
    * builds the Point from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1053,7 +1044,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1111,6 +1102,7 @@ public class XMLBeans
   /**
    * builds the ColorUIResource from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1126,7 +1118,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1180,6 +1172,7 @@ public class XMLBeans
   /**
    * builds the FontUIResource from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1195,7 +1188,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1253,6 +1246,7 @@ public class XMLBeans
   /**
    * builds the BeanInstance from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1269,11 +1263,12 @@ public class XMLBeans
     Object          bean;
     BeanVisual      visual;
     BeanInstance    beaninst;
+    Point           coords;
 
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1391,6 +1386,7 @@ public class XMLBeans
   /**
    * builds the BeanConnection from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1411,7 +1407,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1499,6 +1495,7 @@ public class XMLBeans
     
     Element                 node;
     weka.gui.beans.Saver    saver;
+    File                    file;
 
     // for debugging only
     if (DEBUG)
@@ -1543,8 +1540,14 @@ public class XMLBeans
     file   = null;
 
     // file
-    if (loader instanceof weka.core.converters.AbstractFileLoader)
-      file = ((weka.core.converters.AbstractFileLoader) loader).retrieveFile();
+    if (loader instanceof weka.core.converters.ArffLoader)
+      file = ((weka.core.converters.ArffLoader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.C45Loader)
+      file = ((weka.core.converters.C45Loader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.CSVLoader)
+      file = ((weka.core.converters.CSVLoader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.SerializedInstancesLoader)
+      file = ((weka.core.converters.SerializedInstancesLoader) loader).retrieveFile();
     else
       known = false;
 
@@ -1563,6 +1566,7 @@ public class XMLBeans
   /**
    * builds the Loader from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1579,7 +1583,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
@@ -1603,7 +1607,7 @@ public class XMLBeans
     if (file != null) {
       fl = new File(file);
       if (fl.exists())
-        ((weka.core.converters.AbstractFileLoader) result).setSource(fl);
+        ((weka.core.converters.AbstractLoader) result).setSource(fl);
       else
         System.out.println("WARNING: The file '" + file + "' does not exist!");
     }
@@ -1626,8 +1630,6 @@ public class XMLBeans
     Element                     node;
     weka.core.converters.Saver  saver;
     File                        file;
-    String			prefix;
-    String			dir;
     boolean                     known;
 
     // for debugging only
@@ -1636,37 +1638,31 @@ public class XMLBeans
     
     m_CurrentNode = parent;
     
-    saver  = (weka.core.converters.Saver) o;
+    saver = (weka.core.converters.Saver) o;
     node   = addElement(parent, name, saver.getClass().getName(), false);
-    known  = true;
-    file   = null;
-    prefix = "";
-    dir    = "";
+    known = true;
+    file  = null;
 
     // file
-    if (saver instanceof weka.core.converters.AbstractFileSaver) {
-      file   = ((weka.core.converters.AbstractFileSaver) saver).retrieveFile();
-      prefix = ((weka.core.converters.AbstractFileSaver) saver).filePrefix();
-      dir    = ((weka.core.converters.AbstractFileSaver) saver).retrieveDir();
-    }
-    else {
+    if (saver instanceof weka.core.converters.ArffSaver)
+      file = ((weka.core.converters.ArffSaver) saver).retrieveFile();
+    else if (saver instanceof weka.core.converters.C45Saver)
+      file = ((weka.core.converters.C45Saver) saver).retrieveFile();
+    else if (saver instanceof weka.core.converters.CSVSaver)
+      file = ((weka.core.converters.CSVSaver) saver).retrieveFile();
+    else if (saver instanceof weka.core.converters.SerializedInstancesSaver)
+      file = ((weka.core.converters.SerializedInstancesSaver) saver).retrieveFile();
+    else
       known = false;
-    }
     
     if (!known)
       System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
     
     // only save it, if it's a real file!
-    if ( (file == null) || (file.isDirectory()) ) {
-      invokeWriteToXML(node, "",     VAL_FILE);
-      invokeWriteToXML(node, dir,    VAL_DIR);
-      invokeWriteToXML(node, prefix, VAL_PREFIX);
-    }
-    else {
+    if ( (file == null) || (file.isDirectory()) )
+      invokeWriteToXML(node, "", VAL_FILE);
+    else
       invokeWriteToXML(node, file.getAbsolutePath(), VAL_FILE);
-      invokeWriteToXML(node, "", VAL_DIR);
-      invokeWriteToXML(node, "", VAL_PREFIX);
-    }
     
     return node;
   }
@@ -1674,6 +1670,7 @@ public class XMLBeans
   /**
    * builds the Saver from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1685,20 +1682,16 @@ public class XMLBeans
     int         i;
     String      name;
     String      file;
-    String	dir;
-    String	prefix;
 
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
-    file     = null;
-    dir      = null;
-    prefix   = null;
+    file     = "";
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
@@ -1706,23 +1699,16 @@ public class XMLBeans
 
       if (name.equals(VAL_FILE))
         file = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_DIR))
-        dir = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_PREFIX))
-        prefix = (String) invokeReadFromXML(child);
       else
         readFromXML(result, name, child);
     }
 
-    if ( (file != null) && (file.length() == 0) )
+    if (file.equals(""))
       file = null;
     
     if (file != null) {
-      ((weka.core.converters.AbstractFileSaver) result).setFile(new File(file));
-    }
-    else if ( (dir != null) && (prefix != null) ) {
-      ((weka.core.converters.AbstractFileSaver) result).setDir(dir);
-      ((weka.core.converters.AbstractFileSaver) result).setFilePrefix(prefix);
+      ((weka.core.converters.AbstractSaver) result).setFile(new File(file));
+      ((weka.core.converters.AbstractSaver) result).setDestination(new File(file));
     }
     
     return result;
@@ -1762,6 +1748,7 @@ public class XMLBeans
   /**
    * builds the BeanVisual from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1779,7 +1766,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result       = null;
@@ -1890,6 +1877,7 @@ public class XMLBeans
   /**
    * builds the MetaBean from the given DOM node.
    * 
+   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails

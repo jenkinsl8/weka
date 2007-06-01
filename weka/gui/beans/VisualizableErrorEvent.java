@@ -16,29 +16,24 @@
 
 /*
  *    VisualizableErrorEvent.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.visualize.PlotData2D;
-
 import java.util.EventObject;
+import weka.gui.visualize.PlotData2D;
 
 /**
  * Event encapsulating error information for a learning scheme
  * that can be visualized in the DataVisualizer
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  * @see EventObject
  */
-public class VisualizableErrorEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5811819270887223400L;
+public class VisualizableErrorEvent extends EventObject {
 
   private PlotData2D m_dataSet;
 

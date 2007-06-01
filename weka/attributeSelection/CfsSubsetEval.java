@@ -16,80 +16,40 @@
 
 /*
  *    CfsSubsetEval.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package  weka.attributeSelection;
 
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * CfsSubsetEval :<br/>
- * <br/>
- * Evaluates the worth of a subset of attributes by considering the individual predictive ability of each feature along with the degree of redundancy between them.<br/>
- * <br/>
- * Subsets of features that are highly correlated with the class while having low intercorrelation are preferred.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * M. A. Hall (1998). Correlation-based Feature Subset Selection for Machine Learning. Hamilton, New Zealand.
- * <p/>
- <!-- globalinfo-end -->
+ * CFS attribute subset evaluator.
+ * For more information see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;phdthesis{Hall1998,
- *    address = {Hamilton, New Zealand},
- *    author = {M. A. Hall},
- *    school = {University of Waikato},
- *    title = {Correlation-based Feature Subset Selection for Machine Learning},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Hall, M. A. (1998). Correlation-based Feature Subset Selection for Machine 
+ * Learning. Thesis submitted in partial fulfilment of the requirements of the
+ * degree of Doctor of Philosophy at the University of Waikato. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are:
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <p>
  * 
- * <pre> -M
- *  Treat missing values as a seperate value.</pre>
- * 
- * <pre> -L
- *  Don't include locally predictive attributes.</pre>
- * 
- <!-- options-end -->
+ * -L <br>
+ * Don't include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
- * @see Discretize
+ * @version $Revision: 1.19.2.1 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 747878400813276317L;
+  implements OptionHandler
+{
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -125,29 +85,7 @@ public class CfsSubsetEval
       +"by considering the individual predictive ability of each feature "
       +"along with the degree of redundancy between them.\n\n"
       +"Subsets of features that are highly correlated with the class "
-      +"while having low intercorrelation are preferred.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation        result;
-    
-    result = new TechnicalInformation(Type.PHDTHESIS);
-    result.setValue(Field.AUTHOR, "M. A. Hall");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "Correlation-based Feature Subset Selection for Machine Learning");
-    result.setValue(Field.SCHOOL, "University of Waikato");
-    result.setValue(Field.ADDRESS, "Hamilton, New Zealand");
-    
-    return result;
+      +"while having low intercorrelation are preferred.\n";
   }
 
   /**
@@ -165,35 +103,32 @@ public class CfsSubsetEval
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tTreat missing values as a seperate " 
-                                    + "value.", "M", 0, "-M"));
+    newVector.addElement(new Option("\tTreat missing values as a seperate" 
+				    + "\n\tvalue.", "M", 0, "-M"));
     newVector.addElement(new Option("\tDon't include locally predictive attributes" 
-                                    + ".", "L", 0, "-L"));
+				    + ".", "L", 0, "-L"));
     return  newVector.elements();
   }
 
 
   /**
-   * Parses and sets a given list of options. <p/>
+   * Parses and sets a given list of options. <p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are:
+   *
+   * -M <br>
+   * Treat missing values as a seperate value. <p>
    * 
-   * <pre> -M
-   *  Treat missing values as a seperate value.</pre>
-   * 
-   * <pre> -L
-   *  Don't include locally predictive attributes.</pre>
-   * 
-   <!-- options-end -->
+   * -L <br>
+   * Don't include locally predictive attributes. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
     throws Exception {
-
+    String optionString;
     resetOptions();
     setMissingSeperate(Utils.getFlag('M', options));
     setLocallyPredictive(!Utils.getFlag('L', options));
@@ -285,29 +220,6 @@ public class CfsSubsetEval
     return  options;
   }
 
-  /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
 
   /**
    * Generates a attribute evaluator. Has to initialize all fields of the 
@@ -317,16 +229,16 @@ public class CfsSubsetEval
    * the correlation matrix.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
     throws Exception {
+    if (data.checkForStringAttributes()) {
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
 
-    // can evaluator handle data?
-    getCapabilities().testWithFail(data);
-
-    m_trainInstances = new Instances(data);
+    m_trainInstances = data;
     m_trainInstances.deleteWithMissingClass();
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
@@ -353,7 +265,7 @@ public class CfsSubsetEval
 
     for (int i = 0; i < m_numAttribs; i++) {
       for (int j = 0; j < m_corr_matrix[i].length - 1; j++) {
-        m_corr_matrix[i][j] = -999;
+	m_corr_matrix[i][j] = -999;
       }
     }
   }
@@ -364,8 +276,7 @@ public class CfsSubsetEval
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
-   * @return the merit
-   * @throws Exception if the subset could not be evaluated
+   * @exception Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
@@ -377,44 +288,44 @@ public class CfsSubsetEval
     for (int i = 0; i < m_numAttribs; i++) {
       if (i != m_classIndex) {
         if (subset.get(i)) {
-          if (i > m_classIndex) {
-            larger = i; smaller = m_classIndex;
-          } else {
-            smaller = i; larger = m_classIndex;
-          }
-          /*      int larger = (i > m_classIndex ? i : m_classIndex);
-                  int smaller = (i > m_classIndex ? m_classIndex : i); */
+	  if (i > m_classIndex) {
+	    larger = i; smaller = m_classIndex;
+	  } else {
+	    smaller = i; larger = m_classIndex;
+	  }
+	  /*	  int larger = (i > m_classIndex ? i : m_classIndex);
+		  int smaller = (i > m_classIndex ? m_classIndex : i); */
           if (m_corr_matrix[larger][smaller] == -999) {
             corr = correlate(i, m_classIndex);
-            m_corr_matrix[larger][smaller] = corr;
+	    m_corr_matrix[larger][smaller] = corr;
             num += (m_std_devs[i] * corr);
           }
           else {
-            num += (m_std_devs[i] * m_corr_matrix[larger][smaller]);
-          }
-        }
+	    num += (m_std_devs[i] * m_corr_matrix[larger][smaller]);
+	  }
+	}
       }
     }
 
     // do denominator
     for (int i = 0; i < m_numAttribs; i++) {
       if (i != m_classIndex) {
-        if (subset.get(i)) {
-          denom += (1.0 * m_std_devs[i] * m_std_devs[i]);
+	if (subset.get(i)) {
+	  denom += (1.0 * m_std_devs[i] * m_std_devs[i]);
 
-          for (int j = 0; j < m_corr_matrix[i].length - 1; j++) {
-            if (subset.get(j)) {
-              if (m_corr_matrix[i][j] == -999) {
-                corr = correlate(i, j);
-                m_corr_matrix[i][j] = corr;
-                denom += (2.0 * m_std_devs[i] * m_std_devs[j] * corr);
-              }
-              else {
-                denom += (2.0 * m_std_devs[i] * m_std_devs[j] * m_corr_matrix[i][j]);
-              }
-            }
-          }
-        }
+	  for (int j = 0; j < m_corr_matrix[i].length - 1; j++) {
+	    if (subset.get(j)) {
+	      if (m_corr_matrix[i][j] == -999) {
+		corr = correlate(i, j);
+		m_corr_matrix[i][j] = corr;
+		denom += (2.0 * m_std_devs[i] * m_std_devs[j] * corr);
+	      }
+	      else {
+		denom += (2.0 * m_std_devs[i] * m_std_devs[j] * m_corr_matrix[i][j]);
+	      }
+	    }
+	  }
+	}
       }
     }
 
@@ -462,7 +373,7 @@ public class CfsSubsetEval
 
   private double symmUncertCorr (int att1, int att2) {
     int i, j, k, ii, jj;
-    int ni, nj;
+    int nnj, nni, ni, nj;
     double sum = 0.0;
     double sumi[], sumj[];
     double counts[][];
@@ -485,8 +396,8 @@ public class CfsSubsetEval
       sumi[i] = 0.0;
 
       for (j = 0; j < nj; j++) {
-        sumj[j] = 0.0;
-        counts[i][j] = 0.0;
+	sumj[j] = 0.0;
+	counts[i][j] = 0.0;
       }
     }
 
@@ -495,17 +406,17 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(i);
 
       if (inst.isMissing(att1)) {
-        ii = ni - 1;
+	ii = ni - 1;
       }
       else {
-        ii = (int)inst.value(att1);
+	ii = (int)inst.value(att1);
       }
 
       if (inst.isMissing(att2)) {
-        jj = nj - 1;
+	jj = nj - 1;
       }
       else {
-        jj = (int)inst.value(att2);
+	jj = (int)inst.value(att2);
       }
 
       counts[ii][jj]++;
@@ -516,8 +427,8 @@ public class CfsSubsetEval
       sumi[i] = 0.0;
 
       for (j = 0; j < nj; j++) {
-        sumi[i] += counts[i][j];
-        sum += counts[i][j];
+	sumi[i] += counts[i][j];
+	sum += counts[i][j];
       }
     }
 
@@ -526,75 +437,75 @@ public class CfsSubsetEval
       sumj[j] = 0.0;
 
       for (i = 0; i < ni; i++) {
-        sumj[j] += counts[i][j];
+	sumj[j] += counts[i][j];
       }
     }
 
     // distribute missing counts
     if (!m_missingSeperate && 
-        (sumi[ni-1] < m_numInstances) && 
-        (sumj[nj-1] < m_numInstances)) {
+	(sumi[ni-1] < m_numInstances) && 
+	(sumj[nj-1] < m_numInstances)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
 
       for (i = 0; i < ni; i++) {
-        System.arraycopy(counts[i], 0, counts_copy[i], 0, sumj.length);
+	System.arraycopy(counts[i], 0, counts_copy[i], 0, sumj.length);
       }
 
       System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
       System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
       double total_missing = 
-        (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
+	(sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
 
       // do the missing i's
       if (sumi[ni - 1] > 0.0) {
-        for (j = 0; j < nj - 1; j++) {
-          if (counts[ni - 1][j] > 0.0) {
-            for (i = 0; i < ni - 1; i++) {
-              temp = ((i_copy[i]/(sum - i_copy[ni - 1]))*counts[ni - 1][j]);
-              counts[i][j] += temp;
-              sumi[i] += temp;
-            }
+	for (j = 0; j < nj - 1; j++) {
+	  if (counts[ni - 1][j] > 0.0) {
+	    for (i = 0; i < ni - 1; i++) {
+	      temp = ((i_copy[i]/(sum - i_copy[ni - 1]))*counts[ni - 1][j]);
+	      counts[i][j] += temp;
+	      sumi[i] += temp;
+	    }
 
-            counts[ni - 1][j] = 0.0;
-          }
-        }
+	    counts[ni - 1][j] = 0.0;
+	  }
+	}
       }
 
       sumi[ni - 1] = 0.0;
 
       // do the missing j's
       if (sumj[nj - 1] > 0.0) {
-        for (i = 0; i < ni - 1; i++) {
-          if (counts[i][nj - 1] > 0.0) {
-            for (j = 0; j < nj - 1; j++) {
-              temp = ((j_copy[j]/(sum - j_copy[nj - 1]))*counts[i][nj - 1]);
-              counts[i][j] += temp;
-              sumj[j] += temp;
-            }
+	for (i = 0; i < ni - 1; i++) {
+	  if (counts[i][nj - 1] > 0.0) {
+	    for (j = 0; j < nj - 1; j++) {
+	      temp = ((j_copy[j]/(sum - j_copy[nj - 1]))*counts[i][nj - 1]);
+	      counts[i][j] += temp;
+	      sumj[j] += temp;
+	    }
 
-            counts[i][nj - 1] = 0.0;
-          }
-        }
+	    counts[i][nj - 1] = 0.0;
+	  }
+	}
       }
 
       sumj[nj - 1] = 0.0;
 
       // do the both missing
       if (counts[ni - 1][nj - 1] > 0.0 && total_missing != sum) {
-        for (i = 0; i < ni - 1; i++) {
-          for (j = 0; j < nj - 1; j++) {
-            temp = (counts_copy[i][j]/(sum - total_missing)) * 
-              counts_copy[ni - 1][nj - 1];
-            
-            counts[i][j] += temp;
-            sumi[i] += temp;
-            sumj[j] += temp;
-          }
-        }
+	for (i = 0; i < ni - 1; i++) {
+	  for (j = 0; j < nj - 1; j++) {
+	    temp = (counts_copy[i][j]/(sum - total_missing)) * 
+	      counts_copy[ni - 1][nj - 1];
+	    
+	    counts[i][j] += temp;
+	    sumi[i] += temp;
+	    sumj[j] += temp;
+	  }
+	}
 
-        counts[ni - 1][nj - 1] = 0.0;
+	counts[ni - 1][nj - 1] = 0.0;
       }
     }
 
@@ -602,10 +513,10 @@ public class CfsSubsetEval
 
     if (Utils.eq(corr_measure, 0.0)) {
       if (flag == true) {
-        return  (0.0);
+	return  (0.0);
       }
       else {
-        return  (1.0);
+	return  (1.0);
       }
     }
     else {
@@ -632,13 +543,13 @@ public class CfsSubsetEval
 
     if (sx != 0.0) {
       if (m_std_devs[att1] == 1.0) {
-        m_std_devs[att1] = Math.sqrt((sx/m_numInstances));
+	m_std_devs[att1] = Math.sqrt((sx/m_numInstances));
       }
     }
 
     if (sy != 0.0) {
       if (m_std_devs[att2] == 1.0) {
-        m_std_devs[att2] = Math.sqrt((sy/m_numInstances));
+	m_std_devs[att2] = Math.sqrt((sy/m_numInstances));
       }
     }
 
@@ -648,10 +559,10 @@ public class CfsSubsetEval
     }
     else {
       if (att1 != m_classIndex && att2 != m_classIndex) {
-        return  1.0;
+	return  1.0;
       }
       else {
-        return  0.0;
+	return  0.0;
       }
     }
   }
@@ -667,7 +578,7 @@ public class CfsSubsetEval
       meanOrMode(m_trainInstances.attribute(att2));
     double stdv_num = 0.0;
     double diff1, diff2;
-    double r = 0.0, rr;
+    double r = 0.0, rr, max_corr = 0.0;
     int nx = (!m_missingSeperate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
@@ -686,15 +597,15 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(i);
 
       if (inst.isMissing(att1)) {
-        if (!m_missingSeperate) {
-          ii = mx;
-        }
-        else {
-          ii = nx - 1;
-        }
+	if (!m_missingSeperate) {
+	  ii = mx;
+	}
+	else {
+	  ii = nx - 1;
+	}
       }
       else {
-        ii = (int)inst.value(att1);
+	ii = (int)inst.value(att1);
       }
 
       // increment freq for nominal
@@ -709,21 +620,21 @@ public class CfsSubsetEval
 
       // 
       for (i = 0; i < nx; i++) {
-        if (inst.isMissing(att1)) {
-          if (!m_missingSeperate) {
-            temp = (i == mx)? 1.0 : 0.0;
-          }
-          else {
-            temp = (i == (nx - 1))? 1.0 : 0.0;
-          }
-        }
-        else {
-          temp = (i == inst.value(att1))? 1.0 : 0.0;
-        }
+	if (inst.isMissing(att1)) {
+	  if (!m_missingSeperate) {
+	    temp = (i == mx)? 1.0 : 0.0;
+	  }
+	  else {
+	    temp = (i == (nx - 1))? 1.0 : 0.0;
+	  }
+	}
+	else {
+	  temp = (i == inst.value(att1))? 1.0 : 0.0;
+	}
 
-        diff1 = (temp - (prior_nom[i]/m_numInstances));
-        stdvs_nom[i] += (diff1*diff1);
-        covs[i] += (diff1*diff2);
+	diff1 = (temp - (prior_nom[i]/m_numInstances));
+	stdvs_nom[i] += (diff1*diff1);
+	covs[i] += (diff1*diff2);
       }
     }
 
@@ -733,21 +644,21 @@ public class CfsSubsetEval
       temp += ((prior_nom[i]/m_numInstances)*(stdvs_nom[i]/m_numInstances));
 
       if ((stdvs_nom[i]*stdv_num) > 0.0) {
-        //System.out.println("Stdv :"+stdvs_nom[i]);
-        rr = (covs[i]/(Math.sqrt(stdvs_nom[i]*stdv_num)));
+	//System.out.println("Stdv :"+stdvs_nom[i]);
+	rr = (covs[i]/(Math.sqrt(stdvs_nom[i]*stdv_num)));
 
-        if (rr < 0.0) {
-          rr = -rr;
-        }
+	if (rr < 0.0) {
+	  rr = -rr;
+	}
 
-        r += ((prior_nom[i]/m_numInstances)*rr);
+	r += ((prior_nom[i]/m_numInstances)*rr);
       }
       /* if there is zero variance for the numeric att at a specific 
-         level of the catergorical att then if neither is the class then 
-         make this correlation at this level maximally bad i.e. 1.0. 
-         If either is the class then maximally bad correlation is 0.0 */
+	 level of the catergorical att then if neither is the class then 
+	 make this correlation at this level maximally bad i.e. 1.0. 
+	 If either is the class then maximally bad correlation is 0.0 */
       else {if (att1 != m_classIndex && att2 != m_classIndex) {
-        r += ((prior_nom[i]/m_numInstances)*1.0);
+	r += ((prior_nom[i]/m_numInstances)*1.0);
       }
       }
     }
@@ -756,19 +667,19 @@ public class CfsSubsetEval
     // if ((att1 != classIndex) && (att2 != classIndex)) // =============
     if (temp != 0.0) {
       if (m_std_devs[att1] == 1.0) {
-        m_std_devs[att1] = Math.sqrt(temp);
+	m_std_devs[att1] = Math.sqrt(temp);
       }
     }
 
     if (stdv_num != 0.0) {
       if (m_std_devs[att2] == 1.0) {
-        m_std_devs[att2] = Math.sqrt((stdv_num/m_numInstances));
+	m_std_devs[att2] = Math.sqrt((stdv_num/m_numInstances));
       }
     }
 
     if (r == 0.0) {
       if (att1 != m_classIndex && att2 != m_classIndex) {
-        r = 1.0;
+	r = 1.0;
       }
     }
 
@@ -785,7 +696,7 @@ public class CfsSubsetEval
     int my = (int)m_trainInstances.
       meanOrMode(m_trainInstances.attribute(att2));
     double diff1, diff2;
-    double r = 0.0, rr;
+    double r = 0.0, rr, max_corr = 0.0;
     int nx = (!m_missingSeperate) 
       ? m_trainInstances.attribute(att1).numValues() 
       : m_trainInstances.attribute(att1).numValues() + 1;
@@ -811,7 +722,7 @@ public class CfsSubsetEval
 
     for (i = 0; i < nx; i++) {
       for (j = 0; j < ny; j++) {
-        covs[i][j] = prior_nom[i][j] = 0.0;
+	covs[i][j] = prior_nom[i][j] = 0.0;
       }
     }
 
@@ -821,27 +732,27 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(i);
 
       if (inst.isMissing(att1)) {
-        if (!m_missingSeperate) {
-          ii = mx;
-        }
-        else {
-          ii = nx - 1;
-        }
+	if (!m_missingSeperate) {
+	  ii = mx;
+	}
+	else {
+	  ii = nx - 1;
+	}
       }
       else {
-        ii = (int)inst.value(att1);
+	ii = (int)inst.value(att1);
       }
 
       if (inst.isMissing(att2)) {
-        if (!m_missingSeperate) {
-          jj = my;
-        }
-        else {
-          jj = ny - 1;
-        }
+	if (!m_missingSeperate) {
+	  jj = my;
+	}
+	else {
+	  jj = ny - 1;
+	}
       }
       else {
-        jj = (int)inst.value(att2);
+	jj = (int)inst.value(att2);
       }
 
       // increment freq for nominal
@@ -854,79 +765,79 @@ public class CfsSubsetEval
       inst = m_trainInstances.instance(z);
 
       for (j = 0; j < ny; j++) {
-        if (inst.isMissing(att2)) {
-          if (!m_missingSeperate) {
-            temp2 = (j == my)? 1.0 : 0.0;
-          }
-          else {
-            temp2 = (j == (ny - 1))? 1.0 : 0.0;
-          }
-        }
-        else {
-          temp2 = (j == inst.value(att2))? 1.0 : 0.0;
-        }
+	if (inst.isMissing(att2)) {
+	  if (!m_missingSeperate) {
+	    temp2 = (j == my)? 1.0 : 0.0;
+	  }
+	  else {
+	    temp2 = (j == (ny - 1))? 1.0 : 0.0;
+	  }
+	}
+	else {
+	  temp2 = (j == inst.value(att2))? 1.0 : 0.0;
+	}
 
-        diff2 = (temp2 - (sumy[j]/m_numInstances));
-        stdvsy[j] += (diff2*diff2);
+	diff2 = (temp2 - (sumy[j]/m_numInstances));
+	stdvsy[j] += (diff2*diff2);
       }
 
       // 
       for (i = 0; i < nx; i++) {
-        if (inst.isMissing(att1)) {
-          if (!m_missingSeperate) {
-            temp1 = (i == mx)? 1.0 : 0.0;
-          }
-          else {
-            temp1 = (i == (nx - 1))? 1.0 : 0.0;
-          }
-        }
-        else {
-          temp1 = (i == inst.value(att1))? 1.0 : 0.0;
-        }
+	if (inst.isMissing(att1)) {
+	  if (!m_missingSeperate) {
+	    temp1 = (i == mx)? 1.0 : 0.0;
+	  }
+	  else {
+	    temp1 = (i == (nx - 1))? 1.0 : 0.0;
+	  }
+	}
+	else {
+	  temp1 = (i == inst.value(att1))? 1.0 : 0.0;
+	}
 
-        diff1 = (temp1 - (sumx[i]/m_numInstances));
-        stdvsx[i] += (diff1*diff1);
+	diff1 = (temp1 - (sumx[i]/m_numInstances));
+	stdvsx[i] += (diff1*diff1);
 
-        for (j = 0; j < ny; j++) {
-          if (inst.isMissing(att2)) {
-            if (!m_missingSeperate) {
-              temp2 = (j == my)? 1.0 : 0.0;
-            }
-            else {
-              temp2 = (j == (ny - 1))? 1.0 : 0.0;
-            }
-          }
-          else {
-            temp2 = (j == inst.value(att2))? 1.0 : 0.0;
-          }
+	for (j = 0; j < ny; j++) {
+	  if (inst.isMissing(att2)) {
+	    if (!m_missingSeperate) {
+	      temp2 = (j == my)? 1.0 : 0.0;
+	    }
+	    else {
+	      temp2 = (j == (ny - 1))? 1.0 : 0.0;
+	    }
+	  }
+	  else {
+	    temp2 = (j == inst.value(att2))? 1.0 : 0.0;
+	  }
 
-          diff2 = (temp2 - (sumy[j]/m_numInstances));
-          covs[i][j] += (diff1*diff2);
-        }
+	  diff2 = (temp2 - (sumy[j]/m_numInstances));
+	  covs[i][j] += (diff1*diff2);
+	}
       }
     }
 
     // calculate weighted correlation
     for (i = 0; i < nx; i++) {
       for (j = 0; j < ny; j++) {
-        if ((stdvsx[i]*stdvsy[j]) > 0.0) {
-          //System.out.println("Stdv :"+stdvs_nom[i]);
-          rr = (covs[i][j]/(Math.sqrt(stdvsx[i]*stdvsy[j])));
+	if ((stdvsx[i]*stdvsy[j]) > 0.0) {
+	  //System.out.println("Stdv :"+stdvs_nom[i]);
+	  rr = (covs[i][j]/(Math.sqrt(stdvsx[i]*stdvsy[j])));
 
-          if (rr < 0.0) {
-            rr = -rr;
-          }
+	  if (rr < 0.0) {
+	    rr = -rr;
+	  }
 
-          r += ((prior_nom[i][j]/m_numInstances)*rr);
-        }
-        // if there is zero variance for either of the categorical atts then if
-        // neither is the class then make this
-        // correlation at this level maximally bad i.e. 1.0. If either is 
-        // the class then maximally bad correlation is 0.0
-        else {if (att1 != m_classIndex && att2 != m_classIndex) {
-          r += ((prior_nom[i][j]/m_numInstances)*1.0);
-        }
-        }
+	  r += ((prior_nom[i][j]/m_numInstances)*rr);
+	}
+	// if there is zero variance for either of the categorical atts then if
+	// neither is the class then make this
+	// correlation at this level maximally bad i.e. 1.0. If either is 
+	// the class then maximally bad correlation is 0.0
+	else {if (att1 != m_classIndex && att2 != m_classIndex) {
+	  r += ((prior_nom[i][j]/m_numInstances)*1.0);
+	}
+	}
       }
     }
 
@@ -938,7 +849,7 @@ public class CfsSubsetEval
 
     if (temp1 != 0.0) {
       if (m_std_devs[att1] == 1.0) {
-        m_std_devs[att1] = Math.sqrt(temp1);
+	m_std_devs[att1] = Math.sqrt(temp1);
       }
     }
 
@@ -948,13 +859,13 @@ public class CfsSubsetEval
 
     if (temp2 != 0.0) {
       if (m_std_devs[att2] == 1.0) {
-        m_std_devs[att2] = Math.sqrt(temp2);
+	m_std_devs[att2] = Math.sqrt(temp2);
       }
     }
 
     if (r == 0.0) {
       if (att1 != m_classIndex && att2 != m_classIndex) {
-        r = 1.0;
+	r = 1.0;
       }
     }
 
@@ -977,11 +888,11 @@ public class CfsSubsetEval
       text.append("\tCFS Subset Evaluator\n");
 
       if (m_missingSeperate) {
-        text.append("\tTreating missing values as a seperate value\n");
+	text.append("\tTreating missing values as a seperate value\n");
       }
 
       if (m_locallyPredictive) {
-        text.append("\tIncluding locally predictive attributes\n");
+	text.append("\tIncluding locally predictive attributes\n");
       }
     }
 
@@ -1004,60 +915,60 @@ public class CfsSubsetEval
 
       // find best not already in group
       for (i = 0; i < m_numAttribs; i++) {
-        if (i > m_classIndex) {
-          larger = i; smaller = m_classIndex;
-        } else {
-          smaller = i; larger = m_classIndex;
-        }
-        /*      int larger = (i > m_classIndex ? i : m_classIndex);
-                int smaller = (i > m_classIndex ? m_classIndex : i); */
-        if ((!temp_group.get(i)) && (i != m_classIndex)) {
-          if (m_corr_matrix[larger][smaller] == -999) {
-            corr = correlate(i, m_classIndex);
-            m_corr_matrix[larger][smaller] = corr;
-          }
+	if (i > m_classIndex) {
+	  larger = i; smaller = m_classIndex;
+	} else {
+	  smaller = i; larger = m_classIndex;
+	}
+	/*	int larger = (i > m_classIndex ? i : m_classIndex);
+		int smaller = (i > m_classIndex ? m_classIndex : i); */
+	if ((!temp_group.get(i)) && (i != m_classIndex)) {
+	  if (m_corr_matrix[larger][smaller] == -999) {
+	    corr = correlate(i, m_classIndex);
+	    m_corr_matrix[larger][smaller] = corr;
+	  }
 
-          if (m_corr_matrix[larger][smaller]  > temp_best) {
-            temp_best = m_corr_matrix[larger][smaller];
-            j = i;
-          }
-        }
+	  if (m_corr_matrix[larger][smaller]  > temp_best) {
+	    temp_best = m_corr_matrix[larger][smaller];
+	    j = i;
+	  }
+	}
       }
 
       if (temp_best == -1.0) {
-        done = true;
+	done = true;
       }
       else {
-        ok = true;
-        temp_group.set(j);
+	ok = true;
+	temp_group.set(j);
 
-        // check the best against correlations with others already
-        // in group 
-        for (i = 0; i < m_numAttribs; i++) {
-          if (i > j) {
-            larger = i; smaller = j;
-          } else {
-            larger = j; smaller = i;
-          }
-          /*  int larger = (i > j ? i : j);
-              int smaller = (i > j ? j : i); */
-          if (best_group.get(i)) {
-            if (m_corr_matrix[larger][smaller] == -999) {
-              corr = correlate(i, j);
-              m_corr_matrix[larger][smaller] = corr;
-            }
+	// check the best against correlations with others already
+	// in group 
+	for (i = 0; i < m_numAttribs; i++) {
+	  if (i > j) {
+	    larger = i; smaller = j;
+	  } else {
+	    larger = j; smaller = i;
+	  }
+	  /*  int larger = (i > j ? i : j);
+	      int smaller = (i > j ? j : i); */
+	  if (best_group.get(i)) {
+	    if (m_corr_matrix[larger][smaller] == -999) {
+	      corr = correlate(i, j);
+	      m_corr_matrix[larger][smaller] = corr;
+	    }
 
-            if (m_corr_matrix[larger][smaller] > temp_best - m_c_Threshold) {
-              ok = false;
-              break;
-            }
-          }
-        }
+	    if (m_corr_matrix[larger][smaller] > temp_best - m_c_Threshold) {
+	      ok = false;
+	      break;
+	    }
+	  }
+	}
 
-        // if ok then add to best_group
-        if (ok) {
-          best_group.set(j);
-        }
+	// if ok then add to best_group
+	if (ok) {
+	  best_group.set(j);
+	}
       }
     }
   }
@@ -1069,7 +980,7 @@ public class CfsSubsetEval
    *
    * @param attributeSet the set of attributes found by the search
    * @return a possibly ranked list of postprocessed attributes
-   * @throws Exception if postprocessing fails for some reason
+   * @exception Exception if postprocessing fails for some reason
    */
   public int[] postProcess (int[] attributeSet)
     throws Exception {
@@ -1091,7 +1002,7 @@ public class CfsSubsetEval
     // count how many are set
     for (int i = 0; i < m_numAttribs; i++) {
       if (bestGroup.get(i)) {
-        j++;
+	j++;
       }
     }
 
@@ -1100,7 +1011,7 @@ public class CfsSubsetEval
 
     for (int i = 0; i < m_numAttribs; i++) {
       if (bestGroup.get(i)) {
-        newSet[j++] = i;
+	newSet[j++] = i;
       }
     }
 
@@ -1123,6 +1034,14 @@ public class CfsSubsetEval
    * @param args the options
    */
   public static void main (String[] args) {
-    runEvaluator(new CfsSubsetEval(), args);
+    try {
+      System.out.println(AttributeSelection.
+			 SelectAttributes(new CfsSubsetEval(), args));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
 }
+

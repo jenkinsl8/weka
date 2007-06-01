@@ -16,19 +16,18 @@
 
 /*
  * LabeledItemSet.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.associations;
 
 import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
-
-import java.io.Serializable;
-import java.util.Enumeration;
+import weka.core.Instance;
 import java.util.Hashtable;
+import java.util.Enumeration;
+import java.io.Serializable;
 
 
 /**
@@ -40,15 +39,12 @@ import java.util.Hashtable;
  * Because every item set knows its class label the training set can be splitted up virtually.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 
 public class LabeledItemSet extends ItemSet implements Serializable{
 
-  /** for serialization */
-  private static final long serialVersionUID = 4158771925518299903L;
-
-    /** The class label. */
+     /** The class label. */
     protected int m_classLabel;
 
      /** The support of the rule. */

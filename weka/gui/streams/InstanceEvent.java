@@ -16,9 +16,10 @@
 
 /*
  *    InstanceEvent.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
+
 
 package weka.gui.streams;
 
@@ -28,13 +29,9 @@ import java.util.EventObject;
  * An event encapsulating an instance stream event.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public class InstanceEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 3207259868110667379L;
+public class InstanceEvent extends EventObject {
   
   /** Specifies that the instance format is available */
   public static final int FORMAT_AVAILABLE   = 1;
@@ -52,7 +49,7 @@ public class InstanceEvent
    * type
    *
    * @param source the object generating the InstanceEvent
-   * @param ID the type of the InstanceEvent
+   * @param the type of the InstanceEvent
    */
   public InstanceEvent(Object source, int ID) {
 

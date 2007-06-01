@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39 $
+   $Revision: 1.19.2.16 $
   ===========================================================================
 -->
 
@@ -50,7 +50,7 @@
      <javac srcdir="${path_modifier}weka"
        fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}"
-       source="1.5" target="1.5"/>
+       source="1.4" target="1.4"/>
       <rmic base="${path_modifier}" 
        classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -68,7 +68,7 @@
       destdir="${path_modifier}"
       deprecation="on" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
-      source="1.5" target="1.5"/>
+      source="1.4" target="1.4"/>
      <rmic base="${path_modifier}" 
       classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -79,16 +79,14 @@
     <javac srcdir="${path_modifier}weka" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${path_modifier}${build}/classes"
-      source="1.5" target="1.5"/>
+      source="1.4" target="1.4"/>
     <copy todir="${path_modifier}${build}/classes" >
        <fileset dir="${path_modifier}.">
-         <include name="weka/**/*.excludes"/>
          <include name="weka/**/*.gif"/>
          <include name="weka/**/*.jpeg"/>
          <include name="weka/**/*.jpg"/>
          <include name="weka/**/*.props"/>
          <include name="weka/**/*.txt"/>
-         <include name="weka/**/*.xml"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
        </fileset>
@@ -143,7 +141,7 @@
      <javac srcdir="${path_modifier}tests" 
        fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}${build}/testcases"
-       source="1.5" target="1.5">
+       source="1.4" target="1.4">
         <classpath>
 	   <pathelement location="${path_modifier}${build}/classes"/>
 	   <pathelement path="${path_modifier}${java.class.path}"/>
@@ -153,7 +151,6 @@
        <fileset dir="${path_modifier}tests">
           <include name="**/*.arff"/>
           <include name="**/*.cost"/>
-          <include name="**/*.xml"/>
        </fileset>
      </copy>
   </target>
@@ -220,7 +217,7 @@
     <jar jarfile="${path_modifier}${dist}/weka.jar" 
       basedir="${path_modifier}${build}/classes">
      <manifest>
-       <attribute name="Main-Class" value="weka.gui.Main"/>
+       <attribute name="Main-Class" value="weka.gui.GUIChooser"/>
      </manifest>
     </jar>
   </target>
@@ -231,14 +228,12 @@
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
       basedir="${path_modifier}.">
-      <include name="weka/**/*.excludes"/>
       <include name="weka/**/*.gif"/>
       <include name="weka/**/*.java"/>
       <include name="weka/**/*.jpeg"/>
       <include name="weka/**/*.jpg"/>
       <include name="weka/**/*.props"/>
       <include name="weka/**/*.txt"/>
-      <include name="weka/**/*.xml"/>
       <include name="weka/**/DatabaseUtils.props.*"/>
       <include name="weka/gui/beans/README*"/>
     </jar>
@@ -266,7 +261,7 @@
 
    <target name="changelog"
     description="Create a changelog file for a release of Weka. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changes (eg. 20 Aug 2004)&gt;, -Dtag=&lt;REVISION_FOR_CHANGELOG&gt;.">
-    <cvschangelog cvsroot="${cvsroot_anon}" 
+   <cvschangelog cvsroot="${cvsroot_anon}" 
                 tag="${tag}"
                 dir="${path_modifier}weka"
                 destfile="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
@@ -362,14 +357,14 @@
    description="Does a cvs checkout, builds, runs unit tests, and mails html summary to mail recipients (run ant with -Dmail_recipients=&lt;email,email,...&gt;)">
      <!-- mail the junit test results -->
      <mail messageMimeType="text/html"
-          messageFile="${path_modifier}${reports}/junit-noframes.html"
+               messageFile="${path_modifier}${reports}/junit-noframes.html"
 	       tolist="${mail_recipients}"
-	       mailhost="${mail_smtp_host}"
-	       subject="JUnit test results (${tag}): ${TODAY}"
-	       from="${mail_sender}">
-       <fileset dir="${path_modifier}${reports}">
-         <include name="TESTS-*.xml"/>
-       </fileset>
+               mailhost="${mail_smtp_host}"
+               subject="JUnit test results (${tag}): ${TODAY}"
+               from="${mail_sender}">
+	 <fileset dir="${path_modifier}${reports}">
+	    <include name="TESTS-*.xml"/>
+	 </fileset>
      </mail>
   </target>
 
@@ -406,7 +401,6 @@
        </fileset>
      </mail>
   </target>
-
 
 <!-- Clean -->
   <target name="clean" depends="init_all"

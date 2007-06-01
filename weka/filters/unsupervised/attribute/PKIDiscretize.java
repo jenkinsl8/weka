@@ -16,79 +16,37 @@
 
 /*
  *    PKIDiscretize.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Richard Kirkby
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import weka.core.*;
+import java.util.*;
 
 /**
- <!-- globalinfo-start -->
- * Discretizes numeric attributes using equal frequency binning, where the number of bins is equal to the square root of the number of non-missing values.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
- * Ying Yang, Geoffrey I. Webb: Proportional k-Interval Discretization for Naive-Bayes Classifiers. In: 12th European Conference on Machine Learning, 564-575, 2001.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Yang2001,
- *    author = {Ying Yang and Geoffrey I. Webb},
- *    booktitle = {12th European Conference on Machine Learning},
- *    pages = {564-575},
- *    publisher = {Springer},
- *    series = {LNCS},
- *    title = {Proportional k-Interval Discretization for Naive-Bayes Classifiers},
- *    volume = {2167},
- *    year = {2001}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Discretizes numeric attributes using equal frequency binning where the
+ * number of bins is equal to the square root of the number of non-missing
+ * values.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- * <pre> -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to Discretize. First and last are valid indexes.
- *  (default: first-last)</pre>
- * 
- * <pre> -V
- *  Invert matching sense of column indexes.</pre>
- * 
- * <pre> -D
- *  Output binary attributes for discretized attributes.</pre>
- * 
- <!-- options-end -->
+ * Valid filter-specific options are: <p>
  *
+ * -R col1,col2-col4,... <br>
+ * Specifies list of columns to Discretize. First
+ * and last are valid indexes. (default: first-last) <p>
+ *
+ * -V <br>
+ * Invert matching sense.<p>
+ *
+ * -D <br>
+ * Make binary nominal attributes. <p>
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.4 $
  */
-public class PKIDiscretize 
-  extends Discretize
-  implements TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 6153101248977702675L;
+public class PKIDiscretize extends Discretize {
 
   /**
    * Sets the format of the input instances.
@@ -97,7 +55,7 @@ public class PKIDiscretize
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -135,61 +93,45 @@ public class PKIDiscretize
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
-    
-    result.addElement(new Option(
-	"\tUnsets the class index temporarily before the filter is\n"
-	+ "\tapplied to the data.\n"
-	+ "\t(default: no)",
-	"unset-class-temporarily", 1, "-unset-class-temporarily"));
-    
-    result.addElement(new Option(
-	"\tSpecifies list of columns to Discretize. First"
-	+ " and last are valid indexes.\n"
-	+ "\t(default: first-last)",
-	"R", 1, "-R <col1,col2-col4,...>"));
-    
-    result.addElement(new Option(
-	"\tInvert matching sense of column indexes.",
-	"V", 0, "-V"));
-    
-    result.addElement(new Option(
-	"\tOutput binary attributes for discretized attributes.",
-	"D", 0, "-D"));
-    
-    return result.elements();
+
+    Vector newVector = new Vector(7);
+
+    newVector.addElement(new Option(
+              "\tSpecifies list of columns to Discretize. First"
+	      + " and last are valid indexes.\n"
+	      + "\t(default: first-last)",
+              "R", 1, "-R <col1,col2-col4,...>"));
+
+    newVector.addElement(new Option(
+              "\tInvert matching sense of column indexes.",
+              "V", 0, "-V"));
+
+    newVector.addElement(new Option(
+              "\tOutput binary attributes for discretized attributes.",
+              "D", 0, "-D"));
+
+    return newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -unset-class-temporarily
-   *  Unsets the class index temporarily before the filter is
-   *  applied to the data.
-   *  (default: no)</pre>
-   * 
-   * <pre> -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of columns to Discretize. First and last are valid indexes.
-   *  (default: first-last)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense of column indexes.</pre>
-   * 
-   * <pre> -D
-   *  Output binary attributes for discretized attributes.</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
    *
+   * -R col1,col2-col4,... <br>
+   * Specifies list of columns to Discretize. First
+   * and last are valid indexes. (default none) <p>
+   *
+   * -V <br>
+   * Invert matching sense.<p>
+   *
+   * -D <br>
+   * Make binary nominal attributes. <p>
+   * 
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
-    setIgnoreClass(Utils.getFlag("unset-class-temporarily", options));
     setMakeBinary(Utils.getFlag('D', options));
     setInvertSelection(Utils.getFlag('V', options));
     
@@ -209,23 +151,24 @@ public class PKIDiscretize
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String[] getOptions() {
-    Vector        result;
+  public String [] getOptions() {
 
-    result = new Vector();
+    String [] options = new String [12];
+    int current = 0;
 
-    if (getMakeBinary())
-      result.add("-D");
-    
-    if (getInvertSelection())
-      result.add("-V");
-    
-    if (!getAttributeIndices().equals("")) {
-      result.add("-R");
-      result.add(getAttributeIndices());
+    if (getMakeBinary()) {
+      options[current++] = "-D";
     }
-
-    return (String[]) result.toArray(new String[result.size()]);
+    if (getInvertSelection()) {
+      options[current++] = "-V";
+    }
+    if (!getAttributeIndices().equals("")) {
+      options[current++] = "-R"; options[current++] = getAttributeIndices();
+    }
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -238,32 +181,7 @@ public class PKIDiscretize
 
     return "Discretizes numeric attributes using equal frequency binning,"
       + " where the number of bins is equal to the square root of the"
-      + " number of non-missing values.\n\n"
-      + "For more information, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Ying Yang and Geoffrey I. Webb");
-    result.setValue(Field.TITLE, "Proportional k-Interval Discretization for Naive-Bayes Classifiers");
-    result.setValue(Field.BOOKTITLE, "12th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "2001");
-    result.setValue(Field.PAGES, "564-575");
-    result.setValue(Field.PUBLISHER, "Springer");
-    result.setValue(Field.SERIES, "LNCS");
-    result.setValue(Field.VOLUME, "2167");
-    
-    return result;
+      + " number of non-missing values.";
   }
   
   /**
@@ -362,6 +280,16 @@ public class PKIDiscretize
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new PKIDiscretize(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new PKIDiscretize(), argv);
+      } else {
+	Filter.filterFile(new PKIDiscretize(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+

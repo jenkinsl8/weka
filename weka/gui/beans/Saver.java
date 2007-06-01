@@ -16,30 +16,48 @@
 
 /*
  *    Saver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.util.Vector;
+import java.util.Enumeration;
+import java.io.IOException;
+import java.beans.beancontext.*;
+import javax.swing.JButton;
+
+import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
+import weka.core.converters.*;
+
 
 /**
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.1 $
  *
  */
-public class Saver
-  extends AbstractDataSink
-  implements WekaWrapper {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5371716690308950755L;
+public class Saver extends AbstractDataSink implements WekaWrapper {
 
   /**
    * Holds the instances to be saved
@@ -50,6 +68,8 @@ public class Saver
    * Holds the structure
    */
   private Instances m_structure;
+  
+  
 
   /**
    * Global info for the wrapped loader (if it exists).
@@ -71,13 +91,18 @@ public class Saver
    */
   private String m_fileName;
   
+  
   /** Flag indicating that instances will be saved to database. Used because structure information can only be sent after a database has been configured.*/
   private boolean m_isDBSaver;
+  
+  
  
   /**
    * Count for structure available messages
    */
   private int m_count;
+
+  
   
   private class SaveBatchThread extends Thread {
     private DataSink m_DS;
@@ -174,24 +199,15 @@ public class Saver
     else
         m_isDBSaver = false;
   }
-
-  /**
-   * makes sure that the filename is valid, i.e., replaces slashes,
-   * backslashes and colons with underscores ("_").
-   * 
-   * @param filename	the filename to cleanse
-   * @return		the cleansed filename
-   */
-  protected String sanitizeFilename(String filename) {
-    return filename.replaceAll("\\\\", "_").replaceAll(":", "_").replaceAll("/", "_");
-  }
+  
+  
   
   /** Method reacts to a dataset event and starts the writing process in batch mode
    * @param e a dataset event
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getDataSet().relationName());
+      m_fileName = e.getDataSet().relationName();
       m_dataSet = e.getDataSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -214,7 +230,7 @@ public class Saver
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getTestSet().relationName());
+      m_fileName = e.getTestSet().relationName();
       m_dataSet = e.getTestSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -243,7 +259,7 @@ public class Saver
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
+      m_fileName = e.getTrainingSet().relationName();
       m_dataSet = e.getTrainingSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
            ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -288,7 +304,7 @@ public class Saver
       if(e.getStatus() == e.FORMAT_AVAILABLE){
         m_Saver.setRetrieval(m_Saver.INCREMENTAL);
         m_structure = e.getStructure();
-        m_fileName = sanitizeFilename(m_structure.relationName());
+        m_fileName = m_structure.relationName();
         m_Saver.setInstances(m_structure);
         if(m_isDBSaver)
             if(((DatabaseSaver)m_Saver).getRelationForTableName())

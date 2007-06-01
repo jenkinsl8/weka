@@ -16,28 +16,22 @@
 
 /*
  *    Splitter.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Richard Kirkby
  *
  */
 
 package weka.classifiers.trees.adtree;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
-import java.io.Serializable;
+import weka.core.*;
+import java.io.*;
 
 /**
  * Abstract class representing a splitter node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public abstract class Splitter
-  implements Serializable, Cloneable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8190449848490055L;
+public abstract class Splitter implements Serializable, Cloneable {
 
   /** The number this node was in the order of nodes added to the tree */
   public int orderAdded;

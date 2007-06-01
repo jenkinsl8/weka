@@ -32,14 +32,11 @@ import java.util.Iterator;
  * Class representing the body of a rule.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.1 $
  */
 
 public class Body extends LiteralSet {
   
-  /** for serialization */
-  private static final long serialVersionUID = 4870689270432218016L;
-
   /**
    * Constructor without storing the counter-instances.
    */

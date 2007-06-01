@@ -16,73 +16,65 @@
 
 /*
  *   KDDataGenerator.java
- *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import weka.core.*;
 import java.util.Random;
+import java.io.*;
 
 /**
  * KDDataGenerator. Class that uses kernels to generate new random
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
  */
-public class KDDataGenerator
-  implements DataGenerator, Serializable {
+public class KDDataGenerator implements DataGenerator, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -958573275606402792L;
-
-  /** the instances to use */
+  // the instances to use
   private Instances m_instances;
 
-  /** standard deviations of the normal distributions for numeric attributes in
-   * each KD estimator */
+  // standard deviations of the normal distributions for numeric attributes in
+  // each KD estimator
   private double [] m_standardDeviations;
 
-  /** global means or modes to use for missing values */
+  // global means or modes to use for missing values
   private double [] m_globalMeansOrModes;
 
-  /** minimum standard deviation for numeric attributes */
+  // minimum standard deviation for numeric attributes
   private double m_minStdDev = 1e-5;
 
-  /** Laplace correction for discrete distributions */
+  // Laplace correction for discrete distributions
   private double m_laplaceConst = 1.0;
 
-  /** random number seed */
+  // random number seed
   private int m_seed = 1;
 
-  /** random number generator */
+  // random number generator
   private Random m_random;
 
-  /** which dimensions to use for computing a weight for each generated
-   * instance */
+  // which dimensions to use for computing a weight for each generated
+  // instance
   private boolean [] m_weightingDimensions;
   
-  /** the values for the weighting dimensions to use for computing the weight 
-   * for the next instance to be generated */
+  // the values for the weighting dimensions to use for computing the weight
+  // for the next instance to be generated
   private double [] m_weightingValues;
 
   private static double m_normConst = Math.sqrt(2*Math.PI);
 
-  /** Number of neighbours to use for kernel bandwidth */
+  // Number of neighbours to use for kernel bandwidth
   private int m_kernelBandwidth = 3;
 
-  /** standard deviations for numeric attributes computed from the 
-   * m_kernelBandwidth nearest neighbours for each kernel. */
+  // standard deviations for numeric attributes computed from the 
+  // m_kernelBandwidth nearest neighbours for each kernel.
   private double [][] m_kernelParams;
 
   /** The minimum values for numeric attributes. */
@@ -95,7 +87,7 @@ public class KDDataGenerator
    * Initialize the generator using the supplied instances
    *
    * @param inputInstances the instances to use as the basis of the kernels
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public void buildGenerator(Instances inputInstances) throws Exception {
     m_random = new Random(m_seed);
@@ -188,8 +180,9 @@ public class KDDataGenerator
    * Generates a new instance using one kernel estimator. Each successive
    * call to this method incremets the index of the kernel to use.
    *
+   * @param fast generate the instance quickly
    * @return the new random instance
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public double [][] generateInstances(int [] indices) throws Exception {
     

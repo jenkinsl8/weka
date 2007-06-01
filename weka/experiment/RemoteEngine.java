@@ -16,37 +16,31 @@
 
 /*
  *    RemoteEngine.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 
 package weka.experiment;
 
-import weka.core.Queue;
-
+import java.rmi.*;
+import java.rmi.server.*;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.URLClassLoader;
-import java.rmi.Naming;
-import java.rmi.RMISecurityManager;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.Enumeration;
+import java.net.URL;
 import java.util.Hashtable;
+import java.util.Enumeration;
+
+import weka.core.Queue;
 
 /**
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
-public class RemoteEngine
-  extends UnicastRemoteObject
+public class RemoteEngine extends UnicastRemoteObject
   implements Compute {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1021538162895448259L;
 
   /** The name of the host that this engine is started on */
   private String m_HostName = "local";

@@ -16,40 +16,31 @@
 
 /*
  *    Queue.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  *    Modified March-May 2004 by Mark Utting to add JML specs
  *    (this was done as the example solution of an assignment for a
  *     software engineering course, so the specifications are more precise
  *     and complete than one would normally do).
  *    Passed a static analysis using ESC/Java-2.0a6 with no warnings.
- */
+*/
 
 package weka.core;
 
-import java.io.Serializable;
+import java.io.*;
 
 /** 
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
-public class Queue
-  extends Object
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1141282001146389780L;
+public class Queue extends Object implements Serializable {
 
   /**
    * Represents one node in the queue.
    */
-  protected class QueueNode
-    implements Serializable {
-
-    /** for serialization */
-    private static final long serialVersionUID = -5119358279412097455L;
+  protected class QueueNode implements Serializable {
 
     /** The next node in the queue */
     protected /*@ spec_public @*/ QueueNode m_Next;

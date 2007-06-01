@@ -16,32 +16,28 @@
 
 /*
  *    MultipleClassifiersCombiner.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Capabilities;
-import weka.core.Option;
+import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
+import weka.core.Option;
+import weka.core.Instances;
 import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Abstract utility class for handling settings common to
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.2 $
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
-
-  /** for serialization */
-  private static final long serialVersionUID = 2776436621129422119L;
   
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers = {
@@ -185,33 +181,5 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
     Classifier c = getClassifier(index);
     return c.getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)c).getOptions());
-  }
-
-  /**
-   * Returns combined capabilities of the base classifiers, i.e., the
-   * capabilities all of them have in common.
-   *
-   * @return      the capabilities of the base classifiers
-   */
-  public Capabilities getCapabilities() {
-    Capabilities      result;
-    int               i;
-    
-    if (getClassifiers().length == 0) {
-      result = new Capabilities(this);
-    }
-    else {
-      result = (Capabilities) getClassifier(0).getCapabilities().clone();
-      for (i = 1; i < getClassifiers().length; i++)
-        result.and(getClassifier(i).getCapabilities());
-    }
-    
-    // set dependencies
-    for (Capability cap: Capability.values())
-      result.enableDependency(cap);
-
-    result.setOwner(this);
-
-    return result;
   }
 }

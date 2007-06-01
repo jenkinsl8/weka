@@ -16,24 +16,21 @@
 
 /*
  *    AbstractFileSaver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Richard Kirkby, Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.OptionHandler;
 import weka.core.FastVector;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.Utils;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.util.Enumeration;
+import java.io.*;
 
 /**
  * Abstract class for Savers that save to a file
@@ -49,18 +46,16 @@ import java.util.Enumeration;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  */
-public abstract class AbstractFileSaver
-  extends AbstractSaver
-  implements OptionHandler, FileSourcedConverter{
+public abstract class AbstractFileSaver extends AbstractSaver implements OptionHandler, FileSourcedConverter{
   
   
   /** The destination file. */
   private File m_outputFile;
   
   /** The writer. */
-  private transient BufferedWriter m_writer;
+  private BufferedWriter m_writer;
   
   /** The file extension of the destination file. */
   private String FILE_EXTENSION;
@@ -117,15 +112,6 @@ public abstract class AbstractFileSaver
    
       return FILE_EXTENSION;
   }
-
-  /**
-   * Gets all the file extensions used for this type of file
-   *
-   * @return the file extensions
-   */
-  public String[] getFileExtensions() {
-    return new String[]{getFileExtension()};
-  }
   
   
   /**
@@ -156,7 +142,6 @@ public abstract class AbstractFileSaver
   public void setFile(File outputFile) throws IOException  {
       
       m_outputFile = outputFile;
-      setDestination(outputFile);
       
   }
 
@@ -201,15 +186,13 @@ public abstract class AbstractFileSaver
    */
   public Enumeration listOptions() {
 
-    FastVector newVector = new FastVector();
+    FastVector newVector = new FastVector(2);
 
-    newVector.addElement(new Option(
-	"\tThe input file", 
-	"i", 1, "-i <the input file>"));
+    newVector.addElement(new Option("The input file", "i", 1, 
+				    "-i <the input file>"));
     
-    newVector.addElement(new Option(
-	"\tThe output file", 
-	"o", 1, "-o <the output file>"));
+    newVector.addElement(new Option("The output file", "o", 1, 
+				    "-o <the output file>"));
     
     return newVector.elements();
   }
@@ -259,10 +242,13 @@ public abstract class AbstractFileSaver
         try{
             File output = new File(outputString);
             setFile(output);
-        } catch(Exception ex) {
-            throw new IOException("Cannot create output file (Reason: " + ex.toString() + "). Standard out is used.");
+        } catch(Exception ex){
+            throw new IOException("Cannot create output file. Standard out is used.");
+        } finally{
+            setDestination(m_outputFile);
         }
     }
+
   }
 
   /**
@@ -341,7 +327,7 @@ public abstract class AbstractFileSaver
                 setDestination(new FileOutputStream(m_outputFile));
             }
         } catch(Exception ex){
-            throw new IOException("Cannot create a new output file (Reason: " + ex.toString() + "). Standard out is used.");
+            throw new IOException("Cannot create a new output file. Standard out is used.");
         } finally{
             if(!success){
                 System.err.println("Cannot create a new output file. Standard out is used.");
@@ -376,6 +362,7 @@ public abstract class AbstractFileSaver
             setFile(new File(m_dir + File.separator + relationName+ add + FILE_EXTENSION));
         else
            setFile(new File(m_dir + File.separator + m_prefix + "_" + relationName+ add + FILE_EXTENSION)); 
+        setDestination(m_outputFile);
       }catch(Exception ex){
         System.err.println("File prefix and/or directory could not have been set.");
         ex.printStackTrace();
@@ -388,67 +375,7 @@ public abstract class AbstractFileSaver
    * @return the file type description.
    */
   public abstract String getFileDescription();
-
-  /**
-   * generates a string suitable for output on the command line displaying
-   * all available options.
-   * 
-   * @param saver	the saver to create the option string for
-   * @return		the option string
-   */
-  protected static String makeOptionStr(AbstractFileSaver saver) {
-    StringBuffer 	result;
-    Option 		option;
-    
-    result = new StringBuffer();
-    
-    // build option string
-    result.append("\n");
-    result.append(saver.getClass().getName().replaceAll(".*\\.", ""));
-    result.append(" options:\n\n");
-    Enumeration enm = saver.listOptions();
-    while (enm.hasMoreElements()) {
-      option = (Option) enm.nextElement();
-      result.append(option.synopsis() + "\n");
-      result.append(option.description() + "\n");
-    }
-
-    return result.toString();
-  }
   
-  /**
-   * runs the given saver with the specified options
-   * 
-   * @param saver	the saver to run
-   * @param options	the commandline options
-   */
-  public static void runFileSaver(AbstractFileSaver saver, String[] options) {
-    // help request?
-    try {
-      String[] tmpOptions = (String[]) options.clone();
-      if (Utils.getFlag('h', tmpOptions)) {
-	System.err.println("\nHelp requested\n" + makeOptionStr(saver));
-	return;
-      }
-    }
-    catch (Exception e) {
-      // ignore it
-    }
-    
-    try {
-      // set options
-      try {
-	saver.setOptions(options);  
-      }
-      catch (Exception ex) {
-	System.err.println(makeOptionStr(saver));
-	System.exit(1);
-      }
-      
-      saver.writeBatch();
-    }
-    catch (Exception ex) {
-      ex.printStackTrace();
-    }
-  }
+  
+  
 }

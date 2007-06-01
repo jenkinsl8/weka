@@ -16,7 +16,7 @@
 
 /*
  *    IncremenalConverter.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 package weka.core.converters;

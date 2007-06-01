@@ -16,34 +16,27 @@
 
 /*
  *    ClassifierDecList.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.rules.part;
 
 import weka.classifiers.trees.j48.ClassifierSplitModel;
-import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.EntropySplitCrit;
+import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import weka.core.*;
+import java.io.*;
 
 /**
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.9 $
  */
-public class ClassifierDecList
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7284358349711992497L;
+public class ClassifierDecList implements Serializable {
 
   /** Minimum number of objects */
   protected int m_minNumObj;
@@ -359,7 +352,7 @@ public class ClassifierDecList
   /**
    * Dumps the partial tree (only used for debugging)
    *
-   * @exception Exception Exception if something goes wrong
+   * @exception exception Exception if something goes wrong
    */
   private void dumpTree(int depth,StringBuffer text)
        throws Exception {
@@ -386,7 +379,7 @@ public class ClassifierDecList
    * Help method for computing class probabilities of 
    * a given instance.
    *
-   * @exception Exception Exception if something goes wrong
+   * @exception exception Exception if something goes wrong
    */
   private double getProbs(int classIndex,Instance instance,
 			  double weight) throws Exception {

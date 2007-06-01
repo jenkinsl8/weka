@@ -16,45 +16,46 @@
 
 /*
  *    ArffSaver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Capabilities;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Capabilities.Capability;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+import weka.core.Option;
 
 /**
- * Writes to a destination in arff text format. <p/>
+ * Writes to a destination in arff text format.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -i &lt;the input file&gt;
- * The input file</pre>
- * 
- * <pre> -o &lt;the output file&gt;
- * The output file</pre>
- * 
- <!-- options-end -->
+ * Valid options:
+ *
+ * -i input arff file <br>
+ * The input filw in ARFF format. <p>
+ *
+ * -o the output file <br>
+ * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
+ *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class ArffSaver 
-  extends AbstractFileSaver 
-  implements BatchConverter, IncrementalConverter {
+public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2223634248900042228L;    
-  
+    
   /** Constructor */  
   public ArffSaver(){
   
@@ -91,26 +92,7 @@ public class ArffSaver
     setFileExtension(".arff");
   }
 
-  /** 
-   * Returns the Capabilities of this saver.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
+
   
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
@@ -181,8 +163,6 @@ public class ArffSaver
               }
               m_incrementalCounter = 0;
               resetStructure();
-              outW = null;
-              resetWriter();
           }
       }
   }
@@ -208,17 +188,47 @@ public class ArffSaver
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
-      outW = null;
-      resetWriter();
-      setWriteMode(CANCEL);
   }
 
   /**
    * Main method.
    *
-   * @param args should contain the options of a Saver.
+   * @param options should contain the options of a Saver.
    */
-  public static void main(String[] args) {
-    runFileSaver(new ArffSaver(), args);
-  }
+  public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
+      try{
+        ArffSaver asv = new ArffSaver();
+        text.append("\n\nArffSaver options:\n\n");
+        Enumeration enumi = asv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
+        try {
+          asv.setOptions(options);  
+        } catch (Exception ex) {
+            System.out.println("\n"+text);
+            System.exit(1);
+	}
+        //incremental
+        /*asv.setRetrieval(INCREMENTAL);
+        Instances instances = asv.getInstances();
+        asv.setStructure(instances);
+        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
+            asv.writeIncremental(instances.instance(i));
+        }
+        asv.writeIncremental(null);*/
+        
+        //batch
+        asv.writeBatch();
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	}
+      
+    }
 }
+  
+  

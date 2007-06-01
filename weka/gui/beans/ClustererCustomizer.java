@@ -16,37 +16,35 @@
 
 /*
  *    ClustererCustomizer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Utils;
+import weka.core.OptionHandler;
+import java.beans.*;
+import java.awt.BorderLayout;
+import java.awt.event.*;
+import javax.swing.JPanel;
+import javax.swing.JCheckBox;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
+import weka.gui.PropertyPanel;
+import weka.clusterers.Clusterer;
 
-import java.awt.BorderLayout;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import javax.swing.JPanel;
 
 /**
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.1 $
  */
-public class ClustererCustomizer
-  extends JPanel
-  implements Customizer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -2035688458149534161L;
+public class ClustererCustomizer extends JPanel implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
