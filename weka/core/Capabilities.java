@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.22.2.2 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {

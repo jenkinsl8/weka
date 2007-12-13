@@ -53,7 +53,7 @@ import javax.swing.JPanel;
  * Represents a little tool for querying SQL databases.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.6 $
+ * @version     $Revision: 1.5.2.1 $
  */
 public class SqlViewer 
   extends    JPanel 

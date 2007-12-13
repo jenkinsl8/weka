@@ -72,7 +72,7 @@ import java.util.Vector;
  * @author Mark Hall (mhall@cs.waikato.ac.nz) -- attribute selection code
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- attribute selection code
  * @author fracpete (fracpete at waikato dot ac dot nz) -- filter code
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class PrincipalComponents
   extends Filter

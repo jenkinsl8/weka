@@ -52,7 +52,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.31.2.1 $
  */
 public class DatabaseUtils
   implements Serializable {

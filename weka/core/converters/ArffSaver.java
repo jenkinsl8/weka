@@ -45,7 +45,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  * @see Saver
  */
 public class ArffSaver 

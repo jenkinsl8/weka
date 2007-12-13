@@ -121,7 +121,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.39.2.1 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 

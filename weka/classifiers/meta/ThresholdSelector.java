@@ -118,7 +118,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $ 
+ * @version $Revision: 1.39.2.1 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 

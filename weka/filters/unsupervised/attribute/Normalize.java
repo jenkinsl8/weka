@@ -62,7 +62,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 

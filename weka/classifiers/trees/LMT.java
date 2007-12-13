@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class LMT 
   extends Classifier 
@@ -790,3 +790,4 @@ public class LMT
     runClassifier(new LMT(), argv);
   }  
 }
+
