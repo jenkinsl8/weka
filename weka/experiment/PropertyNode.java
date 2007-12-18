@@ -16,16 +16,18 @@
 
 /*
  *    PropertyNode.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.experiment;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.io.Serializable;
+import java.io.IOException;
+import java.beans.PropertyDescriptor;
+import java.beans.IntrospectionException;
+import java.lang.ClassNotFoundException;
 
 /**
  * Stores information on a property of an object: the class of the
@@ -33,13 +35,9 @@ import java.io.Serializable;
  * value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class PropertyNode
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8718165742572631384L;
+public class PropertyNode implements Serializable {
 
   /** The current property value */
   public Object value;

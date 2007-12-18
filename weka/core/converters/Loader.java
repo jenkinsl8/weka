@@ -16,7 +16,7 @@
 
 /*
  *    Loader.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -34,7 +34,7 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.6.2.2 $
  */
 public interface Loader extends Serializable {
 
@@ -43,7 +43,7 @@ public interface Loader extends Serializable {
    * If there is an existing source, implementations should
    * attempt to reset in such a fashion as to be able to
    * load from the beginning of the source.
-   * @throws Exception if Loader can't be reset for some reason.
+   * @exception if Loader can't be reset for some reason.
    */
   void reset() throws Exception;
 
@@ -60,7 +60,7 @@ public interface Loader extends Serializable {
    * the supplied File object.
    *
    * @param file the File
-   * @throws IOException if an error occurs
+   * @exception IOException if an error occurs
    * support loading from a File.
    *
    * <pre><jml>
@@ -84,7 +84,7 @@ public interface Loader extends Serializable {
    * the supplied InputStream.
    *
    * @param input the source InputStream
-   * @throws IOException if this Loader doesn't
+   * @exception IOException if this Loader doesn't
    * support loading from a File.
    */
   void setSource(InputStream input) throws IOException;
@@ -94,7 +94,7 @@ public interface Loader extends Serializable {
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @throws IOException if there is no source or parsing fails
+   * @exception IOException if there is no source or parsing fails
    *
    * <pre><jml>
    *    public_normal_behavior
@@ -120,7 +120,7 @@ public interface Loader extends Serializable {
    * the rest of the data set.
    *
    * @return the full data set as an Instances object
-   * @throws IOException if there is an error during parsing or if 
+   * @exception IOException if there is an error during parsing or if 
    * getNextInstance has been called on this source (either incremental
    * or batch loading can be used, not both).
    *
@@ -156,7 +156,7 @@ public interface Loader extends Serializable {
    * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @throws IOException if there is an error during parsing or if
+   * @exception IOException if there is an error during parsing or if
    * getDataSet has been called on this source (either incremental
    * or batch loading can be used, not both).
    */

@@ -16,23 +16,24 @@
 
 /*
  *    UnsupervisedAttributeEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
+
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
  * Abstract unsupervised attribute evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
 public abstract class UnsupervisedAttributeEvaluator
   extends AttributeEvaluator{
 
-  /** for serialization */
-  private static final long serialVersionUID = -4100897318675336178L;
-  
 }
 

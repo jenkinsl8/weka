@@ -16,34 +16,26 @@
 
 /*
  *    PredictionAppenderCustomizer.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.PropertySheetPanel;
-
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
 import javax.swing.JPanel;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the prediction appender bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 
-public class PredictionAppenderCustomizer
-  extends JPanel
+public class PredictionAppenderCustomizer extends JPanel
   implements Customizer {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6884933202506331888L;
 
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);

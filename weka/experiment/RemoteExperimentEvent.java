@@ -16,25 +16,21 @@
 
 /*
  *    RemoteExperimentEvent.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
+
 
 package weka.experiment;
 
 import java.io.Serializable;
-
 /**
  * Class encapsulating information on progress of a remote experiment
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class RemoteExperimentEvent
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7000867987391866451L;
+public class RemoteExperimentEvent implements Serializable {
 
   /** A status type message */
   public boolean m_statusMessage;

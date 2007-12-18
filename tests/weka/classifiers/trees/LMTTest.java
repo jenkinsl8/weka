@@ -24,14 +24,15 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests LMT. Run from the command line with:<p/>
- * java weka.classifiers.trees.LMTTest
+ * java weka.classifiers.trees.LMT
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class LMTTest 
   extends AbstractClassifierTest {

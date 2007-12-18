@@ -1,4 +1,7 @@
 /*
+ *    Rule.java
+ *    Copyright (C) 2000 Mark Hall
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -13,32 +16,21 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*
- *    Rule.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
- *
- */
-
 package weka.classifiers.trees.m5;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+import weka.filters.*;
 
 /**
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.10.2.1 $
  */
-public class Rule
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -4458627451682483204L;
+public class Rule implements Serializable {
 
   protected static int LEFT = 0;
   protected static int RIGHT = 1;
@@ -46,32 +38,32 @@ public class Rule
   /**
    * the instances covered by this rule
    */
-  private Instances m_instances;
+  private Instances  m_instances;
 
   /**
    * the class index
    */
-  private int m_classIndex;
+  private int        m_classIndex;
 
   /**
    * the number of attributes
    */
-  private int m_numAttributes;
+  private int        m_numAttributes;
 
   /**
    * the number of instances in the dataset
    */
-  private int m_numInstances;
+  private int        m_numInstances;
 
   /**
    * the indexes of the attributes used to split on for this rule
    */
-  private int[] m_splitAtts;
+  private int[]      m_splitAtts;
 
   /**
    * the corresponding values of the split points
    */
-  private double[] m_splitVals;
+  private double[]   m_splitVals;
 
   /**
    * the corresponding internal nodes. Used for smoothing rules.
@@ -81,52 +73,52 @@ public class Rule
   /**
    * the corresponding relational operators (0 = "<=", 1 = ">")
    */
-  private int[] m_relOps;
+  private int[]      m_relOps;
 
   /**
    * the leaf encapsulating the linear model for this rule
    */
-  private RuleNode m_ruleModel;
+  private RuleNode   m_ruleModel;
 
   /**
    * the top of the m5 tree for this rule
    */
-  protected RuleNode m_topOfTree;
+  protected RuleNode   m_topOfTree;
 
   /**
    * the standard deviation of the class for all the instances
    */
-  private double m_globalStdDev;
+  private double     m_globalStdDev;
 
   /**
    * the absolute deviation of the class for all the instances
    */
-  private double m_globalAbsDev;
+  private double     m_globalAbsDev;
 
   /**
    * the instances covered by this rule
    */
-  private Instances m_covered;
+  private Instances  m_covered;
 
   /**
    * the number of instances covered by this rule
    */
-  private int m_numCovered;
+  private int        m_numCovered;
 
   /**
    * the instances not covered by this rule
    */
-  private Instances m_notCovered;
+  private Instances  m_notCovered;
 
   /**
    * use a pruned m5 tree rather than make a rule
    */
-  private boolean m_useTree;
+  private boolean    m_useTree;
 
   /**
    * use the original m5 smoothing procedure
    */
-  private boolean m_smoothPredictions;
+  private boolean    m_smoothPredictions;
 
   /**
    * Save instances at each node in an M5 tree for visualization purposes.
@@ -219,9 +211,9 @@ public class Rule
    * Calculates a prediction for an instance using this rule
    * or M5 model tree
    * 
-   * @param instance the instance whos class value is to be predicted
+   * @param inst the instance whos class value is to be predicted
    * @return the prediction
-   * @exception Exception if a prediction can't be made.
+   * @exception if a prediction can't be made.
    */
   public double classifyInstance(Instance instance) throws Exception {
     if (m_useTree) {
@@ -259,7 +251,7 @@ public class Rule
   /**
    * Make the single best rule from a pruned m5 model tree
    * 
-   * @exception Exception if something goes wrong.
+   * @exception if something goes wrong.
    */
   private void makeRule() throws Exception {
     RuleNode[] best_leaf = new RuleNode[1];

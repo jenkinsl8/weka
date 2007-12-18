@@ -30,12 +30,9 @@ import java.util.ArrayList;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class Predicate implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8374702481965026640L;
 
   private ArrayList m_literals;
 

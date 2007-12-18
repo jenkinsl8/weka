@@ -16,7 +16,7 @@
 
 /*
  *    MarginCurve.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -37,7 +37,7 @@ import weka.core.Instances;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class MarginCurve {
 

@@ -16,7 +16,7 @@
 
 /*
  *    WekaException.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -26,13 +26,9 @@ package weka.core;
  * Class for Weka-specific exceptions.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class WekaException
-  extends Exception {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6428269989006208585L;
+public class WekaException extends Exception {
 
   /**
    * Creates a new WekaException with no message.

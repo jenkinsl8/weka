@@ -16,7 +16,7 @@
 
 /*
  *    ClassValuePickerBeanInfo.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the class value picker bean
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class ClassValuePickerBeanInfo 
   extends SimpleBeanInfo {

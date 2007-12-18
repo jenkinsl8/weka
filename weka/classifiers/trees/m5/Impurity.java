@@ -16,18 +16,20 @@
 
 /*
  *    Impurity.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Yong Wang
  *
  */
 
 package weka.classifiers.trees.m5;
 
-import weka.core.Instances;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class for handling the impurity values when spliting the instances
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public final class Impurity{
   double n;                   // number of total instances 

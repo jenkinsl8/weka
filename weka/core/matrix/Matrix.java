@@ -28,75 +28,74 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
 /**
- * Jama = Java Matrix class.
- * <P>
- * The Java Matrix Class provides the fundamental operations of numerical linear
- * algebra.  Various constructors create Matrices from two dimensional arrays of
- * double precision floating point numbers.  Various "gets" and "sets" provide
- * access to submatrices and matrix elements.  Several methods implement basic
- * matrix arithmetic, including matrix addition and multiplication, matrix
- * norms, and element-by-element array operations.  Methods for reading and
- * printing matrices are also included.  All the operations in this version of
- * the Matrix Class involve real matrices.  Complex matrices may be handled in a
- * future version.
- * <P>
- * Five fundamental matrix decompositions, which consist of pairs or triples of
- * matrices, permutation vectors, and the like, produce results in five
- * decomposition classes.  These decompositions are accessed by the Matrix class
- * to compute solutions of simultaneous linear equations, determinants, inverses
- * and other matrix functions.  The five decompositions are:
- * <P>
- * <UL>
- *    <LI>Cholesky Decomposition of symmetric, positive definite matrices.
- *    <LI>LU Decomposition of rectangular matrices.
- *    <LI>QR Decomposition of rectangular matrices.
- *    <LI>Singular Value Decomposition of rectangular matrices.
- *    <LI>Eigenvalue Decomposition of both symmetric and nonsymmetric square matrices.
- * </UL>
- * <DL>
- * <DT><B>Example of use:</B></DT>
- * <P>
- * <DD>Solve a linear system A x = b and compute the residual norm, ||b - A x||.
- * <P><PRE>
- *       double[][] vals = {{1.,2.,3},{4.,5.,6.},{7.,8.,10.}};
- *       Matrix A = new Matrix(vals);
- *       Matrix b = Matrix.random(3,1);
- *       Matrix x = A.solve(b);
- *       Matrix r = A.times(x).minus(b);
- *       double rnorm = r.normInf();
- * </PRE></DD>
- * </DL>
+* Jama = Java Matrix class.
+* <P>
+* The Java Matrix Class provides the fundamental operations of numerical linear
+* algebra.  Various constructors create Matrices from two dimensional arrays of
+* double precision floating point numbers.  Various "gets" and "sets" provide
+* access to submatrices and matrix elements.  Several methods implement basic
+* matrix arithmetic, including matrix addition and multiplication, matrix
+* norms, and element-by-element array operations.  Methods for reading and
+* printing matrices are also included.  All the operations in this version of
+* the Matrix Class involve real matrices.  Complex matrices may be handled in a
+* future version.
+* <P>
+* Five fundamental matrix decompositions, which consist of pairs or triples of
+* matrices, permutation vectors, and the like, produce results in five
+* decomposition classes.  These decompositions are accessed by the Matrix class
+* to compute solutions of simultaneous linear equations, determinants, inverses
+* and other matrix functions.  The five decompositions are:
+* <P>
+* <UL>
+*    <LI>Cholesky Decomposition of symmetric, positive definite matrices.
+*    <LI>LU Decomposition of rectangular matrices.
+*    <LI>QR Decomposition of rectangular matrices.
+*    <LI>Singular Value Decomposition of rectangular matrices.
+*    <LI>Eigenvalue Decomposition of both symmetric and nonsymmetric square matrices.
+* </UL>
+* <DL>
+* <DT><B>Example of use:</B></DT>
+* <P>
+* <DD>Solve a linear system A x = b and compute the residual norm, ||b - A x||.
+* <P><PRE>
+*       double[][] vals = {{1.,2.,3},{4.,5.,6.},{7.,8.,10.}};
+*       Matrix A = new Matrix(vals);
+*       Matrix b = Matrix.random(3,1);
+*       Matrix x = A.solve(b);
+*       Matrix r = A.times(x).minus(b);
+*       double rnorm = r.normInf();
+* </PRE></DD>
+* </DL>
  * <p/>
  * Adapted from the <a href="http://math.nist.gov/javanumerics/jama/" target="_blank">JAMA</a> package. Additional methods are tagged with the 
  * <code>@author</code> tag.
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
- */
+ * @version $Revision: 1.2.2.4 $
+*/
+
 public class Matrix 
   implements Cloneable, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7856794138418366180L;
 
   /** 
    * Array for internal storage of elements.
    * @serial internal array storage.
    */
-  protected double[][] A;
+  private double[][] A;
 
   /** 
    * Row and column dimensions.
    * @serial row dimension.
    * @serial column dimension.
    */
-  protected int m, n;
+  private int m, n;
 
   /** 
    * Construct an m-by-n matrix of zeros. 
@@ -129,7 +128,7 @@ public class Matrix
   /** 
    * Construct a matrix from a 2-D array.
    * @param A    Two-dimensional array of doubles.
-   * @throws  IllegalArgumentException All rows must have the same length
+   * @exception  IllegalArgumentException All rows must have the same length
    * @see        #constructWithCopy
    */
   public Matrix(double[][] A) {
@@ -160,7 +159,7 @@ public class Matrix
    * @param vals One-dimensional array of doubles, packed by columns (ala
    * Fortran).
    * @param m    Number of rows.
-   * @throws  IllegalArgumentException Array length must be a multiple of m.
+   * @exception  IllegalArgumentException Array length must be a multiple of m.
    */
   public Matrix(double vals[], int m) {
     this.m = m;
@@ -180,11 +179,11 @@ public class Matrix
    * Reads a matrix from a reader. The first line in the file should
    * contain the number of rows and columns. Subsequent lines
    * contain elements of the matrix.
-   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     r the reader containing the matrix
    * @throws    Exception if an error occurs
    * @see       #write(Writer)
+   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public Matrix(Reader r) throws Exception {
     LineNumberReader lnr = new LineNumberReader(r);
@@ -243,7 +242,7 @@ public class Matrix
   /** 
    * Construct a matrix from a copy of a 2-D array.
    * @param A    Two-dimensional array of doubles.
-   * @throws  IllegalArgumentException All rows must have the same length
+   * @exception  IllegalArgumentException All rows must have the same length
    */
   public static Matrix constructWithCopy(double[][] A) {
     int m = A.length;
@@ -354,7 +353,7 @@ public class Matrix
    * @param i    Row index.
    * @param j    Column index.
    * @return     A(i,j)
-   * @throws  ArrayIndexOutOfBoundsException
+   * @exception  ArrayIndexOutOfBoundsException
    */
   public double get(int i, int j) {
     return A[i][j];
@@ -367,7 +366,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @return     A(i0:i1,j0:j1)
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int i0, int i1, int j0, int j1) {
     Matrix X = new Matrix(i1-i0+1,j1-j0+1);
@@ -389,7 +388,7 @@ public class Matrix
    * @param r    Array of row indices.
    * @param c    Array of column indices.
    * @return     A(r(:),c(:))
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int[] r, int[] c) {
     Matrix X = new Matrix(r.length,c.length);
@@ -412,7 +411,7 @@ public class Matrix
    * @param i1   Final row index
    * @param c    Array of column indices.
    * @return     A(i0:i1,c(:))
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int i0, int i1, int[] c) {
     Matrix X = new Matrix(i1-i0+1,c.length);
@@ -432,10 +431,10 @@ public class Matrix
   /** 
    * Get a submatrix.
    * @param r    Array of row indices.
-   * @param j0   Initial column index
-   * @param j1   Final column index
+   * @param i0   Initial column index
+   * @param i1   Final column index
    * @return     A(r(:),j0:j1)
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int[] r, int j0, int j1) {
     Matrix X = new Matrix(r.length,j1-j0+1);
@@ -457,7 +456,7 @@ public class Matrix
    * @param i    Row index.
    * @param j    Column index.
    * @param s    A(i,j).
-   * @throws  ArrayIndexOutOfBoundsException
+   * @exception  ArrayIndexOutOfBoundsException
    */
   public void set(int i, int j, double s) {
     A[i][j] = s;
@@ -470,7 +469,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @param X    A(i0:i1,j0:j1)
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int i0, int i1, int j0, int j1, Matrix X) {
     try {
@@ -489,7 +488,7 @@ public class Matrix
    * @param r    Array of row indices.
    * @param c    Array of column indices.
    * @param X    A(r(:),c(:))
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int[] r, int[] c, Matrix X) {
     try {
@@ -509,7 +508,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @param X    A(r(:),j0:j1)
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int[] r, int j0, int j1, Matrix X) {
     try {
@@ -529,7 +528,7 @@ public class Matrix
    * @param i1   Final row index
    * @param c    Array of column indices.
    * @param X    A(i0:i1,c(:))
-   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
+   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int i0, int i1, int[] c, Matrix X) {
     try {
@@ -545,9 +544,9 @@ public class Matrix
   
   /**
    * Returns true if the matrix is symmetric.
-   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @return boolean true if matrix is symmetric.
+   * @author FracPete, taken from old weka.core.Matrix class
    */
   public boolean isSymmetric() {
     int nr = A.length, nc = A[0].length;
@@ -567,6 +566,7 @@ public class Matrix
    * returns whether the matrix is a square matrix or not.
    *
    * @return true if the matrix is a square matrix
+   * @author FracPete
    */
   public boolean isSquare() {
     return (getRowDimension() == getColumnDimension());
@@ -850,7 +850,7 @@ public class Matrix
    * Linear algebraic matrix multiplication, A * B
    * @param B    another matrix
    * @return     Matrix product, A * B
-   * @throws  IllegalArgumentException Matrix inner dimensions must agree.
+   * @exception  IllegalArgumentException Matrix inner dimensions must agree.
    */
   public Matrix times(Matrix B) {
     if (B.m != n) {
@@ -1001,6 +1001,7 @@ public class Matrix
    * </ol>
    *
    * @return    sqrt(A)
+   * @author    FracPete
    */
   public Matrix sqrt() {
     EigenvalueDecomposition   evd;
@@ -1062,12 +1063,12 @@ public class Matrix
 
   /**
    * Performs a (ridged) linear regression.
-   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     y the dependent variable vector
    * @param     ridge the ridge parameter
    * @return    the coefficients 
    * @throws    IllegalArgumentException if not successful
+   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public LinearRegression regression(Matrix y, double ridge) {
     return new LinearRegression(this, y, ridge);
@@ -1075,7 +1076,6 @@ public class Matrix
 
   /**
    * Performs a weighted (ridged) linear regression. 
-   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     y the dependent variable vector
    * @param     w the array of data point weights
@@ -1083,6 +1083,7 @@ public class Matrix
    * @return    the coefficients 
    * @throws    IllegalArgumentException if the wrong number of weights were
    *            provided.
+   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public final LinearRegression regression(Matrix y, double[] w, double ridge) {
     return new LinearRegression(this, y, w, ridge);
@@ -1242,7 +1243,7 @@ public class Matrix
    * is used (from the original weka.core.Matrix class).
    *
    * @param input the input stream.
-   * @see #Matrix(Reader)
+   * @see Matrix(Reader)
    * @see #write(Writer)
    */
   public static Matrix read(BufferedReader input) throws java.io.IOException {
@@ -1305,11 +1306,11 @@ public class Matrix
   /**
    * Writes out a matrix. The format can be read via the Matrix(Reader)
    * constructor.
-   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     w the output Writer
    * @throws    Exception if an error occurs
-   * @see       #Matrix(Reader)
+   * @see       Matrix(Reader)
+   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public void write(Writer w) throws Exception {
     w.write("% Rows\tColumns\n");
@@ -1324,10 +1325,10 @@ public class Matrix
   }
 
   /** 
-   * Converts a matrix to a string.
-   * (FracPete: taken from old weka.core.Matrix class)
+   * Converts a matrix to a string
    *
    * @return    the converted string
+   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public String toString() {
     // Determine the width required for the maximum element,
@@ -1361,7 +1362,7 @@ public class Matrix
 
     return text.toString();
   } 
-
+  
   /**
    * converts the Matrix into a single line Matlab string: matrix is enclosed 
    * by parentheses, rows are separated by semicolon and single cells by

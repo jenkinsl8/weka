@@ -21,7 +21,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.AbstractClassifierTest;
-import weka.classifiers.CheckClassifier;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
@@ -29,30 +28,16 @@ import junit.framework.TestSuite;
 
 /**
  * Tests RBFNetwork. Run from the command line with:<p/>
- * java weka.classifiers.functions.RBFNetworkTest
+ * java weka.classifiers.functions.RBFNetwork
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class RBFNetworkTest 
   extends AbstractClassifierTest {
 
   public RBFNetworkTest(String name) { 
     super(name);  
-  }
-
-  /**
-   * configures the CheckClassifier instance used throughout the tests
-   * 
-   * @return	the fully configured CheckClassifier instance used for testing
-   */
-  protected CheckClassifier getTester() {
-    CheckClassifier 	result;
-    
-    result = super.getTester();
-    result.setNumInstances(40);
-    
-    return result;
   }
 
   /** Creates a default RBFNetwork */

@@ -16,13 +16,14 @@
 
 /*
  *    SparseInstance.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Eibe Frank
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
  * Class for storing an instance as a sparse vector. A sparse instance
@@ -35,13 +36,9 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.14.2.3 $
  */
-public class SparseInstance
-  extends Instance {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3579051291332630149L;
+public class SparseInstance extends Instance {
 
   /** The index of the attribute associated with each stored value. */
   protected int[] m_Indices;
@@ -488,20 +485,8 @@ public class SparseInstance
 	      m_Dataset.attribute(m_Indices[i]).isDate()) {
 	    try {
 	      text.append(m_Indices[i] + " " +
-		  Utils.quote(stringValue(m_Indices[i])));
+			  Utils.quote(stringValue(m_Indices[i])));
 	    } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));
-	      throw new Error("This should never happen!");
-	    }
-	  } else if (m_Dataset.attribute(m_Indices[i]).isRelationValued()) {
-	    try {
-	      text.append(m_Indices[i] + " " +
-			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
-				      relation((int)valueSparse(i)).
-                                      stringWithoutHeader()));
-            } catch (Exception e) {
               e.printStackTrace();
               System.err.println(new Instances(m_Dataset, 0));
               System.err.println("Att:" + m_Indices[i] + " Val:" + valueSparse(i));

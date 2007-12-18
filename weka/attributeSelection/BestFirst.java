@@ -16,86 +16,56 @@
 
 /*
  *    BestFirst.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
-
-import java.io.Serializable;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * BestFirst:<br/>
- * <br/>
- * Searches the space of attribute subsets by greedy hillclimbing augmented with a backtracking facility. Setting the number of consecutive non-improving nodes allowed controls the level of backtracking done. Best first may start with the empty set of attributes and search forward, or start with the full set of attributes and search backward, or start at any point and search in both directions (by considering all possible single attribute additions and deletions at a given point).<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing a best first search. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
- * 
- * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
- *  Direction of search. (default = 1).</pre>
- * 
- * <pre> -N &lt;num&gt;
- *  Number of non-improving nodes to
- *  consider before terminating search.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Size of lookup cache for evaluated subsets.
- *  Expressed as a multiple of the number of
- *  attributes in the data set. (default = 1)</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -P start set <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -D 0 = backward | 1 = forward | 2 = bidirectional <br>
+ * Direction of the search. (default = 1). <p>
+ *
+ * -N num <br>
+ * Number of non improving nodes to consider before terminating search.
+ * (default = 5). <p>
+ *
+ * -S num <br>
+ * Size of lookup cache for evaluated subsets. Expressed as a multiple
+ * of the number of attributes in the data set. (default = 1). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  *         Martin Guetlein (cashing merit of expanded nodes) 
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.24.2.3 $
  */
-public class BestFirst 
-  extends ASSearch 
-  implements OptionHandler, StartSetHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7841338689536821867L;
+public class BestFirst extends ASSearch 
+  implements OptionHandler, StartSetHandler
+{
 
   // Inner classes
   /**
    * Class for a node in a linked list. Used in best first search.
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
-  public class Link2 
-    implements Serializable {
+  public class Link2 implements Serializable {
 
-    /** for serialization */
-    static final long serialVersionUID = -8236598311516351420L;
-    
     /*    BitSet group; */
     Object [] m_data;
     double m_merit;
 
 
-    /** 
-     * Constructor
-     */
+    // Constructor
     public Link2 (Object [] data, double mer) {
       //      group = (BitSet)gr.clone();
       m_data = data;
@@ -122,12 +92,9 @@ public class BestFirst
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
   public class LinkedList2
-    extends FastVector {
-    
-    /** for serialization */
-    static final long serialVersionUID = 3250538292330398929L;
-    
-    /** Max number of elements in the list */
+    extends FastVector
+  {
+    // Max number of elements in the list
     int m_MaxSize;
 
     // ================
@@ -145,7 +112,6 @@ public class BestFirst
      **/
     public void removeLinkAt (int index)
       throws Exception {
-      
       if ((index >= 0) && (index < size())) {
         removeElementAt(index);
       }
@@ -161,7 +127,6 @@ public class BestFirst
      **/
     public Link2 getLinkAt (int index)
       throws Exception {
-      
       if (size() == 0) {
         throw  new Exception("List is empty (getLinkAt)");
       }
@@ -177,7 +142,7 @@ public class BestFirst
 
     /**
      * adds an element (Link) to the list.
-     * @param data the attribute set specification
+     * @param gr the attribute set specification
      * @param mer the "merit" of this attribute set
      **/
     public void addToList (Object [] data, double mer)
@@ -241,13 +206,10 @@ public class BestFirst
   /** 0 == backward search, 1 == forward search, 2 == bidirectional */
   protected int m_searchDirection;
 
-  /** search direction: backward */
-  protected static final int SELECTION_BACKWARD = 0;
-  /** search direction: forward */
-  protected static final int SELECTION_FORWARD = 1;
-  /** search direction: bidirectional */
-  protected static final int SELECTION_BIDIRECTIONAL = 2;
   /** search directions */
+  protected static final int SELECTION_BACKWARD = 0;
+  protected static final int SELECTION_FORWARD = 1;
+  protected static final int SELECTION_BIDIRECTIONAL = 2;
   public static final Tag [] TAGS_SELECTION = {
     new Tag(SELECTION_BACKWARD, "Backward"),
     new Tag(SELECTION_FORWARD, "Forward"),
@@ -334,31 +296,26 @@ public class BestFirst
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.</pre>
-   * 
-   * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
-   *  Direction of search. (default = 1).</pre>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  Number of non-improving nodes to
-   *  consider before terminating search.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Size of lookup cache for evaluated subsets.
-   *  Expressed as a multiple of the number of
-   *  attributes in the data set. (default = 1)</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are: <p>
+   *
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
+   * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
+   * Direction of the search. (default = 1). <p>
+   *
+   * -N <num> <br>
+   * Number of non improving nodes to consider before terminating search.
+   * (default = 5). <p>
+   *
+   * -S <num> <br>
+   * Size of lookup cache for evaluated subsets. Expressed as a multiple
+   * of the number of attributes in the data set. (default = 1). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
@@ -445,7 +402,7 @@ public class BestFirst
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @throws Exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -473,7 +430,7 @@ public class BestFirst
    * search.
    *
    * @param t the number of non-improving nodes
-   * @throws Exception if t is less than 1
+   * @exception Exception if t is less than 1
    */
   public void setSearchTermination (int t)
     throws Exception {
@@ -643,12 +600,12 @@ public class BestFirst
   /**
    * Searches the attribute subset space by best first search
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
-  public int[] search (ASEvaluation ASEval, Instances data)
+    public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
     m_totalEvals = 0;
     if (!(ASEval instanceof SubsetEvaluator)) {
@@ -659,7 +616,8 @@ public class BestFirst
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
-    } else {
+    }
+    else {
       m_hasClass = true;
       m_classIndex = data.classIndex();
     }
@@ -700,7 +658,8 @@ public class BestFirst
 
       best_size = m_starting.length;
       m_totalEvals++;
-    } else {
+    }
+    else {
       if (m_searchDirection == SELECTION_BACKWARD) {
 	setStartSet("1-last");
 	m_starting = new int[m_numAttribs];
@@ -733,9 +692,10 @@ public class BestFirst
 
       if (m_searchDirection == SELECTION_BIDIRECTIONAL) {
 	// bi-directional search
-        done = 2;
-        sd = SELECTION_FORWARD;
-      } else {
+	  done = 2;
+	  sd = SELECTION_FORWARD;
+	}
+      else {
 	done = 1;
       }
 
@@ -764,16 +724,18 @@ public class BestFirst
 	for (i = 0; i < m_numAttribs; i++) {
 	  if (sd == SELECTION_FORWARD) {
 	    z = ((i != m_classIndex) && (!temp_group.get(i)));
-	  } else {
+	  }
+	  else {
 	    z = ((i != m_classIndex) && (temp_group.get(i)));
 	  }
-          
+
 	  if (z) {
 	    // set the bit (attribute to add/delete)
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.set(i);
 	      size++;
-	    } else {
+	    }
+	    else {
 	      temp_group.clear(i);
 	      size--;
 	    }
@@ -795,7 +757,8 @@ public class BestFirst
 	      hashC = tt.toString();
     	      lookup.put(hashC, new Double(merit));
     	      insertCount++;
-	    } else {
+	    }
+	    else {
 	      merit = ((Double)lookup.get(hashC)).doubleValue();
 	      cacheHits++;  
 	    }
@@ -814,7 +777,8 @@ public class BestFirst
 	    // is this better than the best?
 	    if (sd == SELECTION_FORWARD) {
 	      z = ((merit - best_merit) > 0.00001);
-	    } else {
+	    }
+	    else {
 	      if (merit == best_merit) {
 		z = (size < best_size);
 	      } else {
@@ -835,7 +799,8 @@ public class BestFirst
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.clear(i);
 	      size--;
-	    } else {
+	    }
+	    else {
 	      temp_group.set(i);
 	      size++;
 	    }
@@ -904,3 +869,4 @@ public class BestFirst
   }
 
 }
+

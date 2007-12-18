@@ -16,24 +16,21 @@
 
 /*
  *    NNConditionalEstimator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.estimators;
 
-import java.util.Random;
-import java.util.Vector;
-
-import weka.core.matrix.Matrix;
-import weka.core.Utils;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * Conditional probability estimator for a numeric domain conditional upon
  * a numeric domain (using Mahalanobis distance).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
 public class NNConditionalEstimator implements ConditionalEstimator {
 
@@ -129,10 +126,10 @@ public class NNConditionalEstimator implements ConditionalEstimator {
     c10 = c01;
     c11 /= (m_SumOfWeights - 1.0);
     m_Covariance = new Matrix(2, 2);
-    m_Covariance.set(0, 0, c00);
-    m_Covariance.set(0, 1, c01);
-    m_Covariance.set(1, 0, c10);
-    m_Covariance.set(1, 1, c11);
+    m_Covariance.setElement(0, 0, c00);
+    m_Covariance.setElement(0, 1, c01);
+    m_Covariance.setElement(1, 0, c10);
+    m_Covariance.setElement(1, 1, c11);
   }
 
   /**
@@ -183,6 +180,7 @@ public class NNConditionalEstimator implements ConditionalEstimator {
   /**
    * Get a probability estimator for a value
    *
+   * @param data the value to estimate the probability of
    * @param given the new value that data is conditional upon 
    * @return the estimator for the supplied value given the condition
    */

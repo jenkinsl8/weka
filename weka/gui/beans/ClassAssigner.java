@@ -16,36 +16,36 @@
 
 /*
  *    ClassAssigner.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.core.Instances;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
+import weka.core.Instance;
 import java.util.Vector;
-
+import java.io.Serializable;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 /**
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.9.2.1 $
  */
-public class ClassAssigner
-  extends JPanel
+public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
 	     DataSource, TrainingSetProducer, TestSetProducer,
 	     BeanCommon, EventConstraints, Serializable,
 	     InstanceListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = 4011131665025817924L;
   
   private String m_classColumn = "last";
 
@@ -165,7 +165,7 @@ public class ClassAssigner
       dataSet.setClassIndex(0);
     } else {
       classCol = Integer.parseInt(m_classColumn) - 1;
-      if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
+      if (classCol < 0 || classCol > dataSet.numAttributes()-1) {
 	if (m_logger != null) {
 	  m_logger.logMessage("Class column outside range of data "
 			      +"(ClassAssigner)");

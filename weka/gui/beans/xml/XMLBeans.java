@@ -21,7 +21,6 @@
 
 package weka.gui.beans.xml;
 
-import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.gui.beans.BeanConnection;
@@ -34,10 +33,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.beans.beancontext.BeanContextSupport;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
 import java.beans.Introspector;
-import java.beans.beancontext.BeanContextSupport;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -58,7 +57,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.1.2.6 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -248,7 +247,7 @@ public class XMLBeans
     m_BeanContextSupport = context;
     setDataType(datatype);
   }
-  
+
   /**
    * sets what kind of data is to be read/written
    * @param value       the type of data
@@ -279,9 +278,6 @@ public class XMLBeans
    * @throws Exception if something goes wrong
    */
   public void clear() throws Exception {
-    Vector<String>	classnames;
-    int			i;
-    
     super.clear();
     
     // ignore: suppress unnecessary GUI stuff 
@@ -338,12 +334,11 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
-    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");    
+    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
     m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
-    m_Properties.addAllowed(weka.core.converters.TextDirectoryLoader.class, "options");
 
     // we assume that classes implementing SplitEvaluator also implement OptionHandler
     m_Properties.addAllowed(weka.experiment.SplitEvaluator.class, "options");
@@ -363,13 +358,15 @@ public class XMLBeans
     m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class, "BeanVisual");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
     m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
-
-    classnames = ConverterUtils.getFileLoaders();
-    for (i = 0; i < classnames.size(); i++)
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Loader");
-    classnames = ConverterUtils.getFileSavers();
-    for (i = 0; i < classnames.size(); i++)
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Saver");
+    
+    m_CustomMethods.register(this, weka.core.converters.ArffLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.ArffSaver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.C45Loader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.C45Saver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.CSVLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.CSVSaver.class, "Saver");
+    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesLoader.class, "Loader");
+    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesSaver.class, "Saver");
     
     // other variables
     m_BeanInstances          = null;
@@ -382,7 +379,7 @@ public class XMLBeans
   /**
    * traverses over all BeanInstances (or MetaBeans) and stores them in a vector 
    * (recurses into MetaBeans, since the sub-BeanInstances are not visible)
-   * @param list       the BeanInstances/MetaBeans to traverse
+   * @param list        the BeanInstances/MetaBeans to traverse
    */
   protected void addBeanInstances(Vector list) {
     int             i;
@@ -406,7 +403,7 @@ public class XMLBeans
       }
     }
   }
-  
+
   /**
    * enables derived classes to due some pre-processing on the objects, that's
    * about to be serialized. Right now it only returns the object.
@@ -819,7 +816,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -897,7 +894,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -975,7 +972,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1053,7 +1050,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1126,7 +1123,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1195,7 +1192,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1273,7 +1270,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1411,7 +1408,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = null;
@@ -1543,8 +1540,14 @@ public class XMLBeans
     file   = null;
 
     // file
-    if (loader instanceof weka.core.converters.AbstractFileLoader)
-      file = ((weka.core.converters.AbstractFileLoader) loader).retrieveFile();
+    if (loader instanceof weka.core.converters.ArffLoader)
+      file = ((weka.core.converters.ArffLoader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.C45Loader)
+      file = ((weka.core.converters.C45Loader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.CSVLoader)
+      file = ((weka.core.converters.CSVLoader) loader).retrieveFile();
+    else if (loader instanceof weka.core.converters.SerializedInstancesLoader)
+      file = ((weka.core.converters.SerializedInstancesLoader) loader).retrieveFile();
     else
       known = false;
 
@@ -1579,7 +1582,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
@@ -1603,7 +1606,7 @@ public class XMLBeans
     if (file != null) {
       fl = new File(file);
       if (fl.exists())
-        ((weka.core.converters.AbstractFileLoader) result).setSource(fl);
+        ((weka.core.converters.AbstractLoader) result).setSource(fl);
       else
         System.out.println("WARNING: The file '" + file + "' does not exist!");
     }
@@ -1636,10 +1639,10 @@ public class XMLBeans
     
     m_CurrentNode = parent;
     
-    saver  = (weka.core.converters.Saver) o;
+    saver = (weka.core.converters.Saver) o;
     node   = addElement(parent, name, saver.getClass().getName(), false);
-    known  = true;
-    file   = null;
+    known = true;
+    file  = null;
     prefix = "";
     dir    = "";
 
@@ -1691,7 +1694,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
@@ -1778,7 +1781,7 @@ public class XMLBeans
     // for debugging only
     if (DEBUG)
        trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+    
     m_CurrentNode = node;
     
     result       = null;

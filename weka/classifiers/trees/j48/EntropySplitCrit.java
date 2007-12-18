@@ -16,25 +16,21 @@
 
 /*
  *    EntropySplitCrit.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Class for computing the entropy for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5 $
  */
-public final class EntropySplitCrit
-  extends EntropyBasedSplitCrit {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5986252682266803935L;
+public final class EntropySplitCrit extends EntropyBasedSplitCrit {
 
   /**
    * Computes entropy for given distribution.

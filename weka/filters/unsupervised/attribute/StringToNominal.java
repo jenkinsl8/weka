@@ -16,54 +16,42 @@
 
 /*
  *    StringToNominal.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
+import weka.filters.*;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.SingleIndex;
 
 /** 
- <!-- globalinfo-start -->
- * Converts a string attribute (i.e. unspecified number of values) to nominal (i.e. set number of values). You should ensure that all string values that will appear are represented in the first batch of the data.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
- * 
- <!-- options-end -->
+ * Converts a string attribute (i.e. unspecified number of values) to nominal
+ * (i.e. set number of values). You should ensure that all string values that
+ * will appear are represented in the dataset.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -C col <br>
+ * Index of the attribute to be changed. (default last)<p>
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.4 $
  */
-public class StringToNominal 
-  extends Filter 
+public class StringToNominal extends Filter 
   implements UnsupervisedFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 8655492378380068939L;
-  
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
@@ -80,27 +68,6 @@ public class StringToNominal
       + "will appear are represented in the first batch of the data.";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -108,9 +75,9 @@ public class StringToNominal
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately.
-   * @throws UnsupportedAttributeTypeException if the selected attribute
+   * @exception UnsupportedAttributeTypeException if the selected attribute
    * a string attribute.
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully.
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -132,7 +99,7 @@ public class StringToNominal
    * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined.
+   * @exception IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -161,7 +128,7 @@ public class StringToNominal
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output.
-   * @throws IllegalStateException if no input structure has been defined.
+   * @exception IllegalStateException if no input structure has been defined.
    */
   public boolean batchFinished() {
 
@@ -202,18 +169,13 @@ public class StringToNominal
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -C col <br>
+   * The column containing the values to be merged. (default last)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -271,7 +233,7 @@ public class StringToNominal
   /**
    * Sets index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -322,6 +284,23 @@ public class StringToNominal
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new StringToNominal(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new StringToNominal(), argv);
+      } else {
+	Filter.filterFile(new StringToNominal(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

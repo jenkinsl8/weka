@@ -16,7 +16,7 @@
 
 /*
  *    TrainTestSplitMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,25 +24,29 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 
-import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Random;
+import java.util.Enumeration;
+import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts data sets, training sets, test sets and produces
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
   implements DataSourceListener, TrainingSetListener, TestSetListener,
 	     UserRequestAcceptor, EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7390064039444605943L;
 
   private int m_trainPercentage = 66;
   private int m_randomSeed = 1;

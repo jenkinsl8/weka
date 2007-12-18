@@ -28,7 +28,7 @@ import weka.core.xml.XMLBasicSerialization;
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.3.2.2 $ 
  */
 public class XMLClassifier extends XMLBasicSerialization {
 

@@ -16,87 +16,56 @@
 
 /*
  *    NaiveBayes.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank,Len Trigg
  *
  */
 
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.estimators.DiscreteEstimator;
-import weka.estimators.Estimator;
-import weka.estimators.KernelEstimator;
-import weka.estimators.NormalEstimator;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.classifiers.Evaluation;
+import weka.classifiers.UpdateableClassifier;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.estimators.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for a Naive Bayes classifier using estimator classes. Numeric estimator precision values are chosen based on analysis of the  training data. For this reason, the classifier is not an UpdateableClassifier (which in typical usage are initialized with zero training instances) -- if you need the UpdateableClassifier functionality, use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable classifier will  use a default precision of 0.1 for numeric attributes when buildClassifier is called with zero training instances.<br/>
- * <br/>
- * For more information on Naive Bayes classifiers, see<br/>
- * <br/>
- * George H. John, Pat Langley: Estimating Continuous Distributions in Bayesian Classifiers. In: Eleventh Conference on Uncertainty in Artificial Intelligence, San Mateo, 338-345, 1995.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for a Naive Bayes classifier using estimator classes. Numeric 
+ * estimator precision values are chosen based on analysis of the 
+ * training data. For this reason, the classifier is not an 
+ * UpdateableClassifier (which in typical usage are initialized with zero 
+ * training instances) -- if you need the UpdateableClassifier functionality,
+ * use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable
+ * classifier will  use a default precision of 0.1 for numeric attributes
+ * when buildClassifier is called with zero training instances.
+ * <p>
+ * For more information on Naive Bayes classifiers, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{John1995,
- *    address = {San Mateo},
- *    author = {George H. John and Pat Langley},
- *    booktitle = {Eleventh Conference on Uncertainty in Artificial Intelligence},
- *    pages = {338-345},
- *    publisher = {Morgan Kaufmann},
- *    title = {Estimating Continuous Distributions in Bayesian Classifiers},
- *    year = {1995}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * George H. John and Pat Langley (1995). <i>Estimating
+ * Continuous Distributions in Bayesian Classifiers</i>. Proceedings
+ * of the Eleventh Conference on Uncertainty in Artificial
+ * Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -K
- *  Use kernel density estimator rather than normal
- *  distribution for numeric attributes</pre>
- * 
- * <pre> -D
- *  Use supervised discretization to process numeric attributes
- * </pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -K <br>
+ * Use kernel estimation for modelling numeric attributes rather than
+ * a single normal distribution.<p>
+ *
+ * -D <br>
+ * Use supervised discretization to process numeric attributes.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.16 $
  */
 public class NaiveBayes extends Classifier 
-implements OptionHandler, WeightedInstancesHandler, 
-           TechnicalInformationHandler {
-
-  /** for serialization */
-  static final long serialVersionUID = 5995231201785697655L;
+  implements OptionHandler, WeightedInstancesHandler {
 
   /** The attribute estimators. */
   protected Estimator [][] m_Distributions;
-
+  
   /** The class estimator. */
   protected Estimator m_ClassDistribution;
 
@@ -144,52 +113,10 @@ implements OptionHandler, WeightedInstancesHandler,
       +" classifier will  use a default precision of 0.1 for numeric attributes"
       +" when buildClassifier is called with zero training instances.\n\n"
       +"For more information on Naive Bayes classifiers, see\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "George H. John and Pat Langley");
-    result.setValue(Field.TITLE, "Estimating Continuous Distributions in Bayesian Classifiers");
-    result.setValue(Field.BOOKTITLE, "Eleventh Conference on Uncertainty in Artificial Intelligence");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.PAGES, "338-345");
-    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
-    result.setValue(Field.ADDRESS, "San Mateo");
-
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-
-    return result;
+      +"George H. John and Pat Langley (1995). Estimating"
+      + " Continuous Distributions in Bayesian Classifiers. Proceedings"
+      +" of the Eleventh Conference on Uncertainty in Artificial"
+      +" Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.";
   }
 
   /**
@@ -201,14 +128,16 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-
+    if (instances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+    if (instances.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Naive Bayes: Class is numeric!");
+    }
     m_NumClasses = instances.numClasses();
+    if (m_NumClasses < 0) {
+      throw new Exception ("Dataset has no class attribute");
+    }
 
     // Copy the instances
     m_Instances = new Instances(instances);
@@ -224,9 +153,9 @@ implements OptionHandler, WeightedInstancesHandler,
 
     // Reserve space for the distributions
     m_Distributions = new Estimator[m_Instances.numAttributes() - 1]
-      [m_Instances.numClasses()];
+    [m_Instances.numClasses()];
     m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), 
-                                                true);
+						true);
     int attIndex = 0;
     Enumeration enu = m_Instances.enumerateAttributes();
     while (enu.hasMoreElements()) {
@@ -266,15 +195,15 @@ implements OptionHandler, WeightedInstancesHandler,
 	case Attribute.NUMERIC: 
 	  if (m_UseKernelEstimator) {
 	    m_Distributions[attIndex][j] = 
-	      new KernelEstimator(numPrecision);
+	    new KernelEstimator(numPrecision);
 	  } else {
 	    m_Distributions[attIndex][j] = 
-	      new NormalEstimator(numPrecision);
+	    new NormalEstimator(numPrecision);
 	  }
 	  break;
 	case Attribute.NOMINAL:
 	  m_Distributions[attIndex][j] = 
-	    new DiscreteEstimator(attribute.numValues(), true);
+	  new DiscreteEstimator(attribute.numValues(), true);
 	  break;
 	default:
 	  throw new Exception("Attribute type unknown to NaiveBayes");
@@ -312,12 +241,12 @@ implements OptionHandler, WeightedInstancesHandler,
 	Attribute attribute = (Attribute) enumAtts.nextElement();
 	if (!instance.isMissing(attribute)) {
 	  m_Distributions[attIndex][(int)instance.classValue()].
-            addValue(instance.value(attribute), instance.weight());
+	    addValue(instance.value(attribute), instance.weight());
 	}
 	attIndex++;
       }
       m_ClassDistribution.addValue(instance.classValue(),
-                                   instance.weight());
+				   instance.weight());
     }
   }
 
@@ -331,8 +260,8 @@ implements OptionHandler, WeightedInstancesHandler,
    * @exception Exception if there is a problem generating the prediction
    */
   public double [] distributionForInstance(Instance instance) 
-    throws Exception { 
-
+  throws Exception { 
+    
     if (m_UseDiscretization) {
       m_Disc.input(instance);
       instance = m_Disc.output();
@@ -348,17 +277,16 @@ implements OptionHandler, WeightedInstancesHandler,
       if (!instance.isMissing(attribute)) {
 	double temp, max = 0;
 	for (int j = 0; j < m_NumClasses; j++) {
-	  temp = Math.max(1e-75, Math.pow(m_Distributions[attIndex][j].
-                                          getProbability(instance.value(attribute)), 
-                                          m_Instances.attribute(attIndex).weight()));
+	  temp = Math.max(1e-75, m_Distributions[attIndex][j].
+	  getProbability(instance.value(attribute)));
 	  probs[j] *= temp;
 	  if (probs[j] > max) {
 	    max = probs[j];
 	  }
 	  if (Double.isNaN(probs[j])) {
 	    throw new Exception("NaN returned from estimator for attribute "
-                                + attribute.name() + ":\n"
-                                + m_Distributions[attIndex][j].toString());
+				+ attribute.name() + ":\n"
+				+ m_Distributions[attIndex][j].toString());
 	  }
 	}
 	if ((max > 0) && (max < 1e-75)) { // Danger of probability underflow
@@ -385,41 +313,35 @@ implements OptionHandler, WeightedInstancesHandler,
     Vector newVector = new Vector(2);
 
     newVector.addElement(
-                         new Option("\tUse kernel density estimator rather than normal\n"
-                                    +"\tdistribution for numeric attributes",
-                                    "K", 0,"-K"));
+    new Option("\tUse kernel density estimator rather than normal\n"
+	       +"\tdistribution for numeric attributes",
+	       "K", 0,"-K"));
     newVector.addElement(
-                         new Option("\tUse supervised discretization to process numeric attributes\n",
-                                    "D", 0,"-D"));
+    new Option("\tUse supervised discretization to process numeric attributes\n",
+	       "D", 0,"-D"));
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -K
-   *  Use kernel density estimator rather than normal
-   *  distribution for numeric attributes</pre>
-   * 
-   * <pre> -D
-   *  Use supervised discretization to process numeric attributes
-   * </pre>
-   * 
-   <!-- options-end -->
+   * -K <br>
+   * Use kernel estimation for modelling numeric attributes rather than
+   * a single normal distribution.<p>
+   *
+   * -D <br>
+   * Use supervised discretization to process numeric attributes.
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     boolean k = Utils.getFlag('K', options);
     boolean d = Utils.getFlag('D', options);
     if (k && d) {
       throw new IllegalArgumentException("Can't use both kernel density " +
-                                         "estimation and discretization!");
+					 "estimation and discretization!");
     }
     setUseSupervisedDiscretization(d);
     setUseKernelEstimator(k);
@@ -456,7 +378,7 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return a description of the classifier as a string.
    */
   public String toString() {
-
+    
     StringBuffer text = new StringBuffer();
 
     text.append("Naive Bayes Classifier");
@@ -466,17 +388,15 @@ implements OptionHandler, WeightedInstancesHandler,
       try {
 	for (int i = 0; i < m_Distributions[0].length; i++) {
 	  text.append("\n\nClass " + m_Instances.classAttribute().value(i) +
-                      ": Prior probability = " + Utils.
-                      doubleToString(m_ClassDistribution.getProbability(i),
-                                     4, 2) + "\n\n");
+		      ": Prior probability = " + Utils.
+		      doubleToString(m_ClassDistribution.getProbability(i),
+				     4, 2) + "\n\n");
 	  Enumeration enumAtts = m_Instances.enumerateAttributes();
 	  int attIndex = 0;
 	  while (enumAtts.hasMoreElements()) {
 	    Attribute attribute = (Attribute) enumAtts.nextElement();
-	    if (attribute.weight() > 0) {
-	      text.append(attribute.name() + ":  " 
-                          + m_Distributions[attIndex][i]);
-	    }
+	    text.append(attribute.name() + ":  " 
+			+ m_Distributions[attIndex][i]);
 	    attIndex++;
 	  }
 	}
@@ -487,7 +407,7 @@ implements OptionHandler, WeightedInstancesHandler,
 
     return text.toString();
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -503,23 +423,23 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return Value of m_UseKernelEstimatory.
    */
   public boolean getUseKernelEstimator() {
-
+    
     return m_UseKernelEstimator;
   }
-
+  
   /**
    * Sets if kernel estimator is to be used.
    *
    * @param v  Value to assign to m_UseKernelEstimatory.
    */
   public void setUseKernelEstimator(boolean v) {
-
+    
     m_UseKernelEstimator = v;
     if (v) {
       setUseSupervisedDiscretization(false);
     }
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -536,30 +456,47 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return true if supervised discretization is to be used.
    */
   public boolean getUseSupervisedDiscretization() {
-
+    
     return m_UseDiscretization;
   }
-
+  
   /**
    * Set whether supervised discretization is to be used.
    *
    * @param newblah true if supervised discretization is to be used.
    */
   public void setUseSupervisedDiscretization(boolean newblah) {
-
+    
     m_UseDiscretization = newblah;
     if (newblah) {
       setUseKernelEstimator(false);
     }
   }
-
+  
   /**
    * Main method for testing this class.
    *
    * @param argv the options
    */
   public static void main(String [] argv) {
-    runClassifier(new NaiveBayes(), argv);
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new NaiveBayes(), argv));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 

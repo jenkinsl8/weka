@@ -14,37 +14,45 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
+/**
  *    AttributeVisualizationPanel.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Ashraf M. Kibriya
  *
  */
 
 package weka.gui;
 
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.PrintablePanel;
-
-import java.awt.BorderLayout;
+import java.io.FileReader;
+import java.util.Random;
 import java.awt.Color;
-import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.Graphics;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
+import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
-import java.io.FileReader;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+//import java.awt.Image;
+//import java.awt.image.BufferedImage;
 
-import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.AttributeStats;
+import weka.core.Utils;
+import weka.core.FastVector;
+import weka.gui.visualize.PrintablePanel;
+import weka.gui.visualize.PrintableComponent;
 
 /**
  * Creates a panel that shows a visualization of an
@@ -61,13 +69,10 @@ import javax.swing.JFrame;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.18.2.6 $
  */
-public class AttributeVisualizationPanel
-  extends PrintablePanel {
 
-  /** for serialization */
-  private static final long serialVersionUID = -8650490488825371193L;
+public class AttributeVisualizationPanel extends PrintablePanel {
   
   /** This holds the current set of instances */
   protected Instances m_data;
@@ -264,9 +269,6 @@ public class AttributeVisualizationPanel
 	    break;
 	  case Attribute.DATE:
 	    type = "(Dat) ";
-	    break;
-	  case Attribute.RELATIONAL:
-	    type = "(Rel) ";
 	    break;
 	  default:
 	    type = "(???) ";

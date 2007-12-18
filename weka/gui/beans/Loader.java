@@ -16,44 +16,52 @@
 
 /*
  *    Loader.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ArffLoader;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.beancontext.BeanContext;
-import java.io.IOException;
-import java.util.Enumeration;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 import java.util.Vector;
-
+import java.util.Enumeration;
+import java.io.IOException;
+import java.beans.beancontext.*;
 import javax.swing.JButton;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.*;
+
 
 /**
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.10.2.3 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
  */
-public class Loader
-  extends AbstractDataSource 
+public class Loader extends AbstractDataSource 
   implements UserRequestAcceptor, WekaWrapper,
 	     EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 1993738191961163027L;
 
   /**
    * Holds the instances loaded
@@ -242,14 +250,10 @@ public class Loader
 				      lastIndexOf('.')+1, 
 				      loaderName.length());
     if (loadImages) {
-      if (m_Loader instanceof Visible) {
-        m_visual = ((Visible) m_Loader).getVisual();
-      } else {
 
-        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
-                                BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
-          useDefaultVisual();
-        }
+      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
+			    BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
+	useDefaultVisual();
       }
     }
     m_visual.setText(loaderName);

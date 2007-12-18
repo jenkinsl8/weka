@@ -14,36 +14,31 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    Filter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.filters;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Serializable;
+import java.util.Enumeration;
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Queue;
-import weka.core.RelationalLocator;
-import weka.core.SerializedObject;
-import weka.core.StringLocator;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Version;
-import weka.core.Capabilities.Capability;
-import weka.core.converters.ConverterUtils.DataSource;
-
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -73,13 +68,22 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.24.2.1 $
  */
-public abstract class Filter
-  implements Serializable, CapabilitiesHandler {
+public abstract class Filter implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -8835063755891851218L;
+  /*
+   * Filter refactoring TODO:
+   *
+   * - Update all filters to use getOutputFormat and setInputFormat
+   * instead of outputFormat, outputFormatPeek and inputFormat.
+   * - Update users of filters to use getOutputFormat and setInputFormat
+   * - remove outputFormat, outputFormatPeek and inputFormat
+   *
+   */
+
+  /** Debugging mode */
+  private boolean m_Debug = false;
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;
@@ -88,16 +92,10 @@ public abstract class Filter
   private Queue m_OutputQueue = null;
 
   /** Indices of string attributes in the output format */
-  protected StringLocator m_OutputStringAtts = null;
+  private int [] m_OutputStringAtts = null;
 
   /** Indices of string attributes in the input format */
-  protected StringLocator m_InputStringAtts = null;
-
-  /** Indices of relational attributes in the output format */
-  protected RelationalLocator m_OutputRelAtts = null;
-
-  /** Indices of relational attributes in the input format */
-  protected RelationalLocator m_InputRelAtts = null;
+  private int [] m_InputStringAtts = null;
 
   /** The input format for instances */
   private Instances m_InputFormat = null;
@@ -107,86 +105,6 @@ public abstract class Filter
 
   /** True if the first batch has been done */
   protected boolean m_FirstBatchDone = false;
-
-  /**
-   * Returns true if the a new batch was started, either a new instance of the 
-   * filter was created or the batchFinished() method got called.
-   * 
-   * @return true if a new batch has been initiated
-   * @see #m_NewBatch
-   * @see #batchFinished()
-   */
-  public boolean isNewBatch() {
-    return m_NewBatch;
-  }
-  
-  /**
-   * Returns true if the first batch of instances got processed. Necessary for
-   * supervised filters, which "learn" from the first batch and then shouldn't
-   * get updated with subsequent calls of batchFinished().
-   * 
-   * @return true if the first batch has been processed
-   * @see #m_FirstBatchDone
-   * @see #batchFinished()
-   */
-  public boolean isFirstBatchDone() {
-    return m_FirstBatchDone;
-  }
-
-  /** 
-   * Returns the Capabilities of this filter. Derived filters have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities 	result;
-
-    result = new Capabilities(this);
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /** 
-   * Returns the Capabilities of this filter, customized based on the data.
-   * I.e., if removes all class capabilities, in case there's not class
-   * attribute present or removes the NO_CLASS capability, in case that
-   * there's a class present.
-   *
-   * @param data	the data to use for customization
-   * @return            the capabilities of this object, based on the data
-   * @see               #getCapabilities()
-   */
-  public Capabilities getCapabilities(Instances data) {
-    Capabilities 	result;
-    Capabilities 	classes;
-    Iterator		iter;
-    Capability		cap;
-
-    result = getCapabilities();
-
-    // no class? -> remove all class capabilites apart from NO_CLASS
-    if (data.classIndex() == -1) {
-      classes = result.getClassCapabilities();
-      iter    = classes.capabilities();
-      while (iter.hasNext()) {
-	cap = (Capability) iter.next();
-	if (cap != Capability.NO_CLASS) {
-	  result.disable(cap);
-	  result.disableDependency(cap);
-	}
-      }
-    }
-    // class? -> remove NO_CLASS
-    else {
-      result.disable(Capability.NO_CLASS);
-      result.disableDependency(Capability.NO_CLASS);
-    }
-    
-    return result;
-  }
 
   /**
    * Sets the format of output instances. The derived class should use this
@@ -199,9 +117,9 @@ public abstract class Filter
 
     if (outputFormat != null) {
       m_OutputFormat = outputFormat.stringFreeStructure();
-      initOutputLocators(m_OutputFormat, null);
+      m_OutputStringAtts = getStringIndices(m_OutputFormat);
 
-      // Rename the relation
+      // Rename the attribute
       String relationName = outputFormat.relationName() 
         + "-" + this.getClass().getName();
       if (this instanceof OptionHandler) {
@@ -259,8 +177,7 @@ public abstract class Filter
   protected void push(Instance instance) {
 
     if (instance != null) {
-      if (instance.dataset() != null)
-	copyValues(instance, false);
+      copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
       instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
@@ -285,113 +202,133 @@ public abstract class Filter
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      copyValues(instance, true);
+      copyStringValues(instance, m_InputFormat, m_InputStringAtts);
       m_InputFormat.add(instance);
     }
   }
 
   /**
-   * Initializes the input attribute locators. If indices is null then all 
-   * attributes of the data will be considered, otherwise only the ones
-   * that were provided.
-   * 
-   * @param data		the data to initialize the locators with
-   * @param indices		if not null, the indices to which to restrict
-   * 				the locating
+   * Returns an array containing the indices of all string attributes in the
+   * input format. This index is created during setInputFormat()
+   *
+   * @return an array containing the indices of string attributes in the 
+   * input dataset.
    */
-  protected void initInputLocators(Instances data, int[] indices) {
-    if (indices == null) {
-      m_InputStringAtts = new StringLocator(data);
-      m_InputRelAtts    = new RelationalLocator(data);
-    }
-    else {
-      m_InputStringAtts = new StringLocator(data, indices);
-      m_InputRelAtts    = new RelationalLocator(data, indices);
-    }
+  protected int [] getInputStringIndex() {
+
+    return m_InputStringAtts;
   }
 
   /**
-   * Initializes the output attribute locators. If indices is null then all 
-   * attributes of the data will be considered, otherwise only the ones
-   * that were provided.
-   * 
-   * @param data		the data to initialize the locators with
-   * @param indices		if not null, the indices to which to restrict
-   * 				the locating
+   * Returns an array containing the indices of all string attributes in the
+   * output format. This index is created during setOutputFormat()
+   *
+   * @return an array containing the indices of string attributes in the 
+   * output dataset.
    */
-  protected void initOutputLocators(Instances data, int[] indices) {
-    if (indices == null) {
-      m_OutputStringAtts = new StringLocator(data);
-      m_OutputRelAtts    = new RelationalLocator(data);
-    }
-    else {
-      m_OutputStringAtts = new StringLocator(data, indices);
-      m_OutputRelAtts    = new RelationalLocator(data, indices);
-    }
+  protected int [] getOutputStringIndex() {
+
+    return m_OutputStringAtts;
   }
-  
+
   /**
-   * Copies string/relational values contained in the instance copied to a new
+   * Copies string values contained in the instance copied to a new
    * dataset. The Instance must already be assigned to a dataset. This
    * dataset and the destination dataset must have the same structure.
    *
-   * @param instance		the Instance containing the string/relational 
-   * 				values to copy.
-   * @param isInput		if true the input format and input attribute 
-   * 				locators are used otherwise the output format 
-   * 				and output locators
+   * @param instance the Instance containing the string values to copy.
+   * @param destDataset the destination set of Instances
+   * @param strAtts an array containing the indices of any string attributes
+   * in the dataset.  
    */
-  protected void copyValues(Instance instance, boolean isInput) {
+  private void copyStringValues(Instance inst, Instances destDataset, 
+                                int []strAtts) {
 
-    RelationalLocator.copyRelationalValues(
-	instance, 
-	(isInput) ? m_InputFormat : m_OutputFormat, 
-	(isInput) ? m_InputRelAtts : m_OutputRelAtts);
-
-    StringLocator.copyStringValues(
-	instance, 
-	(isInput) ? m_InputFormat : m_OutputFormat, 
-	(isInput) ? m_InputStringAtts : m_OutputStringAtts);
+    if (strAtts.length == 0) {
+      return;
+    }
+    if (inst.dataset() == null) {
+      throw new IllegalArgumentException("Instance has no dataset assigned!!");
+    } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
+      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
+    } 
+    copyStringValues(inst, true, inst.dataset(), strAtts,
+                     destDataset, strAtts);
   }
 
   /**
-   * Takes string/relational values referenced by an Instance and copies them 
-   * from a source dataset to a destination dataset. The instance references are
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
+   * updated to be valid for the destination dataset. The instance may have the 
+   * structure (i.e. number and attribute position) of either dataset (this
+   * affects where references are obtained from). The source dataset must
+   * have the same structure as the filter input format and the destination
+   * must have the same structure as the filter output format.
+   *
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   */
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, Instances destDataset) {
+
+    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts,
+                     destDataset, m_OutputStringAtts);
+  }
+
+  /**
+   * Takes string values referenced by an Instance and copies them from a
+   * source dataset to a destination dataset. The instance references are
    * updated to be valid for the destination dataset. The instance may have the 
    * structure (i.e. number and attribute position) of either dataset (this
    * affects where references are obtained from). Only works if the number
-   * of string/relational attributes is the same in both indices (implicitly 
-   * these string/relational attributes should be semantically same but just 
-   * with shifted positions).
+   * of string attributes is the same in both indices (implicitly these string
+   * attributes should be semantically same but just with shifted positions).
    *
-   * @param instance 		the instance containing references to strings/
-   * 				relational values in the source dataset that 
-   * 				will have references updated to be valid for 
-   * 				the destination dataset.
-   * @param instSrcCompat 	true if the instance structure is the same as 
-   * 				the source, or false if it is the same as the 
-   * 				destination (i.e. which of the string/relational 
-   * 				attribute indices contains the correct locations 
-   * 				for this instance).
-   * @param srcDataset 		the dataset for which the current instance 
-   * 				string/relational value references are valid 
-   * 				(after any position mapping if needed)
-   * @param destDataset 	the dataset for which the current instance 
-   * 				string/relational value references need to be 
-   * 				inserted (after any position mapping if needed)
+   * @param instance the instance containing references to strings in the source
+   * dataset that will have references updated to be valid for the destination
+   * dataset.
+   * @param instSrcCompat true if the instance structure is the same as the
+   * source, or false if it is the same as the destination (i.e. which of the
+   * string attribute indices contains the correct locations for this instance).
+   * @param srcDataset the dataset for which the current instance string
+   * references are valid (after any position mapping if needed)
+   * @param srcStrAtts an array containing the indices of string attributes
+   * in the source datset.
+   * @param destDataset the dataset for which the current instance string
+   * references need to be inserted (after any position mapping if needed)
+   * @param destStrAtts an array containing the indices of string attributes
+   * in the destination datset.
    */
-  protected void copyValues(Instance instance, boolean instSrcCompat,
-                         Instances srcDataset, Instances destDataset) {
-
-    RelationalLocator.copyRelationalValues(
-	instance, instSrcCompat, 
-	srcDataset, m_InputRelAtts,
-	destDataset, m_OutputRelAtts);
-
-    StringLocator.copyStringValues(
-	instance, instSrcCompat, 
-	srcDataset, m_InputStringAtts,
-	getOutputFormat(), m_OutputStringAtts);
+  protected void copyStringValues(Instance instance, boolean instSrcCompat,
+                                  Instances srcDataset, int []srcStrAtts,
+                                  Instances destDataset, int []destStrAtts) {
+    if (srcDataset == destDataset) {
+      return;
+    }
+    if (srcStrAtts.length != destStrAtts.length) {
+      throw new IllegalArgumentException("Src and Dest string indices differ in length!!");
+    }
+    for (int i = 0; i < srcStrAtts.length; i++) {
+      int instIndex = instSrcCompat ? srcStrAtts[i] : destStrAtts[i];
+      Attribute src = srcDataset.attribute(srcStrAtts[i]);
+      Attribute dest = destDataset.attribute(destStrAtts[i]);
+      if (!instance.isMissing(instIndex)) {
+        //System.err.println(instance.value(srcIndex) 
+        //                   + " " + src.numValues()
+        //                   + " " + dest.numValues());
+        int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
+        // setValue here shouldn't be too slow here unless your dataset has
+        // squillions of string attributes
+        instance.setValue(instIndex, (double)valIndex);
+      }
+    }
   }
 
   /**
@@ -400,23 +337,20 @@ public abstract class Filter
    */
   protected void flushInput() {
 
-    if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
-	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
+    if (m_InputStringAtts.length > 0) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
     }
   }
-  
+
   /**
-   * tests the data whether the filter can actually handle it
-   * 
-   * @param instanceInfo	the data to test
-   * @throws Exception		if the test fails
+   * @deprecated use <code>setInputFormat(Instances)</code> instead.
    */
-  protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities(instanceInfo).testWithFail(instanceInfo);
+  public boolean inputFormat(Instances instanceInfo) throws Exception {
+
+    return setInputFormat(instanceInfo);
   }
 
   /**
@@ -430,19 +364,25 @@ public abstract class Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    testInputFormat(instanceInfo);
-    
     m_InputFormat = instanceInfo.stringFreeStructure();
+    m_InputStringAtts = getStringIndices(instanceInfo);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
     m_FirstBatchDone = false;
-    initInputLocators(m_InputFormat, null);
     return false;
+  }
+
+  /**
+   * @deprecated use <code>getOutputFormat()</code> instead.
+   */
+  public Instances outputFormat() {
+
+    return getOutputFormat();
   }
 
   /**
@@ -453,7 +393,7 @@ public abstract class Filter
    *
    * @return an Instances object containing the output instance
    * structure only.
-   * @throws NullPointerException if no input structure has been
+   * @exception NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
   public Instances getOutputFormat() {
@@ -476,9 +416,9 @@ public abstract class Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws NullPointerException if the input format has not been
+   * @exception NullPointerException if the input format has not been
    * defined.
-   * @throws Exception if the input instance was not of the correct 
+   * @exception Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.  
    */
   public boolean input(Instance instance) throws Exception {
@@ -505,8 +445,8 @@ public abstract class Filter
    * inputFormat() and input().
    *
    * @return true if there are instances pending output
-   * @throws NullPointerException if no input structure has been defined,
-   * @throws Exception if there was a problem finishing the batch.
+   * @exception NullPointerException if no input structure has been defined,
+   * @exception Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
 
@@ -525,7 +465,7 @@ public abstract class Filter
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @throws NullPointerException if no output structure has been defined
+   * @exception NullPointerException if no output structure has been defined
    */
   public Instance output() {
 
@@ -536,10 +476,9 @@ public abstract class Filter
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    // Clear out references to old strings/relationals occasionally
+    // Clear out references to old strings occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
-      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
-	   || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
+      if (m_OutputStringAtts.length > 0) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
     }
@@ -552,7 +491,7 @@ public abstract class Filter
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @throws NullPointerException if no input structure has been defined 
+   * @exception NullPointerException if no input structure has been defined 
    */
   public Instance outputPeek() {
 
@@ -570,7 +509,7 @@ public abstract class Filter
    * Returns the number of instances pending output
    *
    * @return the number of instances  pending output
-   * @throws NullPointerException if no input structure has been defined
+   * @exception NullPointerException if no input structure has been defined
    */
   public int numPendingOutput() {
 
@@ -591,36 +530,26 @@ public abstract class Filter
   }
 
   /**
-   * Creates a deep copy of the given filter using serialization.
+   * Gets an array containing the indices of all string attributes.
    *
-   * @param model 	the filter to copy
-   * @return 		a deep copy of the filter
-   * @throws Exception 	if an error occurs
+   * @param insts the Instances to scan for string attributes. 
+   * @return an array containing the indices of string attributes in
+   * the input structure. Will be zero-length if there are no
+   * string attributes
    */
-  public static Filter makeCopy(Filter model) throws Exception {
-    return (Filter)new SerializedObject(model).getObject();
-  }
-
-  /**
-   * Creates a given number of deep copies of the given filter using 
-   * serialization.
-   * 
-   * @param model 	the filter to copy
-   * @param num 	the number of filter copies to create.
-   * @return 		an array of filters.
-   * @throws Exception 	if an error occurs
-   */
-  public static Filter[] makeCopies(Filter model, int num) throws Exception {
-
-    if (model == null) {
-      throw new Exception("No model filter set");
+  protected int [] getStringIndices(Instances insts) {
+    
+    // Scan through getting the indices of String attributes
+    int [] index = new int [insts.numAttributes()];
+    int indexSize = 0;
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (insts.attribute(i).type() == Attribute.STRING) {
+        index[indexSize++] = i;
+      }
     }
-    Filter[] filters = new Filter[num];
-    SerializedObject so = new SerializedObject(model);
-    for (int i = 0; i < filters.length; i++) {
-      filters[i] = (Filter) so.getObject();
-    }
-    return filters;
+    int [] result = new int [indexSize];
+    System.arraycopy(index, 0, result, 0, indexSize);
+    return result;
   }
   
   /**
@@ -630,7 +559,7 @@ public abstract class Filter
    * @param data the data to be filtered
    * @param filter the filter to be used
    * @return the filtered set of data
-   * @throws Exception if the filter can't be used successfully
+   * @exception Exception if the filter can't be used successfully
    */
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
@@ -656,283 +585,14 @@ public abstract class Filter
   }
 
   /**
-   * Returns a description of the filter, by default only the classname.
-   * 
-   * @return a string describing the filter
-   */
-  public String toString() {
-    return this.getClass().getName();
-  }
-  
-  /**
-   * generates source code from the filter
-   * 
-   * @param filter the filter to output as source
-   * @param className the name of the generated class
-   * @param input the input data the header is generated for
-   * @param output the output data the header is generated for
-   * @return the generated source code
-   * @throws Exception if source code cannot be generated
-   */
-  public static String wekaStaticWrapper(
-      Sourcable filter, String className, Instances input, Instances output) 
-    throws Exception {
-    
-    StringBuffer	result;
-    int			i;
-    int			n;
-    
-    result = new StringBuffer();
-    
-    result.append("// Generated with Weka " + Version.VERSION + "\n");
-    result.append("//\n");
-    result.append("// This code is public domain and comes with no warranty.\n");
-    result.append("//\n");
-    result.append("// Timestamp: " + new Date() + "\n");
-    result.append("// Relation: " + input.relationName() + "\n");
-    result.append("\n");
-    
-    result.append("package weka.filters;\n");
-    result.append("\n");
-    result.append("import weka.core.Attribute;\n");
-    result.append("import weka.core.Capabilities;\n");
-    result.append("import weka.core.Capabilities.Capability;\n");
-    result.append("import weka.core.FastVector;\n");
-    result.append("import weka.core.Instance;\n");
-    result.append("import weka.core.Instances;\n");
-    result.append("import weka.filters.Filter;\n");
-    result.append("\n");
-    result.append("public class WekaWrapper\n");
-    result.append("  extends Filter {\n");
-
-    // globalInfo
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Returns only the toString() method.\n");
-    result.append("   *\n");
-    result.append("   * @return a string describing the filter\n");
-    result.append("   */\n");
-    result.append("  public String globalInfo() {\n");
-    result.append("    return toString();\n");
-    result.append("  }\n");
-    
-    // getCapabilities
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Returns the capabilities of this filter.\n");
-    result.append("   *\n");
-    result.append("   * @return the capabilities\n");
-    result.append("   */\n");
-    result.append("  public Capabilities getCapabilities() {\n");
-    result.append(((Filter) filter).getCapabilities().toSource("result", 4));
-    result.append("    return result;\n");
-    result.append("  }\n");
-
-    // objectsToInstance
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * turns array of Objects into an Instance object\n");
-    result.append("   *\n");
-    result.append("   * @param obj	the Object array to turn into an Instance\n");
-    result.append("   * @param format	the data format to use\n");
-    result.append("   * @return		the generated Instance object\n");
-    result.append("   */\n");
-    result.append("  protected Instance objectsToInstance(Object[] obj, Instances format) {\n");
-    result.append("    Instance		result;\n");
-    result.append("    double[]		values;\n");
-    result.append("    int		i;\n");
-    result.append("\n");  
-    result.append("    values = new double[obj.length];\n");
-    result.append("\n");
-    result.append("    for (i = 0 ; i < obj.length; i++) {\n");
-    result.append("      if (obj[i] == null)\n");
-    result.append("        values[i] = Instance.missingValue();\n");
-    result.append("      else if (format.attribute(i).isNumeric())\n");
-    result.append("        values[i] = (Double) obj[i];\n");
-    result.append("      else if (format.attribute(i).isNominal())\n");
-    result.append("        values[i] = format.attribute(i).indexOfValue((String) obj[i]);\n");
-    result.append("    }\n");
-    result.append("\n");
-    result.append("    // create new instance\n");
-    result.append("    result = new Instance(1.0, values);\n");
-    result.append("    result.setDataset(format);\n");
-    result.append("\n");
-    result.append("    return result;\n");
-    result.append("  }\n");
-
-    // instanceToObjects
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * turns the Instance object into an array of Objects\n");
-    result.append("   *\n");
-    result.append("   * @param inst	the instance to turn into an array\n");
-    result.append("   * @return		the Object array representing the instance\n");
-    result.append("   */\n");
-    result.append("  protected Object[] instanceToObjects(Instance inst) {\n");
-    result.append("    Object[]	result;\n");
-    result.append("    int		i;\n");
-    result.append("\n");  
-    result.append("    result = new Object[inst.numAttributes()];\n");
-    result.append("\n");
-    result.append("    for (i = 0 ; i < inst.numAttributes(); i++) {\n");
-    result.append("      if (inst.isMissing(i))\n");
-    result.append("  	result[i] = null;\n");
-    result.append("      else if (inst.attribute(i).isNumeric())\n");
-    result.append("  	result[i] = inst.value(i);\n");
-    result.append("      else\n");
-    result.append("  	result[i] = inst.stringValue(i);\n");
-    result.append("    }\n");
-    result.append("\n");
-    result.append("    return result;\n");
-    result.append("  }\n");
-
-    // instancesToObjects
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * turns the Instances object into an array of Objects\n");
-    result.append("   *\n");
-    result.append("   * @param data	the instances to turn into an array\n");
-    result.append("   * @return		the Object array representing the instances\n");
-    result.append("   */\n");
-    result.append("  protected Object[][] instancesToObjects(Instances data) {\n");
-    result.append("    Object[][]	result;\n");
-    result.append("    int		i;\n");
-    result.append("\n");  
-    result.append("    result = new Object[data.numInstances()][];\n");
-    result.append("\n");  
-    result.append("    for (i = 0; i < data.numInstances(); i++)\n");
-    result.append("      result[i] = instanceToObjects(data.instance(i));\n");
-    result.append("\n");  
-    result.append("    return result;\n");
-    result.append("  }\n");
-    
-    // setInputFormat
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Only tests the input data.\n");
-    result.append("   *\n");
-    result.append("   * @param instanceInfo the format of the data to convert\n");
-    result.append("   * @return always true, to indicate that the output format can \n");
-    result.append("   *         be collected immediately.\n");
-    result.append("   */\n");
-    result.append("  public boolean setInputFormat(Instances instanceInfo) throws Exception {\n");
-    result.append("    super.setInputFormat(instanceInfo);\n");
-    result.append("    \n");
-    result.append("    // generate output format\n");
-    result.append("    FastVector atts = new FastVector();\n");
-    result.append("    FastVector attValues;\n");
-    for (i = 0; i < output.numAttributes(); i++) {
-      result.append("    // " + output.attribute(i).name() + "\n");
-      if (output.attribute(i).isNumeric()) {
-	result.append("    atts.addElement(new Attribute(\"" 
-	    + output.attribute(i).name() + "\"));\n");
-      }
-      else if (output.attribute(i).isNominal()) {
-	result.append("    attValues = new FastVector();\n");
-	for (n = 0; n < output.attribute(i).numValues(); n++) {
-	  result.append("    attValues.addElement(\"" + output.attribute(i).value(n) + "\");\n");
-	}
-	result.append("    atts.addElement(new Attribute(\"" 
-	    + output.attribute(i).name() + "\", attValues));\n");
-      }
-      else {
-	throw new UnsupportedAttributeTypeException(
-	    "Attribute type '" + output.attribute(i).type() + "' (position " 
-	    + (i+1) + ") is not supported!");
-      }
-    }
-    result.append("    \n");
-    result.append("    Instances format = new Instances(\"" + output.relationName() + "\", atts, 0);\n");
-    result.append("    format.setClassIndex(" + output.classIndex() + ");\n");
-    result.append("    setOutputFormat(format);\n");
-    result.append("    \n");
-    result.append("    return true;\n");
-    result.append("  }\n");
-    
-    // input
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Directly filters the instance.\n");
-    result.append("   *\n");
-    result.append("   * @param instance the instance to convert\n");
-    result.append("   * @return always true, to indicate that the output can \n");
-    result.append("   *         be collected immediately.\n");
-    result.append("   */\n");
-    result.append("  public boolean input(Instance instance) throws Exception {\n");
-    result.append("    Object[] filtered = " + className + ".filter(instanceToObjects(instance));\n");
-    result.append("    push(objectsToInstance(filtered, getOutputFormat()));\n");
-    result.append("    return true;\n");
-    result.append("  }\n");
-    
-    // batchFinished
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Performs a batch filtering of the buffered data, if any available.\n");
-    result.append("   *\n");
-    result.append("   * @return true if instances were filtered otherwise false\n");
-    result.append("   */\n");
-    result.append("  public boolean batchFinished() throws Exception {\n");
-    result.append("    if (getInputFormat() == null)\n");
-    result.append("      throw new NullPointerException(\"No input instance format defined\");;\n");
-    result.append("\n");
-    result.append("    Instances inst = getInputFormat();\n");
-    result.append("    if (inst.numInstances() > 0) {\n");
-    result.append("      Object[][] filtered = " + className + ".filter(instancesToObjects(inst));\n");
-    result.append("      for (int i = 0; i < filtered.length; i++) {\n");
-    result.append("        push(objectsToInstance(filtered[i], getOutputFormat()));\n");
-    result.append("      }\n");
-    result.append("    }\n");
-    result.append("\n");
-    result.append("    flushInput();\n");
-    result.append("    m_NewBatch = true;\n");
-    result.append("    m_FirstBatchDone = true;\n");
-    result.append("\n");
-    result.append("    return (inst.numInstances() > 0);\n");
-    result.append("  }\n");
-
-    // toString
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Returns only the classnames and what filter it is based on.\n");
-    result.append("   *\n");
-    result.append("   * @return a short description\n");
-    result.append("   */\n");
-    result.append("  public String toString() {\n");
-    result.append("    return \"Auto-generated filter wrapper, based on " 
-	+ filter.getClass().getName() + " (generated with Weka " + Version.VERSION + ").\\n" 
-	+ "\" + this.getClass().getName() + \"/" + className + "\";\n");
-    result.append("  }\n");
-    
-    // main
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * Runs the filter from commandline.\n");
-    result.append("   *\n");
-    result.append("   * @param args the commandline arguments\n");
-    result.append("   */\n");
-    result.append("  public static void main(String args[]) {\n");
-    result.append("    runFilter(new WekaWrapper(), args);\n");
-    result.append("  }\n");
-    result.append("}\n");
-
-    // actual filter code
-    result.append("\n");
-    result.append(filter.toSource(className, input));
-    
-    return result.toString();
-  }
-  
-  /**
    * Method for testing filters.
    *
-   * @param filter the filter to use
-   * @param options should contain the following arguments: <br/>
-   * -i input_file <br/>
-   * -o output_file <br/>
-   * -c class_index <br/>
-   * -z classname (for filters implementing weka.filters.Sourcable) <br/>
+   * @param argv should contain the following arguments: <br>
+   * -i input_file <br>
+   * -o output_file <br>
+   * -c class_index <br>
    * or -h for help on options
-   * @throws Exception if something goes wrong or the user requests help on
+   * @exception Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void filterFile(Filter filter, String [] options) 
@@ -940,10 +600,9 @@ public abstract class Filter
 
     boolean debug = false;
     Instances data = null;
-    DataSource input = null;
+    Reader input = null;
     PrintWriter output = null;
     boolean helpRequest;
-    String sourceCode = "";
 
     try {
        helpRequest = Utils.getFlag('h', options);
@@ -954,8 +613,6 @@ public abstract class Filter
       String infileName = Utils.getOption('i', options);
       String outfileName = Utils.getOption('o', options); 
       String classIndex = Utils.getOption('c', options);
-      if (filter instanceof Sourcable)
-	sourceCode = Utils.getOption('z', options);
       
       if (filter instanceof OptionHandler) {
 	((OptionHandler)filter).setOptions(options);
@@ -966,9 +623,9 @@ public abstract class Filter
 	throw new Exception("Help requested.\n");
       }
       if (infileName.length() != 0) {
-	input = new DataSource(infileName);
+	input = new BufferedReader(new FileReader(infileName));
       } else {
-	input = new DataSource(System.in);
+	input = new BufferedReader(new InputStreamReader(System.in));
       }
       if (outfileName.length() != 0) {
 	output = new PrintWriter(new FileOutputStream(outfileName));
@@ -976,7 +633,7 @@ public abstract class Filter
 	output = new PrintWriter(System.out);
       }
 
-      data = input.getStructure();
+      data = new Instances(input, 1);
       if (classIndex.length() != 0) {
 	if (classIndex.equals("first")) {
 	  data.setClassIndex(0);
@@ -1014,12 +671,6 @@ public abstract class Filter
 	+ "\t\"first\" and \"last\" are also valid entries.\n"
 	+ "\tIf not supplied then no class is assigned.\n";
 
-      if (filter instanceof Sourcable) {
-	genericOptions +=
-	  "-z <class name>\n"
-	  + "\tOutputs the source code representing the trained filter.\n";
-      }
-      
       throw new Exception('\n' + ex.getMessage()
 			  + filterOptions+genericOptions);
     }
@@ -1037,13 +688,11 @@ public abstract class Filter
     }
     
     // Pass all the instances to the filter
-    Instance inst;
-    while (input.hasMoreElements(data)) {
-      inst = input.nextElement(data);
+    while (data.readInstance(input)) {
       if (debug) {
 	System.err.println("Input instance to filter");
       }
-      if (filter.input(inst)) {
+      if (filter.input(data.instance(0))) {
 	if (debug) {
 	  System.err.println("Filter said collect immediately");
 	}
@@ -1056,8 +705,9 @@ public abstract class Filter
 	}
 	output.println(filter.output().toString());
       }
+      data.delete(0);
     }
-
+    
     // Say that input has finished, and print any pending output instances
     if (debug) {
       System.err.println("Setting end of batch");
@@ -1089,26 +739,19 @@ public abstract class Filter
     if (output != null) {
       output.close();
     }
-    
-    if (sourceCode.length() != 0)
-      System.out.println(
-	  wekaStaticWrapper(
-	      (Sourcable) filter, sourceCode, data, filter.getOutputFormat()));
   }
 
   /**
    * Method for testing filters ability to process multiple batches.
    *
-   * @param filter the filter to use
-   * @param options should contain the following arguments: <br/>
-   * -i (first) input file <br/>
-   * -o (first) output file <br/>
-   * -r (second) input file <br/>
-   * -s (second) output file <br/>
-   * -c class_index <br/>
-   * -z classname (for filters implementing weka.filters.Sourcable) <br/>
+   * @param argv should contain the following arguments:<br>
+   * -i (first) input file <br>
+   * -o (first) output file <br>
+   * -r (second) input file <br>
+   * -s (second) output file <br>
+   * -c class_index <br>
    * or -h for help on options
-   * @throws Exception if something goes wrong or the user requests help on
+   * @exception Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void batchFilterFile(Filter filter, String [] options) 
@@ -1116,26 +759,24 @@ public abstract class Filter
 
     Instances firstData = null;
     Instances secondData = null;
-    DataSource firstInput = null;
-    DataSource secondInput = null;
+    Reader firstInput = null;
+    Reader secondInput = null;
     PrintWriter firstOutput = null;
     PrintWriter secondOutput = null;
     boolean helpRequest;
-    String sourceCode = "";
-
     try {
       helpRequest = Utils.getFlag('h', options);
 
       String fileName = Utils.getOption('i', options); 
       if (fileName.length() != 0) {
-	firstInput = new DataSource(fileName);
+	firstInput = new BufferedReader(new FileReader(fileName));
       } else {
 	throw new Exception("No first input file given.\n");
       }
 
       fileName = Utils.getOption('r', options); 
       if (fileName.length() != 0) {
-	secondInput = new DataSource(fileName);
+	secondInput = new BufferedReader(new FileReader(fileName));
       } else {
 	throw new Exception("No second input file given.\n");
       }
@@ -1154,8 +795,6 @@ public abstract class Filter
 	secondOutput = new PrintWriter(System.out);
       }
       String classIndex = Utils.getOption('c', options);
-      if (filter instanceof Sourcable)
-	sourceCode = Utils.getOption('z', options);
 
       if (filter instanceof OptionHandler) {
 	((OptionHandler)filter).setOptions(options);
@@ -1165,8 +804,8 @@ public abstract class Filter
       if (helpRequest) {
 	throw new Exception("Help requested.\n");
       }
-      firstData = firstInput.getStructure();
-      secondData = secondInput.getStructure();
+      firstData = new Instances(firstInput, 1);
+      secondData = new Instances(secondInput, 1);
       if (!secondData.equalHeaders(firstData)) {
 	throw new Exception("Input file formats differ.\n");
       }
@@ -1211,12 +850,6 @@ public abstract class Filter
 	+ "\t\"first\" and \"last\" are also valid entries.\n"
 	+ "\tIf not supplied then no class is assigned.\n";
 
-      if (filter instanceof Sourcable) {
-	genericOptions +=
-	  "-z <class name>\n"
-	  + "\tOutputs the source code representing the trained filter.\n";
-      }
-      
       throw new Exception('\n' + ex.getMessage()
 			  + filterOptions+genericOptions);
     }
@@ -1227,16 +860,15 @@ public abstract class Filter
     }
     
     // Pass all the instances to the filter
-    Instance inst;
-    while (firstInput.hasMoreElements(firstData)) {
-      inst = firstInput.nextElement(firstData);
-      if (filter.input(inst)) {
+    while (firstData.readInstance(firstInput)) {
+      if (filter.input(firstData.instance(0))) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from setInputFormat() "
 			  + "earlier!");
 	}
 	firstOutput.println(filter.output().toString());
       }
+      firstData.delete(0);
     }
     
     // Say that input has finished, and print any pending output instances
@@ -1258,15 +890,15 @@ public abstract class Filter
       printedHeader = true;
     }
     // Pass all the second instances to the filter
-    while (secondInput.hasMoreElements(secondData)) {
-      inst = secondInput.nextElement(secondData);
-      if (filter.input(inst)) {
+    while (secondData.readInstance(secondInput)) {
+      if (filter.input(secondData.instance(0))) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from"
 			  + " isOutputFormatDefined() earlier!");
 	}
 	secondOutput.println(filter.output().toString());
       }
+      secondData.delete(0);
     }
     
     // Say that input has finished, and print any pending output instances
@@ -1281,39 +913,12 @@ public abstract class Filter
     if (secondOutput != null) {
       secondOutput.close();
     }
-
-    if (sourceCode.length() != 0)
-      System.out.println(
-	  wekaStaticWrapper(
-	      (Sourcable) filter, sourceCode, firstData, filter.getOutputFormat()));
   }
 
-  /**
-   * runs the filter instance with the given options.
-   * 
-   * @param filter	the filter to run
-   * @param options	the commandline options
-   */
-  protected static void runFilter(Filter filter, String[] options) {
-    try {
-      if (Utils.getFlag('b', options)) {
-	Filter.batchFilterFile(filter, options);
-      } else {
-	Filter.filterFile(filter, options);
-      }
-    } catch (Exception e) {
-      if (    (e.toString().indexOf("Help requested") == -1) 
-	   && (e.toString().indexOf("Filter options") == -1) )
-	e.printStackTrace();
-      else
-	System.err.println(e.getMessage());
-    }
-  }
-  
   /**
    * Main method for testing this class.
    *
-   * @param args should contain arguments to the filter: use -h for help
+   * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] args) {
     
@@ -1324,10 +929,22 @@ public abstract class Filter
       String fname = args[0];
       Filter f = (Filter)Class.forName(fname).newInstance();
       args[0] = "";
-      runFilter(f, args);
+      if (Utils.getFlag('b', args)) {
+	Filter.batchFilterFile(f, args);
+      } else {
+	Filter.filterFile(f, args);
+      }
     } catch (Exception ex) {
       ex.printStackTrace();
-      System.err.println(ex.getMessage());
+      System.out.println(ex.getMessage());
     }
   }
 }
+
+
+
+
+
+
+
+

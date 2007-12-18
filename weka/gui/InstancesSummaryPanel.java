@@ -16,21 +16,31 @@
 
 /*
  *    InstancesSummaryPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
+
 
 package weka.gui;
 
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 
 /** 
@@ -38,13 +48,9 @@ import javax.swing.SwingConstants;
  * attributes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
-public class InstancesSummaryPanel
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5243579535296681063L;
+public class InstancesSummaryPanel extends JPanel {
 
   /** Message shown when no instances have been loaded */
   protected static final String NO_SOURCE = "None";

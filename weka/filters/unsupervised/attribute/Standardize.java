@@ -16,46 +16,26 @@
 
 /*
  *    Standardize.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Eibe Frank
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Sourcable;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Standardizes all numeric attributes in the given dataset to have zero mean and unit variance (apart from the class attribute, if set).
- * <p/>
- <!-- globalinfo-end -->
+ * Standardizes all numeric attributes in the given dataset
+ * to have zero mean and unit variance.
+ * intervals.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- <!-- options-end -->
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.4.2.1 $
  */
-public class Standardize 
-  extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, Sourcable {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6830769026855053281L;
+public class Standardize extends PotentialClassIgnorer implements UnsupervisedFilter {
 
   /** The means */
   private double [] m_Means;
@@ -75,27 +55,6 @@ public class Standardize
       + "to have zero mean and unit variance (apart from the class attribute, if set).";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -103,7 +62,7 @@ public class Standardize
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -122,7 +81,8 @@ public class Standardize
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception Exception if an error occurs
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -257,96 +217,6 @@ public class Standardize
     inst.setDataset(instance.dataset());
     push(inst);
   }
-  
-  /**
-   * Returns a string that describes the filter as source. The
-   * filter will be contained in a class with the given name (there may
-   * be auxiliary classes),
-   * and will contain two methods with these signatures:
-   * <pre><code>
-   * // converts one row
-   * public static Object[] filter(Object[] i);
-   * // converts a full dataset (first dimension is row index)
-   * public static Object[][] filter(Object[][] i);
-   * </code></pre>
-   * where the array <code>i</code> contains elements that are either
-   * Double, String, with missing values represented as null. The generated
-   * code is public domain and comes with no warranty.
-   *
-   * @param className   the name that should be given to the source class.
-   * @param data	the dataset used for initializing the filter
-   * @return            the object source described by a string
-   * @throws Exception  if the source can't be computed
-   */
-  public String toSource(String className, Instances data) throws Exception {
-    StringBuffer        result;
-    boolean[]		process;
-    int			i;
-    
-    result = new StringBuffer();
-    
-    // determine what attributes were processed
-    process = new boolean[data.numAttributes()];
-    for (i = 0; i < data.numAttributes(); i++) {
-      process[i] = (data.attribute(i).isNumeric() && (i != data.classIndex()));
-    }
-    
-    result.append("class " + className + " {\n");
-    result.append("\n");
-    result.append("  /** lists which attributes will be processed */\n");
-    result.append("  protected final static boolean[] PROCESS = new boolean[]{" + Utils.arrayToString(process) + "};\n");
-    result.append("\n");
-    result.append("  /** the computed means */\n");
-    result.append("  protected final static double[] MEANS = new double[]{" + Utils.arrayToString(m_Means) + "};\n");
-    result.append("\n");
-    result.append("  /** the computed standard deviations */\n");
-    result.append("  protected final static double[] STDEVS = new double[]{" + Utils.arrayToString(m_StdDevs) + "};\n");
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * filters a single row\n");
-    result.append("   * \n");
-    result.append("   * @param i the row to process\n");
-    result.append("   * @return the processed row\n");
-    result.append("   */\n");
-    result.append("  public static Object[] filter(Object[] i) {\n");
-    result.append("    Object[] result;\n");
-    result.append("\n");
-    result.append("    result = new Object[i.length];\n");
-    result.append("    for (int n = 0; n < i.length; n++) {\n");
-    result.append("      if (PROCESS[n] && (i[n] != null)) {\n");
-    result.append("        if (STDEVS[n] > 0)\n");
-    result.append("          result[n] = (((Double) i[n]) - MEANS[n]) / STDEVS[n];\n");
-    result.append("        else\n");
-    result.append("          result[n] = ((Double) i[n]) - MEANS[n];\n");
-    result.append("      }\n");
-    result.append("      else {\n");
-    result.append("        result[n] = i[n];\n");
-    result.append("      }\n");
-    result.append("    }\n");
-    result.append("\n");
-    result.append("    return result;\n");
-    result.append("  }\n");
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * filters multiple rows\n");
-    result.append("   * \n");
-    result.append("   * @param i the rows to process\n");
-    result.append("   * @return the processed rows\n");
-    result.append("   */\n");
-    result.append("  public static Object[][] filter(Object[][] i) {\n");
-    result.append("    Object[][] result;\n");
-    result.append("\n");
-    result.append("    result = new Object[i.length][];\n");
-    result.append("    for (int n = 0; n < i.length; n++) {\n");
-    result.append("      result[n] = filter(i[n]);\n");
-    result.append("    }\n");
-    result.append("\n");
-    result.append("    return result;\n");
-    result.append("  }\n");
-    result.append("}\n");
-    
-    return result.toString();
-  }
 
   /**
    * Main method for testing this class.
@@ -355,6 +225,23 @@ public class Standardize
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Standardize(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Standardize(), argv);
+      } else {
+	Filter.filterFile(new Standardize(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

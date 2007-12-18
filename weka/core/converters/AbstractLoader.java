@@ -16,7 +16,7 @@
 
 /*
  *    AbstractLoader.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -31,7 +31,7 @@ import java.io.*;
  * methods. All other methods must be overridden.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6.2.2 $
  */
 public abstract class AbstractLoader implements Loader {
   
