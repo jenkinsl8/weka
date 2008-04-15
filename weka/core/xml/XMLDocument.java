@@ -52,7 +52,7 @@ import org.xml.sax.InputSource;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class XMLDocument {
   

@@ -86,7 +86,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class MiddleOutConstructor
   extends BallTreeConstructor
@@ -997,7 +997,7 @@ public class MiddleOutConstructor
    * node's centre/anchor point.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class TempNode {
     
@@ -1048,7 +1048,7 @@ public class MiddleOutConstructor
    * anchor point). 
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class ListNode {
     
@@ -1076,7 +1076,7 @@ public class MiddleOutConstructor
    * centre/pivot/anchor, in a (reverse sorted) list.  
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class MyIdxList
     extends FastVector {

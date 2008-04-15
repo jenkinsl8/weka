@@ -32,7 +32,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class NormalEstimator
   extends Estimator

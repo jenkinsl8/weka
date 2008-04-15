@@ -82,9 +82,9 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
-public class BayesNetGenerator extends EditableBayesNet {
+public class BayesNetGenerator extends BayesNet {
     /** the seed value */
     int m_nSeed = 1;
     
@@ -172,22 +172,6 @@ public class BayesNetGenerator extends EditableBayesNet {
 		for (int iNode = 0; iNode < nNodes; iNode++) {
 			m_Distributions[iNode][0] = 
 			  new DiscreteEstimatorBayes(nValues, getEstimator().getAlpha());
-		}
-		m_nEvidence = new FastVector(nNodes);
-		for (int i = 0; i < nNodes; i++) {
-			m_nEvidence.addElement(-1);
-		}
-		m_fMarginP = new FastVector(nNodes);
-		for (int i = 0; i < nNodes; i++) {
-			double[] P = new double[getCardinality(i)];
-			m_fMarginP.addElement(P);
-		}
-
-		m_nPositionX = new FastVector(nNodes);
-		m_nPositionY = new FastVector(nNodes);
-		for (int iNode = 0; iNode < nNodes; iNode++) {
-			m_nPositionX.addElement(iNode%10 * 50);
-			m_nPositionY.addElement(((int)(iNode/10)) * 50);
 		}
 	} // DefineNodes
 

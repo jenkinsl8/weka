@@ -32,7 +32,7 @@ import weka.core.Statistics;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class KernelEstimator extends Estimator implements IncrementalEstimator {
 

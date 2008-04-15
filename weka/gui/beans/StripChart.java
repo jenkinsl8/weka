@@ -50,7 +50,7 @@ import javax.swing.border.TitledBorder;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class StripChart 
   extends JPanel 

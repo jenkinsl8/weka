@@ -28,7 +28,7 @@ import java.io.Serializable;
  * A <code>Tag</code> simply associates a numeric ID with a String description.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.9.2.3 $
  */
 public class Tag implements Serializable {
 

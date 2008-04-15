@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.21.2.4 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 

@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class NominalToString
   extends Filter 

@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class AddClassification
   extends SimpleBatchFilter {
@@ -693,10 +693,6 @@ public class AddClassification
 	newInstance = new SparseInstance(oldInstance.weight(), newValues);
       else
 	newInstance = new Instance(oldInstance.weight(), newValues);
-
-      // copy string/relational values from input to output
-      copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());
-
       result.add(newInstance);
     }
     

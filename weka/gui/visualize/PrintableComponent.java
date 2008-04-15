@@ -59,7 +59,7 @@ import javax.swing.event.DocumentListener;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class PrintableComponent
   implements PrintableHandler {

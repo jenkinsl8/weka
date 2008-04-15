@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
 public class AddCluster 
   extends Filter 
@@ -268,13 +268,8 @@ public class AddCluster
     }
 
     // add cluster to end
-    try {
-      instanceVals[instance.numAttributes()] = m_Clusterer.clusterInstance(filteredI);
-    }
-    catch (Exception e) {
-      // clusterer couldn't cluster instance -> missing
-      instanceVals[instance.numAttributes()] = Instance.missingValue();
-    }
+    instanceVals[instance.numAttributes()]
+      = m_Clusterer.clusterInstance(filteredI);
 
     // create new instance
     if (original instanceof SparseInstance) {

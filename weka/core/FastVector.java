@@ -31,7 +31,7 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class FastVector
   implements Copyable, Serializable {

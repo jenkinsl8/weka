@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15.2.2 $
  */
 public class LeastMedSq 
   extends Classifier 

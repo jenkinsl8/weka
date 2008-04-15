@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.29.2.7 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -207,17 +207,13 @@ public class SimpleKMeans
 
     m_FullMeansOrModes = new double[instances.numAttributes()];
     m_FullMissingCounts = new int[instances.numAttributes()];
-    if (m_displayStdDevs) {
-      m_FullStdDevs = new double[instances.numAttributes()];
-    }
+    m_FullStdDevs = new double[instances.numAttributes()];
     m_FullNominalCounts = new int[instances.numAttributes()][0];
     for (int i = 0; i < instances.numAttributes(); i++) {
       m_FullMissingCounts[i] = instances.attributeStats(i).missingCount;
       m_FullMeansOrModes[i] = instances.meanOrMode(i);
       if (instances.attribute(i).isNumeric()) {
-        if (m_displayStdDevs) {
-          m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
-        }
+        m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
         if (m_FullMissingCounts[i] == instances.numInstances()) {
           m_FullMeansOrModes[i] = Double.NaN; // mark missing as mean
         }
@@ -339,22 +335,18 @@ public class SimpleKMeans
 	m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
       }
     }
-    if (m_displayStdDevs) {
-      m_ClusterStdDevs = new Instances(instances, m_NumClusters);
-    }
+    m_ClusterStdDevs = new Instances(instances, m_NumClusters);
     m_ClusterSizes = new int [m_NumClusters];
     for (i = 0; i < m_NumClusters; i++) {
-      if (m_displayStdDevs) {
-        double [] vals2 = new double[instances.numAttributes()];
-        for (int j = 0; j < instances.numAttributes(); j++) {
-          if (instances.attribute(j).isNumeric()) {
-            vals2[j] = Math.sqrt(tempI[i].variance(j));
-          } else {
-            vals2[j] = Instance.missingValue();
-          }	
-        }    
-        m_ClusterStdDevs.add(new Instance(1.0, vals2));
+      double [] vals2 = new double[instances.numAttributes()];
+      for (int j = 0; j < instances.numAttributes(); j++) {
+	if (instances.attribute(j).isNumeric()) {
+	  vals2[j] = Math.sqrt(tempI[i].variance(j));
+	} else {
+	  vals2[j] = Instance.missingValue();
+	}	
       }
+      m_ClusterStdDevs.add(new Instance(1.0, vals2));
       m_ClusterSizes[i] = tempI[i].numInstances();
     }
   }

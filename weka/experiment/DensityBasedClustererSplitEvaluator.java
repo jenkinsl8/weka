@@ -39,7 +39,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Specify the full class name of the clusterer to evaluate. <p>
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 
 public class DensityBasedClustererSplitEvaluator 

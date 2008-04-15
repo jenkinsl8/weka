@@ -96,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.28.2.1 $
  */
 public class UserClassifier 
   extends Classifier 

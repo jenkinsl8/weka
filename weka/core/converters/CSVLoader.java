@@ -46,7 +46,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.13.2.5 $
  * @see Loader
  */
 public class CSVLoader 

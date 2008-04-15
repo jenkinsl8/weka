@@ -43,7 +43,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.16.2.5 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor

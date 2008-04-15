@@ -59,7 +59,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.7.2.3 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {

@@ -64,7 +64,7 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.25.2.2 $
  */
 public class DatasetListPanel
   extends JPanel

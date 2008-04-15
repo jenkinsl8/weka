@@ -68,7 +68,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  *         Martin Guetlein (cashing merit of expanded nodes) 
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.27.2.1 $
  */
 public class BestFirst 
   extends ASSearch 

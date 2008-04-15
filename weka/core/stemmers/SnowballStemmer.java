@@ -54,7 +54,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.8 $
+ * @version   $Revision: 1.6.2.2 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {

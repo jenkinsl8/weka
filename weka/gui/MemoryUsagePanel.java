@@ -47,7 +47,7 @@ import javax.swing.SwingUtilities;
  * A panel for displaying the memory usage.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class MemoryUsagePanel
   extends JPanel {
@@ -59,7 +59,7 @@ public class MemoryUsagePanel
    * Specialized thread for monitoring the memory usage.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.2 $
    */
   protected class MemoryMonitor
     extends Thread {

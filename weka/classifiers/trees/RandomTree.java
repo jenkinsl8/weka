@@ -71,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class RandomTree 
   extends Classifier 

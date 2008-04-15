@@ -46,7 +46,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class CostMatrix implements Serializable {
 

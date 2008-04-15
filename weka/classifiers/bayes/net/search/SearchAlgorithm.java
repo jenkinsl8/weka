@@ -39,7 +39,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class SearchAlgorithm 
     implements OptionHandler, Serializable {
@@ -327,9 +327,11 @@ public class SearchAlgorithm
                 }
             }
         }
+
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            boolean bIsInMarkovBoundary = (iAttribute == iClass)
-                    || bayesNet.getParentSet(iAttribute).contains(iClass)
+            boolean bIsInMarkovBoundary = (iAttribute == iClass);
+            bIsInMarkovBoundary =
+                bayesNet.getParentSet(iAttribute).contains(iClass)
                     || bayesNet.getParentSet(iClass).contains(iAttribute);
             for (int iAttribute2 = 0; !bIsInMarkovBoundary && iAttribute2 < instances.numAttributes(); iAttribute2++) {
                 bIsInMarkovBoundary =
@@ -337,12 +339,8 @@ public class SearchAlgorithm
                         && bayesNet.getParentSet(iAttribute2).contains(iClass);
             }
             if (!bIsInMarkovBoundary) {
-                if (ancestors.contains(iAttribute)) {
-                	if (bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
-                		bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
-                	} else {
-                		// too bad
-                	}
+                if (ancestors.contains(iAttribute) && bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
+                    bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
                 } else {
                     bayesNet.getParentSet(iAttribute).addParent(iClass, instances);
                 }

@@ -140,7 +140,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator

@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class SerializedClassifier
   extends Classifier {

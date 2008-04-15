@@ -48,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 

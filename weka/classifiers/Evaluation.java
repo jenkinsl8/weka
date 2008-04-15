@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.85 $
+ * @version  $Revision: 1.81.2.2 $
  */
 public class Evaluation
 implements Summarizable {

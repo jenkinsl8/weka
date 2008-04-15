@@ -98,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class K2 
  	extends LocalScoreSearchAlgorithm
@@ -141,7 +141,7 @@ public class K2
 	}
 
 	/**
-	 * search determines the network structure/graph of the network
+	 * buildStructure determines the network structure/graph of the network
 	 * with the K2 algorithm, restricted by its initial structure (which can
 	 * be an empty graph, or a Naive Bayes graph.
 	 * 
@@ -149,7 +149,8 @@ public class K2
 	 * @param instances the data to work with
 	 * @throws Exception if something goes wrong
 	 */
-	public void search (BayesNet bayesNet, Instances instances) throws Exception {
+	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
+		super.buildStructure(bayesNet, instances);
 		int nOrder[] = new int [instances.numAttributes()];
 		nOrder[0] = instances.classIndex();
 

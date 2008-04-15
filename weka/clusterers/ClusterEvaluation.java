@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.42 $
+ * @version  $Revision: 1.41.2.1 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 

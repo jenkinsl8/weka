@@ -97,7 +97,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.43.2.2 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 

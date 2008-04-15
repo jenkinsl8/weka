@@ -37,7 +37,7 @@ import java.util.Vector;
  * Abstract class for constructing a BallTree .
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public abstract class BallTreeConstructor 
   implements OptionHandler, Serializable {

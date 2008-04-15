@@ -105,7 +105,7 @@ import weka.core.Utils;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  *
  */
 public class DTNB extends DecisionTable {

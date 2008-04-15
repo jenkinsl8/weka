@@ -32,7 +32,7 @@ import java.net.URLClassLoader;
  * Utility class that can add jar files to the classpath dynamically.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version  $Revision: 1.1 $
+ * @version  $Revision: 1.1.2.2 $
  */
 public class ClassloaderUtil {
 

@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  * @see Loader
  */
 public class DatabaseLoader 

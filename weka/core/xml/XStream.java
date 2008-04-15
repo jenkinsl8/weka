@@ -41,7 +41,7 @@ import java.lang.StringBuffer;
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
  * @author Mark Hall (mhall[{at}]pentao[{dot}]org
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class XStream {
 

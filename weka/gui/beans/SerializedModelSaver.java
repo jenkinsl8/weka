@@ -45,7 +45,7 @@ import weka.core.Utils;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class SerializedModelSaver
   extends JPanel

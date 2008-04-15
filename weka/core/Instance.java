@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.25.2.1 $ 
  */
 public class Instance
   implements Copyable, Serializable {

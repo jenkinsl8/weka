@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.20.2.1 $
  */
 public class SparseInstance
   extends Instance {

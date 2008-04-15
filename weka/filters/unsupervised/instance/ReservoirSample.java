@@ -79,7 +79,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class ReservoirSample 
   extends Filter 

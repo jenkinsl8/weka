@@ -40,7 +40,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  * @see StringCompare
  */
 public class ClassDiscovery {

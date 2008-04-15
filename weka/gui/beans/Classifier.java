@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.25.2.6 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -124,7 +124,8 @@ public class Classifier
   /** the extension for serialized models (binary Java serialization) */
   public final static String FILE_EXTENSION = "model";
 
-  private transient JFileChooser m_fileChooser = null; 
+  private transient JFileChooser m_fileChooser = 
+    new JFileChooser(new File(System.getProperty("user.dir")));
 
   protected FileFilter m_binaryFilter =
     new ExtensionFileFilter("."+FILE_EXTENSION, "Binary serialized model file (*"
@@ -174,7 +175,7 @@ public class Classifier
     add(m_visual, BorderLayout.CENTER);
     setClassifier(m_Classifier);
     
-    //setupFileChooser();
+    setupFileChooser();
   }
 
   /**

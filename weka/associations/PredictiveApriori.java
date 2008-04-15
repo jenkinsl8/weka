@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ */
+ * @version $Revision: 1.11.2.1 $ */
 
 public class PredictiveApriori 
   extends Associator 

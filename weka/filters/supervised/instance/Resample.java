@@ -70,7 +70,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.11.2.1 $ 
  */
 public class Resample
   extends Filter 
