@@ -28,8 +28,6 @@ import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -118,11 +116,11 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.17 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
-	     AdditionalMeasureProducer, RevisionHandler {
+	     AdditionalMeasureProducer {
 
   /** for serialization */
   static final long serialVersionUID = 2551284958501991352L;
@@ -1157,13 +1155,5 @@ public class AveragingResultProducer
     }
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
-  }
+
 } // AveragingResultProducer

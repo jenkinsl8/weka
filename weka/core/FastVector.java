@@ -31,10 +31,10 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15 $
  */
 public class FastVector
-  implements Copyable, Serializable, RevisionHandler {
+  implements Copyable, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -2173635135622930169L;
@@ -42,8 +42,7 @@ public class FastVector
   /**
    * Class for enumerating the vector's elements.
    */
-  public class FastVectorEnumeration
-    implements Enumeration, RevisionHandler {
+  public class FastVectorEnumeration implements Enumeration {
 
     /** The counter. */
     private int m_Counter;
@@ -121,15 +120,6 @@ public class FastVector
 	m_Counter++;
       }
       return result;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
     }
   }
 
@@ -473,15 +463,6 @@ public class FastVector
     
     System.arraycopy(m_Objects, 0, newObjects, 0, m_Size);
     m_Objects = newObjects;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 }
 

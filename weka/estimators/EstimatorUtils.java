@@ -22,24 +22,18 @@
 
 package weka.estimators;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
+import weka.core.*;
  
 /** 
  * Contains static utility functions for Estimators.<p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class EstimatorUtils
-  implements RevisionHandler {
+public class EstimatorUtils {
   
   /** 
    * Find the minimum distance between values
@@ -319,13 +313,6 @@ public class EstimatorUtils
     }
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
-  }
+
+
 }

@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -116,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
 public class SimpleLogistic 
   extends Classifier 
@@ -722,15 +721,6 @@ public class SimpleLogistic
         return "The AIC is used to determine when to stop LogitBoost iterations "
         +"(instead of cross-validation or training error).";
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.13 $");
-    }
 
     /**
      * Main method for testing this class
@@ -741,3 +731,4 @@ public class SimpleLogistic
         runClassifier(new SimpleLogistic(), argv);
     }
 }
+

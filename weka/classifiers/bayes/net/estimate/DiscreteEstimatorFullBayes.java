@@ -21,14 +21,13 @@
  */
 package weka.classifiers.bayes.net.estimate;
 
-import weka.core.RevisionUtils;
 import weka.estimators.DiscreteEstimator;
 
 /**
  * Symbolic probability estimator based on symbol counts and a prior.
  *  
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class DiscreteEstimatorFullBayes 
   extends DiscreteEstimatorBayes {
@@ -62,15 +61,6 @@ public class DiscreteEstimatorFullBayes
       m_SumOfCounts += m_Counts[iSymbol];
     } 
   } // DiscreteEstimatorFullBayes
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
-  }
 
   /**
    * Main method for testing this class.

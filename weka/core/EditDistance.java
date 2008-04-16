@@ -26,7 +26,7 @@ package weka.core;
  * Computes the Levenshtein edit distance between two strings.
  *
  * @author Bruno Woltzenlogel Paleo
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class EditDistance
     extends AbstractStringDistanceFunction {
@@ -91,13 +91,4 @@ public class EditDistance
       + "is low.\n\n"
       + "For more information, see: http://en.wikipedia.org/wiki/Levenshtein_distance\n\n";
   }  
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
-  }
 }

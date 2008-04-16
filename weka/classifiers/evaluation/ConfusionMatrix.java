@@ -25,7 +25,6 @@ package weka.classifiers.evaluation;
 import weka.classifiers.CostMatrix;
 import weka.core.FastVector;
 import weka.core.Matrix;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -33,7 +32,7 @@ import weka.core.Utils;
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class ConfusionMatrix extends Matrix {
 
@@ -338,14 +337,5 @@ public class ConfusionMatrix extends Matrix {
     }
 
     return new String(ID);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 }

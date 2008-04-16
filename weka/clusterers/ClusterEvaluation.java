@@ -28,8 +28,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -83,11 +82,11 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.43 $
+ * @version  $Revision: 1.42 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = -830188327319128005L;
@@ -1175,15 +1174,6 @@ public class ClusterEvaluation
     
     return true;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.43 $");
-  }
 
   /**
    * Main method for testing this class.
@@ -1206,4 +1196,6 @@ public class ClusterEvaluation
       System.out.println(e.getMessage());
     }
   }
+
 }
+

@@ -25,7 +25,6 @@ package weka.associations;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -36,10 +35,10 @@ import java.io.Serializable;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.9 $ 
  */
 public abstract class Associator 
-  implements Cloneable, Serializable, CapabilitiesHandler, RevisionHandler {
+  implements Cloneable, Serializable, CapabilitiesHandler {
  
   /** for serialization */
   private static final long serialVersionUID = -3017644543382432070L;

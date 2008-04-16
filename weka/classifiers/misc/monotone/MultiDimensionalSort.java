@@ -22,9 +22,6 @@
 
 package weka.classifiers.misc.monotone;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -47,10 +44,9 @@ import java.util.Comparator;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class MultiDimensionalSort
-  implements RevisionHandler {
+public class MultiDimensionalSort {
 
   /** 
    * Sort an array using different comparators.
@@ -116,13 +112,6 @@ public class MultiDimensionalSort
     // sort the last part 
     multiDimensionalSort(a, mark, toIndex, c, depth + 1);
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
-  }
 }
+
+

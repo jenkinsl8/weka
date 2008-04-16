@@ -24,8 +24,6 @@ package weka.associations;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -35,10 +33,9 @@ import java.util.Enumeration;
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class AssociatorEvaluation
-  implements RevisionHandler {
+public class AssociatorEvaluation {
 
   /** the result string */
   protected StringBuffer m_Result;
@@ -238,15 +235,6 @@ public class AssociatorEvaluation
    */
   public String toString() {
     return toSummaryString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

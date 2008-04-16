@@ -30,8 +30,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
 import weka.core.Stopwords;
@@ -40,8 +38,8 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
-import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
+import weka.core.tokenizers.Tokenizer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -131,7 +129,7 @@ import java.util.Vector;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.23 $ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -592,7 +590,7 @@ public class StringToWordVector
    * a threshold.
    */
   private class Count 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
     /** for serialization. */
     static final long serialVersionUID = 2157223818584474321L;
@@ -607,15 +605,6 @@ public class StringToWordVector
      */
     public Count(int c) { 
       count = c; 
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.24 $");
     }
   }
 
@@ -1719,15 +1708,6 @@ public class StringToWordVector
 	}
       }
     }        
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
   }
 
   /**

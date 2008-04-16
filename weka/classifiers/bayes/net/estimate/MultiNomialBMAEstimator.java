@@ -23,7 +23,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 import weka.estimators.Estimator;
@@ -50,7 +49,7 @@ import java.util.Vector;
  * 
  <!-- options-end -->
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  * @author Remco Bouckaert (rrb@xm.co.nz)
  */
 public class MultiNomialBMAEstimator 
@@ -381,13 +380,4 @@ public class MultiNomialBMAEstimator
 
         return options;
     } // getOptions
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
-    }
 } // class MultiNomialBMAEstimator

@@ -26,7 +26,6 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -74,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class RepeatedHillClimber 
     extends HillClimber {
@@ -355,12 +354,4 @@ public class RepeatedHillClimber
 	  " Setting the seed allows replicability of experiments.";
 	} // seedTipText
 
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.6 $");
-	}
 }

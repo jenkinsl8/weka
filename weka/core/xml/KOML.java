@@ -21,9 +21,6 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +34,7 @@ import java.io.OutputStream;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision 1.0$
  */
-public class KOML
-   implements RevisionHandler {
+public class KOML {
   
    /**
     * indicates whether <a href="http://koala.ilog.fr/XML/serialization/" target="_blank">KOML</a> 
@@ -227,14 +223,5 @@ public class KOML
       }
       
       return result;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.4 $");
    }
 }

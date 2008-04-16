@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.filters.Filter;
@@ -69,7 +68,7 @@ import java.util.Vector;
  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -507,15 +506,6 @@ public class RBFNetwork extends Classifier implements OptionHandler {
     while (current < options.length) 
       options[current++] = "";
     return options;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**

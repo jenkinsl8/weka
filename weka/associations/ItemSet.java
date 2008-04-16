@@ -25,8 +25,6 @@ package weka.associations;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -41,10 +39,10 @@ import java.util.Hashtable;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
 public class ItemSet
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 2724000045282835791L;
@@ -423,14 +421,5 @@ public class ItemSet
   public void setItemAt(int value, int k){
       
       m_items[k] = value;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

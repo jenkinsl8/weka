@@ -30,10 +30,10 @@ import java.util.Random;
  * of floating-point values.
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class AlgVector 
-  implements Cloneable, Serializable, RevisionHandler {
+  implements Cloneable, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -4023736016850256591L;
@@ -395,15 +395,6 @@ public class AlgVector
     text.append("\n");
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
 
   /**
    * Main method for testing this class, can take an ARFF file as first argument.
@@ -424,3 +415,4 @@ public class AlgVector
     }
   }
 }
+

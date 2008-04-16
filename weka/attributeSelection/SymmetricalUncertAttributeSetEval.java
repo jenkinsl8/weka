@@ -63,7 +63,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -114,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  * @see Discretize
  */
 public class SymmetricalUncertAttributeSetEval
@@ -717,15 +716,7 @@ public class SymmetricalUncertAttributeSetEval
     text.append("\n");
     return  text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
+
 
   // ============
   // Test method.
@@ -740,3 +731,4 @@ public class SymmetricalUncertAttributeSetEval
     runEvaluator(new SymmetricalUncertAttributeSetEval(), argv);
   }
 }
+

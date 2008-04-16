@@ -22,9 +22,6 @@
 
 package weka.classifiers;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 import java.util.Comparator;
 
@@ -33,10 +30,10 @@ import java.util.Comparator;
  * them alphabetically based on their String Representations
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public final class EnsembleLibraryModelComparator 
-  implements Comparator, Serializable, RevisionHandler {
+  implements Comparator, Serializable {
   
   /** for serialization */
   private static final long serialVersionUID = -6522464740036141188L;
@@ -65,14 +62,5 @@ public final class EnsembleLibraryModelComparator
     }
     
     return comparison;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

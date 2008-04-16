@@ -21,9 +21,6 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 
@@ -31,11 +28,10 @@ import java.text.FieldPosition;
  * Class for the format of floating point numbers
  *
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class FloatingPointFormat
-  extends DecimalFormat
-  implements RevisionHandler {
+  extends DecimalFormat {
 
   /** for serialization */
   private static final long serialVersionUID = 4500373755333429499L;
@@ -122,12 +118,4 @@ public class FloatingPointFormat
     return width;
   }
 
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
-  }
 }

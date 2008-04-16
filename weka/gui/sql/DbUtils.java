@@ -22,7 +22,6 @@
 
 package weka.gui.sql;
 
-import weka.core.RevisionUtils;
 import weka.experiment.DatabaseUtils;
 
 import java.sql.Connection;
@@ -33,7 +32,7 @@ import java.sql.Connection;
  * @see       DatabaseUtils
  * @see       #execute(String)
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.4 $
+ * @version   $Revision: 1.3 $
  */
 public class DbUtils
   extends DatabaseUtils {
@@ -59,14 +58,5 @@ public class DbUtils
    */
   public Connection getConnection() {
     return m_Connection;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

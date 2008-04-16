@@ -35,10 +35,10 @@ import java.io.LineNumberReader;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class Version
-  implements Comparable, RevisionHandler {
+  implements Comparable {
   
   /** the version file */
   public final static String VERSION_FILE = "weka/core/version.txt";
@@ -227,15 +227,6 @@ public class Version
    */
   public String toString() {
     return VERSION;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
   
   /**

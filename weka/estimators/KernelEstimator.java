@@ -24,7 +24,6 @@ package weka.estimators;
 
 import weka.core.Capabilities.Capability;
 import weka.core.Capabilities;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Statistics;
 
@@ -33,7 +32,7 @@ import weka.core.Statistics;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class KernelEstimator extends Estimator implements IncrementalEstimator {
 
@@ -314,15 +313,6 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 
   /**
    * Main method for testing this class.
@@ -355,3 +345,11 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
     }
   }
 }
+
+
+
+
+
+
+
+

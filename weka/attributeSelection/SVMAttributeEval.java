@@ -27,7 +27,6 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -118,7 +117,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Kieran Holland
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.27 $
  */
 public class SVMAttributeEval 
   extends ASEvaluation
@@ -815,15 +814,6 @@ public class SVMAttributeEval
 
     text.append("\n");
     return text.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 
   /**

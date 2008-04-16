@@ -22,8 +22,6 @@
 
 package weka.core.stemmers;
 
-import weka.core.RevisionUtils;
-
 /**
  <!-- globalinfo-start -->
  * An iterated version of the Lovins stemmer. It stems the word (in case it's longer than 2 characters) until it no further changes.<br/>
@@ -50,7 +48,7 @@ import weka.core.RevisionUtils;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
@@ -90,15 +88,6 @@ public class IteratedLovinsStemmer
       stemmed = super.stem(stemmed);
     }
     return stemmed;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

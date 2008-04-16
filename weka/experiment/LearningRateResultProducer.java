@@ -27,8 +27,6 @@ import weka.core.AdditionalMeasureProducer;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -129,11 +127,11 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
-	     AdditionalMeasureProducer, RevisionHandler {
+	     AdditionalMeasureProducer {
 
   /** for serialization */
   static final long serialVersionUID = -3841159673490861331L;
@@ -909,12 +907,4 @@ public class LearningRateResultProducer
     return result;
   }
 
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 } // LearningRateResultProducer

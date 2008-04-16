@@ -25,8 +25,6 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -45,10 +43,10 @@ import java.util.Random;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class RuleStats 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
   
   /** for serialization */
   static final long serialVersionUID = -5708153367675298624L;
@@ -900,13 +898,4 @@ public class RuleStats
     
     return rt;
   }  
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
 }

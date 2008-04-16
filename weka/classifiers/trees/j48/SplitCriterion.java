@@ -22,8 +22,6 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionHandler;
-
 import java.io.Serializable;
 
 /**
@@ -31,10 +29,10 @@ import java.io.Serializable;
  * with respect to distributions of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public abstract class SplitCriterion
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 5490996638027101259L;

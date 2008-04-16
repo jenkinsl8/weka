@@ -24,8 +24,6 @@ package weka.core.neighboursearch.balltrees;
 import weka.core.DistanceFunction;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -33,10 +31,10 @@ import java.io.Serializable;
  * Class representing a node of a BallTree.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class BallNode
-  implements Serializable, RevisionHandler {
+  implements Serializable {
   
   /** for serialization. */
   private static final long serialVersionUID = -8289151861759883510L;
@@ -357,14 +355,5 @@ public class BallNode
                     child2.getRadius();
     
     return radius/2;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

@@ -26,7 +26,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -59,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.25 $
  */
 public class Ranker 
   extends ASSearch 
@@ -618,14 +617,5 @@ public class Ranker
     }
 
     return  false;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.26 $");
   }
 }

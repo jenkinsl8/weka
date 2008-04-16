@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -43,10 +42,10 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public abstract class Kernel 
-  implements Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler {
+  implements Serializable, OptionHandler, CapabilitiesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6102771099905817064L;

@@ -22,7 +22,6 @@
 package weka.core.tokenizers;
 
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,10 +33,10 @@ import java.util.Vector;
  * A superclass for all tokenizer algorithms.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public abstract class Tokenizer
-  implements Enumeration, OptionHandler, Serializable, RevisionHandler {
+  implements Enumeration, OptionHandler, Serializable {
   
   /**
    * Returns a string describing the stemmer

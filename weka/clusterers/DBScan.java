@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -90,7 +89,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class DBScan 
     extends Clusterer 
@@ -616,15 +615,6 @@ public class DBScan
         }
         return stringBuffer.toString() + "\n";
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
-    }
 
     /**
      * Main Method for testing DBScan
@@ -635,4 +625,10 @@ public class DBScan
     public static void main(String[] args) {
         runClusterer(new DBScan(), args);
     }
+
+    // *****************************************************************************************************************
+    // inner classes
+    // *****************************************************************************************************************
+
 }
+

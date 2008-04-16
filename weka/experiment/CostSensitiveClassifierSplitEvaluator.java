@@ -31,7 +31,6 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.Utils;
 
@@ -90,10 +89,10 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.17 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
-  extends ClassifierSplitEvaluator {
+  extends ClassifierSplitEvaluator { 
 
   /** for serialization */
   static final long serialVersionUID = -8069566663019501276L;
@@ -547,14 +546,5 @@ public class CostSensitiveClassifierSplitEvaluator
     }
     return result + m_Template.getClass().getName() + " " 
       + m_ClassifierOptions + "(version " + m_ClassifierVersion + ")";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
   }
 } // CostSensitiveClassifierSplitEvaluator

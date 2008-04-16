@@ -32,8 +32,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.Utils;
 
@@ -88,11 +86,10 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.28 $
  */
 public class ClassifierSplitEvaluator 
-  implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer, 
-             RevisionHandler {
+  implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
   
   /** for serialization */
   static final long serialVersionUID = -8511241602760467265L;
@@ -1018,14 +1015,5 @@ public class ClassifierSplitEvaluator
     }
     return result + m_Template.getClass().getName() + " " 
       + m_ClassifierOptions + "(version " + m_ClassifierVersion + ")";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.29 $");
   }
 } // ClassifierSplitEvaluator

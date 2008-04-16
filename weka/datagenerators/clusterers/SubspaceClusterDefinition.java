@@ -24,7 +24,6 @@ package weka.datagenerators.clusterers;
 
 import weka.core.Option;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.datagenerators.ClusterDefinition;
@@ -67,7 +66,7 @@ import java.util.Vector;
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  * @see SubspaceCluster
  */
 public class SubspaceClusterDefinition 
@@ -889,14 +888,5 @@ public class SubspaceClusterDefinition
       second[index] = Double.parseDouble(tok.nextToken());
       index++;
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

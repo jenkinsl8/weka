@@ -22,8 +22,6 @@
 
 package weka.experiment;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -54,10 +52,10 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.33 $
  */
 public class DatabaseUtils
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization. */
   static final long serialVersionUID = -8252351994547116729L;
@@ -1234,14 +1232,5 @@ public class DatabaseUtils
       update(query);
     }
     return tableName;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.34 $");
   }
 }

@@ -22,12 +22,17 @@
 
 package weka.classifiers.trees.ft;
 
-import weka.classifiers.functions.SimpleLinearRegression;
 import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.functions.SimpleLinearRegression;
+import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.classifiers.trees.j48.C45Split;
+import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.NoSplit;
+
+import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -36,13 +41,10 @@ import weka.core.Utils;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class FTLeavesNode 
-  extends FTtree {   
-
-  /** for serialization. */
-  private static final long serialVersionUID = 950601378326259315L;
+    extends FTtree {   
 
   /**
    * Constructor for Functional Leaves tree node. 
@@ -259,13 +261,5 @@ public class FTLeavesNode
     return probs;
 	
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
-  }
+    
 }

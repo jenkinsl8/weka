@@ -27,7 +27,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
-import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 
 /**
@@ -65,7 +64,7 @@ import weka.core.Capabilities.Capability;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MIPolyKernel 
   extends PolyKernel 
@@ -173,14 +172,5 @@ public class MIPolyKernel
     result.enable(Capability.NO_CLASS);
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

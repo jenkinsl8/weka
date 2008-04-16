@@ -24,8 +24,6 @@ package weka.core.neighboursearch.balltrees;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -35,10 +33,10 @@ import java.util.Vector;
  * Abstract class for splitting a ball tree's BallNode.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public abstract class BallSplitter
-  implements Serializable, OptionHandler, RevisionHandler {
+  implements Serializable, OptionHandler {
   
   /** The instance on which the tree is built. */
   protected Instances m_Instances;
@@ -160,14 +158,5 @@ public abstract class BallSplitter
    */
   public void setEuclideanDistanceFunction(EuclideanDistance func) {
     m_DistanceFunction = func;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

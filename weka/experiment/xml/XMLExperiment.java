@@ -32,7 +32,6 @@ import java.util.Vector;
 
 import org.w3c.dom.Element;
 
-import weka.core.RevisionUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.experiment.Experiment;
@@ -53,11 +52,9 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.5 $ 
  */
-public class XMLExperiment
-   extends XMLBasicSerialization {
-  
+public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
    public final static String NAME_CLASSFIRST = "classFirst";
 
@@ -261,15 +258,6 @@ public class XMLExperiment
          result = new PropertyNode(value);
       
       return result;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
    }
 
    /**

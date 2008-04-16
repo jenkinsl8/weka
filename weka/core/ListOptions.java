@@ -28,10 +28,10 @@ import java.util.Vector;
  * Lists the options of an OptionHandler
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class ListOptions
-  implements OptionHandler, RevisionHandler {
+  implements OptionHandler {
   
   /** the classname */
   protected String m_Classname = ListOptions.class.getName();
@@ -145,15 +145,6 @@ public class ListOptions
     }
     
     return result.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   /**

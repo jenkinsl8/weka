@@ -32,7 +32,6 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -127,7 +126,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.5 $ 
  * @see weka.classifiers.functions.SMO
  */
 public class MISVM 
@@ -502,8 +501,7 @@ public class MISVM
   /**
    * adapted version of SMO
    */
-  private class SVM
-    extends SMO {
+  private class SVM extends SMO {
     
     /** for serialization */
     static final long serialVersionUID = -8325638229658828931L;
@@ -527,15 +525,6 @@ public class MISVM
       double output = 0;
       output = m_classifiers[0][1].SVMOutput(index, inst);
       return output;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
 
@@ -789,15 +778,6 @@ public class MISVM
     distribution [1] = 1.0 - distribution[0];
 
     return distribution;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 
   /**

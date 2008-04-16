@@ -22,8 +22,6 @@
 package weka.classifiers.bayes.net;
 
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -32,10 +30,10 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class ParentSet 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
   
   /** for serialization */
   static final long serialVersionUID = 4155021284407181838L;
@@ -243,26 +241,21 @@ public class ParentSet
       m_nCardinalityOfParents 
       / _Instances.attribute(m_nParents[m_nNrOfParents]).numValues();
   }    // DeleteLastParent
-
-  /** Copy makes current parents set equal to other parent set
-   * 
-   * @param other : parent set to make a copy from
-   */
-  public void copy(ParentSet other) {
-    m_nCardinalityOfParents = other.m_nCardinalityOfParents;
-    m_nNrOfParents = other.m_nNrOfParents;
-    for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
-      m_nParents[iParent] = other.m_nParents[iParent];
-    }
-  } // Copy
-
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
+ 
+ 	/** Copy makes current parents set equal to other parent set
+ 	 * 
+ 	 * @param other : parent set to make a copy from
+ 	 */
+ 	public void copy(ParentSet other) {
+ 		m_nCardinalityOfParents = other.m_nCardinalityOfParents;
+ 		m_nNrOfParents = other.m_nNrOfParents;
+ 		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+			m_nParents[iParent] = other.m_nParents[iParent];
+ 		}
+ 	} // Copy
  
 }      // class ParentSet
+
+
+
+

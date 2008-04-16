@@ -24,25 +24,22 @@
 
 package weka.associations.tertius;
 
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-
+import weka.core.Instance;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.ArrayList;
 
 /**
  * Class representing a set of literals, being either the body or the head
  * of a rule.
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 
-public abstract class LiteralSet
-  implements Serializable, Cloneable, RevisionHandler {
+public abstract class LiteralSet implements Serializable, Cloneable {
   
   /** for serialization */
   private static final long serialVersionUID = 6094536488654503152L;

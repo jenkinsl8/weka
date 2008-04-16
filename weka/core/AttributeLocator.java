@@ -29,11 +29,11 @@ import java.util.Vector;
  * recursively in case of Relational attributes.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  * @see Attribute#RELATIONAL
  */
 public class AttributeLocator 
-  implements Serializable, Comparable<AttributeLocator>, RevisionHandler {
+  implements Serializable, Comparable<AttributeLocator> {
   
   /** for serialization */
   private static final long serialVersionUID = -2932848827681070345L;
@@ -323,14 +323,5 @@ public class AttributeLocator
    */
   public String toString() {
     return m_Attributes.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

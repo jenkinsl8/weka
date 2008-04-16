@@ -22,7 +22,10 @@
 
 package weka.core;
 
+import weka.core.Instance;
+
 import java.io.Serializable;
+import java.util.Enumeration;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -39,10 +42,9 @@ import java.util.Vector;
  * floor, ceil, rint, tan, sin, (, ).
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision 1.0 $
  */
-public class AttributeExpression
-  implements Serializable, RevisionHandler {
+public class AttributeExpression implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = 402130123261736245L;
@@ -51,7 +53,7 @@ public class AttributeExpression
    * Inner class handling an attribute index as an operand
    */
   private class AttributeOperand 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization */
     static final long serialVersionUID = -7674280127286031105L;
@@ -86,22 +88,13 @@ public class AttributeExpression
       }
       return result+"a"+(m_attributeIndex+1);
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
-    }
   }
 
   /**
    * Inner class for storing numeric constant opperands
    */
   private class NumericOperand 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization */
     static final long serialVersionUID = 9037007836243662859L;
@@ -130,22 +123,13 @@ public class AttributeExpression
     public String toString() {
       return ""+m_numericConst;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
-    }
   }
 
   /**
    * Inner class for storing operators
    */
   private class Operator 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization */
     static final long serialVersionUID = -2760353522666004638L;
@@ -224,15 +208,6 @@ public class AttributeExpression
      */
     public String toString() {
       return ""+m_operator;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
 
@@ -570,14 +545,5 @@ public class AttributeExpression
 
   public String toString() {
     return m_originalInfix;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

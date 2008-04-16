@@ -26,7 +26,7 @@ package weka.core;
  * This class locates and records the indices of relational attributes, 
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  * @see Attribute#RELATIONAL
  */
 public class RelationalLocator
@@ -164,14 +164,5 @@ public class RelationalLocator
         copyRelationalValues(rel.instance(n), instSrcCompat, srcDatasetNew, srcRelAttsNew, destDatasetNew, destRelAttsNew);
       }
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

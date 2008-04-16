@@ -27,7 +27,6 @@ import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.SearchAlgorithm;
 import weka.core.Instances;
 import weka.core.Instance;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -58,7 +57,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -708,13 +707,5 @@ public class LocalScoreSearchAlgorithm
 	    + "scores (as opposed to for example conditional independence "
 	    + "based search algorithms).";
 	} // globalInfo
-
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.8 $");
-	}
 }
+

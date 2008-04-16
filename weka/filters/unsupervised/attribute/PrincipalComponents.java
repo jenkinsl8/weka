@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -73,7 +72,7 @@ import java.util.Vector;
  * @author Mark Hall (mhall@cs.waikato.ac.nz) -- attribute selection code
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- attribute selection code
  * @author fracpete (fracpete at waikato dot ac dot nz) -- filter code
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class PrincipalComponents
   extends Filter
@@ -790,15 +789,6 @@ public class PrincipalComponents
     m_FirstBatchDone = true;
     
     return (numPendingOutput() != 0);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

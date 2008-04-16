@@ -22,14 +22,13 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
  * Class for computing the gain ratio for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public final class GainRatioSplitCrit
   extends EntropyBasedSplitCrit{
@@ -106,13 +105,8 @@ public final class GainRatioSplitCrit
     }
     return returnValue;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
 }
+
+
+
+

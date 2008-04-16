@@ -37,7 +37,6 @@ import weka.core.Instances;
 import weka.core.Matchable;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -122,13 +121,11 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  *  (based on J48.java written by Eibe Frank)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class J48graft 
-  extends Classifier
-  implements OptionHandler, Drawable, Matchable, Sourcable, 
-             WeightedInstancesHandler, Summarizable,
-             AdditionalMeasureProducer, TechnicalInformationHandler {
+public class J48graft extends Classifier implements OptionHandler, 
+  Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
+  AdditionalMeasureProducer, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8823716098042427799L;
@@ -812,15 +809,6 @@ public class J48graft
   public void setSaveInstanceData(boolean v) {
 
     m_noCleanup = v;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
  
   /**

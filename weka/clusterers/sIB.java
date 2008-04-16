@@ -23,18 +23,19 @@
 package weka.clusterers;
 
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.matrix.Matrix;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.matrix.Matrix;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.io.Serializable;
@@ -44,72 +45,83 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
+ <!-- globalinfo-start --> 
  * Cluster data using the sequential information bottleneck algorithm.<br/>
+ * <br/> 
+ * Note: only hard clustering is supported, ie. sIB assign for each instance the cluster that have the minimum cost/distance with it, rather than the probabilities of the instance belonging to each of the clusters. The trade-off beta is set to infinite so 1/beta is zero.  
  * <br/>
- * Note: only hard clustering scheme is supported. sIB assign for each instance the cluster that have the minimum cost/distance to the instance. The trade-off beta is set to infinite so 1/beta is zero.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
- * Noam Slonim, Nir Friedman, Naftali Tishby: Unsupervised document classification using sequential information maximization. In: Proceedings of the 25th International ACM SIGIR Conference on Research and Development in Information Retrieval, 129-136, 2002.
- * <p/>
+ * For more information see:<br/> 
+ * <br/> 
+ * Noam Slonim, Nir Friedman, Naftali Tishby: Unsupervised Document Classification using Sequential Information Maximization. In: Proceedings of the 25th
+ * International ACM SIGIR Conference on Research and Development in Information Retrieval, 129-136, 2002. 
+ * <p/>  * 
  <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ <!-- technical-bibtex-start --> 
+ * BibTeX: 
  * <pre>
- * &#64;inproceedings{Slonim2002,
+ *  @inproceedings{Slonim2002,
  *    author = {Noam Slonim and Nir Friedman and Naftali Tishby},
- *    booktitle = {Proceedings of the 25th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+ *    booktitle = {25th International ACM SIGIR Conference on Research and Development in Information Retrieval},
  *    pages = {129-136},
- *    title = {Unsupervised document classification using sequential information maximization},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Unsupervised Document Classification using Sequential Information Maximization},
  *    year = {2002}
  * }
- * </pre>
- * <p/>
+ * </pre> 
+ * <p/> 
  <!-- technical-bibtex-end -->
  * 
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -I &lt;num&gt;
+ *  -I &lt;num&gt;
  *  maximum number of iterations
- *  (default 100).</pre>
+ *  (default 10).
+ * </pre>
  * 
- * <pre> -M &lt;num&gt;
- *  minimum number of changes in a single iteration
- *  (default 0).</pre>
+ * <pre>
+ *  -N &lt;num&gt;
+ *  number of clusters
+ *  (default 2).
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).</pre>
+ * <pre>
+ *  -M &lt;num&gt;
+ *  number of minimum changes
+ *  (default 0).
  * 
- * <pre> -R &lt;num&gt;
- *  number of restarts.
- *  (default 5).</pre>
+ * <pre>
+ *  -R &lt;num&gt;
+ *  number of restarts
+ *  (default 5).
+ * </pre>
  * 
- * <pre> -U
- *  set not to normalize the data
- *  (default true).</pre>
- * 
- * <pre> -V
- *  set to output debug info
- *  (default false).</pre>
- * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ *  -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 10)
+ * </pre> 
+ * 
+ * <pre>
+ *  -U
+ *  If set, clusterer will not normalize the training data.
+ *  (default true)  
+ * </pre>
+ * 
+ * <pre>
+ *  -V
+ *  Set to turn on the debug mode with more output info.
+ *  (default false)
+ * </pre> 
  * 
  <!-- options-end --> 
- *
  * @author Noam Slonim
  * @author <a href="mailto:lh92@cs.waikato.ac.nz">Anna Huang</a> 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class sIB
-  extends RandomizableClusterer
-  implements TechnicalInformationHandler {
-  
+
+public class sIB extends RandomizableClusterer implements OptionHandler {
   /** for serialization. */
   private static final long    serialVersionUID = -8652125897352654213L;
   
@@ -118,9 +130,7 @@ public class sIB
    * 
    * @see Serializable
    */
-  private class Input
-    implements Serializable, RevisionHandler {
-    
+  private class Input implements Serializable{
     /** for serialization */
     static final long serialVersionUID = -2464453171263384037L;
     
@@ -147,15 +157,6 @@ public class sIB
     
     /** Sum values of the dataset */
     private double sumVals;
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
-    }
   }
   
   /**
@@ -163,9 +164,7 @@ public class sIB
    * 
    * @see Serializable
    */
-  private class Partition
-    implements Serializable, RevisionHandler {
-    
+  private class Partition implements Serializable {
     /** for serialization */
     static final long serialVersionUID = 4957194978951259946L;
     
@@ -262,15 +261,6 @@ public class sIB
 	text.append("prior prob : "+Utils.doubleToString(Pt[i], 4)+"\n");
       }
       return text.toString();
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
 
@@ -892,36 +882,50 @@ public class sIB
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-start -->
+   <!-- options-start -->   
    * Valid options are: <p/>
    * 
-   * <pre> -I &lt;num&gt;
+   * <pre>
+   *  -I &lt;num&gt;
    *  maximum number of iterations
-   *  (default 100).</pre>
+   *  (default 10).
+   * </pre>
    * 
-   * <pre> -M &lt;num&gt;
-   *  minimum number of changes in a single iteration
-   *  (default 0).</pre>
+   * <pre>
+   *  -N &lt;num&gt;
+   *  number of clusters
+   *  (default 2).
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).</pre>
+   * <pre>
+   *  -M &lt;num&gt;
+   *  number of minimum changes
+   *  (default 0).
+   * </pre>
    * 
-   * <pre> -R &lt;num&gt;
-   *  number of restarts.
-   *  (default 5).</pre>
+   * <pre>
+   *  -R &lt;num&gt;
+   *  number of restarts
+   *  (default 5).
+   * </pre>
    * 
-   * <pre> -U
-   *  set not to normalize the data
-   *  (default true).</pre>
-   * 
-   * <pre> -V
-   *  set to output debug info
-   *  (default false).</pre>
-   * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   *  -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 10)
+   * </pre> 
+   * 
+   * <pre>
+   *  -U
+   *  If set, clusterer will not normalize the training data.  
+   *  (default true)
+   * </pre>
+   * 
+   * <pre>
+   *  -V
+   *  Set to turn on the debug mode with more output info.
+   *  (default false) 
+   * </pre>
    * 
    <!-- options-end -->
    *
@@ -1223,15 +1227,6 @@ public class sIB
       }
     }
     return text.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   public static void main(String[] argv) {

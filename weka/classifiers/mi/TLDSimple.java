@@ -30,7 +30,6 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -90,7 +89,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class TLDSimple 
   extends RandomizableClassifier 
@@ -889,15 +888,6 @@ public class TLDSimple
 
     return text.toString();
   }     
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
-  }
 
   /**
    * Main method for testing.
@@ -909,7 +899,7 @@ public class TLDSimple
   }
 }
 
-class TLDSimple_Optm extends Optimization {
+class TLDSimple_Optm extends Optimization{
 
   private double[] num;
   private double sSq;
@@ -1025,14 +1015,5 @@ class TLDSimple_Optm extends Optimization {
     }
 
     return h;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 }

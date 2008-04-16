@@ -25,9 +25,11 @@ import weka.classifiers.bayes.BayesianLogisticRegression;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
+
 
 /**
+ *
+ *
  * Implementation of the Gaussian Prior update function based on
  * CLG Algorithm with a certain Trust Region Update.
  *
@@ -36,14 +38,9 @@ import weka.core.RevisionUtils;
  *
  *
  * @author Navendu Garg(gargnav@iit.edu)
- * @version $Revision: 1.2 $
+ * @version 1.0
  */
-public class GaussianPriorImpl
-  extends Prior {
-  
-  /** for serialization. */
-  private static final long serialVersionUID = -2995684220141159223L;
-
+public class GaussianPriorImpl extends Prior {
   /**
    * Update function specific to Laplace Prior.
    */
@@ -109,14 +106,5 @@ public class GaussianPriorImpl
     }
 
     penalty = 0 - penalty;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

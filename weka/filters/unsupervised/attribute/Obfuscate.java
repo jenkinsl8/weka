@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
@@ -41,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class Obfuscate 
   extends Filter 
@@ -150,15 +149,6 @@ public class Obfuscate
     }
     push((Instance)instance.copy());
     return true;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

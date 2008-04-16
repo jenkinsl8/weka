@@ -21,8 +21,6 @@
 
 package weka.core.neighboursearch;
 
-import weka.core.RevisionUtils;
-
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -31,7 +29,7 @@ import java.util.Vector;
  * nearest neighbour search algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class TreePerformanceStats
   extends PerformanceStats {
@@ -309,14 +307,5 @@ public class TreePerformanceStats
 	       ","+getTotalIntNodesVisited()+","+getMeanIntNodesVisited()+", "+getStdDevIntNodesVisited()+"\n");
 
     return buf.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

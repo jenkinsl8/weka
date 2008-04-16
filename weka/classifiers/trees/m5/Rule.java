@@ -24,8 +24,6 @@ package weka.classifiers.trees.m5;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -34,10 +32,10 @@ import java.io.Serializable;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  */
 public class Rule
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -4458627451682483204L;
@@ -627,13 +625,6 @@ public class Rule
   public RuleNode getM5RootNode() {
     return m_topOfTree;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
-  }
 }
+
+

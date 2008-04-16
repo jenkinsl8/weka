@@ -25,7 +25,6 @@ package weka.classifiers.bayes.net.search.local;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -68,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Manuel Neubach
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class LAGDHillClimber 
     extends HillClimber {
@@ -440,13 +439,5 @@ public class LAGDHillClimber
 	  "calculation of the best sequence consisting of nrOfLookAheadSteps operations." ;
 	} // nrOfGoodOperationsTipText
 
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.7 $");
-	}
 
 } // LAGDHillClimber

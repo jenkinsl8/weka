@@ -31,7 +31,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -72,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.19 $
  */
 public class RandomTree 
   extends Classifier 
@@ -1074,15 +1073,6 @@ public class RandomTree
   protected double gain(double[][] dist, double priorVal) {
 
     return priorVal - ContingencyTables.entropyConditionedOnRows(dist);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
   }
 
   /**

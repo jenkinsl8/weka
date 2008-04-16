@@ -21,8 +21,6 @@
 
 package weka.core.tokenizers;
 
-import weka.core.RevisionUtils;
-
 import java.util.StringTokenizer;
 
 /**
@@ -41,7 +39,7 @@ import java.util.StringTokenizer;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class WordTokenizer
   extends CharacterDelimitedTokenizer {
@@ -91,15 +89,6 @@ public class WordTokenizer
    */
   public void tokenize(String s) {
     m_Tokenizer = new StringTokenizer(s, getDelimiters());
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

@@ -21,18 +21,19 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Writer;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.lang.StringBuffer;
 
 /**
  * This class is a helper class for XML serialization using 
@@ -40,10 +41,9 @@ import java.io.Writer;
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
  * @author Mark Hall (mhall[{at}]pentao[{dot}]org
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public class XStream
-  implements RevisionHandler {
+public class XStream {
 
   /**
    * indicates whether <a href="http://xstream.codehaus.org" target="_blank">XStream</a> 
@@ -336,14 +336,5 @@ public class XStream
     }
 
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

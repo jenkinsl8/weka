@@ -27,7 +27,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -48,7 +47,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {
@@ -270,15 +269,6 @@ public class SimpleLinearRegression extends Classifier
     }
     text.append("\n");
     return text.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**

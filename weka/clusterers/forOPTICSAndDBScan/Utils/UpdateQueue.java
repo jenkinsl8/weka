@@ -23,9 +23,6 @@
 
 package weka.clusterers.forOPTICSAndDBScan.Utils;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.util.ArrayList;
 import java.util.TreeMap;
 
@@ -41,10 +38,9 @@ import java.util.TreeMap;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public class UpdateQueue
-    implements RevisionHandler {
+public class UpdateQueue {
 
     /**
      * Used to store the binary heap
@@ -175,13 +171,9 @@ public class UpdateQueue
         }
         return next;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
+
+    // *****************************************************************************************************************
+    // inner classes
+    // *****************************************************************************************************************
+
 }

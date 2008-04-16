@@ -31,7 +31,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -63,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class Reorder 
   extends Filter 
@@ -401,15 +400,6 @@ public class Reorder
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
     setAttributeIndices(Range.indicesToRangeList(attributes));
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

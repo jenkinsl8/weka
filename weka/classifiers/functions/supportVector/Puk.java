@@ -26,7 +26,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -74,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class Puk 
   extends CachedKernel
@@ -411,14 +410,5 @@ public class Puk
    */
   public String toString() {
     return "Puk kernel";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

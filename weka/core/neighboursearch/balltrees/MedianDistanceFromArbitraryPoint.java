@@ -25,7 +25,6 @@ import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -83,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class MedianDistanceFromArbitraryPoint
   extends BallSplitter 
@@ -384,14 +383,5 @@ public class MedianDistanceFromArbitraryPoint
                       indexStart, k - (middle - left + 1));
       }
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

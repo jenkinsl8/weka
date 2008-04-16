@@ -31,7 +31,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -149,7 +148,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.13 $
  */
 public class SMOreg 
   extends Classifier 
@@ -1933,14 +1932,5 @@ public class SMOreg
       //displayStat(-1,-1);
       //displayB();
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
   }
 }

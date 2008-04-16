@@ -22,13 +22,15 @@
 
 package weka.classifiers.trees.m5;
 
-import weka.core.Instances;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Interface for objects that determine a split point on an attribute
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public interface SplitEvaluate {
   

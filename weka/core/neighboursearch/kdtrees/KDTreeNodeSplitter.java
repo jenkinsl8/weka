@@ -24,8 +24,6 @@ package weka.core.neighboursearch.kdtrees;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -35,10 +33,10 @@ import java.util.Vector;
  * Class that splits up a KDTreeNode.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public abstract class KDTreeNodeSplitter
-  implements Serializable, OptionHandler, RevisionHandler {
+  implements Serializable, OptionHandler {
   
   /** The instances that'll be used for tree construction. */
   protected Instances m_Instances;
@@ -240,14 +238,5 @@ public abstract class KDTreeNodeSplitter
       }
     }
     return w;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

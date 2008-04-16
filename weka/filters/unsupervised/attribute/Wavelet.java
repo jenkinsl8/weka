@@ -29,7 +29,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -110,7 +109,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class Wavelet
   extends SimpleBatchFilter 
@@ -688,15 +687,6 @@ public class Wavelet
 	throw new IllegalStateException(
 	    "Algorithm type '" + m_Algorithm + "' is not recognized!");
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -558,15 +557,6 @@ public class DataNearBalancedND
       nn = m_SecondSuccessor.treeToString(text, nn);
     }
     return nn;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
     	
   /**

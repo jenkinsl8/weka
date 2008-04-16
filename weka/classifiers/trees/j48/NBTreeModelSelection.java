@@ -24,7 +24,6 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -33,7 +32,7 @@ import java.util.Enumeration;
  * Class for selecting a NB tree split.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class NBTreeModelSelection
   extends ModelSelection {
@@ -197,14 +196,5 @@ public class NBTreeModelSelection
   public final ClassifierSplitModel selectModel(Instances train, Instances test) {
 
     return selectModel(train);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

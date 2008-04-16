@@ -27,7 +27,6 @@ import weka.core.Instances;
 import weka.core.FastVector;
 import weka.core.Attribute;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Option;
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Enumeration;
 import java.util.Vector;
+
 
 /**
  <!-- globalinfo-start -->
@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -1550,15 +1550,6 @@ public class DatabaseLoader
 	}
       
       
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
   }
 
   /** Main method.

@@ -24,7 +24,6 @@ package weka.classifiers.trees.adtree;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 /**
  * Simple class that extends the Instances class making it possible to create
@@ -32,7 +31,7 @@ import weka.core.RevisionUtils;
  * make reweighting of instances easy to manage.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class ReferenceInstances
   extends Instances {
@@ -62,14 +61,5 @@ public class ReferenceInstances
   public final void addReference(Instance instance) {
 
     m_Instances.addElement(instance);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

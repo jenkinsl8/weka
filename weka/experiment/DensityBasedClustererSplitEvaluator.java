@@ -23,24 +23,14 @@
 
 package weka.experiment;
 
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
-import weka.clusterers.DensityBasedClusterer;
+import java.io.*;
+import java.util.*;
+
+import weka.core.*;
+import weka.clusterers.*;
 import weka.clusterers.EM;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * A SplitEvaluator that produces results for a density based clusterer.
@@ -49,14 +39,13 @@ import java.util.Vector;
  * Specify the full class name of the clusterer to evaluate. <p>
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 public class DensityBasedClustererSplitEvaluator 
   implements SplitEvaluator,
 	     OptionHandler,
-	     AdditionalMeasureProducer,
-	     RevisionHandler {
+	     AdditionalMeasureProducer {
 
   /** Remove the class column (if set) from the data */
   protected boolean m_removeClassColumn = true;
@@ -622,13 +611,7 @@ public class DensityBasedClustererSplitEvaluator
     return result + m_clusterer.getClass().getName() + " " 
       + m_clustererOptions + "(version " + m_clustererVersion + ")";
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
-  }
 }
+
+
+

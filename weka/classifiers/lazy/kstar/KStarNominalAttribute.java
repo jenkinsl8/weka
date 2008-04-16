@@ -24,11 +24,10 @@
 
 package weka.classifiers.lazy.kstar;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
 
 /**
  * A custom class which provides the environment for computing the
@@ -39,8 +38,7 @@ import weka.core.RevisionUtils;
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */
-public class KStarNominalAttribute
-  implements KStarConstants, RevisionHandler {
+public class KStarNominalAttribute implements KStarConstants {
   
   /** The training instances used for classification. */
   protected Instances m_TrainSet;
@@ -605,13 +603,11 @@ public class KStarNominalAttribute
     m_BlendMethod = blendmethod;
     m_BlendFactor = blendfactor;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
+
+
 } // class
+
+
+
+
+

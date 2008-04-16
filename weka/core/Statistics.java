@@ -17,10 +17,9 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
-public class Statistics
-  implements RevisionHandler {
+public class Statistics {
 
   /** Some constants */
   protected static final double MACHEP =  1.11022302462515654042E-16;
@@ -1040,15 +1039,6 @@ public class Statistics
       else  	            s = Math.exp(t);
     }
     return s;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**

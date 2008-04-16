@@ -24,7 +24,6 @@ package weka.core.converters;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -38,7 +37,7 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class SerializedInstancesLoader 
@@ -179,15 +178,6 @@ public class SerializedInstancesLoader
     }
  
     return m_Dataset.instance(m_IncrementalIndex++);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
   }
 
   /**

@@ -29,7 +29,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -44,11 +43,10 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.17 $
  */
 public abstract class Classifier 
-  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler,
-             RevisionHandler {
+  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
  
   /** for serialization */
   private static final long serialVersionUID = 6502780192411755341L;

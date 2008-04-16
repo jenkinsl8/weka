@@ -25,8 +25,6 @@ package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
 import weka.core.FastVector;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.awt.Color;
@@ -48,11 +46,10 @@ import javax.swing.JComponent;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class GraphPanel
-    extends JComponent
-    implements RevisionHandler {
+    extends JComponent {
 
     /** for serialization */
     private static final long serialVersionUID = 7917937528738361470L;
@@ -272,10 +269,7 @@ public class GraphPanel
     // inner classes
     // *****************************************************************************************************************
 
-    private class MouseHandler
-         extends MouseMotionAdapter
-         implements RevisionHandler {
-      
+    private class MouseHandler extends MouseMotionAdapter {
         /**
          * Invoked when the mouse button has been moved on a component
          * (with no buttons no down).
@@ -338,23 +332,6 @@ public class GraphPanel
             }
             return true;
         }
-        
-        /**
-         * Returns the revision string.
-         * 
-         * @return		the revision
-         */
-        public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.4 $");
-        }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
+
 }

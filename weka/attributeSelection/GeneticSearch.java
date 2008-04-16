@@ -26,13 +26,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.BitSet;
@@ -105,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.18 $
  */
 public class GeneticSearch 
   extends ASSearch 
@@ -183,7 +181,7 @@ public class GeneticSearch
    * A bitset for the genetic algorithm
    */
   protected class GABitSet 
-    implements Cloneable, Serializable, RevisionHandler {
+    implements Cloneable, Serializable {
     
     /** for serialization */
     static final long serialVersionUID = -2930607837482622224L;
@@ -290,15 +288,6 @@ public class GeneticSearch
      */
     public boolean get(int bit) {
       return m_chromosome.get(bit);
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.19 $");
     }
   }
 
@@ -1290,14 +1279,5 @@ public class GeneticSearch
     m_starting = null;
     m_startRange = new Range();
     m_seed = 1;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
   }
 }

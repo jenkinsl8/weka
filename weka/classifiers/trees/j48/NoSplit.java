@@ -24,13 +24,12 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 /**
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public final class NoSplit
   extends ClassifierSplitModel{
@@ -103,13 +102,13 @@ public final class NoSplit
 
     return "true";  // or should this be false??
   }  
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
+
 }
+
+
+
+
+
+
+
+

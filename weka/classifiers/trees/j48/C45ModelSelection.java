@@ -24,7 +24,6 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -33,7 +32,7 @@ import java.util.Enumeration;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
 public class C45ModelSelection
   extends ModelSelection {
@@ -191,13 +190,7 @@ public class C45ModelSelection
 
     return selectModel(train);
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
-  }
 }
+
+
+

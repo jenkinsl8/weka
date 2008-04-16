@@ -26,8 +26,6 @@ package weka.clusterers.forOPTICSAndDBScan.DataObjects;
 import weka.clusterers.forOPTICSAndDBScan.Databases.Database;
 import weka.core.Attribute;
 import weka.core.Instance;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -44,10 +42,10 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class EuclidianDataObject
-    implements DataObject, Serializable, RevisionHandler {
+    implements DataObject, Serializable {
 
     /** for serialization */
     private static final long serialVersionUID = -4408119914898291075L;
@@ -289,13 +287,9 @@ public class EuclidianDataObject
     public String toString() {
         return instance.toString();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
-    }
+
+    // *****************************************************************************************************************
+    // inner classes
+    // *****************************************************************************************************************
+
 }

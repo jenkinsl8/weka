@@ -25,7 +25,6 @@ package weka.estimators;
 import weka.core.Capabilities.Capability;
 import weka.core.matrix.Matrix;
 import weka.core.Capabilities;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /** 
@@ -33,7 +32,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class MahalanobisEstimator extends Estimator implements IncrementalEstimator {
   
@@ -167,14 +166,6 @@ public class MahalanobisEstimator extends Estimator implements IncrementalEstima
     return result;
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
   
   /**
    * Main method for testing this class.
@@ -231,3 +222,11 @@ public class MahalanobisEstimator extends Estimator implements IncrementalEstima
     }
   }
 }
+
+
+
+
+
+
+
+

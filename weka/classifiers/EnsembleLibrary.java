@@ -22,8 +22,6 @@
 
 package weka.classifiers;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.gui.ensembleLibraryEditor.LibrarySerialization;
 
 import java.beans.PropertyChangeListener;
@@ -50,10 +48,10 @@ import javax.swing.JOptionPane;
  * and loading models from lists.  
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class EnsembleLibrary
-  implements Serializable, RevisionHandler {
+  implements Serializable {
   
   /** for serialization */
   private static final long serialVersionUID = -7987178904923706760L;
@@ -379,14 +377,5 @@ public class EnsembleLibrary
       m_LibraryPropertySupport.addPropertyChangeListener(listener);
       
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

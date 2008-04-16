@@ -27,7 +27,6 @@ import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.classifiers.trees.j48.Stats;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -35,7 +34,7 @@ import weka.core.Utils;
  * pruning heuristic.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class C45PruneableDecList
   extends ClassifierDecList{
@@ -190,13 +189,14 @@ public class C45PruneableDecList
     return errors+Stats.addErrs(localModel().distribution().total(),
 				errors,(float)CF);
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 }
+
+
+
+
+
+
+
+
+
+

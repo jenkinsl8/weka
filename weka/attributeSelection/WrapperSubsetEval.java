@@ -29,7 +29,6 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -108,7 +107,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.30 $
  */
 public class WrapperSubsetEval
   extends ASEvaluation
@@ -660,15 +659,7 @@ public class WrapperSubsetEval
 
     return  false;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
-  }
+
 
   /**
    * Main method for testing this class.

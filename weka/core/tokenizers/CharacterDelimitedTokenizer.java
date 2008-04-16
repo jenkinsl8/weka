@@ -22,7 +22,6 @@
 package weka.core.tokenizers;
 
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -32,7 +31,7 @@ import java.util.Vector;
  * Abstract superclass for tokenizers that take characters as delimiters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public abstract class CharacterDelimitedTokenizer
   extends Tokenizer {

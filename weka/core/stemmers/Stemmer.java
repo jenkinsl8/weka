@@ -22,18 +22,16 @@
 
 package weka.core.stemmers;
 
-import weka.core.RevisionHandler;
-
 import java.io.Serializable;
 
 /**
  * Interface for all stemming algorithms.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision: 1.2 $
  */
 public interface Stemmer 
-  extends Serializable, RevisionHandler {
+  extends Serializable {
 
   /**
    * Stems the given word and returns the stemmed version

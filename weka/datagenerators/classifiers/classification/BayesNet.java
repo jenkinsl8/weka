@@ -26,7 +26,6 @@ import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.datagenerators.ClassificationGenerator;
 
@@ -70,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  * @see BayesNetGenerator
  */
 
@@ -591,15 +590,6 @@ public class BayesNet
    */
   public String generateFinished() throws Exception {
     return "";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

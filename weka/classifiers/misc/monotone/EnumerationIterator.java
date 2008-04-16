@@ -22,9 +22,6 @@
 
 package weka.classifiers.misc.monotone;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -41,10 +38,10 @@ import java.util.NoSuchElementException;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class EnumerationIterator
-  implements Iterator, RevisionHandler {
+  implements Iterator {
 
   private Enumeration e;
 
@@ -87,14 +84,5 @@ public class EnumerationIterator
    */
   final public void remove() {
     throw new UnsupportedOperationException();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

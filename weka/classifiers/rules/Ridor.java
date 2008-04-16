@@ -30,8 +30,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.UnsupportedClassTypeException;
@@ -119,7 +118,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class Ridor 
   extends Classifier
@@ -205,7 +204,7 @@ public class Ridor
    * and the exceptions to each exception
    */
   private class Ridor_node 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization */
     static final long serialVersionUID = -581370560157467677L;
@@ -549,15 +548,6 @@ public class Ridor
 	    
       return text.toString();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
-    }
   }    
 
   /**
@@ -571,7 +561,7 @@ public class Ridor
    *
    */
   private class RidorRule 
-    implements WeightedInstancesHandler, Serializable, RevisionHandler {
+    implements WeightedInstancesHandler, Serializable {
 	
     /** for serialization */
     static final long serialVersionUID = 4375199423973848157L;
@@ -926,15 +916,6 @@ public class Ridor
     public String toString() {
       return toString(m_ClassAttribute.name(), m_ClassAttribute.value((int)m_Class));
     }        
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
-    }
   }
     
     
@@ -944,7 +925,7 @@ public class Ridor
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
   private abstract class Antd 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     private static final long serialVersionUID = 5317379013858933369L;
@@ -990,15 +971,6 @@ public class Ridor
     public double getAccuRate(){ return accuRate; } 
     public double getAccu(){ return accu; } 
     public double getCover(){ return cover; } 
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
-    }
   }
     
   /** 
@@ -1176,15 +1148,6 @@ public class Ridor
       String symbol = Utils.eq(value, 0.0) ? " <= " : " > ";
       return (att.name() + symbol + Utils.doubleToString(splitPoint, 6));
     }   
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
-    }
   }
     
     
@@ -1296,15 +1259,6 @@ public class Ridor
     public String toString() {
       return (att.name() + " = " +att.value((int)value));
     } 
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
-    }
   }
 
   /**
@@ -1674,15 +1628,6 @@ public class Ridor
 	    "--------------------------------------\n\n" + 
 	    m_Root.toString() +
 	    "\nTotal number of rules (incl. the default rule): " + (int)numRules());
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21 $");
   }
     
   /**

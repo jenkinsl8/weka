@@ -22,13 +22,12 @@
 
 package weka.classifiers.evaluation;
 
+import weka.classifiers.meta.LogitBoost;
+import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * Generates points illustrating the prediction margin. The margin is defined
@@ -38,10 +37,9 @@ import weka.core.Utils;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
-public class MarginCurve
-  implements RevisionHandler {
+public class MarginCurve {
 
   /**
    * Calculates the cumulative margin distribution for the set of
@@ -135,15 +133,6 @@ public class MarginCurve
   }
   
   /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
-  }
-  
-  /**
    * Tests the MarginCurve generation from the command line.
    * The classifier is currently hardcoded. Pipe in an arff file.
    *
@@ -169,3 +158,6 @@ public class MarginCurve
     }
   }
 }
+
+
+

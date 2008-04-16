@@ -24,7 +24,6 @@
 package weka.experiment;
 
 import weka.core.FastVector;
-import weka.core.RevisionUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -36,11 +35,11 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.13 $
  */
 public class DatabaseResultListener 
   extends DatabaseUtils
-  implements ResultListener {
+  implements ResultListener  {
 
   /** for serialization */
   static final long serialVersionUID = 7388014746954652818L;  
@@ -394,12 +393,4 @@ public class DatabaseResultListener
     m_CacheKey = (Object [])key.clone();
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
-  }
 }

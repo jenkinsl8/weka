@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -98,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class MinMaxExtension
   extends Classifier 
@@ -359,15 +358,6 @@ public class MinMaxExtension
    */
   public String toString() {
     return this.getClass().getName();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**

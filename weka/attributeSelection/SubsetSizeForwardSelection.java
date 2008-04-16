@@ -16,7 +16,7 @@
 
 /*
  *    SubsetSizeForwardSelection.java
- *    Copyright (C) 2007 Martin Guetlein
+ *    Copyright (C) 2007 Martin Gütlein
  *
  */
 package weka.attributeSelection;
@@ -24,11 +24,11 @@ package weka.attributeSelection;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
-import weka.core.TechnicalInformation;
 import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
@@ -80,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class SubsetSizeForwardSelection extends ASSearch
   implements OptionHandler {
@@ -868,14 +868,5 @@ public class SubsetSizeForwardSelection extends ASSearch
     }
 
     return list;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

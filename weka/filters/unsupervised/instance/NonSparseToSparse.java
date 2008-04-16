@@ -26,7 +26,6 @@ package weka.filters.unsupervised.instance;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -40,7 +39,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class NonSparseToSparse 
   extends Filter
@@ -121,15 +120,6 @@ public class NonSparseToSparse
     inst.setDataset(instance.dataset());
     push(inst);
     return true;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

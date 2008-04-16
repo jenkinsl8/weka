@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.UnsupportedClassTypeException;
@@ -146,7 +145,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -768,15 +767,6 @@ public class Decorate
     }
     
     /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
-    }
-    
-    /**
      * Main method for testing this class.
      *
      * @param argv the options
@@ -785,3 +775,4 @@ public class Decorate
         runClassifier(new Decorate(), argv);
     }
 }
+

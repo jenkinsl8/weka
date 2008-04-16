@@ -31,7 +31,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -64,7 +63,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -536,15 +535,6 @@ public class ClusterMembership
       m_ignoreAttributesRange = new Range();
       m_ignoreAttributesRange.setRanges(rangeList);
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
   }
 
   /**

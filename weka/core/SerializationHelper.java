@@ -36,10 +36,9 @@ import java.io.Serializable;
  * objects to and fro files or streams.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class SerializationHelper
-  implements RevisionHandler {
+public class SerializationHelper {
 
   /** the field name of serialVersionUID */
   public final static String SERIAL_VERSION_UID = "serialVersionUID";
@@ -251,17 +250,8 @@ public class SerializationHelper
   }
   
   /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
-  }
-  
-  /**
    * Outputs information about a class on the commandline, takes class
-   * name as arguments.
+   * name as arguments
    * 
    * @param args	the classnames to check
    */

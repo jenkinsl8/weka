@@ -22,7 +22,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.trees.m5.M5Base;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
@@ -94,7 +93,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
 public class M5Rules 
   extends M5Base
@@ -148,15 +147,6 @@ public class M5Rules
     
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
-  }
 
   /**
    * Main method by which this class can be tested
@@ -167,3 +157,4 @@ public class M5Rules
     runClassifier(new M5Rules(), args);
   } 
 }
+

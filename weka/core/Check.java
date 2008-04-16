@@ -29,10 +29,10 @@ import java.util.Vector;
  * Abstract general class for testing in Weka.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public abstract class Check
-  implements OptionHandler, RevisionHandler {
+  implements OptionHandler {
   
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug = false;

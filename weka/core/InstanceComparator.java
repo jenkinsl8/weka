@@ -35,12 +35,12 @@ import java.util.Comparator;
  *
  * @see     Instance
  * @author  FracPete (fracpete at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  * @see     java.util.Arrays
  * @see     java.util.Collections
  */
 public class InstanceComparator
-  implements Comparator, Serializable, RevisionHandler {
+  implements Comparator, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -6589278678230949683L;
@@ -141,15 +141,6 @@ public class InstanceComparator
     }
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

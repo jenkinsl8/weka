@@ -23,7 +23,6 @@
 package weka.datagenerators;
 
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -35,11 +34,11 @@ import java.util.Enumeration;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 
 public abstract class ClusterDefinition
-  implements Serializable, OptionHandler, RevisionHandler {
+  implements Serializable, OptionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -5950001207047429961L;

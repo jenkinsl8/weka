@@ -27,7 +27,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -67,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.37 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -1108,15 +1107,6 @@ public class SimpleKMeans
    */
   public int [] getClusterSizes() {
     return m_ClusterSizes;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.38 $");
   }
 
   /**

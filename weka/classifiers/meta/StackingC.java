@@ -27,7 +27,6 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -94,7 +93,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class StackingC 
   extends Stacking 
@@ -312,15 +311,6 @@ public class StackingC
 
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
-  }
 
   /**
    * Main method for testing this class.
@@ -332,3 +322,4 @@ public class StackingC
     runClassifier(new StackingC(), argv);
   }
 }
+

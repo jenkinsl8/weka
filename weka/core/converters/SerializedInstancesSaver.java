@@ -23,7 +23,6 @@
 package weka.core.converters;
 
 import weka.core.Capabilities;
-import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 
 import java.io.BufferedOutputStream;
@@ -49,7 +48,7 @@ import java.io.ObjectOutputStream;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  * @see Saver
  */
 public class SerializedInstancesSaver 
@@ -143,15 +142,6 @@ public class SerializedInstancesSaver
       outW = null;
       resetWriter();
       setWriteMode(CANCEL);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

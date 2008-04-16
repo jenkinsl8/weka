@@ -24,8 +24,6 @@ package weka.associations.gsp;
 
 import weka.core.FastVector;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -34,10 +32,10 @@ import java.util.Enumeration;
  * Class representing a sequence of elements/itemsets.
  * 
  * @author  Sebastian Beer
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Sequence
-  implements Cloneable, Serializable, RevisionHandler {
+  implements Cloneable, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -5001018056339156390L;
@@ -571,14 +569,5 @@ public class Sequence
     result += "\n\n";
 
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

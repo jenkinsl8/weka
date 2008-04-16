@@ -37,10 +37,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * on WikiPedia.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class Trie
-  implements Serializable, Cloneable, Collection<String>, RevisionHandler {
+  implements Serializable, Cloneable, Collection<String> {
 
   /** for serialization */
   private static final long serialVersionUID = -5897980928817779048L;
@@ -49,11 +49,10 @@ public class Trie
    * Represents a node in the trie.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1 $
    */
   public static class TrieNode
-    extends DefaultMutableTreeNode
-    implements RevisionHandler {
+    extends DefaultMutableTreeNode {
     
     /** for serialization */
     private static final long serialVersionUID = -2252907099391881148L;
@@ -412,25 +411,16 @@ public class Trie
     public String toString() {
       return "" + getChar();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
-    }
   }
   
   /**
    * Represents an iterator over a trie
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1 $
    */
   public static class TrieIterator 
-    implements Iterator<String>, RevisionHandler {
+    implements Iterator<String> {
     
     /** the node to use as root */
     protected TrieNode m_Root;
@@ -485,15 +475,6 @@ public class Trie
      * ignored
      */
     public void remove() {
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
   
@@ -848,15 +829,6 @@ public class Trie
    */
   public String toString() {
     return toString(m_Root);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   /**

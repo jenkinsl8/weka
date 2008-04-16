@@ -42,19 +42,18 @@ import java.util.Vector;
  * ridge parameter and <code>setValue(...)</code> will set it.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class PropertyPath
-  implements RevisionHandler {
+public class PropertyPath {
 
   /**
    * Represents a single element of a property path
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1 $
    */
   public static class PathElement
-    implements Cloneable, RevisionHandler {
+    implements Cloneable {
     
     /** the property */
     protected String m_Name;
@@ -132,25 +131,15 @@ public class PropertyPath
       
       return result;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
-    }
   }
   
   /**
    * Contains a (property) path structure
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1 $
    */
-  public static class Path
-    implements RevisionHandler {
+  public static class Path {
     
     /** the structure */
     protected Vector m_Elements;
@@ -298,25 +287,15 @@ public class PropertyPath
       
       return result;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
-    }
   }
 
   /**
    * A helper class that stores Object and PropertyDescriptor together.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1 $
    */
-  protected static class PropertyContainer
-    implements RevisionHandler {
+  protected static class PropertyContainer {
     
     /** the descriptor */
     protected PropertyDescriptor m_Descriptor;
@@ -353,15 +332,6 @@ public class PropertyPath
      */
     public Object getObject() {
       return m_Object;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
   
@@ -554,15 +524,6 @@ public class PropertyPath
    */
   public static void setValue(Object src, String path, Object value) {
     setValue(src, new Path(path), value);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   /**

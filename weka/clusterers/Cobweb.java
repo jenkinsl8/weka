@@ -29,8 +29,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -103,7 +101,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.24 $
  * @see RandomizableClusterer
  * @see Drawable
  */
@@ -120,7 +118,7 @@ public class Cobweb
    * @see Serializable
    */
   private class CNode 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     static final long serialVersionUID = 3452097436933325631L;    
@@ -755,15 +753,6 @@ public class Cobweb
 	}
       }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.25 $");
-    }
   }
 
   /**
@@ -1235,18 +1224,9 @@ public class Cobweb
     text.append("}\n");
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
-  }
 
   /** 
-   * Main method.
+   * Main method
    * 
    * @param argv the commandline options
    */

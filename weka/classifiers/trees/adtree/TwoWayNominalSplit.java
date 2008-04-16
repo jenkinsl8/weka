@@ -25,7 +25,6 @@ package weka.classifiers.trees.adtree;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 import java.util.Enumeration;
 
@@ -34,7 +33,7 @@ import java.util.Enumeration;
  * either 'is some_value' or 'is not some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class TwoWayNominalSplit
   extends Splitter {
@@ -202,13 +201,5 @@ public class TwoWayNominalSplit
       clone.setChildForBranch(1, (PredictionNode) children[1].clone());
     return clone;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
-  }
 }
+

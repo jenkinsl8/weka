@@ -22,21 +22,22 @@
 
 package weka.classifiers.trees;
 
+
+import weka.classifiers.trees.ft.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.trees.ft.FTInnerNode;
-import weka.classifiers.trees.ft.FTLeavesNode;
-import weka.classifiers.trees.ft.FTNode;
-import weka.classifiers.trees.ft.FTtree;
+import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.BinC45ModelSelection;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.core.SelectedTag;
+import weka.core.Tag;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Attribute;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -49,6 +50,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.util.Enumeration;
 import java.util.Vector;
+
 
 /**
  <!-- globalinfo-start -->
@@ -116,7 +118,7 @@ import java.util.Vector;
  *
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira  
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class FT 
   extends Classifier 
@@ -684,7 +686,7 @@ public class FT
     TechnicalInformation 	additional;
       
     result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Joao Gama");
+    result.setValue(Field.AUTHOR, "João Gama");
     result.setValue(Field.TITLE, "Functional Trees");
     result.setValue(Field.BOOKTITLE, "Machine Learning");
     result.setValue(Field.YEAR, "2004");
@@ -776,15 +778,6 @@ public class FT
   public String useAICTipText() {
     return "The AIC is used to determine when to stop LogitBoost iterations. "
       +"The default is not to use AIC.";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
   
   /**

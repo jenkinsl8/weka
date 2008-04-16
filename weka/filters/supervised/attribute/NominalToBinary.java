@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -82,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class NominalToBinary 
   extends Filter 
@@ -653,15 +652,6 @@ public class NominalToBinary
     copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

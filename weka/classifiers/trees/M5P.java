@@ -26,7 +26,6 @@ import weka.classifiers.trees.m5.M5Base;
 import weka.classifiers.trees.m5.Rule;
 import weka.core.Drawable;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -92,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class M5P 
   extends M5Base 
@@ -240,15 +239,6 @@ public class M5P
 
     return options;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
 
   /**
    * Main method by which this class can be tested
@@ -259,3 +249,4 @@ public class M5P
     runClassifier(new M5P(), args);
   } 
 }
+

@@ -26,8 +26,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -88,7 +86,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class MiddleOutConstructor
   extends BallTreeConstructor
@@ -991,15 +989,6 @@ public class MiddleOutConstructor
     return bf.toString();
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
-  }
-  
   /** 
    * Temp class to represent either a leaf node or an internal node. Should only 
    * have two children (could be the case one child is an instance and the 
@@ -1008,10 +997,9 @@ public class MiddleOutConstructor
    * node's centre/anchor point.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.2 $
    */
-  protected class TempNode
-    implements RevisionHandler {
+  protected class TempNode {
     
     /** The anchor point of the node. */
     Instance anchor;
@@ -1052,15 +1040,6 @@ public class MiddleOutConstructor
       } catch(Exception ex) { ex.printStackTrace(); }
       return bf.toString();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
   }
 
   /**
@@ -1069,10 +1048,9 @@ public class MiddleOutConstructor
    * anchor point). 
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.2 $
    */
-  protected class ListNode
-    implements RevisionHandler {
+  protected class ListNode {
     
     /** The index of the point. */
     int idx = -1;
@@ -1090,15 +1068,6 @@ public class MiddleOutConstructor
       idx = i;
       distance = d;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
   }
   
   /**
@@ -1107,7 +1076,7 @@ public class MiddleOutConstructor
    * centre/pivot/anchor, in a (reverse sorted) list.  
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.2 $
    */
   protected class MyIdxList
     extends FastVector {
@@ -1223,15 +1192,6 @@ public class MiddleOutConstructor
                                 " Please check code.");            
         }
       }
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
     }
   }
 }

@@ -26,8 +26,6 @@ import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -86,7 +84,7 @@ import java.util.Vector;
  * @author Sham Kakade (original C++ code)
  * @author John Langford (original C++ code)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class CoverTree
   extends NearestNeighbourSearch
@@ -99,10 +97,10 @@ public class CoverTree
    * class representing a node of the cover tree.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.3 $
    */
   public class CoverTreeNode
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization. */
     private static final long serialVersionUID = 1808760031169036512L;
@@ -166,15 +164,6 @@ public class CoverTree
     public boolean isALeaf() {
       return num_children==0;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
   }
 
   /**
@@ -182,10 +171,9 @@ public class CoverTree
    * point p.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.3 $
    */
-  private class DistanceNode
-    implements RevisionHandler {
+  private class DistanceNode {
     
     /**
      * The last distance is to the current reference point
@@ -204,15 +192,6 @@ public class CoverTree
      */
     public Instance q() {
       return m_Instances.instance(idx);
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
 
@@ -683,10 +662,9 @@ public class CoverTree
    * i.e. the minimum size of the heap is k.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.3 $
    */
-  protected class MyHeap
-    implements RevisionHandler {
+  protected class MyHeap {
     
     /** the heap. */
     MyHeapElement m_heap[] = null;
@@ -882,25 +860,15 @@ public class CoverTree
     public int totalSize() {
       return size()+noOfKthNearest();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
   }
   
   /**
    * A class for storing data about a neighboring instance.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.3 $
    */
-  protected class MyHeapElement
-    implements RevisionHandler {
+  protected class MyHeapElement {
     
     /** the distance. */
     public double distance;
@@ -919,25 +887,15 @@ public class CoverTree
     public MyHeapElement(double d) {
       distance = d;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
   }
   
   /**
    * stores a CoverTreeNode and its distance to the current query node.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.3 $
    */
-  private class d_node
-    implements RevisionHandler {
+  private class d_node {
     
     /** The distance of the node's point to the query point. */
     double dist;
@@ -953,15 +911,6 @@ public class CoverTree
     public d_node(double d, CoverTreeNode node) {
       dist = d;
       n = node;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   };
 
@@ -1934,15 +1883,6 @@ public class CoverTree
       for (int i = 0; i < top_node.num_children; i++)
         print(depth + 1, top_node.children.element(i)); // top_node.children[i]);
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /** 

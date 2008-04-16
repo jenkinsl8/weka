@@ -27,7 +27,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Jython;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.File;
@@ -62,7 +61,7 @@ import java.util.Vector;
  * code.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class JythonClassifier 
   extends Classifier {
@@ -396,15 +395,6 @@ public class JythonClassifier
       return m_JythonObject.toString();
     else
       return "No Jython module loaded.";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**

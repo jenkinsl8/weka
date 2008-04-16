@@ -28,7 +28,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -68,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class NumericTransform 
   extends Filter
@@ -456,14 +455,6 @@ public class NumericTransform
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 
   /**
    * Main method for testing this class.

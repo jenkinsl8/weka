@@ -23,21 +23,19 @@ package weka.attributeSelection;
 
 import weka.core.FastVector;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
+
 import java.util.BitSet;
 import java.util.Hashtable;
 
+
 /**
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public class LFSMethods
-  implements RevisionHandler {
-  
+public class LFSMethods {
   /** max-size of array bestGroupOfSize, should be suffient */
   private final static int MAX_SUBSET_SIZE = 200;
   private BitSet m_bestGroup;
@@ -561,12 +559,7 @@ public class LFSMethods
    *
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    */
-  public class Link2
-    implements Serializable, RevisionHandler {
-    
-    /** for serialization. */
-    private static final long serialVersionUID = -7422719407475185086L;
-    
+  public class Link2 implements Serializable {
     /* BitSet group; */
     Object[] m_data;
     double m_merit;
@@ -586,15 +579,6 @@ public class LFSMethods
     public String toString() {
       return ("Node: " + m_data.toString() + "  " + m_merit);
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
   }
 
   /**
@@ -603,12 +587,7 @@ public class LFSMethods
    *
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    */
-  public class LinkedList2
-    extends FastVector {
-    
-    /** for serialization. */
-    private static final long serialVersionUID = -7776010892419656105L;
-    
+  public class LinkedList2 extends FastVector {
     // Max number of elements in the list
     int m_MaxSize;
 
@@ -708,23 +687,5 @@ public class LFSMethods
         }
       }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

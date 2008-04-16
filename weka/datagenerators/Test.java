@@ -22,11 +22,9 @@
 
 package weka.datagenerators;
 
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import weka.core.Attribute;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -66,11 +64,11 @@ import java.io.Serializable;
  * <br/>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.4 $ 
  **/
 
 public class Test 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = -8890645875887157782L;
@@ -233,14 +231,6 @@ public class Test
   public boolean equalTo(Test t) {
     return (m_AttIndex == t.m_AttIndex && m_Split == t.m_Split && m_Not == t.m_Not);
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
+    
 }
 

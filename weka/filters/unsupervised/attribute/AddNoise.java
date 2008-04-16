@@ -26,7 +26,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -64,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class AddNoise 
   extends Filter 
@@ -620,15 +619,6 @@ public class AddNoise
         }
       }
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

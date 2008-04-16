@@ -29,7 +29,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -100,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.27 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -458,15 +457,7 @@ public class FilteredClassifier
       + m_Classifier.toString();
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
-  }
+
 
   /**
    * Main method for testing this class.

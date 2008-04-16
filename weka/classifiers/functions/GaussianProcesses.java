@@ -32,7 +32,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -116,7 +115,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -803,17 +802,8 @@ public class GaussianProcesses
 
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
  
-  /**
+ /**
    * Main method for testing this class.
    * 
    * @param argv the commandline parameters

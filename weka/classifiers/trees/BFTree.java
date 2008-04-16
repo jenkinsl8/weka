@@ -31,7 +31,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -132,7 +131,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class BFTree
   extends RandomizableClassifier
@@ -2569,15 +2568,6 @@ public class BFTree
    */
   public double getSizePer() {
     return m_SizePer;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

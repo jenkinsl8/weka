@@ -25,12 +25,10 @@ package weka.classifiers.bayes.net;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.io.FileReader;
 import java.io.Serializable;
@@ -61,10 +59,10 @@ import java.io.Serializable;
  <!-- technical-bibtex-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class ADNode 
-	implements Serializable, TechnicalInformationHandler, RevisionHandler {
+	implements Serializable, TechnicalInformationHandler {
   
   	/** for serialization */
   	static final long serialVersionUID = 397409728366910204L;
@@ -286,12 +284,4 @@ public class ADNode
             }
         } // main
         
-        /**
-         * Returns the revision string.
-         * 
-         * @return		the revision
-         */
-        public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.7 $");
-        }
 } // class ADNode

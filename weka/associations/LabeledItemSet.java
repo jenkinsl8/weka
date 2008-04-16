@@ -25,8 +25,6 @@ package weka.associations;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -42,12 +40,10 @@ import java.util.Hashtable;
  * Because every item set knows its class label the training set can be splitted up virtually.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 
-public class LabeledItemSet
-  extends ItemSet
-  implements Serializable, RevisionHandler {
+public class LabeledItemSet extends ItemSet implements Serializable{
 
   /** for serialization */
   private static final long serialVersionUID = 4158771925518299903L;
@@ -394,13 +390,5 @@ public class LabeledItemSet
     
 	return rules;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
-    }
+
 }

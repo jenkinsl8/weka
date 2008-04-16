@@ -22,24 +22,20 @@
 package weka.classifiers.bayes.blr;
 
 import weka.classifiers.bayes.BayesianLogisticRegression;
+
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
+
 
 /**
- * Implementation of the Gaussian Prior update function based on modified
- *  CLG Algorithm (CLG-Lasso) with a certain Trust Region Update based
- * on Laplace Priors.
- *
- * @author Navendu Garg(gargnav@iit.edu)
- * @version $Revision: 1.2 $
- */
-public class LaplacePriorImpl
-  extends Prior {
-  
-  /** for serialization. */
-  private static final long serialVersionUID = 2353576123257012607L;
-  
+* Implementation of the Gaussian Prior update function based on modified
+*  CLG Algorithm (CLG-Lasso) with a certain Trust Region Update based
+* on Laplace Priors.
+*
+* @author Navendu Garg(gargnav@iit.edu)
+* @version 1.0
+*/
+public class LaplacePriorImpl extends Prior {
   Instances m_Instances;
   double Beta;
   double Hyperparameter;
@@ -158,14 +154,5 @@ public class LaplacePriorImpl
     }
 
     penalty = 0 - penalty;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

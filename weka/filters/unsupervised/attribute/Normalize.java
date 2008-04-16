@@ -27,7 +27,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -63,7 +62,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
@@ -557,15 +556,6 @@ public class Normalize
    */
   public void setTranslation(double value) {
     m_Translation = value;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /**

@@ -22,18 +22,7 @@
 
 package weka.estimators;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
+import weka.estimators.IncrementalEstimator;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.InputStreamReader;
@@ -41,6 +30,15 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
  
 /** 
  *
@@ -91,11 +89,10 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public abstract class Estimator 
-  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler, 
-             RevisionHandler {
+  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
   
   /** for serialization */
   static final long serialVersionUID = -5902411487362274342L;
@@ -113,7 +110,7 @@ public abstract class Estimator
    * Class to support a building process of an estimator.
    */
   private static class Builder
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     private static final long serialVersionUID = -5810927990193597303L;
@@ -129,15 +126,6 @@ public abstract class Estimator
 
     /** class value index of the builder */
     int m_classValueIndex = -1; 
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.10 $");
-    }
   }
   
   /**

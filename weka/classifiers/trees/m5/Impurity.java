@@ -23,17 +23,13 @@
 package weka.classifiers.trees.m5;
 
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * Class for handling the impurity values when spliting the instances
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
-public final class Impurity
-  implements RevisionHandler {
-  
+public final class Impurity{
   double n;                   // number of total instances 
   int attr;                   // splitting attribute 
   double nl;                  // number of instances in the left group 
@@ -174,13 +170,10 @@ public final class Impurity
       impurity = y - ((double)nl/(double)n)*yl - ((double)nr/(double)n)*yr;
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
+
 }
+
+
+
+
+

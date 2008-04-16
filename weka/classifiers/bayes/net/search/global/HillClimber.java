@@ -26,8 +26,6 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -69,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class HillClimber 
     extends GlobalScoreSearchAlgorithm {
@@ -82,7 +80,7 @@ public class HillClimber
    * on the current Bayesian network.
    */
     class Operation 
-    	implements Serializable, RevisionHandler {
+    	implements Serializable {
       
       	/** for serialization */
         static final long serialVersionUID = -2934970456587374967L;
@@ -127,15 +125,6 @@ public class HillClimber
         public int m_nOperation;
         /** change of score due to this operation **/
         public double m_fScore = -1E100;
-        
-        /**
-         * Returns the revision string.
-         * 
-         * @return		the revision
-         */
-        public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.9 $");
-        }
     } // class Operation
 	
     /** use the arc reversal operator **/
@@ -527,12 +516,4 @@ public class HillClimber
 	  return "When set to true, the arc reversal operation is used in the search.";
 	} // useArcReversalTipText
 
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.9 $");
-	}
 } // HillClimber

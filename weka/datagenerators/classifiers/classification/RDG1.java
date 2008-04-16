@@ -27,8 +27,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.datagenerators.ClassificationGenerator;
 import weka.datagenerators.Test;
@@ -122,7 +120,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class RDG1 
   extends ClassificationGenerator {
@@ -134,7 +132,7 @@ public class RDG1
    * class to represent decisionlist
    */
   private class RuleList 
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     static final long serialVersionUID = 2830125413361938177L;
@@ -213,14 +211,6 @@ public class RDG1
       return str.toString();
     } 
     
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
-    }
   } /*end class RuleList ******/
 
   /** Number of attribute the dataset should have */
@@ -1204,15 +1194,6 @@ public class RDG1
     }  
 
     return dataset;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

@@ -25,12 +25,10 @@
 
 package weka.associations.tertius;
 
-import weka.core.RevisionUtils;
-
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class IndividualLiteral extends AttributeValueLiteral {
 
@@ -52,13 +50,19 @@ public class IndividualLiteral extends AttributeValueLiteral {
 
     return m_type;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

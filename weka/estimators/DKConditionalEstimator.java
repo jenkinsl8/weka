@@ -22,14 +22,12 @@
 
 package weka.estimators;
 
-import weka.core.RevisionUtils;
-
 /** 
  * Conditional probability estimator for a discrete domain conditional upon
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
 public class DKConditionalEstimator implements ConditionalEstimator {
 
@@ -114,15 +112,7 @@ public class DKConditionalEstimator implements ConditionalEstimator {
     result += "Weights of each estimator given by " + m_Weights;
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
+
 
   /**
    * Main method for testing this class.

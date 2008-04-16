@@ -25,7 +25,6 @@ package weka.classifiers.bayes.net.search.global;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -91,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class SimulatedAnnealing 
 	extends GlobalScoreSearchAlgorithm
@@ -431,12 +430,4 @@ public class SimulatedAnnealing
 	  " Setting the seed allows replicability of experiments.";
 	} // seedTipText
 
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.6 $");
-	}
 } // SimulatedAnnealing

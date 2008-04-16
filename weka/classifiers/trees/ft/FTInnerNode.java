@@ -24,13 +24,17 @@ package weka.classifiers.trees.ft;
 
 import weka.classifiers.functions.SimpleLinearRegression;
 import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.C45Split;
+import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.NoSplit;
+
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
+
 
 /**
  * Class for Functional Inner tree structure. 
@@ -38,14 +42,11 @@ import weka.core.Utils;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class FTInnerNode 
-  extends FTtree {   
+    extends FTtree {   
      
-  /** for serialization. */
-  private static final long serialVersionUID = -1125334488640233181L;
-
   /**
    * Constructor for Functional Inner tree node. 
    *
@@ -281,14 +282,5 @@ public class FTInnerNode
       }
     }
     return probs;	
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

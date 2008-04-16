@@ -25,7 +25,6 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -49,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 
@@ -347,15 +346,6 @@ public class Standardize
     result.append("}\n");
     
     return result.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
   }
 
   /**

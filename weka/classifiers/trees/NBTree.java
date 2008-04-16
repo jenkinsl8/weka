@@ -30,7 +30,6 @@ import weka.core.Capabilities;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -75,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class NBTree 
   extends Classifier 
@@ -270,15 +269,6 @@ public class NBTree
     newVector.addElement("measureNumRules");
     return newVector.elements();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
 
   /**
    * Main method for testing this class
@@ -289,3 +279,4 @@ public class NBTree
     runClassifier(new NBTree(), argv);
   }
 }
+

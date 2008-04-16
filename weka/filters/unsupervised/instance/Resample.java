@@ -27,7 +27,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -65,7 +64,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class Resample 
   extends Filter 
@@ -487,15 +486,6 @@ public class Resample
       createSubsampleWithoutReplacement(random, origSize, sampleSize);
     else
       createSubsampleWithReplacement(random, origSize, sampleSize);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
   }
   
   /**

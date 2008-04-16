@@ -30,7 +30,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RelationalLocator;
-import weka.core.RevisionUtils;
 import weka.core.StringLocator;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -61,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
@@ -417,15 +416,6 @@ public class PropositionalToMultiInstance
     m_FirstBatchDone = true;
     
     return (numPendingOutput() != 0);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

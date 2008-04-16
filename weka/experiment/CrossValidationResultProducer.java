@@ -27,8 +27,6 @@ import weka.core.AdditionalMeasureProducer;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.File;
@@ -101,11 +99,10 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.16 $
  */
 public class CrossValidationResultProducer 
-  implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
-             RevisionHandler {
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
   
   /** for serialization */
   static final long serialVersionUID = -1580053925080091917L;
@@ -805,15 +802,7 @@ public class CrossValidationResultProducer
     }
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
-  }
+
     
   /** 
    * Quick test of timestamp

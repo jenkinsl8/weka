@@ -21,7 +21,6 @@
 
 package weka.classifiers.functions.pace;
 
-import weka.core.RevisionUtils;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.Maths;
 
@@ -62,7 +61,7 @@ import java.util.Random;
  <!-- technical-bibtex-end -->
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class ChisqMixture 
   extends MixtureDistribution {
@@ -415,15 +414,6 @@ public class ChisqMixture
    */
   public String  toString() {
     return mixingDistribution.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
     
   /** 

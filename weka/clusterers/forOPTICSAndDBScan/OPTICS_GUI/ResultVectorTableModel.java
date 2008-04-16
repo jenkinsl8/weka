@@ -25,8 +25,6 @@ package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
 import weka.core.FastVector;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import javax.swing.table.AbstractTableModel;
@@ -42,11 +40,10 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class ResultVectorTableModel
-    extends AbstractTableModel
-    implements RevisionHandler {
+    extends AbstractTableModel {
 
     /** for serialization */
     private static final long serialVersionUID = -7732711470435549210L;
@@ -122,13 +119,9 @@ public class ResultVectorTableModel
                 return "";
         }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
+
+    // *****************************************************************************************************************
+    // inner classes
+    // *****************************************************************************************************************
+
 }

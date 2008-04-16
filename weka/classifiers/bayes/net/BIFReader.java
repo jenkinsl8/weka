@@ -26,7 +26,6 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.FastVector;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -90,7 +89,7 @@ import org.w3c.dom.NodeList;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.13 $
  */
 public class BIFReader 
     extends BayesNet
@@ -608,20 +607,11 @@ public class BIFReader
    		throw new Exception("Could not find node [[" + sNodeName + "]]");
     } // getNode
 
-    /**
-     * the default constructor
-     */
-    public BIFReader() {
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.14 $");
-    }
+	/**
+	 * the default constructor
+	 */
+	public BIFReader() {
+	}
 
     /**
      * Loads the file specified as first parameter and prints it to stdout.

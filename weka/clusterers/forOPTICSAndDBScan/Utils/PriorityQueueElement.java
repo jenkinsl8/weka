@@ -23,9 +23,6 @@
 
 package weka.clusterers.forOPTICSAndDBScan.Utils;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 /**
  * <p>
  * PriorityQueueElement.java <br/>
@@ -38,10 +35,9 @@ import weka.core.RevisionUtils;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public class PriorityQueueElement
-    implements RevisionHandler {
+public class PriorityQueueElement {
 
     /**
      * Holds the priority for the object (in this case: the distance)
@@ -80,13 +76,9 @@ public class PriorityQueueElement
     public Object getObject() {
         return o;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
-    }
+
+    // *****************************************************************************************************************
+    // inner classes
+    // *****************************************************************************************************************
+
 }

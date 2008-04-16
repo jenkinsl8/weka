@@ -25,7 +25,6 @@ package weka.classifiers.bayes.net.estimate;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.Estimator;
 
@@ -47,7 +46,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class SimpleEstimator 
     extends BayesNetEstimator {
@@ -206,14 +205,5 @@ public class SimpleEstimator
 
         return fProbs;
     } // distributionForInstance
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
-    }
 
 } // SimpleEstimator

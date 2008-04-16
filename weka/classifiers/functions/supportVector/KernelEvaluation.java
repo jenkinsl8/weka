@@ -24,8 +24,6 @@ package weka.classifiers.functions.supportVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.BufferedReader;
@@ -36,10 +34,9 @@ import java.util.Enumeration;
  * Class for evaluating Kernels.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
-public class KernelEvaluation
-  implements RevisionHandler {
+public class KernelEvaluation {
 
   /** the result string */
   protected StringBuffer m_Result;
@@ -337,15 +334,6 @@ public class KernelEvaluation
    */
   public String toString() {
     return toSummaryString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

@@ -21,19 +21,15 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class ExponentialFormat
-  extends DecimalFormat
-  implements RevisionHandler {
+  extends DecimalFormat {
 
   /** for serialization */
   private static final long serialVersionUID = -5298981701073897741L;
@@ -99,14 +95,5 @@ public class ExponentialFormat
       s.append('0');
 	
     return s.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

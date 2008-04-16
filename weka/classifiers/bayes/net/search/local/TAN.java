@@ -24,7 +24,6 @@ package weka.classifiers.bayes.net.search.local;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -73,7 +72,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class TAN 
 	extends LocalScoreSearchAlgorithm
@@ -270,15 +269,6 @@ public class TAN
 		  + "For more information see:\n\n"
 		  + getTechnicalInformation().toString();
 	} // globalInfo
-
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.7 $");
-	}
 
 } // TAN
 

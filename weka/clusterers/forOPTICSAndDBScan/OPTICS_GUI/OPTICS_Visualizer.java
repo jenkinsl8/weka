@@ -23,62 +23,18 @@
 
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.gui.LookAndFeel;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Event;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * <p>
@@ -91,10 +47,9 @@ import javax.swing.table.TableColumn;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class OPTICS_Visualizer
-    implements RevisionHandler {
+public class OPTICS_Visualizer {
 
     /**
      * Holds the OPTICS clustering results
@@ -755,23 +710,12 @@ public class OPTICS_Visualizer
         helpFrame.setVisible(true);
         helpFrame.toFront();
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
-    }
 
     // *****************************************************************************************************************
     // inner classes
     // *****************************************************************************************************************
 
-    private class FrameListener
-        implements ActionListener, RevisionHandler {
-      
+    private class FrameListener implements ActionListener {
         /**
          * Invoked when an action occurs.
          */
@@ -884,20 +828,9 @@ public class OPTICS_Visualizer
                 }
             }
         }
-        
-        /**
-         * Returns the revision string.
-         * 
-         * @return		the revision
-         */
-        public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.4 $");
-        }
     }
 
-    private class SettingsPanelListener
-        implements ActionListener, RevisionHandler {
-      
+    private class SettingsPanelListener implements ActionListener {
         /**
          * Invoked when an action occurs.
          */
@@ -938,14 +871,6 @@ public class OPTICS_Visualizer
             Color c = JColorChooser.showDialog(frame, title, Color.black);
             return c;
         }
-        
-        /**
-         * Returns the revision string.
-         * 
-         * @return		the revision
-         */
-        public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.4 $");
-        }
     }
+
 }

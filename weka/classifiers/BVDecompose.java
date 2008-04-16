@@ -27,13 +27,11 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -108,10 +106,10 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  */
 public class BVDecompose
-  implements OptionHandler, TechnicalInformationHandler, RevisionHandler {
+  implements OptionHandler, TechnicalInformationHandler {
 
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug;
@@ -677,14 +675,6 @@ public class BVDecompose
     return result + "\n";
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
-  }
 
   /**
    * Test method for this class

@@ -24,9 +24,6 @@
 
 package weka.classifiers.lazy.kstar;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 
 /**
@@ -35,10 +32,10 @@ import java.io.Serializable;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
 public class KStarCache
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -7693632394267140678L;
@@ -91,7 +88,7 @@ public class KStarCache
    *
    */
   public class CacheTable
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     private static final long serialVersionUID = -8086106452588253423L;
@@ -255,22 +252,14 @@ public class KStarCache
       long bits = Double.doubleToLongBits(key);
       return (int)(bits ^ (bits >> 32));
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
-    }
+  
   } // CacheTable
   
   /**
    * Hashtable collision list.
    */
   public class TableEntry
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization */
     private static final long serialVersionUID = 4057602386766259138L;
@@ -299,24 +288,10 @@ public class KStarCache
       this.pmiss = pmiss;
       this.next  = next;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
-    }
   }  // TableEntry
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
-  }
-  
 } // Cache
+
+
+
+

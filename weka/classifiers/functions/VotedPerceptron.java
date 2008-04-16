@@ -29,7 +29,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -92,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class VotedPerceptron 
   extends Classifier 
@@ -582,15 +581,6 @@ public class VotedPerceptron
       return 1;
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
-  }
 
   /**
    * Main method.
@@ -601,3 +591,4 @@ public class VotedPerceptron
     runClassifier(new VotedPerceptron(), argv);
   }
 }
+

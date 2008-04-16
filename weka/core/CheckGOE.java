@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class CheckGOE
   extends Check {
@@ -367,15 +367,6 @@ public class CheckGOE
 
     if (m_Success)
       m_Success = checkToolTips();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /** 

@@ -19,26 +19,27 @@
  *    Copyright (C) 2008 Illinois Institute of Technology
  *
  */
-
 package weka.classifiers.bayes.blr;
 
 import weka.classifiers.bayes.BayesianLogisticRegression;
+
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
 
 import java.io.Serializable;
 
+
 /**
+ *
+ *
  * This is an interface to plug various priors into
  * the Bayesian Logistic Regression Model.
  *
- * @version $Revision: 1.2 $
+ * @version 1.0
  * @author Navendu Garg (gargnav@iit.edu)
+ *
  */
-public abstract class Prior
-  implements Serializable, RevisionHandler {
-  
+public abstract class Prior implements Serializable {
   protected Instances m_Instances;
   protected double Beta = 0.0;
   protected double Hyperparameter = 0.0;

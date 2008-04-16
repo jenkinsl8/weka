@@ -1,17 +1,16 @@
 package weka.classifiers.bayes.net;
 
+import weka.classifiers.bayes.net.BIFReader;
+import weka.classifiers.bayes.net.ParentSet;
+import weka.classifiers.bayes.net.estimate.BayesNetEstimator;
+import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.classifiers.bayes.BayesNet;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 
-public class MarginCalculator implements Serializable, RevisionHandler {
+public class MarginCalculator implements Serializable {
 	  /** for serialization */
 	  private static final long serialVersionUID = 650278019241175534L;
 
@@ -165,8 +164,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 		return jtns;
 	} // getJunctionTree
 	
-	public class JunctionTreeSeparator implements Serializable, RevisionHandler {
-	  
+	public class JunctionTreeSeparator implements Serializable {
 		  private static final long serialVersionUID = 6502780192411755343L;
 		int [] m_nNodes;
 		int m_nCardinality;
@@ -267,20 +265,10 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 			}
 			return fi;
 		} // update
-		  
-		/**
-		 * Returns the revision string.
-		 * 
-		 * @return		the revision
-		 */
-		public String getRevision() {
-		  return RevisionUtils.extract("$Revision: 1.2 $");
-		}
 
 	} // class JunctionTreeSeparator
 
-	public class JunctionTreeNode implements Serializable, RevisionHandler {
-	  
+	public class JunctionTreeNode implements Serializable {
 		  private static final long serialVersionUID = 650278019241175536L;
 		/** reference Bayes net for information about variables like name, cardinality, etc.
 		 * but not for relations between nodes **/
@@ -627,15 +615,6 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 				m_parentSeparator.updateFromParent();
 			}
 		} // updateEvidence
-
-		/**
-		 * Returns the revision string.
-		 * 
-		 * @return		the revision
-		 */
-		public String getRevision() {
-		  return RevisionUtils.extract("$Revision: 1.2 $");
-		}
 		
 	} // class JunctionTreeNode
 
@@ -909,15 +888,6 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	public double [] getMargin(int iNode) {
 		return m_Margins[iNode];
 	} // getMargin
-
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.2 $");
-	}
 	
 	public static void main(String[] args) {
 		try {

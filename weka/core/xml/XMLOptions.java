@@ -22,8 +22,6 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.File;
@@ -41,10 +39,9 @@ import org.w3c.dom.NodeList;
  * line string.<p>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
-public class XMLOptions
-  implements RevisionHandler {
+public class XMLOptions {
   
   /** tag for a single option. */
   public final static String TAG_OPTION = "option";
@@ -372,15 +369,6 @@ public class XMLOptions
    */
   public String toString() {
     return getXMLDocument().toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

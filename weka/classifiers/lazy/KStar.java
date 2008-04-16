@@ -33,7 +33,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -91,7 +90,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class KStar 
   extends Classifier
@@ -702,15 +701,6 @@ public class KStar
       newArray[index] = temp;
     }
     return newArray;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
 } // class end

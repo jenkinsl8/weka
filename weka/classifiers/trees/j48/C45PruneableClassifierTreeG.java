@@ -26,7 +26,6 @@ package weka.classifiers.trees.j48;
 import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Instance;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.Collections;
  * be pruned using C4.5 procedures and have nodes grafted on.
  *
  * @author Janice Boughton (based on code by Eibe Frank)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 public class C45PruneableClassifierTreeG extends ClassifierTree{
@@ -1213,14 +1212,5 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
        } else
           ((C45PruneableClassifierTreeG)m_sons[i]).dumpTree(depth+1,text);
      }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

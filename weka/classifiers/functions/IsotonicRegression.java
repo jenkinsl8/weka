@@ -28,7 +28,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -51,7 +50,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -299,15 +298,6 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
     }
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
 
   /**
    * Main method for testing this class
@@ -318,3 +308,4 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
     runClassifier(new IsotonicRegression(), argv);
   } 
 }
+

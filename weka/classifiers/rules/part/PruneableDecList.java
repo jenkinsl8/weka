@@ -26,7 +26,6 @@ import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -34,10 +33,10 @@ import weka.core.Utils;
  * can be pruned using a pruning set.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class PruneableDecList
-  extends ClassifierDecList {
+  extends ClassifierDecList{
 
   /** for serialization */
   private static final long serialVersionUID = -7228103346297172921L;
@@ -204,13 +203,12 @@ public class PruneableDecList
     return m_test.total()-
 	    m_test.perClass(localModel().distribution().maxClass());
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
 }
+
+
+
+
+
+
+
+

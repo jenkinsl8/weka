@@ -23,8 +23,6 @@
 package weka.classifiers.meta.ensembleSelection;
 
 import weka.classifiers.Evaluation;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class is used by Ensemble Selection.  It provides the "enumeration" of the
@@ -32,10 +30,9 @@ import weka.core.RevisionUtils;
  * computing the metric using an Evaluation class.
  * 
  * @author  David Michael
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class EnsembleMetricHelper
-  implements RevisionHandler {
+public class EnsembleMetricHelper {
   
   /** metric: Accuracy */
   public static final int METRIC_ACCURACY = 0;
@@ -95,14 +92,5 @@ public class EnsembleMetricHelper
       default:
 	return 0.0; //FIXME TODO - this should probably be an exception?
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

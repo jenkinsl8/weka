@@ -33,7 +33,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -103,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9 $
  */
 public class PART 
   extends Classifier 
@@ -695,15 +694,6 @@ public class PART
   public void setBinarySplits(boolean v) {
     
     m_binarySplits = v;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
   }
   
   /**

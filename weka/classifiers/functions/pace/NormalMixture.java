@@ -22,8 +22,6 @@
 package weka.classifiers.functions.pace;
 
 import java.util.Random;
-
-import weka.core.RevisionUtils;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.Maths;
 
@@ -62,7 +60,7 @@ import weka.core.matrix.Maths;
  <!-- technical-bibtex-end -->
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class  NormalMixture 
   extends MixtureDistribution {
@@ -352,15 +350,6 @@ public class  NormalMixture
    */
   public String  toString() {
     return mixingDistribution.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
     
   /** 

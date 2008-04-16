@@ -28,8 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.File;
@@ -105,11 +103,10 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.19 $
  */
 public class RandomSplitResultProducer 
-  implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
-             RevisionHandler {
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
   
   /** for serialization */
   static final long serialVersionUID = 1403798165056795073L;
@@ -903,12 +900,4 @@ public class RandomSplitResultProducer
     return result;
   }
 
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
-  }
 } // RandomSplitResultProducer

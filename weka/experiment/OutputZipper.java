@@ -23,9 +23,6 @@
 
 package weka.experiment;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,10 +39,9 @@ import java.util.zip.ZipOutputStream;
  * finished() is called to close the file.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
-public class OutputZipper
-  implements RevisionHandler {
+public class OutputZipper {
   
   File m_destination;
   DataOutputStream m_zipOut = null;
@@ -106,15 +102,6 @@ public class OutputZipper
     if (m_zipOut != null) {
       m_zipOut.close();
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

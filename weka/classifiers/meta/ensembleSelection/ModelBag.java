@@ -24,8 +24,6 @@ package weka.classifiers.meta.ensembleSelection;
 
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.util.Random;
 
@@ -45,10 +43,9 @@ import java.util.Random;
  * indexing for our clients.
  * 
  * @author  David Michael
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class ModelBag
-  implements RevisionHandler {
+public class ModelBag {
   
   /**
    * The "models", as a multidimensional array of predictions for the
@@ -634,14 +631,5 @@ public class ModelBag
       performance[i] = evaluatePredictions(instances, model(i), metric);
     }
     return performance;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

@@ -36,7 +36,6 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -146,7 +145,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 
 public class Tertius 
@@ -2000,15 +1999,6 @@ public class Tertius
     }
 
     return text.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

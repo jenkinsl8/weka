@@ -44,7 +44,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class AllJavadoc
   extends Javadoc {
@@ -134,15 +134,6 @@ public class AllJavadoc
     }
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

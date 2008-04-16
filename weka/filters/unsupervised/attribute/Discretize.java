@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -86,7 +85,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12 $
  */
 public class Discretize 
   extends PotentialClassIgnorer 
@@ -1057,15 +1056,6 @@ public class Discretize
     copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 
   /**

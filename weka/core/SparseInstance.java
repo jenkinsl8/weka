@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.21 $
  */
 public class SparseInstance
   extends Instance {
@@ -801,13 +801,6 @@ public class SparseInstance
       e.printStackTrace();
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
-  }
 }
+
+

@@ -25,8 +25,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -65,11 +63,11 @@ import java.util.Vector;
  * Options after -- are passed to the designated filter.<p>
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  * @see     weka.filters.Sourcable
  */
 public class CheckSource
-  implements OptionHandler, RevisionHandler {
+  implements OptionHandler {
 
   /** the classifier used for generating the source code */
   protected Filter m_Filter = null;
@@ -446,15 +444,6 @@ public class CheckSource
     }
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
   
   /**

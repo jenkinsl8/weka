@@ -30,7 +30,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
@@ -75,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveFrequentValues 
    extends Filter 
@@ -622,15 +621,6 @@ public class RemoveFrequentValues
       m_FirstBatchDone = true;
 
       return (numPendingOutput() != 0);
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
    }
    
    /**

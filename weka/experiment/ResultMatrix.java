@@ -22,7 +22,6 @@
 
 package weka.experiment;
 
-import weka.core.RevisionHandler;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -43,7 +42,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -51,7 +50,7 @@ import java.util.Vector;
  * @see #toStringRanking()
  */
 public abstract class ResultMatrix
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 4487179306428209739L;

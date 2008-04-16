@@ -24,7 +24,6 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -82,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8 $
  */
 public class PKIDiscretize 
   extends Discretize
@@ -355,15 +354,6 @@ public class PKIDiscretize
    */
   public void setBins(int numBins) {
 
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

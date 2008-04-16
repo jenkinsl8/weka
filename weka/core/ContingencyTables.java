@@ -26,10 +26,9 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7 $
  */
-public class ContingencyTables
-  implements RevisionHandler {
+public class ContingencyTables {
 
   /** The natural logarithm of 2 */
   private static double log2 = Math.log(2);
@@ -570,15 +569,6 @@ public class ContingencyTables
 
     // Return chi-value for the cell
     return (diff * diff / expected);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

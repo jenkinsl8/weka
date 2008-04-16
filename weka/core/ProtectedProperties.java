@@ -32,11 +32,10 @@ import java.util.Properties;
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5 $
  */
 public class ProtectedProperties
-  extends Properties
-  implements RevisionHandler {
+  extends Properties {
 
   /** for serialization */
   private static final long serialVersionUID = 3876658672657323985L;
@@ -135,14 +134,6 @@ public class ProtectedProperties
     throw new
       UnsupportedOperationException("ProtectedProperties cannot be modified!");
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
-  }
+
 }
 

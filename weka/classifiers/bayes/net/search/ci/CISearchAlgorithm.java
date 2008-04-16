@@ -26,7 +26,6 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 /** 
  <!-- globalinfo-start -->
@@ -49,7 +48,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public class CISearchAlgorithm 
 	extends LocalScoreSearchAlgorithm {
@@ -108,13 +107,5 @@ public class CISearchAlgorithm
 		}
 		return false;
 	} // IsConditionalIndependent
-
-	/**
-	 * Returns the revision string.
-	 * 
-	 * @return		the revision
-	 */
-	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.7 $");
-	}
+	        	
 } // class CISearchAlgorithm

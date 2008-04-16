@@ -23,8 +23,6 @@
 package weka.classifiers.trees.m5;
 
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -34,10 +32,10 @@ import java.io.Serializable;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public final class YongSplitInfo
-  implements Cloneable, Serializable, SplitEvaluate, RevisionHandler {
+  implements Cloneable, Serializable, SplitEvaluate {
 
   /** for serialization */
   private static final long serialVersionUID = 1864267581079767881L;
@@ -200,13 +198,5 @@ public final class YongSplitInfo
   public double splitValue () {
     return splitValue;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
-  }
 }
+

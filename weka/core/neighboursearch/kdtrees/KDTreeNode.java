@@ -21,9 +21,6 @@
 
 package weka.core.neighboursearch.kdtrees;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 
 /**
@@ -41,10 +38,10 @@ import java.io.Serializable;
  * P.S.: The master index array is only stored in KDTree class.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 public class KDTreeNode
-  implements Serializable, RevisionHandler {
+  implements Serializable {
    
   /** for serialization. */
   private static final long serialVersionUID = -3660396067582792648L;
@@ -169,14 +166,5 @@ public class KDTreeNode
    */
   public int numInstances() {
     return (m_End-m_Start+1);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

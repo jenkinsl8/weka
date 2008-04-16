@@ -27,7 +27,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.unsupervised.attribute.AddExpression;
 
@@ -85,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  * @see     AddExpression
  * @see     MexicanHat
  */
@@ -411,15 +410,6 @@ public class Expression
    */
   public String generateFinished() throws Exception {
     return "";
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

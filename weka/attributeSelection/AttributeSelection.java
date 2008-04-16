@@ -26,8 +26,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
@@ -82,10 +80,10 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.47 $
+ * @version  $Revision: 1.46 $
  */
 public class AttributeSelection 
-  implements Serializable, RevisionHandler {
+  implements Serializable {
   
   /** for serialization */
   static final long serialVersionUID = 4170171824147584330L;
@@ -1091,13 +1089,6 @@ public class AttributeSelection
       System.out.println(e.getMessage());
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.47 $");
-  }
+
 }
+

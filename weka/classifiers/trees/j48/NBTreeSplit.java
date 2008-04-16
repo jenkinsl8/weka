@@ -25,7 +25,6 @@ package weka.classifiers.trees.j48;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
@@ -35,7 +34,7 @@ import java.util.Random;
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public class NBTreeSplit
   extends ClassifierSplitModel{
@@ -400,13 +399,5 @@ public class NBTreeSplit
   public double getErrors() {
     return m_errors;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
 }
+

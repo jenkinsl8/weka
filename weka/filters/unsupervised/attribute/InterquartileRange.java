@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.SimpleBatchFilter;
@@ -101,7 +100,7 @@ import java.util.Vector;
  *
  * @author  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2 $
  */
 public class InterquartileRange
   extends SimpleBatchFilter {
@@ -936,15 +935,6 @@ public class InterquartileRange
     }
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

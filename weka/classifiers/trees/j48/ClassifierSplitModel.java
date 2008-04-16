@@ -24,7 +24,6 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -34,10 +33,10 @@ import java.io.Serializable;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10 $
  */
 public abstract class ClassifierSplitModel
-  implements Cloneable, Serializable, RevisionHandler {
+  implements Cloneable, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 4280730118393457457L;

@@ -26,7 +26,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Version;
@@ -44,11 +43,12 @@ import java.util.zip.GZIPInputStream;
 
 import org.w3c.dom.Element;
 
+
 /**
  * XML representation of the Instances class.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class XMLInstances
   extends XMLDocument
@@ -844,15 +844,6 @@ public class XMLInstances
     
     // interprete XML structure
     m_Instances = dataFromXML(headerFromXML());
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

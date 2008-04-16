@@ -25,8 +25,6 @@ package weka.core.converters;
 import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 
@@ -49,11 +47,11 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14 $
  * @see Serializable
  */
 public class ConverterUtils
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
   /** for serialization. */
   static final long serialVersionUID = -2460855349276148760L;
@@ -70,14 +68,14 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.14 $
    * @see #hasMoreElements(Instances)
    * @see #nextElement(Instances)
    * @see #reset()
    * @see DataSink
    */
   public static class DataSource
-    implements Serializable, RevisionHandler {
+    implements Serializable {
     
     /** for serialization. */
     private static final long serialVersionUID = -613122395928757332L;
@@ -508,15 +506,6 @@ public class ConverterUtils
       while (loader.hasMoreElements(structure))
 	System.out.println(loader.nextElement(inst));
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
-    }
   }
 
   /**
@@ -525,11 +514,11 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.14 $
    * @see DataSource
    */
   public static class DataSink
-    implements Serializable, RevisionHandler {
+    implements Serializable {
 
     /** for serialization. */
     private static final long serialVersionUID = -1504966891136411204L;
@@ -660,15 +649,6 @@ public class ConverterUtils
       
       // save data
       DataSink.write(args[1], data);
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
     }
   }
   
@@ -1156,14 +1136,5 @@ public class ConverterUtils
    */
   public static AbstractFileSaver getSaverForExtension(String extension) {
     return (AbstractFileSaver) getConverterForExtension(extension, m_FileSavers);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
   }
 }
