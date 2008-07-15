@@ -16,7 +16,7 @@
 
 /*
  *    PredictionAppender.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.9.2.5 $
  */
 public class PredictionAppender
   extends JPanel
@@ -110,24 +110,6 @@ public class PredictionAppender
   public PredictionAppender() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -379,12 +361,6 @@ public class PredictionAppender
     if (m_dataSourceListeners.size() > 0 
 	|| m_trainingSetListeners.size() > 0
 	|| m_testSetListeners.size() > 0) {
-
-      if (e.getTestSet() == null) {
-        // can't append predictions
-        return;
-      }
-
       Instances testSet = e.getTestSet().getDataSet();
       Instances trainSet = e.getTrainSet().getDataSet();
       int setNum = e.getSetNumber();
@@ -528,7 +504,6 @@ public class PredictionAppender
     }
   }
   
-  
   /**
    * Accept and process a batch clusterer event
    *
@@ -639,7 +614,8 @@ public class PredictionAppender
 	}
       }
     }
-  }
+  }  
+
 
   private Instances 
     makeDataSetProbabilities(Instances format,
@@ -826,10 +802,7 @@ public class PredictionAppender
   }
 
   public void stop() {
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      ((BeanCommon)m_listenee).stop();
-    }
+    // cant really do anything meaningful here
   }
 
   /**

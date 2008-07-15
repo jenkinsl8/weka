@@ -16,68 +16,203 @@
 
 /*
  *    AddExpression.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.AttributeExpression;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
+import weka.filters.*;
+import java.io.*;
+import java.util.StringTokenizer;
+import java.util.Stack;
 import java.util.Vector;
+import java.util.Enumeration;
+
+import weka.core.Utils;
+import weka.core.OptionHandler;
+import weka.core.Option;
+import weka.core.Instance;
+import weka.core.SparseInstance;
+import weka.core.Instances;
+import weka.core.Attribute;
 
 /**
- <!-- globalinfo-start -->
- * An instance filter that creates a new attribute by applying a mathematical expression to existing attributes. The expression can contain attribute references and numeric constants. Supported operators are :<br/>
- * +, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, sin, (, )<br/>
- * Attributes are specified by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1).<br/>
- * Example expression : a1^2*a5/log(a7*4.0).
- * <p/>
- <!-- globalinfo-end -->
+ * Applys a mathematical expression involving attributes and numeric
+ * constants to a dataset. A new attribute is appended after the last
+ * attribute that contains the result of applying the expression. 
+ * Supported operators are: +, -, *, /, ^, log, abs, cos, exp, sqrt, 
+ * floor, ceil, rint, tan, sin, (, ). Attributes are specified
+ * by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1). <p>
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid filter-specific options are:<p>
  * 
- * <pre> -E &lt;expression&gt;
- *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
- *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
- *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
- *  (default: a1^2)</pre>
- * 
- * <pre> -N &lt;name&gt;
- *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
- * 
- * <pre> -D
- *  Debug. Names attribute with the postfix parse of the expression.</pre>
- * 
- <!-- options-end -->
+ * -E expression <br>
+ * Specify the expression to apply. Eg. a1^2*a5/log(a7*4.0). <p>
+ *
+ * -N name <br>
+ * Specify a name for the new attribute. Default is to name it with the
+ * expression provided with the -E option. <p>
+ *
+ * -D <br>
+ * Debug. Names the attribute with the postfix parse of the expression. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.2 $
  */
-public class AddExpression 
-  extends Filter 
+public class AddExpression extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 402130384261736245L;
-  
+  /**
+   * Inner class handling an attribute index as an operand
+   */
+  private class AttributeOperand implements Serializable {
+
+    /** the index of the attribute */
+    protected int m_attributeIndex;
+
+    /** true if the value of the attribute are to be multiplied by -1 */
+    protected boolean m_negative;
+
+    public AttributeOperand(String operand, boolean sign) throws Exception {
+      // strip the leading 'a' and set the index
+      m_attributeIndex = (Integer.parseInt(operand.substring(1)))-1;
+      m_negative = sign;
+    }
+
+    /**
+     * Return a string describing this object
+     * @return a string descibing the attribute operand
+     */
+    public String toString() {
+      String result = "";
+      if (m_negative) {
+	result += '-';
+      }
+      return result+"a"+(m_attributeIndex+1);
+    }
+  }
+
+  /**
+   * Inner class for storing numeric constant opperands
+   */
+  private class NumericOperand implements Serializable {
+
+    /** numeric constant */
+    protected double m_numericConst;
+
+    public NumericOperand(String operand, boolean sign) throws Exception {
+      m_numericConst = Double.valueOf(operand).doubleValue();
+      if (sign) {
+	m_numericConst *= -1.0;
+      }
+    }
+    
+    /**
+     * Return a string describing this object
+     * @return a string descibing the numeric operand
+     */
+    public String toString() {
+      return ""+m_numericConst;
+    }
+  }
+
+  /**
+   * Inner class for storing operators
+   */
+  private class Operator implements Serializable {
+
+    /** the operator */
+    protected char m_operator;
+
+    public Operator(char opp) {
+      if (!isOperator(opp)) {
+	throw new IllegalArgumentException("Unrecognized operator:" + opp);
+      }
+      m_operator = opp;
+    }
+
+    /**
+     * Apply this operator to the supplied arguments
+     * @param first the first argument
+     * @param second the second argument
+     * @return the result
+     */
+    protected double applyOperator(double first, double second) {
+      switch (m_operator) {
+      case '+' :
+	return (first+second);
+      case '-' :
+	return (first-second);
+      case '*' :
+	return (first*second);
+      case '/' :
+	return (first/second);
+      case '^' :
+	return Math.pow(first,second);
+      }
+      return Double.NaN;
+    }
+
+    /**
+     * Apply this operator (function) to the supplied argument
+     * @param value the argument
+     * @return the result
+     */
+    protected double applyFunction(double value) {
+      switch (m_operator) {
+      case 'l' :
+	return Math.log(value);
+      case 'b' :
+	return Math.abs(value);
+      case 'c' :
+	return Math.cos(value);
+      case 'e' :
+	return Math.exp(value);
+      case 's' :
+	return Math.sqrt(value);
+      case 'f' :
+	return Math.floor(value);
+      case 'h' :
+	return Math.ceil(value);
+      case 'r' :
+	return Math.rint(value);
+      case 't' :
+	return Math.tan(value);
+      case 'n' :
+	return Math.sin(value);
+      }
+      return Double.NaN;
+    }
+
+    /**
+     * Return a string describing this object
+     * @return a string descibing the operator
+     */
+    public String toString() {
+      return ""+m_operator;
+    }
+  }
+
   /** The infix expression */
   private String m_infixExpression = "a1^2";
+
+  /** Operator stack */
+  private Stack m_operatorStack = new Stack();
+
+  /** Supported operators. l = log, b = abs, c = cos, e = exp, s = sqrt, 
+      f = floor, h = ceil, r = rint, t = tan, n = sin */
+  private static final String OPERATORS = "+-*/()^lbcesfhrtn";
+  private static final String UNARY_FUNCTIONS = "lbcesfhrtn";
+
+  /** Holds the expression in postfix form */
+  private Vector m_postFixExpVector;
+
+  /** True if the next numeric constant or attribute index is negative */
+  private boolean m_signMod = false;
+
+  /** Holds the previous token */
+  private String m_previousTok = "";
 
   /** Name of the new attribute. "expression"  length string will use the 
       provided expression as the new attribute name */
@@ -87,27 +222,296 @@ public class AddExpression
       expression */
   private boolean m_Debug = false;
 
-  private AttributeExpression m_attributeExpression = null;
-
   /**
    * Returns a string describing this filter
    *
-   * @return 		a description of the filter suitable for
-   * 			displaying in the explorer/experimenter gui
+   * @return a description of the filter suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "An instance filter that creates a new attribute by applying a "
-      + "mathematical expression to existing attributes. The expression "
-      + "can contain attribute references and numeric constants. Supported "
-      + "operators are :\n"
-      + "+, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, "
-      + "sin, (, )\n"
-      + "Attributes are specified by prefixing with 'a', eg. a7 is "
-      + "attribute number 7 (starting from 1).\n"
-      + "Example expression : a1^2*a5/log(a7*4.0).";
+    return "An instance filter that creates a new attribute by applying a "
+      +"mathematical expression to existing attributes. The expression "
+      +"can contain attribute references and numeric constants. Supported "
+      +"opperators are :  +, -, *, /, ^, log, abs, cos, exp, sqrt, "
+      +"floor, ceil, rint, tan, sin, (, ). Attributes are specified "
+      +"by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1)."
+      +" Example expression : a1^2*a5/log(a7*4.0)."; 
   }
-  
+
+  /**
+   * Handles the processing of an infix operand to postfix
+   * @param tok the infix operand
+   * @exception Exception if there is difficulty parsing the operand
+   */
+  private void handleOperand(String tok) throws Exception {
+    // if it contains an 'a' then its an attribute index
+    if (tok.indexOf('a') != -1) {
+      m_postFixExpVector.addElement(new AttributeOperand(tok,m_signMod));
+    } else {
+      try {
+	// should be a numeric constant
+	m_postFixExpVector.addElement(new NumericOperand(tok, m_signMod));
+      } catch (NumberFormatException ne) {
+	throw new Exception("Trouble parsing numeric constant");
+      }
+    }
+    m_signMod = false;
+  }
+
+  /**
+   * Handles the processing of an infix operator to postfix
+   * @param tok the infix operator
+   * @exception Exception if there is difficulty parsing the operator
+   */
+  private void handleOperator(String tok) throws Exception {
+    boolean push = true;
+
+    char tokchar = tok.charAt(0);
+    if (tokchar == ')') {
+      String popop = " ";
+      do {
+	popop = (String)(m_operatorStack.pop());
+	if (popop.charAt(0) != '(') {
+	  m_postFixExpVector.addElement(new Operator(popop.charAt(0)));
+	}
+      } while (popop.charAt(0) != '(');
+    } else {
+      int infixToc = infixPriority(tok.charAt(0));
+      while (!m_operatorStack.empty() && 
+	     stackPriority(((String)(m_operatorStack.peek())).charAt(0)) 
+	     >= infixToc) {
+	
+	// try an catch double operators and see if the current one can
+	// be interpreted as the sign of an upcoming number
+	if (m_previousTok.length() == 1 && 
+	    isOperator(m_previousTok.charAt(0)) &&
+	    m_previousTok.charAt(0) != ')') {
+	  if (tok.charAt(0) == '-') {
+	    m_signMod = true;
+	  } else {
+	    m_signMod = false;
+	  }
+	  push = false;
+	  break;
+	} else {
+	  String popop = (String)(m_operatorStack.pop());
+	  m_postFixExpVector.addElement(new Operator(popop.charAt(0)));
+	}
+      }
+      if (m_postFixExpVector.size() == 0) {
+	if (tok.charAt(0) == '-') {
+	  m_signMod = true;
+	  push = false;
+	}
+      }
+
+      if (push) {
+	m_operatorStack.push(tok);
+      }
+    }
+  }
+
+  /**
+   * Converts a string containing a mathematical expression in infix form
+   * to postfix form. The result is stored in the vector m_postfixExpVector
+   * @param infixExp the infix expression to convert
+   * @exception Exception if something goes wrong during the conversion
+   */
+  private void convertInfixToPostfix(String infixExp) throws Exception {
+    infixExp = Utils.removeSubstring(infixExp, " ");
+    infixExp = Utils.replaceSubstring(infixExp,"log","l");
+    infixExp = Utils.replaceSubstring(infixExp,"abs","b");
+    infixExp = Utils.replaceSubstring(infixExp,"cos","c");
+    infixExp = Utils.replaceSubstring(infixExp,"exp","e");
+    infixExp = Utils.replaceSubstring(infixExp,"sqrt","s");
+    infixExp = Utils.replaceSubstring(infixExp,"floor","f");
+    infixExp = Utils.replaceSubstring(infixExp,"ceil","h");
+    infixExp = Utils.replaceSubstring(infixExp,"rint","r");
+    infixExp = Utils.replaceSubstring(infixExp,"tan","t");
+    infixExp = Utils.replaceSubstring(infixExp,"sin","n");
+
+    StringTokenizer tokenizer = new StringTokenizer(infixExp, OPERATORS, true);
+    m_postFixExpVector = new Vector();
+
+    while (tokenizer.hasMoreTokens()) {
+      String tok = tokenizer.nextToken();
+      
+      if (tok.length() > 1) {
+	handleOperand(tok);
+      } else {
+	// probably an operator, but could be a single char operand
+	if (isOperator(tok.charAt(0))) {
+	  handleOperator(tok);
+	} else {
+	  // should be a numeric constant
+	  handleOperand(tok);
+	}
+      }
+      m_previousTok = tok;
+    }
+    while (!m_operatorStack.empty()) {
+      String popop = (String)(m_operatorStack.pop());
+      if (popop.charAt(0) == '(' || popop.charAt(0) == ')') {
+	throw new Exception("Mis-matched parenthesis!");
+      }
+      m_postFixExpVector.addElement(new Operator(popop.charAt(0)));
+    }
+  }
+
+  /**
+   * Evaluate the expression using the supplied array of attribute values.
+   * The result is stored in the last element of the array. Assumes that
+   * the infix expression has been converted to postfix and stored in
+   * m_postFixExpVector
+   * @param vals the values to apply the expression to
+   * @exception Exception if something goes wrong
+   */
+  private void evaluateExpression(double [] vals) throws Exception {
+    Stack operands = new Stack();
+
+    for (int i=0;i<m_postFixExpVector.size();i++) {
+      Object nextob = m_postFixExpVector.elementAt(i);
+      if (nextob instanceof NumericOperand) {
+	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
+      } else if (nextob instanceof AttributeOperand) {
+	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
+	if (value == Instance.missingValue()) {
+	  vals[vals.length-1] = Instance.missingValue();
+	  break;
+	}
+	if (((AttributeOperand)nextob).m_negative) {
+	  value = -value;
+	}
+	operands.push(new Double(value));
+      } else if (nextob instanceof Operator) {
+	char op = ((Operator)nextob).m_operator;
+	if (isUnaryFunction(op)) {
+	  double operand = ((Double)operands.pop()).doubleValue();
+	  double result = ((Operator)nextob).applyFunction(operand);
+	  operands.push(new Double(result));
+	} else {
+	  double second = ((Double)operands.pop()).doubleValue();
+	  double first = ((Double)operands.pop()).doubleValue();
+	  double result = ((Operator)nextob).applyOperator(first,second);
+	  operands.push(new Double(result));
+	}
+      } else {
+	throw new Exception("Unknown object in postfix vector!");
+      }
+    }
+
+    if (operands.size() != 1) {
+      throw new Exception("Problem applying function");
+    }
+
+    Double result = ((Double)operands.pop());
+    if (result.isNaN() || result.isInfinite()) {
+      vals[vals.length-1] = Instance.missingValue();
+    } else {
+      vals[vals.length-1] = result.doubleValue();
+    }
+  }
+
+  /**
+   * Returns true if a token is an operator
+   * @param tok the token to check
+   * @return true if the supplied token is an operator
+   */
+  private boolean isOperator(char tok) {
+    if (OPERATORS.indexOf(tok) == -1) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns true if a token is a unary function
+   * @param tok the token to check
+   * @return true if the supplied token is a unary function
+   */
+  private boolean isUnaryFunction(char tok) {
+    if (UNARY_FUNCTIONS.indexOf(tok) == -1) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Return the infix priority of an operator
+   * @param char the operator
+   * @return the infix priority
+   */
+  private int infixPriority(char opp) {
+    switch (opp) {
+    case 'l' : 
+    case 'b' :
+    case 'c' :
+    case 'e' :
+    case 's' :
+    case 'f' :
+    case 'h' :
+    case 'r' :
+    case 't' :
+    case 'n' :
+       return 3;
+    case '^' :
+      return 2;
+    case '*' : 
+      return 2;
+    case '/' : 
+      return 2;
+    case '+' :
+      return 1;
+    case '-' :
+      return 1;
+    case '(' :
+      return 4;
+    case ')' :
+      return 0;
+    default :
+      throw new IllegalArgumentException("Unrecognized operator:" + opp);
+    }
+  }
+
+  /**
+   * Return the stack priority of an operator
+   * @param char the operator
+   * @return the stack priority
+   */
+  private int stackPriority(char opp) {
+     switch (opp) {
+     case 'l' :
+     case 'b' :
+     case 'c' :
+     case 'e' :
+     case 's' :
+     case 'f' :
+     case 'h' :
+     case 'r' :
+     case 't' :
+     case 'n' :
+       return 3;
+     case '^' :
+       return 2;
+    case '*' : 
+      return 2;
+    case '/' : 
+      return 2;
+    case '+' :
+      return 1;
+    case '-' :
+      return 1;
+    case '(' :
+      return 0;
+    case ')' :
+      return -1;
+    default :
+      throw new IllegalArgumentException("Unrecognized operator:" + opp);
+    }
+  }
+
   /**
    * Returns an enumeration describing the available options.
    *
@@ -120,8 +524,7 @@ public class AddExpression
     newVector.addElement(new Option(
 	     "\tSpecify the expression to apply. Eg a1^2*a5/log(a7*4.0)."
 	     +"\n\tSupported opperators: ,+, -, *, /, ^, log, abs, cos, "
-	     +"\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )"
-	     +"\n\t(default: a1^2)",
+	     +"\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )",
 	     "E",1,"-E <expression>"));
 
     newVector.addElement(new Option(
@@ -137,34 +540,27 @@ public class AddExpression
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -E &lt;expression&gt;
-   *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
-   *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
-   *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
-   *  (default: a1^2)</pre>
-   * 
-   * <pre> -N &lt;name&gt;
-   *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
-   * 
-   * <pre> -D
-   *  Debug. Names attribute with the postfix parse of the expression.</pre>
-   * 
-   <!-- options-end -->
+   * Parses a list of options for this object. Valid options are:<p>
+   *
+   * -E expression <br>
+   * Specify the expression to apply. Eg. a1^2*a5/log(a7*4.0). <p>
+   *
+   * -N name <br>
+   * Specify a name for the new attribute. Default is to name it with the
+   * expression provided with the -E option. <p>
+   *
+   * -D <br>
+   * Debug. Names the attribute with the postfix parse of the expression. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String expString = Utils.getOption('E', options);
     if (expString.length() != 0) {
       setExpression(expString);
     } else {
-      setExpression("a1^2");
+      throw new Exception("Must specify an expression with the -E option");
     }
 
     String name = Utils.getOption('N',options);
@@ -280,27 +676,6 @@ public class AddExpression
     return m_infixExpression;
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -308,21 +683,18 @@ public class AddExpression
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the format couldn't be set successfully
+   * @exception Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    m_attributeExpression = new AttributeExpression();
-    m_attributeExpression.
-      convertInfixToPostfix(new String(m_infixExpression));
+    convertInfixToPostfix(new String(m_infixExpression));
 
     super.setInputFormat(instanceInfo);
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute;
     if (m_Debug) {
-      newAttribute = 
-        new Attribute(m_attributeExpression.getPostFixExpression());
+      newAttribute = new Attribute(m_postFixExpVector.toString());
     } else if (m_attributeName.compareTo("expression") != 0) {
       newAttribute = new Attribute(m_attributeName);
     } else {
@@ -342,8 +714,8 @@ public class AddExpression
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
-   * @throws Exception if there was a problem during the filtering.
+   * @exception IllegalStateException if no input format has been defined.
+   * @exception Exception if there was a problem during the filtering.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -364,7 +736,7 @@ public class AddExpression
       }
     }
 
-    m_attributeExpression.evaluateExpression(vals);
+    evaluateExpression(vals);
 
     Instance inst = null;
     if (instance instanceof SparseInstance) {
@@ -372,21 +744,10 @@ public class AddExpression
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
   
   /**
@@ -395,6 +756,14 @@ public class AddExpression
    * @param args should contain arguments to the filter: use -h for help
    */
   public static void main(String [] args) {
-    runFilter(new AddExpression(), args);
+    try {
+      if (Utils.getFlag('b', args)) {
+	Filter.batchFilterFile(new AddExpression(), args);
+      } else {
+	Filter.filterFile(new AddExpression(), args);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

@@ -16,26 +16,24 @@
 
 /*
  *    LinearUnit.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Malcolm Ware
  */
+
 
 package weka.classifiers.functions.neural;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+
+
 
 /**
  * This can be used by the 
  * neuralnode to perform all it's computations (as a Linear unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public class LinearUnit
-  implements NeuralMethod, RevisionHandler {
+public class LinearUnit implements NeuralMethod {
 
-  /** for serialization */
-  private static final long serialVersionUID = 8572152807755673630L;
   
   /**
    * This function calculates what the output value should be.
@@ -104,13 +102,5 @@ public class LinearUnit
       cWeights[noa] = c; 
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
+    
 }

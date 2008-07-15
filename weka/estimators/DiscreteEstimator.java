@@ -16,35 +16,30 @@
 
 /*
  *    DiscreteEstimator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.estimators;
 
-import weka.core.Capabilities.Capability;
-import weka.core.Capabilities;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
+
 
 /** 
  * Simple symbolic probability estimator based on symbol counts.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.6 $
  */
-public class DiscreteEstimator extends Estimator implements IncrementalEstimator {
-  
-  /** for serialization */
-  private static final long serialVersionUID = -5526486742612434779L;
+public class DiscreteEstimator implements Estimator {
 
   /** Hold the counts */
   private double [] m_Counts;
-  
+
   /** Hold the sum of counts */
   private double m_SumOfCounts;
-  
-  
+
+
   /**
    * Constructor
    *
@@ -57,12 +52,12 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
     m_SumOfCounts = 0;
     if (laplace) {
       for(int i = 0; i < numSymbols; i++) {
-        m_Counts[i] = 1;
+	m_Counts[i] = 1;
       }
       m_SumOfCounts = (double)numSymbols;
     }
   }
-  
+
   /**
    * Constructor
    *
@@ -70,14 +65,14 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
    * @param fPrior value with which counts will be initialised
    */
   public DiscreteEstimator(int nSymbols, double fPrior) {    
-    
+
     m_Counts = new double [nSymbols];
     for(int iSymbol = 0; iSymbol < nSymbols; iSymbol++) {
       m_Counts[iSymbol] = fPrior;
     }
     m_SumOfCounts = fPrior * (double) nSymbols;
   }
-  
+
   /**
    * Add a new data value to the current estimator.
    *
@@ -89,7 +84,7 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
     m_Counts[(int)data] += weight;
     m_SumOfCounts += weight;
   }
-  
+
   /**
    * Get a probability estimate for a value
    *
@@ -103,18 +98,18 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
     }
     return (double)m_Counts[(int)data] / m_SumOfCounts;
   }
-  
+
   /**
    * Gets the number of symbols this estimator operates with
    *
    * @return the number of estimator symbols
    */
   public int getNumSymbols() {
-    
+
     return (m_Counts == null) ? 0 : m_Counts.length;
   }
-  
-  
+
+
   /**
    * Get the count for a value
    *
@@ -128,7 +123,7 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
     }
     return m_Counts[(int)data];
   }
-  
+
   
   /**
    * Get the sum of all the counts
@@ -136,54 +131,32 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
    * @return the total sum of counts
    */
   public double getSumOfCounts() {
-    
+
     return m_SumOfCounts;
   }
-  
-  
+
+
   /**
    * Display a representation of this estimator
    */
   public String toString() {
     
-    StringBuffer result = new StringBuffer("Discrete Estimator. Counts = ");
+    String result = "Discrete Estimator. Counts = ";
     if (m_SumOfCounts > 1) {
       for(int i = 0; i < m_Counts.length; i++) {
-        result.append(" ").append(Utils.doubleToString(m_Counts[i], 2));
+	result += " " + Utils.doubleToString(m_Counts[i], 2);
       }
-      result.append("  (Total = " ).append(Utils.doubleToString(m_SumOfCounts, 2));
-      result.append(")\n"); 
+      result += "  (Total = " + Utils.doubleToString(m_SumOfCounts, 2)
+	+ ")\n"; 
     } else {
       for(int i = 0; i < m_Counts.length; i++) {
-        result.append(" ").append(m_Counts[i]);
+	result += " " + m_Counts[i];
       }
-      result.append("  (Total = ").append(m_SumOfCounts).append(")\n"); 
+      result += "  (Total = " + m_SumOfCounts + ")\n"; 
     }
-    return result.toString();
-  }
-  
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
     return result;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
-  
+
   /**
    * Main method for testing this class.
    *
@@ -194,24 +167,24 @@ public class DiscreteEstimator extends Estimator implements IncrementalEstimator
     
     try {
       if (argv.length == 0) {
-        System.out.println("Please specify a set of instances.");
-        return;
+	System.out.println("Please specify a set of instances.");
+	return;
       }
       int current = Integer.parseInt(argv[0]);
       int max = current;
       for(int i = 1; i < argv.length; i++) {
-        current = Integer.parseInt(argv[i]);
-        if (current > max) {
-          max = current;
-        }
+	current = Integer.parseInt(argv[i]);
+	if (current > max) {
+	  max = current;
+	}
       }
       DiscreteEstimator newEst = new DiscreteEstimator(max + 1, true);
       for(int i = 0; i < argv.length; i++) {
-        current = Integer.parseInt(argv[i]);
-        System.out.println(newEst);
-        System.out.println("Prediction for " + current 
-            + " = " + newEst.getProbability(current));
-        newEst.addValue(current, 1);
+	current = Integer.parseInt(argv[i]);
+	System.out.println(newEst);
+	System.out.println("Prediction for " + current 
+			   + " = " + newEst.getProbability(current));
+	newEst.addValue(current, 1);
       }
     } catch (Exception e) {
       System.out.println(e.getMessage());

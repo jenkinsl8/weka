@@ -25,19 +25,14 @@
 package weka.associations.tertius;
 
 import weka.core.Instance;
-import weka.core.RevisionUtils;
 import weka.associations.Tertius;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class AttributeValueLiteral
-  extends Literal {
-
-  /** for serialization */
-  private static final long serialVersionUID = 4077436297281456239L;
+public class AttributeValueLiteral extends Literal {
 
   private String m_value;
   
@@ -106,13 +101,9 @@ public class AttributeValueLiteral
     text.append(getPredicate().toString() + " = " + m_value);
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
-  }
 }
+
+
+
+
+

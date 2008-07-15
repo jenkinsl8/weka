@@ -16,33 +16,28 @@
 
 /*
  *    SingleClassifierEnhancer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank
  *
  */
 
 package weka.classifiers;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Capabilities;
-import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.util.Enumeration;
+import weka.core.Option;
 import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Abstract utility class for handling settings common to meta
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.2.2.1 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3665885256363525164L;
 
   /** The base classifier to use */
   protected Classifier m_Classifier = new ZeroR();
@@ -161,28 +156,6 @@ public abstract class SingleClassifierEnhancer extends Classifier {
    */
   public String classifierTipText() {
     return "The base classifier to be used.";
-  }
-
-  /**
-   * Returns default capabilities of the base classifier.
-   *
-   * @return      the capabilities of the base classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities        result;
-
-    if (getClassifier() != null)
-      result = getClassifier().getCapabilities();
-    else
-      result = new Capabilities(this);
-    
-    // set dependencies
-    for (Capability cap: Capability.values())
-      result.enableDependency(cap);
-    
-    result.setOwner(this);
-    
-    return result;
   }
 
   /**

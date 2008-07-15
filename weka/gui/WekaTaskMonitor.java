@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6.4.1 $
  */
 public class WekaTaskMonitor
   extends JPanel

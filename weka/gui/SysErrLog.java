@@ -16,7 +16,7 @@
 
 /*
  *    SysErrLog.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -30,7 +30,7 @@ import java.util.Date;
  * This Logger just sends messages to System.err.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class SysErrLog implements Logger {
 

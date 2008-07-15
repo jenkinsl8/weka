@@ -16,26 +16,22 @@
 
 /*
  *    RandomVariates.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Xin Xu
  *
  */
 
 package weka.core;
 
+import java.lang.Math;
 import java.util.Random;
 
 /**
  * Class implementing some simple random variates generator.
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1 $
  */
-public final class RandomVariates
-    extends Random
-    implements RevisionHandler {
-
-    /** for serialization */
-    private static final long serialVersionUID = -4763742718209460354L;
+public final class RandomVariates extends Random{
     
     /** 
      * Simply the constructor of super class
@@ -79,7 +75,7 @@ public final class RandomVariates
      *
      * @param a the shape parameter, must be no less than 1
      * @return a value of the variate
-     * @exception Exception if parameter less than 1
+     * @exception if parameter less than 1
      */
     public double nextErlang(int a) throws Exception{
 	if(a<1)
@@ -110,7 +106,7 @@ public final class RandomVariates
      *
      * @param a the shape parameter, must be greater than 1
      * @return a value of the variate
-     * @exception Exception if parameter not greater than 1
+     * @exception if parameter not greater than 1
      */
     public double nextGamma(double a) throws Exception{
 	if(a<=0.0)
@@ -224,15 +220,6 @@ public final class RandomVariates
 	    
 	    return x;
 	}	
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
     }
     
     

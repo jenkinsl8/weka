@@ -16,28 +16,22 @@
 
 /*
  *    ModelSelection.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-
-import java.io.Serializable;
+import java.io.*;
+import weka.core.*;
 
 /**
  * Abstract class for model selection criteria.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public abstract class ModelSelection
-  implements Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -4850147125096133642L;
+public abstract class ModelSelection implements Serializable {
 
   /**
    * Selects a model for the given dataset.

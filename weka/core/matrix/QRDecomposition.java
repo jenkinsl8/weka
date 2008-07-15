@@ -14,33 +14,27 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 
 /** 
  * QR Decomposition.
- * <P>
- * For an m-by-n matrix A with m &gt;= n, the QR decomposition is an m-by-n
- * orthogonal matrix Q and an n-by-n upper triangular matrix R so that A = Q*R.
- * <P>
- * The QR decompostion always exists, even if the matrix does not have full
- * rank, so the constructor will never fail.  The primary use of the QR
- * decomposition is in the least squares solution of nonsquare systems of
- * simultaneous linear equations.  This will fail if isFullRank() returns false.
+* <P>
+* For an m-by-n matrix A with m &gt;= n, the QR decomposition is an m-by-n
+* orthogonal matrix Q and an n-by-n upper triangular matrix R so that A = Q*R.
+* <P>
+* The QR decompostion always exists, even if the matrix does not have full
+* rank, so the constructor will never fail.  The primary use of the QR
+* decomposition is in the least squares solution of nonsquare systems of
+* simultaneous linear equations.  This will fail if isFullRank() returns false.
  * <p/>
  * Adapted from the <a href="http://math.nist.gov/javanumerics/jama/" target="_blank">JAMA</a> package.
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
- */
+ * @version $Revision: 1.1.2.2 $
+*/
 public class QRDecomposition 
-  implements Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5013090736132211418L;
+  implements Serializable {
 
   /** 
    * Array for internal storage of decomposition.
@@ -64,6 +58,8 @@ public class QRDecomposition
   /** 
    * QR Decomposition, computed by Householder reflections.
    * @param A    Rectangular matrix
+   * @return     Structure to access R and the Householder vectors and compute
+   * Q.
    */
   public QRDecomposition(Matrix A) {
     // Initialize.
@@ -230,14 +226,5 @@ public class QRDecomposition
       }
     }
     return (new Matrix(X,n,nx).getMatrix(0,n-1,0,nx-1));
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

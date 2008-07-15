@@ -16,7 +16,7 @@
 
 /*
  *    Classifier.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,28 +24,22 @@ package weka.gui.beans;
 
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
-import weka.core.xml.KOML;
-import weka.core.xml.XStream;
 import weka.gui.Logger;
-import weka.gui.ExtensionFileFilter;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
-import java.io.*;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 
 /**
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.16.2.6 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -121,25 +115,6 @@ public class Classifier
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
 
-  /** the extension for serialized models (binary Java serialization) */
-  public final static String FILE_EXTENSION = "model";
-
-  private transient JFileChooser m_fileChooser = null; 
-
-  protected FileFilter m_binaryFilter =
-    new ExtensionFileFilter("."+FILE_EXTENSION, "Binary serialized model file (*"
-                            + FILE_EXTENSION + ")");
-
-  protected FileFilter m_KOMLFilter =
-    new ExtensionFileFilter(KOML.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + KOML.FILE_EXTENSION + FILE_EXTENSION + ")");
-
-  protected FileFilter m_XStreamFilter =
-    new ExtensionFileFilter(XStream.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + XStream.FILE_EXTENSION + FILE_EXTENSION + ")");
-
   /**
    * If the classifier is an incremental classifier, should we
    * update it (ie train it on incoming instances). This makes it
@@ -173,42 +148,6 @@ public class Classifier
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setClassifier(m_Classifier);
-    
-    //setupFileChooser();
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
-  }
-
-  protected void setupFileChooser() {
-    if (m_fileChooser == null) {
-      m_fileChooser = 
-        new JFileChooser(new File(System.getProperty("user.dir")));
-    }
-
-    m_fileChooser.addChoosableFileFilter(m_binaryFilter);
-    if (KOML.isPresent()) {
-      m_fileChooser.addChoosableFileFilter(m_KOMLFilter);
-    }
-    if (XStream.isPresent()) {
-      m_fileChooser.addChoosableFileFilter(m_XStreamFilter);
-    }
-    m_fileChooser.setFileFilter(m_binaryFilter);
   }
 
   /**
@@ -569,17 +508,6 @@ public class Classifier
 		    }
 		    buildClassifier();
 
-                    if (m_batchClassifierListeners.size() > 0) {
-                      // notify anyone who might be interested in just the model
-                      // and training set
-                      BatchClassifierEvent ce = 
-                        new BatchClassifierEvent(this, m_Classifier, 
-                                                 new DataSetEvent(this, e.getTrainingSet()),
-                                                 null, // no test set
-                                                 e.getSetNumber(), e.getMaxSetNumber());
-                      notifyBatchClassifierListeners(ce);
-                    }
-
 		    if (m_Classifier instanceof weka.core.Drawable && 
 			m_graphListeners.size() > 0) {
 		      String grphString = 
@@ -633,13 +561,8 @@ public class Classifier
 		    // prevent any classifier events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-                      String titleString = m_Classifier.getClass().getName();		      
-		      titleString = titleString.
-			substring(titleString.lastIndexOf('.') + 1,
-				  titleString.length());
-		      m_log.logMessage("Build classifier ("
-                                       + titleString + ") interrupted!");
-		      m_log.statusMessage("Interrupted");
+		      m_log.logMessage("Build classifier interrupted!");
+		      m_log.statusMessage("OK");
 		    }
 		  } else {
 		    // save header
@@ -1003,6 +926,7 @@ public class Classifier
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
+	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
@@ -1013,181 +937,6 @@ public class Classifier
       m_buildThread.stop();
       m_buildThread = null;
       m_visual.setStatic();
-    }
-  }
-
-  public void loadModel() {
-    try {
-      if (m_fileChooser == null) {
-        // i.e. after de-serialization
-        setupFileChooser();
-      }
-      int returnVal = m_fileChooser.showOpenDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File loadFrom = m_fileChooser.getSelectedFile();
-
-        // add extension if necessary
-        if (m_fileChooser.getFileFilter() == m_binaryFilter) {
-          if (!loadFrom.getName().toLowerCase().endsWith("." + FILE_EXTENSION)) {
-            loadFrom = new File(loadFrom.getParent(),
-                                loadFrom.getName() + "." + FILE_EXTENSION);
-          }
-        } else if (m_fileChooser.getFileFilter() == m_KOMLFilter) {
-          if (!loadFrom.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION 
-                                                         + FILE_EXTENSION)) {
-            loadFrom = new File(loadFrom.getParent(),
-                                loadFrom.getName() + KOML.FILE_EXTENSION 
-                                + FILE_EXTENSION);
-          }
-        } else if (m_fileChooser.getFileFilter() == m_XStreamFilter) {
-          if (!loadFrom.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION 
-                                                        + FILE_EXTENSION)) {
-            loadFrom = new File(loadFrom.getParent(),
-                                loadFrom.getName() + XStream.FILE_EXTENSION 
-                                + FILE_EXTENSION);
-          }
-        }
-
-        weka.classifiers.Classifier temp = null;
-        Instances tempHeader = null;
-        // KOML ?
-        if ((KOML.isPresent()) &&
-            (loadFrom.getAbsolutePath().toLowerCase().
-             endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION))) {
-          Vector v = (Vector) KOML.read(loadFrom.getAbsolutePath());
-          temp = (weka.classifiers.Classifier) v.elementAt(0);
-          if (v.size() == 2) {
-            // try and grab the header
-            tempHeader = (Instances) v.elementAt(1);
-          }
-        } /* XStream */ else if ((XStream.isPresent()) &&
-                                 (loadFrom.getAbsolutePath().toLowerCase().
-                                  endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION))) {
-          Vector v = (Vector) XStream.read(loadFrom.getAbsolutePath());
-          temp = (weka.classifiers.Classifier) v.elementAt(0);
-          if (v.size() == 2) {
-            // try and grab the header
-            tempHeader = (Instances) v.elementAt(1);
-          } 
-        } /* binary */ else {
-
-          ObjectInputStream is = 
-            new ObjectInputStream(new BufferedInputStream(
-                                                          new FileInputStream(loadFrom)));
-          // try and read the model
-          temp = (weka.classifiers.Classifier)is.readObject();
-          // try and read the header (if present)
-          try {
-            tempHeader = (Instances)is.readObject();
-          } catch (Exception ex) {
-            //            System.err.println("No header...");
-            // quietly ignore
-          }
-          is.close();
-        }
-
-        // Update name and icon
-        setClassifier(temp);
-        // restore header
-        m_trainingSet = tempHeader;
-
-        if (m_log != null) {
-          m_log.logMessage("Loaded classifier: "
-                           + m_Classifier.getClass().toString());
-        }
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem loading classifier.\n",
-                                    "Load Model",
-                                    JOptionPane.ERROR_MESSAGE);
-      if (m_log != null) {
-        m_log.logMessage("Problem loading classifier. " + ex.getMessage());
-      }
-    }
-  }
-
-  public void saveModel() {
-    try {
-      if (m_fileChooser == null) {
-        // i.e. after de-serialization
-        setupFileChooser();
-      }
-      int returnVal = m_fileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File saveTo = m_fileChooser.getSelectedFile();
-        String fn = saveTo.getAbsolutePath();
-        if (m_fileChooser.getFileFilter() == m_binaryFilter) {
-          if (!fn.toLowerCase().endsWith("." + FILE_EXTENSION)) {
-            fn += "." + FILE_EXTENSION;
-          }
-        } else if (m_fileChooser.getFileFilter() == m_KOMLFilter) {
-          if (!fn.toLowerCase().endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION)) {
-            fn += KOML.FILE_EXTENSION + FILE_EXTENSION;
-          }
-        } else if (m_fileChooser.getFileFilter() == m_XStreamFilter) {
-          if (!fn.toLowerCase().endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION)) {
-            fn += XStream.FILE_EXTENSION + FILE_EXTENSION;
-          }
-        }
-        saveTo = new File(fn);
-
-        // now serialize model
-        // KOML?
-        if ((KOML.isPresent()) &&
-            saveTo.getAbsolutePath().toLowerCase().
-            endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION)) {
-          SerializedModelSaver.saveKOML(saveTo,
-                                        m_Classifier,
-                                        (m_trainingSet != null)
-                                        ? new Instances(m_trainingSet, 0)
-                                        : null);
-          /*          Vector v = new Vector();
-          v.add(m_Classifier);
-          if (m_trainingSet != null) {
-            v.add(new Instances(m_trainingSet, 0));
-          }
-          v.trimToSize();
-          KOML.write(saveTo.getAbsolutePath(), v); */
-        } /* XStream */ else if ((XStream.isPresent()) &&
-                                 saveTo.getAbsolutePath().toLowerCase().
-            endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION)) {
-
-          SerializedModelSaver.saveXStream(saveTo,
-                                           m_Classifier,
-                                           (m_trainingSet != null)
-                                           ? new Instances(m_trainingSet, 0)
-                                           : null);
-          /*          Vector v = new Vector();
-          v.add(m_Classifier);
-          if (m_trainingSet != null) {
-            v.add(new Instances(m_trainingSet, 0));
-          }
-          v.trimToSize();
-          XStream.write(saveTo.getAbsolutePath(), v); */
-        } else /* binary */ {
-          ObjectOutputStream os = 
-            new ObjectOutputStream(new BufferedOutputStream(
-                                   new FileOutputStream(saveTo)));
-          os.writeObject(m_Classifier);
-          if (m_trainingSet != null) {
-            Instances header = new Instances(m_trainingSet, 0);
-            os.writeObject(header);
-          }
-          os.close();
-        }
-        if (m_log != null) {
-          m_log.logMessage("Saved classifier OK.");
-        }
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem saving classifier.\n",
-                                    "Save Model",
-                                    JOptionPane.ERROR_MESSAGE);
-      if (m_log != null) {
-        m_log.logMessage("Problem saving classifier. " + ex.getMessage());
-      }
     }
   }
 
@@ -1210,15 +959,6 @@ public class Classifier
     if (m_buildThread != null) {
       newVector.addElement("Stop");
     }
-
-    if (m_buildThread == null && 
-        m_Classifier != null) {
-      newVector.addElement("Save model");
-    }
-
-    if (m_buildThread == null) {
-      newVector.addElement("Load model");
-    }
     return newVector.elements();
   }
 
@@ -1231,10 +971,6 @@ public class Classifier
   public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
-    } else if (request.compareTo("Save model") == 0) {
-      saveModel();
-    } else if (request.compareTo("Load model") == 0) {
-      loadModel();
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Classifier)");
@@ -1302,16 +1038,12 @@ public class Classifier
     }
 
     if (eventName.compareTo("batchClassifier") == 0) {
-      /*      if (!m_listenees.containsKey("testSet")) {
+      if (!m_listenees.containsKey("testSet")) {
         return false;
       }
       if (!m_listenees.containsKey("trainingSet") && 
           m_trainingSet == null) {
 	return false;
-        } */
-      if (!m_listenees.containsKey("testSet") && 
-          !m_listenees.containsKey("trainingSet")) {
-        return false;
       }
       Object source = m_listenees.get("testSet");
       if (source instanceof EventConstraints) {

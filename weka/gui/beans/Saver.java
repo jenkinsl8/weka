@@ -16,31 +16,49 @@
 
 /*
  *    Saver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.util.Vector;
+import java.util.Enumeration;
+import java.io.IOException;
+import java.beans.beancontext.*;
+import javax.swing.JButton;
+
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
+import weka.core.converters.*;
+
 
 /**
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.1.2.2 $
  *
  */
-public class Saver
-  extends AbstractDataSink
-  implements WekaWrapper {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5371716690308950755L;
+public class Saver extends AbstractDataSink implements WekaWrapper {
 
   /**
    * Holds the instances to be saved
@@ -51,6 +69,8 @@ public class Saver
    * Holds the structure
    */
   private Instances m_structure;
+  
+  
 
   /**
    * Global info for the wrapped loader (if it exists).
@@ -72,13 +92,18 @@ public class Saver
    */
   private String m_fileName;
   
+  
   /** Flag indicating that instances will be saved to database. Used because structure information can only be sent after a database has been configured.*/
   private boolean m_isDBSaver;
+  
+  
  
   /**
    * Count for structure available messages
    */
   private int m_count;
+
+  
   
   private class SaveBatchThread extends Thread {
     private DataSink m_DS;
@@ -142,23 +167,7 @@ public class Saver
     
   }
 
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
-  }  
+  
 
   /** Set the loader to use
    * @param saver a Saver
@@ -191,7 +200,7 @@ public class Saver
     else
         m_isDBSaver = false;
   }
-
+  
   /**
    * makes sure that the filename is valid, i.e., replaces slashes,
    * backslashes and colons with underscores ("_"). Also try to prevent
@@ -221,8 +230,8 @@ public class Saver
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getDataSet().relationName());
-      m_dataSet = e.getDataSet();
+    m_fileName = sanitizeFilename(e.getDataSet().relationName());
+    m_dataSet = e.getDataSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
       }
@@ -244,27 +253,27 @@ public class Saver
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getTestSet().relationName());
-      m_dataSet = e.getTestSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
-          ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    m_fileName = sanitizeFilename(e.getTestSet().relationName());
+    m_dataSet = e.getTestSet();
+    if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
+      ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    }
+    if(!e.isStructureOnly()){
+      if(!m_isDBSaver){
+        try{
+          m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
+        }catch (Exception ex){
+          System.out.println(ex);
+        }
       }
-      if(!e.isStructureOnly()){
-          if(!m_isDBSaver){
-            try{
-                m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-            }catch (Exception ex){
-                System.out.println(ex);
-            }
-          }
-          else{
-              String setName = ((DatabaseSaver)m_Saver).getTableName();
-              setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
-              ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-          }
-          saveBatch();
-          System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+      else{
+        String setName = ((DatabaseSaver)m_Saver).getTableName();
+        setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
+        ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
+      saveBatch();
+      System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+    }
   }
   
   /** Method reacts to a training set event and starts the writing process in batch
@@ -273,7 +282,7 @@ public class Saver
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
   
-      m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
+    m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
       m_dataSet = e.getTrainingSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
            ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -399,18 +408,6 @@ public class Saver
 
   /** Stops the bean */  
   public void stop() {
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      ((BeanCommon)m_listenee).stop();
-    }
-    
-    // stop the io thread
-    if (m_ioThread != null) {
-      m_ioThread.interrupt();
-      m_ioThread.stop();
-      m_ioThread = null;
-      m_visual.setStatic();
-    }
   }
   
   

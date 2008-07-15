@@ -16,7 +16,7 @@
 
 /*
  *    Option.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
@@ -30,10 +30,9 @@ package weka.core;
  * <code>Option myOption = new Option("Uses extended mode.", "E", 0, "-E")); </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5 $
  */
-public class Option
-  implements RevisionHandler {
+public class Option {
 
   /** What does this option do? */
   private String m_Description;
@@ -101,15 +100,6 @@ public class Option
   public String synopsis() {
   
     return m_Synopsis;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 }
 

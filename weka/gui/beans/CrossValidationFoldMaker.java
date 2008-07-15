@@ -16,7 +16,7 @@
 
 /*
  *    CrossValidationFoldMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,25 +24,29 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 
-import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Random;
+import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.util.Enumeration;
 
 /**
  * Bean for splitting instances into training ant test sets according to
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.7 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
   implements DataSourceListener, TrainingSetListener, TestSetListener, 
 	     UserRequestAcceptor, EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6350179298851891512L;
 
   private int m_numFolds = 10;
   private int m_randomSeed = 1;
@@ -55,24 +59,6 @@ public class CrossValidationFoldMaker
 		       BeanVisual.ICON_PATH
 		       +"CrossValidationFoldMaker_animated.gif");
     m_visual.setText("CrossValidationFoldMaker");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -198,9 +184,6 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_foldThread == null) {
-          break;
-        }
 	//	System.err.println("Notifying test listeners "
 	//			   +"(cross validation fold maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
@@ -220,9 +203,6 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_foldThread == null) {
-          break;
-        }
 	//	System.err.println("Notifying training listeners "
 	//			   +"(cross validation fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
@@ -290,16 +270,17 @@ public class CrossValidationFoldMaker
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
+      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
     // stop the fold thread
     if (m_foldThread != null) {
+      //      m_buildThread.interrupt();
       Thread temp = m_foldThread;
+      //      m_buildThread.stop();
       m_foldThread = null;
       temp.interrupt();
-      temp.stop();
     }
   }
 

@@ -16,55 +16,34 @@
 
 /*
  *    SymmetricalUncertAttributeEval.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * SymmetricalUncertAttributeEval :<br/>
- * <br/>
- * Evaluates the worth of an attribute by measuring the symmetrical uncertainty with respect to the class. <br/>
- * <br/>
- *  SymmU(Class, Attribute) = 2 * (H(Class) - H(Class | Attribute)) / H(Class) + H(Attribute).<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for Evaluating attributes individually by measuring symmetrical 
+ * uncertainty with respect to the class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M
- *  treat missing values as a seperate value.</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
- * @see Discretize
+ * @version $Revision: 1.15.2.1 $
  */
 public class SymmetricalUncertAttributeEval
-  extends ASEvaluation
-  implements AttributeEvaluator, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8096505776132296416L;
+  extends AttributeEvaluator
+  implements OptionHandler
+{
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -117,18 +96,13 @@ public class SymmetricalUncertAttributeEval
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M
-   *  treat missing values as a seperate value.</pre>
-   * 
-   <!-- options-end -->
+   * -M <br>
+   * Treat missing values as a seperate value. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    **/
   public void setOptions (String[] options)
     throws Exception {
@@ -186,46 +160,29 @@ public class SymmetricalUncertAttributeEval
     return  options;
   }
 
-  /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
 
   /**
    * Initializes a symmetrical uncertainty attribute evaluator. 
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
     throws Exception {
-
-    // can evaluator handle data?
-    getCapabilities().testWithFail(data);
+    if (data.checkForStringAttributes()) {
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
+    if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+      throw  new Exception("Class must be nominal!");
+    }
+
     Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
     disTransform.setInputFormat(m_trainInstances);
@@ -248,8 +205,7 @@ public class SymmetricalUncertAttributeEval
    * uncertainty between it and the class.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @return the uncertainty
-   * @throws Exception if the attribute could not be evaluated
+   * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -408,15 +364,7 @@ public class SymmetricalUncertAttributeEval
     text.append("\n");
     return  text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
-  }
+
 
   // ============
   // Test method.
@@ -428,6 +376,16 @@ public class SymmetricalUncertAttributeEval
    * -t training file
    */
   public static void main (String[] argv) {
-    runEvaluator(new SymmetricalUncertAttributeEval(), argv);
+    try {
+      System.out.println(AttributeSelection.
+			 SelectAttributes(new SymmetricalUncertAttributeEval()
+					  , argv));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
+
 }
+

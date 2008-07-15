@@ -56,7 +56,7 @@ import java.util.Vector;
  * Additional parameters will be appended to the generated java call.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class RunWeka {
 

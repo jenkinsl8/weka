@@ -16,7 +16,7 @@
 
 /*
  *    UnsuppotedAttributeTypeException.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
@@ -27,13 +27,9 @@ package weka.core;
  * attribute types it has been passed.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class UnsupportedAttributeTypeException
-  extends WekaException {
-
-  /** for serialization */
-  private static final long serialVersionUID = 2658987325328414838L;
+public class UnsupportedAttributeTypeException extends WekaException {
 
   /**
    * Creates a new UnsupportedAttributeTypeException with no message.

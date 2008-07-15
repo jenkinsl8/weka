@@ -16,27 +16,22 @@
 
 /*
  *    TestSetEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
 import java.util.EventObject;
+import weka.core.Instances;
 
 /**
  * Event encapsulating a test set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
-public class TestSetEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8780718708498854231L;
+public class TestSetEvent extends EventObject {
   
   /**
    * The test set instances
@@ -54,33 +49,12 @@ public class TestSetEvent
    */
   protected int m_maxSetNumber;
 
-  /**
-   * Creates a new <code>TestSetEvent</code>
-   *
-   * @param source the source of the event
-   * @param testSet the test instances
-   */
   public TestSetEvent(Object source, Instances testSet) {
     super(source);
     m_testSet = testSet;
     if (m_testSet != null && m_testSet.numInstances() == 0) {
       m_structureOnly = true;
     }
-  }
-
-  /**
-   * Creates a new <code>TestSetEvent</code>
-   *
-   * @param source the source of the event
-   * @param testSet the test instances
-   * @param setNum the number of the test set
-   * @param maxSetNum the maximum number of sets
-   */
-  public TestSetEvent(Object source, Instances testSet, 
-                      int setNum, int maxSetNum) {
-    this(source, testSet);
-    m_setNumber = setNum;
-    m_maxSetNumber = maxSetNum;
   }
 
   /**

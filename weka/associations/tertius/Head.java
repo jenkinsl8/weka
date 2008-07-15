@@ -26,23 +26,17 @@ package weka.associations.tertius;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
-
 import java.util.Iterator;
 
 /**
  * Class representing the head of a rule.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.1 $
  */
 
-public class Head
-  extends LiteralSet {
+public class Head extends LiteralSet {
   
-  /** for serialization */
-  private static final long serialVersionUID = 5068076274253706199L;
-
   /**
    * Constructor without storing the counter-instances.
    */
@@ -109,13 +103,14 @@ public class Head
     }
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
-  }
+
 }
+
+
+
+
+
+
+
+
+

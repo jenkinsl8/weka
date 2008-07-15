@@ -16,19 +16,16 @@
 
 /*
  *    EvaluationUtils.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.Classifier;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
+import weka.classifiers.Classifier;
 import java.util.Random;
 
 /**
@@ -36,10 +33,9 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.9 $
  */
-public class EvaluationUtils
-  implements RevisionHandler {
+public class EvaluationUtils {
 
   /** Seed used to randomize data in cross-validation */
   private int m_Seed = 1;
@@ -139,15 +135,6 @@ public class EvaluationUtils
     } else {
       return new NumericPrediction(actual, dist[0], test.weight());
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }
 

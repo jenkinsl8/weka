@@ -32,12 +32,10 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.7 $
+ * @version   $Revision: 1.1.2.4 $
  * @see       #setEnabled(boolean)
  */
-public class Memory
-  implements RevisionHandler {
-  
+public class Memory {
   /** whether memory management is enabled */
   protected static boolean m_Enabled = true;
   
@@ -76,8 +74,6 @@ public class Memory
 
   /**
    * returns whether the memory management is enabled
-   * 
-   * @return		true if enabled
    */
   public boolean isEnabled() {
     return m_Enabled;
@@ -85,8 +81,6 @@ public class Memory
 
   /**
    * sets whether the memory management is enabled
-   * 
-   * @param value	true if the management should be enabled
    */
   public void setEnabled(boolean value) {
     m_Enabled = value;
@@ -95,8 +89,6 @@ public class Memory
   /**
    * whether to display a dialog in case of a problem (= TRUE) or just print
    * on stderr (= FALSE)
-   * 
-   * @return		true if the GUI is used
    */
   public boolean getUseGUI() {
     return m_UseGUI;
@@ -104,8 +96,6 @@ public class Memory
 
   /**
    * returns the initial size of the JVM
-   * 
-   * @return		the initial size in bytes
    */
   public long getInitial() {
     return m_Initial;
@@ -113,8 +103,6 @@ public class Memory
 
   /**
    * returns the current memory consumption
-   * 
-   * @return		the current size in bytes
    */
   public long getCurrent() {
     m_Runtime = Runtime.getRuntime();
@@ -125,8 +113,6 @@ public class Memory
 
   /**
    * returns the maximum amount of memory that can be assigned
-   * 
-   * @return		the maximum size in bytes
    */
   public long getMax() {
     return m_Max;
@@ -135,9 +121,6 @@ public class Memory
   /**
    * checks if there's still enough memory left. if ENABLED is true, then
    * false is returned always
-   * 
-   * @return		true if out of memory (only if management enabled, 
-   * 			otherwise always false)
    */
   public boolean isOutOfMemory() {
     if (isEnabled())
@@ -147,35 +130,36 @@ public class Memory
   }
 
   /**
-   * returns the amount of bytes as MB
-   * 
-   * @return		the MB amount
-   */
-  public static double toMegaByte(long bytes) {
-    return (bytes / (double) (1024 * 1024));
-  }
-
-  /**
    * prints an error message if OutOfMemory (and if GUI is present a dialog),
    * otherwise nothing happens. isOutOfMemory() has to be called beforehand,
    * since it sets all the memory parameters.
    * @see #isOutOfMemory()
-   * @see #m_Enabled
+   * @see #ENABLED
    */
   public void showOutOfMemory() {
+    double        MB;
+    double        initial;
+    double        total;
+    double        max;
+
     if (!isEnabled())
       return;
       
     System.gc();
 
+    MB      = 1024 * 1024;
+    initial = m_Initial / MB;
+    total   = m_Total / MB;
+    max     = m_Max / MB;
+    
     String msg =   "Not enough memory. Please load a smaller "  
                  + "dataset or use larger heap size.\n"
                  + "- initial JVM size:   " 
-                 + Utils.doubleToString(toMegaByte(m_Initial), 1) + "MB\n"
+                 + Utils.doubleToString(initial, 1) + "MB\n"
                  + "- total memory used:  " 
-                 + Utils.doubleToString(toMegaByte(m_Total), 1) + "MB\n"
+                 + Utils.doubleToString(total, 1) + "MB\n"
                  + "- max. memory avail.: " 
-                 + Utils.doubleToString(toMegaByte(m_Max), 1) + "MB\n"
+                 + Utils.doubleToString(max, 1) + "MB\n"
                  + "\n"
                  + "Note:\n"
                  + "The Java heap size can be specified with the -Xmx option.\n"
@@ -217,31 +201,5 @@ public class Memory
     thGroup = null;
 
     System.gc();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
-
-  /**
-   * prints only some statistics
-   *
-   * @param args the commandline arguments - ignored
-   */
-  public static void main(String[] args) {
-    Memory mem = new Memory();
-    System.out.println(
-        "Initial memory: "
-        + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB" 
-        + " (" + mem.getInitial() + ")");
-    System.out.println(
-        "Max memory: "
-        + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB"
-        + " (" + mem.getMax() + ")");
   }
 }

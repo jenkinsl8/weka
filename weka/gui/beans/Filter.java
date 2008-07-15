@@ -16,46 +16,52 @@
 
 /*
  *    Filter.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.filters.AllFilter;
-import weka.filters.StreamableFilter;
-import weka.filters.SupervisedFilter;
-import weka.gui.Logger;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.Vector;
 import java.util.EventObject;
 import java.util.Hashtable;
-import java.util.Vector;
-
+import java.util.Enumeration;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.beans.EventSetDescriptor;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.*;
+import weka.gui.Logger;
 
 /**
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.11.2.2 $
  */
-public class Filter
-  extends JPanel
+public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
 	     InstanceListener, EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8249759470189439321L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Filter",
@@ -130,24 +136,6 @@ public class Filter
   }
 
   /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
-  }
-
-  /**
    * Set the filter to be wrapped by this bean
    *
    * @param c a <code>weka.filters.Filter</code> value
@@ -164,21 +152,13 @@ public class Filter
 				      indexOf('.')+1, 
 				      filterName.length());
     if (loadImages) {
-      if (m_Filter instanceof Visible) {
-        m_visual = ((Visible) m_Filter).getVisual();
-      } else {
-        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
-                                BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
-          useDefaultVisual();
-        }
+      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
+		       BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
+	useDefaultVisual();
       }
     }
     m_visual.setText(filterName.substring(filterName.lastIndexOf('.')+1,
 					  filterName.length()));
-
-    if (m_Filter instanceof LogWriter && m_log != null) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
 
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
@@ -379,10 +359,6 @@ public class Filter
 		  }
 		} catch (Exception ex) {
 		  ex.printStackTrace();
-                  if (m_log != null) {
-                    m_log.logMessage("[KF: Filter] " + ex.toString());
-                    m_log.statusMessage("Problem filtering: see log for details.");
-                  }
 		} finally {
 		  m_visual.setText(oldText);
 		  m_visual.setStatic();
@@ -390,13 +366,7 @@ public class Filter
 		  if (isInterrupted()) {
 		    m_trainingSet = null;
 		    if (m_log != null) {
-                      String titleString = m_Filter.getClass().getName();		      
-		      titleString = titleString.
-			substring(titleString.lastIndexOf('.') + 1,
-				  titleString.length());
-		      m_log.logMessage("Filter ("
-                                       + titleString
-                                       + ") training set interrupted!");
+		      m_log.logMessage("Filter training set interrupted!");
 		      m_log.statusMessage("OK");
 		    }
 		  }
@@ -456,10 +426,6 @@ public class Filter
 		}
 	      } catch (Exception ex) {
 		ex.printStackTrace();
-                if (m_log != null) {
-                  m_log.logMessage("[KF: Filter] " + ex.toString());
-                  m_log.statusMessage("Problem filtering: see log for details.");
-                }
 	      } finally {
 		m_visual.setText(oldText);
 		m_visual.setStatic();
@@ -467,13 +433,7 @@ public class Filter
 		if (isInterrupted()) {
 		  m_trainingSet = null;
 		  if (m_log != null) {
-                      String titleString = m_Filter.getClass().getName();		      
-		      titleString = titleString.
-			substring(titleString.lastIndexOf('.') + 1,
-				  titleString.length());
-		      m_log.logMessage("Filter ("
-                                       + titleString
-                                       + ") test set interrupted!");
+		    m_log.logMessage("Filter test set interrupted!");
 		    m_log.statusMessage("OK");
 		  }
 		}
@@ -722,10 +682,6 @@ public class Filter
 						  Object source) {
     if (connectionAllowed(eventName)) {
       m_listenees.put(eventName, source);
-      if (m_Filter instanceof ConnectionNotificationConsumer) {
-        ((ConnectionNotificationConsumer) m_Filter).
-          connectionNotification(eventName, source);
-      }
     }
   }
 
@@ -739,10 +695,6 @@ public class Filter
    */
   public synchronized void disconnectionNotification(String eventName,
 						     Object source) {
-    if (m_Filter instanceof ConnectionNotificationConsumer) {
-      ((ConnectionNotificationConsumer) m_Filter).
-        disconnectionNotification(eventName, source);
-    }
     m_listenees.remove(eventName);
   }
 
@@ -777,17 +729,12 @@ public class Filter
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
+	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
     
-    // stop the filter thread
-    if (m_filterThread != null) {
-      m_filterThread.interrupt();
-      m_filterThread.stop();
-      m_filterThread = null;
-      m_visual.setStatic();
-    }
+    //
   }
   
   /**
@@ -797,10 +744,6 @@ public class Filter
    */
   public void setLog(Logger logger) {
     m_log = logger;
-
-    if (m_Filter != null && m_Filter instanceof LogWriter) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
   }
 
   /**

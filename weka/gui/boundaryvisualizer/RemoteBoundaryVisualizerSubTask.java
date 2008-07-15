@@ -16,20 +16,19 @@
 
 /*
  *   RemoteBoundaryVisualizerSubTask.java
- *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003 Mark Hall
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
+import java.util.Vector;
+import java.util.Random;
+
+import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
 import weka.experiment.Task;
 import weka.experiment.TaskStatusInfo;
-
-import java.util.Random;
 
 /**
  * Class that encapsulates a sub task for distributed boundary
@@ -37,7 +36,7 @@ import java.util.Random;
  * in one row of the visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see Task
  */
@@ -107,7 +106,7 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
   /**
    * Set the width of the visualization
    *
-   * @param pw the width
+   * @param the width
    */
   public void setPanelWidth(int pw) {
     m_panelWidth = pw;

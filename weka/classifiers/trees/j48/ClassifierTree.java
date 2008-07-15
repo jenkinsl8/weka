@@ -16,36 +16,25 @@
 
 /*
  *    ClassifierTree.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
-import java.io.Serializable;
+import weka.core.*;
+import weka.classifiers.*;
+import java.io.*;
 
 /**
  * Class for handling a tree structure used for
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.17.2.1 $
  */
-public class ClassifierTree 
-  implements Drawable, Serializable, CapabilitiesHandler, RevisionHandler {
+public class ClassifierTree implements Drawable, Serializable {
 
-  /** for serialization */
-  static final long serialVersionUID = -8722249377542734193L;
-  
   /** The model selection method. */  
   protected ModelSelection m_toSelectModel;     
 
@@ -104,29 +93,17 @@ public class ClassifierTree
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    return new Capabilities(this);
-  }
-
-  /**
    * Method for building a classifier tree.
    *
-   * @param data the data to build the tree from
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
     data = new Instances(data);
     data.deleteWithMissingClass();
-    
     buildTree(data, false);
   }
 
@@ -136,7 +113,7 @@ public class ClassifierTree
    * @param data the data for which the tree structure is to be
    * generated.
    * @param keepData is training data to be kept?
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void buildTree(Instances data, boolean keepData) throws Exception {
     
@@ -173,7 +150,7 @@ public class ClassifierTree
    * generated.
    * @param test the test data for potential pruning
    * @param keepData is training Data to be kept?
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void buildTree(Instances train, Instances test, boolean keepData)
        throws Exception {
@@ -210,9 +187,7 @@ public class ClassifierTree
   /** 
    * Classifies an instance.
    *
-   * @param instance the instance to classify
-   * @return the classification
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public double classifyInstance(Instance instance) 
     throws Exception {
@@ -235,8 +210,6 @@ public class ClassifierTree
 
   /**
    * Cleanup in order to save memory.
-   * 
-   * @param justHeaderInfo
    */
   public final void cleanup(Instances justHeaderInfo) {
 
@@ -250,10 +223,7 @@ public class ClassifierTree
   /** 
    * Returns class probabilities for a weighted instance.
    *
-   * @param instance the instance to get the distribution for
-   * @param useLaplace whether to use laplace or not
-   * @return the distribution
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public final double [] distributionForInstance(Instance instance,
 						 boolean useLaplace) 
@@ -274,9 +244,6 @@ public class ClassifierTree
 
   /**
    * Assigns a uniqe id to every node in the tree.
-   * 
-   * @param lastID the last ID that was assign
-   * @return the new current ID
    */
   public int assignIDs(int lastID) {
 
@@ -303,8 +270,7 @@ public class ClassifierTree
   /**
    * Returns graph describing the tree.
    *
-   * @throws Exception if something goes wrong
-   * @return the tree as graph
+   * @exception Exception if something goes wrong
    */
   public String graph() throws Exception {
 
@@ -341,8 +307,7 @@ public class ClassifierTree
   /**
    * Returns tree in prefix order.
    *
-   * @throws Exception if something goes wrong
-   * @return the prefix order
+   * @exception Exception if something goes wrong
    */
   public String prefix() throws Exception {
     
@@ -368,7 +333,7 @@ public class ClassifierTree
    * @param className the classname that this static classifier has
    * @return an array containing two stringbuffers, the first string containing
    * assignment code, and the second containing source for support code.
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public StringBuffer [] toSource(String className) throws Exception {
     
@@ -379,6 +344,7 @@ public class ClassifierTree
       result[1] = new StringBuffer("");
     } else {
       StringBuffer text = new StringBuffer();
+      String nextIndent = "      ";
       StringBuffer atEnd = new StringBuffer();
 
       long printID = ClassifierTree.nextID();
@@ -424,8 +390,6 @@ public class ClassifierTree
 
   /**
    * Returns number of leaves in tree structure.
-   * 
-   * @return the number of leaves
    */
   public int numLeaves() {
     
@@ -443,8 +407,6 @@ public class ClassifierTree
 
   /**
    * Returns number of nodes in tree structure.
-   * 
-   * @return the number of nodes
    */
   public int numNodes() {
     
@@ -460,8 +422,6 @@ public class ClassifierTree
 
   /**
    * Prints tree structure.
-   * 
-   * @return the tree structure
    */
   public String toString() {
 
@@ -486,8 +446,7 @@ public class ClassifierTree
    * Returns a newly created tree.
    *
    * @param data the training data
-   * @return the generated tree
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances data) throws Exception {
 	 
@@ -500,10 +459,9 @@ public class ClassifierTree
   /**
    * Returns a newly created tree.
    *
-   * @param train the training data
+   * @param data the training data
    * @param test the pruning data.
-   * @return the generated tree
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
        throws Exception {
@@ -517,11 +475,9 @@ public class ClassifierTree
   /**
    * Help method for printing tree structure.
    *
-   * @param depth the current depth
-   * @param text for outputting the structure
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
-  private void dumpTree(int depth, StringBuffer text) 
+  private void dumpTree(int depth,StringBuffer text) 
        throws Exception {
     
     int i,j;
@@ -543,8 +499,7 @@ public class ClassifierTree
   /**
    * Help method for printing tree structure as a graph.
    *
-   * @param text for outputting the tree
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   private void graphTree(StringBuffer text) throws Exception {
     
@@ -579,9 +534,6 @@ public class ClassifierTree
 
   /**
    * Prints the tree in prefix form
-   * 
-   * @param text the buffer to output the prefix form to
-   * @throws Exception if something goes wrong
    */
   private void prefixTree(StringBuffer text) throws Exception {
 
@@ -604,7 +556,6 @@ public class ClassifierTree
     }
     text.append("]");
   }
-
   /**
    * Help method for computing class probabilities of 
    * a given instance.
@@ -625,21 +576,21 @@ public class ClassifierTree
     } else {
       int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	double[] weights = localModel().weights(instance);
-	for (int i = 0; i < m_sons.length; i++) {
-	  if (!son(i).m_isEmpty) {
-        prob += son(i).getProbsLaplace(classIndex, instance, 
-					     weights[i] * weight);
-	  }
-	}
-	return prob;
+        double[] weights = localModel().weights(instance);
+        for (int i = 0; i < m_sons.length; i++) {
+          if (!son(i).m_isEmpty) {
+            prob += son(i).getProbsLaplace(classIndex, instance, 
+                                           weights[i] * weight);
+          }
+        }
+        return prob;
       } else {
-	if (son(treeIndex).m_isEmpty) {
-	  return weight * localModel().classProbLaplace(classIndex, instance, 
-							treeIndex);
-	} else {
-	  return son(treeIndex).getProbsLaplace(classIndex, instance, weight);
-	}
+        if (son(treeIndex).m_isEmpty) {
+          return weight * localModel().classProbLaplace(classIndex, instance, 
+                                                        treeIndex);
+        } else {
+          return son(treeIndex).getProbsLaplace(classIndex, instance, weight);
+        }
       }
     }
   }
@@ -664,21 +615,21 @@ public class ClassifierTree
     } else {
       int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	double[] weights = localModel().weights(instance);
-	for (int i = 0; i < m_sons.length; i++) {
-	  if (!son(i).m_isEmpty) {
-	    prob += son(i).getProbs(classIndex, instance, 
-				    weights[i] * weight);
-	  }
-	}
-	return prob;
+        double[] weights = localModel().weights(instance);
+        for (int i = 0; i < m_sons.length; i++) {
+          if (!son(i).m_isEmpty) {
+            prob += son(i).getProbs(classIndex, instance, 
+                                    weights[i] * weight);
+          }
+        }
+        return prob;
       } else {
-	if (son(treeIndex).m_isEmpty) {
-	  return weight * localModel().classProb(classIndex, instance, 
-						 treeIndex);
-	} else {
-	  return son(treeIndex).getProbs(classIndex, instance, weight);
-	}
+        if (son(treeIndex).m_isEmpty) {
+          return weight * localModel().classProb(classIndex, instance, 
+                                                 treeIndex);
+        } else {
+          return son(treeIndex).getProbs(classIndex, instance, weight);
+        }
       }
     }
   }
@@ -698,13 +649,8 @@ public class ClassifierTree
     
     return (ClassifierTree)m_sons[index];
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
-  }
 }
+
+
+
+

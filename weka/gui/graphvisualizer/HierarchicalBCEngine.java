@@ -14,12 +14,12 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    HierarchicalBCEngine.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Ashraf M. Kibriya
  *
  */
-
 package weka.gui.graphvisualizer;
 
 import weka.core.FastVector;
@@ -57,7 +57,7 @@ import java.awt.GridBagConstraints;
  * vertices present in each level.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.3.2.1 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  *
  */
 public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
@@ -204,10 +204,6 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     m_controlsPanel.add(m_jCbEdgeConcentration, gbc);
   }
   
-    /** give access to set of graph nodes */
-    public FastVector getNodes() {
-	return m_nodes;
-    }
   
   /** This method returns a handle to the extra
    * controls panel, so that the visualizing

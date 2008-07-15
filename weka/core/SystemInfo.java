@@ -16,7 +16,7 @@
 
 /*
  *    SystemInfo.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 FracPete
  *
  */
 package weka.core;
@@ -34,11 +34,9 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.4 $
  */
-public class SystemInfo
-  implements RevisionHandler {
-  
+public class SystemInfo {
   /** for storing the information */
   private Hashtable m_Info = null;
   
@@ -60,7 +58,6 @@ public class SystemInfo
     String[]            laf;
     String              tmpStr;
     int                 i;
-    Memory              mem;
     
     m_Info.clear();
 
@@ -85,17 +82,6 @@ public class SystemInfo
     }
     m_Info.put("ui.installedLookAndFeels", tmpStr);
     m_Info.put("ui.currentLookAndFeel", LookAndFeel.getSystemLookAndFeel());
-
-    // memory info
-    mem = new Memory();
-    m_Info.put(
-        "memory.initial", 
-        "" + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB" 
-        + " (" + mem.getInitial() + ")");
-    m_Info.put(
-        "memory.max", 
-        "" + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB"
-        + " (" + mem.getMax() + ")");
   }
 
   /**
@@ -136,15 +122,6 @@ public class SystemInfo
     }
 
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

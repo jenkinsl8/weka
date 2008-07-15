@@ -16,19 +16,18 @@
 
 /*
  *    PropertyNode.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.experiment;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.io.Serializable;
+import java.io.IOException;
+import java.beans.PropertyDescriptor;
+import java.beans.IntrospectionException;
+import java.lang.ClassNotFoundException;
 
 /**
  * Stores information on a property of an object: the class of the
@@ -36,13 +35,9 @@ import java.io.Serializable;
  * value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public class PropertyNode
-  implements Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8718165742572631384L;
+public class PropertyNode implements Serializable {
 
   /** The current property value */
   public Object value;
@@ -128,14 +123,5 @@ public class PropertyNode
 				       + parentClass.getName() + "::"
 				       + name);
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 } // PropertyNode

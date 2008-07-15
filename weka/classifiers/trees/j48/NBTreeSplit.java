@@ -16,32 +16,27 @@
 
 /*
  *    NBTreeSplit.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.classifiers.trees.j48;
 
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
-
-import java.util.Random;
+import weka.filters.Filter;
 
 /**
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
-public class NBTreeSplit
-  extends ClassifierSplitModel{
-
-  /** for serialization */
-  private static final long serialVersionUID = 8922627123884975070L;
+public class NBTreeSplit extends ClassifierSplitModel{
 
   /** Desired number of branches. */
   private int m_complexityIndex;  
@@ -400,13 +395,5 @@ public class NBTreeSplit
   public double getErrors() {
     return m_errors;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
 }
+

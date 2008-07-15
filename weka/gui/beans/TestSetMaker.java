@@ -16,7 +16,7 @@
 
 /*
  *    TestSetMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,21 +24,22 @@ package weka.gui.beans;
 
 import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.3 $
  */
-public class TestSetMaker
-  extends AbstractTestSetProducer 
+public class TestSetMaker extends AbstractTestSetProducer 
   implements DataSourceListener, EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8473882857628061841L;
-
-  protected boolean m_receivedStopNotification = false;
 
   public TestSetMaker() {
      m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -46,24 +47,6 @@ public class TestSetMaker
 		       BeanVisual.ICON_PATH
 		       +"TestSetMaker_animated.gif");
     m_visual.setText("TestSetMaker");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -99,13 +82,6 @@ public class TestSetMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_receivedStopNotification) {
-          if (m_logger != null) {
-            m_logger.logMessage("TestSetMaker stopping.");
-          }
-          m_receivedStopNotification = false;
-          break;
-        }
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -113,12 +89,6 @@ public class TestSetMaker
 
   public void stop() {
     // do something
-    m_receivedStopNotification = true;
-
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      ((BeanCommon)m_listenee).stop();
-    }
   }
 
   /**

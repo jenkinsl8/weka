@@ -16,7 +16,7 @@
 
 /*
  *    BeanCommon.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -36,25 +36,11 @@ import java.beans.EventSetDescriptor;
  * perhaps a limited number of sources.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.1 $
  * @since 1.0
  */
 public interface BeanCommon {
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  void setCustomName(String name);
   
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  String getCustomName();
-
   /**
    * Stop any processing that the bean might be doing.
    */

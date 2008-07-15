@@ -16,22 +16,22 @@
 
 /*
  *    Instance.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.core;
 
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
- * Class for handling an instance. All values (numeric, date, nominal, string
- * or relational) are internally stored as floating-point numbers. If an
- * attribute is nominal (or a string or relational), the stored value is the
- * index of the corresponding nominal (or string or relational) value in the
- * attribute's definition. We have chosen this approach in favor of a more
- * elegant object-oriented approach because it is much faster. <p>
+ * Class for handling an instance. All values (numeric, date, nominal, or
+ * string) are internally stored as floating-point numbers. If an
+ * attribute is nominal (or a string), the stored value is the index
+ * of the corresponding nominal (or string) value in the attribute's
+ * definition. We have chosen this approach in favor of a more elegant
+ * object-oriented approach because it is much faster. <p>
  *
  * Typical usage (code from the main() method of this class): <p>
  *
@@ -62,13 +62,9 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.19.2.2 $ 
  */
-public class Instance
-  implements Copyable, Serializable, RevisionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 1482635194499365122L;
+public class Instance implements Copyable, Serializable {
   
   /** Constant representing a missing value. */
   protected static final double MISSING_VALUE = Double.NaN;
@@ -96,7 +92,7 @@ public class Instance
    * values and the weight are to be copied 
    */
   //@ ensures m_Dataset == null;
-  public Instance(/*@non_null@*/ Instance instance) {
+  protected Instance(/*@non_null@*/ Instance instance) {
     
     m_AttValues = instance.m_AttValues;
     m_Weight = instance.m_Weight;
@@ -143,7 +139,7 @@ public class Instance
    *
    * @param index the attribute's index
    * @return the attribute at the given position
-   * @throws UnassignedDatasetException if instance doesn't have access to a
+   * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
   //@ requires m_Dataset != null;
@@ -161,7 +157,7 @@ public class Instance
    *
    * @param indexOfIndex the index of the attribute's index 
    * @return the attribute at the given position
-   * @throws UnassignedDatasetException if instance doesn't have access to a
+   * @exception UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
   //@ requires m_Dataset != null;
@@ -177,7 +173,7 @@ public class Instance
    * Returns class attribute.
    *
    * @return the class attribute
-   * @throws UnassignedDatasetException if the class is not set or the
+   * @exception UnassignedDatasetException if the class is not set or the
    * instance doesn't have access to a dataset
    */
   //@ requires m_Dataset != null;
@@ -193,7 +189,7 @@ public class Instance
    * Returns the class attribute's index.
    *
    * @return the class index as an integer 
-   * @throws UnassignedDatasetException if instance doesn't have access to a dataset 
+   * @exception UnassignedDatasetException if instance doesn't have access to a dataset 
    */
   //@ requires m_Dataset != null;
   //@ ensures  \result == m_Dataset.classIndex();
@@ -209,7 +205,7 @@ public class Instance
    * Tests if an instance's class is missing.
    *
    * @return true if the instance's class is missing
-   * @throws UnassignedClassException if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset
    */
   //@ requires classIndex() >= 0;
@@ -228,7 +224,7 @@ public class Instance
    * @return the corresponding value as a double (If the 
    * corresponding attribute is nominal (or a string) then it returns the 
    * value's index as a double).
-   * @throws UnassignedClassException if the class is not set or the instance doesn't
+   * @exception UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset 
    */
   //@ requires classIndex() >= 0;
@@ -277,8 +273,8 @@ public class Instance
    * have access to any dataset because otherwise inconsistencies
    * could be introduced.
    *
-   * @param position the attribute's position
-   * @throws RuntimeException if the instance has access to a
+   * @param pos the attribute's position
+   * @exception RuntimeException if the instance has access to a
    * dataset 
    */
   //@ requires m_Dataset != null;
@@ -294,7 +290,7 @@ public class Instance
    * Returns an enumeration of all the attributes.
    *
    * @return enumeration of all the attributes
-   * @throws UnassignedDatasetException if the instance doesn't
+   * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
   //@ requires m_Dataset != null;
@@ -309,10 +305,10 @@ public class Instance
   /**
    * Tests if the headers of two instances are equivalent.
    *
-   * @param inst another instance
+   * @param instance another instance
    * @return true if the header of the given instance is 
    * equivalent to this instance's header
-   * @throws UnassignedDatasetException if instance doesn't have access to any
+   * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -327,7 +323,7 @@ public class Instance
   /**
    * Tests whether an instance has a missing value. Skips the class attribute if set.
    * @return true if instance has a missing value.
-   * @throws UnassignedDatasetException if instance doesn't have access to any
+   * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -364,10 +360,10 @@ public class Instance
    * have access to any dataset because otherwise inconsistencies
    * could be introduced.
    *
-   * @param position the attribute's position
-   * @throws RuntimeException if the instance has accesss to a
+   * @param pos the attribute's position
+   * @exception RuntimeException if the instance has accesss to a
    * dataset
-   * @throws IllegalArgumentException if the position is out of range
+   * @exception IllegalArgumentException if the position is out of range
    */
   //@ requires m_Dataset == null;
   //@ requires 0 <= position && position <= numAttributes();
@@ -388,7 +384,6 @@ public class Instance
    * Tests if a specific value is "missing".
    *
    * @param attIndex the attribute's index
-   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissing(int attIndex) {
 
@@ -403,7 +398,6 @@ public class Instance
    * the same thing as isMissing() if applied to an Instance.
    *
    * @param indexOfIndex the index of the attribute's index 
-   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissingSparse(int indexOfIndex) {
 
@@ -418,7 +412,6 @@ public class Instance
    * The given attribute has to belong to a dataset.
    *
    * @param att the attribute
-   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissing(Attribute att) {
 
@@ -482,7 +475,7 @@ public class Instance
    *
    * @return the number of class labels as an integer if the 
    * class attribute is nominal, 1 otherwise.
-   * @throws UnassignedDatasetException if instance doesn't have access to any
+   * @exception UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -512,7 +505,7 @@ public class Instance
    * values are replaced.
    *
    * @param array containing the means and modes
-   * @throws IllegalArgumentException if numbers of attributes are unequal
+   * @exception IllegalArgumentException if numbers of attributes are unequal
    */
   public void replaceMissingValues(double[] array) {
 	 
@@ -533,8 +526,8 @@ public class Instance
    * the vector of attribute values is performed before the
    * value is set to be missing.
    *
-   * @throws UnassignedClassException if the class is not set
-   * @throws UnassignedDatasetException if the instance doesn't
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnassignedDatasetException if the instance doesn't
    * have access to a dataset
    */
   //@ requires classIndex() >= 0;
@@ -554,8 +547,8 @@ public class Instance
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).  
-   * @throws UnassignedClassException if the class is not set
-   * @throws UnaddignedDatasetException if the instance doesn't
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnaddignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
   //@ requires classIndex() >= 0;
@@ -575,9 +568,9 @@ public class Instance
    * @param value the new class value (If the class
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @throws UnassignedClassException if the class is not set
-   * @throws UnassignedDatasetException if the dataset is not set
-   * @throws IllegalArgumentException if the attribute is not
+   * @exception UnassignedClassException if the class is not set
+   * @exception UnassignedDatasetException if the dataset is not set
+   * @exception IllegalArgumentException if the attribute is not
    * nominal or a string, or the value couldn't be found for a nominal
    * attribute 
    */
@@ -669,8 +662,8 @@ public class Instance
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @throws UnassignedDatasetException if the dataset is not set
-   * @throws IllegalArgumentException if the selected
+   * @exception UnassignedDatasetException if the dataset is not set
+   * @exception IllegalArgumentException if the selected
    * attribute is not nominal or a string, or the supplied value couldn't 
    * be found for a nominal attribute 
    */
@@ -727,7 +720,7 @@ public class Instance
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @throws IllegalArgumentException if the the attribute is not
+   * @exception IllegalArgumentException if the the attribute is not
    * nominal or a string, or the value couldn't be found for a nominal
    * attribute 
    */
@@ -750,22 +743,6 @@ public class Instance
   }
 
   /**
-   * Modifies the instances value for an attribute (floating point
-   * representation). Unlike in <code>setValue</code> no deep copy is
-   * produced, i.e. the actual value is modified.
-   *
-   * @param attIndex the attribute's index 
-   * @param value the new attribute value (If the corresponding
-   * attribute is nominal (or a string) then this is the new value's
-   * index as a double).
-   * @author Arne Muller (arne.muller@gmail.com)
-   */
-  public void modifyValue(int attIndex, double value) {
-    
-    m_AttValues[attIndex] = value;
-  }
-  
-  /**
    * Sets the weight of an instance.
    *
    * @param weight the weight
@@ -776,54 +753,14 @@ public class Instance
   }
 
   /** 
-   * Returns the relational value of a relational attribute.
-   *
-   * @param attIndex the attribute's index
-   * @return the corresponding relation as an Instances object
-   * @throws IllegalArgumentException if the attribute is not a
-   * relation-valued attribute
-   * @throws UnassignedDatasetException if the instance doesn't belong
-   * to a dataset.
-   */
-  //@ requires m_Dataset != null;
-  public final /*@pure@*/ Instances relationalValue(int attIndex) {
-
-    if (m_Dataset == null) {
-      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
-    } 
-    return relationalValue(m_Dataset.attribute(attIndex));
-  }
-
-
-  /** 
-   * Returns the relational value of a relational attribute.
-   *
-   * @param att the attribute
-   * @return the corresponding relation as an Instances object
-   * @throws IllegalArgumentException if the attribute is not a
-   * relation-valued attribute
-   * @throws UnassignedDatasetException if the instance doesn't belong
-   * to a dataset.
-   */
-  public final /*@pure@*/ Instances relationalValue(Attribute att) {
-
-    int attIndex = att.index();
-    if (att.isRelationValued()) {
-      return att.relation((int) value(attIndex));
-    } else {
-      throw new IllegalArgumentException("Attribute isn't relation-valued!");
-    }
-  }
-
-  /** 
-   * Returns the value of a nominal, string, date, or relational attribute
-   * for the instance as a string.
+   * Returns the string value of a nominal, string, or date attribute
+   * for the instance.
    *
    * @param attIndex the attribute's index
    * @return the value as a string
-   * @throws IllegalArgumentException if the attribute is not a nominal,
-   * string, date, or relation-valued attribute.
-   * @throws UnassignedDatasetException if the instance doesn't belong
+   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * string, or date attribute.
+   * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   //@ requires m_Dataset != null;
@@ -835,16 +772,15 @@ public class Instance
     return stringValue(m_Dataset.attribute(attIndex));
   }
 
-
   /** 
-   * Returns the value of a nominal, string, date, or relational attribute
-   * for the instance as a string.
+   * Returns the string value of a nominal, string, or date attribute
+   * for the instance.
    *
    * @param att the attribute
    * @return the value as a string
-   * @throws IllegalArgumentException if the attribute is not a nominal,
-   * string, date, or relation-valued attribute.
-   * @throws UnassignedDatasetException if the instance doesn't belong
+   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * string, or date attribute.
+   * @exception UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   public final /*@pure@*/ String stringValue(Attribute att) {
@@ -856,8 +792,6 @@ public class Instance
       return att.value((int) value(attIndex));
     case Attribute.DATE:
       return att.formatDate(value(attIndex));
-    case Attribute.RELATIONAL:
-      return att.relation((int) value(attIndex)).stringWithoutHeader();
     default:
       throw new IllegalArgumentException("Attribute isn't nominal, string or date!");
     }
@@ -893,10 +827,6 @@ public class Instance
       text.append(toString(i));
     }
 
-    if (m_Weight != 1.0) {
-      text.append(",{" + Utils.doubleToString(m_Weight, 6) + "}");
-    }
-
     return text.toString();
   }
 
@@ -924,7 +854,6 @@ public class Instance
        case Attribute.NOMINAL:
        case Attribute.STRING:
        case Attribute.DATE:
-       case Attribute.RELATIONAL:
          text.append(Utils.quote(stringValue(attIndex)));
          break;
        case Attribute.NUMERIC:
@@ -1009,8 +938,9 @@ public class Instance
    * Deletes an attribute at the given position (0 to 
    * numAttributes() - 1).
    *
-   * @param position the attribute's position
+   * @param pos the attribute's position
    */
+
   void forceDeleteAttributeAt(int position) {
 
     double[] newValues = new double[m_AttValues.length - 1];
@@ -1028,7 +958,7 @@ public class Instance
    * Inserts an attribute at the given position
    * (0 to numAttributes()) and sets its value to be missing. 
    *
-   * @param position the attribute's position
+   * @param pos the attribute's position
    */
   void forceInsertAttributeAt(int position)  {
 
@@ -1058,8 +988,6 @@ public class Instance
 
   /**
    * Main method for testing this class.
-   * 
-   * @param options the commandline options - ignored
    */
   //@ requires options != null;
   public static void main(String[] options) {
@@ -1193,14 +1121,5 @@ public class Instance
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 }

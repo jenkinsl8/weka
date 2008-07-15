@@ -16,51 +16,46 @@
 
 /*
  *    ListSelectorDialog.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui;
 
+import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Frame;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.regex.Pattern;
 
+import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.DefaultListModel;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 
 /** 
  * A dialog to present the user with a list of items, that the user can
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.4.4.1 $
  */
-public class ListSelectorDialog
-  extends JDialog {
-
-  /** for serialization */
-  private static final long serialVersionUID = 906147926840288895L;
+public class ListSelectorDialog extends JDialog {
   
   /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton("Select");
 
   /** Click to cancel the property selection */
   protected JButton m_CancelBut = new JButton("Cancel");
-
-  /** Click to enter a regex pattern for selection */
-  protected JButton m_PatternBut = new JButton("Pattern");
 
   /** The list component */
   protected JList m_List;
@@ -73,9 +68,6 @@ public class ListSelectorDialog
 
   /** Signifies a cancelled property selection */
   public static final int CANCEL_OPTION = 1;
-
-  /** The current regular expression. */
-  protected String m_PatternRegEx = ".*";
   
   /**
    * Create the list selection dialog.
@@ -87,24 +79,16 @@ public class ListSelectorDialog
     
     super(parentFrame, "Select items", true);
     m_List = userList;
-    m_CancelBut.setMnemonic('C');
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;
 	setVisible(false);
       }
     });
-    m_SelectBut.setMnemonic('S');
     m_SelectBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = APPROVE_OPTION;
 	setVisible(false);
-      }
-    });
-    m_PatternBut.setMnemonic('P');
-    m_PatternBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        selectPattern();
       }
     });
     
@@ -114,14 +98,9 @@ public class ListSelectorDialog
     Box b1 = new Box(BoxLayout.X_AXIS);
     b1.add(m_SelectBut);
     b1.add(Box.createHorizontalStrut(10));
-    b1.add(m_PatternBut);
-    b1.add(Box.createHorizontalStrut(10));
     b1.add(m_CancelBut);
     c.add(b1, BorderLayout.SOUTH);
     c.add(new JScrollPane(m_List), BorderLayout.CENTER);
-
-    getRootPane().setDefaultButton(m_SelectBut);
-    
     pack();
 
     // make sure, it's not bigger than the screen
@@ -147,37 +126,6 @@ public class ListSelectorDialog
       m_List.setSelectedIndices(origSelected);
     }
     return m_Result;
-  }
-
-  /**
-   * opens a separate dialog for entering a regex pattern for selecting
-   * elements from the provided list
-   */
-  protected void selectPattern() {
-    String pattern = JOptionPane.showInputDialog(
-                        m_PatternBut.getParent(),
-                        "Enter a Perl regular expression ('.*' for all)",
-                        m_PatternRegEx);
-    if (pattern != null) {
-      try {
-        Pattern.compile(pattern);
-        m_PatternRegEx = pattern;
-        m_List.clearSelection();
-        for (int i = 0; i < m_List.getModel().getSize(); i++) {
-          if (Pattern.matches(
-                pattern, m_List.getModel().getElementAt(i).toString()))
-            m_List.addSelectionInterval(i, i);
-        }
-      }
-      catch (Exception ex) {
-        JOptionPane.showMessageDialog(
-          m_PatternBut.getParent(),
-          "'" + pattern + "' is not a valid Perl regular expression!\n" 
-          + "Error: " + ex, 
-          "Error in Pattern...", 
-          JOptionPane.ERROR_MESSAGE);
-      }
-    }
   }
   
   /**

@@ -16,45 +16,53 @@
 
 /*
  *    Loader.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ArffLoader;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.beancontext.BeanContext;
-import java.io.IOException;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
 import java.io.ObjectStreamException;
-import java.util.Enumeration;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 import java.util.Vector;
-
+import java.util.Enumeration;
+import java.io.IOException;
+import java.beans.beancontext.*;
 import javax.swing.JButton;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.*;
+
 
 /**
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.10.2.5 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
  */
-public class Loader
-  extends AbstractDataSource 
-  implements Startable, UserRequestAcceptor, WekaWrapper,
+public class Loader extends AbstractDataSource 
+  implements UserRequestAcceptor, WekaWrapper,
 	     EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 1993738191961163027L;
 
   /**
    * Holds the instances loaded
@@ -75,11 +83,6 @@ public class Loader
    * Thread for doing IO in
    */
   private LoadThread m_ioThread;
-
-  private static int IDLE = 0;
-  private static int BATCH_LOADING = 1;
-  private static int INCREMENTAL_LOADING = 2;
-  private int m_state = IDLE;
 
   /**
    * Loader
@@ -107,8 +110,6 @@ public class Loader
     public void run() {
       try {
 	m_visual.setAnimated();
-        m_visual.setText("Loading...");
-        
 	boolean instanceGeneration = true;
 	// determine if we are going to produce data set or instance events
 	/*	for (int i = 0; i < m_listeners.size(); i++) {
@@ -119,18 +120,16 @@ public class Loader
 	  } */
 	if (m_dataSetEventTargets > 0) {
 	  instanceGeneration = false;
-          m_state = BATCH_LOADING;
 	}
 
 	if (instanceGeneration) {
-          m_state = INCREMENTAL_LOADING;
 	  //	  boolean start = true;
 	  Instance nextInstance = null;
 	  // load and pass on the structure first
 	  Instances structure = null;
 	  try {
             m_Loader.reset();
-            //	    System.err.println("NOTIFYING STRUCTURE AVAIL");
+	    System.err.println("NOTIFYING STRUCTURE AVAIL");
 	    structure = m_Loader.getStructure();
 	    notifyStructureAvailable(structure);
 	  } catch (IOException e) {
@@ -164,12 +163,8 @@ public class Loader
 	    }
 	    notifyInstanceLoaded(m_ie);
 	    z++;
-            if (z % 10000 == 0) {
-              m_visual.setText("" + z + " instances...");
-            }
 	  }
 	  m_visual.setStatic();
-	  m_visual.setText(structure.relationName());
 	} else {
           m_Loader.reset();
 	  m_dataSet = m_Loader.getDataSet();
@@ -184,8 +179,6 @@ public class Loader
 	//	m_visual.setText("Finished");
 	//	m_visual.setIcon(m_inactive.getVisual());
 	m_visual.setStatic();
-        m_state = IDLE;
-        block(false);
       }
     }
   }
@@ -259,27 +252,23 @@ public class Loader
 				      lastIndexOf('.')+1, 
 				      loaderName.length());
     if (loadImages) {
-      if (m_Loader instanceof Visible) {
-        m_visual = ((Visible) m_Loader).getVisual();
-      } else {
 
-        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
-                                BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
-          useDefaultVisual();
-        }
+      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
+			    BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
+	useDefaultVisual();
       }
     }
     m_visual.setText(loaderName);
     
-    if(! (loader instanceof DatabaseLoader)) {
-      // try to load structure (if possible) and notify any listeners
-      try {
-        m_dataFormat = m_Loader.getStructure();
-        //      System.err.println(m_dataFormat);
-        System.out.println("[Loader] Notifying listeners of instance structure avail.");
-        notifyStructureAvailable(m_dataFormat);
-      }catch (Exception ex) {
-      }
+    if(! (loader instanceof DatabaseLoader)){
+        // try to load structure (if possible) and notify any listeners
+        try {
+            m_dataFormat = m_Loader.getStructure();
+            //      System.err.println(m_dataFormat);
+            System.err.println("Notifying listeners of instance structure avail. (Loader).");
+            notifyStructureAvailable(m_dataFormat);
+        }catch (Exception ex) {
+        }
     }
     
     // get global info
@@ -381,13 +370,11 @@ public class Loader
   public void startLoading() {
     if (m_ioThread == null) {
       //      m_visual.setText(m_dataSetFile.getName());
-      m_state = BATCH_LOADING;
       m_ioThread = new LoadThread(Loader.this);
       m_ioThread.setPriority(Thread.MIN_PRIORITY);
       m_ioThread.start();
     } else {
       m_ioThread = null;
-      m_state = IDLE;
     }
   }
 
@@ -426,38 +413,6 @@ public class Loader
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Loader)");
-    }
-  }
-
-  /**
-   * Start loading
-   *
-   * @exception Exception if something goes wrong
-   */
-  public void start() throws Exception {
-    startLoading();
-    block(true);
-  }
-  
-  /**
-   * Function used to stop code that calls acceptTrainingSet. This is 
-   * needed as classifier construction is performed inside a separate
-   * thread of execution.
-   *
-   * @param tf a <code>boolean</code> value
-   */
-  private synchronized void block(boolean tf) {
-
-    if (tf) {
-      try {
-	  // only block if thread is still doing something useful!
-	if (m_ioThread.isAlive() && m_state != IDLE) {
-	  wait();
-        }
-      } catch (InterruptedException ex) {
-      }
-    } else {
-      notifyAll();
     }
   }
 
@@ -544,7 +499,7 @@ public class Loader
       }
     }catch(Exception ex){
     }
-    // pass on any current instance format      
+    // pass on any current instance format
     notifyStructureAvailable(m_dataFormat);
   }
   
@@ -556,6 +511,17 @@ public class Loader
   public synchronized void removeInstanceListener(InstanceListener dsl) {
     super.removeInstanceListener(dsl);
     m_instanceEventTargets --;
+  }
+
+  private Object readResolve() throws ObjectStreamException {
+    // try and reset the Loader
+    if (m_Loader != null) {
+      try {
+        m_Loader.reset();
+      } catch (Exception ex) {
+      }
+    }
+    return this;
   }
   
   public static void main(String [] args) {
@@ -577,17 +543,6 @@ public class Loader
     } catch (Exception ex) {
       ex.printStackTrace();
     }
-  }
-  
-  private Object readResolve() throws ObjectStreamException {
-    // try and reset the Loader
-    if (m_Loader != null) {
-      try {
-        m_Loader.reset();
-      } catch (Exception ex) {
-      }
-    }
-    return this;
   }
 }
 

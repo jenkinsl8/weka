@@ -16,13 +16,10 @@
 
 /*
  * MethodHandler.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -33,11 +30,9 @@ import java.util.Hashtable;
  * (or classes) and Methods that are associated with them. 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
-public class MethodHandler
-   implements RevisionHandler {
-  
+public class MethodHandler {
    /** 
     * stores the properties/class - Method relationship
     * 
@@ -192,14 +187,5 @@ public class MethodHandler
     */
    public String toString() {
       return m_Methods.toString();
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.3 $");
    }
 }

@@ -16,13 +16,14 @@
 
 /*
  *    BinarySparseInstance.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
  * Class for storing a binary-data-only instance as a sparse vector. A
@@ -35,13 +36,9 @@ import java.util.Enumeration;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.7.2.2 $
  */
-public class BinarySparseInstance
-  extends SparseInstance {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5297388762342528737L;
+public class BinarySparseInstance extends SparseInstance {
 
   /**
    * Constructor that generates a sparse instance from the given
@@ -310,9 +307,6 @@ public class BinarySparseInstance
       }
     }
     text.append('}');
-    if (m_Weight != 1.0) {
-      text.append(",{" + Utils.doubleToString(m_Weight, 6) + "}");
-    }
     return text.toString();
   }
 
@@ -593,13 +587,6 @@ public class BinarySparseInstance
       e.printStackTrace();
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
-  }
 }
+
+

@@ -16,31 +16,23 @@
 
 /*
  *    NormalEstimator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.estimators;
 
-import weka.core.Capabilities.Capability;
-import weka.core.Capabilities;
-import weka.core.RevisionUtils;
-import weka.core.Statistics;
-import weka.core.Utils;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * Simple probability estimator that places a single normal distribution
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.5 $
  */
-public class NormalEstimator
-  extends Estimator
-  implements IncrementalEstimator {
-
-  /** for serialization */
-  private static final long serialVersionUID = 93584379632315841L;
+public class NormalEstimator implements Estimator {
 
   /** The sum of the weights */
   private double m_SumOfWeights;
@@ -70,6 +62,7 @@ public class NormalEstimator
 
     return Math.rint(data / m_Precision) * m_Precision;
   }
+
   
   // ===============
   // Public methods.
@@ -150,64 +143,6 @@ public class NormalEstimator
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    return result;
-  }
-
-  /**
-   * Return the value of the mean of this normal estimator.
-   *
-   * @return the mean
-   */
-  public double getMean() {
-    return m_Mean;
-  }
-
-  /**
-   * Return the value of the standard deviation of this normal estimator.
-   *
-   * @return the standard deviation
-   */
-  public double getStdDev() {
-    return m_StandardDev;
-  }
-
-  /**
-   * Return the value of the precision of this normal estimator.
-   *
-   * @return the precision
-   */
-  public double getPrecision() {
-    return m_Precision;
-  }
-
-  /**
-   * Return the sum of the weights for this normal estimator.
-   *
-   * @return the sum of the weights
-   */
-  public double getSumOfWeights() {
-    return m_SumOfWeights;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
-
-  /**
    * Main method for testing this class.
    *
    * @param argv should contain a sequence of numeric values
@@ -233,3 +168,11 @@ public class NormalEstimator
     }
   }
 }
+
+
+
+
+
+
+
+

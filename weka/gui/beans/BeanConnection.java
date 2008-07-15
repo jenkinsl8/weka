@@ -16,43 +16,41 @@
 
 /*
  *    BeanConnection.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.BeanInfo;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Vector;
-
+import java.beans.Beans;
+import java.beans.EventSetDescriptor;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.IntrospectionException;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Color;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
 
 /**
  * Class for encapsulating a connection between two beans. Also
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.2.2.2 $
  */
-public class BeanConnection
-  implements Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8804264241791332064L;
+public class BeanConnection implements Serializable {
 
   /**
    * The list of connections
@@ -494,7 +492,7 @@ public class BeanConnection
             Object [] args = new Object[1];
             args[0] = targetBean;
             deregisterMethod.invoke(tempSource.getBean(), args);
-            //            System.err.println("Deregistering listener");
+            System.err.println("Deregistering listener");
             removeVector.addElement(bc);
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -512,7 +510,7 @@ public class BeanConnection
       }
     }
     for (int i = 0; i < removeVector.size(); i++) {
-      //      System.err.println("removing connection");
+      System.err.println("removing connection");
       CONNECTIONS.removeElement((BeanConnection)removeVector.elementAt(i));
     }
   }
@@ -569,6 +567,7 @@ public class BeanConnection
    * @param source the source bean
    * @param target the target bean
    * @param esd the EventSetDescriptor for the connection
+   * @param displayComponent the component on which the connection will
    * be displayed
    */
   public BeanConnection(BeanInstance source, BeanInstance target,
@@ -577,7 +576,7 @@ public class BeanConnection
     m_target = target;
     //    m_sourceEsd = sourceEsd;
     m_eventName = esd.getName();
-    //    System.err.println(m_eventName);
+    System.err.println(m_eventName);
 
     // attempt to connect source and target beans
     Method registrationMethod = 
@@ -601,11 +600,11 @@ public class BeanConnection
 	}
 	CONNECTIONS.addElement(this);
       } catch (Exception ex) {
-	System.err.println("[BeanConnection] Unable to connect beans");
+	System.err.println("Unable to connect beans (BeanConnection)");
 	ex.printStackTrace();
       }
     } else {
-      System.err.println("[BeanConnection] Unable to connect beans");
+      System.err.println("Unable to connect beans (BeanConnection)");
     }
   }
 
@@ -639,7 +638,7 @@ public class BeanConnection
       Object [] args = new Object[1];
       args[0] = targetBean;
       deregisterMethod.invoke(getSource().getBean(), args);
-      //      System.err.println("Deregistering listener");
+      System.err.println("Deregistering listener");
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -671,7 +670,7 @@ public class BeanConnection
   public BeanInstance getTarget() {
     return m_target;
   }
-  
+
   /**
    * Returns the name of the event for this conncetion
    * 
@@ -692,7 +691,7 @@ public class BeanConnection
      try {
        BeanInfo sourceInfo = Introspector.getBeanInfo(bc.getClass());
        if (sourceInfo == null) {
-       System.err.println("[BeanConnection] Error getting bean info, source info is null.");
+       System.err.println("Error");
        } else {
 	 EventSetDescriptor [] esds = sourceInfo.getEventSetDescriptors();
 	 for (int i = 0; i < esds.length; i++) {
@@ -702,7 +701,7 @@ public class BeanConnection
 	 }
        }
      } catch (Exception ex) {
-       System.err.println("[BeanConnection] Problem retrieving event set descriptor");
+       System.err.println("Problem retrieving event set descriptor (BeanConnection)");
      }
      return null;
      

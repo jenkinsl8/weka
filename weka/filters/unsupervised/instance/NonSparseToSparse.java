@@ -16,39 +16,27 @@
 
 /*
  *    NonSparseToSparse.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Eibe Frank
  *
  */
 
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that converts all incoming instances into sparse format.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * A filter that converts all incoming instances into sparse format.
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1 $
  */
-public class NonSparseToSparse 
-  extends Filter
+public class NonSparseToSparse extends Filter
   implements UnsupervisedFilter, StreamableFilter {
 
-  /** for serialization */
-  static final long serialVersionUID = 4694489111366063852L;
-  
   /**
    * Returns a string describing this filter
    *
@@ -60,27 +48,6 @@ public class NonSparseToSparse
       + " into sparse format.";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -88,7 +55,6 @@ public class NonSparseToSparse
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if format cannot be processed
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -106,7 +72,7 @@ public class NonSparseToSparse
    * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -122,15 +88,6 @@ public class NonSparseToSparse
     push(inst);
     return true;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
 
   /**
    * Main method for testing this class.
@@ -138,6 +95,23 @@ public class NonSparseToSparse
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new NonSparseToSparse(), argv);
+    
+    try {
+      if (Utils.getFlag('b', argv)) {
+	Filter.batchFilterFile(new NonSparseToSparse(), argv);
+      } else {
+	Filter.filterFile(new NonSparseToSparse(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

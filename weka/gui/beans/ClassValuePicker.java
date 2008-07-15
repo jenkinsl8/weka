@@ -16,34 +16,34 @@
 
 /*
  *    ClassValuePicker.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.SwapValues;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
 import java.util.Vector;
-
+import java.io.Serializable;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.3.2.2 $
  */
-public class ClassValuePicker
-  extends JPanel
+public class ClassValuePicker extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
 	     EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1196143276710882989L;
 
   /** the class value index considered to be the positive class */
   private int m_classValueIndex = 0;
@@ -76,24 +76,6 @@ public class ClassValuePicker
   public ClassValuePicker() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);    
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**

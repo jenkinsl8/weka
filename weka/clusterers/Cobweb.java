@@ -16,118 +16,55 @@
 
 /*
  *    Cobweb.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Mark Hall
  *
  */
 
 package weka.clusterers;
 
-import weka.core.AttributeStats;
-import weka.core.Capabilities;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.experiment.Stats;
+import java.io.*;
+import java.util.*; 
+import weka.core.*; 
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.experiment.Stats;
 
 /**
- <!-- globalinfo-start -->
- * Class implementing the Cobweb and Classit clustering algorithms.<br/>
- * <br/>
- * Note: the application of node operators (merging, splitting etc.) in terms of ordering and priority differs (and is somewhat ambiguous) between the original Cobweb and Classit papers. This algorithm always compares the best host, adding a new leaf, merging the two best hosts, and splitting the best host when considering where to place a new instance.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * D. Fisher (1987). Knowledge acquisition via incremental conceptual clustering. Machine Learning. 2(2):139-172.<br/>
- * <br/>
- * J. H. Gennari, P. Langley, D. Fisher (1990). Models of incremental concept formation. Artificial Intelligence. 40:11-61.
- * <p/>
- <!-- globalinfo-end -->
+ * Class implementing the Cobweb and Classit clustering algorithms.<p><p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Fisher1987,
- *    author = {D. Fisher},
- *    journal = {Machine Learning},
- *    number = {2},
- *    pages = {139-172},
- *    title = {Knowledge acquisition via incremental conceptual clustering},
- *    volume = {2},
- *    year = {1987}
- * }
- * 
- * &#64;article{Gennari1990,
- *    author = {J. H. Gennari and P. Langley and D. Fisher},
- *    journal = {Artificial Intelligence},
- *    pages = {11-61},
- *    title = {Models of incremental concept formation},
- *    volume = {40},
- *    year = {1990}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Note: the application of node operators (merging, splitting etc.) in
+ * terms of ordering and priority differs (and is somewhat ambiguous)
+ * between the original Cobweb and Classit papers. This algorithm always
+ * compares the best host, adding a new leaf, merging the two best hosts, and
+ * splitting the best host when considering where to place a new instance.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -A &lt;acuity&gt;
- *  Acuity.
- *  (default=1.0)</pre>
- * 
- * <pre> -C &lt;cutoff&gt;
- *  Cutoff.
- *  (default=0.002)</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 42)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -A <acuity> <br>
+ * Acuity. <p>
+ *
+ * -C <cutoff> <br>
+ * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25 $
- * @see RandomizableClusterer
+ * @version $Revision: 1.16 $
+ * @see Clusterer
+ * @see OptionHandler
  * @see Drawable
  */
-public class Cobweb 
-  extends RandomizableClusterer
-  implements Drawable, TechnicalInformationHandler, UpdateableClusterer {
+public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 
-  /** for serialization */
-  static final long serialVersionUID = 928406656495092318L;
-  
   /**
    * Inner class handling node operations for Cobweb.
    *
    * @see Serializable
    */
-  private class CNode 
-    implements Serializable, RevisionHandler {
-
-    /** for serialization */
-    static final long serialVersionUID = 3452097436933325631L;    
+  private class CNode implements Serializable {
+    
     /**
      * Within cluster attribute statistics
      */
-    private AttributeStats[] m_attStats;
+    private AttributeStats [] m_attStats;
 
     /**
      * Number of attributes
@@ -182,7 +119,7 @@ public class Cobweb
      * Adds an instance to this cluster.
      *
      * @param newInstance the instance to add
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
     protected void addInstance(Instance newInstance) throws Exception {
       // Add the instance to this cluster
@@ -236,12 +173,12 @@ public class Cobweb
      * @param newInstance the new instance to evaluate
      * @return an array of category utility values---the result of considering
      * each child in turn as a host for the new instance
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
-    private double[] cuScoresForChildren(Instance newInstance) 
+    private double [] cuScoresForChildren(Instance newInstance) 
       throws Exception {
       // look for a host in existing children
-      double[] categoryUtils = new double [m_children.size()];
+      double [] categoryUtils = new double [m_children.size()];
       
       // look for a home for this instance in the existing children
       for (int i = 0; i < m_children.size(); i++) {
@@ -290,7 +227,7 @@ public class Cobweb
      * @param structureFrozen true if the instance is not to be added to
      * the tree and instead the best potential host is to be returned
      * @return the best host
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
     private CNode findHost(Instance newInstance, 
 			   boolean structureFrozen) throws Exception {
@@ -300,7 +237,7 @@ public class Cobweb
       }
       
       // look for a host in existing children and also consider as a new leaf
-      double[] categoryUtils = cuScoresForChildren(newInstance);
+      double [] categoryUtils = cuScoresForChildren(newInstance);
       
       // make a temporary new leaf for this instance and get CU
       CNode newLeaf = new CNode(m_numAttributes, newInstance);
@@ -482,7 +419,6 @@ public class Cobweb
      * Computes the utility of all children with respect to this node
      *
      * @return the category utility of the children with respect to this node.
-     * @throws Exception if there are no children
      */
     protected double categoryUtility() throws Exception {
       
@@ -506,7 +442,7 @@ public class Cobweb
      *
      * @param child the child for which to compute the utility
      * @return the utility of the child with respect to this node
-     * @throws Exception if something goes wrong
+     * @exception Exception if something goes wrong
      */
     protected double categoryUtilityChild(CNode child) throws Exception {
       
@@ -535,7 +471,7 @@ public class Cobweb
      * @param attIndex the index of the attribute
      * @param valueIndex the index of the value of the attribute
      * @return the probability
-     * @throws Exception if the requested attribute is not nominal
+     * @exception Exception if the requested attribute is not nominal
      */
     protected double getProbability(int attIndex, int valueIndex) 
       throws Exception {
@@ -557,7 +493,7 @@ public class Cobweb
      *
      * @param attIndex the index of the attribute
      * @return the standard deviation
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
     protected double getStandardDev(int attIndex) throws Exception {
       if (!m_clusterInstances.attribute(attIndex).isNumeric()) {
@@ -624,9 +560,9 @@ public class Cobweb
      * Recursively assigns numbers to the nodes in the tree.
      *
      * @param cl_num an <code>int[]</code> value
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
-    private void assignClusterNums(int[] cl_num) throws Exception {
+    private void assignClusterNums(int [] cl_num) throws Exception {
       if (m_children != null && m_children.size() < 2) {
 	throw new Exception("assignClusterNums: tree not built correctly!");
       }
@@ -649,9 +585,6 @@ public class Cobweb
      */
     protected void dumpTree(int depth, StringBuffer text) {
 
-      if (depth == 0)
-	determineNumberOfClusters();
-      
       if (m_children == null) {
 	text.append("\n");
 	for (int j = 0; j < depth; j++) {
@@ -678,7 +611,7 @@ public class Cobweb
      * number of the child that each instance belongs to.
      *
      * @return a <code>String</code> value
-     * @throws Exception if an error occurs
+     * @exception Exception if an error occurs
      */
     protected String dumpData() throws Exception {
       if (m_children == null) {
@@ -694,6 +627,7 @@ public class Cobweb
       Instances tempInst = tempNode.m_clusterInstances;
       tempNode = null;
 
+      StringBuffer instBuff = new StringBuffer();
       Add af = new Add();
       af.setAttributeName("Cluster");
       String labels = "";
@@ -724,7 +658,6 @@ public class Cobweb
      * Recursively generate the graph string for the Cobweb tree.
      *
      * @param text holds the graph string
-     * @throws Exception if generation fails
      */
     protected void graphTree(StringBuffer text) throws Exception {
       
@@ -755,15 +688,6 @@ public class Cobweb
 	}
       }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.25 $");
-    }
   }
 
   /**
@@ -787,22 +711,11 @@ public class Cobweb
   protected CNode m_cobwebTree = null;
 
   /**
-   * Number of clusters (nodes in the tree). Must never be queried directly, 
-   * only via the method numberOfClusters(). Otherwise it's not guaranteed that 
-   * it contains the correct value.
-   * 
-   * @see #numberOfClusters()
-   * @see #m_numberOfClustersDetermined
+   * Number of clusters (nodes in the tree).
    */
   protected int m_numberOfClusters = -1;
   
-  /** whether the number of clusters was already determined */
-  protected boolean m_numberOfClustersDetermined = false;
-  
-  /** the number of splits that happened */
   protected int m_numberSplits;
-  
-  /** the number of merges that happened */
   protected int m_numberMerges;
 
   /**
@@ -812,89 +725,10 @@ public class Cobweb
   protected boolean m_saveInstances = false;
 
   /**
-   * default constructor
-   */
-  public Cobweb() {
-    super();
-    
-    m_SeedDefault = 42;
-    setSeed(m_SeedDefault);
-  }
-  
-  /**
-   * Returns a string describing this clusterer
-   * @return a description of the evaluator suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-    return 
-        "Class implementing the Cobweb and Classit clustering algorithms.\n\n"
-      + "Note: the application of node operators (merging, splitting etc.) in "
-      + "terms of ordering and priority differs (and is somewhat ambiguous) "
-      + "between the original Cobweb and Classit papers. This algorithm always "
-      + "compares the best host, adding a new leaf, merging the two best hosts, "
-      + "and splitting the best host when considering where to place a new "
-      + "instance.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "D. Fisher");
-    result.setValue(Field.YEAR, "1987");
-    result.setValue(Field.TITLE, "Knowledge acquisition via incremental conceptual clustering");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "2");
-    result.setValue(Field.NUMBER, "2");
-    result.setValue(Field.PAGES, "139-172");
-    
-    additional = result.add(Type.ARTICLE);
-    additional.setValue(Field.AUTHOR, "J. H. Gennari and P. Langley and D. Fisher");
-    additional.setValue(Field.YEAR, "1990");
-    additional.setValue(Field.TITLE, "Models of incremental concept formation");
-    additional.setValue(Field.JOURNAL, "Artificial Intelligence");
-    additional.setValue(Field.VOLUME, "40");
-    additional.setValue(Field.PAGES, "11-61");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the clusterer.
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // other
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /**
    * Builds the clusterer.
    *
    * @param data the training instances.
-   * @throws Exception if something goes wrong.
+   * @exception Exception if something goes wrong.
    */
   public void buildClusterer(Instances data) throws Exception {
     m_numberOfClusters = -1;
@@ -902,25 +736,22 @@ public class Cobweb
     m_numberSplits = 0;
     m_numberMerges = 0;
 
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
-    // randomize the instances
-    data = new Instances(data);
-    data.randomize(new Random(getSeed()));
-
-    for (int i = 0; i < data.numInstances(); i++) {
-      updateClusterer(data.instance(i));
+    if (data.checkForStringAttributes()) {
+      throw new Exception("Can't handle string attributes!");
     }
     
-    updateFinished();
-  }
+    // randomize the instances
+    data = new Instances(data);
+    data.randomize(new Random(42));
 
-  /**
-   * Singals the end of the updating.
-   */
-  public void updateFinished() {
-    determineNumberOfClusters();
+    for (int i = 0; i < data.numInstances(); i++) {
+      addInstance(data.instance(i));
+    }
+    
+    int [] numClusts = new int [1];
+    numClusts[0] = 0;
+    m_cobwebTree.assignClusterNums(numClusts);
+    m_numberOfClusters = numClusts[0];
   }
 
   /**
@@ -929,14 +760,12 @@ public class Cobweb
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an interger
    * if the class is enumerated, otherwise the predicted value
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
     CNode host = m_cobwebTree;
     CNode temp = null;
-    
-    determineNumberOfClusters();
     
     do {
       if (host.m_children == null) {
@@ -957,65 +786,26 @@ public class Cobweb
   }
 
   /**
-   * determines the number of clusters if necessary
-   * 
-   * @see #m_numberOfClusters
-   * @see #m_numberOfClustersDetermined
-   */
-  protected void determineNumberOfClusters() {
-    if (    !m_numberOfClustersDetermined 
-	 && (m_cobwebTree != null) ) {
-      int[] numClusts = new int [1];
-      numClusts[0] = 0;
-      try {
-	m_cobwebTree.assignClusterNums(numClusts);
-      }
-      catch (Exception e) {
-	e.printStackTrace();
-	numClusts[0] = 0;
-      }
-      m_numberOfClusters = numClusts[0];
-
-      m_numberOfClustersDetermined = true;
-    }
-  }
-  
-  /**
    * Returns the number of clusters.
    *
-   * @return the number of clusters
+   * @exception Exception if something goes wrong.
    */
-  public int numberOfClusters() {
-    determineNumberOfClusters();
+  public int numberOfClusters() throws Exception {
     return m_numberOfClusters;
   }
 
   /**
-   * Adds an instance to the clusterer.
+   * Adds an instance to the Cobweb tree.
    *
    * @param newInstance the instance to be added
-   * @throws Exception 	if something goes wrong
+   * @exception Exception if something goes wrong
    */
-  public void updateClusterer(Instance newInstance) throws Exception {
-    m_numberOfClustersDetermined = false;
-    
+  public void addInstance(Instance newInstance) throws Exception {
     if (m_cobwebTree == null) {
       m_cobwebTree = new CNode(newInstance.numAttributes(), newInstance);
     } else {
       m_cobwebTree.addInstance(newInstance);
     }
-  }
-  
-  /**
-   * Adds an instance to the Cobweb tree.
-   *
-   * @param newInstance the instance to be added
-   * @throws Exception if something goes wrong
-   * @deprecated updateClusterer(Instance) should be used instead
-   * @see #updateClusterer(Instance)
-   */
-  public void addInstance(Instance newInstance) throws Exception {
-    updateClusterer(newInstance);
   }
 
   /**
@@ -1024,48 +814,32 @@ public class Cobweb
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions() {
-    Vector result = new Vector();
     
-    result.addElement(new Option(
-	"\tAcuity.\n"
-	+"\t(default=1.0)",
-	"A", 1,"-A <acuity>"));
+    Vector newVector = new Vector(2);
     
-    result.addElement(new Option(
-	"\tCutoff.\n"
-	+"\t(default=0.002)",
-	"C", 1,"-C <cutoff>"));
-
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+    newVector.addElement(new Option("\tAcuity.\n"
+				    +"\t(default=1.0)", "A", 1,"-A <acuity>"));
+    newVector.addElement(new Option("\tCutoff.\n"
+				    +"a\t(default=0.002)", "C", 1,"-C <cutoff>"));
     
-    return result.elements();
+    return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -A &lt;acuity&gt;
-   *  Acuity.
-   *  (default=1.0)</pre>
-   * 
-   * <pre> -C &lt;cutoff&gt;
-   *  Cutoff.
-   *  (default=0.002)</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 42)</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are:<p>
+   *
+   * -A <acuity> <br>
+   * Acuity. <p>
+   *
+   * -C <cutoff> <br>
+   * Cutoff. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions(String[] options) throws Exception {
     String optionString;
 
@@ -1085,8 +859,6 @@ public class Cobweb
     else {
       m_cutoff = 0.01 * Cobweb.m_normal;
     }
-    
-    super.setOptions(options);
   }
 
   /**
@@ -1167,29 +939,25 @@ public class Cobweb
     
     m_saveInstances = newsaveInstances;
   }
+  
 
   /**
    * Gets the current settings of Cobweb.
    *
    * @return an array of strings suitable for passing to setOptions()
    */
-  public String[] getOptions() {
-    int       		i;
-    Vector<String>    	result;
-    String[]  		options;
-
-    result = new Vector<String>();
-
-    result.add("-A"); 
-    result.add("" + m_acuity);
-    result.add("-C"); 
-    result.add("" + m_cutoff);
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
-    return result.toArray(new String[result.size()]);	  
+  public String [] getOptions() {
+    
+    String [] options = new String [4];
+    int current = 0;
+    options[current++] = "-A"; 
+    options[current++] = "" + m_acuity;
+    options[current++] = "-C"; 
+    options[current++] = "" + m_cutoff;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -1207,10 +975,11 @@ public class Cobweb
       return "Number of merges: "
 	+ m_numberMerges+"\nNumber of splits: "
 	+ m_numberSplits+"\nNumber of clusters: "
-	+ numberOfClusters() +"\n"+text.toString()+"\n\n";
+	+ m_numberOfClusters+"\n"+text.toString()+"\n\n";
      
     }
   }
+
     
   /**
    *  Returns the type of graphs this class
@@ -1225,7 +994,7 @@ public class Cobweb
    * Generates the graph string of the Cobweb tree
    *
    * @return a <code>String</code> value
-   * @throws Exception if an error occurs
+   * @exception Exception if an error occurs
    */
   public String graph() throws Exception {
     StringBuffer text = new StringBuffer();
@@ -1235,22 +1004,18 @@ public class Cobweb
     text.append("}\n");
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
-  }
 
-  /** 
-   * Main method.
-   * 
-   * @param argv the commandline options
-   */
-  public static void main(String[] argv) {
-    runClusterer(new Cobweb(), argv);
+  // Main method for testing this class
+  public static void main(String [] argv)
+  {
+    try {
+      System.out.println(ClusterEvaluation.evaluateClusterer(new Cobweb(), 
+							     argv));
+    }
+    catch (Exception e)
+      {
+	System.out.println(e.getMessage());
+	e.printStackTrace();
+      }
   }
 }

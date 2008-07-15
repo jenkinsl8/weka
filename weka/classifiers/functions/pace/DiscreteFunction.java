@@ -15,17 +15,11 @@
 
 /*
  *    ChisqMixture.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Yong Wang
  *
  */
 
 package weka.classifiers.functions.pace;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.matrix.DoubleVector;
-import weka.core.matrix.FlexibleDecimalFormat;
-import weka.core.matrix.IntVector;
 
 
 /** Class for handling discrete functions. <p>
@@ -34,10 +28,9 @@ import weka.core.matrix.IntVector;
  * set of points. <p>
  * 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.1 $ */
 
-public class  DiscreteFunction
-  implements RevisionHandler {
+public class  DiscreteFunction {
     
   protected DoubleVector  points;
   protected DoubleVector  values;
@@ -275,15 +268,6 @@ public class  DiscreteFunction
     }
 	
     return text.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   public static void main( String args[] )

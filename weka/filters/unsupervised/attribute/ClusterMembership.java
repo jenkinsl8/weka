@@ -14,65 +14,53 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    ClusterMembership.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.clusterers.DensityBasedClusterer;
-import weka.clusterers.AbstractDensityBasedClusterer;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
-
+import weka.filters.unsupervised.attribute.Remove;
+import weka.clusterers.Clusterer;
+import weka.clusterers.DensityBasedClusterer;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.FastVector;
+import weka.core.Option;
+import weka.core.Utils;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * A filter that uses a density-based clusterer to generate cluster membership values; filtered instances are composed of these values plus the class attribute (if set in the input data). If a (nominal) class attribute is set, the clusterer is run separately for each class. The class attribute (if set) and any user-specified attributes are ignored during the clustering operation
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -W &lt;clusterer name&gt;
- *  Full name of clusterer to use. eg:
- *   weka.clusterers.EM
- *  Additional options after the '--'.
- *  (default: weka.clusterers.EM)</pre>
- * 
- * <pre> -I &lt;att1,att2-att4,...&gt;
- *  The range of attributes the clusterer should ignore.
- *  (the class attribute is automatically ignored)</pre>
- * 
- <!-- options-end -->
+ * A filter that uses a clusterer to obtain cluster membership values
+ * for each input instance and outputs them as new instances. The
+ * clusterer needs to be a density-based clusterer. If
+ * a (nominal) class is set, then the clusterer will be run individually
+ * for each class.<p>
  *
- * Options after the -- are passed on to the clusterer.
+ * Valid filter-specific options are: <p>
+ *
+ * Full class name of clusterer to use. Clusterer options may be
+ * specified at the end following a -- .(required)<p>
+ *   
+ * -I range string <br>
+ * The range of attributes the clusterer should ignore. Note: 
+ * the class attribute (if set) is automatically ignored during clustering.<p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.7 $
  */
-public class ClusterMembership 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 6675702504667714026L;
+public class ClusterMembership extends Filter implements UnsupervisedFilter, 
+							 OptionHandler {
 
   /** The clusterer */
   protected DensityBasedClusterer m_clusterer = new weka.clusterers.EM();
@@ -88,47 +76,6 @@ public class ClusterMembership
 
   /** The prior probability for each class */
   protected double[] m_priors;
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = m_clusterer.getCapabilities();
-    
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
-
-  /** 
-   * Returns the Capabilities of this filter, makes sure that the class is
-   * never set (for the clusterer).
-   *
-   * @param data	the data to use for customization
-   * @return            the capabilities of this object, based on the data
-   * @see               #getCapabilities()
-   */
-  public Capabilities getCapabilities(Instances data) {
-    Instances	newData;
-    
-    newData = new Instances(data, 0);
-    newData.setClassIndex(-1);
-    
-    return super.getCapabilities(newData);
-  }
-  
-  /**
-   * tests the data whether the filter can actually handle it
-   * 
-   * @param instanceInfo	the data to test
-   * @throws Exception		if the test fails
-   */
-  protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities(instanceInfo).testWithFail(removeIgnored(instanceInfo));
-  }
   
   /**
    * Sets the format of the input instances.
@@ -137,7 +84,7 @@ public class ClusterMembership
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -149,43 +96,10 @@ public class ClusterMembership
   }
 
   /**
-   * filters all attributes that should be ignored
-   * 
-   * @param data	the data to filter
-   * @return		the filtered data
-   * @throws Exception	if filtering fails
-   */
-  protected Instances removeIgnored(Instances data) throws Exception {
-    Instances result = data;
-    
-    if (m_ignoreAttributesRange != null || data.classIndex() >= 0) {
-      result = new Instances(data);
-      m_removeAttributes = new Remove();
-      String rangeString = "";
-      if (m_ignoreAttributesRange != null) {
-	rangeString += m_ignoreAttributesRange.getRanges();
-      }
-      if (data.classIndex() >= 0) {
-	if (rangeString.length() > 0) {
-	  rangeString += "," + (data.classIndex() + 1);
-	} else {
-	  rangeString = "" + (data.classIndex() + 1);
-	}
-      }
-      ((Remove) m_removeAttributes).setAttributeIndices(rangeString);
-      ((Remove) m_removeAttributes).setInvertSelection(false);
-      m_removeAttributes.setInputFormat(data);
-      result = Filter.useFilter(data, m_removeAttributes);
-    }
-    
-    return result;
-  }
-
-  /**
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
 
@@ -220,15 +134,34 @@ public class ClusterMembership
       }
 
       // filter out attributes if necessary
-      for (int i = 0; i < toFilterIgnoringAttributes.length; i++)
-	toFilterIgnoringAttributes[i] = removeIgnored(toFilterIgnoringAttributes[i]);
+      if (m_ignoreAttributesRange != null || toFilter.classIndex() >= 0) {
+	m_removeAttributes = new Remove();
+	String rangeString = "";
+	if (m_ignoreAttributesRange != null) {
+	  rangeString += m_ignoreAttributesRange.getRanges();
+	}
+	if (toFilter.classIndex() >= 0) {
+	  if (rangeString.length() > 0) {
+	    rangeString += (","+(toFilter.classIndex()+1));	  
+	  } else {
+	    rangeString = ""+(toFilter.classIndex()+1);
+	  }
+	}
+	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
+	((Remove)m_removeAttributes).setInvertSelection(false);
+	((Remove)m_removeAttributes).setInputFormat(toFilter);
+	for (int i = 0; i < toFilterIgnoringAttributes.length; i++) {
+	  toFilterIgnoringAttributes[i] = Filter.useFilter(toFilterIgnoringAttributes[i],
+							   m_removeAttributes);
+	}
+      }     
 
       // build the clusterers
       if ((toFilter.classIndex() <= 0) || !toFilter.classAttribute().isNominal()) {
-	m_clusterers = AbstractDensityBasedClusterer.makeCopies(m_clusterer, 1);
+	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, 1);
 	m_clusterers[0].buildClusterer(toFilterIgnoringAttributes[0]);
       } else {
-	m_clusterers = AbstractDensityBasedClusterer.makeCopies(m_clusterer, toFilter.numClasses());
+	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, toFilter.numClasses());
 	for (int i = 0; i < m_clusterers.length; i++) {
 	  if (toFilterIgnoringAttributes[i].numInstances() == 0) {
 	    m_clusterers[i] = null;
@@ -277,7 +210,7 @@ public class ClusterMembership
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -300,11 +233,6 @@ public class ClusterMembership
 
   /**
    * Converts logs back to density values.
-   * 
-   * @param j the index of the clusterer
-   * @param in the instance to convert the logs back
-   * @return the densities
-   * @throws Exception if something goes wrong
    */
   protected double[] logs2densities(int j, Instance in) throws Exception {
 
@@ -321,7 +249,6 @@ public class ClusterMembership
    * the end of the output queue.
    *
    * @param instance the instance to convert
-   * @throws Exception if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
     
@@ -366,10 +293,8 @@ public class ClusterMembership
     Vector newVector = new Vector(2);
     
     newVector.
-      addElement(new Option("\tFull name of clusterer to use. eg:\n"
-	                    + "\t\tweka.clusterers.EM\n"
-			    + "\tAdditional options after the '--'.\n"
-			    + "\t(default: weka.clusterers.EM)",
+      addElement(new Option("\tFull name of clusterer to use (required).\n"
+			    + "\teg: weka.clusterers.EM",
 			    "W", 1, "-W <clusterer name>"));
 
     newVector.
@@ -381,33 +306,26 @@ public class ClusterMembership
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -W &lt;clusterer name&gt;
-   *  Full name of clusterer to use. eg:
-   *   weka.clusterers.EM
-   *  Additional options after the '--'.
-   *  (default: weka.clusterers.EM)</pre>
-   * 
-   * <pre> -I &lt;att1,att2-att4,...&gt;
-   *  The range of attributes the clusterer should ignore.
-   *  (the class attribute is automatically ignored)</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
    *
-   * Options after the -- are passed on to the clusterer.
+   * -W clusterer string <br>
+   * Full class name of clusterer to use. Clusterer options may be
+   * specified at the end following a -- .(required)<p>
+   *   
+   * -I range string <br>
+   * The range of attributes the clusterer should ignore. Note: 
+   * the class attribute (if set) is automatically ignored during clustering.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
     String clustererString = Utils.getOption('W', options);
-    if (clustererString.length() == 0)
-      clustererString = weka.clusterers.EM.class.getName();
+    if (clustererString.length() == 0) {
+      throw new Exception("A clusterer must be specified"
+			  + " with the -W option.");
+    }
     setDensityBasedClusterer((DensityBasedClusterer)Utils.
 			     forName(DensityBasedClusterer.class, clustererString,
 				     Utils.partitionOptions(options)));
@@ -474,7 +392,7 @@ public class ClusterMembership
    *
    * @return description of this option
    */
-  public String densityBasedClustererTipText() {
+  public String clustererTipText() {
     return "The clusterer that will generate membership values for the instances.";
   }
 
@@ -527,7 +445,7 @@ public class ClusterMembership
    *
    * @param rangeList a string representing the list of attributes. 
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setIgnoredAttributeIndices(String rangeList) {
 
@@ -538,15 +456,6 @@ public class ClusterMembership
       m_ignoreAttributesRange.setRanges(rangeList);
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
-  }
 
   /**
    * Main method for testing this class.
@@ -554,6 +463,16 @@ public class ClusterMembership
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new ClusterMembership(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new ClusterMembership(), argv); 
+      } else {
+	Filter.filterFile(new ClusterMembership(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+  

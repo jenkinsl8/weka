@@ -16,7 +16,7 @@
 
  /*
   *    JPEGWriter.java
-  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 Fracpete
   *
   */
 
@@ -26,7 +26,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -42,27 +44,25 @@ import javax.swing.JComponent;
  * This class takes any JComponent and outputs it to a JPEG-file.
  * Scaling is by default disabled, since we always take a screenshot.
  *
+ * @see #setScalingEnabled()
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.1.2.2 $
  */
-public class JPEGWriter
-  extends JComponentWriter {
-  
-  /** the quality of the image. */
-  protected float m_Quality;
-  
-  /** the background color. */
-  protected Color m_Background;
+public class JPEGWriter extends JComponentWriter {
+  /** the quality of the image */
+  private float quality;
+  /** the background color */
+  private Color background;
   
   /**
-   * initializes the object.
+   * initializes the object 
    */
   public JPEGWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component.
+   * initializes the object with the given Component
    * 
    * @param c         the component to print in the output format
    */
@@ -71,7 +71,7 @@ public class JPEGWriter
   }
 
   /**
-   * initializes the object with the given Component and filename.
+   * initializes the object with the given Component and filename
    * 
    * @param c         the component to print in the output format
    * @param f         the file to store the output in
@@ -79,26 +79,24 @@ public class JPEGWriter
   public JPEGWriter(JComponent c, File f) {
     super(c, f);
     
-    m_Quality    = 1.0f;
-    m_Background = Color.WHITE;
+    quality    = 1.0f;
+    background = Color.WHITE;
   }
   
   /**
-   * further initialization.
+   * further initialization 
    */
   public void initialize() {
     super.initialize();
     
-    m_Quality    = 1.0f;
-    m_Background = Color.WHITE;
+    quality    = 1.0f;
+    background = Color.WHITE;
     setScalingEnabled(false);
   }
 
   /**
    * returns the name of the writer, to display in the FileChooser.
    * must be overridden in the derived class.
-   * 
-   * @return the name of the writer
    */
   public String getDescription() {
     return "JPEG-Image";
@@ -108,55 +106,59 @@ public class JPEGWriter
    * returns the extension (incl. ".") of the output format, to use in the
    * FileChooser. 
    * must be overridden in the derived class.
-   * 
-   * @return the file extension
    */
   public String getExtension() {
     return ".jpg";
   }
   
   /**
-   * returns the current background color.
-   * 
-   * @return the current background color
+   * returns the current background color
    */
   public Color getBackground() {
-    return m_Background;
+    return background;
   }
   
   /**
-   * sets the background color to use in creating the JPEG.
-   * 
-   * @param c the color to use for background
+   * sets the background color to use in creating the JPEG
    */
   public void setBackground(Color c) {
-    m_Background = c;
+    background = c;
   }
   
   /**
-   * returns the quality the JPEG will be stored in.
-   * 
-   * @return the quality
+   * returns the quality the JPEG will be stored in
    */
   public float getQuality() {
-    return m_Quality;
+    return quality;
   }
   
   /**
-   * sets the quality the JPEG is saved in.
-   * 
-   * @param q the quality to use
+   * sets the quality the JPEG is saved in 
    */
   public void setQuality(float q) {
-    m_Quality = q;
+    quality = q;
   }
   
   /**
-   * generates the actual output.
+   * outputs the given component as JPEG in the specified file
    * 
-   * @throws Exception	if something goes wrong
+   * @param c           the component to output as PS
+   * @param f           the file to store the PS in 
+   * @throws Exception  if component of file are <code>null</code>
    */
-  public void generateOutput() throws Exception {
+  public static void toOutput(JComponent c, File f) throws Exception {
+    JComponentWriter        writer;
+    
+    writer = new JPEGWriter(c, f);
+    writer.toOutput();
+  }
+  
+  /**
+   * saves the current component to the currently set file
+   *
+   * @throws Exception  if component of file are <code>null</code>
+   */
+  public void toOutput() throws Exception {
     BufferedImage	bi;
     Graphics		g;
     ImageWriter 	writer;
@@ -201,10 +203,7 @@ public class JPEGWriter
   }
   
   /**
-   * for testing only.
-   * 
-   * @param args the commandline arguments
-   * @throws Exception if something goes wrong
+   * for testing only 
    */
   public static void main(String[] args) throws Exception {
     System.out.println("building TreeVisualizer...");
@@ -214,9 +213,9 @@ public class JPEGWriter
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
-    String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.jpg";
+    String filename = System.getProperty("java.io.tmpdir") + "test.jpg";
     System.out.println("outputting to '" + filename + "'...");
-    toOutput(new JPEGWriter(), tv, new File(filename));
+    toOutput(tv, new File(filename));
 
     System.out.println("done!");
   }

@@ -26,19 +26,15 @@ package weka.associations.tertius;
 
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
+import java.util.Enumeration;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
-public class IndividualInstance
-  extends Instance {
+public class IndividualInstance extends Instance {
 
-  /** for serialization */
-  private static final long serialVersionUID = -7903938733476585114L;
-  
   private Instances m_parts;
 
   public IndividualInstance(Instance individual, Instances parts) {
@@ -64,13 +60,13 @@ public class IndividualInstance
 	
     return m_parts;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
+
 }
+
+
+
+
+
+
+
+

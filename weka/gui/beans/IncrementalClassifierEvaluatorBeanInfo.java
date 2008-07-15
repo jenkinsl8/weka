@@ -16,7 +16,7 @@
 
 /*
  *    IncrementalClassifierEvaluatorBeanInfo.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -28,30 +28,10 @@ import java.beans.*;
  * Bean info class for the incremental classifier evaluator bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
 public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
   
-  /**
-   * Return the property descriptors for this bean
-   *
-   * @return a <code>PropertyDescriptor[]</code> value
-   */
-  public PropertyDescriptor[] getPropertyDescriptors() {
-    try {
-      PropertyDescriptor p1;
-      PropertyDescriptor p2;
-      p1 = new PropertyDescriptor("statusFrequency", IncrementalClassifierEvaluator.class);
-      p2 = new PropertyDescriptor("outputPerClassInfoRetrievalStats", 
-                                  IncrementalClassifierEvaluator.class);
-      PropertyDescriptor [] pds = { p1, p2 };
-      return pds;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return null;
-  }
-
   /**
    * Get the event set descriptors for this bean
    *
@@ -74,15 +54,5 @@ public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
       ex.printStackTrace();
     }
     return null;
-  }
-
-  /**
-   * Return the bean descriptor for this bean
-   *
-   * @return a <code>BeanDescriptor</code> value
-   */
-  public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(weka.gui.beans.IncrementalClassifierEvaluator.class,
-			      IncrementalClassifierEvaluatorCustomizer.class);
   }
 }

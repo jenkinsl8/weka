@@ -16,13 +16,12 @@
 
 /*
  *    DatabaseConnection.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Len Trigg, Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
-import weka.core.RevisionUtils;
 import weka.experiment.DatabaseUtils;
 
 import java.sql.DatabaseMetaData;
@@ -33,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class DatabaseConnection 
   extends DatabaseUtils {
@@ -85,14 +84,5 @@ public class DatabaseConnection
       throw new IllegalStateException("Not connected, please connect first!");
     
     return m_PreparedStatement.getUpdateCount();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 }

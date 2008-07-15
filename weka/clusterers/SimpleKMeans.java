@@ -16,68 +16,40 @@
 
 /*
  *    SimpleKMeans.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 package weka.clusterers;
 
-import weka.classifiers.rules.DecisionTableHashKey;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.experiment.Stats;
+import weka.classifiers.rules.DecisionTable;
 
 /**
- <!-- globalinfo-start -->
- * Cluster data using the k means algorithm
- * <p/>
- <!-- globalinfo-end -->
+ * Simple k means clustering class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).</pre>
- * 
- * <pre> -V
- *  Display std. deviations for centroids.
- * </pre>
- * 
- * <pre> -M
- *  Replace missing values with mean/mode.
- * </pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 10)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
- * @see RandomizableClusterer
+ * @version $Revision: 1.19.2.5 $
+ * @see Clusterer
+ * @see OptionHandler
  */
-public class SimpleKMeans 
-  extends RandomizableClusterer 
-  implements NumberOfClustersRequestable, WeightedInstancesHandler {
+public class SimpleKMeans extends Clusterer 
+  implements NumberOfClustersRequestable,
+	     OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -3235809600124455376L;
-  
   /**
    * replace missing values in training instances
    */
@@ -104,30 +76,16 @@ public class SimpleKMeans
    * nominal attribute
    */
   private int [][][] m_ClusterNominalCounts;
-  private int[][] m_ClusterMissingCounts;
-  
-  /**
-   * Stats on the full data set for comparison purposes
-   */
-  private double[] m_FullMeansOrModes;
-  private double[] m_FullStdDevs;
-  private int[][] m_FullNominalCounts;
-  private int[] m_FullMissingCounts;
-
-  /**
-   * Display standard deviations for numeric atts
-   */
-  private boolean m_displayStdDevs;
-
-  /**
-   * Replace missing values globally?
-   */
-  private boolean m_dontReplaceMissing = false;
 
   /**
    * The number of instances in each cluster
    */
   private int [] m_ClusterSizes;
+
+  /**
+   * random seed
+   */
+  private int m_Seed = 10;
 
   /**
    * attribute min values
@@ -144,21 +102,8 @@ public class SimpleKMeans
    */
   private int m_Iterations = 0;
 
-  /**
-   * Holds the squared errors for all clusters
-   */
   private double [] m_squaredErrors;
 
-  /**
-   * the default constructor
-   */
-  public SimpleKMeans() {
-    super();
-    
-    m_SeedDefault = 10;
-    setSeed(m_SeedDefault);
-  }
-  
   /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
@@ -169,68 +114,25 @@ public class SimpleKMeans
   }
 
   /**
-   * Returns default capabilities of the clusterer.
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    return result;
-  }
-
-  /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_Iterations = 0;
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);
-    if (!m_dontReplaceMissing) {
-      m_ReplaceMissingFilter.setInputFormat(instances);
-      instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
-    }
-
-    m_FullMeansOrModes = new double[instances.numAttributes()];
-    m_FullMissingCounts = new int[instances.numAttributes()];
-    if (m_displayStdDevs) {
-      m_FullStdDevs = new double[instances.numAttributes()];
-    }
-    m_FullNominalCounts = new int[instances.numAttributes()][0];
-    for (int i = 0; i < instances.numAttributes(); i++) {
-      m_FullMissingCounts[i] = instances.attributeStats(i).missingCount;
-      m_FullMeansOrModes[i] = instances.meanOrMode(i);
-      if (instances.attribute(i).isNumeric()) {
-        if (m_displayStdDevs) {
-          m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
-        }
-        if (m_FullMissingCounts[i] == instances.numInstances()) {
-          m_FullMeansOrModes[i] = Double.NaN; // mark missing as mean
-        }
-      } else {
-        m_FullNominalCounts[i] = instances.attributeStats(i).nominalCounts;
-        if (m_FullMissingCounts[i] 
-            > m_FullNominalCounts[i][Utils.maxIndex(m_FullNominalCounts[i])]) {
-          m_FullMeansOrModes[i] = -1; // mark missing as most common value
-        }
-      }
-    }
+    m_ReplaceMissingFilter.setInputFormat(instances);
+    instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
 
     m_Min = new double [instances.numAttributes()];
     m_Max = new double [instances.numAttributes()];
@@ -245,14 +147,14 @@ public class SimpleKMeans
       updateMinMax(instances.instance(i));
     }
     
-    Random RandomO = new Random(getSeed());
+    Random RandomO = new Random(m_Seed);
     int instIndex;
     HashMap initC = new HashMap();
-    DecisionTableHashKey hk = null;
+    DecisionTable.hashKey hk = null;
 
     for (int j = instances.numInstances() - 1; j >= 0; j--) {
       instIndex = RandomO.nextInt(j+1);
-      hk = new DecisionTableHashKey(instances.instance(instIndex), 
+      hk = new DecisionTable.hashKey(instances.instance(instIndex), 
 				     instances.numAttributes(), true);
       if (!initC.containsKey(hk)) {
 	m_ClusterCentroids.add(instances.instance(instIndex));
@@ -273,7 +175,6 @@ public class SimpleKMeans
     Instances [] tempI = new Instances[m_NumClusters];
     m_squaredErrors = new double [m_NumClusters];
     m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
-    m_ClusterMissingCounts = new int[m_NumClusters][instances.numAttributes()];
     while (!converged) {
       emptyClusterCount = 0;
       m_Iterations++;
@@ -303,19 +204,8 @@ public class SimpleKMeans
 	} else {
 	  for (int j = 0; j < instances.numAttributes(); j++) {
 	    vals[j] = tempI[i].meanOrMode(j);
-            m_ClusterMissingCounts[i][j] = tempI[i].attributeStats(j).missingCount;
 	    m_ClusterNominalCounts[i][j] = 
 	      tempI[i].attributeStats(j).nominalCounts;
-            if (tempI[i].attribute(j).isNominal()) {
-              if (m_ClusterMissingCounts[i][j] >  
-                  m_ClusterNominalCounts[i][j][Utils.maxIndex(m_ClusterNominalCounts[i][j])]) {
-                vals[j] = Instance.missingValue(); // mark mode as missing
-              }
-            } else {
-              if (m_ClusterMissingCounts[i][j] == tempI[i].numInstances()) {
-                vals[j] = Instance.missingValue(); // mark mean as missing
-              }
-            }
 	  }
 	  m_ClusterCentroids.add(new Instance(1.0, vals));
 	}
@@ -341,22 +231,18 @@ public class SimpleKMeans
 	m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
       }
     }
-    if (m_displayStdDevs) {
-      m_ClusterStdDevs = new Instances(instances, m_NumClusters);
-    }
+    m_ClusterStdDevs = new Instances(instances, m_NumClusters);
     m_ClusterSizes = new int [m_NumClusters];
     for (i = 0; i < m_NumClusters; i++) {
-      if (m_displayStdDevs) {
-        double [] vals2 = new double[instances.numAttributes()];
-        for (int j = 0; j < instances.numAttributes(); j++) {
-          if (instances.attribute(j).isNumeric()) {
-            vals2[j] = Math.sqrt(tempI[i].variance(j));
-          } else {
-            vals2[j] = Instance.missingValue();
-          }	
-        }    
-        m_ClusterStdDevs.add(new Instance(1.0, vals2));
+      double [] vals2 = new double[instances.numAttributes()];
+      for (int j = 0; j < instances.numAttributes(); j++) {
+	if (instances.attribute(j).isNumeric()) {
+	  vals2[j] = Math.sqrt(tempI[i].variance(j));
+	} else {
+	  vals2[j] = Instance.missingValue();
+	}	
       }
+      m_ClusterStdDevs.add(new Instance(1.0, vals2));
       m_ClusterSizes[i] = tempI[i].numInstances();
     }
   }
@@ -390,18 +276,13 @@ public class SimpleKMeans
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an interger
    * if the class is enumerated, otherwise the predicted value
-   * @throws Exception if instance could not be classified
+   * @exception Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
-    Instance inst = null;
-    if (!m_dontReplaceMissing) {
-      m_ReplaceMissingFilter.input(instance);
-      m_ReplaceMissingFilter.batchFinished();
-      inst = m_ReplaceMissingFilter.output();
-    } else {
-      inst = instance;
-    }
+    m_ReplaceMissingFilter.input(instance);
+    m_ReplaceMissingFilter.batchFinished();
+    Instance inst = m_ReplaceMissingFilter.output();
 
     return clusterProcessedInstance(inst, false);
   }
@@ -409,8 +290,8 @@ public class SimpleKMeans
   /**
    * Calculates the distance between two instances
    *
-   * @param first the first instance
-   * @param second the second instance
+   * @param test the first instance
+   * @param train the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   private double distance(Instance first, Instance second) {  
@@ -461,11 +342,6 @@ public class SimpleKMeans
   /**
    * Computes the difference between two given attribute
    * values.
-   * 
-   * @param index the attribute index
-   * @param val1 the first value
-   * @param val2 the second value
-   * @return the difference
    */
   private double difference(int index, double val1, double val2) {
 
@@ -513,7 +389,6 @@ public class SimpleKMeans
    *
    * @param x the value to be normalized
    * @param i the attribute's index
-   * @return the normalized value
    */
   private double norm(double x, int i) {
 
@@ -554,7 +429,7 @@ public class SimpleKMeans
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters() throws Exception {
@@ -562,29 +437,30 @@ public class SimpleKMeans
   }
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options.. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -N <number of clusters> <br>
+   * Specify the number of clusters to generate. If omitted,
+   * EM will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
    *
    * @return an enumeration of all the available options.
-   */
+   *
+   **/
   public Enumeration listOptions () {
-    Vector result = new Vector();
+    Vector newVector = new Vector(2);
 
-    result.addElement(new Option(
-	"\tnumber of clusters.\n"
-	+ "\t(default 2).", 
-	"N", 1, "-N <num>"));
-    result.addElement(new Option(
-	"\tDisplay std. deviations for centroids.\n", 
-	"V", 0, "-V"));
-    result.addElement(new Option(
-	"\tReplace missing values with mean/mode.\n", 
-	"M", 0, "-M"));
+     newVector.addElement(new Option("\tnumber of clusters. (default = 2)." 
+				    , "N", 1, "-N <num>"));
+     newVector.addElement(new Option("\trandom number seed.\n (default 10)"
+				     , "S", 1, "-S <num>"));
 
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
-
-     return  result.elements();
+     return  newVector.elements();
   }
 
   /**
@@ -600,7 +476,6 @@ public class SimpleKMeans
    * set the number of clusters to generate
    *
    * @param n the number of clusters to generate
-   * @throws Exception if number of clusters is negative
    */
   public void setNumClusters(int n) throws Exception {
     if (n <= 0) {
@@ -617,108 +492,56 @@ public class SimpleKMeans
   public int getNumClusters() {
     return m_NumClusters;
   }
-
+    
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String displayStdDevsTipText() {
-    return "Display std deviations of numeric attributes "
-      + "and counts of nominal attributes.";
+  public String seedTipText() {
+    return "random number seed";
   }
 
+
   /**
-   * Sets whether standard deviations and nominal count
-   * Should be displayed in the clustering output
+   * Set the random number seed
    *
-   * @param stdD true if std. devs and counts should be 
-   * displayed
+   * @param s the seed
    */
-  public void setDisplayStdDevs(boolean stdD) {
-    m_displayStdDevs = stdD;
+  public void setSeed (int s) {
+    m_Seed = s;
   }
 
+
   /**
-   * Gets whether standard deviations and nominal count
-   * Should be displayed in the clustering output
+   * Get the random number seed
    *
-   * @return true if std. devs and counts should be 
-   * displayed
+   * @return the seed
    */
-  public boolean getDisplayStdDevs() {
-    return m_displayStdDevs;
+  public int getSeed () {
+    return  m_Seed;
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String dontReplaceMissingValuesTipText() {
-    return "Replace missing values globally with mean/mode.";
-  }
-
-  /**
-   * Sets whether missing values are to be replaced
-   *
-   * @param r true if missing values are to be
-   * replaced
-   */
-  public void setDontReplaceMissingValues(boolean r) {
-    m_dontReplaceMissing = r;
-  }
-
-  /**
-   * Gets whether missing values are to be replaced
-   *
-   * @return true if missing values are to be
-   * replaced
-   */
-  public boolean getDontReplaceMissingValues() {
-    return m_dontReplaceMissing;
-  }
-
-  /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).</pre>
-   * 
-   * <pre> -V
-   *  Display std. deviations for centroids.
-   * </pre>
-   * 
-   * <pre> -M
-   *  Replace missing values with mean/mode.
-   * </pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 10)</pre>
-   * 
-   <!-- options-end -->
-   *
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
-
-    m_displayStdDevs = Utils.getFlag("V", options);
-    m_dontReplaceMissing = Utils.getFlag("M", options);
 
     String optionString = Utils.getOption('N', options);
 
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
     }
+
+    optionString = Utils.getOption('S', options);
     
-    super.setOptions(options);
+    if (optionString.length() != 0) {
+      setSeed(Integer.parseInt(optionString));
+    }
   }
 
   /**
@@ -727,28 +550,19 @@ public class SimpleKMeans
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
-
-    result = new Vector();
-
-    if (m_displayStdDevs) {
-      result.add("-V");
+    String[] options = new String[4];
+    int current = 0;
+    
+    options[current++] = "-N";
+    options[current++] = "" + getNumClusters();
+    options[current++] = "-S";
+    options[current++] = "" + getSeed();
+    
+    while (current < options.length) {
+      options[current++] = "";
     }
 
-    if (m_dontReplaceMissing) {
-      result.add("-M");
-    }
-
-    result.add("-N");
-    result.add("" + getNumClusters());
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return  options;
   }
 
   /**
@@ -757,368 +571,73 @@ public class SimpleKMeans
    * @return a description of the clusterer as a string
    */
   public String toString() {
-    if (m_ClusterCentroids == null) {
-      return "No clusterer built yet!";
-    }
-
     int maxWidth = 0;
-    int maxAttWidth = 0;
-    boolean containsNumeric = false;
     for (int i = 0; i < m_NumClusters; i++) {
       for (int j = 0 ;j < m_ClusterCentroids.numAttributes(); j++) {
-        if (m_ClusterCentroids.attribute(j).name().length() > maxAttWidth) {
-          maxAttWidth = m_ClusterCentroids.attribute(j).name().length();
-        }
 	if (m_ClusterCentroids.attribute(j).isNumeric()) {
-          containsNumeric = true;
 	  double width = Math.log(Math.abs(m_ClusterCentroids.instance(i).value(j))) /
 	    Math.log(10.0);
-          //          System.err.println(m_ClusterCentroids.instance(i).value(j)+" "+width);
-          if (width < 0) {
-            width = 1;
-          }
-          // decimal + # decimal places + 1
-	  width += 6.0;
+	  width += 1.0;
 	  if ((int)width > maxWidth) {
 	    maxWidth = (int)width;
 	  }
 	}
       }
     }
-
-    for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
-      if (m_ClusterCentroids.attribute(i).isNominal()) {
-        Attribute a = m_ClusterCentroids.attribute(i);
-        for (int j = 0; j < m_ClusterCentroids.numInstances(); j++) {
-          String val = a.value((int)m_ClusterCentroids.instance(j).value(i));
-          if (val.length() > maxWidth) {
-            maxWidth = val.length();
-          }
-        }
-        for (int j = 0; j < a.numValues(); j++) {
-          String val = a.value(j) + " ";
-          if (val.length() > maxAttWidth) {
-            maxAttWidth = val.length();
-          }
-        }
-      }
-    }
-
-    if (m_displayStdDevs) {
-      // check for maximum width of maximum frequency count
-      for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
-        if (m_ClusterCentroids.attribute(i).isNominal()) {
-          int maxV = Utils.maxIndex(m_FullNominalCounts[i]);
-          /*          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
-                      Utils.sum(m_ClusterSizes) * 100.0); */
-          int percent = 6; // max percent width (100%)
-          String nomV = "" + m_FullNominalCounts[i][maxV];
-            //            + " (" + percent + "%)";
-          if (nomV.length() + percent > maxWidth) {
-            maxWidth = nomV.length() + 1;
-          }
-        }
-      }
-    }
-
-    // check for size of cluster sizes
-    for (int i = 0; i < m_ClusterSizes.length; i++) {
-      String size = "(" + m_ClusterSizes[i] + ")";
-      if (size.length() > maxWidth) {
-        maxWidth = size.length();
-      }
-    }
-    
-    if (m_displayStdDevs && maxAttWidth < "missing".length()) {
-      maxAttWidth = "missing".length();
-    }
-    
-    String plusMinus = "+/-";
-    maxAttWidth += 2;
-    if (m_displayStdDevs && containsNumeric) {
-      maxWidth += plusMinus.length();
-    }
-    if (maxAttWidth < "Attribute".length() + 2) {
-      maxAttWidth = "Attribute".length() + 2;
-    }
-
-    if (maxWidth < "Full Data".length()) {
-      maxWidth = "Full Data".length() + 1;
-    }
-
-    if (maxWidth < "missing".length()) {
-      maxWidth = "missing".length() + 1;
-    }
-
-
-    
     StringBuffer temp = new StringBuffer();
-    //    String naString = "N/A";
-
-    
-    /*    for (int i = 0; i < maxWidth+2; i++) {
+    String naString = "N/A";
+    for (int i = 0; i < maxWidth+2; i++) {
       naString += " ";
-      } */
+    }
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
     temp.append("Within cluster sum of squared errors: " + Utils.sum(m_squaredErrors));
-    if (!m_dontReplaceMissing) {
-      temp.append("\nMissing values globally replaced with mean/mode");
-    }
 
     temp.append("\n\nCluster centroids:\n");
-    temp.append(pad("Cluster#", " ", (maxAttWidth + (maxWidth * 2 + 2)) - "Cluster#".length(), true));
-
-    temp.append("\n");
-    temp.append(pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
-
-    
-    temp.append(pad("Full Data", " ", maxWidth + 1 - "Full Data".length(), true));
-
-    // cluster numbers
     for (int i = 0; i < m_NumClusters; i++) {
-      String clustNum = "" + i;
-      temp.append(pad(clustNum, " ", maxWidth + 1 - clustNum.length(), true));
-    }
-    temp.append("\n");
-
-    // cluster sizes
-    String cSize = "(" + Utils.sum(m_ClusterSizes) + ")";
-    temp.append(pad(cSize, " ", maxAttWidth + maxWidth + 1 - cSize.length(), true));
-    for (int i = 0; i < m_NumClusters; i++) {
-      cSize = "(" + m_ClusterSizes[i] + ")";
-      temp.append(pad(cSize, " ",maxWidth + 1 - cSize.length(), true));
-    }
-    temp.append("\n");
-
-    temp.append(pad("", "=", maxAttWidth + 
-                    (maxWidth * (m_ClusterCentroids.numInstances()+1) 
-                     + m_ClusterCentroids.numInstances() + 1), true));
-    temp.append("\n");
-
-    for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
-      String attName = m_ClusterCentroids.attribute(i).name();
-      temp.append(attName);
-      for (int j = 0; j < maxAttWidth - attName.length(); j++) {
-        temp.append(" ");
+      temp.append("\nCluster "+i+"\n\t");
+      temp.append("Mean/Mode: ");
+      for (int j = 0; j < m_ClusterCentroids.numAttributes(); j++) {
+	if (m_ClusterCentroids.attribute(j).isNominal()) {
+	  temp.append(" "+m_ClusterCentroids.attribute(j).
+		      value((int)m_ClusterCentroids.instance(i).value(j)));
+	} else {
+	  temp.append(" "+Utils.doubleToString(m_ClusterCentroids.instance(i).value(j),
+					       maxWidth+5, 4));
+	}
       }
-
-      String strVal;
-      String valMeanMode;
-      // full data
-      if (m_ClusterCentroids.attribute(i).isNominal()) {
-        if (m_FullMeansOrModes[i] == -1) { // missing
-          valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-        } else {
-          valMeanMode = 
-            pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_FullMeansOrModes[i])),
-                " ", maxWidth + 1 - strVal.length(), true);
-        }
-      } else {
-        if (Double.isNaN(m_FullMeansOrModes[i])) {
-          valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-        } else {
-          valMeanMode =  pad((strVal = Utils.doubleToString(m_FullMeansOrModes[i],
-                                                            maxWidth,4).trim()), 
-                             " ", maxWidth + 1 - strVal.length(), true);
-        }
-      }
-      temp.append(valMeanMode);
-
-      for (int j = 0; j < m_NumClusters; j++) {
-        if (m_ClusterCentroids.attribute(i).isNominal()) {
-          if (m_ClusterCentroids.instance(j).isMissing(i)) {
-            valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-          } else {
-            valMeanMode = 
-              pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_ClusterCentroids.instance(j).value(i))),
-                  " ", maxWidth + 1 - strVal.length(), true);
-          }
-        } else {
-          if (m_ClusterCentroids.instance(j).isMissing(i)) {
-            valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-          } else {
-            valMeanMode = pad((strVal = Utils.doubleToString(m_ClusterCentroids.instance(j).value(i),
-                                                               maxWidth,4).trim()), 
-                                " ", maxWidth + 1 - strVal.length(), true);
-          }
-        }
-        temp.append(valMeanMode);
-      }
-      temp.append("\n");
-
-      if (m_displayStdDevs) {
-        // Std devs/max nominal
-        String stdDevVal = "";
-
-        if (m_ClusterCentroids.attribute(i).isNominal()) {
-          // Do the values of the nominal attribute
-          Attribute a = m_ClusterCentroids.attribute(i);
-          for (int j = 0; j < a.numValues(); j++) {
-            // full data
-            String val = "  " + a.value(j);
-            temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
-            int count = m_FullNominalCounts[i][j];
-            int percent = (int)((double)m_FullNominalCounts[i][j] /
-                              Utils.sum(m_ClusterSizes) * 100.0);
-            String percentS = "" + percent + "%)";
-            percentS = pad(percentS, " ", 5 - percentS.length(), true);
-            stdDevVal = "" + count + " (" + percentS;
-            stdDevVal = 
-              pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
-            temp.append(stdDevVal);
-
-            // Clusters
-            for (int k = 0; k < m_NumClusters; k++) {
-              count = m_ClusterNominalCounts[k][i][j];
-              percent = (int)((double)m_ClusterNominalCounts[k][i][j] /
-                              m_ClusterSizes[k] * 100.0);
-              percentS = "" + percent + "%)";
-              percentS = pad(percentS, " ", 5 - percentS.length(), true);
-              stdDevVal = "" + count + " (" + percentS;
-              stdDevVal = 
-                pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
-              temp.append(stdDevVal);
-            }
-            temp.append("\n");
-          }
-          // missing (if any)
-          if (m_FullMissingCounts[i] > 0) {
-            // Full data
-            temp.append(pad("  missing", " ", maxAttWidth + 1 - "  missing".length(), false));
-            int count = m_FullMissingCounts[i];
-            int percent = (int)((double)m_FullMissingCounts[i] /
-                              Utils.sum(m_ClusterSizes) * 100.0);
-            String percentS = "" + percent + "%)";
-            percentS = pad(percentS, " ", 5 - percentS.length(), true);
-            stdDevVal = "" + count + " (" + percentS;
-            stdDevVal = 
-              pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
-            temp.append(stdDevVal);
-           
-            // Clusters
-            for (int k = 0; k < m_NumClusters; k++) {
-              count = m_ClusterMissingCounts[k][i];
-              percent = (int)((double)m_ClusterMissingCounts[k][i] /
-                              m_ClusterSizes[k] * 100.0);
-              percentS = "" + percent + "%)";
-              percentS = pad(percentS, " ", 5 - percentS.length(), true);
-              stdDevVal = "" + count + " (" + percentS;
-              stdDevVal = 
-                pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
-              temp.append(stdDevVal);
-            }
-
-            temp.append("\n");
-          }
-
-          temp.append("\n");
-        } else {
-          // Full data
-          if (Double.isNaN(m_FullMeansOrModes[i])) {
-            stdDevVal = pad("--", " ", maxAttWidth + maxWidth + 1 - 2, true);
-          } else {
-            stdDevVal = pad((strVal = plusMinus 
-                             + Utils.doubleToString(m_FullStdDevs[i],
-                                                    maxWidth,4).trim()), 
-                            " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
-          }
-          temp.append(stdDevVal);
-
-          // Clusters
-          for (int j = 0; j < m_NumClusters; j++) {
-            if (m_ClusterCentroids.instance(j).isMissing(i)) {
-              stdDevVal = pad("--", " ", maxWidth + 1 - 2, true);
-            } else {
-              stdDevVal = 
-                pad((strVal = plusMinus 
-                     + Utils.doubleToString(m_ClusterStdDevs.instance(j).value(i),
-                                            maxWidth,4).trim()), 
-                    " ", maxWidth + 1 - strVal.length(), true);
-            }
-            temp.append(stdDevVal);
-          }
-          temp.append("\n\n");
-        }
+      temp.append("\n\tStd Devs:  ");
+      for (int j = 0; j < m_ClusterStdDevs.numAttributes(); j++) {
+	if (m_ClusterStdDevs.attribute(j).isNumeric()) {
+	  temp.append(" "+Utils.doubleToString(m_ClusterStdDevs.instance(i).value(j), 
+					       maxWidth+5, 4));
+	} else {
+	  temp.append(" "+naString);
+	}
       }
     }
-
     temp.append("\n\n");
     return temp.toString();
   }
 
-  private String pad(String source, String padChar, 
-                     int length, boolean leftPad) {
-    StringBuffer temp = new StringBuffer();
-
-    if (leftPad) {
-      for (int i = 0; i< length; i++) {
-        temp.append(padChar);
-      }
-      temp.append(source);
-    } else {
-      temp.append(source);
-      for (int i = 0; i< length; i++) {
-        temp.append(padChar);
-      }
-    }
-    return temp.toString();
-  }
-
-  /**
-   * Gets the the cluster centroids
-   * 
-   * @return		the cluster centroids
-   */
   public Instances getClusterCentroids() {
     return m_ClusterCentroids;
   }
 
-  /**
-   * Gets the standard deviations of the numeric attributes in each cluster
-   * 
-   * @return		the standard deviations of the numeric attributes 
-   * 			in each cluster
-   */
   public Instances getClusterStandardDevs() {
     return m_ClusterStdDevs;
   }
 
-  /**
-   * Returns for each cluster the frequency counts for the values of each 
-   * nominal attribute
-   * 
-   * @return		the counts
-   */
   public int [][][] getClusterNominalCounts() {
     return m_ClusterNominalCounts;
   }
 
-  /**
-   * Gets the squared error for all clusters
-   * 
-   * @return		the squared error
-   */
   public double getSquaredError() {
     return Utils.sum(m_squaredErrors);
   }
 
-  /**
-   * Gets the number of instances in each cluster
-   * 
-   * @return		The number of instances in each cluster
-   */
   public int [] getClusterSizes() {
     return m_ClusterSizes;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.39 $");
   }
 
   /**
@@ -1128,7 +647,13 @@ public class SimpleKMeans
    * -t training file [-N number of clusters]
    */
   public static void main (String[] argv) {
-    runClusterer(new SimpleKMeans(), argv);
+    try {
+      System.out.println(ClusterEvaluation.
+			 evaluateClusterer(new SimpleKMeans(), argv));
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
   }
 }
-

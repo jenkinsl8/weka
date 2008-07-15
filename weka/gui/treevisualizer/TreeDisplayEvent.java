@@ -16,7 +16,7 @@
 
 /*
  *    TreeDisplayEvent.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware
  *
  */
 
@@ -27,7 +27,7 @@ package weka.gui.treevisualizer;
  * An event containing the user selection from the tree display
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class TreeDisplayEvent {
   public static final int NO_COMMAND = 0;

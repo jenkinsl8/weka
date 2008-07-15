@@ -16,28 +16,24 @@
 
 /*
  *    BeanVisual.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import java.io.Serializable;
+import java.awt.*;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+
 
 /**
  * BeanVisual encapsulates icons and label for a given bean. Has methods
@@ -45,16 +41,12 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.4.2.3 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
-public class BeanVisual
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6677473561687129614L;
+public class BeanVisual extends JPanel implements Serializable {
 
   public static final String ICON_PATH="weka/gui/beans/icons/";
 
@@ -173,8 +165,7 @@ public class BeanVisual
    */
   public boolean loadIcons(String iconPath, String animatedIconPath) {
     boolean success = true;
-    //    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
-    java.net.URL imageURL = this.getClass().getClassLoader().getResource(iconPath);
+    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+iconPath);
     } else {
@@ -187,8 +178,7 @@ public class BeanVisual
       }
     }
     
-    //    imageURL = ClassLoader.getSystemResource(animatedIconPath);
-    imageURL = this.getClass().getClassLoader().getResource(animatedIconPath);
+    imageURL = ClassLoader.getSystemResource(animatedIconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+animatedIconPath);
       success = false;

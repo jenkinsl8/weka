@@ -16,17 +16,27 @@
 
 /*
  *    Associator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.associations;
 
+import java.io.Serializable;
+import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Capabilities;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
-public interface Associator {
-
+/** 
+ * Abstract scheme for learning associations. All schemes for learning
+ * associations implemement this class
+ *
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.5 $ 
+ */
+public abstract class Associator implements Cloneable, Serializable {
+ 
   /**
    * Generates an associator. Must initialize all fields of the associator
    * that are not being set via options (ie. multiple calls of buildAssociator
@@ -37,14 +47,57 @@ public interface Associator {
    * @exception Exception if the associator has not been 
    * generated successfully
    */
-  void buildAssociations(Instances data) throws Exception;
+  public abstract void buildAssociations(Instances data) throws Exception;
 
-  /** 
-   * Returns the Capabilities of this associator. Derived associators have to
-   * override this method to enable capabilities.
+
+ 
+   
+
+
+  /**
+   * Creates a new instance of a associator given it's class name and
+   * (optional) arguments to pass to it's setOptions method. If the
+   * associator implements OptionHandler and the options parameter is
+   * non-null, the associator will have it's options set.
    *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * @param associatorName the fully qualified class name of the associator
+   * @param options an array of options suitable for passing to setOptions. May
+   * be null.
+   * @return the newly created associator, ready for use.
+   * @exception Exception if the associator name is invalid, or the options
+   * supplied are not acceptable to the associator
    */
-  Capabilities getCapabilities();
+  public static Associator forName(String associatorName,
+				   String [] options) throws Exception {
+
+    return (Associator)Utils.forName(Associator.class,
+				     associatorName,
+				     options);
+  }
+
+  /**
+   * Creates copies of the current associator. Note that this method
+   * now uses Serialization to perform a deep copy, so the Associator
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
+   *
+   * @param model an example associator to copy
+   * @param num the number of associators copies to create.
+   * @return an array of associators.
+   * @exception Exception if an error occurs 
+   */
+  public static Associator [] makeCopies(Associator model,
+					 int num) throws Exception {
+
+    if (model == null) {
+      throw new Exception("No model associator set");
+    }
+    Associator [] associators = new Associator [num];
+    SerializedObject so = new SerializedObject(model);
+    for(int i = 0; i < associators.length; i++) {
+      associators[i] = (Associator) so.getObject();
+    }
+    return associators;
+  }
 }
+

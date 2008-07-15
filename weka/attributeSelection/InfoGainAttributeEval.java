@@ -16,61 +16,37 @@
 
 /*
  *    InfoGainAttributeEval.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Capabilities;
-import weka.core.ContingencyTables;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.Discretize;
-import weka.filters.unsupervised.attribute.NumericToBinary;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.supervised.attribute.Discretize;
+import  weka.filters.unsupervised.attribute.NumericToBinary;
+import  weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * InfoGainAttributeEval :<br/>
- * <br/>
- * Evaluates the worth of an attribute by measuring the information gain with respect to the class.<br/>
- * <br/>
- * InfoGain(Class,Attribute) = H(Class) - H(Class | Attribute).<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for Evaluating attributes individually by measuring information gain 
+ * with respect to the class.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M
- *  treat missing values as a seperate value.</pre>
- * 
- * <pre> -B
- *  just binarize numeric attributes instead 
- *  of properly discretizing them.</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -M <br>
+ * Treat missing values as a seperate value. <br>
+ *
+ * -B <br>
+ * Just binarize numeric attributes instead of properly discretizing them. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
- * @see Discretize
- * @see NumericToBinary
+ * @version $Revision: 1.14 $
  */
 public class InfoGainAttributeEval
-  extends ASEvaluation
-  implements AttributeEvaluator, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -1949849512589218930L;
+  extends AttributeEvaluator
+  implements OptionHandler {
 
   /** Treat missing values as a seperate value */
   private boolean m_missing_merge;
@@ -106,32 +82,29 @@ public class InfoGainAttributeEval
   public Enumeration listOptions () {
     Vector newVector = new Vector(2);
     newVector.addElement(new Option("\ttreat missing values as a seperate " 
-                                    + "value.", "M", 0, "-M"));
-    newVector.addElement(new Option("\tjust binarize numeric attributes instead \n" 
-                                    +"\tof properly discretizing them.", "B", 0, 
-                                    "-B"));
+				    + "value.", "M", 0, "-M"));
+    newVector.addElement(new Option("\tjust binarize numeric attributes instead\n " 
+				    +"\tof properly discretizing them.", "B", 0, 
+				    "-B"));
     return  newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. <p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M
-   *  treat missing values as a seperate value.</pre>
-   * 
-   * <pre> -B
-   *  just binarize numeric attributes instead 
-   *  of properly discretizing them.</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are:<p>
+   *
+   * -M <br>
+   * Treat missing values as a seperate value. <br>
+   *
+   * -B <br>
+   * Just binarize numeric attributes instead of properly discretizing them. <br>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
 
@@ -222,43 +195,26 @@ public class InfoGainAttributeEval
     return  m_missing_merge;
   }
 
-  /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
 
   /**
    * Initializes an information gain attribute evaluator.
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the evaluator has not been 
+   * @exception Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
     throws Exception {
     
-    // can evaluator handle data?
-    getCapabilities().testWithFail(data);
-
+    if (data.checkForStringAttributes()) {
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
+    
     int classIndex = data.classIndex();
+    if (data.attribute(classIndex).isNumeric()) {
+      throw  new Exception("Class must be nominal!");
+    }
     int numInstances = data.numInstances();
     
     if (!m_Binarize) {
@@ -277,8 +233,8 @@ public class InfoGainAttributeEval
     double[][][] counts = new double[data.numAttributes()][][];
     for (int k = 0; k < data.numAttributes(); k++) {
       if (k != classIndex) {
-        int numValues = data.attribute(k).numValues();
-        counts[k] = new double[numValues + 1][numClasses + 1];
+	int numValues = data.attribute(k).numValues();
+	counts[k] = new double[numValues + 1][numClasses + 1];
       }
     }
 
@@ -287,16 +243,16 @@ public class InfoGainAttributeEval
     for (int k = 0; k < numInstances; k++) {
       Instance inst = data.instance(k);
       if (inst.classIsMissing()) {
-        temp[numClasses] += inst.weight();
+	temp[numClasses] += inst.weight();
       } else {
-        temp[(int)inst.classValue()] += inst.weight();
+	temp[(int)inst.classValue()] += inst.weight();
       }
     }
     for (int k = 0; k < counts.length; k++) {
       if (k != classIndex) {
-        for (int i = 0; i < temp.length; i++) {
-          counts[k][0][i] = temp[i];
-        }
+	for (int i = 0; i < temp.length; i++) {
+	  counts[k][0][i] = temp[i];
+	}
       }
     }
 
@@ -304,28 +260,28 @@ public class InfoGainAttributeEval
     for (int k = 0; k < numInstances; k++) {
       Instance inst = data.instance(k);
       for (int i = 0; i < inst.numValues(); i++) {
-        if (inst.index(i) != classIndex) {
-          if (inst.isMissingSparse(i) || inst.classIsMissing()) {
-            if (!inst.isMissingSparse(i)) {
-              counts[inst.index(i)][(int)inst.valueSparse(i)][numClasses] += 
-                inst.weight();
-              counts[inst.index(i)][0][numClasses] -= inst.weight();
-            } else if (!inst.classIsMissing()) {
-              counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
-                [(int)inst.classValue()] += inst.weight();
-              counts[inst.index(i)][0][(int)inst.classValue()] -= 
-                inst.weight();
-            } else {
-              counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
-                [numClasses] += inst.weight();
-              counts[inst.index(i)][0][numClasses] -= inst.weight();
-            }
-          } else {
-            counts[inst.index(i)][(int)inst.valueSparse(i)]
-              [(int)inst.classValue()] += inst.weight();
-            counts[inst.index(i)][0][(int)inst.classValue()] -= inst.weight();
-          }
-        }
+	if (inst.index(i) != classIndex) {
+	  if (inst.isMissingSparse(i) || inst.classIsMissing()) {
+	    if (!inst.isMissingSparse(i)) {
+	      counts[inst.index(i)][(int)inst.valueSparse(i)][numClasses] += 
+		inst.weight();
+	      counts[inst.index(i)][0][numClasses] -= inst.weight();
+	    } else if (!inst.classIsMissing()) {
+	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+		[(int)inst.classValue()] += inst.weight();
+	      counts[inst.index(i)][0][(int)inst.classValue()] -= 
+		inst.weight();
+	    } else {
+	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+		[numClasses] += inst.weight();
+	      counts[inst.index(i)][0][numClasses] -= inst.weight();
+	    }
+	  } else {
+	    counts[inst.index(i)][(int)inst.valueSparse(i)]
+	      [(int)inst.classValue()] += inst.weight();
+	    counts[inst.index(i)][0][(int)inst.classValue()] -= inst.weight();
+	  }
+	}
       }
     }
 
@@ -333,57 +289,57 @@ public class InfoGainAttributeEval
     if (m_missing_merge) {
       
       for (int k = 0; k < data.numAttributes(); k++) {
-        if (k != classIndex) {
-          int numValues = data.attribute(k).numValues();
+	if (k != classIndex) {
+	  int numValues = data.attribute(k).numValues();
 
-          // Compute marginals
-          double[] rowSums = new double[numValues];
-          double[] columnSums = new double[numClasses];
-          double sum = 0;
-          for (int i = 0; i < numValues; i++) {
-            for (int j = 0; j < numClasses; j++) {
-              rowSums[i] += counts[k][i][j];
-              columnSums[j] += counts[k][i][j];
-            }
-            sum += rowSums[i];
-          }
+	  // Compute marginals
+	  double[] rowSums = new double[numValues];
+	  double[] columnSums = new double[numClasses];
+	  double sum = 0;
+	  for (int i = 0; i < numValues; i++) {
+	    for (int j = 0; j < numClasses; j++) {
+	      rowSums[i] += counts[k][i][j];
+	      columnSums[j] += counts[k][i][j];
+	    }
+	    sum += rowSums[i];
+	  }
 
-          if (Utils.gr(sum, 0)) {
-            double[][] additions = new double[numValues][numClasses];
+	  if (Utils.gr(sum, 0)) {
+	    double[][] additions = new double[numValues][numClasses];
 
-            // Compute what needs to be added to each row
-            for (int i = 0; i < numValues; i++) {
-              for (int j = 0; j  < numClasses; j++) {
-                additions[i][j] = (rowSums[i] / sum) * counts[k][numValues][j];
-              }
-            }
-            
-            // Compute what needs to be added to each column
-            for (int i = 0; i < numClasses; i++) {
-              for (int j = 0; j  < numValues; j++) {
-                additions[j][i] += (columnSums[i] / sum) * 
-                  counts[k][j][numClasses];
-              }
-            }
-            
-            // Compute what needs to be added to each cell
-            for (int i = 0; i < numClasses; i++) {
-              for (int j = 0; j  < numValues; j++) {
-                additions[j][i] += (counts[k][j][i] / sum) * 
-                  counts[k][numValues][numClasses];
-              }
-            }
-            
-            // Make new contingency table
-            double[][] newTable = new double[numValues][numClasses];
-            for (int i = 0; i < numValues; i++) {
-              for (int j = 0; j < numClasses; j++) {
-                newTable[i][j] = counts[k][i][j] + additions[i][j];
-              }
-            }
-            counts[k] = newTable;
-          }
-        }
+	    // Compute what needs to be added to each row
+	    for (int i = 0; i < numValues; i++) {
+	      for (int j = 0; j  < numClasses; j++) {
+		additions[i][j] = (rowSums[i] / sum) * counts[k][numValues][j];
+	      }
+	    }
+	    
+	    // Compute what needs to be added to each column
+	    for (int i = 0; i < numClasses; i++) {
+	      for (int j = 0; j  < numValues; j++) {
+		additions[j][i] += (columnSums[i] / sum) * 
+		  counts[k][j][numClasses];
+	      }
+	    }
+	    
+	    // Compute what needs to be added to each cell
+	    for (int i = 0; i < numClasses; i++) {
+	      for (int j = 0; j  < numValues; j++) {
+		additions[j][i] += (counts[k][j][i] / sum) * 
+		  counts[k][numValues][numClasses];
+	      }
+	    }
+	    
+	    // Make new contingency table
+	    double[][] newTable = new double[numValues][numClasses];
+	    for (int i = 0; i < numValues; i++) {
+	      for (int j = 0; j < numClasses; j++) {
+		newTable[i][j] = counts[k][i][j] + additions[i][j];
+	      }
+	    }
+	    counts[k] = newTable;
+	  }
+	}
       }
     }
 
@@ -391,9 +347,9 @@ public class InfoGainAttributeEval
     m_InfoGains = new double[data.numAttributes()];
     for (int i = 0; i < data.numAttributes(); i++) {
       if (i != classIndex) {
-        m_InfoGains[i] = 
-          (ContingencyTables.entropyOverColumns(counts[i]) 
-           - ContingencyTables.entropyConditionedOnRows(counts[i]));
+	m_InfoGains[i] = 
+	  (ContingencyTables.entropyOverColumns(counts[i]) 
+	   - ContingencyTables.entropyConditionedOnRows(counts[i]));
       }
     }
   }
@@ -413,8 +369,7 @@ public class InfoGainAttributeEval
    * of information gained about the class given the attribute.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @return the info gain
-   * @throws Exception if the attribute could not be evaluated
+   * @exception Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -435,25 +390,17 @@ public class InfoGainAttributeEval
     else {
       text.append("\tInformation Gain Ranking Filter");
       if (!m_missing_merge) {
-        text.append("\n\tMissing values treated as seperate");
+	text.append("\n\tMissing values treated as seperate");
       }
       if (m_Binarize) {
-        text.append("\n\tNumeric attributes are just binarized");
+	text.append("\n\tNumeric attributes are just binarized");
       }
     }
     
     text.append("\n");
     return  text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
-  }
+
   
   // ============
   // Test method.
@@ -461,9 +408,18 @@ public class InfoGainAttributeEval
   /**
    * Main method for testing this class.
    *
-   * @param args the options
+   * @param argv the options
    */
   public static void main (String[] args) {
-    runEvaluator(new InfoGainAttributeEval(), args);
+    try {
+      System.out.println(AttributeSelection.
+			 SelectAttributes(new InfoGainAttributeEval(), args));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
 }
+
+

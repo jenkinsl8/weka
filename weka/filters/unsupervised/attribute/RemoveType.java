@@ -14,61 +14,39 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    RemoveType.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
 
+import weka.core.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * Removes attributes of a given type.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -T &lt;nominal|numeric|string|date|relational&gt;
- *  Attribute type to delete. Valid options are "nominal", 
- *  "numeric", "string", "date" and "relational".
- *  (default "string")</pre>
- * 
- * <pre> -V
- *  Invert matching sense (i.e. only keep specified columns)</pre>
- * 
- <!-- options-end -->
+ * A filter that removes attributes of a given type.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -T type <br>
+ * Attribute type to delete.
+ * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
+ *
+ * -V<br>
+ * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.4 $
  */
-public class RemoveType 
-  extends Filter
+public class RemoveType extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -3563999462782486279L;
-  
   /** The attribute filter used to do the filtering */
   protected Remove m_attributeFilter = new Remove();
 
@@ -83,34 +61,8 @@ public class RemoveType
     new Tag(Attribute.NOMINAL, "Delete nominal attributes"),
     new Tag(Attribute.NUMERIC, "Delete numeric attributes"),
     new Tag(Attribute.STRING, "Delete string attributes"),
-    new Tag(Attribute.DATE, "Delete date attributes"),
-    new Tag(Attribute.RELATIONAL, "Delete relational attributes")
-  };
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.STRING_ATTRIBUTES);
-    result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
+    new Tag(Attribute.DATE, "Delete date attributes")
+      };
 
   /**
    * Sets the format of the input instances.
@@ -119,7 +71,7 @@ public class RemoveType
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -167,7 +119,6 @@ public class RemoveType
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws Exception if something goes wrong
    */  
   public boolean batchFinished() throws Exception {
 
@@ -227,36 +178,30 @@ public class RemoveType
     Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-	"\tAttribute type to delete. Valid options are \"nominal\", \n"
-	+ "\t\"numeric\", \"string\", \"date\" and \"relational\".\n"
-	+ "\t(default \"string\")",
-	"T", 1, "-T <nominal|numeric|string|date|relational>"));
-
+				    "\tAttribute type to delete. Valid options are \"nominal\", "
+				    + "\"numeric\", \"string\" and \"date\". (default \"string\")",
+				    "T", 1, "-T <nominal|numeric|string|date>"));
     newVector.addElement(new Option(
-	"\tInvert matching sense (i.e. only keep specified columns)",
-	"V", 0, "-V"));
+	      "\tInvert matching sense (i.e. only keep specified columns)",
+              "V", 0, "-V"));
+
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -T &lt;nominal|numeric|string|date|relational&gt;
-   *  Attribute type to delete. Valid options are "nominal", 
-   *  "numeric", "string", "date" and "relational".
-   *  (default "string")</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense (i.e. only keep specified columns)</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -T type <br>
+   * Attribute type to delete.
+   * Options are "nominal", "numeric", "string" and "date". (default "string")<p>
+   *
+   * -V<br>
+   * Invert matching sense (i.e. only keep specified columns)<p>
+   *
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -381,14 +326,13 @@ public class RemoveType
     else if (m_attTypeToDelete == Attribute.NUMERIC) return "numeric";
     else if (m_attTypeToDelete == Attribute.STRING) return "string";
     else if (m_attTypeToDelete == Attribute.DATE) return "date";
-    else if (m_attTypeToDelete == Attribute.RELATIONAL) return "relational";
     else return "unknown";
   }
 
   /**
    * Sets the attribute type to be deleted by the filter.
    *
-   * @param typeString a String representing the new type the filter should delete
+   * @param type a String representing the new type the filter should delete
    */
   protected void setAttributeTypeString(String typeString) {
 
@@ -397,16 +341,6 @@ public class RemoveType
     else if (typeString.equals("numeric")) m_attTypeToDelete = Attribute.NUMERIC;
     else if (typeString.equals("string")) m_attTypeToDelete = Attribute.STRING;
     else if (typeString.equals("date")) m_attTypeToDelete = Attribute.DATE;
-    else if (typeString.equals("relational")) m_attTypeToDelete = Attribute.RELATIONAL;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**
@@ -415,6 +349,15 @@ public class RemoveType
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new RemoveType(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new RemoveType(), argv); 
+      } else {
+	Filter.filterFile(new RemoveType(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

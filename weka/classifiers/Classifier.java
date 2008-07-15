@@ -16,26 +16,22 @@
 
 /*
  *    Classifier.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank, Len Trigg
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Attribute;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.OptionHandler;
+import weka.core.Option;
 
 /** 
  * Abstract classifier. All schemes for numeric or nominal prediction in
@@ -44,15 +40,11 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.11.2.1 $
  */
 public abstract class Classifier 
-  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler,
-             RevisionHandler {
+  implements Cloneable, Serializable, OptionHandler {
  
-  /** for serialization */
-  private static final long serialVersionUID = 6502780192411755341L;
-  
   /** Whether the classifier is run in debug mode. */
   protected boolean m_Debug = false;
 
@@ -273,36 +265,6 @@ public abstract class Classifier
   public String debugTipText() {
     return "If set to true, classifier may output additional info to " +
       "the console.";
-  }
-
-  /** 
-   * Returns the Capabilities of this classifier. Derived classifiers have to
-   * override this method to enable capabilities.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    return new Capabilities(this);
-  }
-  
-  /**
-   * runs the classifier instance with the given options.
-   * 
-   * @param classifier		the classifier to run
-   * @param options	the commandline options
-   */
-  protected static void runClassifier(Classifier classifier, String[] options) {
-    try {
-      System.out.println(Evaluation.evaluateModel(classifier, options));
-    } 
-    catch (Exception e) {
-      if (    ((e.getMessage() != null) && (e.getMessage().indexOf("General options") == -1))
-	   || (e.getMessage() == null) )
-	e.printStackTrace();
-      else
-	System.err.println(e.getMessage());
-    }
   }
 }
 

@@ -21,87 +21,55 @@
 
 package weka.classifiers.bayes;
 
-import weka.classifiers.Classifier;
-import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
+import weka.classifiers.Classifier;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a multinomial Naive Bayes classifier. For more information see,<br/>
- * <br/>
- * Andrew Mccallum, Kamal Nigam: A Comparison of Event Models for Naive Bayes Text Classification. In: AAAI-98 Workshop on 'Learning for Text Categorization', 1998.<br/>
- * <br/>
- * The core equation for this classifier:<br/>
- * <br/>
- * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)<br/>
- * <br/>
- * where Ci is class i and D is a document.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a multinomial Naive Bayes classifier.
+ * For more information see,<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Mccallum1998,
- *    author = {Andrew Mccallum and Kamal Nigam},
- *    booktitle = {AAAI-98 Workshop on 'Learning for Text Categorization'},
- *    title = {A Comparison of Event Models for Naive Bayes Text Classification},
- *    year = {1998}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Andrew Mccallum, Kamal Nigam (1998)<i>A Comparison of Event Models for Naive Bayes Text Classification </i>
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.9.2.2 $ 
  */
-public class NaiveBayesMultinomial 
-  extends Classifier 
-  implements WeightedInstancesHandler,TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 5932177440181257085L;
-  
+
+/**
+ * The core equation for this classifier:
+ * 
+ * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)
+ * 
+ * where Ci is class i and D is a document
+ */
+
+public class NaiveBayesMultinomial extends Classifier 
+  implements WeightedInstancesHandler {
+    
   /**
-   * probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
-   * The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
-   * NOTE: the values are actually the log of Pr[w|H]
-   */
-  protected double[][] m_probOfWordGivenClass;
+    probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
+    The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
+    NOTE: the values are actually the log of Pr[w|H]
+  */
+  private double[][] probOfWordGivenClass;
     
   /** the probability of a class (i.e. Pr[H]) */
-  protected double[] m_probOfClass;
+  private double[] probOfClass;
     
   /** number of unique words */
-  protected int m_numAttributes;
+  private int numAttributes;
     
   /** number of class values */
-  protected int m_numClasses;
+  private int numClasses;
     
   /** cache lnFactorial computations */
-  protected double[] m_lnFactorialCache = new double[]{0.0,0.0};
+  private double[] lnFactorialCache = new double[]{0.0,0.0};
     
   /** copy of header information for use in toString method */
-  protected Instances m_headerInfo;
+  Instances headerInfo;
 
   /**
    * Returns a string describing this classifier
@@ -109,83 +77,47 @@ public class NaiveBayesMultinomial
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Class for building and using a multinomial Naive Bayes classifier. "
-      + "For more information see,\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
-      + "The core equation for this classifier:\n\n"
-      + "P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)\n\n"
-      + "where Ci is class i and D is a document.";
+    return "Class for building and using a multinomial Naive Bayes classifier. "
+      +"For more information see,\n\n"
+      +"Andrew Mccallum, Kamal Nigam (1998) A Comparison of Event Models for Naive "
+      +"Bayes Text Classification";
   }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Andrew Mccallum and Kamal Nigam");
-    result.setValue(Field.YEAR, "1998");
-    result.setValue(Field.TITLE, "A Comparison of Event Models for Naive Bayes Text Classification");
-    result.setValue(Field.BOOKTITLE, "AAAI-98 Workshop on 'Learning for Text Categorization'");
-    
-    return result;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
-  }
-
   /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception 
   {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
-
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
-    m_headerInfo = new Instances(instances, 0);
-    m_numClasses = instances.numClasses();
-    m_numAttributes = instances.numAttributes();
-    m_probOfWordGivenClass = new double[m_numClasses][];
+    headerInfo = new Instances(instances, 0);
+    numClasses = instances.numClasses();
+    numAttributes = instances.numAttributes();
+    probOfWordGivenClass = new double[numClasses][];
 	
     /*
       initialising the matrix of word counts
       NOTE: Laplace estimator introduced in case a word that does not appear for a class in the 
       training set does so for the test set
     */
-    for(int c = 0; c<m_numClasses; c++)
+    for(int c = 0; c<numClasses; c++)
       {
-	m_probOfWordGivenClass[c] = new double[m_numAttributes];
-	for(int att = 0; att<m_numAttributes; att++)
+	probOfWordGivenClass[c] = new double[numAttributes];
+	for(int att = 0; att<numAttributes; att++)
 	  {
-	    m_probOfWordGivenClass[c][att] = 1;
+	    /*
+	      check all attributes (except the class attribute) are numeric and 
+	      that the class attribute in nominal
+	    */
+	    if(instances.classIndex() == att)
+	      {
+		if(!instances.attribute(att).isNominal())
+		  throw new Exception("The class attribute is required to be nominal. This is currently not the case!");
+	      }
+	    else
+	      if(!instances.attribute(att).isNumeric())
+		throw new Exception(("Attribute " + instances.attribute(att).name() + " is not numeric! NaiveBayesMultinomial1 requires that all attributes (except the class attribute) are numeric."));
+	    probOfWordGivenClass[c][att] = 1;
 	  }
       }
 	
@@ -193,8 +125,8 @@ public class NaiveBayesMultinomial
     Instance instance;
     int classIndex;
     double numOccurences;
-    double[] docsPerClass = new double[m_numClasses];
-    double[] wordsPerClass = new double[m_numClasses];
+    double[] docsPerClass = new double[numClasses];
+    double[] wordsPerClass = new double[numClasses];
 	
     java.util.Enumeration enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) 
@@ -212,8 +144,11 @@ public class NaiveBayesMultinomial
 		  if(numOccurences < 0)
 		    throw new Exception("Numeric attribute values must all be greater or equal to zero.");
 		  wordsPerClass[classIndex] += numOccurences;
-		  m_probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
+		  probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
 		}
+	      else {
+		throw new Exception("Cannot handle missing values!");
+	      }
 	    } 
       }
 	
@@ -221,19 +156,19 @@ public class NaiveBayesMultinomial
       normalising probOfWordGivenClass values
       and saving each value as the log of each value
     */
-    for(int c = 0; c<m_numClasses; c++)
-      for(int v = 0; v<m_numAttributes; v++) 
-	m_probOfWordGivenClass[c][v] = Math.log(m_probOfWordGivenClass[c][v] / (wordsPerClass[c] + m_numAttributes - 1));
+    for(int c = 0; c<numClasses; c++)
+      for(int v = 0; v<numAttributes; v++) 
+	probOfWordGivenClass[c][v] = Math.log(probOfWordGivenClass[c][v] / (wordsPerClass[c] + numAttributes - 1));
 	
     /*
       calculating Pr(H)
       NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of 
       training instances
     */
-    final double numDocs = instances.sumOfWeights() + m_numClasses;
-    m_probOfClass = new double[m_numClasses];
-    for(int h=0; h<m_numClasses; h++)
-      m_probOfClass[h] = (double)(docsPerClass[h] + 1)/numDocs; 
+    final double numDocs = instances.sumOfWeights() + numClasses;
+    probOfClass = new double[numClasses];
+    for(int h=0; h<numClasses; h++)
+      probOfClass[h] = (double)(docsPerClass[h] + 1)/numDocs; 
   }
     
   /**
@@ -242,23 +177,23 @@ public class NaiveBayesMultinomial
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if there is a problem generating the prediction
+   * @exception Exception if there is a problem generating the prediction
    */
   public double [] distributionForInstance(Instance instance) throws Exception 
   {
-    double[] probOfClassGivenDoc = new double[m_numClasses];
+    double[] probOfClassGivenDoc = new double[numClasses];
 	
     //calculate the array of log(Pr[D|C])
-    double[] logDocGivenClass = new double[m_numClasses];
-    for(int h = 0; h<m_numClasses; h++)
+    double[] logDocGivenClass = new double[numClasses];
+    for(int h = 0; h<numClasses; h++)
       logDocGivenClass[h] = probOfDocGivenClass(instance, h);
 	
     double max = logDocGivenClass[Utils.maxIndex(logDocGivenClass)];
     double probOfDoc = 0.0;
 	
-    for(int i = 0; i<m_numClasses; i++) 
+    for(int i = 0; i<numClasses; i++) 
       {
-	probOfClassGivenDoc[i] = Math.exp(logDocGivenClass[i] - max) * m_probOfClass[i];
+	probOfClassGivenDoc[i] = Math.exp(logDocGivenClass[i] - max) * probOfClass[i];
 	probOfDoc += probOfClassGivenDoc[i];
       }
 	
@@ -292,7 +227,7 @@ public class NaiveBayesMultinomial
 	{
 	  freqOfWordInDoc = inst.valueSparse(i);
 	  //totalWords += freqOfWordInDoc;
-	  answer += (freqOfWordInDoc * m_probOfWordGivenClass[classIndex][inst.index(i)] 
+	  answer += (freqOfWordInDoc * probOfWordGivenClass[classIndex][inst.index(i)] 
 		     ); //- lnFactorial(freqOfWordInDoc));
 	}
 	
@@ -322,54 +257,40 @@ public class NaiveBayesMultinomial
   {
     if (n < 0) return weka.core.SpecialFunctions.lnFactorial(n);
 	
-    if (m_lnFactorialCache.length <= n) {
+    if (lnFactorialCache.length <= n) {
       double[] tmp = new double[n+1];
-      System.arraycopy(m_lnFactorialCache,0,tmp,0,m_lnFactorialCache.length);
-      for(int i = m_lnFactorialCache.length; i < tmp.length; i++) 
+      System.arraycopy(lnFactorialCache,0,tmp,0,lnFactorialCache.length);
+      for(int i = lnFactorialCache.length; i < tmp.length; i++) 
 	tmp[i] = tmp[i-1] + Math.log(i);
-      m_lnFactorialCache = tmp;
+      lnFactorialCache = tmp;
     }
 	
-    return m_lnFactorialCache[n];
+    return lnFactorialCache[n];
   }
     
-  /**
-   * Returns a string representation of the classifier.
-   * 
-   * @return a string representation of the classifier
-   */
   public String toString()
   {
     StringBuffer result = new StringBuffer("The independent probability of a class\n--------------------------------------\n");
 	
-    for(int c = 0; c<m_numClasses; c++)
-      result.append(m_headerInfo.classAttribute().value(c)).append("\t").append(Double.toString(m_probOfClass[c])).append("\n");
+    for(int c = 0; c<numClasses; c++)
+      result.append(headerInfo.classAttribute().value(c)).append("\t").append(Double.toString(probOfClass[c])).append("\n");
 	
     result.append("\nThe probability of a word given the class\n-----------------------------------------\n\t");
 
-    for(int c = 0; c<m_numClasses; c++)
-      result.append(m_headerInfo.classAttribute().value(c)).append("\t");
+    for(int c = 0; c<numClasses; c++)
+      result.append(headerInfo.classAttribute().value(c)).append("\t");
 	
     result.append("\n");
 
-    for(int w = 0; w<m_numAttributes; w++)
+    for(int w = 0; w<numAttributes; w++)
       {
-	result.append(m_headerInfo.attribute(w).name()).append("\t");
-	for(int c = 0; c<m_numClasses; c++)
-	  result.append(Double.toString(Math.exp(m_probOfWordGivenClass[c][w]))).append("\t");
+	result.append(headerInfo.attribute(w).name()).append("\t");
+	for(int c = 0; c<numClasses; c++)
+	  result.append(Double.toString(Math.exp(probOfWordGivenClass[c][w]))).append("\t");
 	result.append("\n");
       }
 
     return result.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
   }
     
   /**
@@ -378,7 +299,13 @@ public class NaiveBayesMultinomial
    * @param argv the options
    */
   public static void main(String [] argv) {
-    runClassifier(new NaiveBayesMultinomial(), argv);
+    try {
+      System.out.println(weka.classifiers.Evaluation.evaluateModel(new NaiveBayesMultinomial(), argv));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
   }
 }
+    
 

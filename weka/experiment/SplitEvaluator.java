@@ -16,7 +16,7 @@
 
 /*
  *    SplitEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -40,7 +40,7 @@ import java.io.Serializable;
  * </ul>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6 $
  */
 public interface SplitEvaluator extends Serializable {
   

@@ -16,14 +16,14 @@
 
 /*
  *    FastVector.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.core;
 
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.*;
+import java.io.*;
 
 /**
  * Implements a fast vector class without synchronized
@@ -31,19 +31,13 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
- */
-public class FastVector
-  implements Copyable, Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -2173635135622930169L;
+ * @version $Revision: 1.11.2.1 $ */
+public class FastVector implements Copyable, Serializable {
 
   /**
    * Class for enumerating the vector's elements.
    */
-  public class FastVectorEnumeration
-    implements Enumeration, RevisionHandler {
+  public class FastVectorEnumeration implements Enumeration {
 
     /** The counter. */
     private int m_Counter;
@@ -121,15 +115,6 @@ public class FastVector
 	m_Counter++;
       }
       return result;
-    }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
     }
   }
 
@@ -370,9 +355,8 @@ public class FastVector
     System.arraycopy(m_Objects, index + 1, m_Objects, index, 
                      m_Size - index - 1);
 
-    // clear the last reference
+    // clear last reference
     m_Objects[m_Size - 1] = null;
-
     m_Size--;
   }
 
@@ -401,7 +385,7 @@ public class FastVector
   /** 
    * Returns all the elements of this vector as an array
    *
-   * @return an array containing all the elements of this vector
+   * @param an array containing all the elements of this vector
    */
   public final Object [] toArray() {
 
@@ -473,15 +457,6 @@ public class FastVector
     
     System.arraycopy(m_Objects, 0, newObjects, 0, m_Size);
     m_Objects = newObjects;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 }
 

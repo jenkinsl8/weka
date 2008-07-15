@@ -16,26 +16,21 @@
 
 /*
  *    InfoGainSplitCrit.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.6 $
  */
-public final class InfoGainSplitCrit
-  extends EntropyBasedSplitCrit{
-
-  /** for serialization */
-  private static final long serialVersionUID = 4892105020180728499L;
+public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
 
   /**
    * This method is a straightforward implementation of the information
@@ -60,11 +55,11 @@ public final class InfoGainSplitCrit
    * This method computes the information gain in the same way 
    * C4.5 does.
    *
-   * @param bags the distribution
+   * @param distribution the distribution
    * @param totalNoInst weight of ALL instances (including the
    * ones with missing values).
    */
-  public final double splitCritValue(Distribution bags, double totalNoInst) {
+  public final double splitCritValue(Distribution bags,double totalNoInst) {
     
     double numerator;
     double noUnknown;
@@ -87,7 +82,7 @@ public final class InfoGainSplitCrit
    * This method computes the information gain in the same way 
    * C4.5 does.
    *
-   * @param bags the distribution
+   * @param distribution the distribution
    * @param totalNoInst weight of ALL instances 
    * @param oldEnt entropy with respect to "no-split"-model.
    */
@@ -110,13 +105,13 @@ public final class InfoGainSplitCrit
     
     return numerator/bags.total();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
-  }
 }
+
+
+
+
+
+
+
+
+

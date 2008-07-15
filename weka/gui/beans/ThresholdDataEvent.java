@@ -16,29 +16,24 @@
 
 /*
  *    ThresholdDataEvent.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.visualize.PlotData2D;
-
 import java.util.EventObject;
+import weka.gui.visualize.PlotData2D;
 
 /**
  * Event encapsulating classifier performance data based on
  * varying a threshold over the classifier's predicted probabilities
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  * @see EventObject
  */
-public class ThresholdDataEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8309334224492439644L;
+public class ThresholdDataEvent extends EventObject {
 
   private PlotData2D m_dataSet;
 

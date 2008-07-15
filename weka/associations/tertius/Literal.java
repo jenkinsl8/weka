@@ -25,22 +25,16 @@
 
 package weka.associations.tertius;
 
-import weka.core.Instance;
-import weka.core.RevisionHandler;
-
 import java.io.Serializable;
+import weka.core.Instance;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
-public abstract class Literal
-  implements Serializable, RevisionHandler {
+public abstract class Literal implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = 2675363669503575771L;
-  
   private Predicate m_predicate;
 
   public static final int NEG = 0;

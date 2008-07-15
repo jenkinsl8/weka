@@ -16,63 +16,56 @@
 
 /*
  *    ChangeDateFormat.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Len Trigg
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
+import java.util.Vector;
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Changes the date format used by a date attribute. This is most useful for converting to a format with less precision, for example, from an absolute date to day of year, etc. This changes the format string, and changes the date values to those that would be parsed by the new format.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
- * 
- * <pre> -F &lt;value index&gt;
- *  Sets the output date format string (default corresponds to ISO-8601).</pre>
- * 
- <!-- options-end -->
+ * Changes the date format used by a date attribute. This is most
+ * useful for converting to a format with less precision, for example,
+ * from an absolute date to day of year, etc. This changes the format
+ * string, and changes the date values to those that would be parsed
+ * by the new format.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -C col <br>
+ * The column containing the date attribute to be changed. (default last)<p>
+ *
+ * -F format <br>
+ * The output date format (default corresponds to ISO-8601 format).<p>
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.1 $
  */
-public class ChangeDateFormat 
-  extends Filter 
+public class ChangeDateFormat extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = -1609344074013448737L;
 
   /** The default output date format. Corresponds to ISO-8601 format. */
   private static final SimpleDateFormat DEFAULT_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
 
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
@@ -83,6 +76,7 @@ public class ChangeDateFormat
   /** The output attribute. */
   private Attribute m_OutputAttribute;
 
+
   /**
    * Returns a string describing this filter
    *
@@ -90,45 +84,12 @@ public class ChangeDateFormat
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Changes the date format used by a date attribute. This is most "
-      + "useful for converting to a format with less precision, for example, "
-      + "from an absolute date to day of year, etc. This changes the format "
-      + "string, and changes the date values to those that would be parsed "
-      + "by the new format.";
+
+    return "Changes the format used by a date attribute.";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
 
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
-  /**
-   * Sets the format of the input instances.
-   *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
-   * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
-   */
+  /** {@inheritDoc */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
@@ -142,16 +103,9 @@ public class ChangeDateFormat
     return true;
   }
 
-  /**
-   * Input an instance for filtering. 
-   *
-   * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
-   * @throws Exception if the input format was not set or the date format cannot
-   * be parsed
-   */
-  public boolean input(Instance instance) throws Exception {
+
+  /** {@inheritDoc */
+  public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -177,11 +131,8 @@ public class ChangeDateFormat
     return true;
   }
 
-  /**
-   * Returns an enumeration describing the available options
-   *
-   * @return an enumeration of all the available options
-   */
+
+  /** {@inheritDoc */
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(2);
@@ -197,22 +148,18 @@ public class ChangeDateFormat
     return newVector.elements();
   }
 
+
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
-   * 
-   * <pre> -F &lt;value index&gt;
-   *  Sets the output date format string (default corresponds to ISO-8601).</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -C col <br>
+   * The column containing the date attribute to be changed. (default last)<p>
+   *
+   * -F index <br>
+   * The output date format (default corresponds to ISO-8601 format).<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -234,26 +181,24 @@ public class ChangeDateFormat
       setInputFormat(getInputFormat());
     }
   }
-  
-  /**
-   * Gets the current settings of the filter.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
+
+
+  /** {@inheritDoc */
   public String [] getOptions() {
 
     String [] options = new String [4];
     int current = 0;
 
     options[current++] = "-C";
-    options[current++] = "" + getAttributeIndex();
+    options[current++] = "" + (getAttributeIndex());
     options[current++] = "-F"; 
-    options[current++] = "" + getDateFormat().toPattern();
+    options[current++] = "" + (getDateFormat().toPattern());
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
+
 
   /**
    * @return tip text for this property suitable for
@@ -265,6 +210,7 @@ public class ChangeDateFormat
       + "attribute must be of type date (\"first\" and \"last\" are valid values)";
   }
 
+
   /**
    * Gets the index of the attribute converted.
    *
@@ -275,15 +221,17 @@ public class ChangeDateFormat
     return m_AttIndex.getSingleIndex();
   }
 
+
   /**
    * Sets the index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
     m_AttIndex.setSingleIndex(attIndex);
   }
+
 
   /**
    * @return tip text for this property suitable for
@@ -295,6 +243,7 @@ public class ChangeDateFormat
       + "format understood by Java's SimpleDateFormat class.";
   }
 
+
   /**
    * Get the date format used in output.
    *
@@ -305,10 +254,11 @@ public class ChangeDateFormat
     return m_DateFormat;
   }
 
+
   /**
    * Sets the output date format.
    *
-   * @param dateFormat the output date format.
+   * @param index the output date format.
    */
   public void setDateFormat(String dateFormat) {
 
@@ -318,7 +268,7 @@ public class ChangeDateFormat
   /**
    * Sets the output date format.
    *
-   * @param dateFormat the output date format.
+   * @param index the output date format.
    */
   public void setDateFormat(SimpleDateFormat dateFormat) {
     if (dateFormat == null) {
@@ -326,6 +276,7 @@ public class ChangeDateFormat
     }
     m_DateFormat = dateFormat;
   }
+
 
   /**
    * Set the output format. Changes the format of the specified date
@@ -351,15 +302,7 @@ public class ChangeDateFormat
     setOutputFormat(newData);
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
-  }
-  
+
   /**
    * Main method for testing this class.
    *
@@ -367,6 +310,23 @@ public class ChangeDateFormat
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new ChangeDateFormat(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new ChangeDateFormat(), argv);
+      } else {
+	Filter.filterFile(new ChangeDateFormat(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

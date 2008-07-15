@@ -16,7 +16,7 @@
 
 /*
  *    TextEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -28,13 +28,9 @@ import java.util.EventObject;
  * Event that encapsulates some textual information
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  */
-public class TextEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 4196810607402973744L;
+public class TextEvent extends EventObject {
   
   /**
    * The text

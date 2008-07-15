@@ -16,56 +16,42 @@
 
 /*
  *    LoaderCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.FileEditor;
+
+import java.io.File;
+import java.beans.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.FlowLayout;
+import java.awt.event.*;
+import java.awt.Font;
+import javax.swing.*;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
+import weka.gui.ExtensionFileFilter;
+import weka.core.converters.Loader;
+import weka.core.converters.DatabaseLoader;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.FileSourcedConverter;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JCheckBox;
 
 /**
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.7.2.2 $
  */
-public class LoaderCustomizer
-  extends JPanel
+public class LoaderCustomizer extends JPanel
   implements Customizer, CustomizerCloseRequester {
 
-  /** for serialization */
-  private static final long serialVersionUID = 6990446313118930298L;
-
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
@@ -93,8 +79,6 @@ public class LoaderCustomizer
   private JTextField m_keyText;
   
   private JPasswordField m_passwordText;
-
-  private JCheckBox m_relativeFilePath;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -131,9 +115,8 @@ public class LoaderCustomizer
 	public void actionPerformed(ActionEvent e) {
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
-              File selectedFile = m_fileChooser.getSelectedFile();
 	      ((FileSourcedConverter)m_dsLoader.getLoader()).
-		setFile(selectedFile);
+		setFile(m_fileChooser.getSelectedFile());
 	      // tell the loader that a new file has been selected so
 	      // that it can attempt to load the header
 	      m_dsLoader.setLoader(m_dsLoader.getLoader());
@@ -265,47 +248,19 @@ public class LoaderCustomizer
 
   public void setUpFile() {
     removeAll();
-
-    File tmp = ((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile();
-    tmp = new File(tmp.getAbsolutePath());
-    if (tmp.isDirectory()) {
-      m_fileChooser.setCurrentDirectory(tmp);
-    } else {
-      m_fileChooser.setSelectedFile(tmp);
-    }
-    FileSourcedConverter loader = (FileSourcedConverter) m_dsLoader.getLoader();
-    String[] ext = loader.getFileExtensions();
-    ExtensionFileFilter firstFilter = null;
-    for (int i = 0; i < ext.length; i++) {
-      ExtensionFileFilter ff =
-	new ExtensionFileFilter(
-	    ext[i], loader.getFileDescription() + " (*" + ext[i] + ")");
-      if (i == 0)
-	firstFilter = ff;
-      m_fileChooser.addChoosableFileFilter(ff);
-    }
-    if (firstFilter != null)
-      m_fileChooser.setFileFilter(firstFilter);
+    m_fileChooser.
+      setSelectedFile(((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile());
+    ExtensionFileFilter ff = 
+      new ExtensionFileFilter(((FileSourcedConverter)m_dsLoader.getLoader()).
+			      getFileExtension(),
+			      ((FileSourcedConverter)m_dsLoader.getLoader()).
+			      getFileDescription());
+    m_fileChooser.addChoosableFileFilter(ff);
     JPanel about = m_LoaderEditor.getAboutPanel();
     if (about != null) {
       add(about, BorderLayout.NORTH);
     }
     add(m_fileChooser, BorderLayout.CENTER);
-
-    m_relativeFilePath = new JCheckBox("Use relative file paths");
-    m_relativeFilePath.
-      setSelected(((FileSourcedConverter)m_dsLoader.getLoader()).getUseRelativePath());
-
-    m_relativeFilePath.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((FileSourcedConverter)m_dsLoader.getLoader()).
-            setUseRelativePath(m_relativeFilePath.isSelected());
-        }
-      });
-    JPanel holderPanel = new JPanel();
-    holderPanel.setLayout(new FlowLayout());
-    holderPanel.add(m_relativeFilePath);
-    add(holderPanel, BorderLayout.SOUTH);
   }
 
   /**

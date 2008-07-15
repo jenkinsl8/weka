@@ -16,60 +16,51 @@
 
 /*
  *    SaverCustomizer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.converters.DatabaseConverter;
-import weka.core.converters.DatabaseSaver;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
+import weka.gui.FileEditor;
 
+import java.io.File;
+import java.beans.*;
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-
+import java.awt.event.*;
+import javax.swing.SwingConstants;
+import javax.swing.JPanel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFrame;
+import javax.swing.JDialog;
+import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+import weka.gui.ExtensionFileFilter;
+import weka.core.converters.Loader;
+import weka.core.converters.FileSourcedConverter;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseSaver;
 
 /**
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.1.2.2 $
  */
-public class SaverCustomizer
-  extends JPanel
-  implements Customizer, CustomizerCloseRequester {
-
-  /** for serialization */
-  private static final long serialVersionUID = -4874208115942078471L;
+public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
@@ -99,8 +90,6 @@ public class SaverCustomizer
   private JComboBox m_tabBox;
   
   private JTextField m_prefixText;
-
-  private JCheckBox m_relativeFilePath;
   
 
   /** Constructor */  
@@ -289,33 +278,28 @@ public class SaverCustomizer
   public void setUpFile() {
     removeAll();
     m_fileChooser.setFileFilter(new FileFilter()
-      { public boolean accept(File f)
-        { return f.isDirectory();}
-        public String getDescription()
-        { return "Directory";}
-      });
+        { public boolean accept(File f)
+            { return f.isDirectory();}
+          public String getDescription()
+            { return "Directory";}
+         });
     m_fileChooser.setAcceptAllFileFilterUsed(false);
     try{
-      if(!(((m_dsSaver.getSaver()).retrieveDir()).equals(""))) {
-        File tmp = new File(m_dsSaver.getSaver().retrieveDir());
-        tmp = new File(tmp.getAbsolutePath());
-        m_fileChooser.setCurrentDirectory(tmp);
-      }
+        if(!(((m_dsSaver.getSaver()).retrieveDir()).equals("")))
+            m_fileChooser.setCurrentDirectory(new File(m_dsSaver.getSaver().retrieveDir()));
     }catch(Exception ex){
-      System.out.println(ex);
+        System.out.println(ex);
     }
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
     try{
-      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
-      JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
-      JPanel prefixP = new JPanel();   
-      prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-      prefixP.setLayout(new BorderLayout());
-      prefixP.add(prefixLab, BorderLayout.WEST);
-      prefixP.add(m_prefixText, BorderLayout.CENTER);
-      innerPanel.add(prefixP, BorderLayout.SOUTH);
+        m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
+        JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
+        JPanel prefixP = new JPanel();   
+        prefixP.setLayout(new FlowLayout(FlowLayout.LEFT));
+        prefixP.add(prefixLab);//, BorderLayout.WEST);
+        prefixP.add(m_prefixText);
+        innerPanel.add(prefixP, BorderLayout.SOUTH);
     } catch(Exception ex){
     }
     //innerPanel.add(m_SaverEditor, BorderLayout.SOUTH);
@@ -325,21 +309,7 @@ public class SaverCustomizer
     }
     add(innerPanel, BorderLayout.NORTH);
     add(m_fileChooser, BorderLayout.CENTER);
-
-    m_relativeFilePath = new JCheckBox("Use relative file paths");
-    m_relativeFilePath.
-      setSelected(((FileSourcedConverter)m_dsSaver.getSaver()).getUseRelativePath());
-
-    m_relativeFilePath.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          ((FileSourcedConverter)m_dsSaver.getSaver()).
-            setUseRelativePath(m_relativeFilePath.isSelected());
-        }
-      });
-    JPanel holderPanel = new JPanel();
-    holderPanel.setLayout(new FlowLayout());
-    holderPanel.add(m_relativeFilePath);
-    add(holderPanel, BorderLayout.SOUTH);
+    
   }
 
   /**

@@ -25,18 +25,13 @@
 
 package weka.associations.tertius;
 
-import weka.core.RevisionUtils;
-
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class IndividualLiteral extends AttributeValueLiteral {
 
-  /** for serialization */
-  private static final long serialVersionUID = 4712404824517887435L;
-  
   private int m_type;
   public static int INDIVIDUAL_PROPERTY = 0;
   public static int PART_PROPERTY = 1;
@@ -52,13 +47,19 @@ public class IndividualLiteral extends AttributeValueLiteral {
 
     return m_type;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

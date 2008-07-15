@@ -16,7 +16,7 @@
 
 /*
  *    TrainingSetMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,21 +24,24 @@ package weka.gui.beans;
 
 import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.3 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
   implements DataSourceListener, EventConstraints, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -6152577265471535786L;
-
-  protected boolean m_receivedStopNotification = false;
 
   public TrainingSetMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -46,24 +49,6 @@ public class TrainingSetMaker
 		       BeanVisual.ICON_PATH
 		       +"TrainingSetMaker_animated.gif");
     m_visual.setText("TrainingSetMaker");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -100,13 +85,6 @@ public class TrainingSetMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_receivedStopNotification) {
-          if (m_logger != null) {
-            m_logger.logMessage("TrainingSetMaker stopping.");
-          }
-          m_receivedStopNotification = false;
-          break;
-        }
 	System.err.println("Notifying listeners (training set maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
@@ -117,13 +95,7 @@ public class TrainingSetMaker
    * Stop any action
    */
   public void stop() {
-    m_receivedStopNotification = true;
-
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
-      ((BeanCommon)m_listenee).stop();
-    }
+    // do something
   }
 
   /**

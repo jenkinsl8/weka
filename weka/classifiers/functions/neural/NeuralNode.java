@@ -16,26 +16,20 @@
 
 /*
  *    NeuralNode.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Malcolm Ware
  */
 
 package weka.classifiers.functions.neural;
 
-import weka.core.RevisionUtils;
 
 import java.util.Random;
 
 /**
  * This class is used to represent a node in the neuralnet.
- * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public class NeuralNode
-  extends NeuralConnection {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1085750607680839163L;
+public class NeuralNode extends NeuralConnection {
     
   /** The weights for each of the input connections, and the threshold. */
   private double[] m_weights;
@@ -291,13 +285,19 @@ public class NeuralNode
     m_changeInWeights[0] = temp2;
     
   }  
+
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

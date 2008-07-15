@@ -16,7 +16,7 @@
 
 /*
  *    KnowledgeFlow.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 Mark Hall
  *
  */
 
@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 1.30 $
+ * @version  $Revision: 1.23.2.4 $
  */
 public class KnowledgeFlow {
 
@@ -47,7 +47,7 @@ public class KnowledgeFlow {
     Thread nt = new Thread() {
         public void run() {
           weka.gui.SplashWindow.invokeMethod("weka.gui.beans.KnowledgeFlowApp", 
-                                             "createSingleton", null);
+                                             "createSingleton", new String [1]);
         }};
       nt.start();
   }

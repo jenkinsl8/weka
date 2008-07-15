@@ -16,22 +16,28 @@
 
 /*
  *    SubsetEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.BitSet;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- * Interface for attribute subset evaluators.
+ * Abstract attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.7 $
  */
-public interface SubsetEvaluator {
-    
+public abstract class SubsetEvaluator extends ASEvaluation {
+
+  // ===============
+  // Public methods.
+  // ===============
+  
   /**
    * evaluates a subset of attributes
    *
@@ -40,6 +46,6 @@ public interface SubsetEvaluator {
    * @return the "merit" of the subset
    * @exception Exception if the subset could not be evaluated
    */
-  double evaluateSubset(BitSet subset) throws Exception;
+  public abstract double evaluateSubset(BitSet subset) throws Exception;
 }
 
