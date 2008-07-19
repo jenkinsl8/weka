@@ -76,7 +76,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -857,7 +857,7 @@ public class DatabaseSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
   
   /**

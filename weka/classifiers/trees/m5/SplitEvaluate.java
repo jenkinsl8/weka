@@ -28,7 +28,7 @@ import weka.core.Instances;
  * Interface for objects that determine a split point on an attribute
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public interface SplitEvaluate {
   

@@ -62,7 +62,7 @@ import java.util.Vector;
  * code.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class JythonClassifier 
   extends Classifier {
@@ -404,7 +404,7 @@ public class JythonClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
   }
 
   /**

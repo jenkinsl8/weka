@@ -97,7 +97,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class ADTree
   extends Classifier 
@@ -1483,7 +1483,7 @@ public class ADTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

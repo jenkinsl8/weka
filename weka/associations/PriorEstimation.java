@@ -42,7 +42,7 @@ import java.util.Random;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ */
+ * @version $Revision: 1.6.2.1 $ */
 
  public class PriorEstimation
    implements Serializable, RevisionHandler {
@@ -486,6 +486,6 @@ import java.util.Random;
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.7 $");
+      return RevisionUtils.extract("$Revision: 1.6.2.1 $");
     }
 }

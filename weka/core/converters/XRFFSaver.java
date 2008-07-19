@@ -65,7 +65,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.2 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -396,7 +396,7 @@ public class XRFFSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.2 $");
   }
   
   /**

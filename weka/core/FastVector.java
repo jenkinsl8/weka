@@ -31,7 +31,7 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.14.2.2 $
  */
 public class FastVector
   implements Copyable, Serializable, RevisionHandler {
@@ -129,7 +129,7 @@ public class FastVector
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
+      return RevisionUtils.extract("$Revision: 1.14.2.2 $");
     }
   }
 
@@ -481,7 +481,7 @@ public class FastVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.2 $");
   }
 }
 

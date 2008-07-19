@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public abstract class AbstractClusterer
   implements Clusterer, Cloneable, Serializable, CapabilitiesHandler, RevisionHandler {

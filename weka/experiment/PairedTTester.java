@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.34.2.1 $
  */
 public class PairedTTester 
   implements OptionHandler, Tester, RevisionHandler {
@@ -221,7 +221,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
     }
   }
 
@@ -310,7 +310,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
     }
   }
  
@@ -427,7 +427,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
     }
   } // Resultset
 
@@ -1445,7 +1445,7 @@ public class PairedTTester
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.35 $");
+    return RevisionUtils.extract("$Revision: 1.34.2.1 $");
   }
   
   /**

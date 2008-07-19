@@ -70,7 +70,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.7.2.2 $ 
  **/
 public class SpreadSubsample 
   extends Filter 
@@ -597,7 +597,7 @@ public class SpreadSubsample
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
   }
 
   /**

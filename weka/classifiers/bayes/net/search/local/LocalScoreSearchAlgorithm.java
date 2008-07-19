@@ -58,7 +58,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -715,6 +715,6 @@ public class LocalScoreSearchAlgorithm
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.8 $");
+	  return RevisionUtils.extract("$Revision: 1.7.2.1 $");
 	}
 }

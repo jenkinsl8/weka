@@ -34,7 +34,7 @@ import weka.core.matrix.IntVector;
  * set of points. <p>
  * 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.3.2.1 $ */
 
 public class  DiscreteFunction
   implements RevisionHandler {
@@ -283,7 +283,7 @@ public class  DiscreteFunction
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   public static void main( String args[] )

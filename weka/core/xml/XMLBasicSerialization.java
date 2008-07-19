@@ -66,7 +66,7 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.5.2.1 $ 
  */
 public class XMLBasicSerialization
    extends XMLSerialization {
@@ -567,6 +567,6 @@ public class XMLBasicSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
+     return RevisionUtils.extract("$Revision: 1.5.2.1 $");
    }
 }

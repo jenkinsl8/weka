@@ -36,7 +36,7 @@ import java.io.Serializable;
  * objects to and fro files or streams.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class SerializationHelper
   implements RevisionHandler {
@@ -256,7 +256,7 @@ public class SerializationHelper
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
   
   /**

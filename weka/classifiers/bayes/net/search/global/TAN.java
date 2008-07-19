@@ -77,7 +77,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class TAN 
 	extends GlobalScoreSearchAlgorithm
@@ -273,7 +273,7 @@ public class TAN
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.7 $");
+	  return RevisionUtils.extract("$Revision: 1.6.2.1 $");
 	}
 
 } // TAN

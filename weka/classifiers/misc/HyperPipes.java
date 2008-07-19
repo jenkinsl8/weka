@@ -53,7 +53,7 @@ import java.io.Serializable;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.20.2.1 $
  */ 
 public class HyperPipes 
   extends Classifier {
@@ -211,7 +211,7 @@ public class HyperPipes
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }
 
@@ -372,7 +372,7 @@ public class HyperPipes
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21 $");
+    return RevisionUtils.extract("$Revision: 1.20.2.1 $");
   }
 
   /**

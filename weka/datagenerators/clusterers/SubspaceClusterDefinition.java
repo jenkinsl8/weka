@@ -67,7 +67,7 @@ import java.util.Vector;
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  * @see SubspaceCluster
  */
 public class SubspaceClusterDefinition 
@@ -897,6 +897,6 @@ public class SubspaceClusterDefinition
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

@@ -30,7 +30,7 @@ import weka.core.RevisionUtils;
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public final class NoSplit
   extends ClassifierSplitModel{
@@ -110,6 +110,6 @@ public final class NoSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 }

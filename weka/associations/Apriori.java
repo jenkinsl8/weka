@@ -126,7 +126,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.28.2.3 $
  */
 public class Apriori 
   extends AbstractAssociator 
@@ -1449,7 +1449,7 @@ public class Apriori
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
+    return RevisionUtils.extract("$Revision: 1.28.2.3 $");
   }
 
   /**

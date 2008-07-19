@@ -32,7 +32,7 @@ import weka.core.Utils;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class PairedStats
   implements RevisionHandler {
@@ -277,7 +277,7 @@ public class PairedStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 
   /**

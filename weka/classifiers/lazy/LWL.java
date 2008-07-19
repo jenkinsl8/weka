@@ -115,7 +115,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.21.2.1 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -738,7 +738,7 @@ public class LWL
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
   }
   
   /**

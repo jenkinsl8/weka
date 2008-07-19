@@ -38,7 +38,7 @@ import weka.core.Utils;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class MarginCurve
   implements RevisionHandler {
@@ -140,7 +140,7 @@ public class MarginCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
   }
   
   /**

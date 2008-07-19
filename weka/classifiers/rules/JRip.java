@@ -132,7 +132,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class JRip 
   extends Classifier 
@@ -733,7 +733,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22 $");
+      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
     }
   }
     
@@ -935,7 +935,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22 $");
+      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
     }
   }
     
@@ -1059,7 +1059,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22 $");
+      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
     }
   }
 
@@ -1422,7 +1422,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22 $");
+      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
     }
   }
 
@@ -2041,7 +2041,7 @@ public class JRip
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
   }
     
   /**

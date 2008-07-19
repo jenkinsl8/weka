@@ -32,7 +32,7 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class NumericPrediction
   implements Prediction, Serializable, RevisionHandler {
@@ -143,6 +143,6 @@ public class NumericPrediction
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 }

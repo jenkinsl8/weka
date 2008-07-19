@@ -30,7 +30,7 @@ import weka.core.RevisionUtils;
 /**
  * Stores some statistics.
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public final class Values
   implements RevisionHandler {
@@ -110,6 +110,6 @@ public final class Values
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 }

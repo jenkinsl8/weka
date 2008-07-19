@@ -32,7 +32,7 @@ import java.util.HashSet;
  * A helper class for <a href="http://www.jython.org/" target="_blank">Jython</a>.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class Jython
   implements Serializable, RevisionHandler {
@@ -282,7 +282,7 @@ public class Jython
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
   }
   
   /**

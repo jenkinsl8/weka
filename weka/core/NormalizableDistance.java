@@ -35,7 +35,7 @@ import java.util.Vector;
  * @author Fracpete (fracpete at waikato dot ac dot nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public abstract class NormalizableDistance
   implements DistanceFunction, OptionHandler, Serializable, RevisionHandler {

@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class CSVResultListener 
   implements ResultListener, OptionHandler, RevisionHandler {
@@ -359,6 +359,6 @@ public class CSVResultListener
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 } // CSVResultListener

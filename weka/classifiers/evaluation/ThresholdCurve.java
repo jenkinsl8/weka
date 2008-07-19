@@ -42,7 +42,7 @@ import weka.core.Utils;
  * case. The Mann Whitney statistic is used to calculate the AUC.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class ThresholdCurve
   implements RevisionHandler {
@@ -415,7 +415,7 @@ public class ThresholdCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.2 $");
   }
   
   /**

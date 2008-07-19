@@ -116,7 +116,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class LMT 
   extends Classifier 
@@ -788,7 +788,7 @@ public class LMT
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
 
   /**

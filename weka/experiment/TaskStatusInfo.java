@@ -36,7 +36,7 @@ import java.io.Serializable;
  * execute.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class TaskStatusInfo
   implements Serializable, RevisionHandler {
@@ -126,6 +126,6 @@ public class TaskStatusInfo
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

@@ -32,7 +32,7 @@ import java.io.Serializable;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class Stats
   implements Serializable, RevisionHandler {
@@ -162,7 +162,7 @@ public class Stats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 
   /**

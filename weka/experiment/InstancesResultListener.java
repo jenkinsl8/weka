@@ -51,7 +51,7 @@ import java.util.Hashtable;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class InstancesResultListener 
   extends CSVResultListener {
@@ -259,6 +259,6 @@ public class InstancesResultListener
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
   }
 } // InstancesResultListener

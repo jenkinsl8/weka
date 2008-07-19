@@ -92,7 +92,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.22.2.1 $ 
  */
 public class VotedPerceptron 
   extends Classifier 
@@ -589,7 +589,7 @@ public class VotedPerceptron
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.22.2.1 $");
   }
 
   /**

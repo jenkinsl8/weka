@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.25.2.8 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon

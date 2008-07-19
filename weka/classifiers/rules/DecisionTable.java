@@ -128,7 +128,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $ 
+ * @version $Revision: 1.43.2.2 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -1395,7 +1395,7 @@ public class DecisionTable
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.46 $");
+    return RevisionUtils.extract("$Revision: 1.43.2.2 $");
   }
 
   /**

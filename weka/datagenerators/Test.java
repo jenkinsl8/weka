@@ -66,7 +66,7 @@ import java.io.Serializable;
  * <br/>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.4.2.1 $ 
  **/
 
 public class Test 
@@ -240,7 +240,7 @@ public class Test
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }
 

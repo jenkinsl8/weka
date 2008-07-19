@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class BallTree
   extends NearestNeighbourSearch 
@@ -629,6 +629,6 @@ public class BallTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
 }

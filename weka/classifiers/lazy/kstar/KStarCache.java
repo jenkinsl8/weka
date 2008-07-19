@@ -35,7 +35,7 @@ import java.io.Serializable;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class KStarCache
   implements Serializable, RevisionHandler {
@@ -262,7 +262,7 @@ public class KStarCache
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
+      return RevisionUtils.extract("$Revision: 1.10.2.1 $");
     }
   } // CacheTable
   
@@ -306,7 +306,7 @@ public class KStarCache
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
+      return RevisionUtils.extract("$Revision: 1.10.2.1 $");
     }
   }  // TableEntry
   
@@ -316,7 +316,7 @@ public class KStarCache
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
   }
   
 } // Cache

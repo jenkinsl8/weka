@@ -36,7 +36,7 @@ import java.util.Vector;
  * Contains static utility functions for Estimators.<p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class EstimatorUtils
   implements RevisionHandler {
@@ -326,6 +326,6 @@ public class EstimatorUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

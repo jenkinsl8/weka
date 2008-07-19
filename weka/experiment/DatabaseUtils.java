@@ -54,7 +54,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.31.2.2 $
  */
 public class DatabaseUtils
   implements Serializable, RevisionHandler {
@@ -1242,6 +1242,6 @@ public class DatabaseUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.34 $");
+    return RevisionUtils.extract("$Revision: 1.31.2.2 $");
   }
 }

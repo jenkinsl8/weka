@@ -57,7 +57,7 @@ import javax.swing.event.CaretListener;
  * Represents a panel for entering an SQL query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.4 $
+ * @version     $Revision: 1.3.2.1 $
  */
 public class QueryPanel 
   extends JPanel 

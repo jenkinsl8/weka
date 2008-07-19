@@ -82,12 +82,12 @@ import java.util.Vector;
  * <pre> -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]
  *  Measure used for evaluation (default is FMEASURE).
  * </pre>
- * 
+ *
  * <pre> -manual &lt;real&gt;
- *  Set a manual threshold to use. This option overrides
- *  automatic selection and options pertaining to
- *  automatic selection will be ignored.
- *  (default -1, i.e. do not use a manual threshold).</pre>
+ * Sets a manual threshold to use. If set (non-negative value
+ * between 0 and 1), then all options pertaining to automatic
+ * threshold selection are ignored (default -1, i.e. do not use
+ * a manual threshold).</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -119,7 +119,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $ 
+ * @version $Revision: 1.39.2.3 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -507,12 +507,6 @@ public class ThresholdSelector
    * <pre> -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]
    *  Measure used for evaluation (default is FMEASURE).
    * </pre>
-   * 
-   * <pre> -manual &lt;real&gt;
-   *  Set a manual threshold to use. This option overrides
-   *  automatic selection and options pertaining to
-   *  automatic selection will be ignored.
-   *  (default -1, i.e. do not use a manual threshold).</pre>
    * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
@@ -1075,7 +1069,7 @@ public class ThresholdSelector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.43 $");
+    return RevisionUtils.extract("$Revision: 1.39.2.3 $");
   }
   
   /**
@@ -1087,4 +1081,3 @@ public class ThresholdSelector
     runClassifier(new ThresholdSelector(), argv);
   }
 }
-

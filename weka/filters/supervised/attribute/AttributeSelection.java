@@ -69,7 +69,8 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -M
- *  Treat missing values as a seperate value.</pre>
+ *  Treat missing values as a seperate
+ *  value.</pre>
  * 
  * <pre> -L
  *  Don't include locally predictive attributes.</pre>
@@ -97,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class AttributeSelection 
   extends Filter
@@ -203,7 +204,8 @@ public class AttributeSelection
    * </pre>
    * 
    * <pre> -M
-   *  Treat missing values as a seperate value.</pre>
+   *  Treat missing values as a seperate
+   *  value.</pre>
    * 
    * <pre> -L
    *  Don't include locally predictive attributes.</pre>
@@ -562,7 +564,7 @@ public class AttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**
@@ -574,4 +576,3 @@ public class AttributeSelection
     runFilter(new AttributeSelection(), argv);
   }
 }
-

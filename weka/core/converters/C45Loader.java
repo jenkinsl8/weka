@@ -43,7 +43,7 @@ import java.io.StreamTokenizer;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  * @see Loader
  */
 public class C45Loader 
@@ -500,7 +500,7 @@ public class C45Loader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 
   /**

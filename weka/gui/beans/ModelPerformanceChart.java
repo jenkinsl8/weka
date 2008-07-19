@@ -44,7 +44,7 @@ import javax.swing.JPanel;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class ModelPerformanceChart
   extends JPanel

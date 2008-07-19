@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.20.2.1 $
  * @see Discretize
  * @see NumericToBinary
  */
@@ -452,7 +452,7 @@ public class InfoGainAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision: 1.20.2.1 $");
   }
   
   // ============

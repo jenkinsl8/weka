@@ -92,7 +92,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class RandomForest 
   extends Classifier 
@@ -523,7 +523,7 @@ public class RandomForest
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 
   /**

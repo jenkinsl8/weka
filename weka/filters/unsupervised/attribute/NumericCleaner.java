@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class NumericCleaner
   extends SimpleStreamFilter {
@@ -806,7 +806,7 @@ public class NumericCleaner
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
 
   /**

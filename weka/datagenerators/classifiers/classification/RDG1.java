@@ -122,7 +122,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.4.2.1 $ 
  */
 public class RDG1 
   extends ClassificationGenerator {
@@ -219,7 +219,7 @@ public class RDG1
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
     }
   } /*end class RuleList ******/
 
@@ -1212,7 +1212,7 @@ public class RDG1
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 
   /**

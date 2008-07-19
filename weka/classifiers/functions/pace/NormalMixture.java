@@ -62,7 +62,7 @@ import weka.core.matrix.Maths;
  <!-- technical-bibtex-end -->
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class  NormalMixture 
   extends MixtureDistribution {
@@ -360,7 +360,7 @@ public class  NormalMixture
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
     
   /** 

@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class ClassificationViaClustering
   extends Classifier {
@@ -500,7 +500,7 @@ public class ClassificationViaClustering
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
   
   /**

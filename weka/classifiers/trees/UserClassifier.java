@@ -98,7 +98,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.28.2.2 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -1490,7 +1490,7 @@ public class UserClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.30 $");
+      return RevisionUtils.extract("$Revision: 1.28.2.2 $");
     }
   }
   
@@ -1500,6 +1500,6 @@ public class UserClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.30 $");
+    return RevisionUtils.extract("$Revision: 1.28.2.2 $");
   }
 }

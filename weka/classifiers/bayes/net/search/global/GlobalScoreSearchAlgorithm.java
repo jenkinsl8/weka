@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class GlobalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -538,6 +538,6 @@ public class GlobalScoreSearchAlgorithm
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.10 $");
+	  return RevisionUtils.extract("$Revision: 1.9.2.1 $");
 	}
 }

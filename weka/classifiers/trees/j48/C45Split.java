@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class C45Split
   extends ClassifierSplitModel{
@@ -493,6 +493,6 @@ public class C45Split
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 }

@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class SerializedClassifier
   extends Classifier {
@@ -324,7 +324,7 @@ public class SerializedClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
   
   /**

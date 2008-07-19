@@ -72,7 +72,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.18.2.2 $
  */
 public class RandomTree 
   extends Classifier 
@@ -1082,7 +1082,7 @@ public class RandomTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
+    return RevisionUtils.extract("$Revision: 1.18.2.2 $");
   }
 
   /**

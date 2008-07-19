@@ -122,7 +122,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.39.2.2 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -648,7 +648,7 @@ public class Bagging
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.41 $");
+    return RevisionUtils.extract("$Revision: 1.39.2.2 $");
   }
 
   /**

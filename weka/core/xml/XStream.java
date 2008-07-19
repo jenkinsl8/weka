@@ -40,7 +40,7 @@ import java.io.Writer;
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class XStream
   implements RevisionHandler {
@@ -344,6 +344,6 @@ public class XStream
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.5 $");
   }
 }

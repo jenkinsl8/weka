@@ -108,7 +108,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class BVDecompose
   implements OptionHandler, TechnicalInformationHandler, RevisionHandler {
@@ -683,7 +683,7 @@ public class BVDecompose
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 
   /**

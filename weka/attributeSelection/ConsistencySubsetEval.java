@@ -70,7 +70,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.15.2.1 $
  * @see Discretize
  */
 public class ConsistencySubsetEval 
@@ -273,7 +273,7 @@ public class ConsistencySubsetEval
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.17 $");
+      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
     }
   }
 
@@ -507,7 +507,7 @@ public class ConsistencySubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision: 1.15.2.1 $");
   }
 
   /**

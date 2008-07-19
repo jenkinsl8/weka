@@ -142,7 +142,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -413,7 +413,7 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
     }
   }
   
@@ -664,14 +664,14 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
     }
   }
 
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.11.2.1 $
    */
   class ControlPanel 
     extends JPanel
@@ -867,7 +867,7 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
     }
   }
   
@@ -2650,6 +2650,6 @@ public class MultilayerPerceptron
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }

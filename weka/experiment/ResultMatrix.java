@@ -43,7 +43,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()

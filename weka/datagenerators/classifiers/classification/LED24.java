@@ -97,7 +97,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 
 public class LED24
@@ -441,7 +441,7 @@ public class LED24
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 
   /**

@@ -34,7 +34,7 @@ import java.io.Serializable;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public final class YongSplitInfo
   implements Cloneable, Serializable, SplitEvaluate, RevisionHandler {
@@ -207,6 +207,6 @@ public final class YongSplitInfo
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

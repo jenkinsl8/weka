@@ -39,7 +39,7 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.10.2.2 $ 
  */
 public class SerializedObject
   implements Serializable, RevisionHandler {
@@ -162,6 +162,6 @@ public class SerializedObject
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
 }

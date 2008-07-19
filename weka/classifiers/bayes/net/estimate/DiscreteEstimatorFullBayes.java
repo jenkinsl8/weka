@@ -28,7 +28,7 @@ import weka.estimators.DiscreteEstimator;
  * Symbolic probability estimator based on symbol counts and a prior.
  *  
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class DiscreteEstimatorFullBayes 
   extends DiscreteEstimatorBayes {
@@ -69,7 +69,7 @@ public class DiscreteEstimatorFullBayes
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 
   /**

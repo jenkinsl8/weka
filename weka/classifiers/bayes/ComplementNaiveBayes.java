@@ -79,7 +79,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.8.2.1 $ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -481,7 +481,7 @@ public class ComplementNaiveBayes extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
     
     /**

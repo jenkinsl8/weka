@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Abstract class representing a splitter node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public abstract class Splitter
   implements Serializable, Cloneable, RevisionHandler {

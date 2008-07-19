@@ -42,7 +42,7 @@ import weka.core.matrix.IntVector;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ */
+ * @version $Revision: 1.4.2.1 $ */
 
 public abstract class MixtureDistribution
   implements TechnicalInformationHandler, RevisionHandler {

@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public abstract class NeuralConnection
   implements Serializable, RevisionHandler {

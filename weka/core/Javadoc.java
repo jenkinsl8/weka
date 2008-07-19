@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public abstract class Javadoc 
   implements OptionHandler, RevisionHandler {

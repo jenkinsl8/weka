@@ -51,7 +51,7 @@ import java.util.Vector;
  * Specify the full class name of the clusterer to evaluate. <p>
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 
 public class DensityBasedClustererSplitEvaluator 
@@ -631,6 +631,6 @@ public class DensityBasedClustererSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.4 $");
   }
 }

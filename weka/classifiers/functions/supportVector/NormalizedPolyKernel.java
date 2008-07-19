@@ -45,8 +45,7 @@ import weka.core.RevisionUtils;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
+ *  The size of the cache (a prime number).
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -60,7 +59,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class NormalizedPolyKernel 
   extends PolyKernel {
@@ -165,7 +164,6 @@ public class NormalizedPolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 }
-

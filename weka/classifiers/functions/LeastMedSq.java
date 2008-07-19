@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.15.2.3 $
  */
 public class LeastMedSq 
   extends Classifier 
@@ -717,7 +717,7 @@ public class LeastMedSq
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision: 1.15.2.3 $");
   }
 
   /**

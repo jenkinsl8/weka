@@ -182,7 +182,7 @@ import javax.swing.DefaultListModel;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class RemoteExperiment 
   extends Experiment {
@@ -843,7 +843,7 @@ public class RemoteExperiment
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision: 1.15.2.1 $");
   }
 
   /**

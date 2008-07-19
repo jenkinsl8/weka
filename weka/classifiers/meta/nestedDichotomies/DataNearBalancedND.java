@@ -566,7 +566,7 @@ public class DataNearBalancedND
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
     	
   /**

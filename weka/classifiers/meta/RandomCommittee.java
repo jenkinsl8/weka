@@ -69,24 +69,19 @@ import java.util.Random;
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.</pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre> -D
+ *  Turns debugging info on.</pre>
+ * 
+ * <pre> -S
  *  Seed for random number generator.
  *  (default 1)</pre>
- * 
- * <pre> -depth &lt;num&gt;
- *  The maximum depth of the tree, 0 for unlimited.
- *  (default 0)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class RandomCommittee 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -215,7 +210,7 @@ public class RandomCommittee
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 
   /**
@@ -227,4 +222,3 @@ public class RandomCommittee
     runClassifier(new RandomCommittee(), argv);
   }
 }
-

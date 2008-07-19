@@ -33,7 +33,7 @@ import java.sql.Connection;
  * @see       DatabaseUtils
  * @see       #execute(String)
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.4 $
+ * @version   $Revision: 1.2.2.1 $
  */
 public class DbUtils
   extends DatabaseUtils {
@@ -67,6 +67,6 @@ public class DbUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 }

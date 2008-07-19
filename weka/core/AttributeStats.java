@@ -29,7 +29,7 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class AttributeStats
   implements Serializable, RevisionHandler {
@@ -146,6 +146,6 @@ public class AttributeStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 }

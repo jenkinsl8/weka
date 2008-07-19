@@ -125,7 +125,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class ReliefFAttributeEval
   extends ASEvaluation
@@ -1330,7 +1330,7 @@ public class ReliefFAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
   }
 
   // ============

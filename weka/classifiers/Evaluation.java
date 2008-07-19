@@ -175,7 +175,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.88 $
+ * @version  $Revision: 1.81.2.5 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -3418,6 +3418,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.88 $");
+    return RevisionUtils.extract("$Revision: 1.81.2.5 $");
   }
 }

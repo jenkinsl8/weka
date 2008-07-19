@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class PKIDiscretize 
   extends Discretize
@@ -363,7 +363,7 @@ public class PKIDiscretize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 
   /**

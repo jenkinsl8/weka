@@ -35,7 +35,7 @@ import java.util.Random;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class PruneableClassifierTree 
   extends ClassifierTree {
@@ -234,6 +234,6 @@ public class PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }

@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class Distribution
   implements Cloneable, Serializable, RevisionHandler {
@@ -745,6 +745,6 @@ public class Distribution
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }

@@ -126,7 +126,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class VFI 
   extends Classifier 
@@ -622,7 +622,7 @@ public class VFI
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 	
   /**

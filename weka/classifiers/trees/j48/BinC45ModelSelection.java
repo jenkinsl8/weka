@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class BinC45ModelSelection
   extends ModelSelection {
@@ -188,6 +188,6 @@ public class BinC45ModelSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
   }
 }

@@ -74,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class Puk 
   extends CachedKernel
@@ -419,6 +419,6 @@ public class Puk
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
 }

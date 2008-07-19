@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.22.2.5 $
  */
 public class Capabilities 
   implements Cloneable, Serializable, RevisionHandler {
@@ -1611,6 +1611,6 @@ public class Capabilities
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision: 1.22.2.5 $");
   }
 }

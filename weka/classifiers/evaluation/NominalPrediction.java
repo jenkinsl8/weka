@@ -32,7 +32,7 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class NominalPrediction
   implements Prediction, Serializable, RevisionHandler {
@@ -242,7 +242,7 @@ public class NominalPrediction
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }
 

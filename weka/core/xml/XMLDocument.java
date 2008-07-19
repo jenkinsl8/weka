@@ -55,7 +55,7 @@ import org.xml.sax.InputSource;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6.2.2 $
  */
 public class XMLDocument
   implements RevisionHandler {
@@ -653,7 +653,7 @@ public class XMLDocument
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.2 $");
   }
   
   /**

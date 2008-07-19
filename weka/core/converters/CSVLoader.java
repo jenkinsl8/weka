@@ -47,7 +47,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.13.2.6 $
  * @see Loader
  */
 public class CSVLoader 
@@ -524,7 +524,7 @@ public class CSVLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision: 1.13.2.6 $");
   }
 
   /**

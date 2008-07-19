@@ -39,7 +39,7 @@ import java.util.Vector;
  * Abstract class for constructing a BallTree .
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  */
 public abstract class BallTreeConstructor 
   implements OptionHandler, Serializable, RevisionHandler {
@@ -324,6 +324,6 @@ public abstract class BallTreeConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
 }

@@ -48,7 +48,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.15.2.2 $
  */
 public class CostMatrix implements Serializable, RevisionHandler {
 
@@ -804,6 +804,6 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision: 1.15.2.2 $");
   }
 }

@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */ 
 public class ICSSearchAlgorithm 
     extends CISearchAlgorithm {
@@ -139,7 +139,7 @@ public class ICSSearchAlgorithm
          * @return		the revision
          */
         public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.8 $");
+          return RevisionUtils.extract("$Revision: 1.7.2.1 $");
         }
 
     } // class sepset
@@ -647,7 +647,7 @@ public class ICSSearchAlgorithm
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.8 $");
+	  return RevisionUtils.extract("$Revision: 1.7.2.1 $");
 	}
 
 	/**

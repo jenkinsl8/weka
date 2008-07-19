@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.11.2.3 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,

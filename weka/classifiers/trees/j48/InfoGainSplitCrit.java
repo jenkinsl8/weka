@@ -29,7 +29,7 @@ import weka.core.Utils;
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public final class InfoGainSplitCrit
   extends EntropyBasedSplitCrit{
@@ -117,6 +117,6 @@ public final class InfoGainSplitCrit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 }

@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public abstract class ASEvaluation
   implements Serializable, CapabilitiesHandler, RevisionHandler {
@@ -134,7 +134,7 @@ public abstract class ASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
   
   /**

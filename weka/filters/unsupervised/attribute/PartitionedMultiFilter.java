@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  * @see     weka.filters.StreamableFilter
  */
 public class PartitionedMultiFilter
@@ -692,7 +692,7 @@ public class PartitionedMultiFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 
   /**

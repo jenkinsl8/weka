@@ -91,7 +91,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class KStar 
   extends Classifier
@@ -710,7 +710,7 @@ public class KStar
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 
 } // class end

@@ -119,7 +119,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.20.2.1 $ 
  */
 public class Ridor 
   extends Classifier
@@ -556,7 +556,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }    
 
@@ -933,7 +933,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }
     
@@ -997,7 +997,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }
     
@@ -1183,7 +1183,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }
     
@@ -1303,7 +1303,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision: 1.20.2.1 $");
     }
   }
 
@@ -1682,7 +1682,7 @@ public class Ridor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21 $");
+    return RevisionUtils.extract("$Revision: 1.20.2.1 $");
   }
     
   /**

@@ -41,7 +41,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class SearchAlgorithm 
     implements OptionHandler, Serializable, RevisionHandler {
@@ -407,6 +407,6 @@ public class SearchAlgorithm
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
 } // class SearchAlgorithm

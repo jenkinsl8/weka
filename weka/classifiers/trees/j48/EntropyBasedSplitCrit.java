@@ -27,7 +27,7 @@ package weka.classifiers.trees.j48;
  * based on the entropy of a class distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public abstract class EntropyBasedSplitCrit
   extends SplitCriterion {

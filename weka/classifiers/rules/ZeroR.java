@@ -51,7 +51,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class ZeroR 
   extends Classifier 
@@ -244,7 +244,7 @@ public class ZeroR
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision: 1.18.2.1 $");
   }
 
   /**

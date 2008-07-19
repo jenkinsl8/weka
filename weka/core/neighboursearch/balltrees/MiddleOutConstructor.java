@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class MiddleOutConstructor
   extends BallTreeConstructor
@@ -997,7 +997,7 @@ public class MiddleOutConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
   
   /** 
@@ -1008,7 +1008,7 @@ public class MiddleOutConstructor
    * node's centre/anchor point.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.1.2.2 $
    */
   protected class TempNode
     implements RevisionHandler {
@@ -1059,7 +1059,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.2 $");
     }
   }
 
@@ -1069,7 +1069,7 @@ public class MiddleOutConstructor
    * anchor point). 
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.1.2.2 $
    */
   protected class ListNode
     implements RevisionHandler {
@@ -1097,7 +1097,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.2 $");
     }
   }
   
@@ -1107,7 +1107,7 @@ public class MiddleOutConstructor
    * centre/pivot/anchor, in a (reverse sorted) list.  
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.1.2.2 $
    */
   protected class MyIdxList
     extends FastVector {
@@ -1231,7 +1231,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.2 $");
     }
   }
 }

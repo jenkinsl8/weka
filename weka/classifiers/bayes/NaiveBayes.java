@@ -90,7 +90,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.21.2.6 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -931,7 +931,7 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.6 $");
   }
 
   /**

@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class ResultMatrixHTML
   extends ResultMatrix {
@@ -284,7 +284,7 @@ public class ResultMatrixHTML
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

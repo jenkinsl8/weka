@@ -105,7 +105,7 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.19.2.1 $
  */
 public class RandomSplitResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
@@ -909,6 +909,6 @@ public class RandomSplitResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
+    return RevisionUtils.extract("$Revision: 1.19.2.1 $");
   }
 } // RandomSplitResultProducer

@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.60 $
+ * @version $Revision: 1.57.2.3 $
  */
 public final class Utils
   implements RevisionHandler {
@@ -1875,7 +1875,7 @@ public final class Utils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.60 $");
+    return RevisionUtils.extract("$Revision: 1.57.2.3 $");
   }
 
   /**

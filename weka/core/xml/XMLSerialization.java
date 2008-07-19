@@ -90,7 +90,7 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.15.2.1 $ 
  */
 public class XMLSerialization
    implements RevisionHandler {
@@ -1699,6 +1699,6 @@ public class XMLSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.16 $");
+     return RevisionUtils.extract("$Revision: 1.15.2.1 $");
    }
 }

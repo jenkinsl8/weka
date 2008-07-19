@@ -64,15 +64,11 @@ import weka.core.TechnicalInformation;
  *  Use supervised discretization to process numeric attributes
  * </pre>
  * 
- * <pre> -O
- *  Display model in old format (good when there are many classes)
- * </pre>
- * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
@@ -125,7 +121,7 @@ public class NaiveBayesUpdateable extends NaiveBayes
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 
   /**
@@ -137,4 +133,3 @@ public class NaiveBayesUpdateable extends NaiveBayes
     runClassifier(new NaiveBayesUpdateable(), argv);
   }
 }
-

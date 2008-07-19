@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * Class representing a prediction node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public final class PredictionNode
   implements Serializable, Cloneable, RevisionHandler {
@@ -180,6 +180,6 @@ public final class PredictionNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 }

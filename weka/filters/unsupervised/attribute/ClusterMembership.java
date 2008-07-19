@@ -65,7 +65,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.14.2.2 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -545,7 +545,7 @@ public class ClusterMembership
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.2 $");
   }
 
   /**

@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class Rule
   implements Serializable, RevisionHandler {
@@ -634,6 +634,6 @@ public class Rule
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 }

@@ -41,7 +41,7 @@ import java.util.Vector;
  * do nearest neighbour search should extend this class.
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public abstract class NearestNeighbourSearch
   implements Serializable, OptionHandler, AdditionalMeasureProducer,
@@ -54,7 +54,7 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum size of the heap is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class MyHeap
     implements RevisionHandler {
@@ -268,7 +268,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -276,7 +276,7 @@ public abstract class NearestNeighbourSearch
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class MyHeapElement
     implements RevisionHandler {
@@ -304,7 +304,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -312,7 +312,7 @@ public abstract class NearestNeighbourSearch
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */ //better to change this into a heap element
   protected class NeighborNode
     implements RevisionHandler {
@@ -356,7 +356,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   } 
 
@@ -367,7 +367,7 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum length of the list is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */ //better to change this into a heap
   protected class NeighborList
     implements RevisionHandler {
@@ -526,7 +526,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   

@@ -36,7 +36,7 @@ import java.util.Enumeration;
  * Class for evaluating Kernels.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class KernelEvaluation
   implements RevisionHandler {
@@ -345,7 +345,7 @@ public class KernelEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 
   /**

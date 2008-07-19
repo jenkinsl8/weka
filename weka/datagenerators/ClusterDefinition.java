@@ -35,7 +35,7 @@ import java.util.Enumeration;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 
 public abstract class ClusterDefinition

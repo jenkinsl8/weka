@@ -125,7 +125,7 @@ import java.util.Collections;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class RandomSubSpace
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -517,7 +517,7 @@ public class RandomSubSpace
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

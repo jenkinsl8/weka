@@ -73,7 +73,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.22.2.1 $ 
  */
 public class Id3 
   extends Classifier 
@@ -480,7 +480,7 @@ public class Id3
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.22.2.1 $");
   }
 
   /**

@@ -340,7 +340,7 @@ public class ND
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
   }
 
@@ -617,7 +617,7 @@ public class ND
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
     
   /**

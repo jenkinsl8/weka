@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class AssociatorBeanInfo extends SimpleBeanInfo {
  

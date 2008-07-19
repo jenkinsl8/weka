@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.11.2.1 $
  */
 public abstract class ASSearch
   implements Serializable, RevisionHandler {
@@ -52,7 +52,7 @@ public abstract class ASSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
   
   /**

@@ -29,7 +29,7 @@ import java.util.Vector;
  * recursively in case of Relational attributes.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  * @see Attribute#RELATIONAL
  */
 public class AttributeLocator 
@@ -331,6 +331,6 @@ public class AttributeLocator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
 }

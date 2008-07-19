@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.25.2.3 $ 
  */
 public class Instance
   implements Copyable, Serializable, RevisionHandler {
@@ -1201,6 +1201,6 @@ public class Instance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
+    return RevisionUtils.extract("$Revision: 1.25.2.3 $");
   }
 }

@@ -94,7 +94,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.14.2.1 $ 
  */
 public class StackingC 
   extends Stacking 
@@ -319,7 +319,7 @@ public class StackingC
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 
   /**

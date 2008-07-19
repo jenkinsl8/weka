@@ -90,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.15.2.1 $ 
  */
 public class ConjunctiveRule 
   extends Classifier 
@@ -273,7 +273,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
+      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
     }
   }
     
@@ -553,7 +553,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
+      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
     }
   }
     
@@ -814,7 +814,7 @@ public class ConjunctiveRule
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.16 $");
+      return RevisionUtils.extract("$Revision: 1.15.2.1 $");
     }
   }
     
@@ -1678,7 +1678,7 @@ public class ConjunctiveRule
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision: 1.15.2.1 $");
   }
     
   /**

@@ -69,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class HillClimber 
     extends GlobalScoreSearchAlgorithm {
@@ -134,7 +134,7 @@ public class HillClimber
          * @return		the revision
          */
         public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.9 $");
+          return RevisionUtils.extract("$Revision: 1.8.2.1 $");
         }
     } // class Operation
 	
@@ -533,6 +533,6 @@ public class HillClimber
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.9 $");
+	  return RevisionUtils.extract("$Revision: 1.8.2.1 $");
 	}
 } // HillClimber

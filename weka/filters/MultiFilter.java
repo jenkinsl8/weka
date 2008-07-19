@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -383,7 +383,7 @@ public class MultiFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 
   /**

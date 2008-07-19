@@ -48,7 +48,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class LogisticBase 
     extends Classifier 
@@ -1033,6 +1033,6 @@ public class LogisticBase
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
 }

@@ -29,7 +29,7 @@ import weka.core.xml.XMLBasicSerialization;
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.5.2.1 $ 
  */
 public class XMLClassifier
    extends XMLBasicSerialization {
@@ -61,6 +61,6 @@ public class XMLClassifier
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
+     return RevisionUtils.extract("$Revision: 1.5.2.1 $");
    }
 }

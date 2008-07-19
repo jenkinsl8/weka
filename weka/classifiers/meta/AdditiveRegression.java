@@ -97,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.24.2.1 $
  */
 public class AdditiveRegression 
   extends IteratedSingleClassifierEnhancer 
@@ -521,7 +521,7 @@ public class AdditiveRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision: 1.24.2.1 $");
   }
 
   /**

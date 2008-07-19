@@ -63,7 +63,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.10.2.3 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
@@ -565,7 +565,7 @@ public class Normalize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.3 $");
   }
   
   /**

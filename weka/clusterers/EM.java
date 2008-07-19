@@ -74,19 +74,19 @@ import java.util.Vector;
  *  computation
  *  (default 1e-6)</pre>
  * 
- * <pre> -O
- *  Display model in old format (good when there are many clusters)
- * </pre>
- * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 100)</pre>
+ *  (default 1)</pre>
+ *
+ * <pre>
+ *  Display model in old format (good when there are many clusters)
+ * </pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.40.2.2 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -240,13 +240,13 @@ public class EM
    *  computation
    *  (default 1e-6)</pre>
    * 
-   * <pre> -O
-   *  Display model in old format (good when there are many clusters)
-   * </pre>
-   * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 100)</pre>
+   *  (default 1)</pre>
+   *
+   * <pre>
+   *  Display model in old format (good when there are many clusters)
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -1435,7 +1435,7 @@ public class EM
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.44 $");
+    return RevisionUtils.extract("$Revision: 1.40.2.2 $");
   }
 
   // ============
@@ -1451,4 +1451,3 @@ public class EM
     runClusterer(new EM(), argv);
   }
 }
-

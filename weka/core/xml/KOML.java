@@ -235,6 +235,6 @@ public class KOML
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.4 $");
+     return RevisionUtils.extract("$Revision: 1.3.2.1 $");
    }
 }

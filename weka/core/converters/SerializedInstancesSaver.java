@@ -49,7 +49,7 @@ import java.io.ObjectOutputStream;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  * @see Saver
  */
 public class SerializedInstancesSaver 
@@ -151,7 +151,7 @@ public class SerializedInstancesSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 
   /**

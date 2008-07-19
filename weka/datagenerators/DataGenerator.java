@@ -45,7 +45,7 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable, RevisionHandler {

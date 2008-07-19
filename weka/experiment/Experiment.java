@@ -146,7 +146,7 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.26.2.1 $
  */
 public class Experiment 
   implements Serializable, OptionHandler, RevisionHandler {
@@ -1179,6 +1179,6 @@ public class Experiment
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision: 1.26.2.1 $");
   }
 } // Experiment

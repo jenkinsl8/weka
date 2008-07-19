@@ -35,7 +35,7 @@ import weka.core.Utils;
  * pruning heuristic.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class C45PruneableDecList
   extends ClassifierDecList{
@@ -197,6 +197,6 @@ public class C45PruneableDecList
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 }

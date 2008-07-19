@@ -74,7 +74,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.41.2.1 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler, RevisionHandler {

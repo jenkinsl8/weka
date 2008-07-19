@@ -146,7 +146,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.7.2.1 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
@@ -340,7 +340,7 @@ public class BIRCHCluster
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   } // end class Cluster
 
@@ -429,7 +429,7 @@ public class BIRCHCluster
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   } // end class GridVector
   
@@ -1512,7 +1512,7 @@ public class BIRCHCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

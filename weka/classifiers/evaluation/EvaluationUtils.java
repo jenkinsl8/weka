@@ -36,7 +36,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class EvaluationUtils
   implements RevisionHandler {
@@ -147,7 +147,7 @@ public class EvaluationUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
   }
 }
 

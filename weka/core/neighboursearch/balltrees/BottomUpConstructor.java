@@ -67,7 +67,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class BottomUpConstructor
   extends BallTreeConstructor 
@@ -324,7 +324,7 @@ public class BottomUpConstructor
    * other another node).
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.1.2.2 $
    */
   protected class TempNode
     implements RevisionHandler {
@@ -361,7 +361,7 @@ public class BottomUpConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.2 $");
     }
   }
   
@@ -371,6 +371,6 @@ public class BottomUpConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
 }

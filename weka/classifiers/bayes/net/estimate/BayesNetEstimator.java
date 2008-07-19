@@ -50,7 +50,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class BayesNetEstimator 
     implements OptionHandler, Serializable, RevisionHandler {
@@ -205,7 +205,7 @@ public class BayesNetEstimator
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
     }
 
 } // BayesNetEstimator

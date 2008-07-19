@@ -44,7 +44,7 @@ import java.util.Vector;
  * all the available options.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class Stemming
   implements RevisionHandler {
@@ -190,6 +190,6 @@ public class Stemming
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 }

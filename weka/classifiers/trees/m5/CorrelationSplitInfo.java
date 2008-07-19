@@ -34,7 +34,7 @@ import java.io.Serializable;
  * Finds split points using correlation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public final class CorrelationSplitInfo
   implements Cloneable, Serializable, SplitEvaluate, RevisionHandler {
@@ -248,6 +248,6 @@ public final class CorrelationSplitInfo
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

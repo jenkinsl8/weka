@@ -163,7 +163,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.8.2.2 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -1337,7 +1337,7 @@ public class CheckClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.2 $");
   }
   
   /**

@@ -37,7 +37,7 @@ import weka.core.Statistics;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class PairedStatsCorrected
   extends PairedStats {
@@ -112,6 +112,6 @@ public class PairedStatsCorrected
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.11.2.1 $ 
  */
 public class NominalToBinary 
   extends Filter 
@@ -528,7 +528,7 @@ public class NominalToBinary
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 
   /**

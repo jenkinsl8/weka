@@ -71,7 +71,7 @@ import java.util.Vector;
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.2 $
  * @see Loader
  */
 public class TextDirectoryLoader
@@ -424,7 +424,7 @@ public class TextDirectoryLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
   
   /**

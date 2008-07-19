@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Interface for different kinds of Testers in the Experimenter.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public interface Tester
   extends Serializable {

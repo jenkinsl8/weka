@@ -79,7 +79,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class GeneticSearch 
     extends LocalScoreSearchAlgorithm {
@@ -300,7 +300,7 @@ public class GeneticSearch
 		 * @return		the revision
 		 */
 		public String getRevision() {
-		  return RevisionUtils.extract("$Revision: 1.5 $");
+		  return RevisionUtils.extract("$Revision: 1.4.2.1 $");
 		}
 	} // class BayesNetRepresentation 
 	    	
@@ -736,6 +736,6 @@ public class GeneticSearch
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.5 $");
+	  return RevisionUtils.extract("$Revision: 1.4.2.1 $");
 	}
 } // GeneticSearch

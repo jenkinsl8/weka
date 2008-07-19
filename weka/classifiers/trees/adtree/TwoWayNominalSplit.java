@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * either 'is some_value' or 'is not some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class TwoWayNominalSplit
   extends Splitter {
@@ -209,6 +209,6 @@ public class TwoWayNominalSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 }

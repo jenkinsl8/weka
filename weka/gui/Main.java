@@ -112,7 +112,7 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.12.2.3 $
  */
 public class Main
   extends JFrame
@@ -125,7 +125,7 @@ public class Main
    * DesktopPane with background image.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.14 $
+   * @version $Revision: 1.12.2.3 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -177,7 +177,7 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.14 $
+   * @version $Revision: 1.12.2.3 $
    */
   public static class ChildFrameSDI 
     extends JFrame {
@@ -240,7 +240,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.14 $
+   * @version $Revision: 1.12.2.3 $
    */
   public static class ChildFrameMDI
     extends JInternalFrame {

@@ -37,7 +37,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class RuleNode 
   extends Classifier {
@@ -1103,6 +1103,6 @@ public class RuleNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 }

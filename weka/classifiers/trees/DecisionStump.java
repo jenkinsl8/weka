@@ -54,7 +54,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.25.2.2 $
  */
 public class DecisionStump 
   extends Classifier 
@@ -756,7 +756,7 @@ public class DecisionStump
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision: 1.25.2.2 $");
   }
  
   /**

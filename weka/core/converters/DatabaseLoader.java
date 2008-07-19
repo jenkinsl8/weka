@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.12.2.2 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -1558,7 +1558,7 @@ public class DatabaseLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.2 $");
   }
 
   /** Main method.

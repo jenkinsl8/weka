@@ -101,7 +101,7 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.16.2.1 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer, 
@@ -812,7 +812,7 @@ public class CrossValidationResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision: 1.16.2.1 $");
   }
     
   /** 

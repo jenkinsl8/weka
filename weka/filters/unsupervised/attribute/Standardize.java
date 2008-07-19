@@ -49,7 +49,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 
@@ -355,7 +355,7 @@ public class Standardize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
 
   /**

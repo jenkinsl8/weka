@@ -34,7 +34,7 @@ import java.io.Serializable;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public abstract class ClassifierSplitModel
   implements Cloneable, Serializable, RevisionHandler {

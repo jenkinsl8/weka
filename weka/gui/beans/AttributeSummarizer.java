@@ -42,7 +42,7 @@ import javax.swing.JScrollPane;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class AttributeSummarizer
   extends DataVisualizer {

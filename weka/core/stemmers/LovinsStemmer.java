@@ -54,7 +54,7 @@ import java.util.HashMap;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class LovinsStemmer 
   implements Stemmer, TechnicalInformationHandler {
@@ -982,7 +982,7 @@ public class LovinsStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 
   /**

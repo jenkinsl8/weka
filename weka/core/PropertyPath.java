@@ -42,7 +42,7 @@ import java.util.Vector;
  * ridge parameter and <code>setValue(...)</code> will set it.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class PropertyPath
   implements RevisionHandler {
@@ -51,7 +51,7 @@ public class PropertyPath
    * Represents a single element of a property path
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   public static class PathElement
     implements Cloneable, RevisionHandler {
@@ -139,7 +139,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -147,7 +147,7 @@ public class PropertyPath
    * Contains a (property) path structure
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   public static class Path
     implements RevisionHandler {
@@ -305,7 +305,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
 
@@ -313,7 +313,7 @@ public class PropertyPath
    * A helper class that stores Object and PropertyDescriptor together.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected static class PropertyContainer
     implements RevisionHandler {
@@ -361,7 +361,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -562,7 +562,7 @@ public class PropertyPath
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
   
   /**

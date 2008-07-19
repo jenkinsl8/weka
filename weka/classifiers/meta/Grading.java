@@ -90,7 +90,7 @@ import java.util.Random;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.12.2.1 $ 
  */
 public class Grading 
   extends Stacking
@@ -374,7 +374,7 @@ public class Grading
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 
   /**

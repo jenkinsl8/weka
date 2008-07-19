@@ -129,7 +129,7 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
@@ -915,6 +915,6 @@ public class LearningRateResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 } // LearningRateResultProducer

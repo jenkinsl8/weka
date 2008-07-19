@@ -39,7 +39,7 @@ import java.io.Serializable;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class ClassifierDecList
   implements Serializable, RevisionHandler {
@@ -436,6 +436,6 @@ public class ClassifierDecList
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 }

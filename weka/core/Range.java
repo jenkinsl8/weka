@@ -39,7 +39,7 @@ import java.util.Vector;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class Range
   implements Serializable, RevisionHandler {
@@ -425,7 +425,7 @@ public class Range
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision: 1.17.2.1 $");
   }
 
   /**

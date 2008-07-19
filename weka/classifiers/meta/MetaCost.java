@@ -123,7 +123,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.23.2.1 $ 
  */
 public class MetaCost 
   extends RandomizableSingleClassifierEnhancer
@@ -655,7 +655,7 @@ public class MetaCost
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision: 1.23.2.1 $");
   }
 
   /**

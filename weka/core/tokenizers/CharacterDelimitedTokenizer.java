@@ -32,7 +32,7 @@ import java.util.Vector;
  * Abstract superclass for tokenizers that take characters as delimiters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.1 $
  */
 public abstract class CharacterDelimitedTokenizer
   extends Tokenizer {

@@ -105,7 +105,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class GeneticSearch 
   extends ASSearch 
@@ -298,7 +298,7 @@ public class GeneticSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.19 $");
+      return RevisionUtils.extract("$Revision: 1.18.2.1 $");
     }
   }
 
@@ -1298,6 +1298,6 @@ public class GeneticSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision: 1.18.2.1 $");
   }
 }

@@ -38,7 +38,7 @@ import java.io.Serializable;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class PreConstructedLinearModel 
   extends Classifier 
@@ -173,6 +173,6 @@ public class PreConstructedLinearModel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 }

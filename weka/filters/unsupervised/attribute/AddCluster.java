@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class AddCluster 
   extends Filter 
@@ -485,7 +485,7 @@ public class AddCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
 
   /**

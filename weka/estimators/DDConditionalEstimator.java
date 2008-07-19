@@ -30,7 +30,7 @@ import weka.core.RevisionUtils;
  * a discrete domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class DDConditionalEstimator implements ConditionalEstimator {
 
@@ -105,7 +105,7 @@ public class DDConditionalEstimator implements ConditionalEstimator {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

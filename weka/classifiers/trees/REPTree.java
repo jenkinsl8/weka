@@ -76,7 +76,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.25.2.1 $ 
  */
 public class REPTree 
   extends Classifier 
@@ -1326,7 +1326,7 @@ public class REPTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.26 $");
+      return RevisionUtils.extract("$Revision: 1.25.2.1 $");
     }
   }
 
@@ -1956,7 +1956,7 @@ public class REPTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.26 $");
+    return RevisionUtils.extract("$Revision: 1.25.2.1 $");
   }
 
   /**

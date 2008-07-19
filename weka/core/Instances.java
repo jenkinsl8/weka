@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.76 $ 
+ * @version $Revision: 1.72.2.4 $ 
  */
 public class Instances 
   implements Serializable, RevisionHandler {
@@ -2134,6 +2134,6 @@ public class Instances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.76 $");
+    return RevisionUtils.extract("$Revision: 1.72.2.4 $");
   }
 }

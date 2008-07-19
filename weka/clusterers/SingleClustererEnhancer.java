@@ -35,7 +35,7 @@ import java.util.Vector;
  * Meta-clusterer for enhancing a base clusterer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public abstract class SingleClustererEnhancer
   extends AbstractClusterer

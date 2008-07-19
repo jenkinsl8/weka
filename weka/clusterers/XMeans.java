@@ -149,7 +149,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.23.2.1 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -2392,7 +2392,7 @@ public class XMeans
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision: 1.23.2.1 $");
   }
 
   /**

@@ -37,7 +37,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * on WikiPedia.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class Trie
   implements Serializable, Cloneable, Collection<String>, RevisionHandler {
@@ -49,7 +49,7 @@ public class Trie
    * Represents a node in the trie.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   public static class TrieNode
     extends DefaultMutableTreeNode
@@ -419,7 +419,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -427,7 +427,7 @@ public class Trie
    * Represents an iterator over a trie
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.1.2.1 $
    */
   public static class TrieIterator 
     implements Iterator<String>, RevisionHandler {
@@ -493,7 +493,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
     }
   }
   
@@ -856,7 +856,7 @@ public class Trie
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
   
   /**

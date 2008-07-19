@@ -188,7 +188,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5.2.2 $
  * @see TestInstances
  */
 public class CheckAssociator
@@ -1528,7 +1528,7 @@ public class CheckAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.2 $");
   }
   
   /**

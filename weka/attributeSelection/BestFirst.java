@@ -70,7 +70,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  *         Martin Guetlein (cashing merit of expanded nodes) 
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.27.2.2 $
  */
 public class BestFirst 
   extends ASSearch 
@@ -121,7 +121,7 @@ public class BestFirst
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.29 $");
+      return RevisionUtils.extract("$Revision: 1.27.2.2 $");
     }
   }
 
@@ -248,7 +248,7 @@ public class BestFirst
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.29 $");
+      return RevisionUtils.extract("$Revision: 1.27.2.2 $");
     }
   }
 
@@ -927,6 +927,6 @@ public class BestFirst
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.29 $");
+    return RevisionUtils.extract("$Revision: 1.27.2.2 $");
   }
 }

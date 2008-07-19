@@ -29,7 +29,7 @@ import java.util.Random;
  * This class is used to represent a node in the neuralnet.
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class NeuralNode
   extends NeuralConnection {
@@ -298,6 +298,6 @@ public class NeuralNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 }

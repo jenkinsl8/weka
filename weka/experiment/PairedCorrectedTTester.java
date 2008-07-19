@@ -108,7 +108,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class PairedCorrectedTTester 
   extends PairedTTester
@@ -336,6 +336,6 @@ public class PairedCorrectedTTester
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 }

@@ -36,7 +36,7 @@ import java.util.Hashtable;
  * These two measures allow to introduce a sort order for rules.
  *
  * @author Stefan Mutter
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class RuleItem
   implements Comparable, Serializable, RevisionHandler {
@@ -198,6 +198,6 @@ public class RuleItem
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

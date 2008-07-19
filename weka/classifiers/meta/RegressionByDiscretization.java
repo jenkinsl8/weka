@@ -100,7 +100,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.36.2.1 $
  */
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer {
@@ -391,7 +391,7 @@ public class RegressionByDiscretization
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.37 $");
+    return RevisionUtils.extract("$Revision: 1.36.2.1 $");
   }
  
   /**

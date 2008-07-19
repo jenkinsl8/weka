@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class SimulatedAnnealing 
 	extends GlobalScoreSearchAlgorithm
@@ -437,6 +437,6 @@ public class SimulatedAnnealing
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.6 $");
+	  return RevisionUtils.extract("$Revision: 1.4.2.1 $");
 	}
 } // SimulatedAnnealing

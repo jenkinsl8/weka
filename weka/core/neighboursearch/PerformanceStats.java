@@ -34,7 +34,7 @@ import java.util.Vector;
  * neighbour search (NNS) algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class PerformanceStats
   implements AdditionalMeasureProducer, Serializable, RevisionHandler {
@@ -339,6 +339,6 @@ public class PerformanceStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
 }

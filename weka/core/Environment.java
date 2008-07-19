@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * replacing key names (enclosed by ${}) with their associated value in Strings.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class Environment implements RevisionHandler {
   
@@ -157,6 +157,6 @@ public class Environment implements RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
 }

@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.20.2.3 $
  */
 public class SparseInstance
   extends Instance {
@@ -860,6 +860,6 @@ public class SparseInstance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.20.2.3 $");
   }
 }

@@ -35,7 +35,7 @@ import weka.core.Utils;
  * splitting criterion based on residuals of the LogitBoost algorithm.
  * 
  * @author Niels Landwehr
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class ResidualSplit
   extends ClassifierSplitModel{
@@ -314,6 +314,6 @@ public class ResidualSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

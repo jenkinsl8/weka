@@ -50,7 +50,7 @@ import java.util.Vector;
  * 
  <!-- options-end -->
  * 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  * @author Remco Bouckaert (rrb@xm.co.nz)
  */
 public class MultiNomialBMAEstimator 
@@ -388,6 +388,6 @@ public class MultiNomialBMAEstimator
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
 } // class MultiNomialBMAEstimator

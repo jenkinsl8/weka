@@ -31,7 +31,7 @@ import java.io.Serializable;
  * with respect to distributions of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public abstract class SplitCriterion
   implements Serializable, RevisionHandler {

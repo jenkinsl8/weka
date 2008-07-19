@@ -47,7 +47,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class SimpleEstimator 
     extends BayesNetEstimator {
@@ -213,7 +213,7 @@ public class SimpleEstimator
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision: 1.5.2.1 $");
     }
 
 } // SimpleEstimator

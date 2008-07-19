@@ -48,8 +48,7 @@ import weka.core.Capabilities.Capability;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
+ *  The size of the cache (a prime number).
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -66,7 +65,7 @@ import weka.core.Capabilities.Capability;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.2.2.1 $ 
  */
 public class MIPolyKernel 
   extends PolyKernel 
@@ -182,7 +181,6 @@ public class MIPolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 }
-

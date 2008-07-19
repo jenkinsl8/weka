@@ -6,7 +6,7 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.6 $
+# Version $Revision: 1.5.2.1 $
 
 # if set to true the Capabilities filters in the GOE will be initialized
 # based on the full dataset that has been loaded into the Explorer 

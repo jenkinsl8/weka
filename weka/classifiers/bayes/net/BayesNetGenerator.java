@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
@@ -582,7 +582,7 @@ public class BayesNetGenerator extends EditableBayesNet {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.14 $");
+      return RevisionUtils.extract("$Revision: 1.12.2.1 $");
     }
 
     /**

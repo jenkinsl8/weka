@@ -74,7 +74,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.22.2.1 $ 
 */
 public class Prism 
   extends Classifier
@@ -277,7 +277,7 @@ public class Prism
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.23 $");
+      return RevisionUtils.extract("$Revision: 1.22.2.1 $");
     }
   }
   
@@ -323,7 +323,7 @@ public class Prism
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.23 $");
+      return RevisionUtils.extract("$Revision: 1.22.2.1 $");
     }
   }
 
@@ -542,7 +542,7 @@ public class Prism
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.22.2.1 $");
   }
 
   /**

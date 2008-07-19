@@ -73,7 +73,7 @@ import java.util.Vector;
  * @author Mark Hall (mhall@cs.waikato.ac.nz) -- attribute selection code
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- attribute selection code
  * @author fracpete (fracpete at waikato dot ac dot nz) -- filter code
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.3 $
  */
 public class PrincipalComponents
   extends Filter
@@ -798,7 +798,7 @@ public class PrincipalComponents
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.3 $");
   }
 
   /**

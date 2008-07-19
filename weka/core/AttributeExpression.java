@@ -39,7 +39,7 @@ import java.util.Vector;
  * floor, ceil, rint, tan, sin, (, ).
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class AttributeExpression
   implements Serializable, RevisionHandler {
@@ -93,7 +93,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
     }
   }
 
@@ -137,7 +137,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
     }
   }
 
@@ -232,7 +232,7 @@ public class AttributeExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.4.2.1 $");
     }
   }
 
@@ -578,6 +578,6 @@ public class AttributeExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

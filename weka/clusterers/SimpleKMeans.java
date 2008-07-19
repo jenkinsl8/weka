@@ -52,23 +52,22 @@ import java.util.Vector;
  *  number of clusters.
  *  (default 2).</pre>
  * 
- * <pre> -V
- *  Display std. deviations for centroids.
- * </pre>
- * 
- * <pre> -M
- *  Replace missing values with mean/mode.
- * </pre>
- * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 10)</pre>
+ * <pre> -V 
+ *  Display std. deviations for numeric atts.
+ * </pre>
+ *
+ * <pre> -M
+ *  Replace missing values with mean/mode globally.
+ * </pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.29.2.8 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -689,17 +688,16 @@ public class SimpleKMeans
    *  number of clusters.
    *  (default 2).</pre>
    * 
-   * <pre> -V
-   *  Display std. deviations for centroids.
-   * </pre>
-   * 
-   * <pre> -M
-   *  Replace missing values with mean/mode.
-   * </pre>
-   * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 10)</pre>
+   * <pre> -V 
+   *  Display std. deviations for numeric atts.
+   * </pre>
+   *
+   * <pre> -M
+   *  Replace missing values with mean/mode globally.
+   * </pre>
    * 
    <!-- options-end -->
    *
@@ -1118,7 +1116,7 @@ public class SimpleKMeans
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.39 $");
+    return RevisionUtils.extract("$Revision: 1.29.2.8 $");
   }
 
   /**
@@ -1131,4 +1129,3 @@ public class SimpleKMeans
     runClusterer(new SimpleKMeans(), argv);
   }
 }
-

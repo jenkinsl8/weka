@@ -49,7 +49,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.13.2.2 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -70,7 +70,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.13.2.2 $
    * @see #hasMoreElements(Instances)
    * @see #nextElement(Instances)
    * @see #reset()
@@ -515,7 +515,7 @@ public class ConverterUtils
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
+      return RevisionUtils.extract("$Revision: 1.13.2.2 $");
     }
   }
 
@@ -525,7 +525,7 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.13.2.2 $
    * @see DataSource
    */
   public static class DataSink
@@ -668,7 +668,7 @@ public class ConverterUtils
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
+      return RevisionUtils.extract("$Revision: 1.13.2.2 $");
     }
   }
   
@@ -1164,6 +1164,6 @@ public class ConverterUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.13.2.2 $");
   }
 }

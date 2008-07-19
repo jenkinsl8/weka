@@ -29,7 +29,7 @@ import weka.core.RevisionUtils;
  * neuralnode to perform all it's computations (as a sigmoid unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class SigmoidUnit
   implements NeuralMethod, RevisionHandler {
@@ -123,6 +123,6 @@ public class SigmoidUnit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 }

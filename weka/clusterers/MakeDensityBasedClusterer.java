@@ -80,7 +80,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.13.2.4 $
  */
 public class MakeDensityBasedClusterer 
   extends AbstractDensityBasedClusterer
@@ -581,7 +581,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision: 1.13.2.4 $");
   }
 
   /**

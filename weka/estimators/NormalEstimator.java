@@ -33,7 +33,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class NormalEstimator
   extends Estimator
@@ -204,7 +204,7 @@ public class NormalEstimator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.2 $");
   }
 
   /**

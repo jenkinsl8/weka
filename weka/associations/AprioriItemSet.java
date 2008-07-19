@@ -43,7 +43,7 @@ import java.util.Hashtable;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class AprioriItemSet 
   extends ItemSet 
@@ -537,6 +537,6 @@ public class AprioriItemSet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 }

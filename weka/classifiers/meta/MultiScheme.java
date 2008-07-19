@@ -66,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.24.2.1 $
  */
 public class MultiScheme 
   extends RandomizableMultipleClassifiersCombiner {
@@ -463,7 +463,7 @@ public class MultiScheme
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision: 1.24.2.1 $");
   }
 
   /**

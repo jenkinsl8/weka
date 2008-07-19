@@ -50,7 +50,7 @@ import java.util.ArrayList;
  * Abstract base class for cost-sensitive subset and attribute evaluators.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.3 $
  */
 public abstract class CostSensitiveASEvaluation
   extends ASEvaluation
@@ -575,6 +575,6 @@ public abstract class CostSensitiveASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.3 $");
   }
 }

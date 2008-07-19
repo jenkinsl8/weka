@@ -114,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.9.2.1 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -1745,7 +1745,7 @@ public class TestInstances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
   
   /**

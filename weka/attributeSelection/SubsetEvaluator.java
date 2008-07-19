@@ -28,7 +28,7 @@ import java.util.BitSet;
  * Interface for attribute subset evaluators.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.10.2.1 $
  */
 public interface SubsetEvaluator {
     

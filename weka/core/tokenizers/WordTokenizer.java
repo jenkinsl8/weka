@@ -36,12 +36,12 @@ import java.util.StringTokenizer;
  * 
  * <pre> -delimiters &lt;value&gt;
  *  The delimiters to use
- *  (default ' \r\n\t.,;:'"()?!').</pre>
+ *  (default ' \n\t.,;:'"()?!').</pre>
  * 
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class WordTokenizer
   extends CharacterDelimitedTokenizer {
@@ -99,7 +99,7 @@ public class WordTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
   }
 
   /**
@@ -112,4 +112,3 @@ public class WordTokenizer
     runTokenizer(new WordTokenizer(), args);
   }
 }
-

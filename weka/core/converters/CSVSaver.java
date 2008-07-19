@@ -50,7 +50,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7.2.2 $
  * @see Saver
  */
 public class CSVSaver 
@@ -283,7 +283,7 @@ public class CSVSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
   }
 
   /**

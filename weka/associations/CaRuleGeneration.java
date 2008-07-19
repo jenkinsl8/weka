@@ -50,7 +50,7 @@ import java.util.TreeSet;
  * (out of an unpublished manuscript from T. Scheffer). 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.3.2.1 $ */
 public class CaRuleGeneration
   extends RuleGeneration
   implements Serializable, RevisionHandler {
@@ -252,6 +252,6 @@ public class CaRuleGeneration
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

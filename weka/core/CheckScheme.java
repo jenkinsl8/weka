@@ -32,7 +32,7 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  * @see TestInstances
  */
 public abstract class CheckScheme
@@ -59,7 +59,7 @@ public abstract class CheckScheme
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
     }
   }
   

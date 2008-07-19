@@ -51,8 +51,7 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
+ *  The size of the cache (a prime number).
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -68,7 +67,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6.2.2 $
  */
 public class PolyKernel 
   extends CachedKernel {
@@ -164,8 +163,7 @@ public class PolyKernel
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number), 0 for full cache and 
-   *  -1 to turn it off.
+   *  The size of the cache (a prime number).
    *  (default: 250007)</pre>
    * 
    * <pre> -E &lt;num&gt;
@@ -345,7 +343,6 @@ public class PolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.6.2.2 $");
   }
 }
-

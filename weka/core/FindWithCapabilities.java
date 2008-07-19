@@ -140,7 +140,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3.2.2 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator
@@ -891,7 +891,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.2 $");
   }
 
   /**

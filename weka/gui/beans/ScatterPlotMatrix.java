@@ -32,7 +32,7 @@ import java.awt.BorderLayout;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class ScatterPlotMatrix
   extends DataVisualizer {

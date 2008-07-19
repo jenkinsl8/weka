@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.30.2.2 $
  */
 public class BayesNet
   extends Classifier
@@ -1123,6 +1123,6 @@ public class BayesNet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.33 $");
+    return RevisionUtils.extract("$Revision: 1.30.2.2 $");
   }
 } // class BayesNet

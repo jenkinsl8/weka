@@ -136,11 +136,11 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of the kernel analysed.
- *  eg: weka.classifiers.functions.supportVector.RBFKernel
- *  (default weka.classifiers.functions.supportVector.RBFKernel)</pre>
+ *  eg: weka.classifiers.functions.supportVector.PolyKernel
+ *  (default weka.classifiers.functions.supportVector.PolyKernel)</pre>
  * 
  * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+ * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
  * </pre>
  * 
  * <pre> -D
@@ -152,13 +152,16 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
+ *  The size of the cache (a prime number).
  *  (default: 250007)</pre>
  * 
- * <pre> -G &lt;num&gt;
- *  The Gamma parameter.
- *  (default: 0.01)</pre>
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
  * 
  <!-- options-end -->
  *
@@ -166,7 +169,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.2.2.2 $
  * @see TestInstances
  */
 public class CheckKernel
@@ -182,7 +185,7 @@ public class CheckKernel
    */
   
   /*** The kernel to be examined */
-  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.RBFKernel();
+  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.PolyKernel();
   
   /**
    * Returns an enumeration describing the available options.
@@ -198,8 +201,8 @@ public class CheckKernel
     
     result.addElement(new Option(
         "\tFull name of the kernel analysed.\n"
-        +"\teg: weka.classifiers.functions.supportVector.RBFKernel\n"
-        + "\t(default weka.classifiers.functions.supportVector.RBFKernel)",
+        +"\teg: weka.classifiers.functions.supportVector.PolyKernel\n"
+        + "\t(default weka.classifiers.functions.supportVector.PolyKernel)",
         "W", 1, "-W"));
     
     if ((m_Kernel != null) 
@@ -260,11 +263,11 @@ public class CheckKernel
    * 
    * <pre> -W
    *  Full name of the kernel analysed.
-   *  eg: weka.classifiers.functions.supportVector.RBFKernel
-   *  (default weka.classifiers.functions.supportVector.RBFKernel)</pre>
+   *  eg: weka.classifiers.functions.supportVector.PolyKernel
+   *  (default weka.classifiers.functions.supportVector.PolyKernel)</pre>
    * 
    * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
    * </pre>
    * 
    * <pre> -D
@@ -276,13 +279,16 @@ public class CheckKernel
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number), 0 for full cache and 
-   *  -1 to turn it off.
+   *  The size of the cache (a prime number).
    *  (default: 250007)</pre>
    * 
-   * <pre> -G &lt;num&gt;
-   *  The Gamma parameter.
-   *  (default: 0.01)</pre>
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
    * 
    <!-- options-end -->
    *
@@ -296,7 +302,7 @@ public class CheckKernel
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      tmpStr = weka.classifiers.functions.supportVector.RBFKernel.class.getName();
+      tmpStr = weka.classifiers.functions.supportVector.PolyKernel.class.getName();
     setKernel(
 	(Kernel) forName(
 	    "weka.classifiers.functions.supportVector", 
@@ -1432,7 +1438,7 @@ public class CheckKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
   
   /**

@@ -74,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -598,6 +598,6 @@ public class InstanceQuery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
   }
 }

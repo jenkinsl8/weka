@@ -35,7 +35,7 @@ import java.util.Random;
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class NBTreeSplit
   extends ClassifierSplitModel{
@@ -407,6 +407,6 @@ public class NBTreeSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 }

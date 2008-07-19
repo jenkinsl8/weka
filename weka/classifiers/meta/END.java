@@ -152,7 +152,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -343,7 +343,7 @@ public class END
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
   
   /**

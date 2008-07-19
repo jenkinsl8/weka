@@ -421,7 +421,7 @@ public class OrdinalClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision: 1.17.2.1 $");
   }
 
   /**

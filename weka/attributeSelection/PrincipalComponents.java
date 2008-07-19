@@ -72,7 +72,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.35.2.1 $
  */
 public class PrincipalComponents 
   extends UnsupervisedAttributeEvaluator 
@@ -945,7 +945,7 @@ public class PrincipalComponents
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.36 $");
+    return RevisionUtils.extract("$Revision: 1.35.2.1 $");
   }
 
   /**

@@ -31,7 +31,7 @@ import java.util.Arrays;
  * A vector specialized on doubles.
  * 
  * @author Yong Wang
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class  DoubleVector
   implements Cloneable, RevisionHandler {
@@ -731,7 +731,7 @@ public class  DoubleVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   public static void  main( String args[] ) {
