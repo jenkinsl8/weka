@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.10 $
+# Version: $Revision: 1.3.2.6 $
 
 # Start: Weka
 !define WEKA_WEKA "Weka"
@@ -114,11 +114,6 @@ Section "Associate Files" SectionAssociations
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
     WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
-    # XRFF
-    WriteRegStr HKCR ".xrff" "" "XRFFDataFile"
-    WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
-    WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
 SectionEnd
 
 # Start: JRE
@@ -193,9 +188,6 @@ Section /o un.Main UNSEC0000
     # ARFF
     DeleteRegKey HKCR ".arff"
     DeleteRegKey HKCR "ARFFDataFile"
-    # XRFF
-    DeleteRegKey HKCR ".xrff"
-    DeleteRegKey HKCR "XRFFDataFile"
 SectionEnd
 
 Section un.post UNSEC0001
@@ -212,7 +204,7 @@ SectionEnd
 
 # Section overview
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff and .xrff files with the Weka Explorer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff files with the Weka Explorer."
   # Start: JRE
   !insertmacro MUI_DESCRIPTION_TEXT ${SectionJRE} "Installs the Java Runtime Environment (JRE)."
   # End: JRE
