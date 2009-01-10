@@ -112,7 +112,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class SubsetSizeForwardSelection extends ASSearch
   implements OptionHandler {
@@ -599,7 +599,7 @@ public class SubsetSizeForwardSelection extends ASSearch
   /**
    * Set whether verbose output should be generated.
    *
-   * @param b
+   * @param d
    *            true if output is to be verbose.
    */
   public void setVerbose(boolean b) {
@@ -702,7 +702,7 @@ public class SubsetSizeForwardSelection extends ASSearch
   /**
    * Searches the attribute subset space by subset size forward selection
    *
-   * @param ASEval
+   * @param ASEvaluator
    *            the attribute evaluator to guide the search
    * @param data
    *            the training instances.
@@ -908,7 +908,7 @@ public class SubsetSizeForwardSelection extends ASSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
 

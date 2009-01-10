@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.3 $
  */
 public class MiddleOutConstructor
   extends BallTreeConstructor
@@ -751,7 +751,7 @@ public class MiddleOutConstructor
 
   /**
    * Sets the instances on which the tree is to be built.
-   * @param insts The instances on which to build the 
+   * @param inst The instances on which to build the 
    * ball tree.
    */
   public void setInstances(Instances insts) {
@@ -997,7 +997,7 @@ public class MiddleOutConstructor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
   
   /** 
@@ -1008,7 +1008,7 @@ public class MiddleOutConstructor
    * node's centre/anchor point.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.3 $
    */
   protected class TempNode
     implements RevisionHandler {
@@ -1059,7 +1059,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.3 $");
     }
   }
 
@@ -1069,7 +1069,7 @@ public class MiddleOutConstructor
    * anchor point). 
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.3 $
    */
   protected class ListNode
     implements RevisionHandler {
@@ -1097,7 +1097,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.3 $");
     }
   }
   
@@ -1107,7 +1107,7 @@ public class MiddleOutConstructor
    * centre/pivot/anchor, in a (reverse sorted) list.  
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.3 $
    */
   protected class MyIdxList
     extends FastVector {
@@ -1231,7 +1231,7 @@ public class MiddleOutConstructor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.3 $");
     }
   }
 }

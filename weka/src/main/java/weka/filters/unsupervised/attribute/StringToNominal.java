@@ -289,7 +289,7 @@ public class StringToNominal
   /**
    * Sets range of indices of the attributes used.
    *
-   * @param rangeList the list of attribute indices
+   * @param attIndex the index of the attribute
    */
   public void setAttributeRange(String rangeList) {
     

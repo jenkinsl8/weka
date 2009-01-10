@@ -32,7 +32,7 @@ import java.util.HashSet;
  * A helper class for <a href="http://www.jython.org/" target="_blank">Jython</a>.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class Jython
   implements Serializable, RevisionHandler {
@@ -79,8 +79,10 @@ public class Jython
   
   /**
    * executes the specified method on the current interpreter and returns the 
-   * result, if any.
+   * result, if any
    * 
+   * @param o			the object the method should be called from,
+   * 				e.g., a Python Interpreter
    * @param methodName		the name of the method
    * @param paramClasses	the classes of the parameters
    * @param paramValues		the values of the parameters
@@ -133,7 +135,7 @@ public class Jython
    * loads the module and returns a new instance of it as instance of the
    * provided Java class template.
    * 
-   * @param file		the Jython module file
+   * @param filename		the path to the Jython module, incl. filename
    * @param template		the template for the returned Java object
    * @return			the Jython object
    */
@@ -146,7 +148,7 @@ public class Jython
    * provided Java class template. The paths are added to 'sys.path' - can 
    * be used if the module depends on other Jython modules.
    * 
-   * @param file		the Jython module file
+   * @param filename		the path to the Jython module, incl. filename
    * @param template		the template for the returned Java object
    * @param paths		additional paths to add to "sys.path"
    * @return			the Jython object
@@ -280,7 +282,7 @@ public class Jython
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   /**

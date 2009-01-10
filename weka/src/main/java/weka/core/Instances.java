@@ -893,7 +893,8 @@ public class Instances
    * @throws Exception if there was no call to randomizeAttribute or if
    * attributes were added or removed since the last call to
    * <code>randomizeAttribute</code>
-   * @see #randomizeAttribute(int, Random, int)
+   * @see randomizeAttribute
+   * @author Arne Muller (arne.muller@gmail.com)
    */
   public void undoRandomizeAttribute() throws Exception {
     
@@ -926,7 +927,8 @@ public class Instances
    * rounds of shuffling the more random your attribute value distribution
    * (e.g. choose 3, but note that the time needed for shuffling is proportional
    * to the number of rounds).
-   * @see #undoRandomizeAttribute()
+   * @see undoRandomizeAttribute
+   * @author Arne Muller (arne.muller@gmail.com)
    */
   public void randomizeAttribute(int attIdx, Random random, int rounds) {
     

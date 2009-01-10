@@ -51,7 +51,7 @@ import java.util.Vector;
  * Specify the full class name of the clusterer to evaluate. <p>
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision$
+ * @version $Revision: 1.3 $
  */
 
 public class DensityBasedClustererSplitEvaluator 
@@ -251,7 +251,7 @@ public class DensityBasedClustererSplitEvaluator
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */
@@ -530,7 +530,7 @@ public class DensityBasedClustererSplitEvaluator
   /**
    * Sets the clusterer.
    *
-   * @param newClusterer the new clusterer to use.
+   * @param newClassifier the new clusterer to use.
    */
   public void setClusterer(DensityBasedClusterer newClusterer) {
     
@@ -560,7 +560,7 @@ public class DensityBasedClustererSplitEvaluator
    * Set the Clusterer to use, given it's class name. A new clusterer will be
    * instantiated.
    *
-   * @param newClustererName the clusterer class name.
+   * @param newClusterer the Classifier class name.
    * @exception Exception if the class name is invalid.
    */
   public void setClustererName(String newClustererName) throws Exception {
@@ -631,6 +631,6 @@ public class DensityBasedClustererSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

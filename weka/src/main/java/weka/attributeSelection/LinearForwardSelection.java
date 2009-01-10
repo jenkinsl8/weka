@@ -87,7 +87,7 @@ import java.util.Vector;
   <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class LinearForwardSelection 
   extends ASSearch 
@@ -582,7 +582,7 @@ public class LinearForwardSelection
   /**
    * Set whether verbose output should be generated.
    *
-   * @param b
+   * @param d
    *            true if output is to be verbose.
    */
   public void setVerbose(boolean b) {
@@ -725,7 +725,7 @@ public class LinearForwardSelection
   /**
    * Searches the attribute subset space by linear forward selection
    *
-   * @param ASEval
+   * @param ASEvaluator
    *            the attribute evaluator to guide the search
    * @param data
    *            the training instances.
@@ -858,7 +858,7 @@ public class LinearForwardSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
 
