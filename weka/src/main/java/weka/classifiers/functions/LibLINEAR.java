@@ -31,7 +31,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -120,7 +119,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @version $Revision$
  */
 public class LibLINEAR
-  extends AbstractClassifier
+  extends Classifier
   implements TechnicalInformationHandler {
 
   /** the svm classname */

@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -93,7 +92,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class NNge 
-  extends AbstractClassifier 
+  extends Classifier 
   implements UpdateableClassifier, OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -598,7 +597,7 @@ public class NNge
      *
      * @return true if the Exemplar is empty, false otherwise
      */
-    public boolean isEmpty(){
+    private boolean isEmpty(){
       return (numInstances() == 0);
     }
 
@@ -863,7 +862,7 @@ public class NNge
 
     /* check the instance */
     if (m_Train.equalHeaders(instance.dataset()) == false){
-      throw new Exception("NNge.classifyInstance : Incompatible instance types !\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("NNge.classifyInstance : Incompatible instance types !");
     }
 	
     Exemplar matched = nearestExemplar(instance); 
@@ -884,7 +883,7 @@ public class NNge
   public void updateClassifier(Instance instance) throws Exception {
 
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }	
     update(instance);	
   }

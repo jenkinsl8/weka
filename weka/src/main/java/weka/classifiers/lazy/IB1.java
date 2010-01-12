@@ -23,7 +23,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -78,7 +77,7 @@ import java.util.Enumeration;
  * @version $Revision$
  */
 public class IB1 
-  extends AbstractClassifier 
+  extends Classifier 
   implements UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */
@@ -192,7 +191,7 @@ public class IB1
   public void updateClassifier(Instance instance) throws Exception {
   
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (instance.classIsMissing()) {
       return;

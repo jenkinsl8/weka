@@ -391,7 +391,6 @@ public class FilteredAssociator
     
     if (getFilter() == null) {
       result = super.getCapabilities();
-      result.disableAll();
     } else {
       result = getFilter().getCapabilities();
     }

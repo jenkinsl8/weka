@@ -23,11 +23,9 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
@@ -92,7 +90,7 @@ import java.util.Random;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.13 $ 
  */
 public class Grading 
   extends Stacking
@@ -179,7 +177,7 @@ public class Grading
       m_InstPerClass[(int)newData.instance(i).classValue()]++;
     }
     
-    m_MetaClassifiers = AbstractClassifier.makeCopies(m_MetaClassifier,
+    m_MetaClassifiers = Classifier.makeCopies(m_MetaClassifier,
 					      m_Classifiers.length);
 
     for (int i = 0; i < m_Classifiers.length; i++) {
@@ -365,7 +363,7 @@ public class Grading
     }
     
     values[idx]=predConf;
-    metaInstance = new DenseInstance(1, values);
+    metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }
@@ -376,7 +374,7 @@ public class Grading
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 
   /**

@@ -22,9 +22,6 @@
 
 package weka.core;
 
-import weka.core.scripting.Jython;
-import weka.core.scripting.JythonSerializableObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -42,7 +39,7 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.12 $ 
  */
 public class SerializedObject
   implements Serializable, RevisionHandler {
@@ -165,6 +162,6 @@ public class SerializedObject
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.12 $");
   }
 }

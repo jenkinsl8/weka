@@ -28,7 +28,6 @@ import weka.classifiers.trees.j48.C45Split;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.core.Attribute;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -39,7 +38,7 @@ import weka.core.Utils;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class FTInnerNode 
   extends FTtree {   
@@ -156,7 +155,7 @@ public class FTInnerNode
       }
         
     // needed by dynamic data
-    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data, true);
+    m_modelSelection=new  C45ModelSelection(m_minNumInstances, data);
     m_localModel = m_modelSelection.selectModel(data);
     //split node if more than minNumInstances...
     if (m_numInstances > m_minNumInstances) {
@@ -259,7 +258,7 @@ public class FTInnerNode
                
         probs = modelDistributionForInstance(instance);
         //Built auxiliary split instance    
-        Instance instanceSplit=new DenseInstance(instance.numAttributes()+instance.numClasses());
+        Instance instanceSplit=new Instance(instance.numAttributes()+instance.numClasses());
            
         instanceSplit.setDataset(instance.dataset());
      
@@ -290,6 +289,6 @@ public class FTInnerNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

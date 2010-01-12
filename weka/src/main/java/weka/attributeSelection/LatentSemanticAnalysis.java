@@ -28,7 +28,6 @@ import weka.core.Check;
 import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.matrix.Matrix;
 import weka.core.Option;
@@ -95,8 +94,8 @@ implements AttributeTransformer, OptionHandler {
   private Instances m_trainInstances;
   
   /** 
-   * Keep a copy for the class attribute (if set) and for 
-   * checking for header compatibility 
+   * Keep a copy for the class attribute (if set) and for checking
+   * header compatibility 
    */
   private Instances m_trainHeader;
   
@@ -421,16 +420,16 @@ implements AttributeTransformer, OptionHandler {
     Vector attributesToRemove = new Vector();
     
     // if data has a class attribute
-    if (m_trainInstances.classIndex() >= 0) {
-      
+    if (m_trainInstances.classIndex() >= 0) {      
       m_hasClass = true;
       m_classIndex = m_trainInstances.classIndex();
       
       // set class attribute to be removed
       attributesToRemove.addElement(new Integer(m_classIndex));
     }
+    
     // make copy of training data so the class values (if set) can be appended to final 
-    // transformed instances and so that we can check header compatibility
+    // transformed instances and we can check header compatibility
     m_trainHeader = new Instances(m_trainInstances, 0);
     
     // normalize data if desired
@@ -633,7 +632,7 @@ implements AttributeTransformer, OptionHandler {
       if (currentInstance instanceof SparseInstance) {
         newInstance = new SparseInstance(currentInstance.weight(), newValues);
       } else {
-        newInstance = new DenseInstance(currentInstance.weight(), newValues);
+        newInstance = new Instance(currentInstance.weight(), newValues);
       }
       output.add(newInstance);
     }
@@ -678,7 +677,7 @@ implements AttributeTransformer, OptionHandler {
     Instance tempInstance = (Instance)instance.copy();
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: headers don't match: " +
-      "LatentSemanticAnalysis\n" + instance.dataset().equalHeadersMsg(m_trainHeader));
+      "LatentSemanticAnalysis");
     }
     // replace missing values
     m_replaceMissingFilter.input(tempInstance);
@@ -717,7 +716,7 @@ implements AttributeTransformer, OptionHandler {
     if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newValues);
     } else {
-      return new DenseInstance(instance.weight(), newValues);
+      return new Instance(instance.weight(), newValues);
     }
   }
   

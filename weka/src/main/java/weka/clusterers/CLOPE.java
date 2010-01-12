@@ -21,30 +21,24 @@
 package weka.clusterers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.ArrayList;
 
 /**
 <!-- globalinfo-start -->
@@ -417,7 +411,7 @@ public class CLOPE
 
   /**
    * Generate Clustering via CLOPE
-   * @param data The instances that need to be clustered
+   * @param instances The instances that need to be clustered
    * @throws java.lang.Exception If clustering was not successful
    */
   public void buildClusterer(Instances data) throws Exception {

@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -708,7 +709,7 @@ public class DatabaseSaver
    * @return the current setting
    */  
   public String[] getOptions() {
-    Vector<String> options = new Vector<String>();
+    Vector options = new Vector();
 
     if ( (getUrl() != null) && (getUrl().length() != 0) ) {
       options.add("-url");
@@ -748,7 +749,7 @@ public class DatabaseSaver
    */  
   public java.util.Enumeration listOptions() {
       
-     Vector<Option> newVector = new Vector<Option>();
+     FastVector newVector = new FastVector();
 
      newVector.addElement(new Option(
            "\tThe JDBC URL to connect to.\n"

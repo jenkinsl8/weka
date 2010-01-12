@@ -24,15 +24,12 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Capabilities.Capability;
-import weka.core.Utils;
-
 
 /** 
  <!-- globalinfo-start -->
@@ -164,7 +161,7 @@ public class TimeSeriesDelta
         if ((source != null) && !source.isMissing(i) && !dest.isMissing(i)) {
           vals[i] = dest.value(i) - source.value(i);
         } else {
-          vals[i] = Utils.missingValue();
+          vals[i] = Instance.missingValue();
         }
       } else {
         vals[i] = dest.value(i);
@@ -174,7 +171,7 @@ public class TimeSeriesDelta
     if (dest instanceof SparseInstance) {
       inst = new SparseInstance(dest.weight(), vals);
     } else {
-      inst = new DenseInstance(dest.weight(), vals);
+      inst = new Instance(dest.weight(), vals);
     }
     inst.setDataset(dest.dataset());
     return inst;

@@ -23,7 +23,6 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -130,7 +129,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class VFI 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */

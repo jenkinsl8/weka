@@ -25,8 +25,7 @@ import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -531,7 +530,7 @@ public class RELAGGS
     // convert data
     for (k = 0; k < instances.numInstances(); k++) {
       inst    = instances.instance(k);
-      newInst = new DenseInstance(result.numAttributes());
+      newInst = new Instance(result.numAttributes());
       newInst.setWeight(inst.weight());
 
       l = 0;

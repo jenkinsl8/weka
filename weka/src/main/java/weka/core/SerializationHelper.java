@@ -300,10 +300,10 @@ public class SerializationHelper
    */
   public static Object[] readAll(InputStream stream) throws Exception {
     ObjectInputStream 	ois;
-    Vector<Object>		result;
+    Vector		result;
     
     ois    = new ObjectInputStream(stream);
-    result = new Vector<Object>();
+    result = new Vector();
     try {
       while (true) {
 	result.add(ois.readObject());

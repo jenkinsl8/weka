@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
@@ -704,7 +703,7 @@ public class LogitBoost
     }
     m_Classifiers = new Classifier [m_NumClasses][];
     for (int j = 0; j < m_NumClasses; j++) {
-      m_Classifiers[j] = AbstractClassifier.makeCopies(m_Classifier,
+      m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
 					       getNumIterations());
     }
 

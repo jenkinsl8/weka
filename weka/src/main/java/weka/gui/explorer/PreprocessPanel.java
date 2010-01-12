@@ -251,8 +251,7 @@ public class PreprocessPanel
         dialog.setVisible(true);
         if (dialog.getReturnValue() == JOptionPane.OK_OPTION)
           setInstancesFromDBQ(dialog.getURL(), dialog.getUser(),
-                              dialog.getPassword(), dialog.getQuery(),
-                              dialog.getGenerateSparseData());
+                              dialog.getPassword(), dialog.getQuery());
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
@@ -754,11 +753,10 @@ public class PreprocessPanel
   }
 
   /**
-   * Loads (non-sparse) instances from an SQL query the user provided with the
+   * Loads instances from an SQL query the user provided with the
    * SqlViewerDialog, then loads the instances in a background process. This is
    * done in the IO thread, and an error message is popped up if the IO thread
    * is busy.
-   * 
    * @param url           the database URL
    * @param user          the user to connect as
    * @param pw            the password of the user
@@ -766,24 +764,6 @@ public class PreprocessPanel
    */
   public void setInstancesFromDBQ(String url, String user, 
                                   String pw, String query) {
-    setInstancesFromDBQ(url, user, pw, query, false);
-  }
-
-  /**
-   * Loads instances from an SQL query the user provided with the
-   * SqlViewerDialog, then loads the instances in a background process. This is
-   * done in the IO thread, and an error message is popped up if the IO thread
-   * is busy.
-   * 
-   * @param url		the database URL
-   * @param user	the user to connect as
-   * @param pw		the password of the user
-   * @param query	the query for retrieving instances from
-   * @param sparse	whether to create sparse or non-sparse instances
-   */
-  public void setInstancesFromDBQ(String url, String user, 
-                                  String pw, String query,
-                                  boolean sparse) {
     if (m_IOThread == null) {
       try {
 	InstanceQuery InstQ = new InstanceQuery();
@@ -791,7 +771,6 @@ public class PreprocessPanel
         InstQ.setUsername(user);
         InstQ.setPassword(pw);
         InstQ.setQuery(query);
-        InstQ.setSparseData(sparse);
 	
         // we have to disconnect, otherwise we can't change the DB!
         if (InstQ.isConnected())

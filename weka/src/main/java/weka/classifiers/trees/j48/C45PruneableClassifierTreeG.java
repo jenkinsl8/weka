@@ -157,7 +157,7 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
   /**
    * Method for building a pruneable classifier tree.
    *
-   * @param data the data for building the tree
+   * @param datathe data for building the tree
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -1153,9 +1153,7 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
 
   /**
    * Significance test
-   * @param x 
-   * @param n
-   * @param r
+   * @param double  x, double  n, double r.
    * @return returns the probability of obtaining x or MORE out of n
    * if r proportion of n are positive.
    *

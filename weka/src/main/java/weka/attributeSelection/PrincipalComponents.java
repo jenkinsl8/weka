@@ -22,14 +22,10 @@
 
 package weka.attributeSelection;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Matrix;
 import weka.core.Option;
@@ -43,6 +39,9 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -765,7 +764,7 @@ public class PrincipalComponents
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new DenseInstance(inst.weight(), newVals);
+      return new Instance(inst.weight(), newVals);
     }      
   }
 
@@ -787,8 +786,7 @@ public class PrincipalComponents
     Instance tempInst = (Instance)instance.copy();
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: header's don't match: "
-                          +"PrincipalComponents\n"
-                          + instance.dataset().equalHeadersMsg(m_trainHeader));
+                          +"PrincipalComponents");
     }
 
     m_replaceMissingFilter.input(tempInst);
@@ -833,14 +831,14 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new DenseInstance(instance.weight(), newVals);
+        return new Instance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
         return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
                                                             newVals));
       } else {
-        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
+        return convertInstanceToOriginal(new Instance(instance.weight(),
                                                       newVals));
       }
     }

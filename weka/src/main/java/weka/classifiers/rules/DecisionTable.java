@@ -27,7 +27,6 @@ import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.SubsetEvaluator;
 import weka.attributeSelection.ASEvaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.AdditionalMeasureProducer;
@@ -132,7 +131,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class DecisionTable 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
              AdditionalMeasureProducer, TechnicalInformationHandler {
 
@@ -619,7 +618,7 @@ public class DecisionTable
       double weightedAUC = 0;
       for (i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
 	double tempAUC = m_evaluation.areaUnderROC(i);
-	if (!Utils.isMissingValue(tempAUC)) {
+	if (!Instance.isMissingValue(tempAUC)) {
 	  weightedAUC += (classPriors[i] * tempAUC);
 	} else {
 	  System.err.println("Undefined AUC!!");

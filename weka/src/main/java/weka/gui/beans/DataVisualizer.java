@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -303,8 +303,7 @@ public class DataVisualizer extends JPanel
     }
     m_visualizeDataSet = inst;
     PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-    String relationName = m_visualizeDataSet.relationName();
-    pd1.setPlotName(relationName);
+    pd1.setPlotName(m_visualizeDataSet.relationName());
     try {
       m_visPanel.setMasterPlot(pd1);
     } catch (Exception ex) {
@@ -345,18 +344,7 @@ public class DataVisualizer extends JPanel
 	  m_framePoppedUp = true;
 	  final VisualizePanel vis = new VisualizePanel();
 	  PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-	  
-	  String relationName = m_visualizeDataSet.relationName();
-	  
-	  // A bit of a nasty hack. Allows producers of instances-based
-	  // events to specify that the points should be connected
-	  if (relationName.startsWith("__")) {
-	    boolean[] connect = new boolean[m_visualizeDataSet.numInstances()];
-	    for (int i = 1; i < connect.length; i++) { connect[i] = true; }
-	    pd1.setConnectPoints(connect);
-	    relationName = relationName.substring(2);
-	  }
-	  pd1.setPlotName(relationName);
+	  pd1.setPlotName(m_visualizeDataSet.relationName());
 	  try {
 	    vis.setMasterPlot(pd1);
 	  } catch (Exception ex) {

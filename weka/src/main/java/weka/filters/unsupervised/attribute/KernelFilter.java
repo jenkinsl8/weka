@@ -28,8 +28,7 @@ import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MathematicalExpression;
 import weka.core.Option;
@@ -859,7 +858,7 @@ public class KernelFilter
       k[k.length - 1] = classes[i];
 
       // create new instance
-      Instance in = new DenseInstance(1.0, k);
+      Instance in = new Instance(1.0, k);
       result.add(in);    
     }
 

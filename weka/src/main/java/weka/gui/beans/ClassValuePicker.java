@@ -168,6 +168,7 @@ public class ClassValuePicker
 	m_logger.statusMessage(statusMessagePrefix()
 	    + "WARNING: Class attribute must be nominal.");
       }
+      
       return dataSet;
     } else {
       if (m_logger != null) {

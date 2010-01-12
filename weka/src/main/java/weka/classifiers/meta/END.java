@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -153,7 +152,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -266,7 +265,7 @@ public class END
     
     m_hashtable = new Hashtable();
     
-    m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
+    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
     
     Random random = data.getRandomNumberGenerator(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
@@ -344,7 +343,7 @@ public class END
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
   
   /**

@@ -22,6 +22,8 @@
 
 package weka.clusterers;
 
+import java.io.Serializable;
+
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
@@ -30,9 +32,6 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
 
 /** 
  * Abstract clusterer.
@@ -176,7 +175,7 @@ public abstract class AbstractClusterer
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities 	result;
+    Capabilities    result;
     
     result = new Capabilities(this);
     result.enableAll();

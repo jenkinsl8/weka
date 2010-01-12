@@ -23,11 +23,10 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,8 +36,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
 
-import java.util.ArrayList;
-
 /**
  <!-- globalinfo-start -->
  * Reads a file that is C45 format. Can take a filestem or filestem with .names or .data appended. Assumes that path/&lt;filestem&gt;.names and path/&lt;filestem&gt;.data exist and contain the names and data respectively.
@@ -46,7 +43,7 @@ import java.util.ArrayList;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.16 $
  * @see Loader
  */
 public class C45Loader 
@@ -331,7 +328,7 @@ public class C45Loader
       if (!m_ignore[i]) {
 	// Check if value is missing.
 	if  (tokenizer.ttype == '?') {
-	  instance[counter++] = Utils.missingValue();
+	  instance[counter++] = Instance.missingValue();
 	} else {
 	  String val = tokenizer.sval;
 
@@ -362,7 +359,7 @@ public class C45Loader
       }
     }
 
-    return new DenseInstance(1.0, instance);
+    return new Instance(1.0, instance);
   }
 
   /**
@@ -387,8 +384,8 @@ public class C45Loader
    */
   private void readHeader(StreamTokenizer tokenizer) throws IOException {
 
-    ArrayList<Attribute> attribDefs = new ArrayList<Attribute>();
-    ArrayList<Integer> ignores = new ArrayList<Integer>();
+    FastVector attribDefs = new FastVector();
+    FastVector ignores = new FastVector();
     ConverterUtils.getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
       ConverterUtils.errms(tokenizer,"premature end of file");
@@ -396,13 +393,13 @@ public class C45Loader
 
     m_numAttribs = 1;
     // Read the class values
-    ArrayList<String> classVals = new ArrayList<String>();
+    FastVector classVals = new FastVector();
     while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
       String val = tokenizer.sval.trim();
       
       if (val.length() > 0) {
 	val = removeTrailingPeriod(val);
-	classVals.add(val);
+	classVals.addElement(val);
       }
       ConverterUtils.getToken(tokenizer);
     }
@@ -422,26 +419,26 @@ public class C45Loader
 	}
 	String temp = tokenizer.sval.toLowerCase().trim();
 	if (temp.startsWith("ignore") || temp.startsWith("label")) {
-	  ignores.add(new Integer(counter));
+	  ignores.addElement(new Integer(counter));
 	  counter++;
 	} else if (temp.startsWith("continuous")) {
-	  attribDefs.add(new Attribute(attribName));
+	  attribDefs.addElement(new Attribute(attribName));
 	  counter++;
 	} else {
 	  counter++;
 	  // read the values of the attribute
-	  ArrayList<String> attribVals = new ArrayList<String>();
+	  FastVector attribVals = new FastVector();
 	  while (tokenizer.ttype != StreamTokenizer.TT_EOL &&
 		 tokenizer.ttype != StreamTokenizer.TT_EOF) {
 	    String val = tokenizer.sval.trim();
 
 	    if (val.length() > 0) {
 	      val = removeTrailingPeriod(val);
-	      attribVals.add(val);
+	      attribVals.addElement(val);
 	    }
 	    ConverterUtils.getToken(tokenizer);
 	  }
-	  attribDefs.add(new Attribute(attribName, attribVals));
+	  attribDefs.addElement(new Attribute(attribName, attribVals));
 	}
       }
     }
@@ -451,8 +448,8 @@ public class C45Loader
     if (classVals.size() == 1) {
       // look to see if this is an attribute name (ala c5 names file style)
       for (i = 0; i < attribDefs.size(); i++) {
-	if (((Attribute)attribDefs.get(i))
-	    .name().compareTo((String)classVals.get(0)) == 0) {
+	if (((Attribute)attribDefs.elementAt(i))
+	    .name().compareTo((String)classVals.elementAt(0)) == 0) {
 	  ok = false;
 	  m_numAttribs--;
 	  break;
@@ -461,7 +458,7 @@ public class C45Loader
     }
 
     if (ok) {
-      attribDefs.add(new Attribute("Class", classVals));
+      attribDefs.addElement(new Attribute("Class", classVals));
     }
 
     m_structure = new Instances(m_fileStem, attribDefs, 0);
@@ -479,7 +476,7 @@ public class C45Loader
     m_numAttribs = m_structure.numAttributes() + ignores.size();
     m_ignore = new boolean[m_numAttribs];
     for (i = 0; i < ignores.size(); i++) {
-      m_ignore[((Integer)ignores.get(i)).intValue()] = true;
+      m_ignore[((Integer)ignores.elementAt(i)).intValue()] = true;
     }
   }
 
@@ -508,7 +505,7 @@ public class C45Loader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 
   /**

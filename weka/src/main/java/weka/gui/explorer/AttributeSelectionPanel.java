@@ -1081,7 +1081,7 @@ public class AttributeSelectionPanel
     // set new filter
     m_AttributeEvaluatorEditor.setCapabilitiesFilter(filterClass);
     m_AttributeSearchEditor.setCapabilitiesFilter(filterClass);
-    
+
     m_StartBut.setEnabled(true);
     // check capabilities...
     Capabilities currentFilter = m_AttributeEvaluatorEditor.getCapabilitiesFilter();
@@ -1090,7 +1090,7 @@ public class AttributeSelectionPanel
     if (evaluator != null && currentFilter != null && 
         (evaluator instanceof CapabilitiesHandler)) {
       currentSchemeCapabilities = ((CapabilitiesHandler)evaluator).getCapabilities();
-      
+          
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
           !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);

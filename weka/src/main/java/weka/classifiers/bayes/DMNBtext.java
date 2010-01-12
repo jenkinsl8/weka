@@ -23,7 +23,6 @@ package weka.classifiers.bayes;
 
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
@@ -79,7 +78,7 @@ import weka.core.OptionHandler;
  * @author Jiang Su (Jiang.Su@unb.ca) 2008
  * @version $Revision$
  */
-public class DMNBtext extends AbstractClassifier
+public class DMNBtext extends Classifier
     implements OptionHandler, WeightedInstancesHandler, 
                TechnicalInformationHandler, UpdateableClassifier {
 
@@ -148,7 +147,7 @@ public class DMNBtext extends AbstractClassifier
   /**
    * Generates the classifier.
    *
-   * @param data set of instances serving as training data
+   * @param instances set of instances serving as training data
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -440,7 +439,7 @@ public class DMNBtext extends AbstractClassifier
      * Calculates the class membership probabilities for the given test
      * instance.
      *
-     * @param ins the instance to be classified
+     * @param instance the instance to be classified
      * @return predicted class probability distribution
      * @exception Exception if there is a problem generating the prediction
      */

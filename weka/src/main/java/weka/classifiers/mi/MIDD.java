@@ -23,7 +23,6 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -97,7 +96,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class MIDD 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler,
              TechnicalInformationHandler {
 

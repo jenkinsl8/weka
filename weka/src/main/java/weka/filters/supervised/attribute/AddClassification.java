@@ -22,12 +22,10 @@
 package weka.filters.supervised.attribute;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -269,7 +267,7 @@ public class AddClassification
 	throw new Exception("Invalid classifier specification string");
       tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
-      setClassifier(AbstractClassifier.forName(tmpStr, tmpOptions));
+      setClassifier(Classifier.forName(tmpStr, tmpOptions));
     }
 
     super.setOptions(options);
@@ -654,11 +652,10 @@ public class AddClassification
 	// same dataset format?
 	if ((header != null) && (!header.equalHeaders(instances)))
 	  throw new WekaException(
-	      "Training header of classifier and filter dataset don't match:\n"
-	      + header.equalHeadersMsg(instances));
+	      "Training header of classifier and filter dataset don't match!");
       }
       else {
-	m_ActualClassifier = AbstractClassifier.makeCopy(m_Classifier);
+	m_ActualClassifier = Classifier.makeCopy(m_Classifier);
 	m_ActualClassifier.buildClassifier(instances);
       }
     }
@@ -712,7 +709,7 @@ public class AddClassification
       if (oldInstance instanceof SparseInstance)
 	newInstance = new SparseInstance(oldInstance.weight(), newValues);
       else
-	newInstance = new DenseInstance(oldInstance.weight(), newValues);
+	newInstance = new Instance(oldInstance.weight(), newValues);
 
       // copy string/relational values from input to output
       copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());

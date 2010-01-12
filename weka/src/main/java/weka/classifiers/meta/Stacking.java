@@ -23,15 +23,12 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
-import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -98,10 +95,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.32 $ 
  */
 public class Stacking 
-  extends RandomizableParallelMultipleClassifiersCombiner
+  extends RandomizableMultipleClassifiersCombiner
   implements TechnicalInformationHandler {
 
   /** for serialization */
@@ -118,7 +115,7 @@ public class Stacking
 
   /** Set the number of folds for the cross-validation */
   protected int m_NumFolds = 10;
-  
+    
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -247,7 +244,7 @@ public class Stacking
       classifierName = classifierSpec[0];
       classifierSpec[0] = "";
     }
-    setMetaClassifier(AbstractClassifier.forName(classifierName, classifierSpec));
+    setMetaClassifier(Classifier.forName(classifierName, classifierSpec));
   }
 
   /**
@@ -348,7 +345,7 @@ public class Stacking
 
     return result;
   }
-  
+
   /**
    * Buildclassifier selects a classifier from the set of classifiers
    * by minimising error on the training data.
@@ -379,14 +376,11 @@ public class Stacking
 
     // Create meta level
     generateMetaLevel(newData, random);
-  
-    // restart the executor pool because at the end of processing
-    // a set of classifiers it gets shutdown to prevent the program
-    // executing as a server
-    super.buildClassifier(newData);
-    
-    // Rebuild all the base classifiers on the full training data
-    buildClassifiers(newData);
+
+    // Rebuilt all the base classifiers on the full training data
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      getClassifier(i).buildClassifier(newData);
+    }
   }
 
   /**
@@ -403,17 +397,12 @@ public class Stacking
     m_MetaFormat = new Instances(metaData, 0);
     for (int j = 0; j < m_NumFolds; j++) {
       Instances train = newData.trainCV(m_NumFolds, j, random);
-      
-      // start the executor pool (if necessary)
-      // has to be done after each set of classifiers as the
-      // executor pool gets shut down in order to prevent the
-      // program executing as a server (and not returning to
-      // the command prompt when run from the command line
-      super.buildClassifier(train);
-      
-      // construct the actual classifiers
-      buildClassifiers(train);
-      
+
+      // Build base classifiers
+      for (int i = 0; i < m_Classifiers.length; i++) {
+	getClassifier(i).buildClassifier(train);
+      }
+
       // Classify test instances and add to meta data
       Instances test = newData.testCV(m_NumFolds, j);
       for (int i = 0; i < test.numInstances(); i++) {
@@ -421,7 +410,7 @@ public class Stacking
       }
     }
 
-    m_MetaClassifier.buildClassifier(metaData);    
+    m_MetaClassifier.buildClassifier(metaData);
   }
 
   /**
@@ -519,7 +508,7 @@ public class Stacking
       }
     }
     values[i] = instance.classValue();
-    metaInstance = new DenseInstance(1, values);
+    metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }
@@ -530,7 +519,7 @@ public class Stacking
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.32 $");
   }
 
   /**

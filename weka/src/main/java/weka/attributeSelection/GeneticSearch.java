@@ -640,7 +640,7 @@ public class GeneticSearch
     if (p % 2 == 0)
       m_popSize = p;
     else
-      System.err.println("Population size needs to be an even number!");
+      System.out.println("Population size needs to be an even number!");
   }
 
   /**

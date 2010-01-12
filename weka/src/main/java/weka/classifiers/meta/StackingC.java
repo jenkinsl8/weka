@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -95,7 +94,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision$ 
+ * @version $Revision: 1.15 $ 
  */
 public class StackingC 
   extends Stacking 
@@ -181,7 +180,7 @@ public class StackingC
     if (classifierSpec.length != 0) {
       String classifierName = classifierSpec[0];
       classifierSpec[0] = "";
-      setMetaClassifier(AbstractClassifier.forName(classifierName, classifierSpec));
+      setMetaClassifier(Classifier.forName(classifierName, classifierSpec));
     } else {
         ((LinearRegression)(getMetaClassifier())).
 	  setAttributeSelectionMethod(new 
@@ -216,7 +215,7 @@ public class StackingC
       }
     }
     
-    m_MetaClassifiers = AbstractClassifier.makeCopies(m_MetaClassifier,
+    m_MetaClassifiers = Classifier.makeCopies(m_MetaClassifier,
 					      m_BaseFormat.numClasses());
     
     int [] arrIdc = new int[m_Classifiers.length + 1];
@@ -320,7 +319,7 @@ public class StackingC
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.15 $");
   }
 
   /**

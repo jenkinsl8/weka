@@ -22,7 +22,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -84,10 +83,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class PLSClassifier
-  extends AbstractClassifier {
+  extends Classifier {
   
   /** for serialization */
   private static final long serialVersionUID = 4819775160590973256L;
@@ -312,7 +311,7 @@ public class PLSClassifier
    *
    * @param instance 	the instance to be classified
    * @return 		the predicted most likely class for the instance or 
-   * 			Utils.missingValue() if no prediction is made
+   * 			Instance.missingValue() if no prediction is made
    * @throws Exception 	if an error occurred during the prediction
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -351,7 +350,7 @@ public class PLSClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

@@ -41,7 +41,7 @@ import org.w3c.dom.NodeList;
  * line string.<p>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class XMLOptions
   implements RevisionHandler {
@@ -209,7 +209,7 @@ public class XMLOptions
    */
   protected void fixHyphens() {
     NodeList	list;
-    Vector<Element>	hyphens;
+    Vector	hyphens;
     int		i;
     Node	node;
     Node	tmpNode;
@@ -219,10 +219,10 @@ public class XMLOptions
     list = m_XMLDocument.findNodes("//" + TAG_OPTION);
 
     // get all hyphen tags
-    hyphens = new Vector<Element>();
+    hyphens = new Vector();
     for (i = 0; i < list.getLength(); i++) {
       if (((Element) list.item(i)).getAttribute(ATT_TYPE).equals(VAL_TYPE_HYPHENS))
-	hyphens.add((Element)list.item(i));
+	hyphens.add(list.item(i));
     }
 
     // check all hyphen tags whether they are at the end, if not fix it
@@ -380,7 +380,7 @@ public class XMLOptions
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

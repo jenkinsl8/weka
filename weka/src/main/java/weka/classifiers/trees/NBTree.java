@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.j48.NBTreeClassifierTree;
 import weka.classifiers.trees.j48.NBTreeModelSelection;
 import weka.core.AdditionalMeasureProducer;
@@ -76,10 +75,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision$
+ * @version $Revision: 1.10 $
  */
 public class NBTree 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, Drawable, Summarizable,
 	     AdditionalMeasureProducer, TechnicalInformationHandler {
 
@@ -278,7 +277,7 @@ public class NBTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**

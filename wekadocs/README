@@ -4,8 +4,8 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.7.1
-                           12 January 2010
+                             WEKA 3.6.2
+                           12 January 2009
                                                                        
                  Java Programs for Machine Learning 
 
@@ -90,7 +90,7 @@ README file.
 
 The Weka user interfaces provide extensive built-in help facilities
 (tool tips, etc.). Documentation for the Explorer can be found in
-ExplorerGuide.pdf (also in the same directory as this
+WekaManual.pdf (also in the same directory as this
 README).
 
 You can also start the GUIChooser from within weka.jar:
@@ -278,7 +278,7 @@ databases available (also in weka/experiment):
 ----------------------------------------------------------------------
 
 5. The Experiment package:
------------------------------------------
+--------------------------
 
 There is support for running experiments that involve evaluating
 classifiers on repeated randomizations of datasets, over multiple
@@ -339,6 +339,7 @@ t-tests using weka.experiment.PairedTTester (use the -h option to find
 out what options it needs).
 
 However, all this is much easier if you use the Experimenter GUI.
+See the section on the Experimenter in: $WEKAHOME/WekaManual.pdf
 
 ----------------------------------------------------------------------
 
@@ -396,3 +397,4 @@ the file COPYING.
 
 
 $Revision: 1.13 $
+

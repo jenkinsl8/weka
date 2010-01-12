@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.ft.FTInnerNode;
 import weka.classifiers.trees.ft.FTLeavesNode;
 import weka.classifiers.trees.ft.FTNode;
@@ -120,7 +119,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class FT 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, AdditionalMeasureProducer, Drawable,
              TechnicalInformationHandler {
     
@@ -535,7 +534,7 @@ public class FT
   /**
    * Set the Functional Tree type.
    *
-   * @param newMethod Value corresponding to tree type.
+   * @param c Value corresponding to tree type.
    */
   public void setModelType(SelectedTag newMethod){
     if (newMethod.getTags() == TAGS_MODEL) {

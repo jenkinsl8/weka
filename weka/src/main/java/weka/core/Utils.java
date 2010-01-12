@@ -28,7 +28,6 @@ import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  * Class implementing some simple utility methods.
@@ -37,7 +36,7 @@ import java.util.Vector;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision$
+ * @version $Revision: 1.60 $
  */
 public final class Utils
   implements RevisionHandler {
@@ -48,37 +47,6 @@ public final class Utils
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
 
-  /**
-   * Tests if the given value codes "missing".
-   *
-   * @param val the value to be tested
-   * @return true if val codes "missing"
-   */
-  public static boolean isMissingValue(double val) {
-
-    return Double.isNaN(val);
-  }
-
-  /**
-   * Returns the value used to code a missing value.  Note that
-   * equality tests on this value will always return false, so use
-   * isMissingValue(double val) for testing..
-   *
-   * @return the value used as missing value.
-   */
-  public static double missingValue() {
-    
-    return Double.NaN;
-  }
-
-  /**
-   * Casting an object without "unchecked" compile-time warnings.
-   * Use only when absolutely necessary (e.g. when using clone()).
-   */
-  @SuppressWarnings("unchecked")
-    public static <T> T cast(Object x) {
-    return (T) x;
-  }
   
   /**
    * Reads properties that inherit from three locations. Properties
@@ -924,7 +892,7 @@ public final class Utils
    */
   public static String[] splitOptions(String quotedOptionString) throws Exception{
 
-    Vector<String> optionsVec = new Vector<String>();
+    FastVector optionsVec = new FastVector();
     String str = new String(quotedOptionString);
     int i;
     
@@ -1035,11 +1003,11 @@ public final class Utils
    * class is not assignable to the desired class type, or the options
    * supplied are not acceptable to the object
    */
-  public static Object forName(Class<?> classType,
+  public static Object forName(Class classType,
 			       String className,
 			       String[] options) throws Exception {
 
-    Class<?> c = null;
+    Class c = null;
     try {
       c = Class.forName(className);
     } catch (Exception ex) {
@@ -1058,28 +1026,6 @@ public final class Utils
     return o;
   }
 
-  /**
-   * Generates a commandline of the given object. If the object is not 
-   * implementing OptionHandler, then it will only return the classname,
-   * otherwise also the options.
-   * 
-   * @param obj		the object to turn into a commandline
-   * @return		the commandline
-   */
-  public static String toCommandLine(Object obj) {
-    StringBuffer	result;
-    
-    result = new StringBuffer();
-    
-    if (obj != null) {
-      result.append(obj.getClass().getName());
-      if (obj instanceof OptionHandler)
-	result.append(" " + joinOptions(((OptionHandler) obj).getOptions()));
-    }
-    
-    return result.toString().trim();
-  }
-  
   /**
    * Computes entropy for an array of integers.
    *
@@ -1929,7 +1875,7 @@ public final class Utils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.60 $");
   }
 
   /**

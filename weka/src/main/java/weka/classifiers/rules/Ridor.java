@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -54,7 +53,7 @@ import java.util.Vector;
  * Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst.. 5(3):211-228.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  * There are five inner classes defined in this class. <br>
  * The first is Ridor_node, which implements one node in the Ridor tree.  It's basically
  * composed of a default class and a set of exception rules to the default class.<br>
@@ -102,7 +101,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class Ridor 
-  extends AbstractClassifier
+  extends Classifier
   implements AdditionalMeasureProducer, WeightedInstancesHandler {
 
   /** for serialization */
@@ -1305,7 +1304,7 @@ public class Ridor
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
-    
+
     m_Random = new Random(m_Seed);
 	
     /* Create a binary attribute */
@@ -1402,7 +1401,7 @@ public class Ridor
 				    "\t(default 3)","F", 1, "-F <number of folds>"));
     newVector.addElement(new Option("\tSet number of shuffles to randomize\n" +
 				    "\tthe data in order to get better rule.\n" +
-				    "\t(default 1)","S", 1, "-S <number of shuffles>"));
+				    "\t(default 10)","S", 1, "-S <number of shuffles>"));
     newVector.addElement(new Option("\tSet flag of whether use the error rate \n"+
 				    "\tof all the data to select the default class\n"+
 				    "\tin each step. If not set, the learner will only use"+

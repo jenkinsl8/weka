@@ -306,7 +306,7 @@ public class ConverterUtils
       else if (m_URL != null)
 	((URLSourcedLoader) m_Loader).setURL(m_URL.toString());
       else if (m_Loader != null)
-	// m_Loader.reset(); we can't really reset the loader if the source has been set as an input stream
+	// m_Loader.reset();  we can't really reset the loader if the source has been set as an input stream
       
       m_BatchCounter      = 0;
       m_IncrementalBuffer = null;
@@ -677,8 +677,6 @@ public class ConverterUtils
     + weka.core.converters.CSVLoader.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
     + weka.core.converters.LibSVMLoader.class.getName() + ","
-    + weka.core.converters.MatlabLoader.class.getName() + ","
-    + weka.core.converters.SVMLightLoader.class.getName() + ","
     + weka.core.converters.SerializedInstancesLoader.class.getName() + ","
     + weka.core.converters.TextDirectoryLoader.class.getName() + ","
     + weka.core.converters.XRFFLoader.class.getName();
@@ -691,8 +689,6 @@ public class ConverterUtils
     + weka.core.converters.CSVSaver.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
     + weka.core.converters.LibSVMSaver.class.getName() + ","
-    + weka.core.converters.MatlabSaver.class.getName() + ","
-    + weka.core.converters.SVMLightSaver.class.getName() + ","
     + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
     + weka.core.converters.XRFFSaver.class.getName();
   
@@ -739,7 +735,6 @@ public class ConverterUtils
 	  		new String[]{FileSourcedConverter.class.getName()});
     }
     catch (Exception e) {
-      e.printStackTrace();
       // ignore
     }
     finally {
@@ -798,11 +793,11 @@ public class ConverterUtils
    * @return		hashtable with ExtensionFileFilters
    */
   protected static Hashtable<String,String> getFileConverters(String classnames, String[] intf) {
-    Vector<String>	list;
+    Vector	list;
     String[]	names;
     int		i;
     
-    list  = new Vector<String>();
+    list  = new Vector();
     names = classnames.split(",");
     for (i = 0; i < names.length; i++)
       list.add(names[i]);

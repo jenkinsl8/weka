@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Capabilities;
 import weka.core.Drawable;
@@ -103,7 +102,7 @@ import javax.swing.JTabbedPane;
  * @version $Revision$
  */
 public class UserClassifier 
-  extends AbstractClassifier 
+  extends Classifier 
   implements Drawable, TreeDisplayListener, VisualizePanelListener,
              TechnicalInformationHandler {
   
@@ -999,14 +998,14 @@ public class UserClassifier
 	tmp = (FastVector)m_ranges.elementAt(noa);
 	
 	if (((Double)tmp.elementAt(0)).intValue() 
-	    == VLINE && !Utils.isMissingValue(x)) {
+	    == VLINE && !Instance.isMissingValue(x)) {
 	  
 	}
 	else if (((Double)tmp.elementAt(0)).intValue() 
-		 == HLINE && !Utils.isMissingValue(y)) {
+		 == HLINE && !Instance.isMissingValue(y)) {
 	  
 	}
-	else if (Utils.isMissingValue(x) || Utils.isMissingValue(y)) {
+	else if (Instance.isMissingValue(x) || Instance.isMissingValue(y)) {
 	  //System.out.println("miss");
 	  //then go down both branches using their weights
 	  rt = m_set1.calcClassType(i);

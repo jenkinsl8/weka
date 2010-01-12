@@ -23,7 +23,6 @@
 package weka.gui.ensembleLibraryEditor;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.classifiers.meta.ensembleSelection.EnsembleSelectionLibrary;
 import weka.core.Utils;
@@ -68,7 +67,7 @@ import javax.swing.event.ChangeListener;
  * to a specific number of models with a slider bar.
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class DefaultModelsPanel 
   extends JPanel 

@@ -26,7 +26,6 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Undoable;
-import weka.core.Utils;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
@@ -55,7 +54,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.8 $ 
  */
 public class ArffTableModel 
   implements TableModel, Undoable {
@@ -720,7 +719,7 @@ public class ArffTableModel
     
     // missing?
     if (aValue == null) {
-      inst.setValue(index, Utils.missingValue());
+      inst.setValue(index, Instance.missingValue());
     }
     else {
       tmp = aValue.toString();

@@ -23,11 +23,9 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
@@ -148,7 +146,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision$ 
+ * @version $Revision: 1.9 $ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -521,7 +519,7 @@ public class Decorate
 	    addInstances(divData, artData);//Add new artificial data
 	    
 	    //Build new classifier
-	    Classifier tmp[] = AbstractClassifier.makeCopies(m_Classifier,1);
+	    Classifier tmp[] = Classifier.makeCopies(m_Classifier,1);
 	    newClassifier = tmp[0]; 
 	    newClassifier.buildClassifier(divData);
 	    //Remove all the artificial data
@@ -604,7 +602,7 @@ public class Decorate
 		    att[j] = (m_Random.nextGaussian()*stats[1])+stats[0];
 		}else System.err.println("Decorate can only handle numeric and nominal values.");
 	    }
-	    artInstance = new DenseInstance(1.0, att);
+	    artInstance = new Instance(1.0, att);
 	    artData.add(artInstance);
 	}
 	return artData;
@@ -775,7 +773,7 @@ public class Decorate
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.9 $");
     }
     
     /**

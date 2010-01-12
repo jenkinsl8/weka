@@ -24,8 +24,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MathematicalExpression;
 import weka.core.Option;
@@ -270,7 +269,7 @@ public class MathExpression
       for (int j = 0; j < instance.numAttributes(); j++) {
         if (m_SelectCols.isInRange(j)) {          
 	  if (instance.attribute(j).isNumeric() &&
-	    (!Utils.isMissingValue(vals[j])) &&
+	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
               symbols.put("A", new Double(vals[j]));  
               symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
@@ -283,7 +282,7 @@ public class MathExpression
               value = eval(symbols);
               if (Double.isNaN(value) || Double.isInfinite(value)) {
                   System.err.println("WARNING:Error in evaluating the expression: missing value set");
-                  value = Utils.missingValue();
+                  value = Instance.missingValue();
               }
 	      if (value != 0.0) {
 	        newVals[ind] = value;
@@ -312,7 +311,7 @@ public class MathExpression
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
         if (m_SelectCols.isInRange(j)) {
 	  if (instance.attribute(j).isNumeric() &&
-	      (!Utils.isMissingValue(vals[j])) &&
+	      (!Instance.isMissingValue(vals[j])) &&
 	      (getInputFormat().classIndex() != j)) {
               symbols.put("A", new Double(vals[j]));  
               symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
@@ -325,12 +324,12 @@ public class MathExpression
               vals[j] = eval(symbols);
               if (Double.isNaN(vals[j]) || Double.isInfinite(vals[j])) {
                   System.err.println("WARNING:Error in Evaluation the Expression: missing value set");
-                  vals[j] = Utils.missingValue();
+                  vals[j] = Instance.missingValue();
               }
 	  }
         }
       }
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);

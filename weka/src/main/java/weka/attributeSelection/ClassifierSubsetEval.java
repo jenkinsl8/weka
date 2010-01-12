@@ -23,7 +23,6 @@
 package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
@@ -210,7 +209,7 @@ public class ClassifierSubsetEval
     optionString = Utils.getOption('B', options);
     if (optionString.length() == 0)
       optionString = ZeroR.class.getName();
-    setClassifier(AbstractClassifier.forName(optionString,
+    setClassifier(Classifier.forName(optionString,
 				     Utils.partitionOptions(options)));
 
     optionString = Utils.getOption('H',options);
@@ -391,8 +390,7 @@ public class ClassifierSubsetEval
 	m_holdOutInstances.setClassIndex(m_trainingInstances.classIndex());
 	if (m_trainingInstances.equalHeaders(m_holdOutInstances) == false) {
 	  throw new Exception("Hold out/test set is not compatable with "
-			      +"training data.\n" 
-			      + m_trainingInstances.equalHeadersMsg(m_holdOutInstances));
+			      +"training data.");
 	}
     }
   }
@@ -494,8 +492,7 @@ public class ClassifierSubsetEval
     Instances testCopy=null;
 
     if (m_trainingInstances.equalHeaders(holdOut) == false) {
-      throw new Exception("evaluateSubset : Incompatable instance types.\n"
-	  + m_trainingInstances.equalHeadersMsg(holdOut));
+      throw new Exception("evaluateSubset : Incompatable instance types.");
     }
 
     Remove delTransform = new Remove();
@@ -568,8 +565,7 @@ public class ClassifierSubsetEval
     Instance testCopy=null;
 
     if (m_trainingInstances.equalHeaders(holdOut.dataset()) == false) {
-      throw new Exception("evaluateSubset : Incompatable instance types.\n"
-	  + m_trainingInstances.equalHeadersMsg(holdOut.dataset()));
+      throw new Exception("evaluateSubset : Incompatable instance types.");
     }
 
     Remove delTransform = new Remove();

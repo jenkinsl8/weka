@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.SMOset;
@@ -31,7 +30,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -194,7 +192,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class SMO 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -368,7 +366,7 @@ public class SMO
 	  if (inst.classValue() == cl2) {
 	    vals[1] = 1;
 	  }
-	  data.add(new DenseInstance(inst.weight(), vals));
+	  data.add(new Instance(inst.weight(), vals));
 	}
       } else {
 
@@ -398,7 +396,7 @@ public class SMO
 	    if (test.instance(j).classValue() == cl2) {
 	      vals[1] = 1;
 	    }
-	    data.add(new DenseInstance(test.instance(j).weight(), vals));
+	    data.add(new Instance(test.instance(j).weight(), vals));
 	  }
 	}
       }
@@ -1408,9 +1406,9 @@ public class SMO
       if (inst.numClasses() == 2) {
 	double[] newInst = new double[2];
 	newInst[0] = m_classifiers[0][1].SVMOutput(-1, inst);
-	newInst[1] = Utils.missingValue();
+	newInst[1] = Instance.missingValue();
 	return m_classifiers[0][1].m_logistic.
-	  distributionForInstance(new DenseInstance(1, newInst));
+	  distributionForInstance(new Instance(1, newInst));
       }
       double[][] r = new double[inst.numClasses()][inst.numClasses()];
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
@@ -1420,9 +1418,9 @@ public class SMO
 	      (m_classifiers[i][j].m_sparseWeights != null)) {
 	    double[] newInst = new double[2];
 	    newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
-	    newInst[1] = Utils.missingValue();
+	    newInst[1] = Instance.missingValue();
 	    r[i][j] = m_classifiers[i][j].m_logistic.
-	      distributionForInstance(new DenseInstance(1, newInst))[0];
+	      distributionForInstance(new Instance(1, newInst))[0];
 	    n[i][j] = m_classifiers[i][j].m_sumOfWeights;
 	  }
 	}

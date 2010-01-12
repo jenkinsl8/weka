@@ -75,7 +75,7 @@ import weka.core.TechnicalInformation.Type;
 */
 
 public class LADTree
-  extends AbstractClassifier implements Drawable,
+  extends Classifier implements Drawable,
                                 AdditionalMeasureProducer,
                                 TechnicalInformationHandler {
 
@@ -153,14 +153,13 @@ public class LADTree
 
   /** helper classes ********************************************************************/
 
-  protected class LADInstance extends DenseInstance {
+  protected class LADInstance extends Instance {
     public double[] fVector;
     public double[] wVector;
     public double[] pVector;
     public double[] zVector;
     public LADInstance(Instance instance) {
-    
-      super(instance);
+      super(instance); // copy the instance
       
       setDataset(instance.dataset()); // preserve dataset
 
@@ -1317,7 +1316,7 @@ public class LADTree
   /**
    * Returns the value of the named measure.
    *
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */

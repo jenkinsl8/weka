@@ -23,7 +23,6 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -89,7 +88,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class MIOptimalBall 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
              MultiInstanceCapabilitiesHandler, TechnicalInformationHandler {  
 

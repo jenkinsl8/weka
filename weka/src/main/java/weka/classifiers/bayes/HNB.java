@@ -22,7 +22,6 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -73,7 +72,7 @@ import weka.core.TechnicalInformation.Type;
  * @version $Revision$
  */
 public class HNB  
-  extends AbstractClassifier
+  extends Classifier
   implements TechnicalInformationHandler {
 
   /** for serialization */

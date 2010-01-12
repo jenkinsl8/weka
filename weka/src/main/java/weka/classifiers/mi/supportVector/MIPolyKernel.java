@@ -66,7 +66,7 @@ import weka.core.Capabilities.Capability;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision$ 
+ * @version $Revision: 1.4 $ 
  */
 public class MIPolyKernel 
   extends PolyKernel 
@@ -177,21 +177,12 @@ public class MIPolyKernel
   }
   
   /**
-   * Frees the cache used by the kernel.
-   */
-  public void clean() {
-    m_storage = null;
-    m_keys = null;
-    m_kernelMatrix = null;
-  }
-  
-  /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
 

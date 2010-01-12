@@ -23,7 +23,6 @@
 package weka.classifiers.trees.m5;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.FastVector;
@@ -38,10 +37,10 @@ import weka.filters.unsupervised.attribute.Remove;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class RuleNode 
-  extends AbstractClassifier {
+  extends Classifier {
 
   /** for serialization */
   static final long serialVersionUID = 1979807611124337144L;
@@ -1104,6 +1103,6 @@ public class RuleNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

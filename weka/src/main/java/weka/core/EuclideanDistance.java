@@ -72,7 +72,7 @@ import weka.core.neighboursearch.PerformanceStats;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class EuclideanDistance
   extends NormalizableDistance
@@ -269,6 +269,6 @@ public class EuclideanDistance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

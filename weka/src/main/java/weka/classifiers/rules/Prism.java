@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -35,7 +34,6 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.Utils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -79,7 +77,7 @@ import java.util.Enumeration;
  * @version $Revision$ 
 */
 public class Prism 
-  extends AbstractClassifier
+  extends Classifier
   implements TechnicalInformationHandler {
 
   /** for serialization */
@@ -342,7 +340,7 @@ public class Prism
 
     int result = m_rules.resultRules(inst);
     if (result == -1) {
-      return Utils.missingValue();
+      return Instance.missingValue();
     } else {
       return (double)result;
     }

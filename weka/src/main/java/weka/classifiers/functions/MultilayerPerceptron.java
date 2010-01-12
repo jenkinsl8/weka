@@ -22,7 +22,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
@@ -147,7 +146,7 @@ import javax.swing.JTextField;
  * @version $Revision$
  */
 public class MultilayerPerceptron 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
   
   /** for serialization */
@@ -1998,6 +1997,7 @@ public class MultilayerPerceptron
 	}
 	
 	if (right < lastRight) {
+	  
 	  if (right < bestError) {
 	    bestError = right;
 	    // save the network weights at this point

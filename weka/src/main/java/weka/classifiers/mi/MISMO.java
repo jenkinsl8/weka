@@ -23,7 +23,6 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.SMOset;
@@ -32,7 +31,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
@@ -184,10 +182,10 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision$ 
+ * @version $Revision: 1.6 $ 
  */
 public class MISMO 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, MultiInstanceCapabilitiesHandler,
              TechnicalInformationHandler {
 
@@ -346,7 +344,7 @@ public class MISMO
           if (inst.classValue() == cl2) {
             vals[1] = 1;
           }
-          data.add(new DenseInstance(inst.weight(), vals));
+          data.add(new Instance(inst.weight(), vals));
         }
       } else {
 
@@ -374,7 +372,7 @@ public class MISMO
             if (test.instance(j).classValue() == cl2) {
               vals[1] = 1;
             }
-            data.add(new DenseInstance(test.instance(j).weight(), vals));
+            data.add(new Instance(test.instance(j).weight(), vals));
           }
         }
       }
@@ -970,7 +968,7 @@ public class MISMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
 
@@ -1321,9 +1319,9 @@ public class MISMO
       if (inst.numClasses() == 2) {
         double[] newInst = new double[2];
         newInst[0] = m_classifiers[0][1].SVMOutput(-1, inst);
-        newInst[1] = Utils.missingValue();
+        newInst[1] = Instance.missingValue();
         return m_classifiers[0][1].m_logistic.
-          distributionForInstance(new DenseInstance(1, newInst));
+          distributionForInstance(new Instance(1, newInst));
       }
       double[][] r = new double[inst.numClasses()][inst.numClasses()];
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
@@ -1333,9 +1331,9 @@ public class MISMO
               (m_classifiers[i][j].m_sparseWeights != null)) {
             double[] newInst = new double[2];
             newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
-            newInst[1] = Utils.missingValue();
+            newInst[1] = Instance.missingValue();
             r[i][j] = m_classifiers[i][j].m_logistic.
-              distributionForInstance(new DenseInstance(1, newInst))[0];
+              distributionForInstance(new Instance(1, newInst))[0];
             n[i][j] = m_classifiers[i][j].m_sumOfWeights;
               }
         }
@@ -2117,7 +2115,7 @@ public class MISMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 
   /**

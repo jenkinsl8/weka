@@ -21,6 +21,7 @@ weka.experiment.SplitEvaluator=\
 
 # Lists the Classifiers-Packages I want to choose from
 weka.classifiers.Classifier=\
+ weka.classifiers,\
  weka.classifiers.bayes,\
  weka.classifiers.functions,\
  weka.classifiers.lazy,\
@@ -28,13 +29,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.nestedDichotomies,\
  weka.classifiers.mi,\
  weka.classifiers.misc,\
- weka.classifiers.scripting,\
  weka.classifiers.trees,\
  weka.classifiers.rules
-
-# Lists the AbstractClassificationOutput-packages I want to choose from
-weka.classifiers.evaluation.output.prediction.AbstractOutput=\
-  weka.classifiers.evaluation.output.prediction
 
 # Lists the Filters-Packages I want to choose from
 weka.filters.Filter= \
@@ -146,18 +142,6 @@ weka.gui.MainMenuExtension=
 weka.gui.visualize.plugins.VisualizePlugin=\
  weka.gui.visualize.plugins
 
-# List of Explorer tree visualization plugins (classification panel)
-weka.gui.visualize.plugins.TreeVisualizePlugin=\
- weka.gui.visualize.plugins
-
-# List of Explorer graph visualization plugins (classification panel)
-weka.gui.visualize.plugins.GraphVisualizePlugin=\
- weka.gui.visualize.plugins
-
-# List of Explorer error visualization plugins (classification panel)
-weka.gui.visualize.plugins.ErrorVisualizePlugin=\
- weka.gui.visualize.plugins
-
 # List of writers for outputting graphics
 weka.gui.visualize.JComponentWriter=\
  weka.gui.visualize
@@ -187,13 +171,3 @@ weka.core.converters.AbstractFileSaver=\
 #
 #org.tartarus.snowball.SnowballProgram=\
 # org.tartarus.snowball.ext
-
-# List of generators
-weka.classifiers.meta.generators.Generator=\
- weka.classifiers.meta.generators
-
-weka.classifiers.meta.generators.NumericAttributeGenerator=\
- weka.classifiers.meta.generators
-
-weka.classifiers.meta.generators.NominalAttributeGenerator=\
- weka.classifiers.meta.generators

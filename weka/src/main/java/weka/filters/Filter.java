@@ -549,14 +549,13 @@ public abstract class Filter
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    
-    // Clear out references to old strings/relationals occasionally
-    /*if (m_OutputQueue.empty() && m_NewBatch) {
+    /*    // Clear out references to old strings/relationals occasionally
+    if (m_OutputQueue.empty() && m_NewBatch) {
       if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
 	   || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
-    }*/
+      } */
     return result;
   }
   
@@ -1182,7 +1181,7 @@ public abstract class Filter
       firstData = firstInput.getStructure();
       secondData = secondInput.getStructure();
       if (!secondData.equalHeaders(firstData)) {
-	throw new Exception("Input file formats differ.\n" + secondData.equalHeadersMsg(firstData) + "\n");
+	throw new Exception("Input file formats differ.\n");
       }
       if (classIndex.length() != 0) {
 	if (classIndex.equals("first")) {

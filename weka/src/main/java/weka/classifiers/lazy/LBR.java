@@ -44,7 +44,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -102,7 +101,7 @@ import java.util.ArrayList;
  * @version $Revision$
  */
 public class LBR 
-  extends AbstractClassifier
+  extends Classifier
   implements TechnicalInformationHandler {
 
   /** for serialization */
@@ -1088,7 +1087,7 @@ public class LBR
       if (max > 0) {
         tempClassValue = maxIndex;
       } else {
-        tempClassValue = (int)Utils.missingValue();
+        tempClassValue = (int)Instance.missingValue();
       }
       // ###### END LOCAL CLASSIFY INSTANCE ###########
       

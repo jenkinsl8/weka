@@ -24,8 +24,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -605,7 +604,7 @@ public class PrincipalComponents
     if (instance instanceof SparseInstance)
       result = new SparseInstance(instance.weight(), newVals);
     else
-      result = new DenseInstance(instance.weight(), newVals);
+      result = new Instance(instance.weight(), newVals);
     
     return result;
   }

@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.core.Instance;
@@ -67,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.25 $
  */
 public class MultiScheme 
   extends RandomizableMultipleClassifiersCombiner {
@@ -464,7 +463,7 @@ public class MultiScheme
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.25 $");
   }
 
   /**

@@ -24,7 +24,6 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -101,7 +100,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class AODE
-    extends AbstractClassifier
+    extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
                TechnicalInformationHandler {
     

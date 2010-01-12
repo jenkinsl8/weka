@@ -43,7 +43,7 @@ import java.util.Hashtable;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public class AprioriItemSet 
   extends ItemSet 
@@ -453,8 +453,7 @@ public class AprioriItemSet
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instances,
-      boolean treatZeroAsMissing) throws Exception {
+  public static FastVector singletons(Instances instances) throws Exception {
 
     FastVector setOfItemSets = new FastVector();
     ItemSet current;
@@ -462,10 +461,8 @@ public class AprioriItemSet
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (instances.attribute(i).isNumeric())
 	throw new Exception("Can't handle numeric attributes!");
-      int j = (treatZeroAsMissing) ? 1 : 0;
-      for (; j < instances.attribute(i).numValues(); j++) {
+      for (int j = 0; j < instances.attribute(i).numValues(); j++) {
 	current = new AprioriItemSet(instances.numInstances());
-	current.setTreatZeroAsMissing(treatZeroAsMissing);
 	current.m_items = new int[instances.numAttributes()];
 	for (int k = 0; k < instances.numAttributes(); k++)
 	  current.m_items[k] = -1;
@@ -540,6 +537,6 @@ public class AprioriItemSet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 }

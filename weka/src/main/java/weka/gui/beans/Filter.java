@@ -62,8 +62,7 @@ public class Filter
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
-	     InstanceListener, EventConstraints,
-	     ConfigurationProducer {
+	     InstanceListener, EventConstraints {
 
   /** for serialization */
   private static final long serialVersionUID = 8249759470189439321L;
@@ -759,26 +758,6 @@ public class Filter
   public synchronized void removeInstanceListener(InstanceListener tsl) {
     m_instanceListeners.removeElement(tsl);
   }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
-  }
 
   private void notifyDataOrTrainingListeners(EventObject ce) {
     Vector l;
@@ -1032,11 +1011,6 @@ public class Filter
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    
-    if (eventName.equals("configuration") && m_Filter != null) {
-      return true;
-    }
-    
     // can't generate the named even if we are not receiving it as an
     // input!
     if (!m_listenees.containsKey(eventName)) {

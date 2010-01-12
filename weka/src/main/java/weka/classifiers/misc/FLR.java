@@ -23,7 +23,6 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
@@ -119,7 +118,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class FLR
-    extends AbstractClassifier
+    extends Classifier
     implements Serializable, Summarizable, AdditionalMeasureProducer,
                TechnicalInformationHandler {
 
