@@ -16,21 +16,19 @@
 
 /*
  *    CostCurve.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Mark Hall
  *
  */
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.functions.Logistic;
+import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
+import weka.classifiers.Classifier;
 
 /**
  * Generates points illustrating probablity cost tradeoffs that can be 
@@ -40,20 +38,17 @@ import weka.core.RevisionUtils;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 
-public class CostCurve 
-  implements RevisionHandler {
+public class CostCurve {
 
   /** The name of the relation used in cost curve datasets */
   public static final String RELATION_NAME = "CostCurve";
 
-  /** attribute name: Probability Cost Function */
   public static final String PROB_COST_FUNC_NAME = "Probability Cost Function";
-  /** attribute name: Normalized Expected Cost */
-  public static final String NORM_EXPECTED_COST_NAME = "Normalized Expected Cost";
-  /** attribute name: Threshold */
+  public static final String NORM_EXPECTED_COST_NAME = 
+    "Normalized Expected Cost";
   public static final String THRESHOLD_NAME = "Threshold";
 
   /**
@@ -67,7 +62,7 @@ public class CostCurve
    * </ul> <p>
    *
    * @see TwoClassStats
-   * @param predictions the predictions to base the curve on
+   * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances, null if no predictions
    * have been made.
    */
@@ -85,7 +80,6 @@ public class CostCurve
    * Calculates the performance stats for the desired class and return 
    * results as a set of Instances.
    *
-   * @param predictions the predictions to base the curve on
    * @param classIndex index of the class of interest.
    * @return datapoints as a set of instances.
    */
@@ -113,20 +107,15 @@ public class CostCurve
       thresh = threshInst.instance(i).value(threshind);
       vals = new double [3];
       vals[0] = 0; vals[1] = fpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
       vals = new double [3];
       vals[0] = 1; vals[1] = 1.0 - tpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
     }
     
     return insts;
   }
 
-  /**
-   * generates the header
-   * 
-   * @return the header
-   */
   private Instances makeHeader() {
 
     FastVector fv = new FastVector();
@@ -134,15 +123,6 @@ public class CostCurve
     fv.addElement(new Attribute(NORM_EXPECTED_COST_NAME));
     fv.addElement(new Attribute(THRESHOLD_NAME));
     return new Instances(RELATION_NAME, fv, 100);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -16,34 +16,34 @@
 
 /*
  *    ClassValuePicker.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.SwapValues;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
 import java.util.Vector;
-
+import java.io.Serializable;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.EventSetDescriptor;
 
 /**
  * @author Mark Hall
- * @version $Revision$
+ * @version $Revision: 1.3.2.2 $
  */
-public class ClassValuePicker
-  extends JPanel
+public class ClassValuePicker extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
 	     EventConstraints, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1196143276710882989L;
 
   /** the class value index considered to be the positive class */
   private int m_classValueIndex = 0;
@@ -76,24 +76,6 @@ public class ClassValuePicker
   public ClassValuePicker() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);    
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -150,11 +132,7 @@ public class ClassValuePicker
     if (dataSet.classIndex() < 0) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] " 
-	      + statusMessagePrefix() 
-	      + " No class attribute defined in data set.");
-	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: No class attribute defined in data set.");
+	  logMessage("No class attribute defined in data set (ClassValuePicker)");
       }
       return dataSet;
     }
@@ -162,17 +140,9 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] "
-	      + statusMessagePrefix()
-	      + " Class attribute must be nominal (ClassValuePicker)");
-	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: Class attribute must be nominal.");
+	  logMessage("Class attribute must be nominal (ClassValuePicker)");
       }
       return dataSet;
-    } else {
-      if (m_logger != null) {
-        m_logger.statusMessage(statusMessagePrefix() + "remove");
-      }
     }
 
     if (m_classValueIndex != 0) { // nothing to do if == 0
@@ -189,11 +159,7 @@ public class ClassValuePicker
       } catch (Exception ex) {
 	if (m_logger != null) {
 	  m_logger.
-	    logMessage("[ClassValuePicker] "
-	        +statusMessagePrefix()
-	        + " Unable to swap class attibute values.");
-	  m_logger.statusMessage(statusMessagePrefix()
-	      + "ERROR (See log for details)");
+	    logMessage("Unable to swap class attibute values (ClassValuePicker)");
 	}
       }
     }
@@ -327,16 +293,6 @@ public class ClassValuePicker
   public void stop() {
     // nothing to do
   }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return false;
-  }
 
   /**
    * Returns true, if at the current time, the named event could
@@ -369,9 +325,5 @@ public class ClassValuePicker
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }

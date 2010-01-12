@@ -16,15 +16,16 @@
 
 /*
  *    HierarchyPropertyParser.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Xin Xu
  *
  */
 
 package weka.gui;
 
-import java.io.Serializable;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
+import java.lang.*;
+import java.io.*;
+
 
 /**
  * This class implements a parser to read properties that have
@@ -41,13 +42,9 @@ import java.util.Vector;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
-public class HierarchyPropertyParser
-    implements Serializable {
-
-    /** for serialization */
-    private static final long serialVersionUID = -4151103338506077544L;
+public class HierarchyPropertyParser implements Serializable{
 
     /** Keep track of the root of the tree */
     private TreeNode m_Root;
@@ -409,7 +406,7 @@ public class HierarchyPropertyParser
      * according to the given position <br>
      *
      * @param pos the position of the given child
-     * @exception Exception if the position is out of range or leaf is reached
+     * @exception if the position is out of range or leaf is reached
      */
     public synchronized void goToChild(int pos) throws Exception {
 	if((m_Current.children == null) || 

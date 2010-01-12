@@ -1,1 +1,1 @@
-java -Xmx128m -classpath "%CLASSPATH%;weka.jar" weka.gui.Main
+java -Xmx128m -classpath "%CLASSPATH%;weka.jar" weka.gui.GUIChooser

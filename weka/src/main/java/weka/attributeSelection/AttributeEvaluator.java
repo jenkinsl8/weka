@@ -16,21 +16,26 @@
 
 /*
  *    AttributeEvaluator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
+import java.io.*;
+import weka.core.*;
 
 /** 
- * Interface for classes that evaluate attributes individually.
+ * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.7 $
  */
-public interface AttributeEvaluator {
-  
+public abstract class AttributeEvaluator extends ASEvaluation {
+    // ===============
+    // Public methods.
+    // ===============
+
     /**
      * evaluates an individual attribute
      *

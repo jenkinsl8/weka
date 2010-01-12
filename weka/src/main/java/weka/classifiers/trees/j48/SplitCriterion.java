@@ -16,28 +16,22 @@
 
 /*
  *    SplitCriterion.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionHandler;
-
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Abstract class for computing splitting criteria
  * with respect to distributions of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public abstract class SplitCriterion
-  implements Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5490996638027101259L;
+public abstract class SplitCriterion implements Serializable {
 
   /**
    * Computes result of splitting criterion for given distribution.

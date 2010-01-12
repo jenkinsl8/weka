@@ -16,59 +16,51 @@
 
 /*
  *    TimeSeriesTranslate.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Capabilities.Capability;
 import weka.core.Utils;
+import weka.filters.Filter;
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that assumes instances form time-series data and replaces attribute values in the current instance with the equivalent attribute values of some previous (or future) instance. For instances where the desired value is unknown either the instance may be dropped, or missing values used. Skips the class attribute if it is set.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to translate in time. First and
- *  last are valid indexes. (default none)</pre>
- * 
- * <pre> -V
- *  Invert matching sense (i.e. calculate for all non-specified columns)</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  The number of instances forward to translate values
- *  between. A negative number indicates taking values from
- *  a past instance. (default -1)</pre>
- * 
- * <pre> -M
- *  For instances at the beginning or end of the dataset where
- *  the translated values are not known, remove those instances
- *  (default is to use missing values).</pre>
- * 
- <!-- options-end -->
+ * An instance filter that assumes instances form time-series data and
+ * replaces attribute values in the current instance with the equivalent
+ * attribute values of some previous (or future) instance. For
+ * instances where the desired value is unknown either the instance may
+ * be dropped, or missing values used.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -R index1,index2-index4,...<br>
+ * Specify list of columns to calculate new values for.
+ * First and last are valid indexes.
+ * (default none)<p>
+ *
+ * -V <br>
+ * Invert matching sense (i.e. calculate for all non-specified columns)<p>
+ *
+ * -I num <br>
+ * The number of instances forward to translate values between.
+ * A negative number indicates taking values from a past instance.
+ * (default -1) <p>
+ *
+ * -M <br>
+ * For instances at the beginning or end of the dataset where
+ * the translated values are not known, use missing values
+ * (default is to remove those instances).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.3.2.3 $
  */
-public class TimeSeriesTranslate 
-  extends AbstractTimeSeries {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8901621509691785705L;
+public class TimeSeriesTranslate extends AbstractTimeSeries {
 
   /**
    * Returns a string describing this classifier
@@ -76,34 +68,11 @@ public class TimeSeriesTranslate
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "An instance filter that assumes instances form time-series data and "
+    return "An instance filter that assumes instances form time-series data and "
       + "replaces attribute values in the current instance with the equivalent "
       + "attribute values of some previous (or future) instance. For "
       + "instances where the desired value is unknown either the instance may "
       + "be dropped, or missing values used. Skips the class attribute if it is set.";
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
   }
 
   /**
@@ -113,7 +82,7 @@ public class TimeSeriesTranslate
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws UnsupportedAttributeTypeException if selected
+   * @exception UnsupportedAttributeTypeException if selected
    * attributes are not numeric or nominal.
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
@@ -163,7 +132,7 @@ public class TimeSeriesTranslate
         if (source != null) {
           vals[i] = source.value(i);
         } else {
-          vals[i] = Utils.missingValue();
+          vals[i] = Instance.missingValue();
         }
       } else {
         vals[i] = dest.value(i);
@@ -173,19 +142,10 @@ public class TimeSeriesTranslate
     if (dest instanceof SparseInstance) {
       inst = new SparseInstance(dest.weight(), vals);
     } else {
-      inst = new DenseInstance(dest.weight(), vals);
+      inst = new Instance(dest.weight(), vals);
     }
     inst.setDataset(dest.dataset());
     return inst;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -194,6 +154,16 @@ public class TimeSeriesTranslate
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new TimeSeriesTranslate(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new TimeSeriesTranslate(), argv); 
+      } else {
+	Filter.filterFile(new TimeSeriesTranslate(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+

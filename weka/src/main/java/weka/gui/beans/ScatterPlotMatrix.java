@@ -16,7 +16,7 @@
 
 /*
  *    ScatterPlotMatrix.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
@@ -24,30 +24,33 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 import weka.gui.visualize.MatrixPanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
+import java.io.Serializable;
+import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that encapsulates weka.gui.visualize.MatrixPanel for displaying a
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
-public class ScatterPlotMatrix
-  extends DataVisualizer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -657856527563507491L;
+public class ScatterPlotMatrix extends DataVisualizer {
 
   protected MatrixPanel m_matrixPanel;
 
   public ScatterPlotMatrix() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    if (!ge.isHeadless()) {
-      appearanceFinal();
-    }
+    appearanceFinal();
   }
 
   /**

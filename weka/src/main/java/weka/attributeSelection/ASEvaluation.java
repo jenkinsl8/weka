@@ -16,35 +16,28 @@
 
 /*
  *    ASEvaluation.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 
 package weka.attributeSelection;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
+import java.io.Serializable;
+import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-
-import java.io.Serializable;
 
 /** 
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
-public abstract class ASEvaluation
-  implements Serializable, CapabilitiesHandler, RevisionHandler {
 
-  /** for serialization */
-  private static final long serialVersionUID = 2091705669885950849L;
-  
+public abstract class ASEvaluation implements Serializable {
+
   // ===============
   // Public methods.
   // ===============
@@ -116,47 +109,5 @@ public abstract class ASEvaluation
       evaluators[i] = (ASEvaluation) so.getObject();
     }
     return evaluators;
-  }
-
-  /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.enableAll();
-    
-    return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-  
-  /**
-   * runs the evaluator with the given commandline options
-   * 
-   * @param evaluator	the evaluator to run
-   * @param options	the commandline options
-   */
-  protected static void runEvaluator(ASEvaluation evaluator, String[] options) {
-    try {
-      System.out.println(
-	  AttributeSelection.SelectAttributes(evaluator, options));
-    }
-    catch (Exception e) {
-      String msg = e.toString().toLowerCase();
-      if (    (msg.indexOf("help requested") == -1)
-           && (msg.indexOf("no training file given") == -1) )
-        e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
   }
 }

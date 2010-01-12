@@ -16,28 +16,23 @@
 
 /*
  *    DataSetEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
 import java.util.EventObject;
+import weka.core.Instances;
 
 /**
  * Event encapsulating a data set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  * @see EventObject
  */
-public class DataSetEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = -5111218447577318057L;
+public class DataSetEvent extends EventObject {
 
   private Instances m_dataSet;
   private boolean m_structureOnly;

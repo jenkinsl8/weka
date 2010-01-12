@@ -16,7 +16,7 @@
 
 /*
  *    TaskLogger.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -27,7 +27,7 @@ package weka.gui;
  * running tasks.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public interface TaskLogger {
   

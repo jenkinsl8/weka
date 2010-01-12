@@ -16,29 +16,24 @@
 
 /*
  *    SMOset.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.functions.supportVector;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.Serializable;
+import java.util.*;
+import java.io.*;
+import weka.core.*;
 
 /**
  * Stores a set of integer of a given size.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1.2.1 $
  */
-public class SMOset
-  implements Serializable, RevisionHandler {
+public class SMOset implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -8364829283188675777L;
-  
   /** The current number of elements in the set */
   private int m_number;
 
@@ -150,14 +145,5 @@ public class SMOset
   public int numElements() {
       
     return m_number;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

@@ -24,14 +24,15 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests RacedIncrementalLogitBoost. Run from the command line with:<p/>
- * java weka.classifiers.meta.RacedIncrementalLogitBoostTest
+ * java weka.classifiers.meta.RacedIncrementalLogitBoost
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class RacedIncrementalLogitBoostTest 
   extends AbstractClassifierTest {

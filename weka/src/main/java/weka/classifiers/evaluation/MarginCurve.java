@@ -16,20 +16,18 @@
 
 /*
  *    MarginCurve.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.classifiers.evaluation;
 
+import weka.classifiers.meta.LogitBoost;
+import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * Generates points illustrating the prediction margin. The margin is defined
@@ -39,10 +37,9 @@ import weka.core.Utils;
  * margins on the training data and this gives better performance on test data.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
-public class MarginCurve
-  implements RevisionHandler {
+public class MarginCurve {
 
   /**
    * Calculates the cumulative margin distribution for the set of
@@ -132,16 +129,7 @@ public class MarginCurve
     vals[count++] = margin;
     vals[count++] = current;
     vals[count++] = cumulative;
-    return new DenseInstance(1.0, vals);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return new Instance(1.0, vals);
   }
   
   /**
@@ -170,3 +158,6 @@ public class MarginCurve
     }
   }
 }
+
+
+

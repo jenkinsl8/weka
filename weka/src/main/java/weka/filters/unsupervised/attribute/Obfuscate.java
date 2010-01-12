@@ -16,7 +16,7 @@
 
 /*
  *    Obfuscate.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
@@ -24,32 +24,24 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.Capabilities.Capability;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /** 
- <!-- globalinfo-start -->
- * A simple instance filter that renames the relation, all attribute names and all nominal (and string) attribute values. For exchanging sensitive datasets. Currently doesn't like string or relational attributes.
- * <p/>
- <!-- globalinfo-end -->
- * 
+ * A simple instance filter that renames the relation, all attribute names
+ * and all nominal (and string) attribute values. For exchanging sensitive
+ * datasets. Currently doesn't like string attributes.
+ *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.2.2.1 $
  */
-public class Obfuscate 
-  extends Filter 
-  implements UnsupervisedFilter, StreamableFilter {
-  
-  /** for serialization */
-  static final long serialVersionUID = -343922772462971561L;
+public class Obfuscate extends Filter implements UnsupervisedFilter,
+						 StreamableFilter {
 
   /**
    * Returns a string describing this filter
@@ -58,32 +50,7 @@ public class Obfuscate
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "A simple instance filter that renames the relation, all attribute names "
-      + "and all nominal (and string) attribute values. For exchanging sensitive "
-      + "datasets. Currently doesn't like string or relational attributes.";
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+    return "An instance filter that obfuscates all strings in the data";
   }
 
   /**
@@ -93,7 +60,6 @@ public class Obfuscate
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -105,26 +71,21 @@ public class Obfuscate
       Attribute oldAtt = instanceInfo.attribute(i);
       Attribute newAtt = null;
       switch (oldAtt.type()) {
-	case Attribute.NUMERIC:
-	  newAtt = new Attribute("A" + (i + 1));
-	  break;
-	case Attribute.DATE:
-	  String format = oldAtt.getDateFormat();
-	  newAtt = new Attribute("A" + (i + 1), format);
-	  break;
-	case Attribute.NOMINAL:
-	  FastVector vals = new FastVector();
-	  for (int j = 0; j < oldAtt.numValues(); j++) {
-	    vals.addElement("V" + (j + 1));
-	  }
-	  newAtt = new Attribute("A" + (i + 1), vals);
-	  break;
-	case Attribute.STRING:
-	case Attribute.RELATIONAL:
-	default:
-	  newAtt = (Attribute) oldAtt.copy();
-  	  System.err.println("Not converting attribute: " + oldAtt.name());
-	  break;
+      case Attribute.NUMERIC:
+        newAtt = new Attribute("A" + (i + 1));
+        break;
+      case Attribute.NOMINAL:
+        FastVector vals = new FastVector();
+        for (int j = 0; j < oldAtt.numValues(); j++) {
+          vals.addElement("V" + (j + 1));
+        }
+        newAtt = new Attribute("A" + (i + 1), vals);
+        break;
+      case Attribute.STRING:
+      default:
+        newAtt = (Attribute) oldAtt.copy();
+        System.err.println("Not converting attribute: " + oldAtt.name());
+        break;
       }
       v.addElement(newAtt);
     }
@@ -143,7 +104,7 @@ public class Obfuscate
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -157,15 +118,6 @@ public class Obfuscate
     push((Instance)instance.copy());
     return true;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -173,6 +125,23 @@ public class Obfuscate
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Obfuscate(), argv);
+    
+    try {
+      if (Utils.getFlag('b', argv)) {
+	Filter.batchFilterFile(new Obfuscate(), argv);
+      } else {
+	Filter.filterFile(new Obfuscate(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

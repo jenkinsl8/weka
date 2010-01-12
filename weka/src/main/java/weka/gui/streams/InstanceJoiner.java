@@ -16,29 +16,27 @@
 
 /*
  *    InstanceJoiner.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
+
 
 package weka.gui.streams;
 
 import weka.core.Instance;
 import weka.core.Instances;
-
-import java.io.Serializable;
 import java.util.Vector;
+import java.io.Serializable;
+
 
 /** 
  * A bean that joins two streams of instances into one.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.3 $
  */
-public class InstanceJoiner
-  implements Serializable, InstanceProducer, SerialInstanceListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6529972700291329656L;
+public class InstanceJoiner implements Serializable, InstanceProducer, 
+  SerialInstanceListener {
 
   /** The listeners */
   private Vector listeners;
@@ -96,7 +94,7 @@ public class InstanceJoiner
    *
    * @return an Instances object containing the output instance
    * structure only.
-   * @throws Exception if no input structure has been defined (or the output
+   * @exception Exception if no input structure has been defined (or the output
    * format hasn't been determined yet)
    */
   public Instances outputFormat() throws Exception {
@@ -130,7 +128,8 @@ public class InstanceJoiner
    * set). This default implementation assumes all instance processing occurs
    * during inputFormat() and input().
    *
-   * @throws Exception if no input structure has been defined
+   * @return true if there are instances pending output
+   * @exception Exception if no input structure has been defined
    */
   public void batchFinished() throws Exception {
     
@@ -148,7 +147,7 @@ public class InstanceJoiner
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @throws Exception if no input structure has been defined
+   * @exception Exception if no input structure has been defined
    */
   public Instance outputPeek() throws Exception {
     
@@ -273,7 +272,7 @@ public class InstanceJoiner
 	  // Check the formats are compatible
 	  if (!(a.outputFormat()).equalHeaders(outputFormat())) {
 	    throw new Exception(this.getClass().getName()
-	    + "::secondInstanceProduced() - incompatible instance streams\n" + (a.outputFormat()).equalHeadersMsg(outputFormat()));
+	    + "::secondInstanceProduced() - incompatible instance streams");
 	  }
 	  break;
 	case InstanceEvent.INSTANCE_AVAILABLE:

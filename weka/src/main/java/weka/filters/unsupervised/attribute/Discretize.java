@@ -16,85 +16,59 @@
 
 /*
  *    Discretize.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank,Len Trigg
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by simple binning. Skips the class attribute if set.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- * <pre> -B &lt;num&gt;
- *  Specifies the (maximum) number of bins to divide numeric attributes into.
- *  (default = 10)</pre>
- * 
- * <pre> -M &lt;num&gt;
- *  Specifies the desired weight of instances per bin for
- *  equal-frequency binning. If this is set to a positive
- *  number then the -B option will be ignored.
- *  (default = -1)</pre>
- * 
- * <pre> -F
- *  Use equal-frequency instead of equal-width discretization.</pre>
- * 
- * <pre> -O
- *  Optimize number of bins using leave-one-out estimate
- *  of estimated entropy (for equal-width discretization).
- *  If this is set then the -B option will be ignored.</pre>
- * 
- * <pre> -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to Discretize. First and last are valid indexes.
- *  (default: first-last)</pre>
- * 
- * <pre> -V
- *  Invert matching sense of column indexes.</pre>
- * 
- * <pre> -D
- *  Output binary attributes for discretized attributes.</pre>
- * 
- <!-- options-end -->
+ * An instance filter that discretizes a range of numeric attributes in 
+ * the dataset into nominal attributes. Discretization is by simple binning.
+ * Skips the class attribute if set.<p>
  *
+ * Valid filter-specific options are: <p>
+ *
+ * -B num <br>
+ * Specifies the (maximum) number of bins to divide numeric attributes into.
+ * Default = 10.<p>
+ *
+ * -M num <br>
+ * Specifies the desired weight of instances per bin for equal-frequency
+ * binning. If this is set to a positive number then the -B option will be 
+ * ignored. Default = -1.<p>
+ *
+ * -F <br>
+ * Use equal-frequency instead of equal-width discretization if 
+ * class-based discretisation is turned off.<p>
+ *
+ * -O <br>
+ * Optimize the number of bins using a leave-one-out estimate of the 
+ * entropy (for equal-width binning). If this is set then the -B option
+ * will be ignored.<p>
+ *
+ * -R col1,col2-col4,... <br>
+ * Specifies list of columns to Discretize. First
+ * and last are valid indexes. (default: first-last) <p>
+ *
+ * -V <br>
+ * Invert matching sense.<p>
+ *
+ * -D <br>
+ * Make binary nominal attributes. <p>
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.6.2.1 $
  */
-public class Discretize 
-  extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, WeightedInstancesHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -1358531742174527279L;
+public class Discretize extends PotentialClassIgnorer 
+  implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
 
   /** Stores which columns to Discretize */
   protected Range m_DiscretizeCols = new Range();
@@ -127,11 +101,7 @@ public class Discretize
     setAttributeIndices("first-last");
   }
 
-  /** 
-   * Another constructor, sets the attribute indices immediately
-   * 
-   * @param cols the attribute indices
-   */
+  /** Another constructor */
   public Discretize(String cols) {
 
     m_DefaultCols = cols;
@@ -144,99 +114,85 @@ public class Discretize
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
-    Enumeration enm = super.listOptions();
-    while (enm.hasMoreElements())
-      result.add(enm.nextElement());
-      
-    result.addElement(new Option(
-	"\tSpecifies the (maximum) number of bins to divide numeric"
-	+ " attributes into.\n"
-	+ "\t(default = 10)",
-	"B", 1, "-B <num>"));
-    
-    result.addElement(new Option(
-	"\tSpecifies the desired weight of instances per bin for\n"
-	+ "\tequal-frequency binning. If this is set to a positive\n"
-	+ "\tnumber then the -B option will be ignored.\n"
-	+ "\t(default = -1)",
-	"M", 1, "-M <num>"));
-    
-    result.addElement(new Option(
-	"\tUse equal-frequency instead of equal-width discretization.",
-	"F", 0, "-F"));
-    
-    result.addElement(new Option(
-	"\tOptimize number of bins using leave-one-out estimate\n"+
-	"\tof estimated entropy (for equal-width discretization).\n"+
-	"\tIf this is set then the -B option will be ignored.",
-	"O", 0, "-O"));
-    
-    result.addElement(new Option(
-	"\tSpecifies list of columns to Discretize. First"
-	+ " and last are valid indexes.\n"
-	+ "\t(default: first-last)",
-	"R", 1, "-R <col1,col2-col4,...>"));
-    
-    result.addElement(new Option(
-	"\tInvert matching sense of column indexes.",
-	"V", 0, "-V"));
-    
-    result.addElement(new Option(
-	"\tOutput binary attributes for discretized attributes.",
-	"D", 0, "-D"));
 
-    return result.elements();
+    Vector newVector = new Vector(7);
+
+    newVector.addElement(new Option(
+              "\tSpecifies the (maximum) number of bins to divide numeric"
+	      + " attributes into.\n"
+	      + "\t(default = 10)",
+              "B", 1, "-B <num>"));
+
+    newVector.addElement(new Option(
+              "\tSpecifies the desired weight of instances per bin for\n"
+	      + "\tequal-frequency binning. If this is set to a positive\n"
+	      + "\tnumber then the -B option will be ignored.\n"
+	      + "\t(default = -1)",
+              "M", 1, "-M <num>"));
+
+    newVector.addElement(new Option(
+              "\tUse equal-frequency instead of equal-width discretization.",
+              "F", 0, "-F"));
+
+    newVector.addElement(new Option(
+              "\tOptimize number of bins using leave-one-out estimate\n"+
+	      "\tof estimated entropy (for equal-width discretization).\n"+
+	      "\tIf this is set then the -B option will be ignored.",
+              "O", 0, "-O"));
+
+    newVector.addElement(new Option(
+              "\tSpecifies list of columns to Discretize. First"
+	      + " and last are valid indexes.\n"
+	      + "\t(default: first-last)",
+              "R", 1, "-R <col1,col2-col4,...>"));
+
+    newVector.addElement(new Option(
+              "\tInvert matching sense of column indexes.",
+              "V", 0, "-V"));
+
+    newVector.addElement(new Option(
+              "\tOutput binary attributes for discretized attributes.",
+              "D", 0, "-D"));
+
+    return newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -unset-class-temporarily
-   *  Unsets the class index temporarily before the filter is
-   *  applied to the data.
-   *  (default: no)</pre>
-   * 
-   * <pre> -B &lt;num&gt;
-   *  Specifies the (maximum) number of bins to divide numeric attributes into.
-   *  (default = 10)</pre>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  Specifies the desired weight of instances per bin for
-   *  equal-frequency binning. If this is set to a positive
-   *  number then the -B option will be ignored.
-   *  (default = -1)</pre>
-   * 
-   * <pre> -F
-   *  Use equal-frequency instead of equal-width discretization.</pre>
-   * 
-   * <pre> -O
-   *  Optimize number of bins using leave-one-out estimate
-   *  of estimated entropy (for equal-width discretization).
-   *  If this is set then the -B option will be ignored.</pre>
-   * 
-   * <pre> -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of columns to Discretize. First and last are valid indexes.
-   *  (default: first-last)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense of column indexes.</pre>
-   * 
-   * <pre> -D
-   *  Output binary attributes for discretized attributes.</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
    *
+   * -B num <br>
+   * Specifies the (maximum) number of bins to divide numeric attributes into.
+   * Default = 10.<p>
+   *
+   * -M num <br>
+   * Specifies the desired weight of instances per bin for equal-frequency
+   * binning. If this is set to a positive number then the -B option will be 
+   * ignored. Default = -1.<p>
+   *
+   * -F <br>
+   * Use equal-frequency instead of equal-width discretization if 
+   * class-based discretisation is turned off.<p>
+   *
+   * -O <br>
+   * Optimize the number of bins using a leave-one-out estimate of the 
+   * entropy (for equal-width binning). If this is set then the -B
+   * option will be ignored.<p>
+   *
+   * -R col1,col2-col4,... <br>
+   * Specifies list of columns to Discretize. First
+   * and last are valid indexes. (default none) <p>
+   *
+   * -V <br>
+   * Invert matching sense.<p>
+   *
+   * -D <br>
+   * Make binary nominal attributes. <p>
+   * 
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    super.setOptions(options);
 
     setMakeBinary(Utils.getFlag('D', options));
     setUseEqualFrequency(Utils.getFlag('F', options));
@@ -275,63 +231,32 @@ public class Discretize
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector        result;
-    String[]      options;
-    int           i;
 
-    result = new Vector();
+    String [] options = new String [10];
+    int current = 0;
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-
-    if (getMakeBinary())
-      result.add("-D");
-    
-    if (getUseEqualFrequency())
-      result.add("-F");
-    
-    if (getFindNumBins())
-      result.add("-O");
-    
-    if (getInvertSelection())
-      result.add("-V");
-    
-    result.add("-B");
-    result.add("" + getBins());
-    
-    result.add("-M");
-    result.add("" + getDesiredWeightOfInstancesPerInterval());
-    
-    if (!getAttributeIndices().equals("")) {
-      result.add("-R");
-      result.add(getAttributeIndices());
+    if (getMakeBinary()) {
+      options[current++] = "-D";
     }
-
-    return (String[]) result.toArray(new String[result.size()]);
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    if (!getMakeBinary())
-      result.enable(Capability.NO_CLASS);
-    
-    return result;
+    if (getUseEqualFrequency()) {
+      options[current++] = "-F";
+    }
+    if (getFindNumBins()) {
+      options[current++] = "-O";
+    }
+    if (getInvertSelection()) {
+      options[current++] = "-V";
+    }
+    options[current++] = "-B"; options[current++] = "" + getBins();
+    options[current++] = "-M"; 
+    options[current++] = "" + getDesiredWeightOfInstancesPerInterval();
+    if (!getAttributeIndices().equals("")) {
+      options[current++] = "-R"; options[current++] = getAttributeIndices();
+    }
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -341,7 +266,7 @@ public class Discretize
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -373,7 +298,7 @@ public class Discretize
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -400,7 +325,7 @@ public class Discretize
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -661,7 +586,7 @@ public class Discretize
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @throws IllegalArgumentException if an invalid range list is supplied 
+   * @exception IllegalArgumentException if an invalid range list is supplied 
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -675,7 +600,7 @@ public class Discretize
    * @param attributes an array containing indexes of attributes to Discretize.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @throws IllegalArgumentException if an invalid set of ranges
+   * @exception IllegalArgumentException if an invalid set of ranges
    * is supplied 
    */
   public void setAttributeIndicesArray(int [] attributes) {
@@ -686,7 +611,7 @@ public class Discretize
   /**
    * Gets the cut points for an attribute
    *
-   * @param attributeIndex the index (from 0) of the attribute to get the cut points of
+   * @param the index (from 0) of the attribute to get the cut points of
    * @return an array containing the cutpoints (or null if the
    * attribute requested has been discretized into only one interval.)
    */
@@ -700,6 +625,8 @@ public class Discretize
 
   /** Generate the cutpoints for each attribute */
   protected void calculateCutPoints() {
+
+    Instances copy = null;
 
     m_CutPoints = new double [getInputFormat().numAttributes()] [];
     for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
@@ -1012,7 +939,7 @@ public class Discretize
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {
 	  if (instance.isMissing(i)) {
-	    vals[index] = Utils.missingValue();
+	    vals[index] = Instance.missingValue();
 	  } else {
 	    vals[index] = 0;
 	  }
@@ -1020,7 +947,7 @@ public class Discretize
 	} else {
 	  if (!m_MakeBinary) {
 	    if (instance.isMissing(i)) {
-	      vals[index] = Utils.missingValue();
+	      vals[index] = Instance.missingValue();
 	    } else {
 	      for (j = 0; j < m_CutPoints[i].length; j++) {
 		if (currentVal <= m_CutPoints[i][j]) {
@@ -1033,7 +960,7 @@ public class Discretize
 	  } else {
 	    for (j = 0; j < m_CutPoints[i].length; j++) {
 	      if (instance.isMissing(i)) {
-                vals[index] = Utils.missingValue();
+                vals[index] = Instance.missingValue();
 	      } else if (currentVal <= m_CutPoints[i][j]) {
                 vals[index] = 0;
 	      } else {
@@ -1053,21 +980,12 @@ public class Discretize
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
+                     getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -1076,6 +994,24 @@ public class Discretize
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Discretize(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Discretize(), argv);
+      } else {
+	Filter.filterFile(new Discretize(), argv);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

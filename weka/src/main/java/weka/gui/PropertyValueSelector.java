@@ -16,29 +16,27 @@
 
 /*
  *    PropertyValueSelector.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui;
 
-import java.beans.PropertyEditor;
-
+import javax.swing.JComboBox;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
+import java.beans.PropertyEditor;
 
 /** 
  * Support for any PropertyEditor that uses tags.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.5 $
  */
-class PropertyValueSelector
-  extends JComboBox {
-
-  /** for serialization */
-  private static final long serialVersionUID = 128041237745933212L;
+class PropertyValueSelector extends JComboBox {
 
   /** The property editor */
   PropertyEditor m_Editor;
@@ -48,14 +46,12 @@ class PropertyValueSelector
    *
    * @param pe the PropertyEditor
    */
-  public PropertyValueSelector(PropertyEditor pe) {
+  PropertyValueSelector(PropertyEditor pe) {
       
     m_Editor = pe;
     Object value = m_Editor.getAsText();
     String tags[] = m_Editor.getTags();
     ComboBoxModel model = new DefaultComboBoxModel(tags) {
-      private static final long serialVersionUID = 7942587653040180213L;
-      
       public Object getSelectedItem() {
 	return m_Editor.getAsText();
       }

@@ -16,21 +16,18 @@
 
 /*
  *    RemovePercentage.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -38,37 +35,25 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * A filter that removes a given percentage of a dataset.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P &lt;percentage&gt;
- *  Specifies percentage of instances to select. (default 50)
- * </pre>
- * 
- * <pre> -V
- *  Specifies if inverse of selection is to be output.
- * </pre>
- * 
- <!-- options-end -->
+ * This filter removes a given percentage of a dataset.
+ *
+ * Valid options are: <p>
+ *
+ * -V <br>
+ * Specifies if inverse of selection is to be output.<p>
+ *
+ * -P percentage <br>
+ * The percentage of instances to select. (default 50)<p>
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.3.2.1 $ 
 */
-public class RemovePercentage 
-  extends Filter
+public class RemovePercentage extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 2150341191158533133L;
-  
   /** Percentage of instances to select. */
-  private double m_Percentage = 50;
+  private int m_Percentage = 50;
 
   /** Indicates if inverse of selection is to be output. */
   private boolean m_Inverse = false;
@@ -94,31 +79,24 @@ public class RemovePercentage
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P &lt;percentage&gt;
-   *  Specifies percentage of instances to select. (default 50)
-   * </pre>
-   * 
-   * <pre> -V
-   *  Specifies if inverse of selection is to be output.
-   * </pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -P percentage <br>
+   * The percentage of instances to select. (default 50)<p>
+   *
+   * -V <br>
+   * Specifies if inverse of selection is to be output.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
     String percent = Utils.getOption('P', options);
     if (percent.length() != 0) {
-      setPercentage(Double.parseDouble(percent));
+      setPercentage(Integer.parseInt(percent));
     } else {
-      setPercentage(50.0);
+      setPercentage(50);
     }
     setInvertSelection(Utils.getFlag('V', options));
 
@@ -175,7 +153,7 @@ public class RemovePercentage
    * 
    * @return the percentage.
    */
-  public double getPercentage() {
+  public int getPercentage() {
 
     return m_Percentage;
   }
@@ -184,9 +162,9 @@ public class RemovePercentage
    * Sets the percentage of intances to select.
    *
    * @param percent the percentage
-   * @throws IllegalArgumentException if percentage out of range
+   * @exception IllegalArgumentException if percenatge out of range
    */
-  public void setPercentage(double percent) {
+  public void setPercentage(int percent) {
 
     if (percent < 0 || percent > 100) {
       throw new IllegalArgumentException("Percentage must be between 0 and 100.");
@@ -225,28 +203,6 @@ public class RemovePercentage
     m_Inverse = inverse;
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -254,7 +210,7 @@ public class RemovePercentage
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true because outputFormat can be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @exception Exception if the input format can't be set successfully
    */  
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -283,7 +239,7 @@ public class RemovePercentage
         m_NewBatch = false;
      }
 
-     if (isFirstBatchDone()) {
+     if (m_FirstBatchDone) {
        push(instance);
        return true;
      } 
@@ -299,7 +255,7 @@ public class RemovePercentage
    * instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined 
+   * @exception IllegalStateException if no input structure has been defined 
    */
   public boolean batchFinished() {
 
@@ -309,8 +265,8 @@ public class RemovePercentage
 
     // Push instances for output into output queue
     Instances toFilter = getInputFormat();
-    int cutOff = (int) Math.round(toFilter.numInstances() * m_Percentage / 100);
-    
+    int cutOff = toFilter.numInstances() * m_Percentage / 100;
+
     if (m_Inverse) {
       for (int i = 0; i < cutOff; i++) {
 	push(toFilter.instance(i));
@@ -321,20 +277,9 @@ public class RemovePercentage
       }
     }
     flushInput();
-    
     m_NewBatch = true;
     m_FirstBatchDone = true;
-    
     return (numPendingOutput() != 0);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -343,6 +288,15 @@ public class RemovePercentage
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new RemovePercentage(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new RemovePercentage(), argv);
+      } else {
+	Filter.filterFile(new RemovePercentage(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

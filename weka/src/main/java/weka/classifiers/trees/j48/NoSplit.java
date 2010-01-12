@@ -16,27 +16,21 @@
 
 /*
  *    NoSplit.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
+import weka.core.*;
 
 /**
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
-public final class NoSplit
-  extends ClassifierSplitModel{
-
-  /** for serialization */
-  private static final long serialVersionUID = -1292620749331337546L;
+public final class NoSplit extends ClassifierSplitModel{
 
   /**
    * Creates "no-split"-split for given distribution.
@@ -103,13 +97,13 @@ public final class NoSplit
 
     return "true";  // or should this be false??
   }  
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
+
 }
+
+
+
+
+
+
+
+

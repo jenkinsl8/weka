@@ -15,78 +15,75 @@
  */
 
 /*
- *    SerializedInstancesSaver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    SerializedInsancesSaver.java
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Capabilities;
-import weka.core.RevisionUtils;
-import weka.core.Capabilities.Capability;
-
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.Writer;
 import java.io.OutputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.ObjectOutputStream;
+import java.io.BufferedOutputStream;
+import java.util.Enumeration;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
 
 /**
- <!-- globalinfo-start -->
- * Serializes the instances to a file with extension bsi.
- * <p/>
- <!-- globalinfo-end -->
+ * Serialzes to a destination.
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -i &lt;the input file&gt;
- * The input file</pre>
- * 
- * <pre> -o &lt;the output file&gt;
- * The output file</pre>
- * 
- <!-- options-end -->
+ * Valid options:
+ *
+ * -i input arff file <br>
+ * The input filw in arff format. <p>
+ *
+ * -o the output file <br>
+ * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  * @see Saver
  */
-public class SerializedInstancesSaver 
-  extends AbstractFileSaver 
-  implements BatchConverter {
+public class SerializedInstancesSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
 
-  /** for serialization. */
-  static final long serialVersionUID = -7717010648500658872L;
-  
-  /** the output stream. */
-  protected ObjectOutputStream m_objectstream;
-  
-  /** Constructor. */  
+   /** Constructor */  
   public SerializedInstancesSaver(){
+  
       resetOptions();
   }
     
+    
   /**
-   * Returns a string describing this Saver.
-   * 
+   * Returns a string describing this Saver
    * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
     return "Serializes the instances to a file with extension bsi.";
   }
- 
+
+  
   /**
    * Returns a description of the file type.
    *
    * @return a short file description
    */
   public String getFileDescription() {
-    return "Binary serialized instances";
+    return "Serializes the instaces to a file";
   }
 
   /**
-   * Resets the Saver.
+   * Resets the Saver 
    */
   public void resetOptions() {
 
@@ -94,89 +91,104 @@ public class SerializedInstancesSaver
     setFileExtension(".bsi");
   }
 
-  /** 
-   * Returns the Capabilities of this saver.
+/**
+   * Sets the destination file (and directories if necessary).
    *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * @param file the File
+   * @exception IOException always
    */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
+  public void setDestination(File file) throws IOException {
+
+    boolean success = false;
+    String out = file.getAbsolutePath();
     
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+    if(retrieveFile() != null){
+        try{
+            if(out.lastIndexOf(File.separatorChar) == -1)
+                success = file.createNewFile();
+            else{
+                String outPath = out.substring(0,out.lastIndexOf(File.separatorChar));
+                File dir = new File(outPath);
+                if(dir.exists())
+                    success = file.createNewFile();
+                else{
+                    dir.mkdirs();
+                    success = file.createNewFile();
+                }
+            }
+            if(success){ 
+                setFile(file);
+            }
+        } catch(Exception ex){
+            throw new IOException("Cannot create a new output file. Standard out is used.");
+        } finally{
+            if(!success){
+                System.err.println("Cannot create a new output file. Standard out is used.");
+                setFile(null); //use standard out
+            }
+        }
+    }
   }
   
-  /**
-   * Resets the writer, setting writer and objectstream to null.
-   */  
-  public void resetWriter() {
-    super.resetWriter();
-    
-    m_objectstream = null;
-  }
   
-  /**
-   * Sets the destination output stream.
-   * 
-   * @param output the output stream.
-   * @throws IOException throws an IOException if destination cannot be set
-   */
-  public void setDestination(OutputStream output) throws IOException {
-    super.setDestination(output);
-    
-    m_objectstream = new ObjectOutputStream(output);
-  }
   
-  /** 
-   * Writes a Batch of instances.
-   * 
+  /** Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
-    if(getRetrieval() == INCREMENTAL)
-      throw new IOException("Batch and incremental saving cannot be mixed.");
-    
-    if(getInstances() == null)
-      throw new IOException("No instances to save");
-    
-    setRetrieval(BATCH);
-    
-    if (m_objectstream == null)
-      throw new IOException("No output for serialization.");
-
-    setWriteMode(WRITE);
-    m_objectstream.writeObject(getInstances());
-    m_objectstream.flush();
-    m_objectstream.close();
-    setWriteMode(WAIT);
-    resetWriter();
-    setWriteMode(CANCEL);
-  }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+      
+      resetWriter();
+      
+      if(getRetrieval() == INCREMENTAL)
+          throw new IOException("Batch and incremental saving cannot be mixed.");
+      if(getInstances() == null)
+          throw new IOException("No instances to save");
+      setRetrieval(BATCH);
+      if(retrieveFile() == null){
+        throw new IOException("No output to standard out for serialization.");
+      }
+      setWriteMode(WRITE);
+      ObjectOutputStream outW = 
+		  new ObjectOutputStream(
+		  new BufferedOutputStream(
+		  new FileOutputStream(retrieveFile())));
+
+      outW.writeObject(getInstances());
+      outW.flush();
+      outW.close();
+      setWriteMode(WAIT);
   }
 
   /**
    * Main method.
    *
-   * @param args should contain the options of a Saver.
+   * @param options should contain the options of a Saver.
    */
-  public static void main(String[] args) {
-    runFileSaver(new SerializedInstancesSaver(), args);
-  }
+  public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
+      try {
+	SerializedInstancesSaver ssv = new SerializedInstancesSaver();
+        text.append("\n\nSerializedInstancesSaver options:\n\n");
+        Enumeration enumi = ssv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
+        try {
+          ssv.setOptions(options);  
+        } catch (Exception ex) {
+            System.out.println("\n"+text);
+            System.exit(1);
+	}
+        ssv.writeBatch();
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	}
+      
+    }
 }
+  
+  

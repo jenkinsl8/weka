@@ -16,7 +16,7 @@
 
 /*
  *    CrossValidationFoldMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,10 +24,17 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 
-import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Random;
+import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.util.Enumeration;
 
 /**
  * Bean for splitting instances into training ant test sets according to
@@ -41,13 +48,8 @@ public class CrossValidationFoldMaker
   implements DataSourceListener, TrainingSetListener, TestSetListener, 
 	     UserRequestAcceptor, EventConstraints, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -6350179298851891512L;
-
   private int m_numFolds = 10;
   private int m_randomSeed = 1;
-  
-  private boolean m_preserveOrder = false;
 
   private transient Thread m_foldThread = null;
 
@@ -57,24 +59,6 @@ public class CrossValidationFoldMaker
 		       BeanVisual.ICON_PATH
 		       +"CrossValidationFoldMaker_animated.gif");
     m_visual.setText("CrossValidationFoldMaker");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -108,7 +92,7 @@ public class CrossValidationFoldMaker
     DataSetEvent dse = new DataSetEvent(this, testSet);
     acceptDataSet(dse);
   }
-  
+
   /**
    * Accept a data set
    *
@@ -127,18 +111,14 @@ public class CrossValidationFoldMaker
       final Instances dataSet = new Instances(e.getDataSet());
       m_foldThread = new Thread() {
 	  public void run() {
-	    boolean errorOccurred = false;
 	    try {
 	      Random random = new Random(getSeed());
-	      if (!m_preserveOrder) {
-	        dataSet.randomize(random);
-	      }
+	      dataSet.randomize(random);
 	      if (dataSet.classIndex() >= 0 && 
-		  dataSet.attribute(dataSet.classIndex()).isNominal() &&
-		  !m_preserveOrder) {
+		  dataSet.attribute(dataSet.classIndex()).isNominal()) {
 		dataSet.stratify(getFolds());
 		if (m_logger != null) {
-		  m_logger.logMessage("[" + getCustomName() + "] "
+		  m_logger.logMessage("CrossValidationFoldMaker : "
 				      +"stratifying data");
 		}
 	      }
@@ -146,25 +126,18 @@ public class CrossValidationFoldMaker
 	      for (int i = 0; i < getFolds(); i++) {
 		if (m_foldThread == null) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("[" + getCustomName() + "] Cross validation has been canceled!");
+		    m_logger.logMessage("Cross validation has been canceled!");
+		    m_logger.statusMessage("OK");
 		  }
 		  // exit gracefully
 		  break;
 		}
-		Instances train = (!m_preserveOrder) 
-		  ? dataSet.trainCV(getFolds(), i, random)
-		  : dataSet.trainCV(getFolds(), i); 
+		Instances train = dataSet.trainCV(getFolds(), i, random);
 		Instances test  = dataSet.testCV(getFolds(), i);
-
+		
 		// inform all training set listeners
 		TrainingSetEvent tse = new TrainingSetEvent(this, train);
 		tse.m_setNumber = i+1; tse.m_maxSetNumber = getFolds();
-		String msg = getCustomName() + "$" 
-		  + CrossValidationFoldMaker.this.hashCode() + "|";
-		if (m_logger != null) {
-		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
-		      + getFolds() + "|Training fold " + (i+1));
-		}
 		if (m_foldThread != null) {
 		  //		  System.err.println("--Just before notify training set");
 		  notifyTrainingSetProduced(tse);
@@ -174,51 +147,16 @@ public class CrossValidationFoldMaker
 		// inform all test set listeners
 		TestSetEvent teste = new TestSetEvent(this, test);
 		teste.m_setNumber = i+1; teste.m_maxSetNumber = getFolds();
-		
-		if (m_logger != null) {
-		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
-		      + getFolds() + "|Test fold " + (i+1));
-		}
 		if (m_foldThread != null) {
 		  notifyTestSetProduced(teste);
 		}
 	      }
 	    } catch (Exception ex) {
-	      // stop all processing
-	      errorOccurred = true;
-	      if (m_logger != null) {
-	        m_logger.logMessage("[" + getCustomName() 
-	            + "] problem during fold creation. "
-	            + ex.getMessage());
-	      }
 	      ex.printStackTrace();
-	      CrossValidationFoldMaker.this.stop();
 	    } finally {
 	      m_foldThread = null;
-	      
-	      if (errorOccurred) {
-	        if (m_logger != null) {
-	          m_logger.statusMessage(getCustomName() 
-	              + "$" + CrossValidationFoldMaker.this.hashCode()
-	              + "|"
-	              + "ERROR (See log for details).");
-	        }
-	      } else if (isInterrupted()) {
-	        String msg = "[" + getCustomName() + "] Cross validation interrupted";
-	        if (m_logger != null) {
-	          m_logger.logMessage("[" + getCustomName() + "] Cross validation interrupted");
-	          m_logger.statusMessage(getCustomName() + "$"
-	              + CrossValidationFoldMaker.this.hashCode() + "|"
-	              + "INTERRUPTED");
-	        } else {
-	          System.err.println(msg);
-	        }
-	      } else {
-	        String msg = getCustomName() + "$" 
-	        + CrossValidationFoldMaker.this.hashCode() + "|";
-	        if (m_logger != null) {
-	          m_logger.statusMessage(msg + "Finished.");
-	        }
+	      if (isInterrupted()) {
+		System.err.println("Cross validation interrupted");
 	      }
 	      block(false);
 	    }
@@ -247,9 +185,6 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_foldThread == null) {
-          break;
-        }
 	//	System.err.println("Notifying test listeners "
 	//			   +"(cross validation fold maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
@@ -269,9 +204,6 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_foldThread == null) {
-          break;
-        }
 	//	System.err.println("Notifying training listeners "
 	//			   +"(cross validation fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
@@ -332,39 +264,6 @@ public class CrossValidationFoldMaker
   public String seedTipText() {
     return "The randomization seed";
   }
-  
-  /**
-   * Returns true if the order of the incoming instances is to
-   * be preserved under cross-validation (no randomization or 
-   * stratification is done in this case).
-   * 
-   * @return true if the order of the incoming instances is to
-   * be preserved.
-   */
-  public boolean getPreserveOrder() {
-    return m_preserveOrder;
-  }
-  
-  /**
-   * Sets whether the order of the incoming instances is to be
-   * preserved under cross-validation (no randomization or 
-   * stratification is done in this case).
-   *  
-   * @param p true if the order is to be preserved.
-   */
-  public void setPreserveOrder(boolean p) {
-    m_preserveOrder = p;
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_foldThread != null);
-  }
 
   /**
    * Stop any action
@@ -372,16 +271,17 @@ public class CrossValidationFoldMaker
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
+      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
     // stop the fold thread
     if (m_foldThread != null) {
+      //      m_buildThread.interrupt();
       Thread temp = m_foldThread;
+      //      m_buildThread.stop();
       m_foldThread = null;
       temp.interrupt();
-      temp.stop();
     }
   }
 
@@ -396,7 +296,7 @@ public class CrossValidationFoldMaker
     if (tf) {
       try {
 	// make sure the thread is still running before we block
-	if (m_foldThread != null && m_foldThread.isAlive()) {
+	if (m_foldThread.isAlive()) {
 	  wait();
 	}
       } catch (InterruptedException ex) {

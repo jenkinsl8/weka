@@ -16,7 +16,7 @@
 
 /*
  *    BeanCommon.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -27,7 +27,7 @@ import java.beans.EventSetDescriptor;
 /**
  * Interface specifying routines that all weka beans should implement
  * in order to allow the bean environment to exercise some control over the
- * bean and also to allow the bean to exercise some control over connections.
+ * bean and also to allow the bean to excercise some control over connections.
  *
  * Beans may want to  impose constraints in terms of
  * the number of connections they will allow via a particular 
@@ -36,37 +36,15 @@ import java.beans.EventSetDescriptor;
  * perhaps a limited number of sources.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.1.2.1 $
  * @since 1.0
  */
 public interface BeanCommon {
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  void setCustomName(String name);
   
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  String getCustomName();
-
   /**
    * Stop any processing that the bean might be doing.
    */
   void stop();
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  boolean isBusy();
 
   /**
    * Set a logger
@@ -75,12 +53,12 @@ public interface BeanCommon {
    */
   void setLog(weka.gui.Logger logger);
 
-
   /**
    * Returns true if, at this time, 
-   * the object will accept a connection via the named event
+   * the object will accept a connection via the supplied
+   * EventSetDescriptor
    *
-   * @param esd the EventSetDescriptor for the event in question
+   * @param esd the EventSetDescriptor
    * @return true if the object will accept a connection
    */
   boolean connectionAllowed(EventSetDescriptor esd);

@@ -16,27 +16,33 @@
 
 /*
  *    ClassifierPerformanceEvaluator.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Instance;
+import weka.classifiers.Evaluation;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.gui.explorer.ClassifierErrorsPlotInstances;
-import weka.gui.explorer.ExplorerDefaults;
+import weka.core.Instance;
+import weka.core.FastVector;
+import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import java.awt.*;
+import javax.swing.JScrollPane;
 
 /**
  * A bean that evaluates the performance of batch trained classifiers
@@ -49,18 +55,17 @@ public class ClassifierPerformanceEvaluator
   implements BatchClassifierListener, 
 	     Serializable, UserRequestAcceptor, EventConstraints {
 
-  /** for serialization */
-  private static final long serialVersionUID = -3511801418192148690L;
-
   /**
    * Evaluation object used for evaluating a classifier
    */
   private transient Evaluation m_eval;
 
+  /**
+   * Holds the classifier to be evaluated
+   */
+  private transient Classifier m_classifier;
+
   private transient Thread m_evaluateThread = null;
-  
-  private transient long m_currentBatchIdentifier;
-  private transient int m_setsComplete;
   
   private Vector m_textListeners = new Vector();
   private Vector m_thresholdListeners = new Vector();
@@ -72,24 +77,6 @@ public class ClassifierPerformanceEvaluator
 		       BeanVisual.ICON_PATH
 		       +"ClassifierPerformanceEvaluator_animated.gif");
     m_visual.setText("ClassifierPerformanceEvaluator");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
   
   /**
@@ -103,63 +90,53 @@ public class ClassifierPerformanceEvaluator
 
   // ----- Stuff for ROC curves
   private boolean m_rocListenersConnected = false;
-  
-  /** for generating plottable instance with predictions appended. */
-  private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
+  // Plottable Instances with predictions appended
+  private Instances m_predInstances = null;
+  // Actual predictions
+  private FastVector m_preds = null;
+  private FastVector m_plotShape = null;
+  private FastVector m_plotSize = null;
 
   /**
-   * Accept a classifier to be evaluated.
+   * Accept a classifier to be evaluated
    *
    * @param ce a <code>BatchClassifierEvent</code> value
    */
   public void acceptClassifier(final BatchClassifierEvent ce) {
-    if (ce.getTestSet() == null || ce.getTestSet().isStructureOnly()) {
-      return; // cant evaluate empty/non-existent test instances
+    if (ce.getTestSet().isStructureOnly()) {
+      return; // cant evaluate empty instances
     }
     try {
       if (m_evaluateThread == null) {
 	m_evaluateThread = new Thread() {
 	    public void run() {
-	      boolean errorOccurred = false;
-//	      final String oldText = m_visual.getText();
-	      Classifier classifier = ce.getClassifier();
+	      final String oldText = m_visual.getText();
 	      try {
-		// if (ce.getSetNumber() == 1) {
-	        if (ce.getGroupIdentifier() != m_currentBatchIdentifier) {
-		  
-		  if (ce.getTrainSet().getDataSet() == null ||
-		      ce.getTrainSet().getDataSet().numInstances() == 0) {
-		    // we have no training set to estimate majority class
-		    // or mean of target from
-		    m_eval = new Evaluation(ce.getTestSet().getDataSet());
-		    m_eval.useNoPriors();
-		  } else {
-		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
-		  }
-//		  m_classifier = ce.getClassifier();
-		  m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-		  m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
-		  m_PlotInstances.setClassifier(ce.getClassifier());
-		  m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
-		  m_PlotInstances.setEvaluation(m_eval);
-		  m_PlotInstances.setUp();
-		  
-		  m_currentBatchIdentifier = ce.getGroupIdentifier();
-		  m_setsComplete = 0;
+		if (ce.getSetNumber() == 1 || 
+		    ce.getClassifier() != m_classifier) {
+                  if (ce.getTrainSet().getDataSet() == null ||
+                      ce.getTrainSet().getDataSet().numInstances() == 0) {
+                    // we have no training set to estimate majority class
+                    // or mean of target from
+                    m_eval = new Evaluation(ce.getTestSet().getDataSet());
+                    m_eval.useNoPriors();
+                  } else {
+                    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
+                  }
+
+		  m_classifier = ce.getClassifier();
+		  m_predInstances = 
+		    weka.gui.explorer.ClassifierPanel.
+		    setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
+		  m_preds = new FastVector();
+		  m_plotShape = new FastVector();
+		  m_plotSize = new FastVector();
 		}
-//		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
-	        if (m_setsComplete < ce.getMaxSetNumber()) {
-		  
-		  if (ce.getTrainSet().getDataSet() != null &&
-		      ce.getTrainSet().getDataSet().numInstances() > 0) {
-		    // set the priors
-		    m_eval.setPriors(ce.getTrainSet().getDataSet());
-		  }
-		  
-//		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
+		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
+		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix()
-					   +"Evaluating ("+ce.getSetNumber()
+		    m_logger.statusMessage("ClassifierPerformaceEvaluator : "
+					   +"evaluating ("+ce.getSetNumber()
 					   +")...");
 		  }
 		  m_visual.setAnimated();
@@ -168,29 +145,24 @@ public class ClassifierPerformanceEvaluator
 		  ce.getTestSet().getDataSet()); */
 		  for (int i = 0; i < ce.getTestSet().getDataSet().numInstances(); i++) {
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
-		    m_PlotInstances.process(temp, ce.getClassifier(), m_eval);
+		    weka.gui.explorer.ClassifierPanel.
+		    processClassifierPrediction(temp, ce.getClassifier(),
+						m_eval, m_preds,
+						m_predInstances, m_plotShape,
+						m_plotSize);
 		  }
-		  
-		  m_setsComplete++;
 		}
 		
-//		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
-	        if (m_setsComplete == ce.getMaxSetNumber()) {
-                  //		  System.err.println(m_eval.toSummaryString());
+		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
+		  System.err.println(m_eval.toSummaryString());
 		  // m_resultsString.append(m_eval.toSummaryString());
 		  // m_outText.setText(m_resultsString.toString());
-		  String textTitle = classifier.getClass().getName();
-		  String textOptions = "";
-		  if (classifier instanceof OptionHandler) {
-	             textOptions = 
-	               Utils.joinOptions(((OptionHandler)classifier).getOptions()); 
-		  }
+		  String textTitle = m_classifier.getClass().getName();
 		  textTitle = 
 		    textTitle.substring(textTitle.lastIndexOf('.')+1,
 					textTitle.length());
 		  String resultT = "=== Evaluation result ===\n\n"
 		    + "Scheme: " + textTitle + "\n"
-		    + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n": "")
 		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
 		    + "\n\n" + m_eval.toSummaryString();
                   
@@ -208,52 +180,30 @@ public class ClassifierPerformanceEvaluator
 
                   // set up visualizable errors
                   if (m_visualizableErrorListeners.size() > 0) {
-                    PlotData2D errorD = m_PlotInstances.getPlotData(
-                	textTitle + " " + textOptions);
+                    PlotData2D errorD = new PlotData2D(m_predInstances);
+                    errorD.setShapeSize(m_plotSize);
+                    errorD.setShapeType(m_plotShape);
+                    errorD.setPlotName(textTitle+" ("
+                                       +ce.getTestSet().getDataSet().relationName()
+                                       +")");
+                    errorD.addInstanceNumberAttribute();
                     VisualizableErrorEvent vel = 
-                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this, errorD);
+                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this,
+                                                 errorD);
                     notifyVisualizableErrorListeners(vel);
-                    m_PlotInstances.cleanUp();
                   }
                   
 
-		  if (ce.getTestSet().getDataSet().classAttribute().isNominal() &&
-		      m_thresholdListeners.size() > 0) {
+		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
 		    ThresholdCurve tc = new ThresholdCurve();
-		    Instances result = tc.getCurve(m_eval.predictions(), 0);
+		    Instances result = tc.getCurve(m_preds, 0);
 		    result.
 		      setRelationName(ce.getTestSet().getDataSet().relationName());
 		    PlotData2D pd = new PlotData2D(result);
-		    String htmlTitle = "<html><font size=-2>"
-		      + textTitle;
-		    String newOptions = "";
-		    if (classifier instanceof OptionHandler) {
-		      String[] options = 
-		        ((OptionHandler) classifier).getOptions();
-		      if (options.length > 0) {
-		        for (int ii = 0; ii < options.length; ii++) {
-		          if (options[ii].length() == 0) {
-		            continue;
-		          }
-		          if (options[ii].charAt(0) == '-' && 
-		              !(options[ii].charAt(1) >= '0' &&
-		                  options[ii].charAt(1)<= '9')) {
-		            newOptions += "<br>";
-		          }
-		          newOptions += options[ii];
-		        }
-		      }
-		    }
-		    
-		   htmlTitle += " " + newOptions + "<br>" 
-		      + " (class: "
-                      +ce.getTestSet().getDataSet().
-                        classAttribute().value(0) + ")" 
-                      + "</font></html>";
-		    pd.setPlotName(textTitle + " (class: "
-	                      +ce.getTestSet().getDataSet().
-	                        classAttribute().value(0) + ")");
-		    pd.setPlotNameHTML(htmlTitle);
+		    pd.setPlotName(textTitle+" ("
+				   +ce.getTestSet().getDataSet().
+				                   classAttribute().value(0)
+				   +")");
 		    boolean [] connectPoints = 
 		      new boolean [result.numInstances()];
 		    for (int jj = 1; jj < connectPoints.length; jj++) {
@@ -262,7 +212,7 @@ public class ClassifierPerformanceEvaluator
 		    pd.setConnectPoints(connectPoints);
 		    ThresholdDataEvent rde = 
 		      new ThresholdDataEvent(ClassifierPerformanceEvaluator.this,
-				       pd, ce.getTestSet().getDataSet().classAttribute());
+				       pd);
 		    notifyThresholdListeners(rde);
 		    /*te = new TextEvent(ClassifierPerformanceEvaluator.this,
 				       result.toString(),
@@ -270,35 +220,19 @@ public class ClassifierPerformanceEvaluator
 				       notifyTextListeners(te); */
 		  }
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_logger.statusMessage("Done.");
 		  }
-
-		  // save memory
-		  m_PlotInstances = null;
 		}
 	      } catch (Exception ex) {
-	        errorOccurred = true;
-	        ClassifierPerformanceEvaluator.this.stop(); // stop all processing
-	        if (m_logger != null) {
-	          m_logger.logMessage("[ClassifierPerformanceEvaluator] "
-	              + statusMessagePrefix() 
-	              + " problem evaluating classifier. " 
-	              + ex.getMessage());
-	        }
 		ex.printStackTrace();
 	      } finally {
-//		m_visual.setText(oldText);
+		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
-						
-		if (m_logger != null) {
-		  if (errorOccurred) {
-		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "ERROR (See log for details)");
-		  } else if (isInterrupted()) {
-		    m_logger.logMessage("[" + getCustomName() +"] Evaluation interrupted!");
-		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "INTERRUPTED");
+		if (isInterrupted()) {
+		  if (m_logger != null) {
+		    m_logger.logMessage("Evaluation interrupted!");
+		    m_logger.statusMessage("OK");
 		  }
 		}
 		block(false);
@@ -320,22 +254,12 @@ public class ClassifierPerformanceEvaluator
   }
 
   /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_evaluateThread != null);
-  }
-    
-  /**
    * Try and stop any action
    */
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
+      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
@@ -343,8 +267,6 @@ public class ClassifierPerformanceEvaluator
     if (m_evaluateThread != null) {
       m_evaluateThread.interrupt();
       m_evaluateThread.stop();
-      m_evaluateThread = null;
-      m_visual.setStatic();
     }
   }
   
@@ -531,10 +453,6 @@ public class ClassifierPerformanceEvaluator
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }
 

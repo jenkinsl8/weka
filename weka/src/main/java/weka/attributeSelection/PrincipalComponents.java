@@ -16,77 +16,46 @@
 
 /*
  *    PrincipalComponents.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Matrix;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import  weka.filters.unsupervised.attribute.Normalize;
+import  weka.filters.unsupervised.attribute.NominalToBinary;
+import  weka.filters.unsupervised.attribute.Remove;
+import  weka.filters.Filter;
 
 /**
- <!-- globalinfo-start -->
- * Performs a principal components analysis and transformation of the data. Use in conjunction with a Ranker search. Dimensionality reduction is accomplished by choosing enough eigenvectors to account for some percentage of the variance in the original data---default 0.95 (95%). Attribute noise can be filtered by transforming to the PC space, eliminating some of the worst eigenvectors, and then transforming back to the original space.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing principal components analysis/transformation. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  Don't normalize input data.</pre>
- * 
- * <pre> -R
- *  Retain enough PC attributes to account 
- *  for this proportion of variance in the original data.
- *  (default = 0.95)</pre>
- * 
- * <pre> -O
- *  Transform through the PC space and 
- *  back to the original space.</pre>
- * 
- * <pre> -A
- *  Maximum number of attributes to include in 
- *  transformed attribute names. (-1 = include all)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ * -N <br>
+ * Don't normalize the input data. <p>
+ *
+ * -R <variance> <br>
+ * Retain enough pcs to account for this proportion of the variance. <p>
+ *
+ * -T <br>
+ * Transform through the PC space and back to the original space. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.25.2.4 $
  */
-public class PrincipalComponents 
-  extends UnsupervisedAttributeEvaluator 
+public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3310137541055815078L;
   
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
 
   /** Keep a copy for the class attribute (if set) */
-  private Instances m_trainHeader;
+  private Instances m_trainCopy;
 
   /** The header for the transformed data format */
   private Instances m_transformedFormat;
@@ -175,50 +144,42 @@ public class PrincipalComponents
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);
     newVector.addElement(new Option("\tDon't normalize input data." 
-                                    , "D", 0, "-D"));
+				    , "D", 0, "-D"));
 
     newVector.addElement(new Option("\tRetain enough PC attributes to account "
-                                    +"\n\tfor this proportion of variance in "
-                                    +"the original data.\n"
-                                    + "\t(default = 0.95)",
-                                    "R",1,"-R"));
+				    +"\n\tfor this proportion of variance in "
+				    +"the original data. (default = 0.95)",
+				    "R",1,"-R"));
     
     newVector.addElement(new Option("\tTransform through the PC space and "
-                                    +"\n\tback to the original space."
-                                    , "O", 0, "-O"));
-                                    
+				    +"\n\tback to the original space."
+				    , "O", 0, "-O"));
+				    
     newVector.addElement(new Option("\tMaximum number of attributes to include in "
-                                    + "\n\ttransformed attribute names. (-1 = include all)"
-                                    , "A", 1, "-A"));
+                                    + "\ntransformed attribute names. (-1 = include all)"
+				    , "A", 1, "-A"));
     return  newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -D
-   *  Don't normalize input data.</pre>
-   * 
-   * <pre> -R
-   *  Retain enough PC attributes to account 
-   *  for this proportion of variance in the original data.
-   *  (default = 0.95)</pre>
-   * 
-   * <pre> -O
-   *  Transform through the PC space and 
-   *  back to the original space.</pre>
-   * 
-   * <pre> -A
-   *  Maximum number of attributes to include in 
-   *  transformed attribute names. (-1 = include all)</pre>
-   * 
-   <!-- options-end -->
+   * Valid options are:<p>
+   * -N <br>
+   * Don't normalize the input data. <p>
+   *
+   * -R <variance> <br>
+   * Retain enough pcs to account for this proportion of the variance. <p>
+   *
+   * -T <br>
+   * Transform through the PC space and back to the original space. <p>
+   *
+   * -A <max>
+   * The maximum number of attributes to include in transformed attribute names.
+   * (-1 = include all attributes)
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception {
@@ -393,40 +354,11 @@ public class PrincipalComponents
   }
 
   /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
-  /**
    * Initializes principal components and performs the analysis
    * @param data the instances to analyse/transform
-   * @throws Exception if analysis fails
+   * @exception Exception if analysis fails
    */
   public void buildEvaluator(Instances data) throws Exception {
-    // can evaluator handle data?
-    getCapabilities().testWithFail(data);
-
     buildAttributeConstructor(data);
   }
 
@@ -436,16 +368,20 @@ public class PrincipalComponents
     m_attributeFilter = null;
     m_nominalToBinFilter = null;
     m_sumOfEigenValues = 0.0;
-    m_trainInstances = new Instances(data);
+
+    if (data.checkForStringAttributes()) {
+      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
+    m_trainInstances = data;
 
     // make a copy of the training data so that we can get the class
     // column to append to the transformed data (if necessary)
-    m_trainHeader = new Instances(m_trainInstances, 0);
+    m_trainCopy = new Instances(m_trainInstances);
     
     m_replaceMissingFilter = new ReplaceMissingValues();
     m_replaceMissingFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
-                                        m_replaceMissingFilter);
+					m_replaceMissingFilter);
 
     if (m_normalize) {
       m_normalizeFilter = new Normalize();
@@ -456,13 +392,13 @@ public class PrincipalComponents
     m_nominalToBinFilter = new NominalToBinary();
     m_nominalToBinFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, 
-                                        m_nominalToBinFilter);
+					m_nominalToBinFilter);
     
     // delete any attributes with only one distinct value or are all missing
     Vector deleteCols = new Vector();
     for (int i=0;i<m_trainInstances.numAttributes();i++) {
       if (m_trainInstances.numDistinctValues(i) <=1) {
-        deleteCols.addElement(new Integer(i));
+	deleteCols.addElement(new Integer(i));
       }
     }
 
@@ -478,16 +414,13 @@ public class PrincipalComponents
       m_attributeFilter = new Remove();
       int [] todelete = new int [deleteCols.size()];
       for (int i=0;i<deleteCols.size();i++) {
-        todelete[i] = ((Integer)(deleteCols.elementAt(i))).intValue();
+	todelete[i] = ((Integer)(deleteCols.elementAt(i))).intValue();
       }
       m_attributeFilter.setAttributeIndicesArray(todelete);
       m_attributeFilter.setInvertSelection(false);
       m_attributeFilter.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
     }
-    
-    // can evaluator handle the processed data ? e.g., enough attributes?
-    getCapabilities().testWithFail(m_trainInstances);
 
     m_numInstances = m_trainInstances.numInstances();
     m_numAttribs = m_trainInstances.numAttributes();
@@ -497,15 +430,25 @@ public class PrincipalComponents
     double [] d = new double[m_numAttribs]; 
     double [][] v = new double[m_numAttribs][m_numAttribs];
 
+
     Matrix corr = new Matrix(m_correlation);
     corr.eigenvalueDecomposition(v, d);
+    //if (debug) {
+    //  Matrix V = new Matrix(v);
+    //  boolean b = corr.testEigen(V, d, true);
+    //  if (!b)
+    //	System.out.println("Problem with eigenvektors!!!");
+    //  else
+    //	System.out.println("***** everything's fine !!!");
+    //  }
+    
     m_eigenvectors = (double [][])v.clone();
     m_eigenvalues = (double [])d.clone();
 
     // any eigenvalues less than 0 are not worth anything --- change to 0
     for (int i = 0; i < m_eigenvalues.length; i++) {
       if (m_eigenvalues[i] < 0) {
-        m_eigenvalues[i] = 0.0;
+	m_eigenvalues[i] = 0.0;
       }
     }
     m_sortedEigens = Utils.sort(m_eigenvalues);
@@ -517,29 +460,29 @@ public class PrincipalComponents
       
       // new ordered eigenvector matrix
       int numVectors = (m_transformedFormat.classIndex() < 0) 
-        ? m_transformedFormat.numAttributes()
-        : m_transformedFormat.numAttributes() - 1;
+	? m_transformedFormat.numAttributes()
+	: m_transformedFormat.numAttributes() - 1;
 
       double [][] orderedVectors = 
-        new double [m_eigenvectors.length][numVectors + 1];
+	new double [m_eigenvectors.length][numVectors + 1];
       
       // try converting back to the original space
       for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
-        for (int j = 0; j < m_numAttribs; j++) {
-          orderedVectors[j][m_numAttribs - i] = 
-            m_eigenvectors[j][m_sortedEigens[i]];
-        }
+	for (int j = 0; j < m_numAttribs; j++) {
+	  orderedVectors[j][m_numAttribs - i] = 
+	    m_eigenvectors[j][m_sortedEigens[i]];
+	}
       }
       
       // transpose the matrix
       int nr = orderedVectors.length;
       int nc = orderedVectors[0].length;
       m_eTranspose = 
-        new double [nc][nr];
+	new double [nc][nr];
       for (int i = 0; i < nc; i++) {
-        for (int j = 0; j < nr; j++) {
-          m_eTranspose[i][j] = orderedVectors[j][i];
-        }
+	for (int j = 0; j < nr; j++) {
+	  m_eTranspose[i][j] = orderedVectors[j][i];
+	}
       }
     }
   }
@@ -548,9 +491,9 @@ public class PrincipalComponents
    * Returns just the header for the transformed data (ie. an empty
    * set of instances. This is so that AttributeSelection can
    * determine the structure of the transformed data without actually
-   * having to get all the transformed data through transformedData().
+   * having to get all the transformed data through getTransformedData().
    * @return the header of the transformed data.
-   * @throws Exception if the header of the transformed data can't
+   * @exception Exception if the header of the transformed data can't
    * be determined.
    */
   public Instances transformedHeader() throws Exception {
@@ -567,22 +510,22 @@ public class PrincipalComponents
   /**
    * Gets the transformed training data.
    * @return the transformed training data
-   * @throws Exception if transformed data can't be returned
+   * @exception Exception if transformed data can't be returned
    */
-  public Instances transformedData(Instances data) throws Exception {
+  public Instances transformedData() throws Exception {
     if (m_eigenvalues == null) {
       throw new Exception("Principal components hasn't been built yet");
     }
 
-    Instances output = null;
+    Instances output;
 
     if (m_transBackToOriginal) {
       output = new Instances(m_originalSpaceFormat);
     } else {
       output = new Instances(m_transformedFormat);
     }
-    for (int i = 0; i < data.numInstances(); i++) {
-      Instance converted = convertInstance(data.instance(i));
+    for (int i=0;i<m_trainCopy.numInstances();i++) {
+      Instance converted = convertInstance(m_trainCopy.instance(i));
       output.add(converted);
     }
 
@@ -596,7 +539,7 @@ public class PrincipalComponents
    * to the original space.
    * @param att the attribute to be evaluated
    * @return the merit of a transformed attribute
-   * @throws Exception if attribute can't be evaluated
+   * @exception Exception if attribute can't be evaluated
    */
   public double evaluateAttribute(int att) throws Exception {
     if (m_eigenvalues == null) {
@@ -627,17 +570,17 @@ public class PrincipalComponents
 
     for (int i = 0; i < m_numAttribs; i++) {
       for (int j = 0; j < m_numAttribs; j++) {
-        if (i == j) {
-          m_correlation[i][j] = 1.0;
-        } else {
-          for (int k = 0; k < m_numInstances; k++) {
-            att1[k] = m_trainInstances.instance(k).value(i);
-            att2[k] = m_trainInstances.instance(k).value(j);
-          }
-          corr = Utils.correlation(att1,att2,m_numInstances);
-          m_correlation[i][j] = corr;
-          m_correlation[j][i] = corr;
-        }
+	if (i == j) {
+	  m_correlation[i][j] = 1.0;
+	} else {
+	  for (int k = 0; k < m_numInstances; k++) {
+	    att1[k] = m_trainInstances.instance(k).value(i);
+	    att2[k] = m_trainInstances.instance(k).value(j);
+	  }
+	  corr = Utils.correlation(att1,att2,m_numInstances);
+	  m_correlation[i][j] = corr;
+	  m_correlation[j][i] = corr;
+	}
       }
     }
   }
@@ -655,24 +598,24 @@ public class PrincipalComponents
     try {
       output = setOutputFormat();
       numVectors = (output.classIndex() < 0) 
-        ? output.numAttributes()
-        : output.numAttributes()-1;
+	? output.numAttributes()
+	: output.numAttributes()-1;
     } catch (Exception ex) {
     }
     //tomorrow
     result.append("Correlation matrix\n"+matrixToString(m_correlation)
-                  +"\n\n");
+		  +"\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
     for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
       result.append(Utils.doubleToString(m_eigenvalues[m_sortedEigens[i]],9,5)
-                    +"\t"+Utils.
-                    doubleToString((m_eigenvalues[m_sortedEigens[i]] / 
-                                    m_sumOfEigenValues),
-                                     9,5)
-                    +"\t"+Utils.doubleToString((cumulative / 
-                                                m_sumOfEigenValues),9,5)
-                    +"\t"+output.attribute(m_numAttribs - i - 1).name()+"\n");
+		    +"\t"+Utils.
+		    doubleToString((m_eigenvalues[m_sortedEigens[i]] / 
+				    m_sumOfEigenValues),
+				     9,5)
+		    +"\t"+Utils.doubleToString((cumulative / 
+						m_sumOfEigenValues),9,5)
+		    +"\t"+output.attribute(m_numAttribs - i - 1).name()+"\n");
     }
 
     result.append("\nEigenvectors\n");
@@ -683,17 +626,17 @@ public class PrincipalComponents
     for (int j = 0; j < m_numAttribs; j++) {
 
       for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
-        result.append(Utils.
-                      doubleToString(m_eigenvectors[j][m_sortedEigens[i]],7,4)
-                      +"\t");
+	result.append(Utils.
+		      doubleToString(m_eigenvectors[j][m_sortedEigens[i]],7,4)
+		      +"\t");
       }
       result.append(m_trainInstances.attribute(j).name()+'\n');
     }
 
     if (m_transBackToOriginal) {
       result.append("\nPC space transformed back to original space.\n"
-                    +"(Note: can't evaluate attributes in the original "
-                    +"space)\n");
+		    +"(Note: can't evaluate attributes in the original "
+		    +"space)\n");
     }
     return result.toString();
   }
@@ -707,7 +650,7 @@ public class PrincipalComponents
       return "Principal components hasn't been built yet!";
     } else {
       return "\tPrincipal Components Attribute Transformer\n\n"
-        +principalComponentsSummary();
+	+principalComponentsSummary();
     }
   }
 
@@ -722,10 +665,10 @@ public class PrincipalComponents
 
     for (int i = 0; i <= last; i++) {
       for (int j = 0; j <= last; j++) {
-        result.append(Utils.doubleToString(matrix[i][j],6,2)+" ");
-        if (j == last) {
-          result.append('\n');
-        }
+	result.append(Utils.doubleToString(matrix[i][j],6,2)+" ");
+	if (j == last) {
+	  result.append('\n');
+	}
       }
     }
     return result.toString();
@@ -734,9 +677,9 @@ public class PrincipalComponents
   /**
    * Convert a pc transformed instance back to the original space
    * 
-   * @param inst        the instance to convert
-   * @return            the processed instance
-   * @throws Exception  if something goes wrong
+   * @param inst	the instance to convert
+   * @return		the processed instance
+   * @throws Exception	if something goes wrong
    */
   private Instance convertInstanceToOriginal(Instance inst)
     throws Exception {
@@ -756,8 +699,8 @@ public class PrincipalComponents
     for (int i = 0; i < m_eTranspose[0].length; i++) {
       double tempval = 0.0;
       for (int j = 1; j < m_eTranspose.length; j++) {
-        tempval += (m_eTranspose[j][i] * 
-                    inst.value(j - 1));
+	tempval += (m_eTranspose[j][i] * 
+		    inst.value(j - 1));
        }
       newVals[i] = tempval;
     }
@@ -765,7 +708,7 @@ public class PrincipalComponents
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new DenseInstance(inst.weight(), newVals);
+      return new Instance(inst.weight(), newVals);
     }      
   }
 
@@ -774,21 +717,20 @@ public class PrincipalComponents
    * to the original space if requested.
    * @param instance an instance in the original (unormalized) format
    * @return a transformed instance
-   * @throws Exception if instance cant be transformed
+   * @exception Exception if instance cant be transformed
    */
   public Instance convertInstance(Instance instance) throws Exception {
 
     if (m_eigenvalues == null) {
       throw new Exception("convertInstance: Principal components not "
-                          +"built yet");
+			  +"built yet");
     }
 
     double[] newVals = new double[m_outputNumAtts];
     Instance tempInst = (Instance)instance.copy();
-    if (!instance.dataset().equalHeaders(m_trainHeader)) {
+    if (!instance.equalHeaders(m_trainCopy.instance(0))) {
       throw new Exception("Can't convert instance: header's don't match: "
-                          +"PrincipalComponents\n"
-                          + instance.dataset().equalHeadersMsg(m_trainHeader));
+			  +"PrincipalComponents");
     }
 
     m_replaceMissingFilter.input(tempInst);
@@ -819,13 +761,13 @@ public class PrincipalComponents
     for (int i = m_numAttribs - 1; i >= 0; i--) {
       double tempval = 0.0;
       for (int j = 0; j < m_numAttribs; j++) {
-        tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
-                    tempInst.value(j));
+	tempval += (m_eigenvectors[j][m_sortedEigens[i]] * 
+		    tempInst.value(j));
        }
       newVals[m_numAttribs - i - 1] = tempval;
       cumulative+=m_eigenvalues[m_sortedEigens[i]];
       if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
-        break;
+	break;
       }
     }
     
@@ -833,24 +775,24 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new DenseInstance(instance.weight(), newVals);
+	return new Instance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
-        return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
-                                                            newVals));
+	return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
+							    newVals));
       } else {
-        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
-                                                      newVals));
+	return convertInstanceToOriginal(new Instance(instance.weight(),
+						      newVals));
       }
     }
   }
 
   /**
-   * Set up the header for the PC->original space dataset
+   * Set up the header for the PC-&gt;original space dataset
    * 
-   * @return            the output format
-   * @throws Exception  if something goes wrong
+   * @return 		the output format
+   * @throws Exception 	if something goes wrong
    */
   private Instances setOutputFormatOriginal() throws Exception {
     FastVector attributes = new FastVector();
@@ -861,12 +803,12 @@ public class PrincipalComponents
     }
     
     if (m_hasClass) {
-      attributes.addElement(m_trainHeader.classAttribute().copy());
+      attributes.addElement(m_trainCopy.classAttribute().copy());
     }
 
     Instances outputFormat = 
-      new Instances(m_trainHeader.relationName()+"->PC->original space",
-                    attributes, 0);
+      new Instances(m_trainCopy.relationName()+"->PC->original space",
+		    attributes, 0);
     
     // set the class to be the last attribute if necessary
     if (m_hasClass) {
@@ -879,7 +821,7 @@ public class PrincipalComponents
   /**
    * Set the format for the transformed data
    * @return a set of empty Instances (header only) in the new format
-   * @throws Exception if the output format can't be set
+   * @exception Exception if the output format can't be set
    */
   private Instances setOutputFormat() throws Exception {
     if (m_eigenvalues == null) {
@@ -911,8 +853,8 @@ public class PrincipalComponents
          double coeff_value = m_eigenvectors[coeff_inds[j]][m_sortedEigens[i]];
          if (j > 0 && coeff_value >= 0)
            attName.append("+");
-         attName.append(Utils.doubleToString(coeff_value,5,3)
-                        +m_trainInstances.attribute(coeff_inds[j]).name());
+	 attName.append(Utils.doubleToString(coeff_value,5,3)
+			+m_trainInstances.attribute(coeff_inds[j]).name());
        }
        if (num_attrs < m_numAttribs)
          attName.append("...");
@@ -921,17 +863,17 @@ public class PrincipalComponents
        cumulative+=m_eigenvalues[m_sortedEigens[i]];
 
        if ((cumulative / m_sumOfEigenValues) >= m_coverVariance) {
-         break;
+	 break;
        }
      }
      
      if (m_hasClass) {
-       attributes.addElement(m_trainHeader.classAttribute().copy());
+       attributes.addElement(m_trainCopy.classAttribute().copy());
      }
 
      Instances outputFormat = 
        new Instances(m_trainInstances.relationName()+"_principal components",
-                     attributes, 0);
+		     attributes, 0);
 
      // set the class to be the last attribute if necessary
      if (m_hasClass) {
@@ -941,15 +883,7 @@ public class PrincipalComponents
      m_outputNumAtts = outputFormat.numAttributes();
      return outputFormat;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
+
 
   /**
    * Main method for testing this class
@@ -957,6 +891,16 @@ public class PrincipalComponents
    * evaluator/transformer (see AttributeSelection)
    */
   public static void main(String [] argv) {
-    runEvaluator(new PrincipalComponents(), argv);
+    try {
+      System.out.println(AttributeSelection.
+			 SelectAttributes(new PrincipalComponents(), argv));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
+  
 }
+
+

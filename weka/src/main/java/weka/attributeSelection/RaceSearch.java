@@ -16,135 +16,67 @@
 
 /*
  *    RaceSearch.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Statistics;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 import weka.experiment.PairedStats;
 import weka.experiment.Stats;
 
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 /** 
- <!-- globalinfo-start -->
- * Races the cross validation error of competing attribute subsets. Use in conjuction with a ClassifierSubsetEval. RaceSearch has four modes:<br/>
- * <br/>
- * forward selection races all single attribute additions to a base set (initially  no attributes), selects the winner to become the new base set and then iterates until there is no improvement over the base set. <br/>
- * <br/>
- * Backward elimination is similar but the initial base set has all attributes included and races all single attribute deletions. <br/>
- * <br/>
- * Schemata search is a bit different. Each iteration a series of races are run in parallel. Each race in a set determines whether a particular attribute should be included or not---ie the race is between the attribute being "in" or "out". The other attributes for this race are included or excluded randomly at each point in the evaluation. As soon as one race has a clear winner (ie it has been decided whether a particular attribute should be inor not) then the next set of races begins, using the result of the winning race from the previous iteration as new base set.<br/>
- * <br/>
- * Rank race first ranks the attributes using an attribute evaluator and then races the ranking. The race includes no attributes, the top ranked attribute, the top two attributes, the top three attributes, etc.<br/>
- * <br/>
- * It is also possible to generate a raked list of attributes through the forward racing process. If generateRanking is set to true then a complete forward race will be run---that is, racing continues until all attributes have been selected. The order that they are added in determines a complete ranking of all the attributes.<br/>
- * <br/>
- * Racing uses paired and unpaired t-tests on cross-validation errors of competing subsets. When there is a significant difference between the means of the errors of two competing subsets then the poorer of the two can be eliminated from the race. Similarly, if there is no significant difference between the mean errors of two competing subsets and they are within some threshold of each other, then one can be eliminated from the race.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * Andrew W. Moore, Mary S. Lee: Efficient Algorithms for Minimizing Cross Validation Error. In: Eleventh International Conference on Machine Learning, 190-198, 1994.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing a racing search. <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Moore1994,
- *    author = {Andrew W. Moore and Mary S. Lee},
- *    booktitle = {Eleventh International Conference on Machine Learning},
- *    pages = {190-198},
- *    publisher = {Morgan Kaufmann},
- *    title = {Efficient Algorithms for Minimizing Cross Validation Error},
- *    year = {1994}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * For more information see: <br>
+ * Moore, A. W. and Lee, M. S. (1994). Efficient algorithms for minimising
+ * cross validation error. Proceedings of the Eleventh International
+ * Conference on Machine Learning. pp 190--198. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are:<p>
+ *
+ * -R race type<br>
+ * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
  * 
- * <pre> -R &lt;0 = forward | 1 = backward race | 2 = schemata | 3 = rank&gt;
- *  Type of race to perform.
- *  (default = 0).</pre>
+ * -L significance level <br>
+ * significance level to use for t-tests. <p>
+ *
+ * -T threshold <br>
+ * threshold for considering mean errors of two subsets the same <p>
+ *
+ * -F xval type <br>
+ * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
+ * <p>
+ *
+ * -A attribute evaluator <br>
+ * the attribute evaluator to use when doing a rank search <p>
+ *
+ * -Q <br>
+ * produce a ranked list of attributes. Selecting this option forces
+ * the race type to be forward. Racing continues until *all* attributes
+ * have been selected, thus producing a ranked list of attributes. <p>
+ *
+ * -N number to retain <br>
+ * Specify the number of attributes to retain. Overides any threshold. 
+ * Use in conjunction with -Q. <p>
  * 
- * <pre> -L &lt;significance&gt;
- *  Significance level for comaparisons
- *  (default = 0.001(forward/backward/rank)/0.01(schemata)).</pre>
- * 
- * <pre> -T &lt;threshold&gt;
- *  Threshold for error comparison.
- *  (default = 0.001).</pre>
- * 
- * <pre> -A &lt;attribute evaluator&gt;
- *  Attribute ranker to use if doing a 
- *  rank search. Place any
- *  evaluator options LAST on 
- *  the command line following a "--".
- *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
- *  (default = GainRatioAttributeEval)</pre>
- * 
- * <pre> -F &lt;0 = 10 fold | 1 = leave-one-out&gt;
- *  Folds for cross validation
- *  (default = 0 (1 if schemata race)</pre>
- * 
- * <pre> -Q
- *  Generate a ranked list of attributes.
- *  Forces the search to be forward
- *  and races until all attributes have
- *  selected, thus producing a ranking.</pre>
- * 
- * <pre> -N &lt;num to select&gt;
- *  Specify number of attributes to retain from 
- *  the ranking. Overides -T. Use in conjunction with -Q</pre>
- * 
- * <pre> -J &lt;threshold&gt;
- *  Specify a theshold by which attributes
- *  may be discarded from the ranking.
- *  Use in conjuction with -Q</pre>
- * 
- * <pre> -Z
- *  Verbose output for monitoring the search.</pre>
- * 
- * <pre> 
- * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
- * </pre>
- * 
- * <pre> -M
- *  treat missing values as a seperate value.</pre>
- * 
- <!-- options-end -->
+ * -J threshold <br>
+ * Specify a threshold by which the AttributeSelection module can discard
+ * attributes. Use in conjunction with -Q. <p>
+ *
+ * -Z <br>
+ * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.14.2.2 $
  */
-public class RaceSearch 
-  extends ASSearch 
-  implements RankedOutputSearch, OptionHandler, TechnicalInformationHandler {
+public class RaceSearch extends ASSearch implements RankedOutputSearch, 
+						    OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 4015453851212985720L;
-
-  /** the training instances */
+  /* the training instances */
   private Instances m_Instances = null;
 
   /** search types */
@@ -270,30 +202,7 @@ public class RaceSearch
       +"competing subsets then the poorer of the two can be eliminated from "
       +"the race. Similarly, if there is no significant difference between "
       +"the mean errors of two competing subsets and they are within some "
-      +"threshold of each other, then one can be eliminated from the race.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation        result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Andrew W. Moore and Mary S. Lee");
-    result.setValue(Field.TITLE, "Efficient Algorithms for Minimizing Cross Validation Error");
-    result.setValue(Field.BOOKTITLE, "Eleventh International Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1994");
-    result.setValue(Field.PAGES, "190-198");
-    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
-    
-    return result;
+      +"threshold of each other, then one can be eliminated from the race. ";
   }
 
   /**
@@ -317,16 +226,16 @@ public class RaceSearch
     }
     if (m_raceType == SCHEMATA_RACE && !m_rankingRequested) {
       try {
-        setFoldsType(new SelectedTag(LEAVE_ONE_OUT,
-                                     XVALTAGS_SELECTION));
-        setSignificanceLevel(0.01);
+	setFoldsType(new SelectedTag(LEAVE_ONE_OUT,
+				     XVALTAGS_SELECTION));
+	setSignificanceLevel(0.01);
       } catch (Exception ex) {
       }
     } else {
       try {
-        setFoldsType(new SelectedTag(TEN_FOLD,
-                                     XVALTAGS_SELECTION));
-        setSignificanceLevel(0.001);
+	setFoldsType(new SelectedTag(TEN_FOLD,
+				     XVALTAGS_SELECTION));
+	setSignificanceLevel(0.001);
       } catch (Exception ex) {
       }
     }
@@ -397,9 +306,9 @@ public class RaceSearch
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String foldsTypeTipText() {
-    return "Set the number of folds to use for x-val error estimation; "
-      +"leave-one-out is selected automatically for schemata search.";
+  public String foldsTipText() {
+    return "Set the number of folds to use for x-val error estimation. "
+      +"Leave-one-out is selected automatically for schemata search.";
   }
 
   /**
@@ -493,8 +402,8 @@ public class RaceSearch
     m_rankingRequested = doRank;
     if (m_rankingRequested) {
       try {
-        setRaceType(new SelectedTag(FORWARD_RACE,
-                                    TAGS_SELECTION));
+	setRaceType(new SelectedTag(FORWARD_RACE,
+				    TAGS_SELECTION));
       } catch (Exception ex) {
       }
     }
@@ -589,134 +498,108 @@ public class RaceSearch
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector();
+     newVector.addElement(new Option("\tType of race to perform.\n\t"
+				     +"(default = 0).",
+				     "R", 1 ,"-R <0 = forward | 1 = backward "
+				     +"race | 2 = schemata | 3 = rank>"));
+     newVector.addElement(new Option("\tSignificance level for comaparisons"
+				     +"\n\t(default = 0.001(forward/backward/"
+				     +"rank)/0.01(schemata)).",
+				     "L",1,"-L <significance>"));
+     newVector.addElement(new Option("\tThreshold for error comparison.\n\t"
+				     +"(default = 0.001).",
+				     "T",1,"-T <threshold>"));
+     
+     newVector.addElement(new Option("\tAttribute ranker to use if doing a "
+			   +"\n\trank search. Place any\n\t"
+			   +"evaluator options LAST on the" 
+			   + "\n\tcommand line following a \"--\"." 
+			   + "\n\teg. -A weka.attributeSelection."
+			   +"GainRatioAttributeEval ... " 
+			   + "-- -M.\n\t(default = GainRatioAttributeEval)", 
+			   "A", 1, "-A <attribute evaluator>"));
     
-     newVector.addElement(new Option(
-	 "\tType of race to perform.\n"
-	 + "\t(default = 0).",
-	 "R", 1 ,"-R <0 = forward | 1 = backward race | 2 = schemata | 3 = rank>"));
-     
-     newVector.addElement(new Option(
-	 "\tSignificance level for comaparisons\n"
-	 + "\t(default = 0.001(forward/backward/rank)/0.01(schemata)).",
-	 "L",1,"-L <significance>"));
-     
-     newVector.addElement(new Option(
-	 "\tThreshold for error comparison.\n"
-	 + "\t(default = 0.001).",
-	 "T",1,"-T <threshold>"));
-     
-     newVector.addElement(new Option(
-	 "\tAttribute ranker to use if doing a \n"
-	 + "\trank search. Place any\n"
-	 + "\tevaluator options LAST on \n"
-	 + "\tthe command line following a \"--\".\n" 
-	 + "\teg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.\n"
-	 + "\t(default = GainRatioAttributeEval)", 
-	 "A", 1, "-A <attribute evaluator>"));
-    
-     newVector.addElement(new Option(
-	 "\tFolds for cross validation\n"
-	 + "\t(default = 0 (1 if schemata race)",
-	 "F",1,"-F <0 = 10 fold | 1 = leave-one-out>"));
-     
-     newVector.addElement(new Option(
-	 "\tGenerate a ranked list of attributes.\n"
-	 +"\tForces the search to be forward\n"
-	 +"\tand races until all attributes have\n"
-	 +"\tselected, thus producing a ranking.",
-	 "Q",0,"-Q"));
+     newVector.addElement(new Option("\tFolds for cross validation\n\t"
+			    +"(default = 0 (1 if schemata race)",
+			    "F",1,"-F <0 = 10 fold | 1 = leave-one-out>"));
+     newVector.addElement(new Option("\tGenerate a ranked list of attributes."
+				     +"\n\tForces the search to be forward\n."
+				     +"\tand races until all attributes have\n"
+				     +"\tselected, thus producing a ranking.",
+				     "Q",0,"-Q"));
 
-    newVector.addElement(new Option(
-	"\tSpecify number of attributes to retain from \n"
-	+ "\tthe ranking. Overides -T. Use in conjunction with -Q", 
-	"N", 1, "-N <num to select>"));
+    newVector
+      .addElement(new Option("\tSpecify number of attributes to retain from "
+			     +"\n\tthe ranking. Overides -T. Use "
+			     +"in conjunction with -Q"
+			     ,"N",1
+			     , "-N <num to select>"));
 
-    newVector.addElement(new Option(
-	"\tSpecify a theshold by which attributes\n" 
-	+ "\tmay be discarded from the ranking.\n"
-	+"\tUse in conjuction with -Q",
-	"J",1, "-J <threshold>"));
+    newVector
+      .addElement(new Option("\tSpecify a theshold by which attributes" 
+			     + "\n\tmay be discarded from the ranking."
+			     +"\n\tUse in conjuction with -Q","J",1
+			     , "-J <threshold>"));
 
-     newVector.addElement(new Option(
-	 "\tVerbose output for monitoring the search.",
-	 "Z",0,"-Z"));
-     
+     newVector.addElement(new Option("\tVerbose output for monitoring the "
+				     +"search.",
+				     "Z",0,"-Z"));
      if ((m_ASEval != null) && 
-         (m_ASEval instanceof OptionHandler)) {
-       newVector.addElement(new Option(
-	   "", 
-	   "", 0, "\nOptions specific to evaluator " 
-	   + m_ASEval.getClass().getName() + ":"));
-
+	 (m_ASEval instanceof OptionHandler)) {
+       newVector.addElement(new Option("", "", 0, "\nOptions specific to " 
+				       + "evaluator " 
+				       + m_ASEval.getClass().getName() 
+				       + ":"));
        Enumeration enu = ((OptionHandler)m_ASEval).listOptions();
+       
        while (enu.hasMoreElements()) {
-         newVector.addElement(enu.nextElement());
+	 newVector.addElement(enu.nextElement());
        }
      }
-     
      return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are:<p>
+   *
+   * -R race type<br>
+   * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
    * 
-   * <pre> -R &lt;0 = forward | 1 = backward race | 2 = schemata | 3 = rank&gt;
-   *  Type of race to perform.
-   *  (default = 0).</pre>
+   * -L significance level <br>
+   * significance level to use for t-tests. <p>
+   *
+   * -T threshold <br>
+   * threshold for considering mean errors of two subsets the same <p>
+   *
+   * -F xval type <br>
+   * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
+   * <p>
+   *
+   * -A attribute evaluator <br>
+   * the attribute evaluator to use when doing a rank search <p>
+   *
+   * -Q <br>
+   * produce a ranked list of attributes. Selecting this option forces
+   * the race type to be forward. Racing continues until *all* attributes
+   * have been selected, thus producing a ranked list of attributes. <p>
+   *
+   * -N number to retain <br>
+   * Specify the number of attributes to retain. Overides any threshold. 
+   * Use in conjunction with -Q. <p>
    * 
-   * <pre> -L &lt;significance&gt;
-   *  Significance level for comaparisons
-   *  (default = 0.001(forward/backward/rank)/0.01(schemata)).</pre>
-   * 
-   * <pre> -T &lt;threshold&gt;
-   *  Threshold for error comparison.
-   *  (default = 0.001).</pre>
-   * 
-   * <pre> -A &lt;attribute evaluator&gt;
-   *  Attribute ranker to use if doing a 
-   *  rank search. Place any
-   *  evaluator options LAST on 
-   *  the command line following a "--".
-   *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
-   *  (default = GainRatioAttributeEval)</pre>
-   * 
-   * <pre> -F &lt;0 = 10 fold | 1 = leave-one-out&gt;
-   *  Folds for cross validation
-   *  (default = 0 (1 if schemata race)</pre>
-   * 
-   * <pre> -Q
-   *  Generate a ranked list of attributes.
-   *  Forces the search to be forward
-   *  and races until all attributes have
-   *  selected, thus producing a ranking.</pre>
-   * 
-   * <pre> -N &lt;num to select&gt;
-   *  Specify number of attributes to retain from 
-   *  the ranking. Overides -T. Use in conjunction with -Q</pre>
-   * 
-   * <pre> -J &lt;threshold&gt;
-   *  Specify a theshold by which attributes
-   *  may be discarded from the ranking.
-   *  Use in conjuction with -Q</pre>
-   * 
-   * <pre> -Z
-   *  Verbose output for monitoring the search.</pre>
-   * 
-   * <pre> 
-   * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
-   * </pre>
-   * 
-   * <pre> -M
-   *  treat missing values as a seperate value.</pre>
-   * 
-   <!-- options-end -->
+   * -J threshold <br>
+   * Specify a threshold by which the AttributeSelection module can discard
+   * attributes. Use in conjunction with -Q. <p>
+   *
+   * -Z <br>
+   * Turn on verbose output for monitoring the search <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -725,36 +608,42 @@ public class RaceSearch
     optionString = Utils.getOption('R', options);
     if (optionString.length() != 0) {
       setRaceType(new SelectedTag(Integer.parseInt(optionString),
-                                  TAGS_SELECTION));
+				  TAGS_SELECTION));
     }
     
     optionString = Utils.getOption('F', options);
     if (optionString.length() != 0) {
       setFoldsType(new SelectedTag(Integer.parseInt(optionString),
-                                  XVALTAGS_SELECTION));
+				  XVALTAGS_SELECTION));
     }
 
     optionString = Utils.getOption('L', options);
     if (optionString.length() !=0) {
-      setSignificanceLevel(Double.parseDouble(optionString));
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setSignificanceLevel(temp.doubleValue());
     }
 
     optionString = Utils.getOption('T', options);
     if (optionString.length() !=0) {
-      setThreshold(Double.parseDouble(optionString));
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setThreshold(temp.doubleValue());
     }
 
     optionString = Utils.getOption('A', options);
     if (optionString.length() != 0) {
       setAttributeEvaluator(ASEvaluation.forName(optionString, 
-                            Utils.partitionOptions(options)));
+			    Utils.partitionOptions(options)));
     }
 
     setGenerateRanking(Utils.getFlag('Q', options));
 
     optionString = Utils.getOption('J', options);
     if (optionString.length() != 0) {
-      setSelectionThreshold(Double.parseDouble(optionString));
+      Double temp;
+      temp = Double.valueOf(optionString);
+      setSelectionThreshold(temp.doubleValue());
     }
     
     optionString = Utils.getOption('N', options);
@@ -774,7 +663,7 @@ public class RaceSearch
     String[] evaluatorOptions = new String[0];
 
     if ((m_ASEval != null) && 
-        (m_ASEval instanceof OptionHandler)) {
+	(m_ASEval instanceof OptionHandler)) {
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
     String[] options = new String[17+evaluatorOptions.length];
@@ -797,7 +686,7 @@ public class RaceSearch
       options[current++] = getAttributeEvaluator().getClass().getName();
       options[current++] = "--";
       System.arraycopy(evaluatorOptions, 0, options, current, 
-                       evaluatorOptions.length);
+		       evaluatorOptions.length);
       current += evaluatorOptions.length;
     }
 
@@ -816,44 +705,44 @@ public class RaceSearch
    * Searches the attribute subset space by racing cross validation
    * errors of competing subsets
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
-                           + " is not a " 
-                           + "Subset evaluator! (RaceSearch)");
+			   + " is not a " 
+			   + "Subset evaluator! (RaceSearch)");
     }
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       throw new Exception("Can't use an unsupervised subset evaluator "
-                          +"(RaceSearch).");
+			  +"(RaceSearch).");
     }
 
     if (!(ASEval instanceof HoldOutSubsetEvaluator)) {
       throw new Exception("Must use a HoldOutSubsetEvaluator, eg. "
-                          +"weka.attributeSelection.ClassifierSubsetEval "
-                          +"(RaceSearch)");
+			  +"weka.attributeSelection.ClassifierSubsetEval "
+			  +"(RaceSearch)");
     }
 
     if (!(ASEval instanceof ErrorBasedMeritEvaluator)) {
       throw new Exception("Only error based subset evaluators can be used, "
-                          +"eg. weka.attributeSelection.ClassifierSubsetEval "
-                          +"(RaceSearch)");
+			  +"eg. weka.attributeSelection.ClassifierSubsetEval "
+			  +"(RaceSearch)");
     }
 
     m_Instances = new Instances(data);
     m_Instances.deleteWithMissingClass();
     if (m_Instances.numInstances() == 0) {
-      throw new Exception("All train instances have missing class! (RaceSearch)");
+      throw new Exception("All instances have missing class! (RaceSearch)");
     }
     if (m_rankingRequested && m_numToSelect > m_Instances.numAttributes()-1) {
       throw new Exception("More attributes requested than exist in the data "
-                          +"(RaceSearch).");
+			  +"(RaceSearch).");
     }
     m_theEvaluator = (HoldOutSubsetEvaluator)ASEval;
     m_numAttribs = m_Instances.numAttributes();
@@ -893,11 +782,11 @@ public class RaceSearch
   public double [][] rankedAttributes() throws Exception {
     if (!m_rankingRequested) {
       throw new Exception("Need to request a ranked list of attributes "
-                          +"before attributes can be ranked (RaceSearch).");
+			  +"before attributes can be ranked (RaceSearch).");
     }
     if (m_rankedAtts == null) {
       throw new Exception("Search must be performed before attributes "
-                          +"can be ranked (RaceSearch).");
+			  +"can be ranked (RaceSearch).");
     }
     
     double [][] final_rank = new double [m_rankedSoFar][2];
@@ -908,9 +797,9 @@ public class RaceSearch
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
-        m_calculatedNumToSelect = final_rank.length;
+	m_calculatedNumToSelect = final_rank.length;
       } else {
-        determineNumToSelectFromThreshold(final_rank);
+	determineNumToSelectFromThreshold(final_rank);
       }
     }
 
@@ -921,7 +810,7 @@ public class RaceSearch
     int count = 0;
     for (int i = 0; i < ranking.length; i++) {
       if (ranking[i][1] > m_threshold) {
-        count++;
+	count++;
       }
     }
     m_calculatedNumToSelect = count;
@@ -934,7 +823,7 @@ public class RaceSearch
     StringBuffer temp = new StringBuffer();
     for (int i=0;i<raceSets.length;i++) {
       for (int j=0;j<m_numAttribs;j++) {
-        temp.append(raceSets[i][j]);
+	temp.append(raceSets[i][j]);
       }
       temp.append('\n');
     }
@@ -969,17 +858,17 @@ public class RaceSearch
     // set up initial races
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
-        parallelRaces[count][0] = (char [])base.clone();
-        parallelRaces[count][1] = (char [])base.clone();
-        parallelRaces[count][0][i] = '1';
-        parallelRaces[count++][1][i] = '0';
+	parallelRaces[count][0] = (char [])base.clone();
+	parallelRaces[count][1] = (char [])base.clone();
+	parallelRaces[count][0][i] = '1';
+	parallelRaces[count++][1][i] = '0';
       }
     }
     
     if (m_debug) {
       System.err.println("Initial sets:\n");
       for (int i=0;i<numRaces;i++) {
-        System.err.print(printSets(parallelRaces[i])+"--------------\n");
+	System.err.print(printSets(parallelRaces[i])+"--------------\n");
       }
     }
     
@@ -993,180 +882,178 @@ public class RaceSearch
     raceSet: while (numRaces > 0) {
       boolean won = false;
       for (int i=0;i<numRaces;i++) {
-        raceStats[i][0] = new Stats();
-        raceStats[i][1] = new Stats();
+	raceStats[i][0] = new Stats();
+	raceStats[i][1] = new Stats();
       }
 
       // keep an eye on how many test instances have been randomly sampled
       int sampleCount = 0;
       // run the current set of races
       while (!won) {
-        // generate a random binary string
-        for (int i=0;i<m_numAttribs;i++) {
-          if (i != m_classIndex) {
-            if (!attributeConstraints[i]) {
-              if (r.nextDouble() < 0.5) {
-                randomB.set(i);
-              } else {
-                randomB.clear(i);
-              }
-            } else { // this position has been decided from previous races
-              if (base[i] == '1') { 
-                randomB.set(i);
-              } else {
-                randomB.clear(i);
-              }
-            }
-          }
-        }
-        
-        // randomly select an instance to test on
-        int testIndex = Math.abs(r.nextInt() % numInstances);
+	// generate a random binary string
+	for (int i=0;i<m_numAttribs;i++) {
+	  if (i != m_classIndex) {
+	    if (!attributeConstraints[i]) {
+	      if (r.nextDouble() < 0.5) {
+		randomB.set(i);
+	      } else {
+		randomB.clear(i);
+	      }
+	    } else { // this position has been decided from previous races
+	      if (base[i] == '1') { 
+		randomB.set(i);
+	      } else {
+		randomB.clear(i);
+	      }
+	    }
+	  }
+	}
+	
+	// randomly select an instance to test on
+	int testIndex = Math.abs(r.nextInt() % numInstances);
 
 
         // We want to randomize the data the same way for every 
         // learning scheme.
-        trainCV = data.trainCV(numInstances, testIndex, new Random (1));
-        testCV = data.testCV(numInstances, testIndex);
-        testInstance = testCV.instance(0);
-        sampleCount++;
-        /*      if (sampleCount > numInstances) {
-          throw new Exception("raceSchemata: No clear winner after sampling "
-                              +sampleCount+" instances.");
-                              } */
-        
-        m_theEvaluator.buildEvaluator(trainCV);
-        
-        // the evaluator must retrain for every test point
-        error = -((HoldOutSubsetEvaluator)m_theEvaluator).
-          evaluateSubset(randomB, 
-                         testInstance,
-                         true);
-        evaluationCount++;
-        
-        // see which racers match this random subset
-        for (int i=0;i<m_numAttribs;i++) {
-          if (randomB.get(i)) {
-            randomBC[i] = '1';
-          } else {
-            randomBC[i] = '0';
-          }
-        }
-        //      System.err.println("Random subset: "+(new String(randomBC)));
+	trainCV = data.trainCV(numInstances, testIndex, new Random (1));
+	testCV = data.testCV(numInstances, testIndex);
+	testInstance = testCV.instance(0);
+	sampleCount++;
+	/*	if (sampleCount > numInstances) {
+	  throw new Exception("raceSchemata: No clear winner after sampling "
+			      +sampleCount+" instances.");
+			      } */
+	
+	m_theEvaluator.buildEvaluator(trainCV);
+	
+	// the evaluator must retrain for every test point
+	error = -((HoldOutSubsetEvaluator)m_theEvaluator).
+	  evaluateSubset(randomB, 
+			 testInstance,
+			 true);
+	evaluationCount++;
+	
+	// see which racers match this random subset
+	for (int i=0;i<m_numAttribs;i++) {
+	  if (randomB.get(i)) {
+	    randomBC[i] = '1';
+	  } else {
+	    randomBC[i] = '0';
+	  }
+	}
+	//	System.err.println("Random subset: "+(new String(randomBC)));
 
         checkRaces: for (int i=0;i<numRaces;i++) {
-          // if a pair of racers has evaluated more than num instances
-          // then bail out---unlikely that having any more atts is any
-          // better than the current base set.
-          if (((raceStats[i][0].count + raceStats[i][1].count) / 2) > 
-              (numInstances)) {
-            break raceSet;
-          }
-          for (int j=0;j<2;j++) {
-            boolean matched = true;
-            for (int k =0;k<m_numAttribs;k++) {
-              if (parallelRaces[i][j][k] != '*') {
-                if (parallelRaces[i][j][k] != randomBC[k]) {
-                  matched = false;
-                  break;
-                }
-              }
-            }
-            if (matched) { // update the stats for this racer
-              //              System.err.println("Matched "+i+" "+j);
-              raceStats[i][j].add(error);
+	  // if a pair of racers has evaluated more than num instances
+	  // then bail out---unlikely that having any more atts is any
+	  // better than the current base set.
+	  if (((raceStats[i][0].count + raceStats[i][1].count) / 2) > 
+	      (numInstances)) {
+	    break raceSet;
+	  }
+	  for (int j=0;j<2;j++) {
+	    boolean matched = true;
+	    for (int k =0;k<m_numAttribs;k++) {
+	      if (parallelRaces[i][j][k] != '*') {
+		if (parallelRaces[i][j][k] != randomBC[k]) {
+		  matched = false;
+		  break;
+		}
+	      }
+	    }
+	    if (matched) { // update the stats for this racer
+	      //	      System.err.println("Matched "+i+" "+j);
+	      raceStats[i][j].add(error);
 
-                // does this race have a clear winner, meaning we can
-                // terminate the whole set of parallel races?
-                if (raceStats[i][0].count > m_samples &&
-                    raceStats[i][1].count > m_samples) {
-                  raceStats[i][0].calculateDerived();
-                  raceStats[i][1].calculateDerived();
-                  //              System.err.println(j+" : "+(new String(parallelRaces[i][j])));
-                  //              System.err.println(raceStats[i][0]);
-                  //              System.err.println(raceStats[i][1]);
-                  // check the ttest
-                  double prob = ttest(raceStats[i][0], raceStats[i][1]);
-                  //              System.err.println("Prob :"+prob);
-                  if (prob < m_sigLevel) { // stop the races we have a winner!
-                    if (raceStats[i][0].mean < raceStats[i][1].mean) {
-                      base = (char [])parallelRaces[i][0].clone();
-                      m_bestMerit = raceStats[i][0].mean;
-                      if (m_debug) {
-                        System.err.println("contender 0 won ");
-                      }
-                    } else {
-                      base = (char [])parallelRaces[i][1].clone();
-                      m_bestMerit = raceStats[i][1].mean;
-                      if (m_debug) {
-                        System.err.println("contender 1 won");
-                      }
-                    }
-                    if (m_debug) {
-                      System.err.println((new String(parallelRaces[i][0]))
-                                 +" "+(new String(parallelRaces[i][1])));
-                      System.err.println("Means : "+raceStats[i][0].mean
-                                         +" vs"+raceStats[i][1].mean);
-                      System.err.println("Evaluations so far : "
-                                         +evaluationCount);
-                    }
-                    won = true;
-                    break checkRaces;
-                  }
-                }
-             
-            }
-          }
-        }
+		// does this race have a clear winner, meaning we can
+		// terminate the whole set of parallel races?
+		if (raceStats[i][0].count > m_samples &&
+		    raceStats[i][1].count > m_samples) {
+		  raceStats[i][0].calculateDerived();
+		  raceStats[i][1].calculateDerived();
+		  //		  System.err.println(j+" : "+(new String(parallelRaces[i][j])));
+		  //		  System.err.println(raceStats[i][0]);
+		  //		  System.err.println(raceStats[i][1]);
+		  // check the ttest
+		  double prob = ttest(raceStats[i][0], raceStats[i][1]);
+		  //		  System.err.println("Prob :"+prob);
+		  if (prob < m_sigLevel) { // stop the races we have a winner!
+		    if (raceStats[i][0].mean < raceStats[i][1].mean) {
+		      base = (char [])parallelRaces[i][0].clone();
+		      m_bestMerit = raceStats[i][0].mean;
+		      if (m_debug) {
+			System.err.println("contender 0 won ");
+		      }
+		    } else {
+		      base = (char [])parallelRaces[i][1].clone();
+		      m_bestMerit = raceStats[i][1].mean;
+		      if (m_debug) {
+			System.err.println("contender 1 won");
+		      }
+		    }
+		    if (m_debug) {
+		      System.err.println((new String(parallelRaces[i][0]))
+				 +" "+(new String(parallelRaces[i][1])));
+		      System.err.println("Means : "+raceStats[i][0].mean
+					 +" vs"+raceStats[i][1].mean);
+		      System.err.println("Evaluations so far : "
+					 +evaluationCount);
+		    }
+		    won = true;
+		    break checkRaces;
+		  }
+		}
+	     
+	    }
+	  }
+	}
       }
 
       numRaces--;
       // set up the next set of races if necessary
       if (numRaces > 0 && won) {
-        parallelRaces = new char [numRaces][2][m_numAttribs-1];
-        raceStats = new Stats[numRaces][2];
-        // update the attribute constraints
-        for (int i=0;i<m_numAttribs;i++) {
-          if (i != m_classIndex && !attributeConstraints[i] &&
-              base[i] != '*') {
-            attributeConstraints[i] = true;
-            break;
-          }
-        }
-        count=0;
-        for (int i=0;i<numRaces;i++) {
-          parallelRaces[i][0] = (char [])base.clone();
-          parallelRaces[i][1] = (char [])base.clone();
-          for (int j=count;j<m_numAttribs;j++) {
-            if (j != m_classIndex && parallelRaces[i][0][j] == '*') {
-              parallelRaces[i][0][j] = '1';
-              parallelRaces[i][1][j] = '0';
-              count = j+1;
-              break;
-            }
-          }
-        }
-        
-        if (m_debug) {
-          System.err.println("Next sets:\n");
-          for (int i=0;i<numRaces;i++) {
-            System.err.print(printSets(parallelRaces[i])+"--------------\n");
-          }
-        }
+	parallelRaces = new char [numRaces][2][m_numAttribs-1];
+	raceStats = new Stats[numRaces][2];
+	// update the attribute constraints
+	for (int i=0;i<m_numAttribs;i++) {
+	  if (i != m_classIndex && !attributeConstraints[i] &&
+	      base[i] != '*') {
+	    attributeConstraints[i] = true;
+	    break;
+	  }
+	}
+	count=0;
+	for (int i=0;i<numRaces;i++) {
+	  parallelRaces[i][0] = (char [])base.clone();
+	  parallelRaces[i][1] = (char [])base.clone();
+	  for (int j=count;j<m_numAttribs;j++) {
+	    if (j != m_classIndex && parallelRaces[i][0][j] == '*') {
+	      parallelRaces[i][0][j] = '1';
+	      parallelRaces[i][1][j] = '0';
+	      count = j+1;
+	      break;
+	    }
+	  }
+	}
+	
+	if (m_debug) {
+	  System.err.println("Next sets:\n");
+	  for (int i=0;i<numRaces;i++) {
+	    System.err.print(printSets(parallelRaces[i])+"--------------\n");
+	  }
+	}
       }
     }
 
     if (m_debug) {
       System.err.println("Total evaluations : "
-                         +evaluationCount);
+			 +evaluationCount);
     }
     return attributeList(base);
   }
 
-  /** 
-   * t-test for unequal sample sizes and same variance. Returns probability
-   * that observed difference in means is due to chance.
-   */
+  // t-test for unequal sample sizes and same variance. Returns probability
+  // that observed difference in means is due to chance.
   private double ttest(Stats c1, Stats c2) throws Exception {
     double n1 = c1.count; double n2 = c2.count;
     double v1 = c1.stdDev * c1.stdDev;
@@ -1179,7 +1066,7 @@ public class RaceSearch
     double t = (av1 - av2) / Math.sqrt(cv * ((1.0 / n1) + (1.0 / n2)));
     
     return Statistics.incompleteBeta(df / 2.0, 0.5,
-                                     df / (df + (t * t)));
+				     df / (df + (t * t)));
   }
     
   /**
@@ -1196,30 +1083,31 @@ public class RaceSearch
     double bestSetError;
     for (int i=0;i<m_numAttribs;i++) {
       if (i == m_classIndex) {
-        baseSet[i] = '-';
+	baseSet[i] = '-';
       } else {
-        baseSet[i] = '0';
+	baseSet[i] = '0';
       }
     }
 
     int numCompetitors = m_numAttribs-1;
     char [][] raceSets = new char [numCompetitors+1][m_numAttribs];
+    int winner;
     
     if (m_ASEval instanceof AttributeEvaluator) {
       // generate the attribute ranking first
       Ranker ranker = new Ranker();
-      m_ASEval.buildEvaluator(data);
-      m_Ranking = ranker.search(m_ASEval,data);
+      ((AttributeEvaluator)m_ASEval).buildEvaluator(data);
+      m_Ranking = ranker.search((AttributeEvaluator)m_ASEval,data);
     } else {
       GreedyStepwise fs = new GreedyStepwise();
       double [][]rankres; 
       fs.setGenerateRanking(true);
-      ((ASEvaluation)m_ASEval).buildEvaluator(data);
+      ((SubsetEvaluator)m_ASEval).buildEvaluator(data);
       fs.search(m_ASEval, data);
       rankres = fs.rankedAttributes();
       m_Ranking = new int[rankres.length];
       for (int i=0;i<rankres.length;i++) {
-        m_Ranking[i] = (int)rankres[i][0];
+	m_Ranking[i] = (int)rankres[i][0];
       }
     }
 
@@ -1250,38 +1138,39 @@ public class RaceSearch
    * @param data the instances to estimate accuracy over
    * @param random a random number generator
    * @return an array of selected attribute indices.
-   * @throws Exception if something goes wrong
    */
   private int [] hillclimbRace(Instances data, Random random) throws Exception {
     double baseSetError;
     char [] baseSet = new char [m_numAttribs];
+    int rankCount = 0;
 
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
-        if (m_raceType == FORWARD_RACE) {
-          baseSet[i] = '0';
-        } else {
-          baseSet[i] = '1';
-        } 
+	if (m_raceType == FORWARD_RACE) {
+	  baseSet[i] = '0';
+	} else {
+	  baseSet[i] = '1';
+	} 
       } else {
-        baseSet[i] = '-';
+	baseSet[i] = '-';
       }
     }
 
     int numCompetitors = m_numAttribs-1;
     char [][] raceSets = new char [numCompetitors+1][m_numAttribs];
+    int winner;
 
     raceSets[0] = (char [])baseSet.clone();
     int count = 1;
     // initialize each race set to 1 attribute
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
-        raceSets[count] = (char [])baseSet.clone();
-        if (m_raceType == BACKWARD_RACE) {
-          raceSets[count++][i] = '0';
-        } else {
-          raceSets[count++][i] = '1';
-        }
+	raceSets[count] = (char [])baseSet.clone();
+	if (m_raceType == BACKWARD_RACE) {
+	  raceSets[count++][i] = '0';
+	} else {
+	  raceSets[count++][i] = '1';
+	}
       }
     }
 
@@ -1308,7 +1197,7 @@ public class RaceSearch
       // generate the next set of competitors
       numCompetitors--;
       if (numCompetitors == 0) { //race finished!
-        break;
+	break;
       }
       j=0;
       // +1. we'll race against the base set---might be able to bail out
@@ -1316,57 +1205,57 @@ public class RaceSearch
       // than the base set. Base set is stored in loc 0.
       raceSets = new char [numCompetitors+1][m_numAttribs];
       for (int i=0;i<numCompetitors+1;i++) {
-        raceSets[i] = (char [])baseSet.clone();
-        if (i > 0) {
-          for (int k=j;k<m_numAttribs;k++) {
-            if (m_raceType == 1) {
-              if (k != m_classIndex && raceSets[i][k] != '0') {
-                raceSets[i][k] = '0';
-                j = k+1;
-                break;
-              }
-            } else {
-              if (k != m_classIndex && raceSets[i][k] != '1') {
-                raceSets[i][k] = '1';
-                j = k+1;
-                break;
-              }
-            }
-          }
-        }
+	raceSets[i] = (char [])baseSet.clone();
+	if (i > 0) {
+	  for (int k=j;k<m_numAttribs;k++) {
+	    if (m_raceType == 1) {
+	      if (k != m_classIndex && raceSets[i][k] != '0') {
+		raceSets[i][k] = '0';
+		j = k+1;
+		break;
+	      }
+	    } else {
+	      if (k != m_classIndex && raceSets[i][k] != '1') {
+		raceSets[i][k] = '1';
+		j = k+1;
+		break;
+	      }
+	    }
+	  }
+	}
       }
       
       if (m_debug) {
-        System.err.println("Next set : \n"+printSets(raceSets));
+	System.err.println("Next set : \n"+printSets(raceSets));
       }
       improved = false;
       winnerInfo = raceSubsets(raceSets, data, true, random);
       String bs = new String(baseSet); 
       String win = new String(raceSets[(int)winnerInfo[0]]);
       if (bs.compareTo(win) == 0) {
-        // race finished
+	// race finished
       } else {
-        if (winnerInfo[1] < baseSetError || m_rankingRequested) {
-          improved = true;
-          baseSetError = winnerInfo[1];
-          m_bestMerit = baseSetError;
-          // find which att is different
-          if (m_rankingRequested) {
-            for (int i = 0; i < baseSet.length; i++) {
-              if (win.charAt(i) != bs.charAt(i)) {
-                m_rankedAtts[m_rankedSoFar][0] = i;
-                m_rankedAtts[m_rankedSoFar][1] = winnerInfo[1];
-                m_rankedSoFar++;
-              }
-            }
-          }
-          baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
-        } else {
-          // Will get here for a subset whose error is outside the delta
-          // threshold but is not *significantly* worse than the base
-          // subset
-          //throw new Exception("RaceSearch: problem in hillClimbRace");
-        }
+	if (winnerInfo[1] < baseSetError || m_rankingRequested) {
+	  improved = true;
+	  baseSetError = winnerInfo[1];
+	  m_bestMerit = baseSetError;
+	  // find which att is different
+	  if (m_rankingRequested) {
+	    for (int i = 0; i < baseSet.length; i++) {
+	      if (win.charAt(i) != bs.charAt(i)) {
+		m_rankedAtts[m_rankedSoFar][0] = i;
+		m_rankedAtts[m_rankedSoFar][1] = winnerInfo[1];
+		m_rankedSoFar++;
+	      }
+	    }
+	  }
+	  baseSet = (char [])raceSets[(int)winnerInfo[0]].clone();
+	} else {
+	  // Will get here for a subset whose error is outside the delta
+	  // threshold but is not *significantly* worse than the base
+	  // subset
+	  //throw new Exception("RaceSearch: problem in hillClimbRace");
+	}
       }
     }
     return attributeList(baseSet);
@@ -1380,7 +1269,7 @@ public class RaceSearch
 
     for (int i=0;i<m_numAttribs;i++) {
       if (list[i] == '1') {
-        count++;
+	count++;
       }
     }
 
@@ -1388,7 +1277,7 @@ public class RaceSearch
     count = 0;
      for (int i=0;i<m_numAttribs;i++) {
        if (list[i] == '1') {
-         rlist[count++] = i;
+	 rlist[count++] = i;
        }
      }
 
@@ -1404,14 +1293,14 @@ public class RaceSearch
    * base set generated from the previous race
    * @param random a random number generator
    * @return the index of the winning subset
-   * @throws Exception if an error occurs during cross validation
+   * @exception Exception if an error occurs during cross validation
    */
   private double [] raceSubsets(char [][]raceSets, Instances data,
-                                boolean baseSetIncluded, Random random) 
+				boolean baseSetIncluded, Random random) 
     throws Exception {
     // the evaluators --- one for each subset
     ASEvaluation [] evaluators = 
-      ASEvaluation.makeCopies(m_theEvaluator, raceSets.length);
+      m_theEvaluator.makeCopies(m_theEvaluator, raceSets.length);
 
     // array of subsets eliminated from the race
     boolean [] eliminated = new boolean [raceSets.length];
@@ -1429,7 +1318,7 @@ public class RaceSearch
     for (int i=0;i<raceSets.length;i++) {
       individualStats[i] = new Stats();
       for (int j=i+1;j<raceSets.length;j++) {
-        testers[i][j] = new PairedStats(m_sigLevel);
+	testers[i][j] = new PairedStats(m_sigLevel);
       }
     }
     
@@ -1437,9 +1326,9 @@ public class RaceSearch
     for (int i=0;i<raceSets.length;i++) {
       raceBitSets[i] = new BitSet(m_numAttribs);
       for (int j=0;j<m_numAttribs;j++) {
-        if (raceSets[i][j] == '1') {
-          raceBitSets[i].set(j);
-        }
+	if (raceSets[i][j] == '1') {
+	  raceBitSets[i].set(j);
+	}
       }
     }
 
@@ -1454,6 +1343,8 @@ public class RaceSearch
     // if there is one set left in the race then we need to continue to
     // evaluate it for the remaining instances in order to get an
     // accurate error estimate
+    Stats clearWinner = null;
+    int foldSize=1;
     processedCount = 0;
     race: for (int i=0;i<m_numFolds;i++) {
 
@@ -1461,188 +1352,189 @@ public class RaceSearch
       // learning scheme.
       trainCV = data.trainCV(m_numFolds, i, new Random (1));
       testCV = data.testCV(m_numFolds, i);
+      foldSize = testCV.numInstances();
       
       // loop over the surviving attribute sets building classifiers for this
       // training set
       for (int j=startPt;j<raceSets.length;j++) {
-        if (!eliminated[j]) {
-          evaluators[j].buildEvaluator(trainCV);
-        }
+	if (!eliminated[j]) {
+	  evaluators[j].buildEvaluator(trainCV);
+	}
       }
 
       for (int z=0;z<testCV.numInstances();z++) {
-        testInst = testCV.instance(z);
-        processedCount++;
+	testInst = testCV.instance(z);
+	processedCount++;
 
-        // loop over surviving attribute sets computing errors for this
-        // test point
-        for (int zz=startPt;zz<raceSets.length;zz++) {
-          if (!eliminated[zz]) {
-            if (z == 0) {// first test instance---make sure classifier is built
-              errors[zz] = -((HoldOutSubsetEvaluator)evaluators[zz]).
-                evaluateSubset(raceBitSets[zz], 
-                               testInst,
-                               true);
-            } else { // must be k fold rather than leave one out
-              errors[zz] = -((HoldOutSubsetEvaluator)evaluators[zz]).
-                evaluateSubset(raceBitSets[zz], 
-                               testInst,
-                               false);
-            }
-          }
-        }
+	// loop over surviving attribute sets computing errors for this
+	// test point
+	for (int zz=startPt;zz<raceSets.length;zz++) {
+	  if (!eliminated[zz]) {
+	    if (z == 0) {// first test instance---make sure classifier is built
+	      errors[zz] = -((HoldOutSubsetEvaluator)evaluators[zz]).
+		evaluateSubset(raceBitSets[zz], 
+			       testInst,
+			       true);
+	    } else { // must be k fold rather than leave one out
+	      errors[zz] = -((HoldOutSubsetEvaluator)evaluators[zz]).
+		evaluateSubset(raceBitSets[zz], 
+			       testInst,
+			       false);
+	    }
+	  }
+	}
 
-        // now update the stats
-        for (int j=startPt;j<raceSets.length;j++) {
-          if (!eliminated[j]) {
-            individualStats[j].add(errors[j]);
-            for (int k=j+1;k<raceSets.length;k++) {
-              if (!eliminated[k]) {
-                testers[j][k].add(errors[j], errors[k]);
-              }
-            }
-          }
-        }
+	// now update the stats
+	for (int j=startPt;j<raceSets.length;j++) {
+	  if (!eliminated[j]) {
+	    individualStats[j].add(errors[j]);
+	    for (int k=j+1;k<raceSets.length;k++) {
+	      if (!eliminated[k]) {
+		testers[j][k].add(errors[j], errors[k]);
+	      }
+	    }
+	  }
+	}
       
-        // test for near identical models and models that are significantly
-        // worse than some other model
-        if (processedCount > m_samples-1 && 
-            (eliminatedCount < raceSets.length-1)) {
-          for (int j=0;j<raceSets.length;j++) {
-            if (!eliminated[j]) {
-              for (int k=j+1;k<raceSets.length;k++) {
-                if (!eliminated[k]) {
-                  testers[j][k].calculateDerived();
-                  // near identical ?
-                  if ((testers[j][k].differencesSignificance == 0) && 
-                      (Utils.eq(testers[j][k].differencesStats.mean, 0.0) ||
-                      (Utils.gr(m_delta, Math.abs(testers[j][k].
-                                                  differencesStats.mean))))) {
-                    // if they're exactly the same and there is a base set
-                    // in this race, make sure that the base set is NOT the
-                    // one eliminated.
-                    if (Utils.eq(testers[j][k].differencesStats.mean, 0.0)) {
+	// test for near identical models and models that are significantly
+	// worse than some other model
+	if (processedCount > m_samples-1 && 
+	    (eliminatedCount < raceSets.length-1)) {
+	  for (int j=0;j<raceSets.length;j++) {
+	    if (!eliminated[j]) {
+	      for (int k=j+1;k<raceSets.length;k++) {
+		if (!eliminated[k]) {
+		  testers[j][k].calculateDerived();
+		  // near identical ?
+		  if ((testers[j][k].differencesSignificance == 0) && 
+		      (Utils.eq(testers[j][k].differencesStats.mean, 0.0) ||
+		      (Utils.gr(m_delta, Math.abs(testers[j][k].
+						  differencesStats.mean))))) {
+		    // if they're exactly the same and there is a base set
+		    // in this race, make sure that the base set is NOT the
+		    // one eliminated.
+		    if (Utils.eq(testers[j][k].differencesStats.mean, 0.0)) {
 
-                      if (baseSetIncluded) { 
-                        if (j != 0) {
-                          eliminated[j] = true;
-                        } else {
-                          eliminated[k] = true;
-                        }
-                        eliminatedCount++;
-                      } else {
-                        eliminated[j] = true;
-                      }
-                      if (m_debug) {
-                        System.err.println("Eliminating (identical) "
-                                           +j+" "+raceBitSets[j].toString()
-                                           +" vs "+k+" "
-                                           +raceBitSets[k].toString()
-                                           +" after "
-                                           +processedCount
-                                           +" evaluations\n"
-                                           +"\nerror "+j+" : "
-                                           +testers[j][k].xStats.mean
-                                           +" vs "+k+" : "
-                                           +testers[j][k].yStats.mean
-                                           +" diff : "
-                                           +testers[j][k].differencesStats
-                                           .mean);
-                      }
-                    } else {
-                      // eliminate the one with the higer error
-                      if (testers[j][k].xStats.mean > 
-                          testers[j][k].yStats.mean) {
-                        eliminated[j] = true;
-                        eliminatedCount++;
-                        if (m_debug) {
-                          System.err.println("Eliminating (near identical) "
-                                           +j+" "+raceBitSets[j].toString()
-                                           +" vs "+k+" "
-                                           +raceBitSets[k].toString()
-                                           +" after "
-                                           +processedCount
-                                           +" evaluations\n"
-                                           +"\nerror "+j+" : "
-                                           +testers[j][k].xStats.mean
-                                           +" vs "+k+" : "
-                                           +testers[j][k].yStats.mean
-                                           +" diff : "
-                                           +testers[j][k].differencesStats
-                                           .mean);
-                        }
-                        break;
-                      } else {
-                        eliminated[k] = true;
-                        eliminatedCount++;
-                        if (m_debug) {
-                          System.err.println("Eliminating (near identical) "
-                                           +k+" "+raceBitSets[k].toString()
-                                           +" vs "+j+" "
-                                           +raceBitSets[j].toString()
-                                           +" after "
-                                           +processedCount
-                                           +" evaluations\n"
-                                           +"\nerror "+k+" : "
-                                           +testers[j][k].yStats.mean
-                                           +" vs "+j+" : "
-                                           +testers[j][k].xStats.mean
-                                           +" diff : "
-                                           +testers[j][k].differencesStats
-                                             .mean);
-                        }
-                      }
-                    }
-                  } else {
-                    // significantly worse ?
-                    if (testers[j][k].differencesSignificance != 0) {
-                      if (testers[j][k].differencesSignificance > 0) {
-                        eliminated[j] = true;
-                        eliminatedCount++;
-                        if (m_debug) {
-                          System.err.println("Eliminating (-worse) "
-                                           +j+" "+raceBitSets[j].toString()
-                                           +" vs "+k+" "
-                                           +raceBitSets[k].toString()
-                                           +" after "
-                                           +processedCount
-                                           +" evaluations"
-                                           +"\nerror "+j+" : "
-                                           +testers[j][k].xStats.mean
-                                           +" vs "+k+" : "
-                                           +testers[j][k].yStats.mean);
-                        }
-                        break;
-                      } else {
-                        eliminated[k] = true;
-                        eliminatedCount++;
-                        if (m_debug) {
-                          System.err.println("Eliminating (worse) "
-                                           +k+" "+raceBitSets[k].toString()
-                                           +" vs "+j+" "
-                                           +raceBitSets[j].toString()
-                                           +" after "
-                                           +processedCount
-                                           +" evaluations"
-                                           +"\nerror "+k+" : "
-                                           +testers[j][k].yStats.mean
-                                           +" vs "+j+" : "
-                                           +testers[j][k].xStats.mean);
-                        }
-                      }
-                    }
-                  }
-                }    
-              }
-            }
-          }
-        }
-        // if there is a base set from the previous race and it's the
-        // only remaining subset then terminate the race.
-        if (eliminatedCount == raceSets.length-1 && baseSetIncluded &&
-            !eliminated[0] && !m_rankingRequested) {
-          break race;
-        }
+		      if (baseSetIncluded) { 
+			if (j != 0) {
+			  eliminated[j] = true;
+			} else {
+			  eliminated[k] = true;
+			}
+			eliminatedCount++;
+		      } else {
+			eliminated[j] = true;
+		      }
+		      if (m_debug) {
+			System.err.println("Eliminating (identical) "
+					   +j+" "+raceBitSets[j].toString()
+					   +" vs "+k+" "
+					   +raceBitSets[k].toString()
+					   +" after "
+					   +processedCount
+					   +" evaluations\n"
+					   +"\nerror "+j+" : "
+					   +testers[j][k].xStats.mean
+					   +" vs "+k+" : "
+					   +testers[j][k].yStats.mean
+					   +" diff : "
+					   +testers[j][k].differencesStats
+					   .mean);
+		      }
+		    } else {
+		      // eliminate the one with the higer error
+		      if (testers[j][k].xStats.mean > 
+			  testers[j][k].yStats.mean) {
+			eliminated[j] = true;
+			eliminatedCount++;
+			if (m_debug) {
+			  System.err.println("Eliminating (near identical) "
+					   +j+" "+raceBitSets[j].toString()
+					   +" vs "+k+" "
+					   +raceBitSets[k].toString()
+					   +" after "
+					   +processedCount
+					   +" evaluations\n"
+					   +"\nerror "+j+" : "
+					   +testers[j][k].xStats.mean
+					   +" vs "+k+" : "
+					   +testers[j][k].yStats.mean
+					   +" diff : "
+					   +testers[j][k].differencesStats
+					   .mean);
+			}
+			break;
+		      } else {
+			eliminated[k] = true;
+			eliminatedCount++;
+			if (m_debug) {
+			  System.err.println("Eliminating (near identical) "
+					   +k+" "+raceBitSets[k].toString()
+					   +" vs "+j+" "
+					   +raceBitSets[j].toString()
+					   +" after "
+					   +processedCount
+					   +" evaluations\n"
+					   +"\nerror "+k+" : "
+					   +testers[j][k].yStats.mean
+					   +" vs "+j+" : "
+					   +testers[j][k].xStats.mean
+					   +" diff : "
+					   +testers[j][k].differencesStats
+					     .mean);
+			}
+		      }
+		    }
+		  } else {
+		    // significantly worse ?
+		    if (testers[j][k].differencesSignificance != 0) {
+		      if (testers[j][k].differencesSignificance > 0) {
+			eliminated[j] = true;
+			eliminatedCount++;
+			if (m_debug) {
+			  System.err.println("Eliminating (-worse) "
+					   +j+" "+raceBitSets[j].toString()
+					   +" vs "+k+" "
+					   +raceBitSets[k].toString()
+					   +" after "
+					   +processedCount
+					   +" evaluations"
+					   +"\nerror "+j+" : "
+					   +testers[j][k].xStats.mean
+					   +" vs "+k+" : "
+					   +testers[j][k].yStats.mean);
+			}
+			break;
+		      } else {
+			eliminated[k] = true;
+			eliminatedCount++;
+			if (m_debug) {
+			  System.err.println("Eliminating (worse) "
+					   +k+" "+raceBitSets[k].toString()
+					   +" vs "+j+" "
+					   +raceBitSets[j].toString()
+					   +" after "
+					   +processedCount
+					   +" evaluations"
+					   +"\nerror "+k+" : "
+					   +testers[j][k].yStats.mean
+					   +" vs "+j+" : "
+					   +testers[j][k].xStats.mean);
+			}
+		      }
+		    }
+		  }
+		}    
+	      }
+	    }
+	  }
+	}
+	// if there is a base set from the previous race and it's the
+	// only remaining subset then terminate the race.
+	if (eliminatedCount == raceSets.length-1 && baseSetIncluded &&
+	    !eliminated[0] && !m_rankingRequested) {
+	  break race;
+	}
       }
     }
 
@@ -1654,15 +1546,15 @@ public class RaceSearch
     // return the index of the winner
     for (int i=startPt;i<raceSets.length;i++) {
       if (!eliminated[i]) {
-        individualStats[i].calculateDerived();
-        if (m_debug) {
-          System.err.println("Remaining error: "+raceBitSets[i].toString()
-                             +" "+individualStats[i].mean);
-        }
-        if (individualStats[i].mean < bestError) {
-          bestError = individualStats[i].mean;
-          bestIndex = i;
-        }
+	individualStats[i].calculateDerived();
+	if (m_debug) {
+	  System.err.println("Remaining error: "+raceBitSets[i].toString()
+			     +" "+individualStats[i].mean);
+	}
+	if (individualStats[i].mean < bestError) {
+	  bestError = individualStats[i].mean;
+	  bestIndex = i;
+	}
       }
     }
 
@@ -1674,23 +1566,18 @@ public class RaceSearch
       System.err.print("Best set from race : ");
       
       for (int i=0;i<m_numAttribs;i++) {
-        if (raceSets[bestIndex][i] == '1') {
-          System.err.print('1');
-        } else {
-          System.err.print('0');
-        }
+	if (raceSets[bestIndex][i] == '1') {
+	  System.err.print('1');
+	} else {
+	  System.err.print('0');
+	}
       }
       System.err.println(" :"+bestError+" Processed : "+(processedCount)
-                         +"\n"+individualStats[bestIndex].toString());
+			 +"\n"+individualStats[bestIndex].toString());
     }
     return retInfo;
   }
 
-  /**
-   * Returns a string represenation
-   * 
-   * @return a string representation
-   */
   public String toString() {
     StringBuffer text = new StringBuffer();
     
@@ -1708,21 +1595,21 @@ public class RaceSearch
     case RANK_RACE:
       text.append("rank race\n\tBase set : no attributes\n\t");
       text.append("Attribute evaluator : "
-                  + getAttributeEvaluator().getClass().getName() +" ");
+		  + getAttributeEvaluator().getClass().getName() +" ");
       if (m_ASEval instanceof OptionHandler) {
-        String[] evaluatorOptions = new String[0];
-        evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
-        for (int i=0;i<evaluatorOptions.length;i++) {
-          text.append(evaluatorOptions[i]+' ');
-        }
+	String[] evaluatorOptions = new String[0];
+	evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
+	for (int i=0;i<evaluatorOptions.length;i++) {
+	  text.append(evaluatorOptions[i]+' ');
+	}
       }
       text.append("\n");
       text.append("\tAttribute ranking : \n");
       int rlength = (int)(Math.log(m_Ranking.length) / Math.log(10) + 1);
       for (int i=0;i<m_Ranking.length;i++) {
-        text.append("\t "+Utils.doubleToString((double)(m_Ranking[i]+1),
-                                               rlength,0)
-                    +" "+m_Instances.attribute(m_Ranking[i]).name()+'\n');
+	text.append("\t "+Utils.doubleToString((double)(m_Ranking[i]+1),
+					       rlength,0)
+		    +" "+m_Instances.attribute(m_Ranking[i]).name()+'\n');
       }
       break;
     }
@@ -1738,7 +1625,7 @@ public class RaceSearch
     double precision = (m_bestMerit - (int)m_bestMerit);
     if (Math.abs(m_bestMerit) > 0) {
       fieldwidth = (int)Math.abs((Math.log(Math.abs(m_bestMerit)) / 
-                                  Math.log(10)))+2;
+				  Math.log(10)))+2;
     }
     if (Math.abs(precision) > 0) {
       precision = Math.abs((Math.log(Math.abs(precision)) / Math.log(10)))+3;
@@ -1747,8 +1634,8 @@ public class RaceSearch
     }
 
     text.append(Utils.doubleToString(Math.abs(m_bestMerit),
-                                     fieldwidth+(int)precision,
-                                     (int)precision)+"\n");
+				     fieldwidth+(int)precision,
+				     (int)precision)+"\n");
     return text.toString();
     
   }
@@ -1767,13 +1654,5 @@ public class RaceSearch
     m_bestMerit = -Double.MAX_VALUE;
     m_numFolds = 10;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.26 $");
-  }
 }
+

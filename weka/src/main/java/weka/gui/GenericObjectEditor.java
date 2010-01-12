@@ -16,27 +16,20 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Len Trigg, Xin Xu, Richard Kirkby
  *
  */
 
 package weka.gui;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.gui.CheckBoxList.CheckBoxListModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.FontMetrics;
-import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -47,7 +40,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -55,7 +47,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Array;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -64,7 +55,6 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -88,19 +78,18 @@ import javax.swing.tree.TreeSelectionModel;
  * and themselves configured. The configuration file is called
  * "GenericObjectEditor.props" and may live in either the location given by
  * "user.home" or the current directory (this last will take precedence), and a
- * default properties file is read from the Weka distribution. For speed, the
+ * default properties file is read from the weka distribution. For speed, the
  * properties file is read only once when the class is first loaded -- this may
  * need to be changed if we ever end up running in a Java OS ;-). <br>
  * <br>
- * If it is used in a <b>dynamic</b> way (the <code>UseDynamic</code> property 
- * of the GenericPropertiesCreator props file is set to <code>true</code>) 
- * then the classes to list are discovered by the 
+ * If it is used in a <b>dynamic</b> way (<code>USE_DYNAMIC</code> is
+ * <code>true</code>) then the classes to list are discovered by the 
  * <code>GenericPropertiesCreator</code> class (it checks the complete classpath). 
  * 
+ * @see #USE_DYNAMIC
  * @see GenericPropertiesCreator
- * @see GenericPropertiesCreator#useDynamic()
  * @see GenericPropertiesCreator#CREATOR_FILE
- * @see weka.core.ClassDiscovery
+ * @see weka.core.RTSI
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
@@ -110,51 +99,48 @@ import javax.swing.tree.TreeSelectionModel;
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
-  /** The object being configured. */
+  /** The object being configured */
   protected Object m_Object;
   
   /** Holds a copy of the current object that can be reverted to
-      if the user decides to cancel. */
+      if the user decides to cancel */
   protected Object m_Backup;
     
-  /** Handles property change notification. */
+  /** Handles property change notification */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
     
-  /** The Class of objects being edited. */
+  /** The Class of objects being edited */
   protected Class m_ClassType;
     
-  /** The model containing the list of names to select from. */
+  /** The model containing the list of names to select from */
   protected Hashtable m_ObjectNames;
 
-  /** The GUI component for editing values, created when needed. */
+  /** The GUI component for editing values, created when needed */
   protected GOEPanel m_EditorComponent;
     
-  /** True if the GUI component is needed. */
+  /** True if the GUI component is needed */
   protected boolean m_Enabled = true;
     
-  /** The name of the properties file. */
+  /** The name of the properties file */
   protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
     
-  /** Contains the editor properties. */
+  /** Contains the editor properties */
   protected static Properties EDITOR_PROPERTIES;
 
-  /** the properties files containing the class/editor mappings. */
-  public static final String GUIEDITORS_PROPERTY_FILE = "weka/gui/GUIEditors.props";
+  /** The tree node of the current object so we can re-select it for the user */
+  protected DefaultMutableTreeNode m_treeNodeOfCurrentObject;
 
-  /** The tree node of the current object so we can re-select it for the user. */
-  protected GOETreeNode m_treeNodeOfCurrentObject;
-
-  /** The property panel created for the objects. */
+  /** The property panel created for the objects */
   protected PropertyPanel m_ObjectPropertyPanel;
     
-  /** whether the class can be changed. */
+  /** whether the class can be changed */
   protected boolean m_canChangeClassInDialog;
-  
-  /** whether the Weka Editors were already registered. */
-  protected static boolean m_EditorsRegistered;
 
-  /** for filtering the tree based on the Capabilities of the leaves. */
-  protected Capabilities m_CapabilitiesFilter = null;
+  /** whether to generate the properties dynamically or use the static props-file */
+  protected final static boolean USE_DYNAMIC = true;
+  
+  /** whether the Weka Editors were already registered */
+  protected static boolean m_EditorsRegistered;
   
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
@@ -163,373 +149,58 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @see GenericPropertiesCreator
    */
   static {
-
-    try {
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-
-      // dynamic approach?
-      if (creator.useDynamic()) {
-	try {
-	  creator.execute(false);
-	  EDITOR_PROPERTIES = creator.getOutputProperties();
-	}
-	catch (Exception e) {
-	  JOptionPane.showMessageDialog(
-	      null,
-	      "Could not determine the properties for the generic object\n"
-	      + "editor. This exception was produced:\n"
-	      + e.toString(),
-	      "GenericObjectEditor",
-	      JOptionPane.ERROR_MESSAGE);
-	}
-      }
-      else {
-	// Allow a properties file in the current directory to override
-	try {
-	  EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-	  java.util.Enumeration keys = 
-	    (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-	  if (!keys.hasMoreElements()) {
-	    throw new Exception("Failed to read a property file for the "
-		+"generic object editor");
-	  }
-	}
-	catch (Exception ex) {
-	  JOptionPane.showMessageDialog(
-	      null,
-	      "Could not read a configuration file for the generic object\n"
-	      +"editor. An example file is included with the Weka distribution.\n"
-	      +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-	      +"should be placed either in your user home (which is set\n"
-	      + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-	      + "or the directory that java was started from\n",
-	      "GenericObjectEditor",
-	      JOptionPane.ERROR_MESSAGE);
-	}
-      }
-    }
-    catch (Exception e) {
-      JOptionPane.showMessageDialog(
-	  null,
-	  "Could not initialize the GenericPropertiesCreator. "
-	  + "This exception was produced:\n"
-	  + e.toString(),
-	  "GenericObjectEditor",
-	  JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  /**
-   * A specialized TreeNode for supporting filtering via Capabilities.
-   */
-  public class GOETreeNode
-    extends DefaultMutableTreeNode {
-    
-    /** for serialization. */
-    static final long serialVersionUID = -1707872446682150133L;
-    
-    /** color for "no support". */
-    public final static String NO_SUPPORT = "silver";
-    
-    /** color for "maybe support". */
-    public final static String MAYBE_SUPPORT = "blue";
-    
-    /** the Capabilities object to use for filtering. */
-    protected Capabilities m_Capabilities = null;
-    
-    /**
-     * Creates a tree node that has no parent and no children, but which 
-     * allows children.
-     */
-    public GOETreeNode() {
-      super();
-    }
-    
-    /**
-     * Creates a tree node with no parent, no children, but which allows 
-     * children, and initializes it with the specified user object.
-     * 
-     * @param userObject	an Object provided by the user that constitutes 
-     * 				the node's data
-     */
-    public GOETreeNode(Object userObject) {
-      super(userObject);
-    }
-    
-    /**
-     * Creates a tree node with no parent, no children, initialized with the 
-     * specified user object, and that allows children only if specified.
-
-     * @param userObject	an Object provided by the user that constitutes 
-     * 				the node's data
-     * @param allowsChildren	if true, the node is allowed to have child nodes 
-     * 				-- otherwise, it is always a leaf node
-     */
-    public GOETreeNode(Object userObject, boolean allowsChildren) {
-      super(userObject, allowsChildren);
-    }
-    
-    /**
-     * generates if necessary a Capabilities object for the given leaf.
-     */
-    protected void initCapabilities() {
-      String 	classname;
-      Class	cls;
-      Object	obj;
-      
-      if (m_Capabilities != null)
-	return;
-      if (!isLeaf())
-	return;
-      
-      classname = getClassnameFromPath(new TreePath(getPath()));
-      try {
-	cls = Class.forName(classname);
-	if (!ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls))
-	  return;
 	
-	obj = cls.newInstance();
-	m_Capabilities = ((CapabilitiesHandler) obj).getCapabilities();
+    if (USE_DYNAMIC) {
+      try {
+        GenericPropertiesCreator creator = new GenericPropertiesCreator();
+        creator.execute(false);
+        EDITOR_PROPERTIES = creator.getOutputProperties();
       }
       catch (Exception e) {
-	// ignore it
+        JOptionPane.showMessageDialog(
+            null,
+              "Could not determine the properties for the generic object\n"
+            + "editor. This exception was produced:\n"
+            + e.toString(),
+            "GenericObjectEditor",
+            JOptionPane.ERROR_MESSAGE);
       }
     }
-    
-    /**
-     * returns a string representation of this treenode.
-     * 
-     * @return 		the text to display 
-     */
-    public String toString() {
-      String	result;
-      
-      result = super.toString();
-      
-      if (m_CapabilitiesFilter != null) {
-	initCapabilities();
-	if (m_Capabilities != null) {
-	  if (m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && !m_Capabilities.supports(m_CapabilitiesFilter))
-	    result = "<html><font color=\"" + MAYBE_SUPPORT + "\">" + result + "</font></i><html>";
-	  else if (!m_Capabilities.supports(m_CapabilitiesFilter))
-	    result = "<html><font color=\"" + NO_SUPPORT + "\">" + result + "</font></i><html>";
-	}
+    else {
+      // Allow a properties file in the current directory to override
+      try {
+        EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+        java.util.Enumeration keys = 
+  	(java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+        if (!keys.hasMoreElements()) {
+  	  throw new Exception("Failed to read a property file for the "
+  			      +"generic object editor");
+        }
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(null,
+  				    "Could not read a configuration file for the generic object\n"
+  				    +"editor. An example file is included with the Weka distribution.\n"
+  				    +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+  				    +"should be placed either in your user home (which is set\n"
+  				    + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+  				    + "or the directory that java was started from\n",
+  				    "GenericObjectEditor",
+  				    JOptionPane.ERROR_MESSAGE);
       }
-      
-      return result;
     }
   }
-  
-  /**
-   * A dialog for selecting Capabilities to look for in the GOE tree.
-   */
-  public class CapabilitiesFilterDialog 
-    extends JDialog {
-    
-    /** for serialization. */
-    static final long serialVersionUID = -7845503345689646266L;
-    
-    /** the dialog itself. */
-    protected JDialog m_Self;
-    
-    /** the popup to display again. */
-    protected JPopupMenu m_Popup = null;
-    
-    /** the capabilities used for initializing the dialog. */
-    protected Capabilities m_Capabilities = new Capabilities(null);
 
-    /** the label, listing the name of the superclass. */
-    protected JLabel m_InfoLabel = new JLabel();
-    
-    /** the list with all the capabilities. */
-    protected CheckBoxList m_List = new CheckBoxList();
-    
-    /** the OK button. */
-    protected JButton m_OkButton = new JButton("OK");
-    
-    /** the Cancel button. */
-    protected JButton m_CancelButton = new JButton("Cancel");
-    
-    /**
-     * creates a dialog to choose Capabilities from.
-     */
-    public CapabilitiesFilterDialog() {
-      super();
-
-      m_Self = this;
-      
-      initGUI();
-    }
-    
-    /**
-     * sets up the GUI.
-     */
-    protected void initGUI() {
-      JPanel			panel;
-      CheckBoxListModel		model;
-
-      setTitle("Filtering Capabilities...");
-      setLayout(new BorderLayout());
-      
-      panel = new JPanel(new BorderLayout());
-      panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      getContentPane().add(panel, BorderLayout.NORTH);
-      m_InfoLabel.setText(
-	    "<html>"
-	  + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
-	  + " have to support <i>at least</i> the following capabilities <br>"
-	  + "(the ones highlighted <font color=\"" + GOETreeNode.NO_SUPPORT + "\">" + GOETreeNode.NO_SUPPORT + "</font> don't meet these requirements <br>"
-	  + "the ones highlighted  <font color=\"" + GOETreeNode.MAYBE_SUPPORT + "\">" + GOETreeNode.MAYBE_SUPPORT + "</font> possibly meet them):"
-	  + "</html>");
-      panel.add(m_InfoLabel, BorderLayout.CENTER);
-      
-      // list
-      getContentPane().add(new JScrollPane(m_List), BorderLayout.CENTER);
-      model = (CheckBoxListModel) m_List.getModel();
-      for (Capability cap: Capability.values())
-	model.addElement(cap);
-      
-      // buttons
-      panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-      getContentPane().add(panel, BorderLayout.SOUTH);
-      
-      m_OkButton.setMnemonic('O');
-      m_OkButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          updateCapabilities();
-          if (m_CapabilitiesFilter == null)
-            m_CapabilitiesFilter = new Capabilities(null);
-          m_CapabilitiesFilter.assign(m_Capabilities);
-          m_Self.setVisible(false);
-          showPopup();
-        }
-      });
-      panel.add(m_OkButton);
-      
-      m_CancelButton.setMnemonic('C');
-      m_CancelButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          m_Self.setVisible(false);
-          showPopup();
-        }
-      });
-      panel.add(m_CancelButton);
-      pack();
-    }
-
-    /**
-     * transfers the Capabilities object to the JList.
-     * 
-     * @see #m_Capabilities
-     * @see #m_List
-     */
-    protected void updateList() {
-      CheckBoxListModel		model;
-      
-      model = (CheckBoxListModel) m_List.getModel();
-
-      for (Capability cap: Capability.values())
-	model.setChecked(model.indexOf(cap), m_Capabilities.handles(cap));
-    }
-    
-    /**
-     * transfers the selected Capabilities from the JList to the 
-     * Capabilities object.
-     * 
-     * @see #m_Capabilities
-     * @see #m_List
-     */
-    protected void updateCapabilities() {
-      CheckBoxListModel		model;
-      
-      model = (CheckBoxListModel) m_List.getModel();
-
-      for (Capability cap: Capability.values()) {
-	if (model.getChecked(model.indexOf(cap)))
-          m_Capabilities.enable(cap);
-	else
-	  m_Capabilities.disable(cap);
-      }
-    }
-    
-    /**
-     * sets the initial capabilities.
-     * 
-     * @param value the capabilities to use
-     */
-    public void setCapabilities(Capabilities value) {
-      if (value != null)
-	m_Capabilities.assign(value);
-      else
-	m_Capabilities = new Capabilities(null);
-      
-      updateList();
-    }
-    
-    /**
-     * returns the currently selected capabilities.
-     * 
-     * @return the currently selected capabilities
-     */
-    public Capabilities getCapabilities() {
-      return m_Capabilities;
-    }
-    
-    /**
-     * sets the JPopupMenu to display again after closing the dialog.
-     * 
-     * @param value the JPopupMenu to display again
-     */
-    public void setPopup(JPopupMenu value) {
-      m_Popup = value;
-    }
-    
-    /**
-     * returns the currently set JPopupMenu.
-     * 
-     * @return the current JPopupMenu
-     */
-    public JPopupMenu getPopup() {
-      return m_Popup;
-    }
-    
-    /**
-     * if a JPopupMenu is set, it is displayed again. Displaying this dialog
-     * closes any JPopupMenu automatically.
-     */
-    public void showPopup() {
-      if (getPopup() != null)
-	getPopup().setVisible(true);
-    }
-  }
-  
   /**
    * Creates a popup menu containing a tree that is aware
    * of the screen dimensions.
    */
-  public class JTreePopupMenu 
-    extends JPopupMenu {
-    
-    /** for serialization. */
-    static final long serialVersionUID = -3404546329655057387L;
+  public class JTreePopupMenu extends JPopupMenu {
 
-    /** the popup itself. */
-    private JPopupMenu m_Self;
-    
-    /** The tree. */
-    private JTree m_tree;
+    /** The tree */
+    JTree m_tree;
 
-    /** The scroller. */
-    private JScrollPane m_scroller;
-
-    /** The filter button in case of CapabilitiesHandlers. */
-    private JButton m_FilterButton = new JButton("Filter...");
-
-    /** The remove filter button in case of CapabilitiesHandlers. */
-    private JButton m_RemoveFilterButton = new JButton("Remove filter");
-    
-    /** The button for closing the popup again. */
-    private JButton m_CloseButton = new JButton("Close");
+    /** The scroller */
+    JScrollPane m_scroller;
     
     /**
      * Constructs a new popup menu.
@@ -538,54 +209,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      */
     public JTreePopupMenu(JTree tree) {
 
-      m_Self = this;
-      
-      setLayout(new BorderLayout());
-      JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-      add(panel, BorderLayout.SOUTH);
-
-      if (ClassDiscovery.hasInterface(CapabilitiesHandler.class, m_ClassType)) {
-	// filter
-	m_FilterButton.setMnemonic('F');
-	m_FilterButton.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    if (e.getSource() == m_FilterButton) {
-	      CapabilitiesFilterDialog dialog = new CapabilitiesFilterDialog();
-	      dialog.setCapabilities(m_CapabilitiesFilter);
-	      dialog.setPopup(m_Self);
-	      dialog.setVisible(true);
-	      m_Support.firePropertyChange("", null, null);
-	      repaint();
-	    }
-	  }
-	});
-	panel.add(m_FilterButton);
-	
-	// remove
-	m_RemoveFilterButton.setMnemonic('R');
-	m_RemoveFilterButton.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e) {
-	    if (e.getSource() == m_RemoveFilterButton) {
-	      m_CapabilitiesFilter = null;
-	      m_Support.firePropertyChange("", null, null);
-	      repaint();
-	    }
-	  }
-	});
-	panel.add(m_RemoveFilterButton);
-      }
-
-      // close
-      m_CloseButton.setMnemonic('C');
-      m_CloseButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          if (e.getSource() == m_CloseButton) {
-            m_Self.setVisible(false);
-          }
-        }
-      });
-      panel.add(m_CloseButton);
-      
       m_tree = tree;
       
       JPanel treeView = new JPanel();
@@ -637,34 +260,30 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Handles the GUI side of editing values.
    */
-  public class GOEPanel 
-    extends JPanel {
+  public class GOEPanel extends JPanel {
     
-    /** for serialization. */
-    static final long serialVersionUID = 3656028520876011335L;
-    
-    /** The component that performs classifier customization. */
+    /** The component that performs classifier customization */
     protected PropertySheetPanel m_ChildPropertySheet;
     
-    /** The name of the current class. */
+    /** The name of the current class */
     protected JLabel m_ClassNameLabel;
 
-    /** Open object from disk. */
+    /** Open object from disk */
     protected JButton m_OpenBut;
     
-    /** Save object to disk. */
+    /** Save object to disk */
     protected JButton m_SaveBut;
     
-    /** ok button. */
+    /** ok button */
     protected JButton m_okBut;
     
-    /** cancel button. */
+    /** cancel button */
     protected JButton m_cancelBut;
     
-    /** The filechooser for opening and saving object files. */
+    /** The filechooser for opening and saving object files */
     protected JFileChooser m_FileChooser;
     
-    /** Creates the GUI editor component. */
+    /** Creates the GUI editor component */
     public GOEPanel() {
     
       m_Backup = copyObject(m_Object);
@@ -825,9 +444,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * Saves an object to a file selected by the user.
+     * Opens an object from a file selected by the user.
      * 
-     * @param object the object to save
+     * @return the loaded object, or null if the operation was cancelled
      */
     protected void saveObject(Object object) {
       
@@ -860,10 +479,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
       m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }
-    
+
     /**
-     * Makes a copy of an object using serialization.
-     * 
+     * Makes a copy of an object using serialization
      * @param source the object to copy
      * @return a copy of the source object
      */
@@ -881,10 +499,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       }
       return result;
     }
-    
+        
     /**
      * Allows customization of the action label on the dialog.
-     * 
      * @param newLabel the new string for the ok button
      */
     public void setOkButtonText(String newLabel) {
@@ -893,8 +510,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 
     /** 
-     * This is used to hook an action listener to the ok button.
-     * 
+     * This is used to hook an action listener to the ok button
      * @param a The action listener.
      */
     public void addOkListener(ActionListener a) {
@@ -903,8 +519,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * This is used to hook an action listener to the cancel button.
-     * 
+     * This is used to hook an action listener to the cancel button
      * @param a The action listener.
      */
     public void addCancelListener(ActionListener a) {
@@ -913,8 +528,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 	
     /**
-     * This is used to remove an action listener from the ok button.
-     * 
+     * This is used to remove an action listener from the ok button
      * @param a The action listener
      */
     public void removeOkListener(ActionListener a) {
@@ -923,8 +537,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * This is used to remove an action listener from the cancel button.
-     * 
+     * This is used to remove an action listener from the cancel button
      * @param a The action listener
      */
     public void removeCancelListener(ActionListener a) {
@@ -932,9 +545,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_cancelBut.removeActionListener(a);
     }
     
-    /**
-     * Updates the child property sheet, and creates if needed.
-     */
+    /** Updates the child property sheet, and creates if needed */
     public void updateChildPropertySheet() {
       
       // Update the object name displayed
@@ -975,88 +586,113 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
   
   /**
-   * registers all the editors in Weka.
+   * registers all the editors in Weka
    */
   public static void registerEditors() {
-    Properties 		props;
-    Enumeration 	enm;
-    String 		name;
-    String 		value;
-    Class 		baseCls;
-    Class		cls;
-
     if (m_EditorsRegistered)
       return;
     
     System.err.println("---Registering Weka Editors---");
     m_EditorsRegistered = true;
 
-    // load properties
-    try {
-      props = Utils.readProperties(GUIEDITORS_PROPERTY_FILE);
-    }
-    catch (Exception e) {
-      props = new Properties();
-      e.printStackTrace();
-    }
+    // general
+    java.beans.PropertyEditorManager.registerEditor(
+        Object[].class,
+        weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        java.io.File.class,
+        FileEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        java.text.SimpleDateFormat.class,
+        SimpleDateFormatEditor.class);
     
-    enm = props.propertyNames();
-    while (enm.hasMoreElements()) {
-      name  = enm.nextElement().toString();
-      value = props.getProperty(name, "");
-      try {
-	// array class?
-	if (name.endsWith("[]")) {
-	  baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
-	  cls = Array.newInstance(baseCls, 1).getClass();
-	}
-	else {
-	  cls = Class.forName(name);
-	}
-	// register
-	PropertyEditorManager.registerEditor(cls, Class.forName(value));
-      }
-      catch (Exception e) {
-	System.err.println("Problem registering " + name + "/" + value + ": " + e);
-      }
-    }
+    // core
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.SelectedTag.class, 
+        weka.gui.SelectedTagEditor.class);
+    
+    // converters
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.converters.Loader.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.converters.Saver.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // estimators
+    java.beans.PropertyEditorManager.registerEditor(
+	weka.estimators.Estimator.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.estimators.Estimator[].class, 
+        weka.gui.GenericArrayEditor.class);
+    
+    // filters
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.filters.Filter.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.filters.Filter[].class, 
+        weka.gui.GenericArrayEditor.class);
+    
+    // classifiers
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.Classifier.class, 
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.Classifier[].class, 
+        weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.CostMatrix.class, 
+        weka.gui.CostMatrixEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.bayes.net.search.SearchAlgorithm.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.bayes.net.estimate.BayesNetEstimator.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // experiment
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.ResultListener.class,
+        GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.ResultProducer.class,
+        GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.SplitEvaluator.class,
+        GenericObjectEditor.class);
+    
+
+    // associations
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.associations.Associator.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // clusterers
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.clusterers.Clusterer.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.clusterers.DensityBasedClusterer.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // attribute selection
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.ASEvaluation.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.ASSearch.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.UnsupervisedSubsetEvaluator.class,
+         GenericObjectEditor.class);
   }
 
-  /**
-   * Sets whether the user can change the class in the dialog.
-   * 
-   * @param value	if true then the user can change the class
-   */
-  public void setCanChangeClassInDialog(boolean value) {
-    m_canChangeClassInDialog = value;
-  }
-  
-  /**
-   * Returns whether the user can change the class in the dialog.
-   * 
-   * @return		true if the user can change the class
-   */
-  public boolean getCanChangeClassInDialog() {
-    return m_canChangeClassInDialog;
-  }
-  
-  /**
-   * Returns the backup object (may be null if there is no
-   * backup.
-   *
-   * @return the backup object
-   */
-  public Object getBackup() {
-    return m_Backup;
-  }
   
   /**
    * returns the name of the root element of the given class name, 
-   * <code>null</code> if it doesn't contain the separator.
-   * 
-   * @param clsname the full classname
-   * @param separator the separator 
-   * @return string the root element
+   * <code>null</code> if it doesn't contain the separator
    */
   protected static String getRootFromClass(String clsname, String separator) {
     if (clsname.indexOf(separator) > -1)
@@ -1064,7 +700,17 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     else
       return null;
   }
-  
+
+  /**
+   * Returns the backup object (may be null if there is no
+   * backup).
+   *
+   * @return the backup object
+   */
+  public Object getBackup() {
+    return m_Backup;
+  }
+
   /**
    * parses the given string of classes separated by ", " and returns the
    * a hashtable with as many entries as there are different root elements in 
@@ -1135,12 +781,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     return result;
   }
 
-  /** 
-   * Called when the class of object being edited changes. 
-   * 
-   * @return the hashtable containing the HierarchyPropertyParsers for the root
-   *         elements
-   */
+  /** Called when the class of object being edited changes. */
   protected Hashtable getClassesFromProperties() {	    
 
     Hashtable hpps = new Hashtable();
@@ -1216,7 +857,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   
   /**
    * Sets the current object to be the default, taken as the first item in
-   * the chooser.
+   * the chooser
    */
   public void setDefaultValue() {
     
@@ -1369,14 +1010,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       gfx.setFont(originalFont.deriveFont(java.awt.Font.BOLD));
 
       FontMetrics fm = gfx.getFontMetrics();
-      int vpad = (box.height - fm.getHeight());
-      gfx.drawString(rep, 2, fm.getAscent() + vpad);
+      int vpad = (box.height - fm.getHeight()) / 2;
+      gfx.drawString(rep, 2, fm.getHeight() + vpad);
       int repwidth = fm.stringWidth(rep);
 
       gfx.setFont(originalFont);
       if (m_Object instanceof OptionHandler) {
 	gfx.drawString(" " + Utils.joinOptions(((OptionHandler)m_Object).getOptions()),
-					       repwidth + 2, fm.getAscent() + vpad);
+					       repwidth + 2, fm.getHeight() + vpad);
       }
     }
   }
@@ -1395,7 +1036,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * Returns null as we don't support getting/setting values as text. 
    *
    * @param text the text value
-   * @throws IllegalArgumentException as we don't support
+   * @exception IllegalArgumentException as we don't support
    * getting/setting values as text.
    */
   public void setAsText(String text) {
@@ -1459,9 +1100,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Gets the custom panel used for editing the object.
    *
-   * @return the panel
    */
   public JPanel getCustomPanel() {
+
     final JButton chooseButton = createChooseClassButton();    
     m_ObjectPropertyPanel = new PropertyPanel(this, true);
     
@@ -1480,8 +1121,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Creates a button that when clicked will enable the user to change
    * the class of the object being edited.
-   * 
-   * @return the choose button
    */
   protected JButton createChooseClassButton() {
 
@@ -1499,7 +1138,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    Component comp = (Component) e.getSource();
 	    popup.show(comp, comp.getX(), comp.getY());
 	    popup.pack();
-	    popup.repaint();
 	  }
 	}
       });
@@ -1507,29 +1145,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     return setButton;
   }
 
-  /**
-   * creates a classname from the given path.
-   * 
-   * @param path	the path to generate the classname from
-   * @return		the generated classname
-   */
-  protected String getClassnameFromPath(TreePath path) {
-    StringBuffer classname = new StringBuffer();
-    
-    // recreate class name from path
-    int start = 0;
-    if (m_ObjectNames.size() > 1)
-      start = 1;
-
-    for (int i = start; i < path.getPathCount(); i++) {
-      if (i>start) classname.append(".");
-      classname.append(
-	  (String) ((GOETreeNode) path.getPathComponent(i)).getUserObject());
-    }
-    
-    return classname.toString();
-  }
-  
   /**
    * Returns a popup menu that allows the user to change
    * the class of object.
@@ -1555,19 +1170,29 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     // respond when the user chooses a class
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 	public void valueChanged(TreeSelectionEvent e) {
-	  GOETreeNode node = (GOETreeNode) tree.getLastSelectedPathComponent();
+	  DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+	    tree.getLastSelectedPathComponent();
 	  
-	  if (node == null) 
-	    return;
+	  if (node == null) return;
+	  
+	  Object nodeInfo = node.getUserObject();
 	  
 	  if (node.isLeaf()) {
-	    /*if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
-	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
-	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
-	        return;
-	      }
-	    } */
-	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
+	    TreePath selectedPath = tree.getSelectionPath();
+	    StringBuffer classSelected = new StringBuffer();
+	    // recreate class name from path
+	    int start = 0;
+	    if (m_ObjectNames.size() > 1)
+	      start = 1;
+	    for (int i=start; i<selectedPath.getPathCount(); i++) {
+              
+	      if (i>start) classSelected.append(".");
+	      classSelected.append((String)
+				   ((DefaultMutableTreeNode)
+				    selectedPath.getPathComponent(i))
+				   .getUserObject());
+	    }
+	    classSelected(classSelected.toString());
 	    popup.setVisible(false);
 	  }
 	}
@@ -1579,16 +1204,16 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Creates a JTree from an object heirarchy.
    *
-   * @param hpps the hierarchy of objects to mirror in the tree
+   * @param hpp the hierarchy of objects to mirror in the tree
    * @return a JTree representation of the hierarchy
    */
   protected JTree createTree(Hashtable hpps) {
-    GOETreeNode             superRoot;
+    DefaultMutableTreeNode  superRoot;
     Enumeration             enm;
     HierarchyPropertyParser hpp;
     
     if (hpps.size() > 1)
-      superRoot = new GOETreeNode("root");
+      superRoot = new DefaultMutableTreeNode("root");
     else
       superRoot = null;
 
@@ -1596,7 +1221,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (enm.hasMoreElements()) {
       hpp = (HierarchyPropertyParser) enm.nextElement();
       hpp.goToRoot();
-      GOETreeNode root = new GOETreeNode(hpp.getValue());
+      DefaultMutableTreeNode root =
+        new DefaultMutableTreeNode(hpp.getValue());
       addChildrenToTree(root, hpp);
       
       if (superRoot == null)
@@ -1618,13 +1244,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @param tree the root of the tree to add children to
    * @param hpp the hierarchy of objects to mirror in the tree
    */
-  protected void addChildrenToTree(GOETreeNode tree,
+  protected void addChildrenToTree(DefaultMutableTreeNode tree,
 				   HierarchyPropertyParser hpp) {
 
     try {
       for (int i=0; i<hpp.numChildren(); i++) {
 	hpp.goToChild(i);
-	GOETreeNode child = new GOETreeNode(hpp.getValue());
+	DefaultMutableTreeNode child =
+	  new DefaultMutableTreeNode(hpp.getValue());
 	if ((m_Object != null) &&
 	    m_Object.getClass().getName().equals(hpp.fullValue())) {
 	  m_treeNodeOfCurrentObject = child;
@@ -1674,68 +1301,16 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       }
     }
   }
-  
-  /**
-   * Sets the capabilities to use for filtering.
-   * 
-   * @param value	the object to get the filter capabilities from
-   */
-  public void setCapabilitiesFilter(Capabilities value) {
-    m_CapabilitiesFilter = new Capabilities(null);
-    m_CapabilitiesFilter.assign(value);
-  }
-  
-  /**
-   * Returns the current Capabilities filter, can be null.
-   * 
-   * @return		the current Capabiliities used for filtering
-   */
-  public Capabilities getCapabilitiesFilter() {
-    return m_CapabilitiesFilter;
-  }
-  
-  /**
-   * Removes the current Capabilities filter.
-   */
-  public void removeCapabilitiesFilter() {
-    m_CapabilitiesFilter = null;
-  }
 
   /**
-   * Makes a copy of an object using serialization.
-   * 
+   * Makes a copy of an object using serialization
    * @param source the object to copy
    * @return a copy of the source object
    * @exception Exception if the copy fails
    */
-  public static Object makeCopy(Object source) throws Exception {
+  public Object makeCopy(Object source) throws Exception {
     SerializedObject so = new SerializedObject(source);
     Object result = so.getObject();
-    return result;
-  }
-  
-  /**
-   * Returns the available classnames for a certain property in the 
-   * props file.
-   * 
-   * @param property	the property to get the classnames for
-   * @return		the classnames
-   */
-  public static Vector<String> getClassnames(String property) {
-    Vector<String>	result;
-    String		value;
-    String[]		items;
-    int			i;
-    
-    result = new Vector<String>();
-    
-    value = EDITOR_PROPERTIES.getProperty(property, "").replaceAll(" ", "").trim();
-    if (value.length() > 0) {
-      items = value.split(",");
-      for (i = 0; i < items.length; i++)
-	result.add(items[i]);
-    }
-    
     return result;
   }
 
@@ -1763,7 +1338,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       else	  
 	ce.setValue(initial);
       
-      PropertyDialog pd = new PropertyDialog((Frame) null, ce, 100, 100);
+      PropertyDialog pd = new PropertyDialog(ce, 100, 100);
       pd.addWindowListener(new WindowAdapter() {
 	  public void windowClosing(WindowEvent e) {
 	    PropertyEditor pe = ((PropertyDialog)e.getSource()).getEditor();
@@ -1776,7 +1351,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    System.exit(0);
 	  }
 	});
-      pd.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());

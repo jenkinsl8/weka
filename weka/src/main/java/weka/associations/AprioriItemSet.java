@@ -16,21 +16,15 @@
 
 /*
  *    AprioriItemSet.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank, Stefan Mutter
  *
  */
 
 package weka.associations;
 
-import weka.core.ContingencyTables;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 
 /**
@@ -41,20 +35,13 @@ import java.util.Hashtable;
  * The class provides methods that are used in the Apriori algorithm to construct
  * association rules.
  *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz), Stefan Mutter (mutter@cs.waikato.ac.nz)
+ * @version $Revision: 1.2.2.1 $
  */
-public class AprioriItemSet 
-  extends ItemSet 
-  implements Serializable, RevisionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 7684467755712672058L;
+public class AprioriItemSet extends ItemSet implements Serializable {
 
   /**
    * Constructor
-   * 
    * @param totalTrans the total number of transactions in the data
    */
   public AprioriItemSet(int totalTrans) {
@@ -219,8 +206,7 @@ public class AprioriItemSet
    * item sets
    * @param numItemsInSet the size of the item set for which the rules
    * are to be generated
-   * @param numTransactions
-   * @param significanceLevel the significance level for testing the rules
+   * @param the significance level for testing the rules
    * @return all the rules with minimum metric for the given item set
    * @exception Exception if something goes wrong
    */
@@ -453,8 +439,7 @@ public class AprioriItemSet
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instances,
-      boolean treatZeroAsMissing) throws Exception {
+  public static FastVector singletons(Instances instances) throws Exception {
 
     FastVector setOfItemSets = new FastVector();
     ItemSet current;
@@ -462,10 +447,8 @@ public class AprioriItemSet
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (instances.attribute(i).isNumeric())
 	throw new Exception("Can't handle numeric attributes!");
-      int j = (treatZeroAsMissing) ? 1 : 0;
-      for (; j < instances.attribute(i).numValues(); j++) {
+      for (int j = 0; j < instances.attribute(i).numValues(); j++) {
 	current = new AprioriItemSet(instances.numInstances());
-	current.setTreatZeroAsMissing(treatZeroAsMissing);
 	current.m_items = new int[instances.numAttributes()];
 	for (int k = 0; k < instances.numAttributes(); k++)
 	  current.m_items[k] = -1;
@@ -482,7 +465,6 @@ public class AprioriItemSet
    *
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
-   * @param totalTrans the total number of transactions in the data
    * @return the generated (k)-item sets
    */
   public static FastVector mergeAllItemSets(FastVector itemSets, int size, 
@@ -533,13 +515,13 @@ public class AprioriItemSet
     }
     return newVector;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
+ 
 }
+
+
+
+
+
+
+
+

@@ -14,9 +14,6 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 
 /** 
@@ -38,13 +35,11 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.1.2.2 $
  */
-public class EigenvalueDecomposition 
-  implements Serializable, RevisionHandler {
 
-  /** for serialization */
-  private static final long serialVersionUID = 4011654467211422319L;
+public class EigenvalueDecomposition 
+  implements Serializable {
 
   /** 
    * Row and column dimension (square matrix).
@@ -884,7 +879,8 @@ public class EigenvalueDecomposition
   /** 
    * Check for symmetry, then construct the eigenvalue decomposition
    *
-   * @param Arg    Square matrix
+   * @param A    Square matrix
+   * @return     Structure to access D and V.
    */
   public EigenvalueDecomposition(Matrix Arg) {
     double[][] A = Arg.getArray();
@@ -974,14 +970,5 @@ public class EigenvalueDecomposition
       }
     }
     return X;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

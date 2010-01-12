@@ -16,28 +16,39 @@
 
 /*
  *    AttributePanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware, Mark Hall
  *
  */
 
+
 package weka.gui.visualize;
 
+import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Instances;
+import weka.core.Utils;
 
+import java.util.Random;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 
 /**
  * This panel displays one dimensional views of the attributes in a
@@ -46,14 +57,9 @@ import javax.swing.JScrollPane;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
-public class AttributePanel
-  extends JScrollPane {
-
-  /** for serialization */
-  private static final long serialVersionUID = 3533330317806757814L;
-  
+public class AttributePanel extends JScrollPane {
   /** The instances to be plotted */
   protected Instances m_plotInstances=null;
     
@@ -78,12 +84,6 @@ public class AttributePanel
 					new Color(255, 0, 0),
 					new Color(0, 255, 0),
 					Color.white};
-    
-  /**
-   *  If set, it allows this panel to avoid setting a color in
-   * the color list that is equal to the background color
-   */
-  protected Color m_backgroundColor = null; 
 
   /** The list of things listening to this panel */
   protected FastVector m_Listeners = new FastVector();
@@ -104,11 +104,7 @@ public class AttributePanel
   /** inner inner class used for plotting the points 
    * into a bar for a particular attribute. 
    */
-  protected class AttributeSpacing
-    extends JPanel {
-
-    /** for serialization */
-    private static final long serialVersionUID = 7220615894321679898L;
+  protected class AttributeSpacing extends JPanel {
 
     /** The min and max values for this attribute. */
     protected double m_maxVal;
@@ -325,17 +321,11 @@ public class AttributePanel
       }
     }
   }
-  
-  public AttributePanel() {
-    this(null);
-  }
  
   /**
    * This constructs an attributePanel.
    */
-  public AttributePanel(Color background) {
-    m_backgroundColor = background;
-    
+  public AttributePanel() {
     setProperties();
     this.setBackground(Color.blue);
     setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
@@ -445,10 +435,6 @@ public class AttributePanel
 	  pc = pc.brighter();
 	}
 	
-	if (m_backgroundColor != null) {
-	  pc = Plot2D.checkAgainstBackground(pc, m_backgroundColor);
-	}
-
 	m_colorList.addElement(pc);
       }
     }
@@ -460,10 +446,6 @@ public class AttributePanel
    */
   public void setColours(FastVector cols) {
     m_colorList = cols;
-  }
-  
-  protected void setDefaultColourList(Color[] list) {
-    m_DefaultColors = list;
   }
 
   /** 
@@ -477,8 +459,6 @@ public class AttributePanel
 
     if (m_span == null) {
       m_span = new JPanel() {
-	  private static final long serialVersionUID = 7107576557995451922L;
-	  
 	  public void paintComponent(Graphics gx) {
 	    super.paintComponent(gx);
 	    gx.setColor(Color.red);

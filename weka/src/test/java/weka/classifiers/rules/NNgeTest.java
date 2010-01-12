@@ -24,14 +24,15 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests NNge. Run from the command line with:<p/>
- * java weka.classifiers.rules.rules.NNge
+ * java weka.classifiers.rules.NNge
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class NNgeTest 
   extends AbstractClassifierTest {

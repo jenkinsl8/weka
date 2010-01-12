@@ -16,31 +16,24 @@
 
 /*
  *    PredictionNode.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Richard Kirkby
  *
  */
 
 package weka.classifiers.trees.adtree;
 
 import weka.classifiers.trees.ADTree;
-import weka.core.FastVector;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
+import weka.core.*;
+import java.io.*;
+import java.util.*;
 
 /**
  * Class representing a prediction node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.4 $
  */
-public final class PredictionNode
-  implements Serializable, Cloneable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6018958856358698814L;
+public final class PredictionNode implements Serializable, Cloneable {
 
   /** The prediction value stored in this node */
   private double value;
@@ -172,14 +165,5 @@ public final class PredictionNode
 	for (Enumeration e = node.children(); e.hasMoreElements(); )
 	  setOrderAddedSubtree((Splitter) e.nextElement(), addingTo);
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 }

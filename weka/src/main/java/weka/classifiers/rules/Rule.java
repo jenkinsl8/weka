@@ -16,16 +16,15 @@
 
 /*
  *    Rule.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Xin Xu
  */
 
 package weka.classifiers.rules;
 
-import weka.core.Copyable;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Copyable;
 
 import java.io.Serializable;
 
@@ -33,13 +32,11 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.3 $
  */
-public abstract class Rule 
-    implements WeightedInstancesHandler, Copyable, Serializable, RevisionHandler {
 
-    /** for serialization */
-    private static final long serialVersionUID = 8815687740470471229L;
+public abstract class Rule 
+    implements WeightedInstancesHandler, Copyable, Serializable {
     
     /**
      * Get a shallow copy of this rule
@@ -51,7 +48,7 @@ public abstract class Rule
     /**
      * Whether the instance covered by this rule
      * 
-     * @param datum the instance in question
+     * @param inst the instance in question
      * @return the boolean value indicating whether the instance 
      *         is covered by this rule
      */
@@ -61,7 +58,7 @@ public abstract class Rule
      * Build this rule
      *
      * @param data the data used to build the rule
-     * @exception Exception if rule cannot be built
+     * @exception if rule cannot be built
      */    
     public abstract void grow(Instances data) throws Exception;    
 

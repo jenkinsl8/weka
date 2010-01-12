@@ -22,8 +22,8 @@
 package wekaexamples.gui.visualize;
 
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.gui.visualize.AttributePanel;
+import wekaexamples.core.converters.DataSource;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

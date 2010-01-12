@@ -20,12 +20,15 @@
 
 package weka.filters.unsupervised.instance;
 
+import weka.core.Instance;
 import weka.core.InstanceComparator;
 import weka.core.Instances;
+import weka.core.Attribute;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -33,7 +36,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.instance.NormalizeTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class NormalizeTest 
   extends AbstractFilterTest {

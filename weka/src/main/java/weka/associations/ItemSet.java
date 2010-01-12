@@ -16,21 +16,15 @@
 
 /*
  *    ItemSet.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.associations;
 
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -41,14 +35,10 @@ import java.util.Hashtable;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.10 $
  */
-public class ItemSet
-  implements Serializable, RevisionHandler {
+public class ItemSet implements Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = 2724000045282835791L;
-  
   /** The items stored as an array of of ints. */
   protected int[] m_items;
 
@@ -57,12 +47,11 @@ public class ItemSet
 
   /** The total number of transactions */
   protected int m_totalTransactions;
-  
-  /** 
-   * Treat zeros as missing (rather than a value in their
-   * own right)
-   */
-  protected boolean m_treatZeroAsMissing = false;
+
+ 
+    
+
+    
 
   /**
    * Constructor
@@ -99,53 +88,15 @@ public class ItemSet
    * @param instance the instance to be tested
    * @return true if the given instance contains this item set
    */
-  public boolean containedBy(Instance instance) {
-
-    if (instance instanceof weka.core.SparseInstance && m_treatZeroAsMissing) {
-      int numInstVals = instance.numValues();
-      int numItemSetVals = m_items.length;
-
-      for (int p1 = 0, p2 = 0; p1 < numInstVals || p2 < numItemSetVals; ) {
-        int instIndex = Integer.MAX_VALUE;
-        if (p1 < numInstVals) {
-          instIndex = instance.index(p1);
-        }
-        int itemIndex = p2;
-
-        if (m_items[itemIndex] > -1) {
-          if (itemIndex != instIndex) {
-            return false;
-          } else {
-            if (instance.isMissingSparse(p1)) {
-              return false;
-            }
-            if (m_items[itemIndex] != (int)instance.valueSparse(p1)) {
-              return false;
-            }
-          }
-
-          p1++;
-          p2++;
-        } else {
-          if (itemIndex < instIndex) {
-            p2++;
-          } else if (itemIndex == instIndex){
-            p2++;
-            p1++;
-          }
-        }      
+  public final boolean containedBy(Instance instance) {
+    
+    for (int i = 0; i < instance.numAttributes(); i++) 
+      if (m_items[i] > -1) {
+	if (instance.isMissing(i))
+	  return false;
+	if (m_items[i] != (int)instance.value(i))
+	  return false;
       }
-    } else {
-      for (int i = 0; i < instance.numAttributes(); i++) 
-        if (m_items[i] > -1) {
-          if (instance.isMissing(i) || 
-              (m_treatZeroAsMissing && (int)instance.value(i) == 0))
-            return false;
-          if (m_items[i] != (int)instance.value(i))
-            return false;
-        }
-    }
-
     return true;
   }
 
@@ -212,7 +163,7 @@ public class ItemSet
    *
    * @return a hash code for a set of items
    */
-  public int hashCode() {
+  public final int hashCode() {
 
     long result = 0;
 
@@ -333,6 +284,10 @@ public class ItemSet
     rules[1] = newConsequences;
     rules[2] = newConf;
   }
+  
+  
+ 
+  
 
   /**
    * Converts the header info of the given set of instances into a set 
@@ -392,6 +347,8 @@ public class ItemSet
     text.append(m_counter);
     return text.toString();
   }
+
+
 
   /**
    * Updates counter of item set with respect to given transaction.
@@ -469,32 +426,13 @@ public class ItemSet
       m_items[k] = value;
   }
   
-  /**
-   * Sets whether zeros (i.e. the first value of a nominal attribute)
-   * should be treated as missing values.
-   * 
-   * @param z true if zeros should be treated as missing values.
-   */
-  public void setTreatZeroAsMissing(boolean z) {
-    m_treatZeroAsMissing = z;
-  }
-  
-  /**
-   * Gets whether zeros (i.e. the first value of a nominal attribute)
-   * is to be treated int he same way as missing values.
-   * 
-   * @return true if zeros are to be treated like missing values.
-   */
-  public boolean getTreatZeroAsMissing() {
-    return m_treatZeroAsMissing;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 }
+
+
+
+
+
+
+
+
+

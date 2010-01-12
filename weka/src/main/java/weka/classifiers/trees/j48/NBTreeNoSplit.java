@@ -16,36 +16,28 @@
 
 /*
  *    NBTreeNoSplit.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.classifiers.trees.j48;
 
+import java.util.Random;
+import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
-
-import java.util.Random;
+import weka.filters.Filter;
 
 /**
  * Class implementing a "no-split"-split (leaf node) for naive bayes
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
-public final class NBTreeNoSplit
-  extends ClassifierSplitModel {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7824804381545259618L;
+public final class NBTreeNoSplit extends ClassifierSplitModel {
 
   /** the naive bayes classifier */
   private NaiveBayesUpdateable m_nb;
@@ -189,7 +181,7 @@ public final class NBTreeNoSplit
 			       Instances trainingSet,
 			       Random r) throws Exception {
     // make some copies for fast evaluation of 5-fold xval
-    Classifier [] copies = AbstractClassifier.makeCopies(fullModel, 5);
+    Classifier [] copies = Classifier.makeCopies(fullModel, 5);
     Evaluation eval = new Evaluation(trainingSet);
     // make some splits
     for (int j = 0; j < 5; j++) {
@@ -204,14 +196,5 @@ public final class NBTreeNoSplit
       eval.evaluateModel(copies[j], test);
     }
     return eval.incorrect();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -16,52 +16,38 @@
 
 /*
  *    HyperPipes.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.classifiers.misc;
 
+import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
-import java.io.Serializable;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.UnsupportedClassTypeException;
+import java.io.*;
 
 /**
- <!-- globalinfo-start -->
- * Class implementing a HyperPipe classifier. For each category a HyperPipe is constructed that contains all points of that category (essentially records the attribute bounds observed for each category). Test instances are classified according to the category that "most contains the instance".<br/>
- * Does not handle numeric class, or missing values in test cases. Extremely simple algorithm, but has the advantage of being extremely fast, and works quite well when you have "smegloads" of attributes.
- * <p/>
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Class implementing a HyperPipe classifier. For each category a
+ * HyperPipe is constructed that contains all points of that category 
+ * (essentially records the attribute bounds observed for each category).
+ * Test instances are classified according to the category that most 
+ * contains the instance). 
+ * Does not handle numeric class, or missing values in test cases. Extremely
+ * simple algorithm, but has the advantage of being extremely fast, and
+ * works quite well when you have smegloads of attributes.
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.15.2.1 $
  */ 
-public class HyperPipes 
-  extends AbstractClassifier {
+public class HyperPipes extends Classifier {
 
-  /** for serialization */
-  static final long serialVersionUID = -7527596632268975274L;
-  
   /** The index of the class attribute */
   protected int m_ClassIndex;
 
@@ -72,7 +58,7 @@ public class HyperPipes
   protected HyperPipe [] m_HyperPipes;
 
   /** a ZeroR model in case no model can be built from the data */
-  protected Classifier m_ZeroR;
+  private Classifier m_ZeroR;
     
   /**
    * Returns a string describing classifier
@@ -85,7 +71,7 @@ public class HyperPipes
     +  "HyperPipe is constructed that contains all points of that category "
       + "(essentially records the attribute bounds observed for each category). "
       + "Test instances are classified according to the category that \"most "
-      + "contains the instance\".\n" 
+      + "contains the instance\". " 
       + "Does not handle numeric class, or missing values in test cases. Extremely "
       + "simple algorithm, but has the advantage of being extremely fast, and "
       + "works quite well when you have \"smegloads\" of attributes.";
@@ -95,11 +81,7 @@ public class HyperPipes
    * Represents an n-dimensional structure that bounds all instances 
    * passed to it (generally all of a given class value).
    */
-  class HyperPipe 
-    implements Serializable, RevisionHandler {
-    
-    /** for serialization */
-    static final long serialVersionUID = 3972254260367902025L;
+  class HyperPipe implements Serializable {
 
     /** Contains the numeric bounds of all instances in the HyperPipe */
     protected double [][] m_NumericBounds;
@@ -113,7 +95,7 @@ public class HyperPipes
      * pointSet.
      *
      * @param instances all instances belonging to the same class
-     * @throws Exception if missing values are found
+     * @exception Exception if missing values are found
      */
     public HyperPipe(Instances instances) throws Exception {
       
@@ -146,7 +128,7 @@ public class HyperPipes
      * are ignored (i.e. they don't change the bounds for that attribute)
      *
      * @param instance the instance
-     * @throws Exception if any missing values are encountered
+     * @exception Exception if any missing values are encountered
      */
     public void addInstance(Instance instance) throws Exception {
 
@@ -174,8 +156,7 @@ public class HyperPipes
      * values lying within the corresponding bounds of the HyperPipe.
      *
      * @param instance the instance
-     * @return the fraction of dimensions
-     * @throws Exception if any missing values are encountered
+     * @exception Exception if any missing values are encountered
      */
     public double partialContains(Instance instance) throws Exception {
       
@@ -205,63 +186,29 @@ public class HyperPipes
 
       return ((double)count) / (instance.numAttributes() - 1);
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
   }
 
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-    
-    return result;
-  }
 
   /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
-    // can classifier handle the data?
-    getCapabilities().testWithFail(instances);
+    if (instances.classIndex() == -1) {
+      throw new Exception("No class attribute assigned");
+    }
+    if (!instances.classAttribute().isNominal()) {
+      throw new UnsupportedClassTypeException("HyperPipes: class attribute needs to be nominal!");
+    }
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-    
     // only class? -> build ZeroR model
     if (instances.numAttributes() == 1) {
       System.err.println(
 	  "Cannot build model (only class attribute present in data!), "
-	  + "using ZeroR model instead!");
+          + "using ZeroR model instead!");
       m_ZeroR = new weka.classifiers.rules.ZeroR();
       m_ZeroR.buildClassifier(instances);
       return;
@@ -290,7 +237,7 @@ public class HyperPipes
    * Updates the classifier.
    *
    * @param instance the instance to be put into the classifier
-   * @throws Exception if the instance could not be included successfully
+   * @exception Exception if the instance could not be included successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
   
@@ -306,7 +253,7 @@ public class HyperPipes
    *
    * @param instance the instance to be classified
    * @return the predicted class for the instance 
-   * @throws Exception if the instance can't be classified
+   * @exception Exception if the instance can't be classified
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
         
@@ -367,15 +314,7 @@ public class HyperPipes
 
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
+
 
   /**
    * Main method for testing this class.
@@ -384,6 +323,11 @@ public class HyperPipes
    * (see Evaluation).
    */
   public static void main(String [] argv) {
-    runClassifier(new HyperPipes(), argv);
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new HyperPipes(), argv));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+    }
   }
 }

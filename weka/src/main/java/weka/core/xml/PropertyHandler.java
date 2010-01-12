@@ -21,9 +21,6 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -33,11 +30,9 @@ import java.util.Hashtable;
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.1.2.3 $ 
  */
-public class PropertyHandler
-   implements RevisionHandler {
-  
+public class PropertyHandler {
    /** 
     * contains display names of properties to ignore in the serialization
     * process
@@ -47,7 +42,7 @@ public class PropertyHandler
     * @see #removeIgnored(String)
     * @see #isIgnored(String)
     */
-  protected Hashtable<Object,HashSet<String>> m_Ignored = null;
+   protected Hashtable m_Ignored = null;
    
    /**
     * lists for a class the properties allowed to use for setting and getting.
@@ -59,7 +54,7 @@ public class PropertyHandler
     * @see #removeAllowed(Class,String)
     * @see #isAllowed(Class,String)
     */
-  protected Hashtable<Object,HashSet<String>> m_Allowed = null;
+   protected Hashtable m_Allowed = null;
 
    /**
     * initializes the handling 
@@ -67,8 +62,8 @@ public class PropertyHandler
    public PropertyHandler() {
       super();
 
-      m_Ignored = new Hashtable<Object,HashSet<String>>();
-      m_Allowed = new Hashtable<Object,HashSet<String>>();
+      m_Ignored = new Hashtable();
+      m_Allowed = new Hashtable();
    }
    
    /**
@@ -94,9 +89,9 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
-      list = new HashSet<String>();
+      list = new HashSet();
       list.add(displayName);
       
       m_Ignored.put(displayName, list);
@@ -111,14 +106,14 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(Class c, String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
       // retrieve list
       if (m_Ignored.contains(c)) {
-         list = (HashSet<String>) m_Ignored.get(c);
+         list = (HashSet) m_Ignored.get(c);
       }
       else {
-         list = new HashSet<String>();
+         list = new HashSet();
          m_Ignored.put(c, list);
       }
       
@@ -254,12 +249,12 @@ public class PropertyHandler
     * @see #m_Allowed
     */
    public void addAllowed(Class c, String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
       // retrieve list
-      list = (HashSet<String>) m_Allowed.get(c);
+      list = (HashSet) m_Allowed.get(c);
       if (list == null) {
-         list = new HashSet<String>();
+         list = new HashSet();
          m_Allowed.put(c, list);
       }
       
@@ -351,14 +346,5 @@ public class PropertyHandler
       }
       
       return result;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
 }

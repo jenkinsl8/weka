@@ -16,14 +16,14 @@
 
 /*
  *    BatchClustererEvent.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan mutter
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Instances;
 import weka.clusterers.Clusterer;
-
 import java.util.EventObject;
 
 /**
@@ -31,15 +31,11 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1 $
  * @since 1.0
  * @see EventObject
  */
-public class BatchClustererEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7268777944939129714L;
+public class BatchClustererEvent extends EventObject {
 
   /**
    * The clusterer
@@ -68,8 +64,8 @@ public class BatchClustererEvent
    */
   protected int m_maxSetNumber;
   
-  public static int TEST = 0;
-  public static int TRAINING = 1;
+  private static int TEST = 0;
+  private static int TRAINING = 1;
 
   /**
    * Creates a new <code>BatchClustererEvent</code> instance.

@@ -24,7 +24,7 @@ package wekaexamples.clusterers;
 import weka.clusterers.EM;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * This example class builds an EM clusterer on a dataset and outputs for 
@@ -47,7 +47,7 @@ public class OutputClusterDistribution {
     Instances test = DataSource.read(args[1]);
     if (!train.equalHeaders(test))
       throw new IllegalArgumentException(
-	  "Train and test set are not compatible: " + train.equalHeadersMsg(test));
+	  "Train and test set are not compatible!");
     
     // build clusterer
     EM clusterer = new EM();

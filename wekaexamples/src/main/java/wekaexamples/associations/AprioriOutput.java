@@ -24,7 +24,7 @@ package wekaexamples.associations;
 
 import weka.associations.Apriori;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * Loads a dataset, builds Apriori on it and outputs Apriori's model.
@@ -35,8 +35,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class AprioriOutput {
 
   /**
-   * Expects a dataset as first parameter. The last attribute is used
-   * as class attribute.
+   * Expects a dataset as first parameter.
    *
    * @param args	the command-line parameters
    * @throws Exception	if something goes wrong
@@ -44,11 +43,9 @@ public class AprioriOutput {
   public static void main(String[] args) throws Exception {
     // load data
     Instances data = DataSource.read(args[0]);
-    data.setClassIndex(data.numAttributes() - 1);
 
     // build associator
     Apriori apriori = new Apriori();
-    apriori.setClassIndex(data.classIndex());
     apriori.buildAssociations(data);
 
     // output associator

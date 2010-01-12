@@ -16,52 +16,36 @@
 
 /*
  *    ClassifierCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
+import weka.core.Utils;
+import weka.core.OptionHandler;
+import java.beans.*;
+import java.awt.BorderLayout;
+import java.awt.event.*;
+import javax.swing.JPanel;
+import javax.swing.JCheckBox;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
+import weka.gui.PropertyPanel;
+import weka.classifiers.Classifier;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 /**
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.6.2.1 $
  */
-public class ClassifierCustomizer
-  extends JPanel
-  implements Customizer, CustomizerClosingListener, 
-  CustomizerCloseRequester {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6688000820160821429L;
+public class ClassifierCustomizer extends JPanel
+  implements Customizer {
 
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
@@ -77,22 +61,8 @@ public class ClassifierCustomizer
   private JCheckBox m_updateIncrementalClassifier 
     = new JCheckBox("Update classifier on incoming instance stream");
   private boolean m_panelVisible = false;
-  
-  private JPanel m_holderPanel = new JPanel();
-  private JTextField m_executionSlotsText = new JTextField();
-  
-  private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
-  
-  private JFrame m_parentFrame;
-  
-  /** Copy of the current classifier in case cancel is selected */
-  protected weka.classifiers.Classifier m_backup;
 
   public ClassifierCustomizer() {
-    
-    m_ClassifierEditor.
-      setBorder(BorderFactory.createTitledBorder("Classifier options"));
-    
     m_updateIncrementalClassifier.
       setToolTipText("Train the classifier on "
 		     +"each individual incoming streamed instance.");
@@ -107,97 +77,21 @@ public class ClassifierCustomizer
 	  }
 	});
     m_incrementalPanel.add(m_updateIncrementalClassifier);
-    
-    m_executionSlotsText.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_dsClassifier != null &&
-            m_executionSlotsText.getText().length() > 0) {
-          int newSlots = Integer.parseInt(m_executionSlotsText.getText());
-          m_dsClassifier.setExecutionSlots(newSlots);
-        }
-      }
-    });
-    
-    m_executionSlotsText.addFocusListener(new FocusListener() {
-      public void focusGained(FocusEvent e) {}
-      
-      public void focusLost(FocusEvent e) {
-        if (m_dsClassifier != null && 
-            m_executionSlotsText.getText().length() > 0) {
-          int newSlots = Integer.parseInt(m_executionSlotsText.getText());
-          m_dsClassifier.setExecutionSlots(newSlots);
-        }
-      }
-    });
-    
-    m_blockOnLastFold.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_dsClassifier != null) {
-          m_dsClassifier.setBlockOnLastFold(m_blockOnLastFold.isSelected());
-        }
-      }
-    });
-    
-    JPanel executionSlotsPanel = new JPanel();
-    executionSlotsPanel.
-      setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    JLabel executionSlotsLabel = new JLabel("Execution slots");
-    executionSlotsPanel.setLayout(new BorderLayout());
-    executionSlotsPanel.add(executionSlotsLabel, BorderLayout.WEST);
-    executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
-    m_holderPanel.
-      setBorder(BorderFactory.createTitledBorder("More options"));
-    m_holderPanel.setLayout(new BorderLayout());
-    m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
-//    m_blockOnLastFold.setHorizontalTextPosition(SwingConstants.RIGHT);
-    m_holderPanel.add(m_blockOnLastFold, BorderLayout.SOUTH);
-    
-    JPanel holder2 = new JPanel();
-    holder2.setLayout(new BorderLayout());
-    holder2.add(m_holderPanel, BorderLayout.NORTH);
-    JButton OKBut = new JButton("OK");
-    JButton CancelBut = new JButton("Cancel");
-    OKBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
-      }
-    });
-    
-    CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // cancel requested, so revert to backup and then
-        // close the dialog
-        if (m_backup != null) {
-          m_dsClassifier.setClassifierTemplate(m_backup);
-        }
-        m_parentFrame.dispose();
-      }
-    });
-    
-    JPanel butHolder = new JPanel();
-    butHolder.setLayout(new GridLayout(1,2));
-    butHolder.add(OKBut);
-    butHolder.add(CancelBut);
-    holder2.add(butHolder, BorderLayout.SOUTH);
-    
     setLayout(new BorderLayout());
     add(m_ClassifierEditor, BorderLayout.CENTER);
-    add(holder2, BorderLayout.SOUTH);
   }
   
   private void checkOnClassifierType() {
-    Classifier editedC = m_dsClassifier.getClassifierTemplate();
+    Classifier editedC = m_dsClassifier.getClassifier();
     if (editedC instanceof weka.classifiers.UpdateableClassifier && 
 	m_dsClassifier.hasIncomingStreamInstances()) {
       if (!m_panelVisible) {
-	m_holderPanel.add(m_incrementalPanel, BorderLayout.SOUTH);
+	add(m_incrementalPanel, BorderLayout.SOUTH);
 	m_panelVisible = true;
-	m_executionSlotsText.setEnabled(false);
       }
     } else {
       if (m_panelVisible) {
-	m_holderPanel.remove(m_incrementalPanel);
-	m_executionSlotsText.setEnabled(true);
+	remove(m_incrementalPanel);
 	m_panelVisible = false;
       }
     }
@@ -211,28 +105,10 @@ public class ClassifierCustomizer
   public void setObject(Object object) {
     m_dsClassifier = (weka.gui.beans.Classifier)object;
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
-    try {
-      m_backup = 
-        (weka.classifiers.Classifier)GenericObjectEditor.makeCopy(m_dsClassifier.getClassifierTemplate());
-    } catch (Exception ex) {
-      // ignore
-    }
-    m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
+    m_ClassifierEditor.setTarget(m_dsClassifier.getClassifier());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
-    m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
-    m_blockOnLastFold.setSelected(m_dsClassifier.getBlockOnLastFold());
     checkOnClassifierType();
-  }
-  
-  /* (non-Javadoc)
-   * @see weka.gui.beans.CustomizerClosingListener#customizerClosing()
-   */
-  public void customizerClosing() {
-    if (m_executionSlotsText.getText().length() > 0) {
-      int newSlots = Integer.parseInt(m_executionSlotsText.getText());
-      m_dsClassifier.setExecutionSlots(newSlots);
-    }
   }
 
   /**
@@ -251,9 +127,5 @@ public class ClassifierCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  public void setParentFrame(JFrame parent) {
-    m_parentFrame = parent;    
   }
 }

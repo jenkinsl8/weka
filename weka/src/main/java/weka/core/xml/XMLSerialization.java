@@ -22,10 +22,7 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.Version;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -50,6 +47,9 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
+
+import weka.core.Version;
 
 /**
  * With this class objects can be serialized to XML instead into a binary 
@@ -63,7 +63,7 @@ import org.w3c.dom.Element;
  * <code>public</code>!) as the <code>readFromXML</code> and <code>writeToXML</code>
  * methods. Methods that apply to the naming rule <code>read + property name</code>
  * are added automatically to the list of methods by the method 
- * <code>XMLSerializationMethodHandler.addMethods(...)</code>.  
+ * <code>XMLSerializationMethodHandler.addMethods()</code>.  
  * <p>
  * Other properties that are not conform the bean set/get-methods have to be 
  * processed manually in a derived class (cf. <code>readPostProcess(Object)</code>, 
@@ -88,13 +88,13 @@ import org.w3c.dom.Element;
  * @see #writePostProcess(Object)
  * @see #readFromXML(Element)
  * @see #writeToXML(Element, Object, String)
+ * @see #addMethods()
+ * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.1.2.10 $ 
  */
-public class XMLSerialization
-   implements RevisionHandler {
-  
+public class XMLSerialization {
    /** for debugging purposes only */
    protected static boolean DEBUG = false;
   
@@ -102,15 +102,15 @@ public class XMLSerialization
     * (something might go wrong writing the new child) and in case of reading 
     * the actual node that is tried to process */
    protected Element m_CurrentNode = null;
-   
+  
    /** the tag for an object */
    public final static String TAG_OBJECT = "object";
    
    /** the version attribute */
-   public final static String ATT_VERSION = XMLDocument.ATT_VERSION;
+   public final static String ATT_VERSION = "version";
   
    /** the tag for the name */
-   public final static String ATT_NAME = XMLDocument.ATT_NAME;
+   public final static String ATT_NAME = "name";
    
    /** the tag for the class */
    public final static String ATT_CLASS = "class";
@@ -125,10 +125,10 @@ public class XMLSerialization
    public final static String ATT_NULL = "null";
    
    /** the value "yes" for the primitive and array attribute */
-   public final static String VAL_YES = XMLDocument.VAL_YES;
+   public final static String VAL_YES = "yes";
    
    /** the value "no" for the primitive and array attribute */
-   public final static String VAL_NO = XMLDocument.VAL_NO;
+   public final static String VAL_NO = "no";
    
    /** the value of the name for the root node */
    public final static String VAL_ROOT = "__root__";
@@ -150,15 +150,15 @@ public class XMLSerialization
    
    /** the DOCTYPE for the serialization */
    public final static String DOCTYPE = 
-        "<!" + XMLDocument.DTD_DOCTYPE + " " + ROOT_NODE + "\n"
+        "<!DOCTYPE " + ROOT_NODE + "\n"
       + "[\n"
-      + "   <!" + XMLDocument.DTD_ELEMENT + " " + TAG_OBJECT + " (" + XMLDocument.DTD_PCDATA + XMLDocument.DTD_SEPARATOR + TAG_OBJECT + ")" + XMLDocument.DTD_ZERO_OR_MORE + ">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NAME + "      " + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_CLASS + "     " + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_PRIMITIVE + " " + XMLDocument.DTD_CDATA + " \"" + ATT_PRIMITIVE_DEFAULT + "\">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_ARRAY + "     " + XMLDocument.DTD_CDATA + " \"" + ATT_ARRAY_DEFAULT + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NULL + "      " + XMLDocument.DTD_CDATA + " \"" + ATT_NULL_DEFAULT + "\">\n"
-      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_VERSION + "   " + XMLDocument.DTD_CDATA + " \"" + Version.VERSION + "\">\n"
+      + "   <!ELEMENT " + TAG_OBJECT + " (#PCDATA | " + TAG_OBJECT + ")*>\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NAME + "      CDATA #REQUIRED>\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_CLASS + "     CDATA #REQUIRED>\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_PRIMITIVE + " CDATA \"" + ATT_PRIMITIVE_DEFAULT + "\">\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_ARRAY + "     CDATA \"" + ATT_ARRAY_DEFAULT + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NULL + "      CDATA \"" + ATT_NULL_DEFAULT + "\">\n"
+      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_VERSION + "   CDATA \"" + Version.VERSION + "\">\n"
       + "]\n"
       + ">";
    
@@ -172,8 +172,8 @@ public class XMLSerialization
    protected XMLSerializationMethodHandler m_CustomMethods = null;
 
    /** for overriding class names (Class &lt;-&gt; Classname (String)) 
-    * @see #overrideClassname(Object) */
-   protected Hashtable<Class,String> m_ClassnameOverride = null;
+    * @see #overrideClassname(Class) */
+   protected Hashtable m_ClassnameOverride = null;
    
    /**
     * initializes the serialization
@@ -201,8 +201,6 @@ public class XMLSerialization
    /**
     * generates internally a new XML document and clears also the IgnoreList and
     * the mappings for the Read/Write-Methods
-    * 
-    * @throws Exception	if something goes wrong
     */
    public void clear() throws Exception {
       m_Document = new XMLDocument();
@@ -212,7 +210,7 @@ public class XMLSerialization
       m_Properties        = new PropertyHandler();
       m_CustomMethods     = new XMLSerializationMethodHandler(this);
 
-      m_ClassnameOverride = new Hashtable<Class,String>();
+      m_ClassnameOverride = new Hashtable();
       // java.io.File is sometimes represented as another class:
       // - Win32: sun.awt.shell.Win32ShellFolder2 
       // - Linux: sun.awt.shell.DefaultShellFolder
@@ -226,8 +224,6 @@ public class XMLSerialization
    
    /**
     * sets the given version string in the XML document
-    * 
-    * @param version	the new version string
     */
    private void setVersion(String version) {
       Document     doc;
@@ -238,8 +234,6 @@ public class XMLSerialization
    
    /**
     * returns the WEKA version with which the serialized object was created
-    * 
-    * @return		the current version
     * @see Version 
     */
    public String getVersion() {
@@ -283,9 +277,9 @@ public class XMLSerialization
       BeanInfo                   info;
       PropertyDescriptor[]       desc;
       int                        i;
-      Hashtable<String,PropertyDescriptor>                  result;
+      Hashtable                  result;
       
-      result = new Hashtable<String,PropertyDescriptor>();
+      result = new Hashtable();
 
       info = Introspector.getBeanInfo(o.getClass());
       desc = info.getPropertyDescriptors();
@@ -379,7 +373,7 @@ public class XMLSerialization
    protected Element addElement(Element parent, String name, String classname, boolean primitive) {
      return addElement(parent, name, classname, primitive, 0);
    }
-   
+
    /**
     * appends a new node to the parent with the given parameters
     * 
@@ -713,7 +707,7 @@ public class XMLSerialization
    /**
     * checks whether the innermost class is a primitive class (handles 
     * multi-dimensional arrays)
-    * @param c        the array class to inspect
+    * @param o        the array class to inspect
     * @return         whether the array consists of primitive elements
     */
    protected boolean isPrimitiveArray(Class c) {
@@ -722,7 +716,7 @@ public class XMLSerialization
     else
        return c.getComponentType().isPrimitive();
    }
-   
+
    /**
     * adds the given Object to a DOM structure. 
     * (only public due to reflection).<br>
@@ -744,6 +738,7 @@ public class XMLSerialization
    public Element writeToXML(Element parent, Object o, String name) throws Exception {
       String               classname;
       Element              node;
+      Text                 text;
       Hashtable            memberlist;
       Enumeration          enm;
       Object               member;
@@ -893,6 +888,7 @@ public class XMLSerialization
     * @param name the name of the object
     * @return the node that was created
     * @throws Exception if invocation or turning into XML fails
+    * @see #m_CustomReadMethods
     */
    protected Element invokeWriteToXML(Element parent, Object o, String name) throws Exception {
       Method         method;
@@ -905,7 +901,7 @@ public class XMLSerialization
       node       = null;
       method     = null;
       useDefault = false;
-
+      
       m_CurrentNode = parent;
       
       // default, if null
@@ -1119,6 +1115,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1127,7 +1124,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Boolean) getPrimitive(node)).booleanValue();
@@ -1136,6 +1133,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1144,7 +1142,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Byte) getPrimitive(node)).byteValue();
@@ -1153,6 +1151,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1161,7 +1160,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Character) getPrimitive(node)).charValue();
@@ -1170,6 +1169,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1178,7 +1178,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Double) getPrimitive(node)).doubleValue();
@@ -1187,6 +1187,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1195,7 +1196,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Float) getPrimitive(node)).floatValue();
@@ -1204,6 +1205,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1212,7 +1214,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Integer) getPrimitive(node)).intValue();
@@ -1221,6 +1223,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1229,7 +1232,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Long) getPrimitive(node)).longValue();
@@ -1238,6 +1241,7 @@ public class XMLSerialization
    /**
     * builds the primitive from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the primitive created from the XML description
     * @throws Exception if instantiation fails 
@@ -1246,7 +1250,7 @@ public class XMLSerialization
      // for debugging only
      if (DEBUG)
         trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+     
      m_CurrentNode = node;
      
      return ((Short) getPrimitive(node)).shortValue();
@@ -1259,17 +1263,19 @@ public class XMLSerialization
     * @param name         the name of the object for which to set a property
     *                     (only for information reasons)
     * @param child        the value of the property to add
-    * @return             the provided object, but augmented by the child
     * @throws Exception   if something goes wrong
     */
    public Object readFromXML(Object o, String name, Element child) throws Exception {
       Object               result;
+      int                  i;
       Hashtable            descriptors;
       PropertyDescriptor   descriptor;
       String               methodName;
       Method               method;
+      Class[]              methodClasses;
       Object[]             methodArgs;
       Object               tmpResult;
+      Object[]             tmpResultArray;
       Class                paramClass;
      
       result      = o;
@@ -1325,8 +1331,8 @@ public class XMLSerialization
     * @return the dimensions of the array
     */
    protected int[] getArrayDimensions(Element node) {
-     Vector<Element>         children;
-     Vector<Integer>         tmpVector;      
+     Vector         children;
+     Vector         tmpVector;      
      int[]          tmp;
      int[]          result;
      int            i;
@@ -1338,7 +1344,7 @@ public class XMLSerialization
        children = null;
      
      if (children != null) {
-       tmpVector = new Vector<Integer>();
+       tmpVector = new Vector();
 
        if (children.size() > 0) {
          // are children also arrays?
@@ -1373,6 +1379,7 @@ public class XMLSerialization
     * builds the object from the given DOM node. 
     * (only public due to reflection) 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -1383,19 +1390,27 @@ public class XMLSerialization
       boolean              primitive;
       boolean              array;
       boolean              isnull;
-      Class<?>                cls;
-      Vector<Element>               children;
+      Class                cls;
+      Vector               children;
       Object               result;
       int                  i;
+      int                  n;
+      Hashtable            descriptors;
+      PropertyDescriptor   descriptor;
       Constructor          constructor;
+      String               methodName;
+      Method               method;
       Class[]              methodClasses;
       Object[]             methodArgs;
+      Object               tmpResult;
+      Object[]             tmpResultArray;
+      Class                paramClass;
       Element              child;
            
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       result    = null;
@@ -1454,7 +1469,8 @@ public class XMLSerialization
          }
          // normal get/set methods
          else {
-            result = cls.newInstance();
+            result      = cls.newInstance();
+            descriptors = getDescriptors(result);
             for (i = 0; i < children.size(); i++)
               result = readFromXML(result, name, (Element) children.get(i));
          }
@@ -1467,9 +1483,11 @@ public class XMLSerialization
     * either invokes a custom method to read a specific property/class or the standard
     * method <code>readFromXML(Element)</code>
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails
+    * @see #m_CustomReadMethods 
     */
    protected Object invokeReadFromXML(Element node) throws Exception {
       Method         method;
@@ -1481,7 +1499,7 @@ public class XMLSerialization
       useDefault = false;
       method     = null;
       m_CurrentNode = node;
-      
+
       try {
          // special handling of null values
          if (stringToBoolean(node.getAttribute(ATT_NULL)))
@@ -1536,7 +1554,7 @@ public class XMLSerialization
     * actual reading from XML (working on the raw XML). right now it does 
     * nothing with the document.
     * 
-    * @param document 	the document to pre-process
+    * @param o the object to perform some additional processing on
     * @return the processed object
     * @throws Exception if post-processing fails
     */
@@ -1561,7 +1579,7 @@ public class XMLSerialization
     * 
     * @param document the parsed DOM document representing the object
     * @return the XML as object 
-    * @throws Exception if object instantiation fails
+    * @throws if object instantiation fails
     */
    public Object fromXML(Document document) throws Exception {
       if (!document.getDocumentElement().getNodeName().equals(ROOT_NODE))
@@ -1577,7 +1595,7 @@ public class XMLSerialization
     * 
     * @param xml the xml to parse (if "<?xml" is not found then it is considered a file)
     * @return the generated instance
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public Object read(String xml) throws Exception {
       return fromXML(m_Document.read(xml));
@@ -1588,7 +1606,7 @@ public class XMLSerialization
     * 
     * @param file the XML file to parse
     * @return the parsed DOM document
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public Object read(File file) throws Exception {
       return fromXML(m_Document.read(file));
@@ -1599,7 +1617,7 @@ public class XMLSerialization
     * 
     * @param stream the XML stream to parse
     * @return the parsed DOM document
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public Object read(InputStream stream) throws Exception {
       return fromXML(m_Document.read(stream));
@@ -1610,7 +1628,7 @@ public class XMLSerialization
     * 
     * @param reader the XML reader to parse
     * @return the parsed DOM document
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public Object read(Reader reader) throws Exception {
       return fromXML(m_Document.read(reader));
@@ -1622,7 +1640,7 @@ public class XMLSerialization
     * 
     * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public void write(String file, Object o) throws Exception {
       toXML(o).write(file);
@@ -1633,7 +1651,7 @@ public class XMLSerialization
     * 
     * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public void write(File file, Object o) throws Exception {
       toXML(o).write(file);
@@ -1642,9 +1660,9 @@ public class XMLSerialization
    /**
     * writes the given object into the stream
     * 
-    * @param stream the filename to write to
+    * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public void write(OutputStream stream, Object o) throws Exception {
       toXML(o).write(stream);
@@ -1653,9 +1671,9 @@ public class XMLSerialization
    /**
     * writes the given object into the writer
     * 
-    * @param writer the filename to write to
+    * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws Exception if something goes wrong with the parsing
+    * @throws if something goes wrong with the parsing
     */
    public void write(Writer writer, Object o) throws Exception {
       toXML(o).write(writer);
@@ -1691,14 +1709,5 @@ public class XMLSerialization
             oo.close();
          }
       }
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
 }

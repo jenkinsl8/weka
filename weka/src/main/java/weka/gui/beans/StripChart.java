@@ -16,53 +16,53 @@
 
 /*
  *    StripChart.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.VisualizeUtils;
-
+import javax.swing.JPanel;
+import java.awt.Image;
+import java.awt.Graphics;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
+import java.util.Random;
+import java.awt.image.CropImageFilter;
+import java.awt.image.FilteredImageSource;
+import javax.swing.JFrame;
+import java.util.Vector;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.beans.EventSetDescriptor;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Vector;
-
+import javax.swing.JLabel;
+import java.awt.Dimension;
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+import javax.swing.border.EtchedBorder;
+import java.util.LinkedList;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.io.Serializable;
+import java.beans.EventSetDescriptor;
+
+import weka.core.Queue;
+import weka.core.Instances;
+import weka.core.Instance;
 
 /**
  * Bean that can display a horizontally scrolling strip chart. Can
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.10.2.2 $
  */
-public class StripChart
-  extends JPanel
-  implements ChartListener, InstanceListener, Visible,
-	     BeanCommon, UserRequestAcceptor {
-
-  /** for serialization */
-  private static final long serialVersionUID = 1483649041577695019L;
-
+public class StripChart 
+  extends JPanel 
+  implements ChartListener, InstanceListener, Visible, 
+	     BeanCommon, UserRequestAcceptor, 
+	     Serializable {
+  
   /** default colours for colouring lines */
   protected Color [] m_colorList = {Color.green,
 				    Color.red,
@@ -75,21 +75,8 @@ public class StripChart
 				    new Color(0, 255, 0),
 				    Color.white};
 
-  /** the background color. */
-  protected Color m_BackgroundColor;
-  
-  /** the color of the legend panel's border. */
-  protected Color m_LegendPanelBorderColor;
-  
-  /**
-   * Class providing a panel for the plot.
-   */
-  private class StripPlotter
-    extends JPanel {
-
-    /** for serialization. */
-    private static final long serialVersionUID = -7056271598761675879L;
-
+  // Class providing a panel for the plot
+  private class StripPlotter extends JPanel {
     public void paintComponent(Graphics g) {
       super.paintComponent(g);
       if (m_osi != null) {
@@ -102,28 +89,28 @@ public class StripChart
   private transient StripPlotter m_plotPanel = null;
 
   /**
-   * The off screen image for rendering to.
+   * The off screen image for rendering to
    */
   private transient Image m_osi = null;
-
+  
   /**
-   * Width and height of the off screen image.
+   * Width and height of the off screen image
    */
   private int m_iheight;
   private int m_iwidth;
 
   /**
-   * Max value for the y axis.
+   * Max value for the y axis
    */
   private double m_max = 1;
 
   /**
-   * Min value for the y axis.
+   * Min value for the y axis
    */
   private double m_min = 0;
 
   /**
-   * Scale update requested.
+   * Scale update requested
    */
   private boolean m_yScaleUpdate = false;
   private double m_oldMax;
@@ -137,64 +124,48 @@ public class StripChart
   private Vector m_legendText = new Vector();
 
   /**
-   * Class providing a panel for displaying the y axis.
+   * Class providing a panel for displaying the y axis
    */
-  private class ScalePanel 
-    extends JPanel {
-
-    /** for serialization. */
-    private static final long serialVersionUID = 6416998474984829434L;
-
-    public void paintComponent(Graphics gx) {
-      super.paintComponent(gx);
-      if (m_labelMetrics == null) {
-	m_labelMetrics = gx.getFontMetrics(m_labelFont);
+  private JPanel m_scalePanel = new JPanel() {
+      public void paintComponent(Graphics gx) {
+	super.paintComponent(gx);
+	if (m_labelMetrics == null) {
+	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
+	}
+	gx.setFont(m_labelFont);
+	int hf = m_labelMetrics.getAscent();
+	String temp = ""+m_max;
+	gx.setColor(m_colorList[m_colorList.length-1]);
+	gx.drawString(temp, 1, hf-2);
+	temp = ""+(m_min + ((m_max - m_min)/2.0));
+	gx.drawString(temp, 1, (this.getHeight() / 2)+(hf / 2));
+	temp = ""+m_min;
+	gx.drawString(temp, 1, this.getHeight()-1);
       }
-      gx.setFont(m_labelFont);
-      int hf = m_labelMetrics.getAscent();
-      String temp = ""+m_max;
-      gx.setColor(m_colorList[m_colorList.length-1]);
-      gx.drawString(temp, 1, hf-2);
-      temp = ""+(m_min + ((m_max - m_min)/2.0));
-      gx.drawString(temp, 1, (this.getHeight() / 2)+(hf / 2));
-      temp = ""+m_min;
-      gx.drawString(temp, 1, this.getHeight()-1);
-    }
-  };
-  
-  /** the scale. */
-  private ScalePanel m_scalePanel = new ScalePanel();
+    };
 
   /**
-   * Class providing a panel for the legend.
+   * Class providing a panel for the legend
    */
-  private class LegendPanel 
-    extends JPanel {
+  private JPanel m_legendPanel = new JPanel() {
+      public void paintComponent(Graphics gx) {
+	super.paintComponent(gx);
 
-    /** for serialization. */
-    private static final long serialVersionUID = 7713986576833797583L;
-
-    public void paintComponent(Graphics gx) {
-      super.paintComponent(gx);
-
-      if (m_labelMetrics == null) {
-	m_labelMetrics = gx.getFontMetrics(m_labelFont);
+	if (m_labelMetrics == null) {
+	  m_labelMetrics = gx.getFontMetrics(m_labelFont);
+	}
+	int hf = m_labelMetrics.getAscent();
+	int x = 10; int y = hf+15;
+	gx.setFont(m_labelFont);
+	for (int i = 0; i < m_legendText.size(); i++) {
+	  String temp = (String)m_legendText.elementAt(i);
+	  gx.setColor(m_colorList[(i % m_colorList.length)]);
+	  gx.drawString(temp,x,y);
+	  y+=hf;
+	}
+	StripChart.this.revalidate();
       }
-      int hf = m_labelMetrics.getAscent();
-      int x = 10; int y = hf+15;
-      gx.setFont(m_labelFont);
-      for (int i = 0; i < m_legendText.size(); i++) {
-	String temp = (String)m_legendText.elementAt(i);
-	gx.setColor(m_colorList[(i % m_colorList.length)]);
-	gx.drawString(temp,x,y);
-	y+=hf;
-      }
-      StripChart.this.revalidate();
-    }
-  };
-  
-  /** the legend. */
-  private LegendPanel m_legendPanel = new LegendPanel();
+    };
 
   /**
    * Holds the data to be plotted. Entries in the list are arrays of
@@ -206,8 +177,8 @@ public class StripChart
 
   private transient Thread m_updateHandler;
 
-  protected BeanVisual m_visual =
-    new BeanVisual("StripChart",
+  protected BeanVisual m_visual = 
+    new BeanVisual("StripChart", 
 		   BeanVisual.ICON_PATH+"StripChart.gif",
 		   BeanVisual.ICON_PATH+"StripChart_animated.gif");
 
@@ -230,9 +201,6 @@ public class StripChart
    */
   private int m_refreshFrequency = 5;
 
-  /** the class responsible for printing */
-  protected PrintableComponent m_Printer = null;
-
   public StripChart() {
 
     //    m_plotPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -242,24 +210,6 @@ public class StripChart
 
     // start a thread to handle plot updates
     initPlot();
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   *
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   *
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -342,7 +292,7 @@ public class StripChart
     if (z < 1) {
       z = 1;
     }
-
+    
     if (z * m_refreshWidth < refWidth+5) {
       m_refreshWidth *= (((refWidth+5) / z) + 1) ;
     }
@@ -367,36 +317,11 @@ public class StripChart
     }
   }
 
-  /**
-   * Loads properties from properties file.
-   * 
-   * @see	KnowledgeFlowApp#BEAN_PROPERTIES
-   */
-  private void setProperties() {
-    String 	key;
-    String 	color;
-
-    // background color
-    key   = this.getClass().getName() + ".backgroundColour";
-    color = KnowledgeFlowApp.BEAN_PROPERTIES.getProperty(key);
-    m_BackgroundColor = Color.BLACK;
-    if (color != null)
-      m_BackgroundColor = VisualizeUtils.processColour(color, m_BackgroundColor);
-
-    // legend color (border)
-    key   = m_legendPanel.getClass().getName() + ".borderColour";
-    color = KnowledgeFlowApp.BEAN_PROPERTIES.getProperty(key);
-    m_LegendPanelBorderColor = Color.BLUE;
-    if (color != null)
-      m_LegendPanelBorderColor = VisualizeUtils.processColour(color, m_LegendPanelBorderColor);
-  }
-
   private void initPlot() {
-    setProperties();
     m_plotPanel = new StripPlotter();
-    m_plotPanel.setBackground(m_BackgroundColor);
-    m_scalePanel.setBackground(m_BackgroundColor);
-    m_legendPanel.setBackground(m_BackgroundColor);
+    m_plotPanel.setBackground(Color.black);
+    m_scalePanel.setBackground(Color.black);
+    m_legendPanel.setBackground(Color.black);
     m_xCount = 0;
   }
 
@@ -435,15 +360,12 @@ public class StripChart
    * Popup the chart panel
    */
   public void showChart() {
-    if (m_outputFrame == null) {
+    if (m_outputFrame == null) {      
       m_outputFrame = new JFrame("Strip Chart");
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
-      JPanel panel = new JPanel(new BorderLayout());
-      new PrintableComponent(panel);
-      m_outputFrame.getContentPane().add(panel, BorderLayout.CENTER);
-      panel.add(m_legendPanel, BorderLayout.WEST);
-      panel.add(m_plotPanel, BorderLayout.CENTER);
-      panel.add(m_scalePanel, BorderLayout.EAST);
+      m_outputFrame.getContentPane().add(m_legendPanel, BorderLayout.WEST);
+      m_outputFrame.getContentPane().add(m_plotPanel, BorderLayout.CENTER);
+      m_outputFrame.getContentPane().add(m_scalePanel, BorderLayout.EAST);
       m_legendPanel.setMinimumSize(new Dimension(100,getHeight()));
       m_legendPanel.setPreferredSize(new Dimension(100,getHeight()));
       m_scalePanel.setMinimumSize(new Dimension(30, getHeight()));
@@ -455,8 +377,8 @@ public class StripChart
 						       Color.darkGray),
 				    "Legend" ,
 				    TitledBorder.CENTER,
-				    TitledBorder.DEFAULT_POSITION, lf,
-				    m_LegendPanelBorderColor));
+				    TitledBorder.DEFAULT_POSITION, lf, 
+				    Color.blue));
       m_outputFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    if (m_updateHandler != null) {
@@ -479,7 +401,6 @@ public class StripChart
       int iheight = m_plotPanel.getHeight();
       m_osi = m_plotPanel.createImage(iwidth, iheight);
       Graphics m = m_osi.getGraphics();
-      m.setColor(m_BackgroundColor);
       m.fillRect(0,0,iwidth,iheight);
       m_previousY[0] = -1;
       setRefreshWidth();
@@ -493,7 +414,7 @@ public class StripChart
   }
 
   private int convertToPanelY(double yval) {
-    int height = m_plotPanel.getHeight();
+    int height = m_plotPanel.getHeight(); 
     double temp = (yval - m_min) / (m_max - m_min);
     temp = temp * height;
     temp = height - temp;
@@ -511,7 +432,6 @@ public class StripChart
       int ih = m_plotPanel.getHeight();
       m_osi = m_plotPanel.createImage(iw, ih);
       Graphics m = m_osi.getGraphics();
-      m.setColor(m_BackgroundColor);
       m.fillRect(0,0,iw,ih);
       m_previousY[0] = convertToPanelY(0);
       m_iheight = ih; m_iwidth = iw;
@@ -530,7 +450,7 @@ public class StripChart
 
     osg.copyArea(m_refreshWidth,0,m_iwidth-m_refreshWidth,
 		 m_iheight,-m_refreshWidth,0);
-    osg.setColor(m_BackgroundColor);
+    osg.setColor(Color.black);
     osg.fillRect(m_iwidth-m_refreshWidth,0, m_iwidth, m_iheight);
 
     // paint the old scale onto the plot if a scale update has occured
@@ -558,7 +478,7 @@ public class StripChart
     for (int i = 0; i < dataPoint.length-1; i++) {
       osg.setColor(m_colorList[(i % m_colorList.length)]);
       pos = convertToPanelY(dataPoint[i]);
-      osg.drawLine(m_iwidth-m_refreshWidth, (int)m_previousY[i],
+      osg.drawLine(m_iwidth-m_refreshWidth, (int)m_previousY[i], 
 		   m_iwidth-1, (int)pos);
       m_previousY[i] = pos;
       if (dataPoint[dataPoint.length-1] % m_xValFreq == 0) {
@@ -576,7 +496,7 @@ public class StripChart
 	osg.drawString(val, m_iwidth-w, (int)pos);
       }
     }
-
+    
     // last element in the data point array contains the data point number
     if (dataPoint[dataPoint.length-1] % m_xValFreq == 0) {
 
@@ -596,12 +516,12 @@ public class StripChart
     int whole = (int)Math.abs(num);
     double decimal = Math.abs(num) - whole;
     int nondecimal;
-    nondecimal = (whole > 0)
+    nondecimal = (whole > 0) 
       ? (int)(Math.log(whole) / Math.log(10))
       : 1;
-
-    precision = (decimal > 0)
-      ? (int)Math.abs(((Math.log(Math.abs(num)) /
+    
+    precision = (decimal > 0) 
+      ? (int)Math.abs(((Math.log(Math.abs(num)) / 
 				      Math.log(10))))+2
       : 1;
     if (precision > 5) {
@@ -611,7 +531,7 @@ public class StripChart
     String numString = weka.core.Utils.doubleToString(num,
 						      nondecimal+1+precision
 						      ,precision);
-
+    
     return numString;
   }
 
@@ -648,7 +568,7 @@ public class StripChart
     acceptDataPoint(m_dataPoint);
     m_xCount++;
   }
-
+  
   /**
    * Accept a data point (encapsulated in a chart event) to plot
    *
@@ -666,7 +586,7 @@ public class StripChart
 	m_legendText = e.getLegendText();
 	refresh = true;
       }
-
+      
       if (e.getMin() != m_min || e.getMax() != m_max) {
 	m_oldMax = m_max; m_oldMin = m_min;
 	m_max = e.getMax();
@@ -674,12 +594,12 @@ public class StripChart
 	refresh = true;
 	m_yScaleUpdate = true;
       }
-
+    
       if (refresh) {
 	m_legendPanel.repaint();
 	m_scalePanel.repaint();
       }
-
+      
       acceptDataPoint(e.getDataPoint());
     }
     m_xCount++;
@@ -691,7 +611,7 @@ public class StripChart
    * @param dataPoint a <code>double[]</code> value
    */
   public void acceptDataPoint(double [] dataPoint) {
-
+ 
     if (m_outputFrame != null && (m_xCount % m_refreshFrequency == 0 )) {
       double [] dp = new double[dataPoint.length+1];
       dp[dp.length-1] = m_xCount;
@@ -740,7 +660,7 @@ public class StripChart
   public BeanVisual getVisual() {
     return m_visual;
   }
-
+  
   /**
    * Use the default visual appearance for this bean
    */
@@ -753,20 +673,7 @@ public class StripChart
    * Stop any processing that the bean might be doing.
    */
   public void stop() {
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      ((BeanCommon)m_listenee).stop();
-    }
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_updateHandler != null);
+    // nothing to be done
   }
 
   /**
@@ -779,7 +686,7 @@ public class StripChart
   }
 
   /**
-   * Returns true if, at this time,
+   * Returns true if, at this time, 
    * the object will accept a connection via the named event
    *
    * @param eventName the name of the event
@@ -793,7 +700,7 @@ public class StripChart
   }
 
   /**
-   * Returns true if, at this time,
+   * Returns true if, at this time, 
    * the object will accept a connection according to the supplied
    * EventSetDescriptor
    *
@@ -818,7 +725,7 @@ public class StripChart
       m_listenee = source;
     }
   }
-
+  
   /**
    * Notify this object that it has been deregistered as a listener with
    * a source for named event. This object is responsible
@@ -853,7 +760,7 @@ public class StripChart
     if (request.compareTo("Show chart") == 0) {
       showChart();
     } else {
-      throw new
+      throw new 
 	IllegalArgumentException(request
 				 + " not supported (StripChart)");
     }

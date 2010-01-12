@@ -16,7 +16,7 @@
 
 /*
  *    UpdateableClassifier.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
@@ -29,7 +29,7 @@ import weka.core.*;
  * one instance at a time.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public interface UpdateableClassifier {
 
@@ -43,3 +43,4 @@ public interface UpdateableClassifier {
   void updateClassifier(Instance instance) throws Exception;
 
 }
+ 
