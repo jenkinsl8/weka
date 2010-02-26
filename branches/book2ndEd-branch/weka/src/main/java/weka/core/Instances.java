@@ -33,16 +33,16 @@ import java.util.*;
  *
  * <code>
  * ... <br>
- * 
+ *
  * // Read all the instances in the file <br>
  * reader = new FileReader(filename); <br>
  * instances = new Instances(reader); <br><br>
  *
  * // Make the last attribute be the class <br>
  * instances.setClassIndex(instances.numAttributes() - 1); <br><br>
- * 
+ *
  * // Print header and instances. <br>
- * System.out.println("\nDataset:\n"); <br> 
+ * System.out.println("\nDataset:\n"); <br>
  * System.out.println(instances); <br><br>
  *
  * ... <br>
@@ -55,9 +55,10 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58.2.6 $ 
+ * @version $Revision:
  */
 public class Instances implements Serializable {
+lizable {
  
   /** The filename extension that should be used for arff files */
   public static String FILE_EXTENSION = ".arff";
@@ -72,11 +73,11 @@ public class Instances implements Serializable {
   static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
-  protected /*@spec_public non_null@*/ String m_RelationName;         
+  protected /*@spec_public non_null@*/ String m_Ree;         
 
   /** The attribute information. */
   protected /*@spec_public non_null@*/ FastVector m_Attributes;
-  /*  public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
+  /*  public invariant (\forall int i; 0 <= i && i < m_Attribues.size(); 
                     m_Attributes.elementAt(i) != null);
   */
 
@@ -95,11 +96,11 @@ public class Instances implements Serializable {
 
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
-   * one to each instance. Lets the index of the class 
+   * one to each instance. Lets the index o the class 
    * attribute be undefined (negative).
    *
    * @param reader the reader
-   * @exception IOException if the ARFF file is not read 
+   * @exception IOException if the ARFF file s not read 
    * successfully
    */
   public Instances(/*@non_null@*/Reader reader) throws IOException {
@@ -112,11 +113,9 @@ public class Instances implements Serializable {
     m_ClassIndex = -1;
     m_Instances = new FastVector(1000);
     while (getInstance(tokenizer, true)) {};
-    compactify();
-  }
- 
+    compact
   /**
-   * Reads the header of an ARFF file from a reader and 
+   * Reads the header of an ARFF file from a reader andreader and 
    * reserves space for the given number of instances. Lets
    * the class index be undefined (negative).
    *
@@ -136,7 +135,7 @@ public class Instances implements Serializable {
     if (capacity < 0) {
       throw new IllegalArgumentException("Capacity has to be positive!");
     }
-    tokenizer = new StreamTokenizer(reader); 
+    tokenizer = new StreamTokenizr(reader); 
     initTokenizer(tokenizer);
     readHeader(tokenizer);
     m_ClassIndex = -1;
@@ -161,14 +160,15 @@ public class Instances implements Serializable {
    * to the header information from the given set of instances. Sets
    * the capacity of the set of instances to 0 if its negative.
    *
-   * @param instances the instances from which the header 
+   * @param instances the instances from which
    * information is to be taken
-   * @param capacity the capacity of the new dataset 
+   * @param capacity the capacity of the new datasetew dataset 
    */
-  public Instances(/*@non_null@*/Instances dataset, int capacity) {
-    
+  public Instances(/*@non_null@*/Instances dataset, int c
     if (capacity < 0) {
       capacity = 0;
+    }
+
     }
     
     // Strings only have to be "shallow" copied because
@@ -180,10 +180,10 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Creates a new set of instances by copying a 
+   * Creates a new set of instances b
    * subset of another set.
    *
-   * @param source the set of instances from which a subset 
+   * @param source the set of instances from which a subseth a subset 
    * is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
@@ -192,7 +192,7 @@ public class Instances implements Serializable {
   //@ requires 0 <= first;
   //@ requires 0 <= toCopy;
   //@ requires first + toCopy <= source.numInstances();
-  public Instances(/*@non_null@*/Instances source, int first, int toCopy) {
+  public Instances(/*@non_null@*/Instances source, int first, intopy) {
     
     this(source, toCopy);
 
@@ -205,7 +205,7 @@ public class Instances implements Serializable {
 
   /**
    * Creates an empty set of instances. Uses the given
-   * attribute information. Sets the capacity of the set of 
+   * attribute information. Sets the capacity ofthe set of 
    * instances to 0 if its negative. Given attribute information
    * must not be changed after this constructor has been used.
    *
@@ -213,8 +213,16 @@ public class Instances implements Serializable {
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
    */
-  public Instances(/*@non_null@*/String name, 
+  public Instances(/*@non_null@*/S
 		   /*@non_null@*/FastVector attInfo, int capacity) {
+
+    // check whether the attribute names are unique
+    HashSet names = new HashSet();
+    for (int i = 0; i < attInfo.size(); i++)
+      names.add(((Attribute) attInfo.elementAt(i)).name());
+    if (names.size() != attInfo.size())
+      throw new IllegalArgumentException("Attribute names are not unique!");
+    names.clear();capacity) {
 
     m_RelationName = name;
     m_ClassIndex = -1;
@@ -222,7 +230,7 @@ public class Instances implements Serializable {
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
     }
-    m_Instances = new FastVector(capacity);
+    m_Instances = new FastVector(capaity);
   }
  
   /**
@@ -246,7 +254,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Adds one instance to the end of the set. 
+   * Adds one instance to the end f the set. 
    * Shallow copies instance before it is added. Increases the
    * size of the dataset if it is not large enough. Does not
    * check if the instance is compatible with the dataset.
@@ -271,7 +279,7 @@ public class Instances implements Serializable {
   //@ requires 0 <= index;
   //@ requires index < m_Attributes.size();
   //@ ensures \result != null;
-  public /*@pure@*/ Attribute attribute(int index) {
+  public /*@pure@*/ Attribute attribute(index) {
     
     return (Attribute) m_Attributes.elementAt(index);
   }
@@ -283,9 +291,9 @@ public class Instances implements Serializable {
    *
    * @param name the attribute's name
    * @return the attribute with the given name, null if the
-   * attribute can't be found
-   */ 
+   * attribute can't be 
   public /*@pure@*/ Attribute attribute(String name) {
+ame) {
     
     for (int i = 0; i < numAttributes(); i++) {
       if (attribute(i).name().equals(name)) {
@@ -302,7 +310,7 @@ public class Instances implements Serializable {
    */
   public /*@pure@*/ boolean checkForStringAttributes() {
 
-    int i = 0;
+     i = 0;
    
     while (i < m_Attributes.size()) {
       if (attribute(i++).isString()) {
@@ -315,10 +323,10 @@ public class Instances implements Serializable {
   /**
    * Checks if the given instance is compatible
    * with this dataset. Only looks at the size of
-   * the instance and the ranges of the values for 
+   * the instance and the ranges of thevalues for 
    * nominal and string attributes.
    *
-   * @return true if the instance is compatible with the dataset 
+   * @return true if the instance is compatible with he dataset 
    */
   public /*@pure@*/ boolean checkInstance(Instance instance) {
 
@@ -340,7 +348,7 @@ public class Instances implements Serializable {
 	}
       }
     }
-    return true;
+    returntrue;
   }
 	
   /**
@@ -365,9 +373,10 @@ public class Instances implements Serializable {
    * @return the class index as an integer
    */
   // ensures \result == m_ClassIndex;
-  public /*@pure@*/ int classIndex() {
-    
+  public /*@pure@*/ int clas
     return m_ClassIndex;
+  }
+ndex;
   }
  
   /**
@@ -382,7 +391,7 @@ public class Instances implements Serializable {
   /**
    * Removes all instances from the set.
    */
-  public void delete() {
+  public void te() {
     
     m_Instances = new FastVector();
   }
@@ -393,23 +402,22 @@ public class Instances implements Serializable {
    * @param index the instance's position
    */
   //@ requires 0 <= index && index < numInstances();
-  public void delete(int index) {
-    
+  public void delete(in
     m_Instances.removeElementAt(index);
   }
 
   /**
-   * Deletes an attribute at the given position 
+   * Deletes an attribute at the given positionn position 
    * (0 to numAttributes() - 1). A deep copy of the attribute
    * information is performed before the attribute is deleted.
    *
    * @param pos the attribute's position
-   * @exception IllegalArgumentException if the given index is out of range 
+   * @exception IllegalArgumentException if the given index is ot of range 
    *            or the class attribute is being deleted
    */
   //@ requires 0 <= position && position < numAttributes();
   //@ requires position != classIndex();
-  public void deleteAttributeAt(int position) {
+  public void deleteAttributeAt(int pition) {
 	 
     if ((position < 0) || (position >= m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
@@ -427,7 +435,7 @@ public class Instances implements Serializable {
       current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).forceDeleteAttributeAt(position); 
+      instance(i).forceDeleteAttributeAtposition); 
     }
   }
 
@@ -435,7 +443,7 @@ public class Instances implements Serializable {
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
    *
-   * @exception IllegalArgumentException if string attribute couldn't be 
+   * @exception IllegalArgumentException if string attribute ouldn't be 
    * successfully deleted (probably because it is the class attribute).
    */
   public void deleteStringAttributes() {
@@ -518,7 +526,7 @@ public class Instances implements Serializable {
    * Checks if two headers are equivalent.
    *
    * @param dataset another dataset
-   * @return true if the header of the given dataset is equivalent 
+   * @return true if the header of the given dataset isequivalent 
    * to this header
    */
   public /*@pure@*/ boolean equalHeaders(Instances dataset){
@@ -535,7 +543,7 @@ public class Instances implements Serializable {
 	return false;
       }
     }
-    return true;
+    returntrue;
   }
  
   /**
@@ -544,7 +552,7 @@ public class Instances implements Serializable {
    * @return the first instance in the set
    */
   //@ requires numInstances() > 0;
-  public /*@non_null pure@*/ Instance firstInstance() {
+  public /*@non_null pure@*/ Instance firstInce() {
     
     return (Instance)m_Instances.firstElement();
   }
@@ -552,8 +560,7 @@ public class Instances implements Serializable {
   /**
    * Returns a random number generator. The initial seed of the random
    * number generator depends on the given seed and the hash code of
-   * a string representation of a instances chosen based on the given
-   * seed. 
+   * a string representation of a instances chosen based on the given   * seed. 
    *
    * @param seed the given seed
    * @return the random number generator
@@ -562,11 +569,9 @@ public class Instances implements Serializable {
 
     Random r = new Random(seed);
     r.setSeed(instance(r.nextInt(numInstances())).toString().hashCode() + seed);
-    return r;
-  }
- 
+    ret
   /**
-   * Inserts an attribute at the given position (0 to 
+   * Inserts an attribute at the given position (0 totion (0 to 
    * numAttributes()) and sets all values to be missing.
    * Shallow copies the attribute before it is inserted, and performs
    * a deep copy of the existing attribute information.
@@ -577,7 +582,7 @@ public class Instances implements Serializable {
    */
   //@ requires 0 <= position;
   //@ requires position <= numAttributes();
-  public void insertAttributeAt(/*@non_null@*/ Attribute att, int position) {
+  public void insertAttributeAt(/*@non_null@*/ Attribute att, int pition) {
 	 
     if ((position < 0) ||
 	(position > m_Attributes.size())) {
@@ -635,8 +640,8 @@ public class Instances implements Serializable {
    * @param k the value of k
    * @return the kth-smallest value
    */
-  public double kthSmallestValue(int attIndex, int k) {
-    
+  public double kthSmallestValue(int attIndexights = 0;
+
     if (!attribute(attIndex).isNumeric()) {
       throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
     }
@@ -671,14 +676,14 @@ public class Instances implements Serializable {
    * @return the last instance in the set
    */
   //@ requires numInstances() > 0;
-  public /*@non_null pure@*/ Instance lastInstance() {
+  public /*@non_null pure@*/ Instance lastInce() {
     
     return (Instance)m_Instances.lastElement();
   }
 
   /**
    * Returns the mean (mode) for a numeric (nominal) attribute as
-   * a floating-point value. Returns 0 if the attribute is neither nominal nor 
+   * a floating-point value. Returns 0 if the attribute is neither ominal nor 
    * numeric. If all values are missing it returns zero.
    *
    * @param attIndex the attribute's index
@@ -721,7 +726,7 @@ public class Instances implements Serializable {
    * nominal nor numeric.  If all values are missing it returns zero.
    *
    * @param att the attribute
-   * @return the mean or the mode 
+   * @return the mean r the mode 
    */
   public /*@pure@*/ double meanOrMode(Attribute att) {
 
@@ -742,12 +747,13 @@ public class Instances implements Serializable {
   /**
    * Returns the number of class labels.
    *
-   * @return the number of class labels as an integer if the class 
-   * attribute is nominal, 1 otherwise.
+   * @return the number of class labels as an integer i
+   * attribute is nominal, 1 otherwise.s attribute
    * @exception UnassignedClassException if the class is not set
    */
   //@ requires classIndex() >= 0;
-  public /*@pure@*/ int numClasses() {
+  public int numClasses() {
+es() {
     
     if (m_ClassIndex < 0) {
       throw new UnassignedClassException("Class index is negative (not set)!");
@@ -781,7 +787,7 @@ public class Instances implements Serializable {
 	if (current.isMissing(attIndex)) {
 	  break;
 	}
-	if ((i == 0) || 
+	if (i == 0) || 
 	    (current.value(attIndex) > prev)) {
 	  prev = current.value(attIndex);
 	  counter++;
@@ -803,7 +809,7 @@ public class Instances implements Serializable {
    */
   public /*@pure@*/ int numDistinctValues(/*@non_null@*/Attribute att) {
 
-    return numDistinctValues(att.index());
+    return numDistinctValues(att.ind());
   }
   
   /**
@@ -818,7 +824,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Shuffles the instances in the set so that they are ordered 
+   * Shuffles the instances in the set so that they re ordered 
    * randomly.
    *
    * @param random a random number generator
@@ -835,18 +841,19 @@ public class Instances implements Serializable {
    * is not large enough to hold the instance. This method does
    * not check for carriage return at the end of the line.
    *
-   * @param reader the reader 
+   * @param readerch instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @exception IOException if the information 
    * successfully
-   */ 
-  public boolean readInstance(Reader reader) 
+   */
+  public boolean readInstance(Reader reader)
        throws IOException {
 
     StreamTokenizer tokenizer = new StreamTokenizer(reader);
-    
+
     initTokenizer(tokenizer);
     return getInstance(tokenizer, false);
+  }e);
   }    
 
   /**
@@ -900,7 +907,7 @@ public class Instances implements Serializable {
    *
    * @param att the attribute's index
    * @param val the value's index
-   * @param name the new name 
+   * @param name te new name 
    */
   public void renameAttributeValue(int att, int val, String name) {
 
@@ -926,7 +933,7 @@ public class Instances implements Serializable {
    * @param val the value
    * @param name the new name
    */
-  public void renameAttributeValue(Attribute att, String val, 
+  public void renameAttributeValue(Attribute att, tring val, 
                                          String name) {
 
     int v = att.indexOfValue(val);
@@ -982,7 +989,7 @@ public class Instances implements Serializable {
    * @exception IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
-  public Instances resampleWithWeights(Random random, 
+  public Instances resampleWithWeights(Ranom random, 
 					     double[] weights) {
 
     if (weights.length != numInstances()) {
@@ -1010,7 +1017,7 @@ public class Instances implements Serializable {
       }
       sumProbs += weights[l];
       while ((k < numInstances()) &&
-	     (probabilities[k] <= sumProbs)) { 
+	     (probabilities[k] <= s
 	newData.add(instance(l));
 	newData.instance(k).setWeight(1);
 	k++;
@@ -1020,6 +1027,8 @@ public class Instances implements Serializable {
     return newData;
   }
 
+  /**  }
+
   /** 
    * Sets the class attribute.
    *
@@ -1027,8 +1036,7 @@ public class Instances implements Serializable {
    */
   public void setClass(Attribute att) {
 
-    m_ClassIndex = att.index();
-  }
+    m_ClassIndex = att.index();  }
 
   /** 
    * Sets the class index of the set.
@@ -1051,16 +1059,16 @@ public class Instances implements Serializable {
    *
    * @param newName the new relation name.
    */
-  public void setRelationName(/*@non_null@*/String newName) {
+  public void setRelationName(/*@non_null@*/String ame) {
     
     m_RelationName = newName;
   }
 
   /**
-   * Sorts the instances based on an attribute. For numeric attributes, 
-   * instances are sorted in ascending order. For nominal attributes, 
-   * instances are sorted based on the attribute label ordering 
-   * specified in the header. Instances with missing values for the 
+   * Sorts the instances based on an attribute. For numeric 
+   * instances are sorted in ascending order. For nominal attributes,
+   * instances are sorted based on the attribute label ordering
+   * specified in the header. Instances with missing values for thees for the 
    * attribute are placed at the end of the dataset.
    *
    * @param attIndex the attribute's index
@@ -1087,10 +1095,10 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Sorts the instances based on an attribute. For numeric attributes, 
-   * instances are sorted into ascending order. For nominal attributes, 
-   * instances are sorted based on the attribute label ordering 
-   * specified in the header. Instances with missing values for the 
+   * Sorts the instances based on an attribute. For numeric ttributes, 
+   * instances are sorted into ascending order. For nominal 
+   * instances are sorted based on the attribute label ordering
+   * specified in the header. Instances with missing values for thees for the 
    * attribute are placed at the end of the dataset.
    *
    * @param att the attribute
@@ -1101,14 +1109,14 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Stratifies a set of instances according to its class values 
-   * if the class attribute is nominal (so that afterwards a 
+   * Stratifies a set of instances according to its c
+   * if the class attribute is nominal (so that afterwards aterwards a 
    * stratified cross-validation can be performed).
    *
    * @param numFolds the number of folds in the cross-validation
    * @exception UnassignedClassException if the class is not set
    */
-  public void stratify(int numFolds) {
+  public void stratify(int nlds) {
     
     if (numFolds <= 0) {
       throw new IllegalArgumentException("Number of folds must be greater than 1");
@@ -1125,7 +1133,7 @@ public class Instances implements Serializable {
 	for (int j = index; j < numInstances(); j++) {
 	  Instance instance2 = instance(j);
 	  if ((instance1.classValue() == instance2.classValue()) ||
-	      (instance1.classIsMissing() && 
+	      (instance1.classIsMssing() && 
 	       instance2.classIsMissing())) {
 	    swap(index,j);
 	    index++;
@@ -1133,8 +1141,7 @@ public class Instances implements Serializable {
 	}
 	index++;
       }
-      stratStep(numFolds);
-    }
+      stratStep(numFolds);    }
   }
  
   /**
@@ -1142,7 +1149,7 @@ public class Instances implements Serializable {
    *
    * @return the sum of all the instances' weights as a double
    */
-  public /*@pure@*/ double sumOfWeights() {
+  public /*@pure@*/ double sumOfWts() {
     
     double sum = 0;
 
@@ -1153,7 +1160,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Creates the test set for one fold of a cross-validation on 
+   * Creates the test set for one fold of a cross-vaidation on 
    * the dataset.
    *
    * @param numFolds the number of folds in the cross-validation. Must
@@ -1168,8 +1175,8 @@ public class Instances implements Serializable {
   public Instances testCV(int numFolds, int numFold) {
 
     int numInstForFold, first, offset;
-    Instances test;
-    
+    Instaes train;
+ 
     if (numFolds < 2) {
       throw new IllegalArgumentException("Number of folds must be at least 2!");
     }
@@ -1177,7 +1184,7 @@ public class Instances implements Serializable {
       throw new IllegalArgumentException("Can't have more folds than instances!");
     }
     numInstForFold = numInstances() / numFolds;
-    if (numFold < numInstances() % numFolds){
+    if (numFold < numInstances()  numFolds) {
       numInstForFold++;
       offset = numFold;
     }else
@@ -1185,7 +1192,7 @@ public class Instances implements Serializable {
     test = new Instances(this, numInstForFold);
     first = numFold * (numInstances() / numFolds) + offset;
     copyInstances(first, test, numInstForFold);
-    return test;
+    returntest;
   }
  
   /**
@@ -1195,9 +1202,9 @@ public class Instances implements Serializable {
    *
    * @return the dataset in ARFF format as a string
    */
-  public String toString() {
-    
+  public String to
     StringBuffer text = new StringBuffer();
+fer();
     
     text.append(ARFF_RELATION).append(" ").
       append(Utils.quote(m_RelationName)).append("\n\n");
@@ -1215,22 +1222,24 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Creates the training set for one fold of a cross-validation 
-   * on the dataset. 
+   * Creates the training set for one fold of a cross
+   * onon on 
+   * the dataset.
    *
    * @param numFolds the number of folds in the cross-validation. Must
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
-   * @return the training set 
+   * @rraining setaining set 
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
   //@ requires 0 <= numFold && numFold < numFolds;
-  public Instances trainCV(int numFolds, int numFold) {
+  public Instances trainCV(int numFolds, ) {
 
     int numInstForFold, first, offset;
     Instances train;
+es train;
  
     if (numFolds < 2) {
       throw new IllegalArgumentException("Number of folds must be at least 2!");
@@ -1254,7 +1263,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Creates the training set for one fold of a cross-validation 
+   * Creates the training set for one fold of a crossvalidation 
    * on the dataset. The data is subsequently randomized based
    * on the given random number generator.
    *
@@ -1262,7 +1271,7 @@ public class Instances implements Serializable {
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @param random the random number generator
-   * @return the training set 
+   * @return the taining set 
    * @exception IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
@@ -1282,7 +1291,7 @@ public class Instances implements Serializable {
    * @return the variance if the attribute is numeric
    * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public /*@pure@*/ double variance(int attIndex) {
+  public /*@pure@*/ double variance(int aIndex) {
   
     double sum = 0, sumSquared = 0, sumOfWeights = 0;
 
@@ -1292,9 +1301,9 @@ public class Instances implements Serializable {
     }
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-	sum += instance(i).weight() * 
+	sum += instance(i)
 	  instance(i).value(attIndex);
-	sumSquared += instance(i).weight() * 
+	sumSquared += instance(i).weight() *weight() * 
 	  instance(i).value(attIndex) *
 	  instance(i).value(attIndex);
 	sumOfWeights += instance(i).weight();
@@ -1303,7 +1312,7 @@ public class Instances implements Serializable {
     if (sumOfWeights <= 1) {
       return 0;
     }
-    double result = (sumSquared - (sum * sum / sumOfWeights)) / 
+    double result = (sumSquared - (sum * sum / sumOfeights)) / 
       (sumOfWeights - 1);
 
     // We don't like negative variance
@@ -1321,9 +1330,10 @@ public class Instances implements Serializable {
    * @return the variance if the attribute is numeric
    * @exception IllegalArgumentException if the attribute is not numeric
    */
-  public /*@pure@*/ double variance(Attribute att) {
-    
+  public /*@pure@*/ double variance(Attrib
     return variance(att.index());
+  }
+());
   }
   
   /**
@@ -1364,8 +1374,10 @@ public class Instances implements Serializable {
       }
     }
     result.addDistinct(prev, currentCount);
-    result.distinctCount--; // So we don't count "missing" as a value 
+    result.distinctCount--; // So we don't count "missing"
     return result;
+  }
+ult;
   }
   
   /**
@@ -1375,7 +1387,7 @@ public class Instances implements Serializable {
    *
    * @param index the index of the attribute.
    * @return an array containing the value of the desired attribute for
-   * each instance in the dataset. 
+   * each instance in te dataset. 
    */
   //@ requires 0 <= index && index < numAttributes();
   public /*@pure@*/ double [] attributeToDoubleArray(int index) {
@@ -1465,24 +1477,26 @@ public class Instances implements Serializable {
       result.append(Utils.padLeft("" + as.distinctCount, 5)).append(' ');
       result.append('\n');
     }
-    return result.toString();
+    return result.toStr
+    }
   }
-  
+
   /**
    * Reads a single instance using the tokenizer and appends it
    * to the dataset. Automatically expands the dataset if it
    * is not large enough to hold the instance.
    *
    * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
+   * @param flag if method should test for carriage rturn after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @exception IOException if the information 
    * successfully
-   */ 
-  protected boolean getInstance(StreamTokenizer tokenizer, 
-				boolean flag) 
+   */
+  protected boolean getInstance(StreamTokenizer tokenizer,
+				boolean flag)
        throws IOException {
+tion {
     
     // Check if any attributes have been declared.
     if (m_Attributes.size() == 0) {
@@ -1492,7 +1506,7 @@ public class Instances implements Serializable {
     // Check if end of file reached.
     getFirstToken(tokenizer);
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      return false;
+      return fa
     }
     
     // Parse instance
@@ -1509,26 +1523,25 @@ public class Instances implements Serializable {
    * is not large enough to hold the instance.
    *
    * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
+   * @param flag if method should test for carriage rturn after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @exception IOException if the information 
    * successfully
-   */ 
-  protected boolean getInstanceSparse(StreamTokenizer tokenizer, 
-				      boolean flag) 
+   */
+  protected boolean getInstanceSparse(StreamTokenizer tokenizer,
+				      boolean flag)lean flag) 
        throws IOException {
 
-    int valIndex, numValues = 0, maxIndex = -1;
-    
+    int valIndex, numValues = 0, maxI
     // Get values
     do {
+do {
       
       // Get index
       getIndex(tokenizer);
       if (tokenizer.ttype == '}') {
-	break;
-      }
+	brea  }
        
       // Is index valid?
       try{
@@ -1539,7 +1552,7 @@ public class Instances implements Serializable {
       if (m_IndicesBuffer[numValues] <= maxIndex) {
 	errms(tokenizer,"indices have to be ordered");
       }
-      if ((m_IndicesBuffer[numValues] < 0) || 
+      if ((m_IndicesBuffer[numValus] < 0) || 
 	  (m_IndicesBuffer[numValues] >= numAttributes())) {
 	errms(tokenizer,"index out of bounds");
       }
@@ -1560,7 +1573,7 @@ public class Instances implements Serializable {
         switch (attribute(m_IndicesBuffer[numValues]).type()) {
           case Attribute.NOMINAL:
             // Check if value appears in header.
-            valIndex = 
+           valIndex = 
               attribute(m_IndicesBuffer[numValues]).indexOfValue(tokenizer.sval);
             if (valIndex == -1) {
               errms(tokenizer,"nominal value not declared in header");
@@ -1577,12 +1590,12 @@ public class Instances implements Serializable {
 	  }
           break;
 	case Attribute.STRING:
-	  m_ValueBuffer[numValues] = 
+	  m_ValueBuffer[nmValues] = 
 	    attribute(m_IndicesBuffer[numValues]).addStringValue(tokenizer.sval);
           break;
         case Attribute.DATE:
           try {
-            m_ValueBuffer[numValues] = 
+            m_ValueBuffer[nmValues] = 
               attribute(m_IndicesBuffer[numValues]).parseDate(tokenizer.sval);
           } catch (ParseException e) {
             errms(tokenizer,"unparseable date: " + tokenizer.sval);
@@ -1595,8 +1608,7 @@ public class Instances implements Serializable {
       numValues++;
     } while (true);
     if (flag) {
-      getLastToken(tokenizer,true);
-    }
+      getLastToken(tokenizer,tr   }
       
     // Add instance to dataset
     double[] tempValues = new double[numValues];
@@ -1613,30 +1625,28 @@ public class Instances implements Serializable {
    * is not large enough to hold the instance.
    *
    * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
+   * @param flag if method should test for carriage rturn after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @exception IOException if the information 
    * successfully
-   */ 
-  protected boolean getInstanceFull(StreamTokenizer tokenizer, 
-				    boolean flag) 
+   */
+  protected boolean getInstanceFull(StreamTokenizer tokenizer,
+				    boolean flag)lean flag) 
        throws IOException {
 
     double[] instance = new double[numAttributes()];
-    int index;
     
     // Get values for all attributes.
     for (int i = 0; i < numAttributes(); i++){
-      
+
       // Get next token
       if (i > 0) {
 	getNextToken(tokenizer);
-      }
-            
+      }tokenizer);
+
       // Check if value is missing.
-      if  (tokenizer.ttype == '?') {
-	instance[i] = Instance.missingValue();
+      if  (tokenizer.ttype instance[ir[numValues] = Instance.missingValue();
       } else {
 
 	// Check if token is valid.
@@ -1677,8 +1687,7 @@ public class Instances implements Serializable {
       }
     }
     if (flag) {
-      getLastToken(tokenizer,true);
-    }
+      getLastToken(tokenizer,tr   }
       
     // Add instance to dataset
     add(new Instance(1, instance));
@@ -1689,11 +1698,12 @@ public class Instances implements Serializable {
    * Reads and stores header of an ARFF file.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if the information is not read 
+   * @exception IOException if the information 
    * successfully
-   */ 
-  protected void readHeader(StreamTokenizer tokenizer) 
+   */
+  protected void readHeader(StreamTokenizer tokenizer)
      throws IOException {
+tion {
     
     String attributeName;
     FastVector attributeValues;
@@ -1713,7 +1723,7 @@ public class Instances implements Serializable {
     }
 
     // Create vectors to hold information temporarily.
-    m_Attributes = new FastVector();
+    m_Attributes = new FasVector();
  
     // Get attribute declarations.
     getFirstToken(tokenizer);
@@ -1766,7 +1776,7 @@ public class Instances implements Serializable {
 
 	// Attribute is nominal.
 	attributeValues = new FastVector();
-	tokenizer.pushBack();
+	tokenizer.pshBack();
 	
 	// Get values for nominal attribute.
 	if (tokenizer.nextToken() != '{') {
@@ -1791,8 +1801,7 @@ public class Instances implements Serializable {
 
     // Check if data part follows. We can't easily check for EOL.
     if (!ARFF_DATA.equalsIgnoreCase(tokenizer.sval)) {
-      errms(tokenizer,"keyword " + ARFF_DATA + " expected");
-    }
+      errms(tokenizer,"keyword " + ARFF_DATA + " expectetion {
     
     // Check if any attributes have been declared.
     if (m_Attributes.size() == 0) {
@@ -1805,7 +1814,7 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Copies instances from one set to the end of another 
+   * Copies instances from one set to the endof another 
    * one.
    *
    * @param source the source of the instances
@@ -1815,11 +1824,12 @@ public class Instances implements Serializable {
    */
   //@ requires 0 <= from && from <= numInstances() - num;
   //@ requires 0 <= num;
-  protected void copyInstances(int from, /*@non_null@*/ Instances dest, int num) {
-    
+  protected void copyInstances(int from, /*@non_null@*/ Instances dest, 
     for (int i = 0; i < num; i++) {
       dest.add(instance(from + i));
     }
+  }
+   }
   }
   
   /**
@@ -1829,10 +1839,12 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @throws IOExcpetion containing the error message
    */
-  protected void errms(StreamTokenizer tokenizer, String theMsg) 
+  protected void errms(StreamTokenizer tokenizer, Str
        throws IOException {
-    
+
     throw new IOException(theMsg + ", read " + tokenizer.toString());
+  }
+());
   }
   
   /**
@@ -1850,8 +1862,9 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if reading the next token fails
    */
-  protected void getFirstToken(StreamTokenizer tokenizer) 
+  protected void getFirstToken(StreamTokenizer
     throws IOException {
+tion {
     
     while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
     if ((tokenizer.ttype == '\'') ||
@@ -1869,14 +1882,15 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if it finds a premature end of line
    */
-  protected void getIndex(StreamTokenizer tokenizer) throws IOException {
+  protected void getIndex(StreamTokenizer tokenizer) throws IOEtion {
     
     if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
       errms(tokenizer,"premature end of line");
     }
     if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
-    }
+      errms(tokenizer,"premature end of fi
+  }
+   }
   }
   
   /**
@@ -1885,7 +1899,7 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if it doesn't find an end of line
    */
-  protected void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
+  protected void getLastToken(StreamTokenizer tokenizer, boolean edOfFileOk) 
        throws IOException {
 
     if ((tokenizer.nextToken() != StreamTokenizer.TT_EOL) &&
@@ -1900,8 +1914,9 @@ public class Instances implements Serializable {
    * @param tokenizer the stream tokenizer
    * @exception IOException if it finds a premature end of line
    */
-  protected void getNextToken(StreamTokenizer tokenizer) 
+  protected void getNextToken(StreamTokenizer
        throws IOException {
+tion {
     
     if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
       errms(tokenizer,"premature end of line");
@@ -1913,8 +1928,7 @@ public class Instances implements Serializable {
       tokenizer.ttype = StreamTokenizer.TT_WORD;
     } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
 	       (tokenizer.sval.equals("?"))){
-      tokenizer.ttype = '?';
-    }
+      tokenizer.ttype = '?';    }
   }
 	
   /**
@@ -1924,8 +1938,8 @@ public class Instances implements Serializable {
    */
   protected void initTokenizer(StreamTokenizer tokenizer){
 
-    tokenizer.resetSyntax();         
-    tokenizer.whitespaceChars(0, ' ');    
+    tokenizer.res
+    tokenizer.whitespaceChars(0, ' ');, ' ');    
     tokenizer.wordChars(' '+1,'\u00FF');
     tokenizer.whitespaceChars(',',',');
     tokenizer.commentChar('%');
@@ -1933,7 +1947,7 @@ public class Instances implements Serializable {
     tokenizer.quoteChar('\'');
     tokenizer.ordinaryChar('{');
     tokenizer.ordinaryChar('}');
-    tokenizer.eolIsSignificant(true);
+    tokenizer.eolIsSignificant(rue);
   }
  
   /**
@@ -1952,7 +1966,7 @@ public class Instances implements Serializable {
 	text.append("\n");
       }
     }
-    return text.toString();
+    return text.toStrg();
   }
   
   /**
@@ -1960,14 +1974,14 @@ public class Instances implements Serializable {
    * kthSmallestValue.
    *
    * @param attIndex the attribute's index
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param left the first index of
+   * @param right the last index of the subsetthe subset 
    *
    * @return the index of the middle element
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   //@ requires 0 <= left && left <= right && right < numInstances();
-  protected int partition(int attIndex, int l, int r) {
+  protected int partition(int attIndex, int lt r) {
     
     double pivot = instance((l + r) / 2).value(attIndex);
 
@@ -1985,10 +1999,11 @@ public class Instances implements Serializable {
       }
     }
     if ((l == r) && (instance(r).value(attIndex) > pivot)) {
-      r--;
-    } 
+     
 
     return r;
+  }
+n r;
   }
   
   /**
@@ -2015,11 +2030,12 @@ public class Instances implements Serializable {
    *
    * @param tokenizer the stream tokenizer
    */
-  protected void readTillEOL(StreamTokenizer tokenizer) 
+  protected void readTillEOL(StreamTokenizer
        throws IOException {
+tion {
     
     while (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {};
-    tokenizer.pushBack();
+    tokenizer.pushBk();
   }
   
   /**
@@ -2027,15 +2043,15 @@ public class Instances implements Serializable {
    * to Manber's "Introduction to Algorithms".
    *
    * @param attIndex the attribute's index
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param left the first index of
+   * @param right the last index of the subsetthe subset 
    * @param k the value of k
    *
    * @return the index of the kth-smallest element
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   //@ requires 0 <= first && first <= right && right < numInstances();
-  protected int select(int attIndex, int left, int right, int k) {
+  protected int select(int attIndex, int left, int rightt k) {
     
     if (left == right) {
       return left;
@@ -2054,7 +2070,7 @@ public class Instances implements Serializable {
    *
    * @param numFolds the number of folds for the stratification
    */
-  protected void stratStep (int numFolds){
+  protected void stratStep (int olds){
     
     FastVector newVec = new FastVector(m_Instances.capacity());
     int start = 0, j;
@@ -2068,7 +2084,7 @@ public class Instances implements Serializable {
       }
       start++;
     }
-    m_Instances = newVec;
+    m_Instances = nVec;
   }
   
   /**
@@ -2079,14 +2095,14 @@ public class Instances implements Serializable {
    */
   //@ requires 0 <= i && i < numInstances();
   //@ requires 0 <= j && j < numInstances();
-  public void swap(int i, int j){
+  public void swap(int nt j){
     
     m_Instances.swap(i, j);
   }
 
   /**
    * Merges two sets of Instances together. The resulting set will have
-   * all the attributes of the first set plus all the attributes of the 
+   * all the attributes of the first set plus all the attribtes of the 
    * second set. The number of instances in both sets must be the same.
    *
    * @param first the first set of Instances
@@ -2106,13 +2122,13 @@ public class Instances implements Serializable {
       newAttributes.addElement(first.attribute(i));
     }
     for (int i = 0; i < second.numAttributes(); i++) {
-      newAttributes.addElement(second.attribute(i));
+      newAttributes.addElement(second.attribute(
     }
     
     // Create the set of Instances
     Instances merged = new Instances(first.relationName() + '_'
-				     + second.relationName(), 
-				     newAttributes, 
+				     + second.rela
+				     newAttributes,ttributes, 
 				     first.numInstances());
     // Merge each instance
     for (int i = 0; i < first.numInstances(); i++) {
@@ -2138,12 +2154,11 @@ public class Instances implements Serializable {
     int start, num;
     double newWeight;
     FastVector testAtts, testVals;
-    int i,j;
+  t i,j;
     
     try{
       if (argv.length > 1) {
-	throw (new Exception("Usage: Instances [<filename>]"));
-      }
+	throw (new Exception("Usage: Instances [<filename>]")   }
       
       // Creating set of instances from scratch
       testVals = new FastVector(2);
@@ -2158,11 +2173,11 @@ public class Instances implements Serializable {
       instances.add(new Instance(instances.numAttributes()));
       instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
-      System.out.println(instances);
-      
+      System.out.println(i
       if (argv.length == 1) {
 	String filename = argv[0];
 	reader = new FileReader(filename);
+ilename);
 	
 	// Read first five instances and print them
 	System.out.println("\nFirst five instances from file:\n");
@@ -2178,14 +2193,14 @@ public class Instances implements Serializable {
 	reader = new FileReader(filename);
 	instances = new Instances(reader);
 
-	// Make the last attribute be the class 
+	// Make the last attribute b
 	instances.setClassIndex(instances.numAttributes() - 1);
+s() - 1);
 	
 	// Print header and instances.
 	System.out.println("\nDataset:\n");
 	System.out.println(instances);
-	System.out.println("\nClass index: "+instances.classIndex());
-      }
+	System.out.println("\nClass index: "+instances.classIndex()   }
       
       // Test basic methods based on class index.
       System.out.println("\nClass name: "+instances.classAttribute().name());
@@ -2207,21 +2222,20 @@ public class Instances implements Serializable {
 	  System.out.println("\tis missing");
 	} else {
 	  System.out.println();
-	}
-      }
+   }
       
       // Create random weights.
       System.out.println("\nCreating random weights for instances.");
       for (i = 0; i < instances.numInstances(); i++) {
-	instances.instance(i).setWeight(random.nextDouble()); 
+	instances.instance(i).setWeight(random.nex
       }
+om);
       
       // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(instances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
-      System.out.println(instances.sumOfWeights());
-      
+      System.out.println(instances.sumOfWeights()); 
       // Insert an attribute
       secondInstances = new Instances(instances);
       Attribute testAtt = new Attribute("Inserted");
@@ -2229,18 +2243,18 @@ public class Instances implements Serializable {
       System.out.println("\nSet with inserted attribute:\n");
       System.out.println(secondInstances);
       System.out.println("\nClass name: "
-			 + secondInstances.classAttribute().name());
+			 + secondInstances.classAttribute(());
       
       // Delete the attribute
       secondInstances.deleteAttributeAt(0);
       System.out.println("\nSet with attribute deleted:\n");
       System.out.println(secondInstances);
       System.out.println("\nClass name: "
-			 + secondInstances.classAttribute().name());
+			 + secondInstances.classAttribute(());
       
       // Test if headers are equal
       System.out.println("\nHeaders equal: "+
-			 instances.equalHeaders(secondInstances) + "\n");
+			 instances.equalHeaders(secondInstancesn");
       
       // Print data in internal format.
       System.out.println("\nData (internal values):\n");
@@ -2252,8 +2266,7 @@ public class Instances implements Serializable {
 	    System.out.print(instances.instance(i).value(j) + " ");
 	  }
 	}
-	System.out.println();
-      }
+	System.out.println(   }
       
       // Just print header
       System.out.println("\nEmpty dataset:\n");
@@ -2265,8 +2278,8 @@ public class Instances implements Serializable {
       if (empty.classAttribute().isNominal()) {
 	Instances copy = new Instances(empty, 0);
 	copy.renameAttribute(copy.classAttribute(), "new_name");
-	copy.renameAttributeValue(copy.classAttribute(), 
-				  copy.classAttribute().value(0), 
+	copy.renameAttributeValue(copy.classA
+				  copy.classAttribute().value(0),.value(0), 
 				  "new_val_name");
 	System.out.println("\nDataset with names changed:\n" + copy);
 	System.out.println("\nOriginal dataset:\n" + empty);
@@ -2276,7 +2289,7 @@ public class Instances implements Serializable {
       start = instances.numInstances() / 4;
       num = instances.numInstances() / 2;
       System.out.print("\nSubset of dataset: ");
-      System.out.println(num + " instances from " + (start + 1) 
+      System.out.println(num + " instances from " + start + 1) 
 			 + ". instance");
       secondInstances = new Instances(instances, start, num);
       System.out.println("\nClass name: "
@@ -2286,7 +2299,7 @@ public class Instances implements Serializable {
       System.out.println("\nInstances and their weights:\n");
       System.out.println(secondInstances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
-      System.out.println(secondInstances.sumOfWeights());
+      System.out.println(secondInstances.sumOfW());
       
       // Create and print training and test sets for 3-fold
       // cross-validation.
@@ -2296,8 +2309,7 @@ public class Instances implements Serializable {
       }
       for (j = 0; j < 3; j++) {
         train = instances.trainCV(3,j, new Random(1));
-	test = instances.testCV(3,j);
-                      
+	test = instances.te           
 	// Print all instances and their weights (and the sum of weights).
 	System.out.println("\nTrain: ");
 	System.out.println("\nInstances and their weights:\n");
@@ -2315,7 +2327,7 @@ public class Instances implements Serializable {
 
       // Randomize instances and print them.
       System.out.println("\nRandomized dataset:");
-      instances.randomize(random);
+      instances.randomizom);
       
       // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
@@ -2326,15 +2338,14 @@ public class Instances implements Serializable {
       // Sort instances according to first attribute and
       // print them.
       System.out.print("\nInstances sorted according to first attribute:\n ");
-      instances.sort(0);
-        
+      instanceom);
+      
       // Print all instances and their weights (and the sum of weights).
       System.out.println("\nInstances and their weights:\n");
       System.out.println(instances.instancesAndWeights());
       System.out.print("\nSum of weights: ");
-      System.out.println(instances.sumOfWeights());
-    } catch (Exception e) {
-      e.printStackTrace(); 
+      System.out.println(instances.sumOfW    } catch (Exception e) {
+      e.printStackTrace();ckTrace(); 
     }
   }
 
@@ -2387,7 +2398,4 @@ public class Instances implements Serializable {
     catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
-    }
-  }
-}
-
+  
