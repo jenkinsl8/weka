@@ -16,7 +16,7 @@
 
 /*
  *    Edge.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware
  *
  */
 
@@ -32,7 +32,7 @@ import java.awt.*;
  * This in particular contains information about an edges in the tree.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class Edge {
   /** The text caption for the edge. */

@@ -16,7 +16,7 @@
 
  /*
   *    PrintableComponent.java
-  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 Fracpete, Dale Fletcher
   *
   */
 
@@ -31,7 +31,7 @@ import java.util.Hashtable;
  * @see PrintableComponent
  * @see PrintablePanel
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.1 $
  */
 public interface PrintableHandler {
   /**

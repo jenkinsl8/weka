@@ -16,7 +16,7 @@
 
 /*
  *    Randomizable.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Richard Kirkby
  *
  */
 
@@ -27,7 +27,7 @@ package weka.core;
  * seeded with an integer.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public interface Randomizable {
 

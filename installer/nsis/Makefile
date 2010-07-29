@@ -1,7 +1,7 @@
 # Compiles the Java classes.
 #
 # Author:  FracPete (fracpete at waikato dot ac dot nz)
-# Version: $Revision: 1.1 $
+# Version: $Revision: 1.1.2.2 $
 
 all:	GenerateSetup RunWeka
 

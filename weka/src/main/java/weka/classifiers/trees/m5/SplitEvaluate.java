@@ -1,4 +1,7 @@
 /*
+ *    SplitEvaluate.java
+ *    Copyright (C) 2000 Mark Hall
+ *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -13,22 +16,17 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*
- *    SplitEvaluate.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
- *    
- */
-
 package weka.classifiers.trees.m5;
 
-import weka.core.Instances;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Interface for objects that determine a split point on an attribute
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 public interface SplitEvaluate {
   

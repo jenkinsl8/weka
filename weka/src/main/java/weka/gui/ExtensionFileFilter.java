@@ -16,7 +16,7 @@
 
 /*
  *    ExtensionFileFilter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -24,7 +24,6 @@
 package weka.gui;
 
 import java.io.File;
-import java.io.Serializable;
 import java.io.FilenameFilter;
 import javax.swing.filechooser.FileFilter;
 
@@ -34,17 +33,15 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public class ExtensionFileFilter
-  extends FileFilter
-  implements FilenameFilter, Serializable {
+public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
 
   /** The text description of the types of files accepted */
   protected String m_Description;
 
   /** The filename extensions of accepted files */
-  protected String[] m_Extension;
+  protected String [] m_Extension;
 
   /**
    * Creates the ExtensionFileFilter
@@ -81,15 +78,6 @@ public class ExtensionFileFilter
   }
   
   /**
-   * Returns a copy of the acceptable extensions.
-   * 
-   * @return the accepted extensions
-   */
-  public String[] getExtensions() {
-    return (String[]) m_Extension.clone();
-  }
-  
-  /**
    * Returns true if the supplied file should be accepted (i.e.: if it
    * has the required extension or is a directory).
    *
@@ -121,4 +109,4 @@ public class ExtensionFileFilter
   public boolean accept(File dir, String name) {
     return accept(new File(dir, name));
   }
-}
+} // ExtensionFileFilter

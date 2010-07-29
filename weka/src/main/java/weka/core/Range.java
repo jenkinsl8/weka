@@ -16,21 +16,21 @@
 
 /*
  *    Range.java
- *    Copyright (C) 1999-2010 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.core;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.io.*;
+import java.util.*;
 
 /** 
  * Class representing a range of cardinal numbers. The range is set by a 
  * string representation such as: <P>
  *
  * <code>
+ *   all
  *   first-last
  *   1,2,3,4
  * </code> <P>
@@ -39,21 +39,17 @@ import java.util.Vector;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.14 $
  */
-public class Range
-  implements Serializable, RevisionHandler, CustomDisplayStringProvider {
-  
-  /** for serialization. */
-  static final long serialVersionUID = 3667337062176835900L;
+public class Range implements Serializable {
 
-  /** Record the string representations of the columns to delete. */
+  /** Record the string representations of the columns to delete */
   /*@non_null spec_public@*/Vector m_RangeStrings = new Vector();
 
-  /** Whether matching should be inverted. */
+  /** Whether matching should be inverted */
   /*@spec_public@*/ boolean m_Invert;
 
-  /** The array of flags for whether an column is selected. */
+  /** The array of flags for whether an column is selected */
   /*@spec_public@*/boolean [] m_SelectFlags;
 
   /** Store the maximum value permitted in the range. -1 indicates that
@@ -69,7 +65,7 @@ public class Range
    * Constructor to set initial range.
    *
    * @param rangeList the initial range
-   * @throws IllegalArgumentException if the range list is invalid
+   * @exception IllegalArgumentException if the range list is invalid
    */
   public Range(/*@non_null@*/ String rangeList) {
 
@@ -113,24 +109,23 @@ public class Range
   }
 
   /**
-   * Gets the string representing the selected range of values.
+   * Gets the string representing the selected range of values
    *
    * @return the range selection string
    */
+
   public /*@non_null pure@*/String getRanges() {
 
-    StringBuffer result = new StringBuffer(m_RangeStrings.size()*4);
-    boolean first = true;
-    char sep = ',';
-    for (int i = 0; i < m_RangeStrings.size(); i++) {
-      if (first) {
-        result.append((String)m_RangeStrings.elementAt(i));
-        first = false;
+    String result = null;
+    Enumeration enu = m_RangeStrings.elements();
+    while (enu.hasMoreElements()) {
+      if (result == null) {
+	result = (String)enu.nextElement();
       } else {
-        result.append(sep + (String)m_RangeStrings.elementAt(i));
+	result += ',' + (String)enu.nextElement();
       }
     }
-    return result.toString();
+    return (result == null) ? "" : result;
   }
 
   /**
@@ -139,13 +134,13 @@ public class Range
    *
    * @param rangeList the comma separated list of ranges. The empty
    * string sets the range to empty.
-   * @throws IllegalArgumentException if the rangeList was not well formed
+   * @exception IllegalArgumentException if the rangeList was not well formed
    */
   //@requires rangeList != null;
   //@assignable m_RangeStrings,m_SelectFlags;
   public void setRanges(String rangeList) {
 
-    Vector<String> ranges = new Vector<String> (10);
+    Vector ranges = new Vector (10);
 
     // Split the rangeList up into the vector
     while (!rangeList.equals("")) {
@@ -171,7 +166,7 @@ public class Range
    *
    * @param index the number of interest
    * @return true if index is in the current range
-   * @throws RuntimeException if the upper limit of the range hasn't been defined
+   * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
   //@requires m_Upper >= 0;
   //@requires 0 <= index && index < m_SelectFlags.length;
@@ -232,10 +227,10 @@ public class Range
 
   /**
    * Gets an array containing all the selected values, in the order
-   * that they were selected (or ascending order if range inversion is on).
+   * that they were selected (or ascending order if range inversion is on)
    *
    * @return the array of selected values
-   * @throws RuntimeException if the upper limit of the range hasn't been defined
+   * @exception RuntimeException if the upper limit of the range hasn't been defined
    */
   //@requires m_Upper >= 0;
   public /*@non_null@*/ int [] getSelection() {
@@ -278,7 +273,6 @@ public class Range
    * @param indices an array containing indices to select.
    * Since the array will typically come from a program, indices are assumed
    * from 0, and thus will have 1 added in the String representation.
-   * @return the string representation of the indices
    */
   public static /*@non_null pure@*/String indicesToRangeList(/*@non_null@*/ int []indices) {
 
@@ -325,7 +319,7 @@ public class Range
 
 
   /**
-   * Translates a single string selection into it's internal 0-based equivalent.
+   * Translates a single string selection into it's internal 0-based equivalent
    *
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
@@ -386,7 +380,7 @@ public class Range
    * Examples: <code>first  last   2   first-last  first-4  4-last</code>
    * Doesn't check that a < b for a-b
    *
-   * @param range the string to check
+   * @param range
    * @return true if the range is valid
    */
   protected boolean isValidRange(String range) {
@@ -418,27 +412,6 @@ public class Range
       return false;
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-
-  /**
-   * Returns the custom display string.
-   * 
-   * @return		the string
-   */
-  public String toDisplay() {
-    if (getInvert())
-      return "inv(" + getRanges() + ")";
-    else
-      return getRanges();
-  }
 
   /**
    * Main method for testing this class.
@@ -466,3 +439,5 @@ public class Range
     }
   }
 }
+
+

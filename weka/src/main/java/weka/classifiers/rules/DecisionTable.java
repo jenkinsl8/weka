@@ -16,168 +16,94 @@
 
 /*
  *    DecisionTable.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.classifiers.rules;
 
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.SubsetEvaluator;
-import weka.attributeSelection.ASEvaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
+import weka.classifiers.lazy.IB1;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Vector;
-
 /**
- <!-- globalinfo-start -->
- * Class for building and using a simple decision table majority classifier.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
- * Ron Kohavi: The Power of Decision Tables. In: 8th European Conference on Machine Learning, 174-189, 1995.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a simple decision table majority classifier.
+ * For more information see: <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{Kohavi1995,
- *    author = {Ron Kohavi},
- *    booktitle = {8th European Conference on Machine Learning},
- *    pages = {174-189},
- *    publisher = {Springer},
- *    title = {The Power of Decision Tables},
- *    year = {1995}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Kohavi R. (1995).<i> The Power of Decision Tables.</i> In Proc
+ * European Conference on Machine Learning.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
+ *
+ * -S num <br>
+ * Number of fully expanded non improving subsets to consider
+ * before terminating a best first search.
+ * (Default = 5) <p>
+ *
+ * -X num <br>
+ * Use cross validation to evaluate features. Use number of folds = 1 for
+ * leave one out CV. (Default = leave one out CV) <p>
  * 
- * <pre> -S &lt;search method specification&gt;
- *  Full class name of search method, followed
- *  by its options.
- *  eg: "weka.attributeSelection.BestFirst -D 1"
- *  (default weka.attributeSelection.BestFirst)</pre>
- * 
- * <pre> -X &lt;number of folds&gt;
- *  Use cross validation to evaluate features.
- *  Use number of folds = 1 for leave one out CV.
- *  (Default = leave one out CV)</pre>
- * 
- * <pre> -E &lt;acc | rmse | mae | auc&gt;
- *  Performance evaluation measure to use for selecting attributes.
- *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
- * 
- * <pre> -I
- *  Use nearest neighbour instead of global table majority.</pre>
- * 
- * <pre> -R
- *  Display decision table rules.
- * </pre>
- * 
- * <pre> 
- * Options specific to search method weka.attributeSelection.BestFirst:
- * </pre>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
- * 
- * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
- *  Direction of search. (default = 1).</pre>
- * 
- * <pre> -N &lt;num&gt;
- *  Number of non-improving nodes to
- *  consider before terminating search.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Size of lookup cache for evaluated subsets.
- *  Expressed as a multiple of the number of
- *  attributes in the data set. (default = 1)</pre>
- * 
- <!-- options-end -->
+ * -I <br>
+ * Use nearest neighbour instead of global table majority. <p>
+ *
+ * -R <br>
+ * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.29.2.1 $ 
  */
-public class DecisionTable 
-  extends AbstractClassifier 
+public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
-             AdditionalMeasureProducer, TechnicalInformationHandler {
-
-  /** for serialization */
-  static final long serialVersionUID = 2888557078165701326L;
-
+	     AdditionalMeasureProducer {
+  
   /** The hashtable used to hold training instances */
-  protected Hashtable m_entries;
-
-  /** The class priors to use when there is no match in the table */
-  protected double [] m_classPriorCounts;
-  protected double [] m_classPriors;
+  private Hashtable m_entries;
 
   /** Holds the final feature set */
-  protected int [] m_decisionFeatures;
+  private int [] m_decisionFeatures;
 
   /** Discretization filter */
-  protected Filter m_disTransform;
+  private Filter m_disTransform;
 
   /** Filter used to remove columns discarded by feature selection */
-  protected Remove m_delTransform;
+  private Remove m_delTransform;
 
   /** IB1 used to classify non matching instances rather than majority class */
-  protected IBk m_ibk;
-
-  /** Holds the original training instances */
-  protected Instances m_theInstances;
-
-  /** Holds the final feature selected set of instances */
-  protected Instances m_dtInstances;
-
+  private IBk m_ibk;
+  
+  /** Holds the training instances */
+  private Instances m_theInstances;
+  
   /** The number of attributes in the dataset */
-  protected int m_numAttributes;
+  private int m_numAttributes;
 
   /** The number of instances in the dataset */
   private int m_numInstances;
 
   /** Class is nominal */
-  protected boolean m_classIsNominal;
+  private boolean m_classIsNominal;
+
+  /** Output debug info */
+  private boolean m_debug;
 
   /** Use the IBk classifier rather than majority class */
-  protected boolean m_useIBk;
+  private boolean m_useIBk;
 
   /** Display Rules */
-  protected boolean m_displayRules;
+  private boolean m_displayRules;
+
+  /** 
+   * Maximum number of fully expanded non improving subsets for a best 
+   * first search. 
+   */
+  private int m_maxStale;
 
   /** Number of folds for cross validating feature sets */
   private int m_CVFolds;
@@ -186,33 +112,7 @@ public class DecisionTable
   private Random m_rr;
 
   /** Holds the majority class */
-  protected double m_majority;
-
-  /** The search method to use */
-  protected ASSearch m_search = new BestFirst();
-
-  /** Our own internal evaluator */
-  protected ASEvaluation m_evaluator;
-
-  /** The evaluation object used to evaluate subsets */
-  protected Evaluation m_evaluation;
-
-  /** default is accuracy for discrete class and RMSE for numeric class */
-  public static final int EVAL_DEFAULT = 1;
-  public static final int EVAL_ACCURACY = 2;
-  public static final int EVAL_RMSE = 3;
-  public static final int EVAL_MAE = 4;
-  public static final int EVAL_AUC = 5;
-
-  public static final Tag [] TAGS_EVALUATION = {
-    new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
-    new Tag(EVAL_ACCURACY, "Accuracy (discrete class only"),
-    new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
-    new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
-    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)")
-  };
-
-  protected int m_evaluationMeasure = EVAL_DEFAULT;
+  private double m_majority;
 
   /**
    * Returns a string describing classifier
@@ -221,65 +121,320 @@ public class DecisionTable
    */
   public String globalInfo() {
 
-    return  
-    "Class for building and using a simple decision table majority "
-    + "classifier.\n\n"
-    + "For more information see: \n\n"
-    + getTechnicalInformation().toString();
+    return  "Class for building and using a simple decision table majority "
+      + "classifier. For more information see: \n\n"
+      + "Kohavi R. (1995). \"The Power of Decision Tables.\" In Proc "
+      + "European Conference on Machine Learning.";
   }
 
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
+   * Class for a node in a linked list. Used in best first search.
    */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+  public class Link {
 
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Ron Kohavi");
-    result.setValue(Field.TITLE, "The Power of Decision Tables");
-    result.setValue(Field.BOOKTITLE, "8th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.PAGES, "174-189");
-    result.setValue(Field.PUBLISHER, "Springer");
+    /** The group */
+    BitSet m_group;
 
-    return result;
+    /** The merit */
+    double m_merit;
+
+    /**
+     * The constructor.
+     *
+     * @param gr the group
+     * @param mer the merit
+     */
+    public Link (BitSet gr, double mer) {
+
+      m_group = (BitSet)gr.clone();
+      m_merit = mer;
+    }
+  
+    /**
+     * Gets the group.
+     */
+    public BitSet getGroup() {
+
+      return m_group;
+    }
+  
+    /**
+     * Gets the merit.
+     */
+    public double getMerit() {
+
+      return m_merit;
+    }
+
+    /**
+     * Returns string representation.
+     */
+    public String toString() {
+
+      return ("Node: "+m_group.toString()+"  "+m_merit);
+    }
   }
   
+  /**
+   * Class for handling a linked list. Used in best first search.
+   * Extends the Vector class.
+   */
+  public class LinkedList extends FastVector {
+
+    /**
+     * Removes an element (Link) at a specific index from the list.
+     *
+     * @param index the index of the element to be removed.
+     */
+    public void removeLinkAt(int index) throws Exception {
+
+      if ((index >= 0) && (index < size())) {
+	removeElementAt(index);
+      } else {
+	throw new Exception("index out of range (removeLinkAt)");
+      }
+    }
+
+    /**
+     * Returns the element (Link) at a specific index from the list.
+     *
+     * @param index the index of the element to be returned.
+     */
+    public Link getLinkAt(int index) throws Exception {
+
+      if (size()==0) {
+	throw new Exception("List is empty (getLinkAt)");
+      } else if ((index >= 0) && (index < size())) {
+	return ((Link)(elementAt(index)));
+      } else {
+	throw new Exception("index out of range (getLinkAt)");
+      }
+    }
+
+    /**
+     * Aadds an element (Link) to the list.
+     *
+     * @param gr the feature set specification
+     * @param mer the "merit" of this feature set
+     */
+    public void addToList(BitSet gr, double mer) {
+
+      Link newL = new Link(gr, mer);
+	
+      if (size()==0) {
+	addElement(newL);
+      }
+      else if (mer > ((Link)(firstElement())).getMerit()) {
+	insertElementAt(newL,0);
+      } else {
+	int i = 0;
+	int size = size();
+	boolean done = false;
+	while ((!done) && (i < size)) {
+	  if (mer > ((Link)(elementAt(i))).getMerit()) {
+	    insertElementAt(newL,i);
+	    done = true;
+	  } else if (i == size-1) {
+	    addElement(newL);
+	    done = true;
+	  } else {
+	    i++;
+	  }
+	}
+      }
+    }
+  }
+
+  /**
+   * Class providing keys to the hash table
+   */
+  public static class hashKey implements Serializable {
+    
+    /** Array of attribute values for an instance */
+    private double [] attributes;
+    
+    /** True for an index if the corresponding attribute value is missing. */
+    private boolean [] missing;
+
+    /** The values */
+    private String [] values;
+
+    /** The key */
+    private int key;
+
+    /**
+     * Constructor for a hashKey
+     *
+     * @param t an instance from which to generate a key
+     * @param numAtts the number of attributes
+     * @param ignoreClass if true treat the class as a normal attribute
+     */
+    public hashKey(Instance t, int numAtts, boolean ignoreClass) throws Exception {
+
+      int i;
+      int cindex = t.classIndex();
+
+      key = -999;
+      attributes = new double [numAtts];
+      missing = new boolean [numAtts];
+      for (i=0;i<numAtts;i++) {
+	if (i == cindex && !ignoreClass) {
+	  missing[i] = true;
+	} else {
+	  if ((missing[i] = t.isMissing(i)) == false) {
+	    attributes[i] = t.value(i);
+	  }
+	}
+      }
+    }
+
+    /**
+     * Convert a hash entry to a string
+     *
+     * @param t the set of instances
+     * @param maxColWidth width to make the fields
+     */
+    public String toString(Instances t, int maxColWidth) {
+
+      int i;
+      int cindex = t.classIndex();
+      StringBuffer text = new StringBuffer();
+      
+      for (i=0;i<attributes.length;i++) {
+	if (i != cindex) {
+	  if (missing[i]) {
+	    text.append("?");
+	    for (int j=0;j<maxColWidth;j++) {
+	      text.append(" ");
+	    }
+	  } else {
+	    String ss = t.attribute(i).value((int)attributes[i]);
+	    StringBuffer sb = new StringBuffer(ss);
+	    
+	    for (int j=0;j < (maxColWidth-ss.length()+1); j++) {
+		sb.append(" ");
+	    }
+	    text.append(sb);
+	  }
+	}
+      }
+      return text.toString();
+    }
+
+    /**
+     * Constructor for a hashKey
+     *
+     * @param t an array of feature values
+     */
+    public hashKey(double [] t) {
+
+      int i;
+      int l = t.length;
+
+      key = -999;
+      attributes = new double [l];
+      missing = new boolean [l];
+      for (i=0;i<l;i++) {
+	if (t[i] == Double.MAX_VALUE) {
+	  missing[i] = true;
+	} else {
+	  missing[i] = false;
+	  attributes[i] = t[i];
+	}
+      }
+    }
+    
+    /**
+     * Calculates a hash code
+     *
+     * @return the hash code as an integer
+     */
+    public int hashCode() {
+
+      int hv = 0;
+      
+      if (key != -999)
+	return key;
+      for (int i=0;i<attributes.length;i++) {
+	if (missing[i]) {
+	  hv += (i*13);
+	} else {
+	  hv += (i * 5 * (attributes[i]+1));
+	}
+      }
+      if (key == -999) {
+	key = hv;
+      }
+      return hv;
+    }
+
+    /**
+     * Tests if two instances are equal
+     *
+     * @param b a key to compare with
+     */
+    public boolean equals(Object b) {
+      
+      if ((b == null) || !(b.getClass().equals(this.getClass()))) {
+        return false;
+      }
+      boolean ok = true;
+      boolean l;
+      if (b instanceof hashKey) {
+	hashKey n = (hashKey)b;
+	for (int i=0;i<attributes.length;i++) {
+	  l = n.missing[i];
+	  if (missing[i] || l) {
+	    if ((missing[i] && !l) || (!missing[i] && l)) {
+	      ok = false;
+	      break;
+	    }
+	  } else {
+	    if (attributes[i] != n.attributes[i]) {
+	      ok = false;
+	      break;
+	    }
+	  }
+	}
+      } else {
+	return false;
+      }
+      return ok;
+    }
+    
+    /**
+     * Prints the hash code
+     */
+    public void print_hash_code() {
+      
+      System.out.println("Hash val: "+hashCode());
+    }
+  }
+
   /**
    * Inserts an instance into the hash table
    *
    * @param inst instance to be inserted
-   * @param instA to create the hash key from
-   * @throws Exception if the instance can't be inserted
+   * @exception Exception if the instance can't be inserted
    */
   private void insertIntoTable(Instance inst, double [] instA)
-  throws Exception {
+       throws Exception {
 
     double [] tempClassDist2;
     double [] newDist;
-    DecisionTableHashKey thekey;
+    hashKey thekey;
 
     if (instA != null) {
-      thekey = new DecisionTableHashKey(instA);
+      thekey = new hashKey(instA);
     } else {
-      thekey = new DecisionTableHashKey(inst, inst.numAttributes(), false);
+      thekey = new hashKey(inst, inst.numAttributes(), false);
     }
-
+      
     // see if this one is already in the table
     tempClassDist2 = (double []) m_entries.get(thekey);
     if (tempClassDist2 == null) {
       if (m_classIsNominal) {
 	newDist = new double [m_theInstances.classAttribute().numValues()];
-	
-	//Leplace estimation
-	for (int i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
-	  newDist[i] = 1.0;
-	}
-	
 	newDist[(int)inst.classValue()] = inst.weight();
 
 	// add to the table
@@ -297,7 +452,7 @@ public class DecisionTable
       // update the distribution for this instance
       if (m_classIsNominal) {
 	tempClassDist2[(int)inst.classValue()]+=inst.weight();
-
+	
 	// update the table
 	m_entries.put(thekey, tempClassDist2);
       } else  {
@@ -317,16 +472,15 @@ public class DecisionTable
    * @param instance instance to be "left out" and classified
    * @param instA feature values of the selected features for the instance
    * @return the classification of the instance
-   * @throws Exception if something goes wrong
    */
-  double evaluateInstanceLeaveOneOut(Instance instance, double [] instA)
-  throws Exception {
+  double classifyInstanceLeaveOneOut(Instance instance, double [] instA)
+       throws Exception {
 
-    DecisionTableHashKey thekey;
+    hashKey thekey;
     double [] tempDist;
     double [] normDist;
 
-    thekey = new DecisionTableHashKey(instA);
+    thekey = new hashKey(instA);
     if (m_classIsNominal) {
 
       // if this one is not in the table
@@ -341,42 +495,17 @@ public class DecisionTable
 	// first check to see if the class counts are all zero now
 	boolean ok = false;
 	for (int i=0;i<normDist.length;i++) {
-	  if (Utils.gr(normDist[i],1.0)) {
+	  if (!Utils.eq(normDist[i],0.0)) {
 	    ok = true;
 	    break;
 	  }
 	}
-
-//	downdate the class prior counts
-	m_classPriorCounts[(int)instance.classValue()] -= 
-	  instance.weight();
-	double [] classPriors = m_classPriorCounts.clone();
-	Utils.normalize(classPriors);
-	if (!ok) { // majority class
-	  normDist = classPriors;
-	}
-
-	m_classPriorCounts[(int)instance.classValue()] += 
-	  instance.weight();
-
-	//if (ok) {
-	Utils.normalize(normDist);
-	if (m_evaluationMeasure == EVAL_AUC) {
-	  m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, instance);						
+	if (ok) {
+	  Utils.normalize(normDist);
+	  return Utils.maxIndex(normDist);
 	} else {
-	  m_evaluation.evaluateModelOnce(normDist, instance);
-	}
-	return Utils.maxIndex(normDist);
-	/*} else {
-	  normDist = new double [normDist.length];
-	  normDist[(int)m_majority] = 1.0;
-	  if (m_evaluationMeasure == EVAL_AUC) {
-	    m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, instance);						
-	  } else {
-	    m_evaluation.evaluateModelOnce(normDist, instance);
-	  }
 	  return m_majority;
-	} */
+	}
       }
       //      return Utils.maxIndex(tempDist);
     } else {
@@ -388,21 +517,15 @@ public class DecisionTable
 	normDist[0] -= (instance.classValue() * instance.weight());
 	normDist[1] -= instance.weight();
 	if (Utils.eq(normDist[1],0.0)) {
-	  double [] temp = new double[1];
-	  temp[0] = m_majority;
-	  m_evaluation.evaluateModelOnce(temp, instance);
-	  return m_majority;
+	    return m_majority;
 	} else {
-	  double [] temp = new double[1];
-	  temp[0] = normDist[0] / normDist[1];
-	  m_evaluation.evaluateModelOnce(temp, instance);
-	  return temp[0];
+	  return (normDist[0] / normDist[1]);
 	}
       } else {
 	throw new Error("This should never happen!");
       }
     }
-
+    
     // shouldn't get here 
     // return 0.0;
   }
@@ -414,9 +537,8 @@ public class DecisionTable
    * @param fold set of instances to be "left out" and classified
    * @param fs currently selected feature set
    * @return the accuracy for the fold
-   * @throws Exception if something goes wrong
    */
-  double evaluateFoldCV(Instances fold, int [] fs) throws Exception {
+  double classifyFoldCV(Instances fold, int [] fs) throws Exception {
 
     int i;
     int ruleCount = 0;
@@ -425,7 +547,7 @@ public class DecisionTable
     double [][] class_distribs = new double [numFold][numCl];
     double [] instA = new double [fs.length];
     double [] normDist;
-    DecisionTableHashKey thekey;
+    hashKey thekey;
     double acc = 0.0;
     int classI = m_theInstances.classIndex();
     Instance inst;
@@ -448,7 +570,7 @@ public class DecisionTable
 	  instA[j] = inst.value(fs[j]);
 	}
       }
-      thekey = new DecisionTableHashKey(instA);
+      thekey = new hashKey(instA);
       if ((class_distribs[i] = (double [])m_entries.get(thekey)) == null) {
 	throw new Error("This should never happen!");
       } else {
@@ -460,11 +582,7 @@ public class DecisionTable
 	}
 	ruleCount++;
       }
-      m_classPriorCounts[(int)inst.classValue()] -= 
-	inst.weight();	
     }
-    double [] classPriors = m_classPriorCounts.clone();
-    Utils.normalize(classPriors);
 
     // now classify instances
     for (i=0;i<numFold;i++) {
@@ -473,40 +591,28 @@ public class DecisionTable
       if (m_classIsNominal) {
 	boolean ok = false;
 	for (int j=0;j<normDist.length;j++) {
-	  if (Utils.gr(normDist[j],1.0)) {
+	  if (!Utils.eq(normDist[j],0.0)) {
 	    ok = true;
 	    break;
 	  }
 	}
-
-	if (!ok) { // majority class
-	  normDist = classPriors.clone();
-	}
-
-//	if (ok) {
-	Utils.normalize(normDist);
-	if (m_evaluationMeasure == EVAL_AUC) {
-	  m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
+	if (ok) {
+	  Utils.normalize(normDist);
+	  if (Utils.maxIndex(normDist) == inst.classValue())
+	    acc += inst.weight();
 	} else {
-	  m_evaluation.evaluateModelOnce(normDist, inst);
-	}
-	/*	} else {					
-	  normDist[(int)m_majority] = 1.0;
-	  if (m_evaluationMeasure == EVAL_AUC) {
-	    m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
-	  } else {
-	    m_evaluation.evaluateModelOnce(normDist, inst);					
+	  if (inst.classValue() == m_majority) {
+	    acc += inst.weight();
 	  }
-	} */
+	}
       } else {
 	if (Utils.eq(normDist[1],0.0)) {
-	  double [] temp = new double[1];
-	  temp[0] = m_majority;
-	  m_evaluation.evaluateModelOnce(temp, inst);
+	    acc += ((inst.weight() * (m_majority - inst.classValue())) * 
+		    (inst.weight() * (m_majority - inst.classValue())));
 	} else {
-	  double [] temp = new double[1];
-	  temp[0] = normDist[0] / normDist[1];
-	  m_evaluation.evaluateModelOnce(temp, inst);
+	  double t = (normDist[0] / normDist[1]);
+	  acc += ((inst.weight() * (t - inst.classValue())) * 
+		  (inst.weight() * (t - inst.classValue())));
 	}
       }
     }
@@ -514,10 +620,6 @@ public class DecisionTable
     // now re-insert instances
     for (i=0;i<numFold;i++) {
       inst = fold.instance(i);
-
-      m_classPriorCounts[(int)inst.classValue()] += 
-	inst.weight();
-
       if (m_classIsNominal) {
 	class_distribs[i][(int)inst.classValue()] += inst.weight();
       } else {
@@ -535,18 +637,19 @@ public class DecisionTable
    * @param feature_set the subset to be evaluated
    * @param num_atts the number of attributes in the subset
    * @return the estimated accuracy
-   * @throws Exception if subset can't be evaluated
+   * @exception Exception if subset can't be evaluated
    */
-  protected double estimatePerformance(BitSet feature_set, int num_atts)
-  throws Exception {
+  private double estimateAccuracy(BitSet feature_set, int num_atts)
+    throws Exception {
 
-    m_evaluation = new Evaluation(m_theInstances);
     int i;
+    Instances newInstances;
     int [] fs = new int [num_atts];
-
+    double acc = 0.0;
+    double [][] evalArray;
     double [] instA = new double [num_atts];
     int classI = m_theInstances.classIndex();
-
+    
     int index = 0;
     for (i=0;i<m_numAttributes;i++) {
       if (feature_set.get(i)) {
@@ -572,8 +675,8 @@ public class DecisionTable
       }
       insertIntoTable(inst, instA);
     }
-
-
+    
+    
     if (m_CVFolds == 1) {
 
       // calculate leave one out error
@@ -588,7 +691,16 @@ public class DecisionTable
 	    instA[j] = inst.value(fs[j]);
 	  }
 	}
-	evaluateInstanceLeaveOneOut(inst, instA);				
+	double t = classifyInstanceLeaveOneOut(inst, instA);
+	if (m_classIsNominal) {
+	  if (t == inst.classValue()) {
+	    acc+=inst.weight();
+	  }
+	} else {
+	  acc += ((inst.weight() * (t - inst.classValue())) * 
+		  (inst.weight() * (t - inst.classValue())));
+	}
+	// weight_sum += inst.weight();
       }
     } else {
       m_theInstances.randomize(m_rr);
@@ -597,38 +709,15 @@ public class DecisionTable
       // calculate 10 fold cross validation error
       for (i=0;i<m_CVFolds;i++) {
 	Instances insts = m_theInstances.testCV(m_CVFolds,i);
-	evaluateFoldCV(insts, fs);
+	acc += classifyFoldCV(insts, fs);
       }
     }
-
-    switch (m_evaluationMeasure) {
-    case EVAL_DEFAULT:
-      if (m_classIsNominal) {
-	return m_evaluation.pctCorrect();
-      }
-      return -m_evaluation.rootMeanSquaredError();
-    case EVAL_ACCURACY:
-      return m_evaluation.pctCorrect();
-    case EVAL_RMSE:
-      return -m_evaluation.rootMeanSquaredError();
-    case EVAL_MAE:
-      return -m_evaluation.meanAbsoluteError();
-    case EVAL_AUC:
-      double [] classPriors = m_evaluation.getClassPriors();
-      Utils.normalize(classPriors);
-      double weightedAUC = 0;
-      for (i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
-	double tempAUC = m_evaluation.areaUnderROC(i);
-	if (!Utils.isMissingValue(tempAUC)) {
-	  weightedAUC += (classPriors[i] * tempAUC);
-	} else {
-	  System.err.println("Undefined AUC!!");
-	}
-      }
-      return weightedAUC;
+  
+    if (m_classIsNominal) {
+      return (acc / m_theInstances.sumOfWeights());
+    } else {
+      return -(Math.sqrt(acc / m_theInstances.sumOfWeights()));   
     }
-    // shouldn't get here
-    return 0.0;
   }
 
   /**
@@ -639,6 +728,8 @@ public class DecisionTable
    */
   private String printSub(BitSet sub) {
 
+    int i;
+
     String s="";
     for (int jj=0;jj<m_numAttributes;jj++) {
       if (sub.get(jj)) {
@@ -647,6 +738,131 @@ public class DecisionTable
     }
     return s;
   }
+    
+  /**
+   * Does a best first search 
+   */
+  private void best_first() throws Exception {
+
+    int i,j,classI,count=0,fc,tree_count=0;
+    int evals=0;
+    BitSet best_group, temp_group;
+    int [] stale;
+    double [] best_merit;
+    double merit;
+    boolean z;
+    boolean added;
+    Link tl;
+  
+    Hashtable lookup = new Hashtable((int)(200.0*m_numAttributes*1.5));
+    LinkedList bfList = new LinkedList();
+    best_merit = new double[1]; best_merit[0] = 0.0;
+    stale = new int[1]; stale[0] = 0;
+    best_group = new BitSet(m_numAttributes);
+
+    // Add class to initial subset
+    classI = m_theInstances.classIndex();
+    best_group.set(classI);
+    best_merit[0] = estimateAccuracy(best_group, 1);
+    if (m_debug)
+      System.out.println("Accuracy of initial subset: "+best_merit[0]);
+
+    // add the initial group to the list
+    bfList.addToList(best_group,best_merit[0]);
+
+    // add initial subset to the hashtable
+    lookup.put(best_group,"");
+    while (stale[0] < m_maxStale) {
+
+      added = false;
+
+      // finished search?
+      if (bfList.size()==0) {
+	stale[0] = m_maxStale;
+	break;
+      }
+
+      // copy the feature set at the head of the list
+      tl = bfList.getLinkAt(0);
+      temp_group = (BitSet)(tl.getGroup().clone());
+
+      // remove the head of the list
+      bfList.removeLinkAt(0);
+
+      for (i=0;i<m_numAttributes;i++) {
+
+	// if (search_direction == 1)
+	z = ((i != classI) && (!temp_group.get(i)));
+	if (z) {
+
+	  // set the bit (feature to add/delete) */
+	  temp_group.set(i);
+	  
+	  /* if this subset has been seen before, then it is already in 
+	     the list (or has been fully expanded) */
+	  BitSet tt = (BitSet)temp_group.clone();
+	  if (lookup.containsKey(tt) == false) {
+	    fc = 0;
+	    for (int jj=0;jj<m_numAttributes;jj++) {
+	      if (tt.get(jj)) {
+		fc++;
+	      }
+	    }
+	    merit = estimateAccuracy(tt, fc);
+	    if (m_debug) {
+	      System.out.println("evaluating: "+printSub(tt)+" "+merit); 
+	    }
+	    
+	    // is this better than the best?
+	    // if (search_direction == 1)
+	    z = ((merit - best_merit[0]) > 0.00001);
+	 
+	    // else
+	    // z = ((best_merit[0] - merit) > 0.00001);
+
+	    if (z) {
+	      if (m_debug) {
+		System.out.println("new best feature set: "+printSub(tt)+
+				   " "+merit);
+	      }
+	      added = true;
+	      stale[0] = 0;
+	      best_merit[0] = merit;
+	      best_group = (BitSet)(temp_group.clone());
+	    }
+
+	    // insert this one in the list and the hash table
+	    bfList.addToList(tt, merit);
+	    lookup.put(tt,"");
+	    count++;
+	  }
+
+	  // unset this addition(deletion)
+	  temp_group.clear(i);
+	}
+      }
+      /* if we haven't added a new feature subset then full expansion 
+	 of this node hasn't resulted in anything better */
+      if (!added) {
+	stale[0]++;
+      }
+    }
+   
+    // set selected features
+    for (i=0,j=0;i<m_numAttributes;i++) {
+      if (best_group.get(i)) {
+	j++;
+      }
+    }
+    
+    m_decisionFeatures = new int[j];
+    for (i=0,j=0;i<m_numAttributes;i++) {
+      if (best_group.get(i)) {
+	m_decisionFeatures[j++] = i;    
+      }
+    }
+  }
+ 
 
   /**
    * Resets the options.
@@ -655,13 +871,14 @@ public class DecisionTable
 
     m_entries = null;
     m_decisionFeatures = null;
+    m_debug = false;
     m_useIBk = false;
     m_CVFolds = 1;
+    m_maxStale = 5;
     m_displayRules = false;
-    m_evaluationMeasure = EVAL_DEFAULT;
   }
 
-  /**
+   /**
    * Constructor for a DecisionTable
    */
   public DecisionTable() {
@@ -676,42 +893,28 @@ public class DecisionTable
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(7);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
-	"\tFull class name of search method, followed\n"
-	+ "\tby its options.\n"
-	+ "\teg: \"weka.attributeSelection.BestFirst -D 1\"\n"
-	+ "\t(default weka.attributeSelection.BestFirst)",
-	"S", 1, "-S <search method specification>"));
+              "\tNumber of fully expanded non improving subsets to consider\n" +
+	      "\tbefore terminating a best first search.\n" +
+	      "\tUse in conjunction with -B. (Default = 5)",
+              "S", 1, "-S <number of non improving nodes>"));
+    
 
     newVector.addElement(new Option(
-	"\tUse cross validation to evaluate features.\n" +
-	"\tUse number of folds = 1 for leave one out CV.\n" +
-	"\t(Default = leave one out CV)",
-	"X", 1, "-X <number of folds>"));
+              "\tUse cross validation to evaluate features.\n" +
+	      "\tUse number of folds = 1 for leave one out CV.\n" +
+	      "\t(Default = leave one out CV)",
+              "X", 1, "-X <number of folds>"));
 
-    newVector.addElement(new Option(
-	"\tPerformance evaluation measure to use for selecting attributes.\n" +
-	"\t(Default = accuracy for discrete class and rmse for numeric class)",
-	"E", 1, "-E <acc | rmse | mae | auc>"));
+     newVector.addElement(new Option(
+              "\tUse nearest neighbour instead of global table majority.\n",
+              "I", 0, "-I"));
 
-    newVector.addElement(new Option(
-	"\tUse nearest neighbour instead of global table majority.",
-	"I", 0, "-I"));
-
-    newVector.addElement(new Option(
-	"\tDisplay decision table rules.\n",
-	"R", 0, "-R")); 
-
-    newVector.addElement(new Option(
-	"",
-	"", 0, "\nOptions specific to search method "
-	+ m_search.getClass().getName() + ":"));
-    Enumeration enu = ((OptionHandler)m_search).listOptions();
-    while (enu.hasMoreElements()) {
-      newVector.addElement(enu.nextElement());
-    }
+     newVector.addElement(new Option(
+              "\tDisplay decision table rules.\n",
+              "R", 0, "-R")); 
     return newVector.elements();
   }
 
@@ -749,6 +952,37 @@ public class DecisionTable
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String maxStaleTipText() {
+    return "Sets the number of non improving decision tables to consider " 
+      + "before abandoning the search.";
+  }
+
+  /**
+   * Sets the number of non improving decision tables to consider
+   * before abandoning the search.
+   *
+   * @param stale the number of nodes
+   */
+  public void setMaxStale(int stale) {
+
+    m_maxStale = stale;
+  }
+
+  /**
+   * Gets the number of non improving decision tables
+   *
+   * @return the number of non improving decision tables
+   */
+  public int getMaxStale() {
+
+    return m_maxStale;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String useIBkTipText() {
     return "Sets whether IBk should be used instead of the majority class.";
   }
@@ -762,7 +996,7 @@ public class DecisionTable
 
     m_useIBk = ibk;
   }
-
+  
   /**
    * Gets whether IBk is being used instead of the majority class
    *
@@ -791,7 +1025,7 @@ public class DecisionTable
 
     m_displayRules = rules;
   }
-
+  
   /**
    * Gets whether rules are being printed
    *
@@ -803,115 +1037,27 @@ public class DecisionTable
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String searchTipText() {
-    return "The search method used to find good attribute combinations for the "
-    + "decision table.";
-  }
-  /**
-   * Sets the search method to use
-   * 
-   * @param search
-   */
-  public void setSearch(ASSearch search) {
-    m_search = search;
-  }
-
-  /**
-   * Gets the current search method
-   * 
-   * @return the search method used
-   */
-  public ASSearch getSearch() {
-    return m_search;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String evaluationMeasureTipText() {
-    return "The measure used to evaluate the performance of attribute combinations "
-    + "used in the decision table.";
-  }
-  /**
-   * Gets the currently set performance evaluation measure used for selecting
-   * attributes for the decision table
-   * 
-   * @return the performance evaluation measure
-   */
-  public SelectedTag getEvaluationMeasure() {
-    return new SelectedTag(m_evaluationMeasure, TAGS_EVALUATION);
-  }
-
-  /**
-   * Sets the performance evaluation measure to use for selecting attributes
-   * for the decision table
-   * 
-   * @param newMethod the new performance evaluation metric to use
-   */
-  public void setEvaluationMeasure(SelectedTag newMethod) {
-    if (newMethod.getTags() == TAGS_EVALUATION) {
-      m_evaluationMeasure = newMethod.getSelectedTag().getID();
-    }
-  }
-
-  /**
-   * Parses the options for this object. <p/>
+   * Parses the options for this object.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
+   *
+   * -S num <br>
+   * Number of fully expanded non improving subsets to consider
+   * before terminating a best first search.
+   * (Default = 5) <p>
+   *
+   * -X num <br>
+   * Use cross validation to evaluate features. Use number of folds = 1 for
+   * leave one out CV. (Default = leave one out CV) <p>
    * 
-   * <pre> -S &lt;search method specification&gt;
-   *  Full class name of search method, followed
-   *  by its options.
-   *  eg: "weka.attributeSelection.BestFirst -D 1"
-   *  (default weka.attributeSelection.BestFirst)</pre>
-   * 
-   * <pre> -X &lt;number of folds&gt;
-   *  Use cross validation to evaluate features.
-   *  Use number of folds = 1 for leave one out CV.
-   *  (Default = leave one out CV)</pre>
-   * 
-   * <pre> -E &lt;acc | rmse | mae | auc&gt;
-   *  Performance evaluation measure to use for selecting attributes.
-   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
-   * 
-   * <pre> -I
-   *  Use nearest neighbour instead of global table majority.</pre>
-   * 
-   * <pre> -R
-   *  Display decision table rules.
-   * </pre>
-   * 
-   * <pre> 
-   * Options specific to search method weka.attributeSelection.BestFirst:
-   * </pre>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.</pre>
-   * 
-   * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
-   *  Direction of search. (default = 1).</pre>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  Number of non-improving nodes to
-   *  consider before terminating search.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Size of lookup cache for evaluated subsets.
-   *  Expressed as a multiple of the number of
-   *  attributes in the data set. (default = 1)</pre>
-   * 
-   <!-- options-end -->
+   * -I <br>
+   * Use nearest neighbour instead of global table majority. <p>
+   *
+   * -R <br>
+   * Prints the decision table. <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -924,35 +1070,14 @@ public class DecisionTable
       m_CVFolds = Integer.parseInt(optionString);
     }
 
+    optionString = Utils.getOption('S',options);
+    if (optionString.length() != 0) {
+      m_maxStale = Integer.parseInt(optionString);
+    }
+
     m_useIBk = Utils.getFlag('I',options);
 
     m_displayRules = Utils.getFlag('R',options);
-
-    optionString = Utils.getOption('E', options);
-    if (optionString.length() != 0) {
-      if (optionString.equals("acc")) {
-	setEvaluationMeasure(new SelectedTag(EVAL_ACCURACY, TAGS_EVALUATION));
-      } else if (optionString.equals("rmse")) {
-	setEvaluationMeasure(new SelectedTag(EVAL_RMSE, TAGS_EVALUATION));
-      } else if (optionString.equals("mae")) {
-	setEvaluationMeasure(new SelectedTag(EVAL_MAE, TAGS_EVALUATION));
-      } else if (optionString.equals("auc")) {
-	setEvaluationMeasure(new SelectedTag(EVAL_AUC, TAGS_EVALUATION));
-      } else {
-	throw new IllegalArgumentException("Invalid evaluation measure");
-      }
-    }
-
-    String searchString = Utils.getOption('S', options);
-    if (searchString.length() == 0)
-      searchString = weka.attributeSelection.BestFirst.class.getName();
-    String [] searchSpec = Utils.splitOptions(searchString);
-    if (searchSpec.length == 0) {
-      throw new IllegalArgumentException("Invalid search specification string");
-    }
-    String searchName = searchSpec[0];
-    searchSpec[0] = "";
-    setSearch(ASSearch.forName(searchName, searchSpec));
   }
 
   /**
@@ -962,165 +1087,60 @@ public class DecisionTable
    */
   public String [] getOptions() {
 
-    String [] options = new String [9];
+    String [] options = new String [7];
     int current = 0;
 
     options[current++] = "-X"; options[current++] = "" + m_CVFolds;
-
-    if (m_evaluationMeasure != EVAL_DEFAULT) {
-      options[current++] = "-E";
-      switch (m_evaluationMeasure) {
-      case EVAL_ACCURACY:
-	options[current++] = "acc";
-	break;
-      case EVAL_RMSE:
-	options[current++] = "rmse";
-	break;
-      case EVAL_MAE:
-	options[current++] = "mae";
-	break;
-      case EVAL_AUC:
-	options[current++] = "auc";
-	break;
-      }
-    }
+    options[current++] = "-S"; options[current++] = "" + m_maxStale;
     if (m_useIBk) {
       options[current++] = "-I";
     }
     if (m_displayRules) {
       options[current++] = "-R";
     }
-
-    options[current++] = "-S";
-    options[current++] = "" + getSearchSpec();
-
     while (current < options.length) {
       options[current++] = "";
     }
     return options;
   }
-
-  /**
-   * Gets the search specification string, which contains the class name of
-   * the search method and any options to it
-   *
-   * @return the search string.
-   */
-  protected String getSearchSpec() {
-
-    ASSearch s = getSearch();
-    if (s instanceof OptionHandler) {
-      return s.getClass().getName() + " "
-      + Utils.joinOptions(((OptionHandler)s).getOptions());
-    }
-    return s.getClass().getName();
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_AUC) {
-      result.enable(Capability.NUMERIC_CLASS);
-      result.enable(Capability.DATE_CLASS);
-    }
-    
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    return result;
-  }
   
-  private class DummySubsetEvaluator extends ASEvaluation implements SubsetEvaluator {
-    /** for serialization */
-    private static final long serialVersionUID = 3927442457704974150L;
-      
-    public void buildEvaluator(Instances data) throws Exception {
-    }
-
-    public double evaluateSubset(BitSet subset) throws Exception {
-
-      int fc = 0;
-      for (int jj = 0;jj < m_numAttributes; jj++) {
-        if (subset.get(jj)) {
-          fc++;
-        }
-      }
-
-      return estimatePerformance(subset, fc);
-    }
-  }
-
-  /**
-   * Sets up a dummy subset evaluator that basically just delegates
-   * evaluation to the estimatePerformance method in DecisionTable
-   */
-  protected void setUpEvaluator() throws Exception {
-    m_evaluator = new DummySubsetEvaluator();
-  }
-
-  protected boolean m_saveMemory = true;
   /**
    * Generates the classifier.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the classifier has not been generated successfully
+   * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    m_theInstances = new Instances(data);
-    m_theInstances.deleteWithMissingClass();
+    int i;
 
     m_rr = new Random(1);
-
-    if (m_theInstances.classAttribute().isNominal())  {//	 Set up class priors
-      m_classPriorCounts = 
-	new double [data.classAttribute().numValues()];
-      Arrays.fill(m_classPriorCounts, 1.0);
-      for (int i = 0; i <data.numInstances(); i++) {
-	Instance curr = data.instance(i);
-	m_classPriorCounts[(int)curr.classValue()] += 
-	  curr.weight();
-      }
-      m_classPriors = m_classPriorCounts.clone();
-      Utils.normalize(m_classPriors);
+    m_theInstances = new Instances(data);
+    m_theInstances.deleteWithMissingClass();
+    if (m_theInstances.numInstances() == 0) {
+      throw new Exception("No training instances without missing class!");
     }
-
-    setUpEvaluator();
+    if (m_theInstances.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
 
     if (m_theInstances.classAttribute().isNumeric()) {
       m_disTransform = new weka.filters.unsupervised.attribute.Discretize();
       m_classIsNominal = false;
-
+      
       // use binned discretisation if the class is numeric
       ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
-      setBins(10);
+	setBins(10);
       ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
-      setInvertSelection(true);
-
+	setInvertSelection(true);
+      
       // Discretize all attributes EXCEPT the class 
       String rangeList = "";
       rangeList+=(m_theInstances.classIndex()+1);
       //System.out.println("The class col: "+m_theInstances.classIndex());
-
+      
       ((weka.filters.unsupervised.attribute.Discretize)m_disTransform).
-      setAttributeIndices(rangeList);
+	setAttributeIndices(rangeList);
     } else {
       m_disTransform = new weka.filters.supervised.attribute.Discretize();
       ((weka.filters.supervised.attribute.Discretize)m_disTransform).setUseBetterEncoding(true);
@@ -1129,51 +1149,42 @@ public class DecisionTable
 
     m_disTransform.setInputFormat(m_theInstances);
     m_theInstances = Filter.useFilter(m_theInstances, m_disTransform);
-
+    
     m_numAttributes = m_theInstances.numAttributes();
     m_numInstances = m_theInstances.numInstances();
     m_majority = m_theInstances.meanOrMode(m_theInstances.classAttribute());
-
-    // Perform the search
-    int [] selected = m_search.search(m_evaluator, m_theInstances);
-
-    m_decisionFeatures = new int [selected.length+1];
-    System.arraycopy(selected, 0, m_decisionFeatures, 0, selected.length);
-    m_decisionFeatures[m_decisionFeatures.length-1] = m_theInstances.classIndex();
-
+    
+    best_first();
+    
     // reduce instances to selected features
     m_delTransform = new Remove();
     m_delTransform.setInvertSelection(true);
-
+    
     // set features to keep
     m_delTransform.setAttributeIndicesArray(m_decisionFeatures); 
     m_delTransform.setInputFormat(m_theInstances);
-    m_dtInstances = Filter.useFilter(m_theInstances, m_delTransform);
-
+    m_theInstances = Filter.useFilter(m_theInstances, m_delTransform);
+    
     // reset the number of attributes
-    m_numAttributes = m_dtInstances.numAttributes();
-
+    m_numAttributes = m_theInstances.numAttributes();
+    
     // create hash table
-    m_entries = new Hashtable((int)(m_dtInstances.numInstances() * 1.5));
-
+    m_entries = new Hashtable((int)(m_theInstances.numInstances() * 1.5));
+    
     // insert instances into the hash table
-    for (int i = 0; i < m_numInstances; i++) {
-      Instance inst = m_dtInstances.instance(i);
+    for (i=0;i<m_numInstances;i++) {
+      Instance inst = m_theInstances.instance(i);
       insertIntoTable(inst, null);
     }
-
+    
     // Replace the global table majority with nearest neighbour?
     if (m_useIBk) {
       m_ibk = new IBk();
       m_ibk.buildClassifier(m_theInstances);
     }
-
+    
     // Save memory
-    if (m_saveMemory) {
-      m_theInstances = new Instances(m_theInstances, 0);
-      m_dtInstances = new Instances(m_dtInstances, 0);
-    }
-    m_evaluation = null;
+    m_theInstances = new Instances(m_theInstances, 0);
   }
 
   /**
@@ -1182,12 +1193,12 @@ public class DecisionTable
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @throws Exception if distribution can't be computed
+   * @exception Exception if distribution can't be computed
    */
   public double [] distributionForInstance(Instance instance)
-  throws Exception {
+       throws Exception {
 
-    DecisionTableHashKey thekey;
+    hashKey thekey;
     double [] tempDist;
     double [] normDist;
 
@@ -1199,8 +1210,8 @@ public class DecisionTable
     m_delTransform.batchFinished();
     instance = m_delTransform.output();
 
-    thekey = new DecisionTableHashKey(instance, instance.numAttributes(), false);
-
+    thekey = new hashKey(instance, instance.numAttributes(), false);
+    
     // if this one is not in the table
     if ((tempDist = (double [])m_entries.get(thekey)) == null) {
       if (m_useIBk) {
@@ -1210,9 +1221,8 @@ public class DecisionTable
 	  tempDist = new double[1];
 	  tempDist[0] = m_majority;
 	} else {
-	  tempDist = m_classPriors.clone();
-	  /*tempDist = new double [m_theInstances.classAttribute().numValues()];
-	  tempDist[(int)m_majority] = 1.0; */
+	  tempDist = new double [m_theInstances.classAttribute().numValues()];
+	  tempDist[(int)m_majority] = 1.0;
 	}
       }
     } else {
@@ -1221,7 +1231,7 @@ public class DecisionTable
 	normDist[0] = (tempDist[0] / tempDist[1]);
 	tempDist = normDist;
       } else {
-
+	
 	// normalise distribution
 	normDist = new double [tempDist.length];
 	System.arraycopy(tempDist,0,normDist,0,tempDist.length);
@@ -1241,7 +1251,7 @@ public class DecisionTable
 
     int i;
     String s = "";
-
+   
     for (i=0;i<m_decisionFeatures.length;i++) {
       if (i==0) {
 	s = ""+(m_decisionFeatures[i]+1);
@@ -1272,16 +1282,16 @@ public class DecisionTable
 
   /**
    * Returns the value of the named measure
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
       return measureNumRules();
     } else {
       throw new IllegalArgumentException(additionalMeasureName 
-	  + " not supported (DecisionTable)");
+			  + " not supported (DecisionTable)");
     }
   }
 
@@ -1296,40 +1306,39 @@ public class DecisionTable
       return "Decision Table: No model built yet.";
     } else {
       StringBuffer text = new StringBuffer();
-
+      
       text.append("Decision Table:"+
-	  "\n\nNumber of training instances: "+m_numInstances+
-	  "\nNumber of Rules : "+m_entries.size()+"\n");
-
+		  "\n\nNumber of training instances: "+m_numInstances+
+		  "\nNumber of Rules : "+m_entries.size()+"\n");
+      
       if (m_useIBk) {
 	text.append("Non matches covered by IB1.\n");
       } else {
 	text.append("Non matches covered by Majority class.\n");
       }
-
-      text.append(m_search.toString());
-      /*text.append("Best first search for feature set,\nterminated after "+
-					m_maxStale+" non improving subsets.\n"); */
-
+      
+      text.append("Best first search for feature set,\nterminated after "+
+		  m_maxStale+" non improving subsets.\n");
+      
       text.append("Evaluation (for feature selection): CV ");
       if (m_CVFolds > 1) {
 	text.append("("+m_CVFolds+" fold) ");
       } else {
-	text.append("(leave one out) ");
+	  text.append("(leave one out) ");
       }
       text.append("\nFeature set: "+printFeatures());
-
+      
       if (m_displayRules) {
 
 	// find out the max column width
 	int maxColWidth = 0;
-	for (int i=0;i<m_dtInstances.numAttributes();i++) {
-	  if (m_dtInstances.attribute(i).name().length() > maxColWidth) {
-	    maxColWidth = m_dtInstances.attribute(i).name().length();
+	for (int i=0;i<m_theInstances.numAttributes();i++) {
+	  if (m_theInstances.attribute(i).name().length() > maxColWidth) {
+	    maxColWidth = m_theInstances.attribute(i).name().length();
 	  }
 
-	  if (m_classIsNominal || (i != m_dtInstances.classIndex())) {
-	    Enumeration e = m_dtInstances.attribute(i).enumerateValues();
+	  if (m_classIsNominal || (i != m_theInstances.classIndex())) {
+	    Enumeration e = m_theInstances.attribute(i).enumerateValues();
 	    while (e.hasMoreElements()) {
 	      String ss = (String)e.nextElement();
 	      if (ss.length() > maxColWidth) {
@@ -1341,16 +1350,16 @@ public class DecisionTable
 
 	text.append("\n\nRules:\n");
 	StringBuffer tm = new StringBuffer();
-	for (int i=0;i<m_dtInstances.numAttributes();i++) {
-	  if (m_dtInstances.classIndex() != i) {
-	    int d = maxColWidth - m_dtInstances.attribute(i).name().length();
-	    tm.append(m_dtInstances.attribute(i).name());
+	for (int i=0;i<m_theInstances.numAttributes();i++) {
+	  if (m_theInstances.classIndex() != i) {
+	    int d = maxColWidth - m_theInstances.attribute(i).name().length();
+	    tm.append(m_theInstances.attribute(i).name());
 	    for (int j=0;j<d+1;j++) {
 	      tm.append(" ");
 	    }
 	  }
 	}
-	tm.append(m_dtInstances.attribute(m_dtInstances.classIndex()).name()+"  ");
+	tm.append(m_theInstances.attribute(m_theInstances.classIndex()).name()+"  ");
 
 	for (int i=0;i<tm.length()+10;i++) {
 	  text.append("=");
@@ -1365,14 +1374,14 @@ public class DecisionTable
 
 	Enumeration e = m_entries.keys();
 	while (e.hasMoreElements()) {
-	  DecisionTableHashKey tt = (DecisionTableHashKey)e.nextElement();
-	  text.append(tt.toString(m_dtInstances,maxColWidth));
+	  hashKey tt = (hashKey)e.nextElement();
+	  text.append(tt.toString(m_theInstances,maxColWidth));
 	  double [] ClassDist = (double []) m_entries.get(tt);
 
 	  if (m_classIsNominal) {
 	    int m = Utils.maxIndex(ClassDist);
 	    try {
-	      text.append(m_dtInstances.classAttribute().value(m)+"\n");
+	      text.append(m_theInstances.classAttribute().value(m)+"\n");
 	    } catch (Exception ee) {
 	      System.out.println(ee.getMessage());
 	    }
@@ -1380,7 +1389,7 @@ public class DecisionTable
 	    text.append((ClassDist[0] / ClassDist[1])+"\n");
 	  }
 	}
-
+	
 	for (int i=0;i<tm.length()+10;i++) {
 	  text.append("=");
 	}
@@ -1390,15 +1399,6 @@ public class DecisionTable
       return text.toString();
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -1406,6 +1406,17 @@ public class DecisionTable
    * @param argv the command-line options
    */
   public static void main(String [] argv) {
-    runClassifier(new DecisionTable(), argv);
+    
+    Classifier scheme;
+    
+    try {
+      scheme = new DecisionTable();
+      System.out.println(Evaluation.evaluateModel(scheme,argv));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
 }
+

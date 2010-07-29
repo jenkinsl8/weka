@@ -16,37 +16,35 @@
 
 /*
  *    AbstractDataSink.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.util.Vector;
+import java.awt.*;
+import java.io.Serializable;
+import java.beans.EventSetDescriptor;
 
 /**
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.4.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
 
-public abstract class AbstractDataSink
-  extends JPanel
+public abstract class AbstractDataSink extends JPanel
   implements DataSink, BeanCommon, Visible, 
 	     DataSourceListener, TrainingSetListener,
-	     TestSetListener, InstanceListener, ThresholdDataListener,
-	     Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 3956528599473814287L;
+	     TestSetListener, InstanceListener, Serializable {
 
   /**
    * Default visual for data sources
@@ -93,12 +91,6 @@ public abstract class AbstractDataSink
    */
   public abstract void acceptDataSet(DataSetEvent e);
   
-  /**
-   * Accept a threshold data set
-   *
-   * @param e a <code>ThresholdDataEvent</code> value
-   */
-  public abstract void acceptDataSet(ThresholdDataEvent e);
   
   /**
    * Accept an instance

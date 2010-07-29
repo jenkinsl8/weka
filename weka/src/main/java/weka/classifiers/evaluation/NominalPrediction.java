@@ -16,14 +16,11 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.classifiers.evaluation;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -32,10 +29,9 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.9.2.1 $
  */
-public class NominalPrediction
-  implements Prediction, Serializable, RevisionHandler {
+public class NominalPrediction implements Prediction, Serializable {
 
   /**
    * Remove this if you change this class so that serialization would be
@@ -82,16 +78,12 @@ public class NominalPrediction
       throw new NullPointerException("Null distribution in NominalPrediction.");
     }
     m_Actual = actual;
-    m_Distribution = distribution.clone();
+    m_Distribution = (double[]) distribution.clone();
     m_Weight = weight;
     updatePredicted();
   }
 
-  /**
-   * Gets the predicted probabilities
-   * 
-   * @return the predicted probabilities
-   */
+  /** Gets the predicted probabilities */
   public double [] distribution() { 
 
     return m_Distribution; 
@@ -234,15 +226,6 @@ public class NominalPrediction
       sb.append(' ').append(dist[i]);
     }
     return sb.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
   }
 }
 

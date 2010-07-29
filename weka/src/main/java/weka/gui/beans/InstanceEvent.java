@@ -16,30 +16,24 @@
 
 /*
  *    InstanceEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
 import java.util.EventObject;
+import weka.core.Instances;
+import weka.core.Instance;
 
 /**
  * Event that encapsulates a single instance or header information only
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  * @see EventObject
  */
-public class InstanceEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 6104920894559423946L;
-  
+public class InstanceEvent extends EventObject {
   public static final int FORMAT_AVAILABLE = 0;
   public static final int INSTANCE_AVAILABLE = 1;
   public static final int BATCH_FINISHED = 2;

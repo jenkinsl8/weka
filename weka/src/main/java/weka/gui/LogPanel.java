@@ -53,7 +53,7 @@ import javax.swing.event.ChangeListener;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.14.2.2 $
  */
 public class LogPanel
   extends JPanel
@@ -83,7 +83,7 @@ public class LogPanel
    */
   public LogPanel() {
 
-    this(null, false, false, true);
+    this(null, false);
   }
 
   /**
@@ -94,7 +94,7 @@ public class LogPanel
    */
   public LogPanel(WekaTaskMonitor tm) {
 
-    this(tm, true, false, true);
+    this(tm, true);
   }
 
   /**
@@ -107,25 +107,6 @@ public class LogPanel
    *                  log should always be visible.
    */
   public LogPanel(WekaTaskMonitor tm, boolean logHidden) {
-    this(tm, logHidden, false, true);
-  }
-
-  /**
-   * Creates the log panel, possibly with task monitor,
-   * where the either the log is optionally hidden or the status
-   * (having both hidden is not allowed).
-   * 
-   *
-   * @param tm the task monitor, or null for none
-   * @param logHidden true if the log should be hidden and
-   *                  acessible via a button, or false if the
-   *                  log should always be visible.
-   * @param statusHidden true if the status bar should be hidden (i.e.
-   * @param titledBorder true if the log should have a title
-   * you only want the log part).
-   */
-  public LogPanel(WekaTaskMonitor tm, boolean logHidden, 
-      boolean statusHidden, boolean titledBorder) {
 
     m_TaskMonitor = tm;
     m_LogText.setEditable(false);
@@ -194,26 +175,20 @@ public class LogPanel
       // log always visible
       
       JPanel p1 = new JPanel();
-      if (titledBorder) {
-        p1.setBorder(BorderFactory.createTitledBorder("Log"));
-      }
+      p1.setBorder(BorderFactory.createTitledBorder("Log"));
       p1.setLayout(new BorderLayout());
       p1.add(js, BorderLayout.CENTER);
       setLayout(new BorderLayout());
       add(p1, BorderLayout.CENTER);
 
       if (tm == null) {
-        if (!statusHidden) {
-          add(m_StatusLab, BorderLayout.SOUTH);
-        }
+	add(m_StatusLab, BorderLayout.SOUTH);
       } else {
-        if (!statusHidden) {
-          JPanel p2 = new JPanel();
-          p2.setLayout(new BorderLayout());
-          p2.add(m_StatusLab,BorderLayout.CENTER);
-          p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
-          add(p2, BorderLayout.SOUTH);
-        }
+	JPanel p2 = new JPanel();
+	p2.setLayout(new BorderLayout());
+	p2.add(m_StatusLab,BorderLayout.CENTER);
+	p2.add((java.awt.Component)m_TaskMonitor, BorderLayout.EAST);
+	add(p2, BorderLayout.SOUTH);
       }
     }
     addPopup();
@@ -326,7 +301,6 @@ public class LogPanel
       m_LogText.append("\n");
     }
     m_LogText.append(LogPanel.getTimestamp() + ' ' + message);
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, message);
   }
 
   /**

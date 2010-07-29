@@ -1,3 +1,4 @@
+
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +17,7 @@
 
 /*
  * Scoreable.java
- * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2001 Remco Bouckaert
  * 
  */
 package weka.classifiers.bayes.net.search.local;
@@ -25,7 +26,7 @@ package weka.classifiers.bayes.net.search.local;
  * Interface for allowing to score a classifier
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.1 $
  */
 public interface Scoreable {
 
@@ -40,9 +41,6 @@ public interface Scoreable {
 
   /**
    * Returns log-score
-   * 
-   * @param nType the score type
-   * @return the log-score
    */
   double logScore(int nType, int nCardinality);
 }    // interface Scoreable

@@ -16,106 +16,55 @@
 
 /*
  *    Add.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.SingleIndex;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * An instance filter that adds a new attribute to the dataset. The new attribute will contain all missing values.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -T &lt;NUM|NOM|STR|DAT&gt;
- *  The type of attribute to create:
- *  NUM = Numeric attribute
- *  NOM = Nominal attribute
- *  STR = String attribute
- *  DAT = Date attribute
- *  (default: NUM)</pre>
- * 
- * <pre> -C &lt;index&gt;
- *  Specify where to insert the column. First and last
- *  are valid indexes.(default: last)</pre>
- * 
- * <pre> -N &lt;name&gt;
- *  Name of the new attribute.
- *  (default: 'Unnamed')</pre>
- * 
- * <pre> -L &lt;label1,label2,...&gt;
- *  Create nominal attribute with given labels
- *  (default: numeric attribute)</pre>
- * 
- * <pre> -F &lt;format&gt;
- *  The format of the date values (see ISO-8601)
- *  (default: yyyy-MM-dd'T'HH:mm:ss)</pre>
- * 
- <!-- options-end -->
+ * An instance filter that adds a new attribute to the dataset. 
+ * The new attribute contains all missing values.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -C index <br>
+ * Specify where to insert the column. First and last are valid indexes.
+ * (default last)<p>
+ *
+ * -L label1,label2,...<br>
+ * Create nominal attribute with the given labels
+ * (default numeric attribute)<p>
+ *
+ * -N name<br>
+ * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Add 
-  extends Filter 
-  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
-  /** for serialization. */
-  static final long serialVersionUID = 761386447332932389L;
+public class Add extends Filter implements UnsupervisedFilter,
+					   StreamableFilter, OptionHandler {
 
-  /** the attribute type. */
-  public static final Tag[] TAGS_TYPE = {
-    new Tag(Attribute.NUMERIC, "NUM", "Numeric attribute"),
-    new Tag(Attribute.NOMINAL, "NOM", "Nominal attribute"),
-    new Tag(Attribute.STRING,  "STR", "String attribute"),
-    new Tag(Attribute.DATE,    "DAT", "Date attribute")
-  };
-  
-  /** Record the type of attribute to insert. */
+  /** Record the type of attribute to insert */
   protected int m_AttributeType = Attribute.NUMERIC;
 
-  /** The name for the new attribute. */
+  /** The name for the new attribute */
   protected String m_Name = "unnamed";
 
-  /** The location to insert the new attribute. */
+  /** The location to insert the new attribute */
   private SingleIndex m_Insert = new SingleIndex("last"); 
 
-  /** The list of labels for nominal attribute. */
-  protected FastVector m_Labels = new FastVector();
+  /** The list of labels for nominal attribute */
+  protected FastVector m_Labels = new FastVector(5);
 
-  /** The date format. */
-  protected String m_DateFormat = "yyyy-MM-dd'T'HH:mm:ss";
-  
   /**
-   * Returns a string describing this filter.
+   * Returns a string describing this filter
    *
    * @return a description of the filter suitable for
    * displaying in the explorer/experimenter gui
@@ -132,111 +81,48 @@ public class Add
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector 		newVector;
-    String		desc;
-    SelectedTag		tag;
-    int			i;
 
-    newVector = new Vector();
-
-    desc  = "";
-    for (i = 0; i < TAGS_TYPE.length; i++) {
-      tag = new SelectedTag(TAGS_TYPE[i].getID(), TAGS_TYPE);
-      desc  +=   "\t" + tag.getSelectedTag().getIDStr() 
-      	       + " = " + tag.getSelectedTag().getReadable()
-      	       + "\n";
-    }
-    newVector.addElement(new Option(
-	"\tThe type of attribute to create:\n"
-	+ desc
-	+"\t(default: " + new SelectedTag(Attribute.NUMERIC, TAGS_TYPE) + ")",
-	"T", 1, "-T " + Tag.toOptionList(TAGS_TYPE)));
+    Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-	"\tSpecify where to insert the column. First and last\n"
-	+"\tare valid indexes.(default: last)",
-	"C", 1, "-C <index>"));
-
+              "\tSpecify where to insert the column. First and last\n"
+	      +"\tare valid indexes.(default last)",
+              "C", 1, "-C <index>"));
     newVector.addElement(new Option(
-	"\tName of the new attribute.\n"
-	+"\t(default: 'Unnamed')",
-	"N", 1,"-N <name>"));
-    
+	      "\tCreate nominal attribute with given labels\n"
+	      +"\t(default numeric attribute)",
+              "L", 1, "-L <label1,label2,...>"));
     newVector.addElement(new Option(
-	"\tCreate nominal attribute with given labels\n"
-	+"\t(default: numeric attribute)",
-	"L", 1, "-L <label1,label2,...>"));
-
-    newVector.addElement(new Option(
-	"\tThe format of the date values (see ISO-8601)\n"
-	+"\t(default: yyyy-MM-dd'T'HH:mm:ss)",
-	"F", 1, "-F <format>"));
+              "\tName of the new attribute.\n"
+              +"\t(default = 'Unnamed')",
+              "N", 1,"-N <name>"));
 
     return newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -T &lt;NUM|NOM|STR|DAT&gt;
-   *  The type of attribute to create:
-   *  NUM = Numeric attribute
-   *  NOM = Nominal attribute
-   *  STR = String attribute
-   *  DAT = Date attribute
-   *  (default: NUM)</pre>
-   * 
-   * <pre> -C &lt;index&gt;
-   *  Specify where to insert the column. First and last
-   *  are valid indexes.(default: last)</pre>
-   * 
-   * <pre> -N &lt;name&gt;
-   *  Name of the new attribute.
-   *  (default: 'Unnamed')</pre>
-   * 
-   * <pre> -L &lt;label1,label2,...&gt;
-   *  Create nominal attribute with given labels
-   *  (default: numeric attribute)</pre>
-   * 
-   * <pre> -F &lt;format&gt;
-   *  The format of the date values (see ISO-8601)
-   *  (default: yyyy-MM-dd'T'HH:mm:ss)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a list of options for this object. Valid options are:<p>
+   *
+   * -C index <br>
+   * Specify where to insert the column. First and last are valid indexes.
+   * (default last)<p>
+   *
+   * -L label1,label2,...<br>
+   * Create nominal attribute with the given labels
+   * (default numeric attribute)<p>
+   *
+   * -N name<br>
+   * Name of the new attribute. (default = 'Unnamed')<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-
-    tmpStr = Utils.getOption('T', options);
-    if (tmpStr.length() != 0)
-      setAttributeType(new SelectedTag(tmpStr, TAGS_TYPE));
-    else
-      setAttributeType(new SelectedTag(Attribute.NUMERIC, TAGS_TYPE));
     
-    tmpStr = Utils.getOption('C', options);
-    if (tmpStr.length() == 0)
-      tmpStr = "last";
-    setAttributeIndex(tmpStr);
-    
+    setAttributeIndex(Utils.getOption('C', options));
+    setNominalLabels(Utils.getOption('L', options));
     setAttributeName(Utils.unbackQuoteChars(Utils.getOption('N', options)));
-    
-    if (m_AttributeType == Attribute.NOMINAL) {
-      tmpStr = Utils.getOption('L', options);
-      if (tmpStr.length() != 0)
-	setNominalLabels(tmpStr);
-    }
-    else if (m_AttributeType == Attribute.DATE) {
-      tmpStr = Utils.getOption('F', options);
-      if (tmpStr.length() != 0)
-	setDateFormat(tmpStr);
-    }
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
@@ -249,53 +135,21 @@ public class Add
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector<String>	result;
-    
-    result = new Vector<String>();
-    
-    if (m_AttributeType != Attribute.NUMERIC) {
-      result.add("-T");
-      result.add("" + getAttributeType());
-    }
-    
-    result.add("-N");
-    result.add(Utils.backQuoteChars(getAttributeName()));
-    
+
+    String [] options = new String [6];
+    int current = 0;
+
+    options[current++] = "-N"; options[current++] = Utils.backQuoteChars(getAttributeName());
     if (m_AttributeType == Attribute.NOMINAL) {
-      result.add("-L");
-      result.add(getNominalLabels());
+      options[current++] = "-L"; options[current++] = getNominalLabels();
     }
-    else if (m_AttributeType == Attribute.NOMINAL) {
-      result.add("-F");
-      result.add(getDateFormat());
+    options[current++] = "-C";
+    options[current++] = "" + getAttributeIndex();
+
+    while (current < options.length) {
+      options[current++] = "";
     }
-    
-    result.add("-C");
-    result.add("" + getAttributeIndex());
-
-    return result.toArray(new String[result.size()]);
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+    return options;
   }
 
   /**
@@ -305,7 +159,7 @@ public class Add
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the format couldn't be set successfully
+   * @exception Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -315,20 +169,14 @@ public class Add
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute = null;
     switch (m_AttributeType) {
-      case Attribute.NUMERIC:
-	newAttribute = new Attribute(m_Name);
-	break;
-      case Attribute.NOMINAL:
-	newAttribute = new Attribute(m_Name, m_Labels);
-	break;
-      case Attribute.STRING:
-	newAttribute = new Attribute(m_Name, (FastVector) null);
-	break;
-      case Attribute.DATE:
-	newAttribute = new Attribute(m_Name, m_DateFormat);
-	break;
-      default:
-	throw new IllegalArgumentException("Unknown attribute type in Add");
+    case Attribute.NUMERIC:
+      newAttribute = new Attribute(m_Name);
+      break;
+    case Attribute.NOMINAL:
+      newAttribute = new Attribute(m_Name, m_Labels);
+      break;
+    default:
+      throw new IllegalArgumentException("Unknown attribute type in Add");
     }
 
     if ((m_Insert.getIndex() < 0) || 
@@ -337,14 +185,6 @@ public class Add
     }
     outputFormat.insertAttributeAt(newAttribute, m_Insert.getIndex());
     setOutputFormat(outputFormat);
-    
-    // all attributes, except index of added attribute
-    // (otherwise the length of the input/output indices differ)
-    Range atts = new Range(m_Insert.getSingleIndex());
-    atts.setInvert(true);
-    atts.setUpper(outputFormat.numAttributes() - 1);
-    initOutputLocators(outputFormat, atts.getSelection());
-    
     return true;
   }
 
@@ -356,7 +196,7 @@ public class Add
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -371,8 +211,10 @@ public class Add
     Instance inst = (Instance)instance.copy();
 
     // First copy string values from input to output
-    copyValues(inst, true, inst.dataset(), getOutputFormat());
-    
+    // Will break if the attribute being created is of type STRING (currently
+    // Add only adds NOMINAL or NUMERIC types)
+    copyStringValues(inst, true, inst.dataset(), getOutputFormat());
+
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
     inst.insertAttributeAt(m_Insert.getIndex());
@@ -382,7 +224,7 @@ public class Add
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -393,7 +235,7 @@ public class Add
   }
 
   /**
-   * Get the name of the attribute to be created.
+   * Get the name of the attribute to be created
    *
    * @return the new attribute name
    */
@@ -403,7 +245,7 @@ public class Add
   }
 
   /** 
-   * Set the new attribute's name.
+   * Set the new attribute's name
    *
    * @param name the new name
    */
@@ -415,7 +257,7 @@ public class Add
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -439,7 +281,7 @@ public class Add
   /**
    * Sets index of the attribute used.
    *
-   * @param attIndex the index of the attribute
+   * @param index the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -447,7 +289,7 @@ public class Add
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -459,7 +301,7 @@ public class Add
   }
 
   /**
-   * Get the list of labels for nominal attribute creation.
+   * Get the list of labels for nominal attribute creation
    *
    * @return the list of labels for nominal attribute creation
    */
@@ -480,7 +322,7 @@ public class Add
    * Set the labels for nominal attribute creation.
    *
    * @param labelList a comma separated list of labels
-   * @throws IllegalArgumentException if the labelList was invalid
+   * @exception IllegalArgumentException if the labelList was invalid
    */
   public void setNominalLabels(String labelList) {
 
@@ -513,84 +355,28 @@ public class Add
   }
 
   /**
-   * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
-   */
-  public String attributeTypeTipText() {
-    return "Defines the type of the attribute to generate.";
-  }
-
-  /**
-   * Sets the type of attribute to generate. 
-   *
-   * @param value 	the attribute type
-   */
-  public void setAttributeType(SelectedTag value) {
-    if (value.getTags() == TAGS_TYPE) {
-      m_AttributeType = value.getSelectedTag().getID();
-    }
-  }
-
-  /**
-   * Gets the type of attribute to generate. 
-   *
-   * @return 		the current attribute type.
-   */
-  public SelectedTag getAttributeType() {
-    return new SelectedTag(m_AttributeType, TAGS_TYPE);
-  }
-
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
-   */
-  public String dateFormatTipText() {
-    return "The format of the date values (see ISO-8601).";
-  }
-
-  /**
-   * Get the date format, complying to ISO-8601.
-   *
-   * @return 		the date format
-   */
-  public String getDateFormat() {
-    return m_DateFormat;
-  }
-
-  /**
-   * Set the date format, complying to ISO-8601.
-   *
-   * @param value 	a comma separated list of labels
-   */
-  public void setDateFormat(String value) {
-    try {
-      new SimpleDateFormat(value);
-      m_DateFormat = value;
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-
-  /**
    * Main method for testing this class.
    *
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Add(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Add(), argv);
+      } else {
+	Filter.filterFile(new Add(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

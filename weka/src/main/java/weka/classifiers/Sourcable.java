@@ -16,17 +16,17 @@
 
 /*
  *    Sourcable.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.classifiers;
 
-/**
+/** 
  * Interface for classifiers that can be converted to Java source.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public interface Sourcable {
 
@@ -44,7 +44,7 @@ public interface Sourcable {
    *
    * @param className the name that should be given to the source class.
    * @return the object source described by a string
-   * @throws Exception if the source can't be computed
+   * @exception Exception if the souce can't be computed
    */
   String toSource(String className) throws Exception;
 }

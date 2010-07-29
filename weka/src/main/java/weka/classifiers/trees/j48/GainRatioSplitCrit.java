@@ -16,26 +16,21 @@
 
 /*
  *    GainRatioSplitCrit.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Class for computing the gain ratio for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public final class GainRatioSplitCrit
-  extends EntropyBasedSplitCrit{
-
-  /** for serialization */
-  private static final long serialVersionUID = -433336694718670930L;
+public final class GainRatioSplitCrit extends EntropyBasedSplitCrit{
 
   /**
    * This method is a straightforward implementation of the gain
@@ -106,13 +101,8 @@ public final class GainRatioSplitCrit
     }
     return returnValue;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
-  }
 }
+
+
+
+

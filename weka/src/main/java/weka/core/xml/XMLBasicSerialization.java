@@ -22,9 +22,6 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -59,7 +56,7 @@ import org.w3c.dom.Element;
  *    <li>java.util.Vector</li>
  *    <li>javax.swing.DefaultListModel</li>
  * </ul>
- *
+ * 
  * Weka classes:
  * <ul>
  *    <li>weka.core.Matrix</li>
@@ -67,10 +64,9 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.1.2.4 $ 
  */
-public class XMLBasicSerialization
-   extends XMLSerialization {
+public class XMLBasicSerialization extends XMLSerialization {
 
    /** the value for mapping, e.g., Maps */
    public final static String VAL_MAPPING = "mapping";
@@ -96,8 +92,6 @@ public class XMLBasicSerialization
    /**
     * generates internally a new XML document and clears also the IgnoreList
     * and the mappings for the Read/Write-Methods
-    * 
-    * @throws Exception if initializing fails
     */
    public void clear() throws Exception {
       super.clear();
@@ -156,6 +150,7 @@ public class XMLBasicSerialization
    /**
     * builds the DefaultListModel from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -172,7 +167,7 @@ public class XMLBasicSerialization
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
@@ -238,15 +233,16 @@ public class XMLBasicSerialization
    /**
     * builds the Collection from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
     * @see java.util.Collection
     */
    public Object readCollection(Element node) throws Exception {
-      Collection<Object>           coll;
-      Vector<Object>               v;
-      Vector<Element>               children;
+      Collection           coll;
+      Vector               v;
+      Vector               children;
       Element              child;
       int                  i;
       int                  index;
@@ -255,11 +251,11 @@ public class XMLBasicSerialization
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
-      v        = new Vector<Object>();
+      v        = new Vector();
 
       // determine highest index for size
       index    = children.size() - 1;
@@ -281,8 +277,8 @@ public class XMLBasicSerialization
       }
       
       // populate collection
-      coll = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                        newInstance());
+      coll = (Collection) Class.forName(
+                  node.getAttribute(ATT_CLASS)).newInstance();
       coll.addAll(v);
       
       return coll;
@@ -332,13 +328,14 @@ public class XMLBasicSerialization
    /**
     * builds the Map from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
     * @see java.util.Map
     */
    public Object readMap(Element node) throws Exception {
-     Map<Object,Object>                  map;
+      Map                  map;
       Object               key;
       Object               value;
       Vector               children;
@@ -352,11 +349,11 @@ public class XMLBasicSerialization
       // for debugging only
       if (DEBUG)
          trace(new Throwable(), node.getAttribute(ATT_NAME));
-
+      
       m_CurrentNode = node;
       
-      map      = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                            newInstance());
+      map      = (Map) Class.forName(
+                     node.getAttribute(ATT_CLASS)).newInstance();
       children = XMLDocument.getChildTags(node); 
 
       for (i = 0; i < children.size(); i++) {
@@ -382,7 +379,7 @@ public class XMLBasicSerialization
       
       return map;
    }
-   
+
    /**
     * adds the given Matrix to a DOM structure. 
     * 
@@ -417,6 +414,7 @@ public class XMLBasicSerialization
    /**
     * builds the Matrix from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -491,6 +489,7 @@ public class XMLBasicSerialization
    /**
     * builds the Matrix (old) from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -538,6 +537,7 @@ public class XMLBasicSerialization
    /**
     * builds the Matrix (old) from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -560,14 +560,5 @@ public class XMLBasicSerialization
       matrix    = new weka.classifiers.CostMatrix(new StringReader(writer.toString()));
       
       return matrix;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
 }

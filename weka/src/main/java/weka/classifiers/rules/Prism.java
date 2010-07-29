@@ -16,118 +16,50 @@
 
 /*
  *    Prism.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Ian H. Witten
  *
  */
 
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.Utils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
+import weka.classifiers.Evaluation;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a PRISM rule set for classification. Can only deal with nominal attributes. Can't deal with missing values. Doesn't do any pruning.<br/>
- * <br/>
- * For more information, see <br/>
- * <br/>
- * J. Cendrowska (1987). PRISM: An algorithm for inducing modular rules. International Journal of Man-Machine Studies. 27(4):349-370.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for building and using a PRISM rule set for classifcation.  
+ * Can only deal with nominal attributes. Can't deal with missing values.
+ * Doesn't do any pruning. For more information, see <p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Cendrowska1987,
- *    author = {J. Cendrowska},
- *    journal = {International Journal of Man-Machine Studies},
- *    number = {4},
- *    pages = {349-370},
- *    title = {PRISM: An algorithm for inducing modular rules},
- *    volume = {27},
- *    year = {1987}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * J. Cendrowska (1987). <i>PRISM: An algorithm for
+ * inducing modular rules</i>. International Journal of Man-Machine
+ * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.17 $ 
 */
-public class Prism 
-  extends AbstractClassifier
-  implements TechnicalInformationHandler {
+public class Prism extends Classifier {
 
-  /** for serialization */
-  static final long serialVersionUID = 1310258880025902106L;
-  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Class for building and using a PRISM rule set for classification. "
-      + "Can only deal with nominal attributes. Can't deal with missing values. "
-      + "Doesn't do any pruning.\n\n"
-      + "For more information, see \n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "J. Cendrowska");
-    result.setValue(Field.YEAR, "1987");
-    result.setValue(Field.TITLE, "PRISM: An algorithm for inducing modular rules");
-    result.setValue(Field.JOURNAL, "International Journal of Man-Machine Studies");
-    result.setValue(Field.VOLUME, "27");
-    result.setValue(Field.NUMBER, "4");
-    result.setValue(Field.PAGES, "349-370");
-    
-    return result;
+  return "Class for building and using a PRISM rule set for classification. "
+    + "Can only deal with nominal attributes. Can't deal with missing values. "
+    + "Doesn't do any pruning. For more information, see \n\n"
+    + "J. Cendrowska (1987). \"PRISM: An algorithm for "
+    + "inducing modular rules\". International Journal of Man-Machine "
+    + "Studies. Vol.27, No.4, pp.349-370.";
   }
 
   /**
    * Class for storing a PRISM ruleset, i.e. a list of rules
    */
-  private class PrismRule 
-    implements Serializable, RevisionHandler {
-    
-    /** for serialization */
-    static final long serialVersionUID = 4248784350656508583L;
+  private class PrismRule implements Serializable {
     
     /** The classification */
     private int m_classification;
@@ -272,25 +204,12 @@ public class Prism
 	return "Can't print Prism classifier!";
       }
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
   }
   
   /**
    * Class for storing a list of attribute-value tests
    */
-  private class Test 
-    implements Serializable, RevisionHandler {
-    
-    /** for serialization */
-    static final long serialVersionUID = -8925333011350280799L;
+  private class Test implements Serializable { 
 
     /** Attribute to test */
     private int m_attr = -1; 
@@ -318,15 +237,6 @@ public class Prism
       }
       return false;    
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
   }
 
   /** The first rule in the list of rules */
@@ -342,29 +252,10 @@ public class Prism
 
     int result = m_rules.resultRules(inst);
     if (result == -1) {
-      return Utils.missingValue();
+      return Instance.missingValue();
     } else {
       return (double)result;
     }
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
   }
 
   /**
@@ -376,19 +267,36 @@ public class Prism
   public void buildClassifier(Instances data) throws Exception {
 
     int cl; // possible value of theClass
-    Instances E, ruleE;
+    Instances E, ruleE, emptyDataset;
     PrismRule rule = null;
     Test test = null, oldTest = null;
     int bestCorrect, bestCovers, attUsed;
-    Enumeration enumAtt;
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    }
+    if (data.classAttribute().isNumeric()) {
+      throw new UnsupportedClassTypeException("Prism can't handle a numeric class!");
+    }
     data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+    Enumeration enumAtt = data.enumerateAttributes();
+    while (enumAtt.hasMoreElements()) {
+      Attribute attr = (Attribute) enumAtt.nextElement();
+      if (!attr.isNominal()) {
+	throw new UnsupportedAttributeTypeException("Prism can only deal with nominal attributes!");
+      }
+      Enumeration enu = data.enumerateInstances();
+      while (enu.hasMoreElements()) {
+	if (((Instance) enu.nextElement()).isMissing(attr)) {
+	  throw new NoSupportForMissingValuesException("Prism can't handle attributes with missing values!");
+	}
+      }
+    }
+    data.deleteWithMissingClass(); // delete all instances with a missing class
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances with a class value!");
+    }
+
     for (cl = 0; cl < data.numClasses(); cl++) { // for each class cl
       E = data; // initialize E to the instance set
       while (contains(E, cl)) { // while E contains examples in class cl
@@ -495,7 +403,6 @@ public class Prism
    * @param E the instances to be checked
    * @param C the class
    * @return true if there are any instances of class C
-   * @throws Exception if something goes wrong
    */
   private static boolean contains(Instances E, int C) throws Exception {
 
@@ -513,7 +420,6 @@ public class Prism
    *
    * @param attr the attribute to be checked for
    * @param t test contained by rule
-   * @return true if the attribute is mentioned in the rule
    */
   private static boolean isMentionedIn(Attribute attr, Test t) {
 
@@ -538,22 +444,20 @@ public class Prism
     }
     return "Prism rules\n----------\n" + m_rules.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class
-   * 
-   * @param args the commandline parameters
    */
   public static void main(String[] args) {
-    runClassifier(new Prism(), args);
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new Prism(), args));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+    }
   }
 }
+
+
+
+

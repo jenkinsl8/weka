@@ -16,7 +16,7 @@
 
 /*
  *    TrainTestSplitMaker.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -24,27 +24,31 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 
-import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Random;
+import java.util.Enumeration;
+import java.io.Serializable;
 import java.util.Vector;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that accepts data sets, training sets, test sets and produces
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.5.2.1 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
   implements DataSourceListener, TrainingSetListener, TestSetListener,
 	     UserRequestAcceptor, EventConstraints, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = 7390064039444605943L;
-
-  private double m_trainPercentage = 66;
+  private int m_trainPercentage = 66;
   private int m_randomSeed = 1;
   
   private Thread m_splitThread = null;
@@ -55,24 +59,6 @@ public class TrainTestSplitMaker
 		       BeanVisual.ICON_PATH
 		       +"TrainTestSplittMaker_animated.gif");
     m_visual.setText("TrainTestSplitMaker");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -98,7 +84,7 @@ public class TrainTestSplitMaker
    *
    * @param newTrainPercent an <code>int</code> value
    */
-  public void setTrainPercent(double newTrainPercent) {
+  public void setTrainPercent(int newTrainPercent) {
     m_trainPercentage = newTrainPercent;
   }
 
@@ -108,7 +94,7 @@ public class TrainTestSplitMaker
    *
    * @return an <code>int</code> value
    */
-  public double getTrainPercent() {
+  public int getTrainPercent() {
     return m_trainPercentage;
   }
 
@@ -173,8 +159,7 @@ public class TrainTestSplitMaker
 	  public void run() {
 	    try {
 	      dataSet.randomize(new Random(m_randomSeed));
-	      int trainSize = 
-                (int)Math.round(dataSet.numInstances() * m_trainPercentage / 100);
+	      int trainSize = dataSet.numInstances() * m_trainPercentage / 100;
 	      int testSize = dataSet.numInstances() - trainSize;
       
 	      Instances train = new Instances(dataSet, 0, trainSize);
@@ -195,31 +180,15 @@ public class TrainTestSplitMaker
 		notifyTestSetProduced(teste);
 	      } else {
 		if (m_logger != null) {
-		  m_logger.logMessage("[TrainTestSplitMaker] "
-		      + statusMessagePrefix() + " Split has been canceled!");
-		  m_logger.statusMessage(statusMessagePrefix()
-		      + "INTERRUPTED");
+		  m_logger.logMessage("Split has been canceled!");
+		  m_logger.statusMessage("OK");
 		}
 	      }
 	    } catch (Exception ex) {
-	      stop(); // stop all processing
-	      if (m_logger != null) {
-	          m_logger.statusMessage(statusMessagePrefix()
-	              + "ERROR (See log for details)");
-	          m_logger.logMessage("[TrainTestSplitMaker] " 
-	              + statusMessagePrefix()
-	              + " problem during split creation. " 
-	              + ex.getMessage());
-	      }
 	      ex.printStackTrace();
 	    } finally {
 	      if (isInterrupted()) {
-	        if (m_logger != null) {
-	          m_logger.logMessage("[TrainTestSplitMaker] "
-	              + statusMessagePrefix() + " Split has been canceled!");
-	          m_logger.statusMessage(statusMessagePrefix()
-	              + "INTERRUPTED");
-	        }
+		System.err.println("Split maker interrupted");
 	      }
 	      block(false);
 	    }
@@ -247,11 +216,8 @@ public class TrainTestSplitMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_splitThread == null) {
-          break;
-        }
-        //	System.err.println("Notifying test listeners "
-        //			   +"(Train - test split maker)");
+	System.err.println("Notifying test listeners "
+			   +"(cross validation fold maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -269,11 +235,8 @@ public class TrainTestSplitMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-        if (m_splitThread == null) {
-          break;
-        }
-        //	System.err.println("Notifying training listeners "
-        //			   +"(Train - test split fold maker)");
+	System.err.println("Notifying training listeners "
+			   +"(cross validation fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }
@@ -281,7 +244,7 @@ public class TrainTestSplitMaker
 
   /**
    * Function used to stop code that calls acceptDataSet. This is 
-   * needed as split is performed inside a separate
+   * needed as cross validation is performed inside a separate
    * thread of execution.
    *
    * @param tf a <code>boolean</code> value
@@ -306,27 +269,18 @@ public class TrainTestSplitMaker
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
+      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
     // stop the split thread
     if (m_splitThread != null) {
+      //      m_buildThread.interrupt();
       Thread temp = m_splitThread;
+      //      m_buildThread.stop();
       m_splitThread = null;
       temp.interrupt();
-      temp.stop();
     }
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_splitThread != null);
   }
 
   /**
@@ -381,9 +335,5 @@ public class TrainTestSplitMaker
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }

@@ -22,10 +22,10 @@
 package wekaexamples.filters;
 
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSink;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Standardize;
+import wekaexamples.core.converters.DataSink;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * Filters two datasets: the first is used to initialize the filter and the

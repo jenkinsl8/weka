@@ -16,33 +16,26 @@
 
 /*
  *    TrainTestSplitMakerCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.PropertySheetPanel;
-
+import java.io.File;
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
 import javax.swing.JPanel;
+import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the train test split maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.1 $
  */
-public class TrainTestSplitMakerCustomizer
-  extends JPanel
+public class TrainTestSplitMakerCustomizer extends JPanel
   implements Customizer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1684662340241807260L;
 
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);

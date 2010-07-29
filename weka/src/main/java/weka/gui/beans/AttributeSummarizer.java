@@ -16,7 +16,7 @@
 
 /*
  *    AttributeSummarizer.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
@@ -24,31 +24,32 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 import weka.gui.AttributeVisualizationPanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.beans.beancontext.BeanContext;
-import java.util.Enumeration;
+import java.io.Serializable;
 import java.util.Vector;
-
-import javax.swing.BorderFactory;
+import java.util.Enumeration;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import java.awt.*;
+import java.beans.*;
+import java.beans.beancontext.*;
 
 /**
  * Bean that encapsulates displays bar graph summaries for attributes in
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.7.2.1 $
  */
-public class AttributeSummarizer
-  extends DataVisualizer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -294354961169372758L;
+public class AttributeSummarizer extends DataVisualizer {
 
   /**
    * The number of plots horizontally in the display
@@ -69,11 +70,7 @@ public class AttributeSummarizer
    * Creates a new <code>AttributeSummarizer</code> instance.
    */
   public AttributeSummarizer() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    if (!ge.isHeadless()) {
-      appearanceFinal();
-    }
+    appearanceFinal();
   }
 
   /**
@@ -246,13 +243,13 @@ public class AttributeSummarizer
    *
    * @param bc a <code>BeanContext</code> value
    */
-  /*  public void setBeanContext(BeanContext bc) {
+  public void setBeanContext(BeanContext bc) {
     m_beanContext = bc;
     m_design = m_beanContext.isDesignTime();
     if (m_design) {
       appearanceDesign();
-    } 
-    } */
+    }
+  }
 
   /**
    * Set instances for this bean. This method is a convenience method

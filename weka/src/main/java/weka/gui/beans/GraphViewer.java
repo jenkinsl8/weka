@@ -16,106 +16,64 @@
 
 /*
  *    GraphViewer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Drawable;
 import weka.core.FastVector;
+import weka.core.Drawable;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.treevisualizer.*;
+import weka.gui.graphvisualizer.*;
 
-import java.awt.BorderLayout;
-import java.awt.event.MouseEvent;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.beans.beancontext.BeanContext;
-import java.beans.beancontext.BeanContextChild;
-import java.beans.beancontext.BeanContextChildSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.VetoableChangeListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.ImageIcon;
+
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import java.awt.*;
+import javax.swing.JScrollPane;
+import javax.swing.BorderFactory;
+import java.io.ObjectInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.awt.event.MouseEvent;
 
 /**
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
 public class GraphViewer 
   extends JPanel
   implements Visible, GraphListener,
-	     UserRequestAcceptor, 
-             Serializable, BeanContextChild {
+	     UserRequestAcceptor, Serializable {
 
-  /** for serialization */
-  private static final long serialVersionUID = -5183121972114900617L;
+  protected BeanVisual m_visual = 
+    new BeanVisual("GraphViewer", 
+		   BeanVisual.ICON_PATH+"DefaultGraph.gif",
+		   BeanVisual.ICON_PATH+"DefaultGraph_animated.gif");
 
-  protected BeanVisual m_visual;
 
   private transient JFrame m_resultsFrame = null;
 
-  protected transient ResultHistoryPanel m_history;
-
-  /**
-   * BeanContex that this bean might be contained within
-   */
-  protected transient BeanContext m_beanContext = null;
-
-  /**
-   * BeanContextChild support
-   */
-  protected BeanContextChildSupport m_bcSupport = 
-    new BeanContextChildSupport(this);
-
-  /**
-   * True if this bean's appearance is the design mode appearance
-   */
-  protected boolean m_design;
+  protected transient ResultHistoryPanel m_history = 
+    new ResultHistoryPanel(null);
 
   public GraphViewer() {
-    /*    setUpResultHistory();
-    setLayout(new BorderLayout());
-    add(m_visual, BorderLayout.CENTER); */
-
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    if (!ge.isHeadless()) {
-      appearanceFinal();
-    }
-  }
-
-  protected void appearanceDesign() {
     setUpResultHistory();
-    removeAll();
-    m_visual = 
-      new BeanVisual("GraphViewer", 
-                     BeanVisual.ICON_PATH+"DefaultGraph.gif",
-		   BeanVisual.ICON_PATH+"DefaultGraph_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-  }
-
-  protected void appearanceFinal() {
-    removeAll();
-    setLayout(new BorderLayout());
-    setUpFinal();
-  }
-
-  protected void setUpFinal() {
-    setUpResultHistory();
-    add(m_history, BorderLayout.CENTER);
   }
 
   /**
@@ -135,9 +93,6 @@ public class GraphViewer
     m_history.setHandleRightClicks(false);
     m_history.getList().
       addMouseListener(new ResultHistoryPanel.RMouseAdapter() {
-	  /** for serialization */
-	  private static final long serialVersionUID = -4984130887963944249L;
-
 	  public void mouseClicked(MouseEvent e) {
 	    int index = m_history.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
@@ -146,56 +101,6 @@ public class GraphViewer
 	    }
 	  }
 	});
-  }
-
-  /**
-   * Set a bean context for this bean
-   *
-   * @param bc a <code>BeanContext</code> value
-   */
-  public void setBeanContext(BeanContext bc) {
-    m_beanContext = bc;
-    m_design = m_beanContext.isDesignTime();
-    if (m_design) {
-      appearanceDesign();
-    } else {
-      java.awt.GraphicsEnvironment ge = 
-        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-      if (!ge.isHeadless()){
-        appearanceFinal();
-      }
-    }
-  }
-
-  /**
-   * Return the bean context (if any) that this bean is embedded in
-   *
-   * @return a <code>BeanContext</code> value
-   */
-  public BeanContext getBeanContext() {
-    return m_beanContext;
-  }
-
-  /**
-   * Add a vetoable change listener to this bean
-   *
-   * @param name the name of the property of interest
-   * @param vcl a <code>VetoableChangeListener</code> value
-   */
-  public void addVetoableChangeListener(String name,
-				       VetoableChangeListener vcl) {
-    m_bcSupport.addVetoableChangeListener(name, vcl);
-  }
-  
-  /**
-   * Remove a vetoable change listener from this bean
-   *
-   * @param name the name of the property of interest
-   * @param vcl a <code>VetoableChangeListener</code> value
-   */
-  public void removeVetoableChangeListener(String name,
-					   VetoableChangeListener vcl) {
-    m_bcSupport.removeVetoableChangeListener(name, vcl);
   }
 
   /**
@@ -210,7 +115,8 @@ public class GraphViewer
     if (m_history == null) {
       setUpResultHistory();
     }
-    String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
+    String name = (new SimpleDateFormat("HH:mm:ss - "))
+      .format(new Date());
 
     name += e.getGraphTitle();
     graphInfo.addElement(new Integer(e.getGraphType()));

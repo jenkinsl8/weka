@@ -16,225 +16,42 @@
 
 /*
  *    CheckOptionHandler.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 
 /**
- * Simple command line checking of classes that implement OptionHandler.<p/>
+ * Simple command line checking of classes that implement OptionHandler.<p>
  *
- * Usage: <p/>
+ * Usage: <p>
  * <code>
  *     CheckOptionHandler -W optionHandlerClassName -- test options
- * </code> <p/>
+ * </code> <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
- * <pre> -S
- *  Silent mode - prints nothing to stdout.</pre>
- * 
- * <pre> -W
- *  Full name of the OptionHandler analysed.
- *  eg: weka.classifiers.rules.ZeroR
- *  (default weka.classifiers.rules.ZeroR)</pre>
- * 
- * <pre> 
- * Options specific to option handler weka.classifiers.rules.ZeroR:
- * </pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- <!-- options-end -->
+ * Valid options are: <p>
+ *
+ * -W classname <br>
+ * The name of a class implementing an OptionHandler. <p>
  *
  * Options after -- are used as user options in testing the
- * OptionHandler
+ * OptionHandler <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
-public class CheckOptionHandler
-  extends Check {
-
-  /** the optionhandler to test */
-  protected OptionHandler m_OptionHandler = new weka.classifiers.rules.ZeroR();
-
-  /** the user-supplied options */
-  protected String[] m_UserOptions = new String[0];
-  
-  /** whether the tests were successful */
-  protected boolean m_Success;
-  
-  /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
-    
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
-    
-    result.addElement(new Option(
-        "\tFull name of the OptionHandler analysed.\n"
-        +"\teg: weka.classifiers.rules.ZeroR\n"
-        + "\t(default weka.classifiers.rules.ZeroR)",
-        "W", 1, "-W"));
-    
-    if (m_OptionHandler != null) {
-      result.addElement(new Option(
-	  "", "", 0, 
-	  "\nOptions specific to option handler " 
-	  + m_OptionHandler.getClass().getName() + ":"));
-      
-      Enumeration enm = m_OptionHandler.listOptions();
-      while (enm.hasMoreElements())
-        result.addElement((Option)enm.nextElement());
-    }
-    
-    return result.elements();
-  }
-  
-  /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -D
-   *  Turn on debugging output.</pre>
-   * 
-   * <pre> -S
-   *  Silent mode - prints nothing to stdout.</pre>
-   * 
-   * <pre> -W
-   *  Full name of the OptionHandler analysed.
-   *  eg: weka.classifiers.rules.ZeroR
-   *  (default weka.classifiers.rules.ZeroR)</pre>
-   * 
-   * <pre> 
-   * Options specific to option handler weka.classifiers.rules.ZeroR:
-   * </pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   <!-- options-end -->
-   *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-    String      tmpStr;
-    
-    super.setOptions(options);
-    
-    tmpStr = Utils.getOption('W', options);
-    if (tmpStr.length() == 0)
-      tmpStr = weka.classifiers.rules.ZeroR.class.getName();
-    setUserOptions(Utils.partitionOptions(options));
-    setOptionHandler(
-	(OptionHandler) Utils.forName(
-	    OptionHandler.class, tmpStr, null));
-  }
-  
-  /**
-   * Gets the current settings of the CheckClassifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String[] getOptions() {
-    Vector<String>        result;
-    String[]      options;
-    int           i;
-    
-    result = new Vector<String>();
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    if (getOptionHandler() != null) {
-      result.add("-W");
-      result.add(getOptionHandler().getClass().getName());
-    }
-    
-    if (m_OptionHandler != null) {
-      options = m_OptionHandler.getOptions();
-      result.add("--");
-      for (i = 0; i < options.length; i++)
-        result.add(options[i]);
-    }
-    
-    return (String[]) result.toArray(new String[result.size()]);
-  }
-  
-  /**
-   * Set the OptionHandler to work on.. 
-   *
-   * @param value the OptionHandler to use.
-   */
-  public void setOptionHandler(OptionHandler value) {
-    m_OptionHandler = value;
-  }
-  
-  /**
-   * Get the OptionHandler used in the tests.
-   *
-   * @return the OptionHandler used in the tests.
-   */
-  public OptionHandler getOptionHandler() {
-    return m_OptionHandler;
-  }
-
-  /**
-   * Sets the user-supplied options (creates a copy)
-   * 
-   * @param value	the user-supplied options to use
-   */
-  public void setUserOptions(String[] value) {
-    m_UserOptions = getCopy(value);
-  }
-  
-  /**
-   * Gets the current user-supplied options (creates a copy)
-   * 
-   * @return		the user-supplied options
-   */
-  public String[] getUserOptions() {
-    return getCopy(m_UserOptions);
-  }
-  
-  /**
-   * returns the success of the tests
-   * 
-   * @return		true if the tests were successful
-   */
-  public boolean getSuccess() {
-    return m_Success;
-  }
+public class CheckOptionHandler {
   
   /**
    * Prints the given options to a string.
    *
    * @param options the options to be joined
-   * @return the options as one long string
    */
-  protected String printOptions(String[] options) {
+  public static String printOptions(String [] options) {
+    
     if (options == null) {
       return("<null>");
     } else {
@@ -247,9 +64,9 @@ public class CheckOptionHandler
    *
    * @param options1 the first set of options
    * @param options2 the second set of options
-   * @throws Exception if the two sets of options differ
+   * @exception Exception if the two sets of options differ
    */
-  protected void compareOptions(String[] options1, String[] options2) 
+  public static void compareOptions(String [] options1, String [] options2) 
     throws Exception {
 
     if (options1 == null) {
@@ -276,325 +93,91 @@ public class CheckOptionHandler
   }
 
   /**
-   * creates a copy of the given options
-   * 
-   * @param options	the options to copy
-   * @return		the copy
-   */
-  protected String[] getCopy(String[] options) {
-    String[]	result;
-    
-    result = new String[options.length];
-    System.arraycopy(options, 0, result, 0, options.length);
-    
-    return result;
-  }
-  
-  /**
-   * returns a new instance of the OptionHandler's class
-   * 
-   * @return		a new instance
-   */
-  protected OptionHandler getDefaultHandler() {
-    OptionHandler	result;
-    
-    try {
-      result = (OptionHandler) m_OptionHandler.getClass().newInstance();
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      result = null;
-    }
-    
-    return result;
-  }
-
-  /**
-   * returns the default options the default OptionHandler will return
-   * 
-   * @return		the default options
-   */
-  protected String[] getDefaultOptions() {
-    String[]		result;
-    OptionHandler	o;
-    
-    o = getDefaultHandler();
-    if (o == null) {
-      println("WARNING: couldn't create default handler, cannot use default options!");
-      result = new String[0];
-    }
-    else {
-      result = o.getOptions();
-    }
-    
-    return result;
-  }
-  
-  /**
-   * checks whether the listOptions method works
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkListOptions() {
-    boolean	result;
-    
-    print("ListOptions...");
-    
-    try {
-      Enumeration enu = getOptionHandler().listOptions();
-      if (getDebug() && enu.hasMoreElements())
-	println("");
-      while (enu.hasMoreElements()) {
-	Option option = (Option) enu.nextElement();
-	if (getDebug()) {
-	  println(option.synopsis());
-	  println(option.description());
-	}
-      }
-
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * checks whether the user-supplied options can be processed at all
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkSetOptions() {
-    boolean	result;
-    
-    print("SetOptions...");
-    
-    try {
-      getDefaultHandler().setOptions(getUserOptions());
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * checks whether the default options can be processed completely
-   * or some invalid options are returned by the getOptions() method.
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkDefaultOptions() {
-    boolean	result;
-    String[]	options;
-    
-    print("Default options...");
-
-    options = getDefaultOptions();
-    
-    try {
-      getDefaultHandler().setOptions(options);
-      Utils.checkForRemainingOptions(options);
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * checks whether the user-supplied options can be processed completely
-   * or some "left-over" options remain
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkRemainingOptions() {
-    boolean	result;
-    String[]	options;
-    
-    print("Remaining options...");
-
-    options = getUserOptions();
-    
-    try {
-      getDefaultHandler().setOptions(options);
-      if (getDebug())
-	println("\n  remaining: " + printOptions(options));
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * checks whether the user-supplied options stay the same after settting,
-   * getting and re-setting again
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkCanonicalUserOptions() {
-    boolean		result;
-    OptionHandler	handler;
-    String[] 		userOptions;
-    String[] 		userOptionsCheck;
-    
-    print("Canonical user options...");
-
-    try {
-      handler = getDefaultHandler();
-      handler.setOptions(getUserOptions());
-      if (getDebug())
-	print("\n  Getting canonical user options: ");
-      userOptions = handler.getOptions();
-      if (getDebug())
-	println(printOptions(userOptions));
-      if (getDebug())
-	println("  Setting canonical user options");
-      handler.setOptions((String[])userOptions.clone());
-      if (getDebug())
-	println("  Checking canonical user options");
-      userOptionsCheck = handler.getOptions();
-      compareOptions(userOptions, userOptionsCheck);
-
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-
-  /**
-   * checks whether the optionhandler can be re-setted again to default
-   * options after the user-supplied options have been set.
-   * 
-   * @return index 0 is true if the test was passed, index 1 is always false
-   */
-  public boolean checkResettingOptions() {
-    boolean		result;
-    String[]		defaultOptions;
-    String[] 		defaultOptionsCheck;
-    OptionHandler	handler;
-
-    print("Resetting options...");
-    
-    try {
-      if (getDebug())
-	println("\n  Setting user options");
-      handler = getDefaultHandler();
-      handler.setOptions(getUserOptions());
-      defaultOptions = getDefaultOptions();
-      if (getDebug())
-	println("  Resetting to default options");
-      handler.setOptions(getCopy(defaultOptions));
-      if (getDebug())
-	println("  Checking default options match previous default");
-      defaultOptionsCheck = handler.getOptions();
-      compareOptions(defaultOptions, defaultOptionsCheck);
-      
-      println("yes");
-      result = true;
-    }
-    catch (Exception e) {
-      println("no");
-      result = false;
-
-      if (getDebug())
-	println(e);
-    }
-    
-    return result;
-  }
-  
-  /**
    * Runs some diagnostic tests on an optionhandler object. Output is
-   * printed to System.out (if not silent).
+   * printed to System.out.
+   *
+   * @param oh the OptionHandler of interest
+   * @param options an array of strings containing some test command
+   * line options
+   * @exception Exception if the option handler fails any of the tests.
    */
-  public void doTests() {
-    println("OptionHandler: " + m_OptionHandler.getClass().getName() + "\n");
-
-    if (getDebug()) {
-      println("--> Info");
-      print("Default options: ");
-      println(printOptions(getDefaultOptions()));
-      print("User options: ");
-      println(printOptions(getUserOptions()));
+  public static void checkOptionHandler(OptionHandler oh, String []options)
+    throws Exception {
+    
+    System.out.println("OptionHandler: " + oh.getClass().getName());
+    System.out.println("ListOptions:");
+    Enumeration enu = oh.listOptions();
+    while (enu.hasMoreElements()) {
+      Option option = (Option) enu.nextElement();
+      System.out.println(option.synopsis());
+      System.out.println(option.description());
     }
 
-    println("--> Tests");
-    m_Success = checkListOptions();
+    // Get the default options and check that after
+    // setting them the same gets returned
+    String [] defaultOptions = oh.getOptions();
+    System.out.print("Default options:");
+    System.out.println(printOptions(defaultOptions));
 
-    if (m_Success)
-      m_Success = checkSetOptions();
-   
-    if (m_Success)
-      m_Success = checkDefaultOptions();
-    
-    if (m_Success)
-      m_Success = checkRemainingOptions();
+    // Set some options, get them back, set them, and check 
+    // the returned ones are the same as returned initially
+    System.out.print("User options:");
+    System.out.println(printOptions(options));
+    System.out.println("Setting user options...");
+    oh.setOptions(options);
+    System.out.print("Remaining options:");
+    System.out.println(CheckOptionHandler.printOptions(options));
+    System.out.print("Getting canonical user options:");
+    String [] userOptions = oh.getOptions();
+    System.out.println(CheckOptionHandler.printOptions(userOptions));
+    System.out.println("Setting canonical user options...");
+    oh.setOptions((String [])userOptions.clone());
+    System.out.print("Checking canonical user options...");
+    String [] userOptionsCheck = oh.getOptions();
+    CheckOptionHandler.compareOptions(userOptions, userOptionsCheck);
+    System.out.println("OK");
 
-    if (m_Success)
-      m_Success = checkCanonicalUserOptions();
-
-    if (m_Success)
-      m_Success = checkResettingOptions();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    System.out.println("Resetting to default options...");
+    oh.setOptions((String [])defaultOptions.clone());
+    System.out.print("Checking default options match previous default...");
+    String [] defaultOptionsCheck = oh.getOptions();
+    CheckOptionHandler.compareOptions(defaultOptions, defaultOptionsCheck);
+    System.out.println("OK");
   }
   
   /** 
-   * Main method for using the CheckOptionHandler.
+   * Main method for using the CheckOptionHandler.<p>
    *
-   * @param args 	the options to the CheckOptionHandler
+   * Valid options are: <p>
+   *
+   * -W classname <br>
+   * The name of the class implementing an OptionHandler. <p>
+   *
+   * Options after -- are used as user options in testing the
+   * OptionHandler <p>
+   *
+   * @param the options to the CheckOptionHandler
    */
-  public static void main(String[] args) {
-    CheckOptionHandler check = new CheckOptionHandler();
-    runCheck(check, args);
-    if (check.getSuccess())
-      System.exit(0);
-    else
-      System.exit(1);
+  public static void main(String [] args) {
+
+    try {
+      String className = Utils.getOption('W', args);
+      if (className.length() == 0) {
+	throw new Exception("Please give a class name with -W option");
+      }
+      OptionHandler o;
+      try {
+	o = (OptionHandler)Class.forName(className).newInstance();
+      } catch (Exception ex) {
+	throw new Exception("Couldn't find OptionHandler with name " 
+			    + className);
+      }
+      String [] options = Utils.partitionOptions(args);
+      Utils.checkForRemainingOptions(args);
+
+      CheckOptionHandler.checkOptionHandler(o, options);
+    } catch (Exception ex) {
+      System.err.println(ex.getMessage());
+    }
   }
 }

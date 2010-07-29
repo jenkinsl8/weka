@@ -21,14 +21,14 @@
 
 package wekaexamples.clusterers;
 
-import weka.clusterers.AbstractClusterer;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.gui.explorer.ClustererAssignmentsPlotInstances;
+import weka.gui.explorer.ClustererPanel;
+import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
+import wekaexamples.core.converters.DataSource;
 
 import java.awt.BorderLayout;
 import java.text.SimpleDateFormat;
@@ -72,7 +72,7 @@ public class VisualizeClusterAssignments {
     String[] options = Utils.splitOptions(Utils.getOption('W', args));
     String classname = options[0];
     options[0] = "";
-    Clusterer clusterer = AbstractClusterer.forName(classname, options);
+    Clusterer clusterer = Clusterer.forName(classname, options);
     
     // evaluate clusterer
     clusterer.buildClusterer(train);
@@ -82,11 +82,7 @@ public class VisualizeClusterAssignments {
 
     // setup visualization
     // taken from: ClustererPanel.startClusterer()
-    ClustererAssignmentsPlotInstances plotInstances = new ClustererAssignmentsPlotInstances();
-    plotInstances.setClusterer(clusterer);
-    plotInstances.setInstances(train);
-    plotInstances.setClusterEvaluation(eval);
-    plotInstances.setUp();
+    PlotData2D predData = ClustererPanel.setUpVisualizableInstances(train, eval);
     String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
     String cname = clusterer.getClass().getName();
     if (cname.startsWith("weka.clusterers."))
@@ -94,9 +90,11 @@ public class VisualizeClusterAssignments {
     else
       name += cname;
     name = name + " (" + train.relationName() + ")";
+
     VisualizePanel vp = new VisualizePanel();
     vp.setName(name);
-    vp.addPlot(plotInstances.getPlotData(cname));
+    predData.setPlotName(name);
+    vp.addPlot(predData);
 
     // display data
     // taken from: ClustererPanel.visualizeClusterAssignments(VisualizePanel)

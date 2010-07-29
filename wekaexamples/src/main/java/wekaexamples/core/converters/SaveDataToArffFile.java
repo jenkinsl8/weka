@@ -30,8 +30,7 @@ import java.io.File;
 
 /**
  * Loads the data from the ARFF file provided as first parameter and saves it
- * again to the ARFF file provided as second parameter.  The input filename can
- * be either a local file or an URL.
+ * again to the ARFF file provided as second parameter.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -47,16 +46,13 @@ public class SaveDataToArffFile {
   public static void main(String[] args) throws Exception {
     // output usage
     if (args.length != 2) {
-      System.err.println("\nUsage: java SaveDataToArffFile <input-file|URL> <output-file>\n");
+      System.err.println("\nUsage: java SaveDataToArffFile <input-file> <output-file>\n");
       System.exit(1);
     }
 
     System.out.println("\nReading from file " + args[0] + "...");
     ArffLoader loader = new ArffLoader();
-    if (args[0].startsWith("http:") || args[0].startsWith("ftp:"))
-      loader.setURL(args[0]);
-    else
-      loader.setSource(new File(args[0]));
+    loader.setSource(new File(args[0]));
     Instances data = loader.getDataSet();
 
     System.out.println("\nSaving to file " + args[1] + "...");

@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2006 University of Waikato 
+ * Copyright (C) 2010 University of Waikato
  */
 
 package weka.core;
@@ -23,26 +23,27 @@ package weka.core;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 /**
  * Tests Range. Run from the command line with:<p/>
  * java weka.core.RangeTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
-public class RangeTest 
+public class RangeTest
   extends TestCase {
-  
+
   /**
    * Constructs the <code>RangeTest</code>.
    *
    * @param name the name of the test class
    */
-  public RangeTest(String name) { 
-    super(name); 
+  public RangeTest(String name) {
+    super(name);
   }
-  
+
   /**
    * Called by JUnit before each test method.
    *
@@ -66,7 +67,7 @@ public class RangeTest
    * @param upper       the upper limit
    */
   protected Range getRange(String initial, int upper) {
-    Range   result; 
+    Range   result;
 
     if (initial == null) {
       result = new Range();
@@ -196,6 +197,6 @@ public class RangeTest
   }
 
   public static void main(String[] args){
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
   }
 }

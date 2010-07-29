@@ -16,39 +16,35 @@
 
 /*
  *    AbstractDataSource.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.beans.PropertyChangeListener;
-import java.beans.VetoableChangeListener;
-import java.beans.beancontext.BeanContext;
-import java.beans.beancontext.BeanContextChild;
-import java.beans.beancontext.BeanContextChildSupport;
-import java.io.Serializable;
-import java.util.Vector;
-
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.util.Vector;
+import java.awt.*;
+import java.io.Serializable;
+import java.beans.beancontext.*;
+import java.beans.*;
+
 
 /**
  * Abstract class for objects that can provide instances from some source
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see DataSource
  * @see Serializable
  */
-public abstract class AbstractDataSource
-  extends JPanel
+public abstract class AbstractDataSource extends JPanel
   implements DataSource, Visible, Serializable, BeanContextChild {
-
-  /** for serialization */
-  private static final long serialVersionUID = -4127257701890044793L;
 
   /**
    * True if this bean's appearance is the design mode appearance

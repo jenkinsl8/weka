@@ -16,30 +16,24 @@
 
 /*
  *    NeuralNode.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Malcolm Ware
  */
 
 package weka.classifiers.functions.neural;
 
-import weka.core.RevisionUtils;
 
 import java.util.Random;
 
 /**
  * This class is used to represent a node in the neuralnet.
- * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class NeuralNode
-  extends NeuralConnection {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1085750607680839163L;
+public class NeuralNode extends NeuralConnection {
     
   /** The weights for each of the input connections, and the threshold. */
   private double[] m_weights;
-  
+
   /** The best (lowest error) weights. Only used when validation set is used */
   private double[] m_bestWeights;
   
@@ -117,24 +111,6 @@ public class NeuralNode
   }
 
   /**
-   * Call this to reset the value and error for this unit, ready for the next
-   * run. This will also call the reset function of all units that are 
-   * connected as inputs to this one.
-   * This is also the time that the update for the listeners will be performed.
-   */
-  public void reset() {
-    
-    if (!Double.isNaN(m_unitValue) || !Double.isNaN(m_unitError)) {
-      m_unitValue = Double.NaN;
-      m_unitError = Double.NaN;
-      m_weightsUpdated = false;
-      for (int noa = 0; noa < m_numInputs; noa++) {
-	m_inputList[noa].reset();
-      }
-    }
-  }
-  
-  /**
    * Call this to have the connection save the current
    * weights.
    */
@@ -159,6 +135,24 @@ public class NeuralNode
     // tell inputs to restore weights
     for (int i = 0; i < m_numInputs; i++) {
       m_inputList[i].restoreWeights();
+    }
+  }
+
+  /**
+   * Call this to reset the value and error for this unit, ready for the next
+   * run. This will also call the reset function of all units that are 
+   * connected as inputs to this one.
+   * This is also the time that the update for the listeners will be performed.
+   */
+  public void reset() {
+    
+    if (!Double.isNaN(m_unitValue) || !Double.isNaN(m_unitError)) {
+      m_unitValue = Double.NaN;
+      m_unitError = Double.NaN;
+      m_weightsUpdated = false;
+      for (int noa = 0; noa < m_numInputs; noa++) {
+	m_inputList[noa].reset();
+      }
     }
   }
 
@@ -327,13 +321,19 @@ public class NeuralNode
     m_changeInWeights[0] = temp2;
     
   }  
+
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

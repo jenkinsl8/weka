@@ -16,7 +16,7 @@
 
 /*
  *    SelectedTagEditor.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -40,7 +40,7 @@ import javax.swing.JLabel;
  * weka.core.SelectedTag object.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class SelectedTagEditor extends PropertyEditorSupport {
 

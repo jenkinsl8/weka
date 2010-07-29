@@ -16,25 +16,22 @@
 
 /*
  *    Stats.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Statistics;
+import weka.core.*;
 
 /**
  * Class implementing a statistical routine needed by J48 to
  * compute its error estimate.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
-public class Stats
-  implements RevisionHandler {
+public class Stats {
 
   /**
    * Computes estimated extra error for given total number of instances
@@ -90,13 +87,12 @@ public class Stats
 
     return (r * N) - e;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 }
+
+
+
+
+
+
+
+

@@ -22,10 +22,9 @@
 
 package weka.core.xml;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.lang.reflect.Method;
+
+import javax.swing.plaf.ColorUIResource;
 
 import org.w3c.dom.Element;
 
@@ -42,11 +41,9 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.1.2.3 $ 
  */
-public class XMLSerializationMethodHandler
-   implements RevisionHandler {
-  
+public class XMLSerializationMethodHandler {
    /** for storing read methods */
    protected MethodHandler m_ReadMethods = null;
    
@@ -60,8 +57,7 @@ public class XMLSerializationMethodHandler
     * initializes the method handling, executes also <code>clear()</code>, which
     * adds initial methods automatically.
     * 
-    * @param owner the owner to retrieve the methods from
-    * @throws Exception if initialization fails
+    * @param o the owner to retrieve the methods from
     * @see #clear() 
     */
    public XMLSerializationMethodHandler(Object owner) throws Exception {
@@ -77,7 +73,7 @@ public class XMLSerializationMethodHandler
    /**
     * adds all methods that are like <code>template</code> to the method list
     * 
-    * @param handler the list to add fitting methods to
+    * @param list the list to add fitting methods to
     * @param template the signature to check the given methods against
     * @param methods the methods to check
     */
@@ -156,8 +152,7 @@ public class XMLSerializationMethodHandler
     * <code>readFromXML()</code> of the <code>XMLSerialiation</code> class. 
     * simplifies the adding of custom methods.
     * 
-    * @param o the object to inspect
-    * @param name the name of the method to return
+    * @param the name of the method to return
     * @return either <code>null</code> if no method was found or a reference 
     * @see XMLSerialization#readFromXML(Element)
     */
@@ -184,8 +179,7 @@ public class XMLSerializationMethodHandler
     * <code>writeToXML()</code> of the <code>XMLSerialiation</code> class. 
     * simplifies the adding of custom methods.
     * 
-    * @param o the object to inspect
-    * @param name the name of the method to return
+    * @param the name of the method to return
     * @return either <code>null</code> if no method was found or a reference 
     * @see XMLSerialization#writeToXML(Element, Object, String)
     */
@@ -263,14 +257,5 @@ public class XMLSerializationMethodHandler
     */
    public String toString() {
       return "Read Methods:\n" + read() + "\n\n" + "Write Methods:\n" + write();
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
 }

@@ -16,32 +16,26 @@
 
 /*
  *    IncrementalClassifierEvent.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.Instance;
 import weka.core.Instances;
-
+import weka.core.Instance;
+import weka.classifiers.Classifier;
 import java.util.EventObject;
 
 /**
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.5.2.1 $
  * @since 1.0
  * @see EventObject
  */
-public class IncrementalClassifierEvent
-  extends EventObject {
-
-  /** for serialization */
-  private static final long serialVersionUID = 28979464317643232L;
+public class IncrementalClassifierEvent extends EventObject {
 
   public static final int NEW_BATCH = 0;
   public static final int WITHIN_BATCH = 1;
@@ -57,8 +51,7 @@ public class IncrementalClassifierEvent
    *
    * @param source the source of the event
    * @param scheme the classifier
-   * @param currentI the current instance
-   * @param status the status
+   * @param tstI the current instance
    */
   public IncrementalClassifierEvent(Object source, Classifier scheme,
 			 Instance currentI, int status) {

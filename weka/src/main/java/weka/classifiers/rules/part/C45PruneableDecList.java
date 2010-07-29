@@ -16,32 +16,27 @@
 
 /*
  *    C45PruneableDecList.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.rules.part;
 
+import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.classifiers.trees.j48.Stats;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Class for handling a partial tree structure pruned using C4.5's
  * pruning heuristic.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.6 $
  */
-public class C45PruneableDecList
-  extends ClassifierDecList{
-
-  /** for serialization */
-  private static final long serialVersionUID = -2757684345218324559L;
+public class C45PruneableDecList extends ClassifierDecList{
     
   /** CF */
   private double CF = 0.25;
@@ -190,13 +185,14 @@ public class C45PruneableDecList
     return errors+Stats.addErrs(localModel().distribution().total(),
 				errors,(float)CF);
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
-  }
 }
+
+
+
+
+
+
+
+
+
+

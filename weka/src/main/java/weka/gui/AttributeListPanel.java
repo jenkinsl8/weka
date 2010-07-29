@@ -16,23 +16,28 @@
 
 /*
  *    AttributeListPanel.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
+
 
 package weka.gui;
 
 import weka.core.Instances;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
-
+import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.JButton;
 import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.BorderFactory;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -40,22 +45,14 @@ import javax.swing.table.TableColumnModel;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
-public class AttributeListPanel
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -2030706987910400362L;
+public class AttributeListPanel extends JPanel {
 
   /**
    * A table model that looks at the names of attributes.
    */
-  class AttributeTableModel
-    extends AbstractTableModel {
-
-    /** for serialization */
-    private static final long serialVersionUID = -7345701953670327707L;
+  class AttributeTableModel extends AbstractTableModel {
 
     /** The instances who's attribute structure we are reporting */
     protected Instances m_Instances;

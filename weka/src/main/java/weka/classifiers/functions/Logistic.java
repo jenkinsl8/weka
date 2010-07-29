@@ -16,111 +16,74 @@
 
 /*
  *    Logistic.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Xin Xu
  *
  */
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Optimization;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.RemoveUseless;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.classifiers.*;
+import java.util.*;
+import java.io.*;
+import weka.core.*;
+import weka.filters.*;
+import weka.filters.unsupervised.attribute.*;
 
 /**
- <!-- globalinfo-start -->
- * Class for building and using a multinomial logistic regression model with a ridge estimator.<br/>
- * <br/>
- * There are some modifications, however, compared to the paper of leCessie and van Houwelingen(1992): <br/>
- * <br/>
- * If there are k classes for n instances with m attributes, the parameter matrix B to be calculated will be an m*(k-1) matrix.<br/>
- * <br/>
- * The probability for class j with the exception of the last class is<br/>
- * <br/>
- * Pj(Xi) = exp(XiBj)/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br/>
- * <br/>
- * The last class has probability<br/>
- * <br/>
- * 1-(sum[j=1..(k-1)]Pj(Xi)) <br/>
- * 	= 1/((sum[j=1..(k-1)]exp(Xi*Bj))+1)<br/>
- * <br/>
- * The (negative) multinomial log-likelihood is thus: <br/>
- * <br/>
- * L = -sum[i=1..n]{<br/>
- * 	sum[j=1..(k-1)](Yij * ln(Pj(Xi)))<br/>
- * 	+(1 - (sum[j=1..(k-1)]Yij)) <br/>
- * 	* ln(1 - sum[j=1..(k-1)]Pj(Xi))<br/>
- * 	} + ridge * (B^2)<br/>
- * <br/>
- * In order to find the matrix B for which L is minimised, a Quasi-Newton Method is used to search for the optimized values of the m*(k-1) variables.  Note that before we use the optimization procedure, we 'squeeze' the matrix B into a m*(k-1) vector.  For details of the optimization procedure, please check weka.core.Optimization class.<br/>
- * <br/>
- * Although original Logistic Regression does not deal with instance weights, we modify the algorithm a little bit to handle the instance weights.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * le Cessie, S., van Houwelingen, J.C. (1992). Ridge Estimators in Logistic Regression. Applied Statistics. 41(1):191-201.<br/>
- * <br/>
- * Note: Missing values are replaced using a ReplaceMissingValuesFilter, and nominal attributes are transformed into numeric attributes using a NominalToBinaryFilter.
- * <p/>
- <!-- globalinfo-end -->
+ * Second implementation for building and using a multinomial logistic
+ * regression model with a ridge estimator.  <p>
+ * 
+ * There are some modifications, however, compared to the paper of le
+ * Cessie and van Houwelingen(1992): <br>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{leCessie1992,
- *    author = {le Cessie, S. and van Houwelingen, J.C.},
- *    journal = {Applied Statistics},
- *    number = {1},
- *    pages = {191-201},
- *    title = {Ridge Estimators in Logistic Regression},
- *    volume = {41},
- *    year = {1992}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * If there are k classes for n instances with m attributes, the
+ * parameter matrix B to be calculated will be an m*(k-1) matrix.<br>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * The probability for class j except the last class is <br>
+ * Pj(Xi) = exp(XiBj)/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
+ * The last class has probability <br>
+ * 1-(sum[j=1..(k-1)]Pj(Xi)) = 1/((sum[j=1..(k-1)]exp(Xi*Bj))+1) <br>
+ *
+ * The (negative) multinomial log-likelihood is thus: <br>
+ * L = -sum[i=1..n]{
+ * sum[j=1..(k-1)](Yij * ln(Pj(Xi))) +
+ * (1 - (sum[j=1..(k-1)]Yij)) * ln(1 - sum[j=1..(k-1)]Pj(Xi))
+ * } + ridge * (B^2) <br>
+ *
+ * In order to find the matrix B for which L is minimised, a
+ * Quasi-Newton Method is used to search for the optimized values of
+ * the m*(k-1) variables.  Note that before we use the optimization
+ * procedure, we "squeeze" the matrix B into a m*(k-1) vector.  For
+ * details of the optimization procedure, please check
+ * weka.core.Optimization class. <p>
+ *
+ * Although original Logistic Regression does not deal with instance
+ * weights, we modify the algorithm a little bit to handle the
+ * instance weights. <p>
+ *
+ * Reference: le Cessie, S. and van Houwelingen, J.C. (1992). <i>
+ * Ridge Estimators in Logistic Regression.</i> Applied Statistics,
+ * Vol. 41, No. 1, pp. 191-201. <p>
+ *
+ * Missing values are replaced using a ReplaceMissingValuesFilter, and
+ * nominal attributes are transformed into numeric attributes using a
+ * NominalToBinaryFilter.<p>
+ *
+ * Valid options are:<p>
+ *
+ * -D <br>
+ * Turn on debugging output.<p>
+ *
+ * -R <ridge> <br>
+ * Set the ridge parameter for the log-likelihood.<p>
  * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
- * <pre> -R &lt;ridge&gt;
- *  Set the ridge in the log-likelihood.</pre>
- * 
- * <pre> -M &lt;number&gt;
- *  Set the maximum number of iterations (default -1, until convergence).</pre>
- * 
- <!-- options-end -->
+ * -M <number of iterations> <br> Set the maximum number of iterations
+ * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision$
- */
-public class Logistic extends AbstractClassifier 
-  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3932117032546553727L;
+ * @version $Revision: 1.32 $ */
+public class Logistic extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler {
   
   /** The coefficients (optimized parameters) of the model */
   protected double [][] m_Par;
@@ -140,7 +103,7 @@ public class Logistic extends AbstractClassifier
   /** The ridge parameter. */
   protected double m_Ridge = 1e-8;
     
-  /** An attribute filter */
+  /* An attribute filter */
   private RemoveUseless m_AttFilter;
     
   /** The filter used to make attributes numeric. */
@@ -157,8 +120,6 @@ public class Logistic extends AbstractClassifier
     
   /** The maximum number of iterations. */
   private int m_MaxIts = -1;
-
-  private Instances m_structure;
     
   /**
    * Returns a string describing this classifier
@@ -189,33 +150,12 @@ public class Logistic extends AbstractClassifier
       +"Although original Logistic Regression does not deal with instance "
       +"weights, we modify the algorithm a little bit to handle the "
       +"instance weights.\n\n"
-      +"For more information see:\n\n"
-      + getTechnicalInformation().toString() + "\n\n"
+      +"For more information see:\n\nle Cessie, S. and van Houwelingen, J.C. (1992). " 
+      +"Ridge Estimators in Logistic Regression.  Applied Statistics, "
+      +"Vol. 41, No. 1, pp. 191-201. \n\n"
       +"Note: Missing values are replaced using a ReplaceMissingValuesFilter, and "
       +"nominal attributes are transformed into numeric attributes using a "
       +"NominalToBinaryFilter.";
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "le Cessie, S. and van Houwelingen, J.C.");
-    result.setValue(Field.YEAR, "1992");
-    result.setValue(Field.TITLE, "Ridge Estimators in Logistic Regression");
-    result.setValue(Field.JOURNAL, "Applied Statistics");
-    result.setValue(Field.VOLUME, "41");
-    result.setValue(Field.NUMBER, "1");
-    result.setValue(Field.PAGES, "191-201");
-    
-    return result;
   }
 
   /**
@@ -236,24 +176,20 @@ public class Logistic extends AbstractClassifier
   }
     
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * -D <br>
+   * Turn on debugging output.<p>
+   *
+   * -R ridge <br>
+   * Set the ridge parameter for the log-likelihood.<p>
    * 
-   * <pre> -D
-   *  Turn on debugging output.</pre>
-   * 
-   * <pre> -R &lt;ridge&gt;
-   *  Set the ridge in the log-likelihood.</pre>
-   * 
-   * <pre> -M &lt;number&gt;
-   *  Set the maximum number of iterations (default -1, until convergence).</pre>
-   * 
-   <!-- options-end -->
+   * -M num <br>
+   * Set the maximum number of iterations.
+   * (default -1, until convergence)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setDebug(Utils.getFlag('D', options));
@@ -376,23 +312,21 @@ public class Logistic extends AbstractClassifier
   }    
     
   private class OptEng extends Optimization{
-    /** Weights of instances in the data */
+    // Weights of instances in the data
     private double[] weights;
 
-    /** Class labels of instances */
+    // Class labels of instances
     private int[] cls;
 	
-    /** 
-     * Set the weights of instances
-     * @param w the weights to be set
+    /* Set the weights of instances
+     * @param d the weights to be set
      */ 
     public void setWeights(double[] w) {
       weights = w;
     }
 	
-    /** 
-     * Set the class labels of instances
-     * @param c the class labels to be set
+    /* Set the class labels of instances
+     * @param d the class labels to be set
      */ 
     public void setClassLabels(int[] c) {
       cls = c;
@@ -493,37 +427,6 @@ public class Logistic extends AbstractClassifier
 	    
       return grad;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   *
-   * @return      the capabilities of this classifier
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    
-    return result;
   }
     
   /**
@@ -531,16 +434,21 @@ public class Logistic extends AbstractClassifier
    *
    * @param train the training data to be used for generating the
    * boosted classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances train) throws Exception {
-    // can classifier handle the data?
-    getCapabilities().testWithFail(train);
-
-    // remove instances with missing class
+    if (train.classAttribute().type() != Attribute.NOMINAL) {
+      throw new UnsupportedClassTypeException("Class attribute must be nominal.");
+    }
+    if (train.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
     train = new Instances(train);
     train.deleteWithMissingClass();
-    
+    if (train.numInstances() == 0) {
+      throw new IllegalArgumentException("No train instances without missing class value!");
+    }
+
     // Replace missing values	
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(train);
@@ -555,9 +463,6 @@ public class Logistic extends AbstractClassifier
     m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(train);
     train = Filter.useFilter(train, m_NominalToBinary);
-    
-    // Save the structure for printing the model
-    m_structure = new Instances(train, 0);
 	
     // Extract data
     m_ClassIndex = train.classIndex();
@@ -703,7 +608,7 @@ public class Logistic extends AbstractClassifier
    *
    * @param instance the instance for which distribution is computed
    * @return the distribution
-   * @throws Exception if the distribution can't be computed successfully
+   * @exception Exception if the distribution can't be computed successfully
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
@@ -757,17 +662,6 @@ public class Logistic extends AbstractClassifier
 	
     return prob;
   } 
-
-  /**
-   * Returns the coefficients for this logistic model.
-   * The first dimension indexes the attributes, and
-   * the second the classes.
-   * 
-   * @return the coefficients for this logistic model
-   */
-  public double [][] coefficients() {
-    return m_Par;
-  }
     
   /**
    * Gets a string describing the classifier.
@@ -775,131 +669,39 @@ public class Logistic extends AbstractClassifier
    * @return a string describing the classifer built.
    */
   public String toString() {
-    StringBuffer temp = new StringBuffer();
-
-    String result = "";
-    temp.append("Logistic Regression with ridge parameter of " + m_Ridge);
+	
+    double CSq;
+    int df = m_NumPredictors;
+    String result = "Logistic Regression with ridge parameter of "+m_Ridge;
     if (m_Par == null) {
       return result + ": No model built yet.";
     }
-
-    // find longest attribute name
-    int attLength = 0;
-    for (int i = 0; i < m_structure.numAttributes(); i++) {
-      if (i != m_structure.classIndex() && 
-          m_structure.attribute(i).name().length() > attLength) {
-        attLength = m_structure.attribute(i).name().length();
-      }
-    }
-
-    if ("Intercept".length() > attLength) {
-      attLength = "Intercept".length();
-    }
-
-    if ("Variable".length() > attLength) {
-      attLength = "Variable".length();
-    }
-    attLength += 2;
-
-    int colWidth = 0;
-    // check length of class names
-    for (int i = 0; i < m_structure.classAttribute().numValues() - 1; i++) {
-      if (m_structure.classAttribute().value(i).length() > colWidth) {
-        colWidth = m_structure.classAttribute().value(i).length();
-      }
-    }
-
-    // check against coefficients and odds ratios
+	
+    result += "\nCoefficients...\n"
+      + "Variable      Coeff.\n";
     for (int j = 1; j <= m_NumPredictors; j++) {
-      for (int k = 0; k < m_NumClasses - 1; k++) {
-        if (Utils.doubleToString(m_Par[j][k], 12, 4).trim().length() > colWidth) {
-          colWidth = Utils.doubleToString(m_Par[j][k], 12, 4).trim().length();
-        }
-        double ORc = Math.exp(m_Par[j][k]);
-	String t = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
-        if (t.trim().length() > colWidth) {
-          colWidth = t.trim().length();
-        }
-      }
-    }
-
-    if ("Class".length() > colWidth) {
-      colWidth = "Class".length();
-    }
-    colWidth += 2;
-    
-    
-    temp.append("\nCoefficients...\n");
-    temp.append(Utils.padLeft(" ", attLength) + Utils.padLeft("Class", colWidth) + "\n");
-    temp.append(Utils.padRight("Variable", attLength));
-
-    for (int i = 0; i < m_NumClasses - 1; i++) {
-      String className = m_structure.classAttribute().value(i);
-      temp.append(Utils.padLeft(className, colWidth));
-    }
-    temp.append("\n");
-    int separatorL = attLength + ((m_NumClasses - 1) * colWidth);
-    for (int i = 0; i < separatorL; i++) {
-      temp.append("=");
-    }
-    temp.append("\n");
-                
-    int j = 1;
-    for (int i = 0; i < m_structure.numAttributes(); i++) {
-      if (i != m_structure.classIndex()) {
-        temp.append(Utils.padRight(m_structure.attribute(i).name(), attLength));
-        for (int k = 0; k < m_NumClasses-1; k++) {
-          temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 12, 4).trim(), colWidth));
-        }
-        temp.append("\n");
-        j++;
-      }
+      result += Utils.doubleToString(j, 8, 0);
+      for (int k = 0; k < m_NumClasses-1; k++)
+	result += " "+Utils.doubleToString(m_Par[j][k], 12, 4); 
+      result += "\n";
     }
 	
-    temp.append(Utils.padRight("Intercept", attLength));
-    for (int k = 0; k < m_NumClasses-1; k++) {
-      temp.append(Utils.padLeft(Utils.doubleToString(m_Par[0][k], 10, 4).trim(), colWidth)); 
-    }
-    temp.append("\n");
+    result += "Intercept ";
+    for (int k = 0; k < m_NumClasses-1; k++)
+      result += " "+Utils.doubleToString(m_Par[0][k], 10, 4); 
+    result += "\n";
 	
-    temp.append("\n\nOdds Ratios...\n");
-    temp.append(Utils.padLeft(" ", attLength) + Utils.padLeft("Class", colWidth) + "\n");
-    temp.append(Utils.padRight("Variable", attLength));
-
-    for (int i = 0; i < m_NumClasses - 1; i++) {
-      String className = m_structure.classAttribute().value(i);
-      temp.append(Utils.padLeft(className, colWidth));
-    }
-    temp.append("\n");
-    for (int i = 0; i < separatorL; i++) {
-      temp.append("=");
-    }
-    temp.append("\n");
-
-    j = 1;
-    for (int i = 0; i < m_structure.numAttributes(); i++) {
-      if (i != m_structure.classIndex()) {
-        temp.append(Utils.padRight(m_structure.attribute(i).name(), attLength));
-        for (int k = 0; k < m_NumClasses-1; k++) {
-          double ORc = Math.exp(m_Par[j][k]);
-          String ORs = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
-          temp.append(Utils.padLeft(ORs.trim(), colWidth));
-        }
-        temp.append("\n");
-        j++;
+    result += "\nOdds Ratios...\n"
+      + "Variable         O.R.\n";
+    for (int j = 1; j <= m_NumPredictors; j++) {
+      result += Utils.doubleToString(j, 8, 0); 
+      for (int k = 0; k < m_NumClasses-1; k++){
+	double ORc = Math.exp(m_Par[j][k]);
+	result += " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
       }
+      result += "\n";
     }
-
-    return temp.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return result;
   }
     
   /**
@@ -909,6 +711,11 @@ public class Logistic extends AbstractClassifier
    * scheme (see Evaluation)
    */
   public static void main(String [] argv) {
-    runClassifier(new Logistic(), argv);
+    try {
+      System.out.println(Evaluation.evaluateModel(new Logistic(), argv));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
   }
 }

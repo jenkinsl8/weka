@@ -16,35 +16,33 @@
 
 /*
  *    InstanceSavePanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui.streams;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Label;
 import java.awt.Panel;
 import java.awt.TextField;
+import java.awt.Label;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.FileOutputStream;
+import java.io.Serializable;
 import java.io.PrintWriter;
+
+import weka.core.Instances;
+import weka.core.Instance;
 
 /** 
  * A bean that saves a stream of instances to a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class InstanceSavePanel
-  extends Panel
-  implements InstanceListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6061005366989295026L;
+public class InstanceSavePanel extends Panel implements Serializable,
+  InstanceListener {
   
   private Label count_Lab;
   private int m_Count;

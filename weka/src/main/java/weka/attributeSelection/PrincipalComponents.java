@@ -26,20 +26,16 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Matrix;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
+import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Center;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -54,10 +50,8 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -C
- *  Center (rather than standardize) the
- *  data and compute PCA using the covariance (rather
- *   than the correlation) matrix.</pre>
+ * <pre> -D
+ *  Don't normalize input data.</pre>
  * 
  * <pre> -R
  *  Retain enough PC attributes to account 
@@ -82,14 +76,14 @@ public class PrincipalComponents
   extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
   
-  /** for serialization */
-  private static final long serialVersionUID = -3675307197777734007L;
+  /** for serialization */    
+  private static final long serialVersionUID = -4021439289203755494L;
 
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
 
   /** Keep a copy for the class attribute (if set) */
-  private Instances m_trainHeader;
+  private Instances m_trainCopy;
 
   /** The header for the transformed data format */
   private Instances m_transformedFormat;
@@ -115,13 +109,6 @@ public class PrincipalComponents
   private double[] m_means;
   private double[] m_stdDevs;
   
-  /** 
-   * If true, center (rather than standardize) the data and
-   * compute PCA from covariance (rather than correlation)
-   * matrix.
-   */
-  private boolean m_center = false;
-
   /** Will hold the unordered linear transformations of the (normalized)
       original data */
   private double [][] m_eigenvectors;
@@ -139,11 +126,13 @@ public class PrincipalComponents
   private ReplaceMissingValues m_replaceMissingFilter;
   private NominalToBinary m_nominalToBinFilter;
   private Remove m_attributeFilter;
-  private Center m_centerFilter;
   private Standardize m_standardizeFilter;
 
   /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
+  
+  /** normalize the input data? */
+  //private boolean m_normalize = true;
 
   /** the amount of variance to cover in the original data when
       retaining the best n PC's */
@@ -181,12 +170,7 @@ public class PrincipalComponents
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(3);
-    
-    newVector.addElement(new Option("\tCenter (rather than standardize) the" +
-    		"\n\tdata and compute PCA using the covariance (rather" +
-    		"\n\t than the correlation) matrix.",
-    		"C", 0, "-C"));
+    Vector newVector = new Vector(3);        
 
     newVector.addElement(new Option("\tRetain enough PC attributes to account "
                                     +"\n\tfor this proportion of variance in "
@@ -210,10 +194,8 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -C
-   *  Center (rather than standardize) the
-   *  data and compute PCA using the covariance (rather
-   *   than the correlation) matrix.</pre>
+   * <pre> -D
+   *  Don't normalize input data.</pre>
    * 
    * <pre> -R
    *  Retain enough PC attributes to account 
@@ -250,7 +232,6 @@ public class PrincipalComponents
     }
 
     setTransformBackToOriginal(Utils.getFlag('O', options));
-    setCenterData(Utils.getFlag('C', options));
   }
 
   /**
@@ -260,41 +241,6 @@ public class PrincipalComponents
     m_coverVariance = 0.95;
     m_sumOfEigenValues = 0.0;
     m_transBackToOriginal = false;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String centerDataTipText() {
-    return "Center (rather than standardize) the data. PCA will "
-      + "be computed from the covariance (rather than correlation) "
-      + "matrix";
-  }
-  
-  /**
-   * Set whether to center (rather than standardize)
-   * the data. If set to true then PCA is computed
-   * from the covariance rather than correlation matrix.
-   * 
-   * @param center true if the data is to be
-   * centered rather than standardized
-   */
-  public void setCenterData(boolean center) {
-    m_center = center;
-  }
-  
-  /**
-   * Get whether to center (rather than standardize)
-   * the data. If true then PCA is computed
-   * from the covariance rather than correlation matrix. 
-   * 
-   * @return true if the data is to be centered rather
-   * than standardized.
-   */
-  public boolean getCenterData() {
-    return m_center;
   }
 
   /**
@@ -393,10 +339,6 @@ public class PrincipalComponents
     String[] options = new String[6];
     int current = 0;
     
-    if (getCenterData()) {
-      options[current++] = "-C";
-    }
-
     options[current++] = "-R";
     options[current++] = ""+getVarianceCovered();
 
@@ -415,40 +357,11 @@ public class PrincipalComponents
   }
 
   /**
-   * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
-  /**
    * Initializes principal components and performs the analysis
    * @param data the instances to analyse/transform
    * @throws Exception if analysis fails
    */
   public void buildEvaluator(Instances data) throws Exception {
-    // can evaluator handle data?
-    getCapabilities().testWithFail(data);
-
     buildAttributeConstructor(data);
   }
 
@@ -458,11 +371,16 @@ public class PrincipalComponents
     m_attributeFilter = null;
     m_nominalToBinFilter = null;
     m_sumOfEigenValues = 0.0;
+    
+    if (data.checkForStringAttributes()) {
+      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
+    }
     m_trainInstances = new Instances(data);
 
     // make a copy of the training data so that we can get the class
     // column to append to the transformed data (if necessary)
-    m_trainHeader = new Instances(m_trainInstances, 0);
+//    m_trainHeader = new Instances(m_trainInstances, 0);
+    m_trainCopy = new Instances(m_trainInstances);
     
     m_replaceMissingFilter = new ReplaceMissingValues();
     m_replaceMissingFilter.setInputFormat(m_trainInstances);
@@ -508,14 +426,10 @@ public class PrincipalComponents
       m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
     }
     
-    // can evaluator handle the processed data ? e.g., enough attributes?
-    getCapabilities().testWithFail(m_trainInstances);
-
     m_numInstances = m_trainInstances.numInstances();
     m_numAttribs = m_trainInstances.numAttributes();
 
-    //fillCorrelation();
-    fillCovariance();
+    fillCorrelation();    
 
     double [] d = new double[m_numAttribs]; 
     double [][] v = new double[m_numAttribs][m_numAttribs];
@@ -599,7 +513,7 @@ public class PrincipalComponents
    * @return the transformed training data
    * @throws Exception if transformed data can't be returned
    */
-  public Instances transformedData(Instances data) throws Exception {
+  public Instances transformedData() throws Exception {
     if (m_eigenvalues == null) {
       throw new Exception("Principal components hasn't been built yet");
     }
@@ -611,8 +525,8 @@ public class PrincipalComponents
     } else {
       output = new Instances(m_transformedFormat);
     }
-    for (int i = 0; i < data.numInstances(); i++) {
-      Instance converted = convertInstance(data.instance(i));
+    for (int i = 0; i < m_trainCopy.numInstances(); i++) {
+      Instance converted = convertInstance(m_trainCopy.instance(i));
       output.add(converted);
     }
 
@@ -646,51 +560,6 @@ public class PrincipalComponents
     return 1.0 - cumulative / m_sumOfEigenValues;
   }
   
-  private void fillCovariance() throws Exception {
-    // first store the means
-    m_means = new double[m_trainInstances.numAttributes()];
-    m_stdDevs = new double[m_trainInstances.numAttributes()];
-    for (int i = 0; i < m_trainInstances.numAttributes(); i++) {
-      m_means[i] = m_trainInstances.meanOrMode(i);
-    }
-    
-    if (!m_center) {
-      fillCorrelation();
-      return;
-    }
-    
-    double[] att = new double[m_trainInstances.numInstances()];
-    
-    // now center the data by subtracting the mean
-    m_centerFilter = new Center();
-    m_centerFilter.setInputFormat(m_trainInstances);
-    m_trainInstances = Filter.useFilter(m_trainInstances, m_centerFilter);
-    
-    // now compute the covariance matrix
-    m_correlation = new double[m_numAttribs][m_numAttribs];
-    
-    for (int i = 0; i < m_numAttribs; i++) {
-      for (int j = 0; j < m_numAttribs; j++) {
-        
-        double cov = 0;
-        for (int k = 0; k < m_numInstances; k++) {
-       
-          if (i == j) {
-            cov += (m_trainInstances.instance(k).value(i) *
-                m_trainInstances.instance(k).value(i));
-          } else {
-          cov += (m_trainInstances.instance(k).value(i) *
-              m_trainInstances.instance(k).value(j));
-          }
-        }
-        
-        cov /= (double)(m_trainInstances.numInstances() - 1);
-        m_correlation[i][j] = cov;
-        m_correlation[j][i] = cov;                
-      }
-    }
-  }
-
   /**
    * Fill the correlation matrix
    */
@@ -699,6 +568,12 @@ public class PrincipalComponents
     double [] att1 = new double [m_numInstances];
     double [] att2 = new double [m_numInstances];
     double corr;
+    // first store the means
+    m_means = new double[m_trainInstances.numAttributes()];
+    m_stdDevs = new double[m_trainInstances.numAttributes()];
+    for (int i = 0; i < m_trainInstances.numAttributes(); i++) {
+      m_means[i] = m_trainInstances.meanOrMode(i);
+    }
 
     for (int i = 0; i < m_numAttribs; i++) {
       for (int j = 0; j < m_numAttribs; j++) {
@@ -709,7 +584,7 @@ public class PrincipalComponents
         if (i == j) {
           m_correlation[i][j] = 1.0;
             // store the standard deviation
-          m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
+            m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
         } else {
           corr = Utils.correlation(att1,att2,m_numInstances);
           m_correlation[i][j] = corr;
@@ -742,8 +617,8 @@ public class PrincipalComponents
     } catch (Exception ex) {
     }
     //tomorrow
-    String corrCov = (m_center) ? "Covariance " : "Correlation ";
-    result.append(corrCov + "matrix\n"+matrixToString(m_correlation)
+
+    result.append("Correlation matrix\n"+matrixToString(m_correlation)
                   +"\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
     for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
@@ -843,16 +718,15 @@ public class PrincipalComponents
                     inst.value(j - 1));
        }
       newVals[i] = tempval;
-      if (!m_center) {
-        newVals[i] *= m_stdDevs[i];
-      } 
+
+      newVals[i] *= m_stdDevs[i];
       newVals[i] += m_means[i];
     }
     
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new DenseInstance(inst.weight(), newVals);
+      return new Instance(inst.weight(), newVals);
     }      
   }
 
@@ -872,10 +746,10 @@ public class PrincipalComponents
 
     double[] newVals = new double[m_outputNumAtts];
     Instance tempInst = (Instance)instance.copy();
-    if (!instance.dataset().equalHeaders(m_trainHeader)) {
+    if (!instance.dataset().equalHeaders(m_trainCopy)) {
       throw new Exception("Can't convert instance: header's don't match: "
                           +"PrincipalComponents\n"
-                          + instance.dataset().equalHeadersMsg(m_trainHeader));
+                          + "Can't convert instance: header's don't match.");
     }
 
     m_replaceMissingFilter.input(tempInst);
@@ -897,16 +771,11 @@ public class PrincipalComponents
       m_attributeFilter.batchFinished();
       tempInst = m_attributeFilter.output();
     }
-    
-    if (!m_center) {
-      m_standardizeFilter.input(tempInst);
-      m_standardizeFilter.batchFinished();
-      tempInst = m_standardizeFilter.output();
-    } else {
-      m_centerFilter.input(tempInst);
-      m_centerFilter.batchFinished();
-      tempInst = m_centerFilter.output();
-    }
+
+
+    m_standardizeFilter.input(tempInst);
+    m_standardizeFilter.batchFinished();
+    tempInst = m_standardizeFilter.output();
 
     if (m_hasClass) {
        newVals[m_outputNumAtts - 1] = instance.value(instance.classIndex());
@@ -930,14 +799,14 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new DenseInstance(instance.weight(), newVals);
+        return new Instance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
         return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
                                                             newVals));
       } else {
-        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
+        return convertInstanceToOriginal(new Instance(instance.weight(),
                                                       newVals));
       }
     }
@@ -958,11 +827,11 @@ public class PrincipalComponents
     }
     
     if (m_hasClass) {
-      attributes.addElement(m_trainHeader.classAttribute().copy());
+      attributes.addElement(m_trainCopy.classAttribute().copy());
     }
 
     Instances outputFormat = 
-      new Instances(m_trainHeader.relationName()+"->PC->original space",
+      new Instances(m_trainCopy.relationName()+"->PC->original space",
                     attributes, 0);
     
     // set the class to be the last attribute if necessary
@@ -1023,7 +892,7 @@ public class PrincipalComponents
      }
      
      if (m_hasClass) {
-       attributes.addElement(m_trainHeader.classAttribute().copy());
+       attributes.addElement(m_trainCopy.classAttribute().copy());
      }
 
      Instances outputFormat = 
@@ -1039,22 +908,19 @@ public class PrincipalComponents
      return outputFormat;
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-
+  
   /**
    * Main method for testing this class
    * @param argv should contain the command line arguments to the
    * evaluator/transformer (see AttributeSelection)
    */
   public static void main(String [] argv) {
-    runEvaluator(new PrincipalComponents(), argv);
+    try {
+      System.out.println(AttributeSelection.
+          SelectAttributes(new PrincipalComponents(), argv));
+    } catch (Exception e) {
+      e.printStackTrace();
+      System.out.println(e.getMessage());
+    }
   }
 }
-

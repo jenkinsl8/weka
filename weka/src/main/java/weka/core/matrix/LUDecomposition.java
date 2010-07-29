@@ -14,9 +14,6 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
 
 /** 
@@ -36,13 +33,11 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.1.2.2 $
  */
-public class LUDecomposition 
-  implements Serializable, RevisionHandler {
 
-  /** for serialization */
-  private static final long serialVersionUID = -2731022568037808629L;
+public class LUDecomposition 
+  implements Serializable {
 
   /** 
    * Array for internal storage of decomposition.
@@ -67,6 +62,7 @@ public class LUDecomposition
   /** 
    * LU Decomposition
    * @param  A   Rectangular matrix
+   * @return     Structure to access L, U and piv.
    */
   public LUDecomposition(Matrix A) {
 
@@ -267,14 +263,5 @@ public class LUDecomposition
       }
     }
     return Xmat;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }
