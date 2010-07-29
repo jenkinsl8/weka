@@ -26,11 +26,11 @@ package weka.gui;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.FontMetrics;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
-
 import javax.swing.JFileChooser;
 
 
@@ -42,7 +42,7 @@ import javax.swing.JFileChooser;
  */
 public class FileEditor extends PropertyEditorSupport {
 
-  /** The file chooser used for selecting files. */
+  /** The file chooser used for selecting files */
   protected JFileChooser m_FileChooser;
   
   /**

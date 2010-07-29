@@ -25,7 +25,6 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance; 
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -52,10 +51,8 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -C
- *  Center (rather than standardize) the
- *  data and compute PCA using the covariance (rather
- *   than the correlation) matrix.</pre>
+ * <pre> -D
+ *  Don't normalize input data.</pre>
  * 
  * <pre> -R &lt;num&gt;
  *  Retain enough PC attributes to account
@@ -213,10 +210,8 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -C
-   *  Center (rather than standardize) the
-   *  data and compute PCA using the covariance (rather
-   *   than the correlation) matrix.</pre>
+   * <pre> -D
+   *  Don't normalize input data.</pre>
    * 
    * <pre> -R &lt;num&gt;
    *  Retain enough PC attributes to account
@@ -672,7 +667,7 @@ public class PrincipalComponents
     if (instance instanceof SparseInstance)
       result = new SparseInstance(instance.weight(), newVals);
     else
-      result = new DenseInstance(instance.weight(), newVals);
+      result = new Instance(instance.weight(), newVals);
     
     return result;
   }
@@ -876,4 +871,3 @@ public class PrincipalComponents
     runFilter(new PrincipalComponents(), args);
   }
 }
-

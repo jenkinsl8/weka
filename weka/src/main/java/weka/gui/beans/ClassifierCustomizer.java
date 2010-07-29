@@ -23,12 +23,10 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -36,15 +34,17 @@ import java.awt.event.FocusListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
 /**
  * GUI customizer for the classifier wrapper bean
@@ -54,8 +54,8 @@ import javax.swing.SwingConstants;
  */
 public class ClassifierCustomizer
   extends JPanel
-  implements Customizer, CustomizerClosingListener, 
-  CustomizerCloseRequester {
+  implements Customizer, CustomizerClosingListener,
+             CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -6688000820160821429L;
@@ -80,11 +80,9 @@ public class ClassifierCustomizer
   
   private JPanel m_holderPanel = new JPanel();
   private JTextField m_executionSlotsText = new JTextField();
-  
-  private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
-  
+
   private JFrame m_parentFrame;
-  
+
   /** Copy of the current classifier in case cancel is selected */
   protected weka.classifiers.Classifier m_backup;
 
@@ -130,14 +128,6 @@ public class ClassifierCustomizer
       }
     });
     
-    m_blockOnLastFold.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_dsClassifier != null) {
-          m_dsClassifier.setBlockOnLastFold(m_blockOnLastFold.isSelected());
-        }
-      }
-    });
-    
     JPanel executionSlotsPanel = new JPanel();
     executionSlotsPanel.
       setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -149,30 +139,28 @@ public class ClassifierCustomizer
       setBorder(BorderFactory.createTitledBorder("More options"));
     m_holderPanel.setLayout(new BorderLayout());
     m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
-//    m_blockOnLastFold.setHorizontalTextPosition(SwingConstants.RIGHT);
-    m_holderPanel.add(m_blockOnLastFold, BorderLayout.SOUTH);
-    
+
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(m_holderPanel, BorderLayout.NORTH);
     JButton OKBut = new JButton("OK");
     JButton CancelBut = new JButton("Cancel");
     OKBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_parentFrame.dispose();
-      }
-    });
+        public void actionPerformed(ActionEvent e) {
+          m_parentFrame.dispose();
+        }
+      });
     
     CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // cancel requested, so revert to backup and then
-        // close the dialog
-        if (m_backup != null) {
-          m_dsClassifier.setClassifierTemplate(m_backup);
+        public void actionPerformed(ActionEvent e) {
+          // cancel requested, so revert to backup and then
+          // close the dialog
+          if (m_backup != null) {
+            m_dsClassifier.setClassifierTemplate(m_backup);
+          }
+          m_parentFrame.dispose();
         }
-        m_parentFrame.dispose();
-      }
-    });
+      });
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
@@ -217,11 +205,11 @@ public class ClassifierCustomizer
     } catch (Exception ex) {
       // ignore
     }
+
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
-    m_blockOnLastFold.setSelected(m_dsClassifier.getBlockOnLastFold());
     checkOnClassifierType();
   }
   

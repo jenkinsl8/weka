@@ -24,7 +24,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -38,7 +38,6 @@ import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -265,8 +264,8 @@ public class PartitionedMultiFilter
   protected void testInputFormat(Instances instanceInfo) throws Exception {
     for (int i = 0; i < getRanges().length; i++) {
       Instances newi = new Instances(instanceInfo, 0);
-      if (instanceInfo.size() > 0){
-	newi.add((Instance)instanceInfo.get(0).copy());
+      if (instanceInfo.numInstances() > 0){
+	newi.add((Instance)instanceInfo.instance(0).copy());
       }
       Range range = getRanges()[i];
       range.setUpper(instanceInfo.numAttributes() - 1);
@@ -528,17 +527,17 @@ public class PartitionedMultiFilter
    * @throws Exception	if renaming fails
    */
   protected Instances renameAttributes(Instances data, String prefix) throws Exception {
-    Instances			result;
-    int				i;
-    ArrayList<Attribute>	atts;
+    Instances	result;
+    int		i;
+    FastVector	atts;
 
     // rename attributes
-    atts = new ArrayList<Attribute>();
+    atts = new FastVector();
     for (i = 0; i < data.numAttributes(); i++) {
       if (i == data.classIndex())
-	atts.add((Attribute) data.attribute(i).copy());
+	atts.addElement((Attribute) data.attribute(i).copy());
       else
-	atts.add(data.attribute(i).copy(prefix + data.attribute(i).name()));
+	atts.addElement(data.attribute(i).copy(prefix + data.attribute(i).name()));
     }
 
     // create new dataset
@@ -567,12 +566,12 @@ public class PartitionedMultiFilter
    * @see                   #batchFinished()
    */
   protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
-    Instances   		result;
-    Instances			processed;
-    int         		i;
-    int				n;
-    ArrayList<Attribute>	atts;
-    Attribute			att;
+    Instances   result;
+    Instances	processed;
+    int         i;
+    int		n;
+    FastVector	atts;
+    Attribute	att;
 
     if (!isFirstBatchDone()) {
       // we need the full dataset here, see process(Instances)
@@ -584,7 +583,7 @@ public class PartitionedMultiFilter
       // determine unused indices
       determineUnusedIndices(inputFormat);
 
-      atts = new ArrayList<Attribute>();
+      atts = new FastVector();
       for (i = 0; i < getFilters().length; i++) {
 	if (!isFirstBatchDone()) {
 	  // generate subset
@@ -604,7 +603,7 @@ public class PartitionedMultiFilter
 	for (n = 0; n < processed.numAttributes(); n++) {
 	  if (n == processed.classIndex())
 	    continue;
-	  atts.add((Attribute) processed.attribute(n).copy());
+	  atts.addElement((Attribute) processed.attribute(n).copy());
 	}
       }
 
@@ -612,13 +611,13 @@ public class PartitionedMultiFilter
       if (!getRemoveUnused()) {
 	for (i = 0; i < m_IndicesUnused.length; i++) {
 	  att = inputFormat.attribute(m_IndicesUnused[i]);
-	  atts.add(att.copy("unfiltered-" + att.name()));
+	  atts.addElement(att.copy("unfiltered-" + att.name()));
 	}
       }
 
       // add class if present
       if (inputFormat.classIndex() > -1)
-	atts.add((Attribute) inputFormat.classAttribute().copy());
+	atts.addElement((Attribute) inputFormat.classAttribute().copy());
 
       // generate new dataset
       result = new Instances(inputFormat.relationName(), atts, 0);
@@ -724,7 +723,7 @@ public class PartitionedMultiFilter
       if (inst instanceof SparseInstance)
 	newInst = new SparseInstance(instances.instance(i).weight(), values);
       else
-	newInst = new DenseInstance(instances.instance(i).weight(), values);
+	newInst = new Instance(instances.instance(i).weight(), values);
       result.add(newInst);
     }
 

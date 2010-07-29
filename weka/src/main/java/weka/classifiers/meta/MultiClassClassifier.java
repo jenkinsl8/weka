@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
@@ -99,7 +98,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.48 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -237,7 +236,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -269,7 +268,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -351,7 +350,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -396,7 +395,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -444,7 +443,7 @@ public class MultiClassClassifier
     int numClassifiers = insts.numClasses();
     if (numClassifiers <= 2) {
 
-      m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, 1);
+      m_Classifiers = Classifier.makeCopies(m_Classifier, 1);
       m_Classifiers[0].buildClassifier(insts);
 
       m_ClassFilters = null;
@@ -462,7 +461,7 @@ public class MultiClassClassifier
       }
 
       numClassifiers = pairs.size();
-      m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, numClassifiers);
+      m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new Filter[numClassifiers];
       m_SumOfWeights = new double[numClassifiers];
 
@@ -518,7 +517,7 @@ public class MultiClassClassifier
         throw new Exception("Unrecognized correction code type");
       }
       numClassifiers = code.size();
-      m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, numClassifiers);
+      m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new MakeIndicator[numClassifiers];
       for (int i = 0; i < m_Classifiers.length; i++) {
 	m_ClassFilters[i] = new MakeIndicator();
@@ -982,7 +981,7 @@ public class MultiClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.48 $");
   }
 
   /**

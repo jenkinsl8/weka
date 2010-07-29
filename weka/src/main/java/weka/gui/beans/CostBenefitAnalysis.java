@@ -59,7 +59,6 @@ import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.Logger;
@@ -173,7 +172,7 @@ public class CostBenefitAnalysis extends JPanel
     protected JTextField m_cost_aa = new JTextField("0.0", 5);
     protected JTextField m_cost_ab = new JTextField("1.0", 5);
     protected JTextField m_cost_ba = new JTextField("1.0", 5);
-    protected JTextField m_cost_bb = new JTextField("0.0" ,5);
+    protected JTextField m_cost_bb = new JTextField("0.0", 5);
     protected JButton m_maximizeCB = new JButton("Maximize Cost/Benefit");
     protected JButton m_minimizeCB = new JButton("Minimize Cost/Benefit");
     protected JRadioButton m_costR = new JRadioButton("Cost");
@@ -257,7 +256,7 @@ public class CostBenefitAnalysis extends JPanel
        * @param precision precision for the percentage value
        */
       public void setCellValue(double cellValue, double max, double scaleFactor, int precision) {
-        if (!Utils.isMissingValue(cellValue)) {
+        if (!Instance.isMissingValue(cellValue)) {
           m_percentage = cellValue / max;
         } else {
           m_percentage = 0;
@@ -625,7 +624,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         fnCost = Double.parseDouble(m_cost_ab.getText());
       } catch (NumberFormatException n) {}
-            
+      
       totalRandomCB += posInSample * tpCost;
       totalRandomCB += negInSample * fpCost;
       totalRandomCB += posOutSample * fnCost;
@@ -919,7 +918,7 @@ public class CostBenefitAnalysis extends JPanel
             + current.value(1) * fnCost
             + current.value(2) * fpCost
             + current.value(3) * tnCost) * scaleFactor;
-        Instance newInst = new DenseInstance(1.0, vals);
+        Instance newInst = new Instance(1.0, vals);
         costBenefitI.add(newInst);
       }
       

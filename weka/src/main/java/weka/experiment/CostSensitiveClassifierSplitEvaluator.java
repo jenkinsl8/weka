@@ -24,7 +24,6 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.core.AdditionalMeasureProducer;
@@ -91,7 +90,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.18 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator {
@@ -427,7 +426,7 @@ public class CostSensitiveClassifierSplitEvaluator
     new FileReader(costFile)));
     
     Evaluation eval = new Evaluation(train, costMatrix);    
-    m_Classifier = AbstractClassifier.makeCopy(m_Template);
+    m_Classifier = Classifier.makeCopy(m_Template);
     
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)
@@ -486,8 +485,8 @@ public class CostSensitiveClassifierSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Utils.missingValue());
-      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
     }
     
     // sizes
@@ -515,7 +514,7 @@ public class CostSensitiveClassifierSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Utils.isMissingValue(dv)) {
+          if (!Instance.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {
@@ -556,6 +555,6 @@ public class CostSensitiveClassifierSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.18 $");
   }
 } // CostSensitiveClassifierSplitEvaluator

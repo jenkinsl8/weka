@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class MedianDistanceFromArbitraryPoint
   extends BallSplitter 
@@ -168,11 +168,11 @@ public class MedianDistanceFromArbitraryPoint
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     Enumeration enm = super.listOptions();
     while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
+      result.addElement(enm.nextElement());
       
     result.addElement(new Option(
         "\tThe seed value for the random number generator.\n"
@@ -392,6 +392,6 @@ public class MedianDistanceFromArbitraryPoint
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

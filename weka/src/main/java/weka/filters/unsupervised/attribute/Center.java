@@ -23,8 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -194,7 +193,7 @@ public class Center
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Utils.isMissingValue(vals[j])) &&
+	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  
 	  value = vals[j] - m_Means[j];
@@ -223,12 +222,12 @@ public class Center
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Utils.isMissingValue(vals[j])) &&
+	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  vals[j] = (vals[j] - m_Means[j]);
 	}
       }	
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     
     inst.setDataset(instance.dataset());

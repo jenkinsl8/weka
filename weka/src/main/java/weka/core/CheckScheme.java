@@ -32,7 +32,7 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  * @see TestInstances
  */
 public abstract class CheckScheme
@@ -59,7 +59,7 @@ public abstract class CheckScheme
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
   
@@ -103,11 +103,11 @@ public abstract class CheckScheme
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",
@@ -226,11 +226,11 @@ public abstract class CheckScheme
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>        result;
+    Vector        result;
     String[]      options;
     int           i;
     
-    result = new Vector<String>();
+    result = new Vector();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -431,9 +431,9 @@ public abstract class CheckScheme
    */
   protected static String[] listToArray(String value) {
     StringTokenizer	tok;
-    Vector<String>		list;
+    Vector		list;
     
-    list = new Vector<String>();
+    list = new Vector();
     tok = new StringTokenizer(value, ",");
     while (tok.hasMoreTokens())
       list.add(tok.nextToken());
@@ -551,7 +551,7 @@ public abstract class CheckScheme
     throws Exception {
     
     if (!data2.equalHeaders(data1)) {
-      throw new Exception("header has been modified\n" + data2.equalHeadersMsg(data1));
+      throw new Exception("header has been modified");
     }
     if (!(data2.numInstances() == data1.numInstances())) {
       throw new Exception("number of instances has changed");

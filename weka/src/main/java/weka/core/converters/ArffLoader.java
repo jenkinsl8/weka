@@ -23,13 +23,12 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
-import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +40,7 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.ArrayList;
+
 
 /**
  <!-- globalinfo-start -->
@@ -465,7 +464,7 @@ public class ArffLoader
 
         // Check if value is missing.
         if  (m_Tokenizer.ttype == '?') {
-          m_ValueBuffer[numValues] = Utils.missingValue();
+  	m_ValueBuffer[numValues] = Instance.missingValue();
         } else {
 
   	// Check if token is valid.
@@ -564,7 +563,7 @@ public class ArffLoader
               
         // Check if value is missing.
         if  (m_Tokenizer.ttype == '?') {
-  	instance[i] = Utils.missingValue();
+  	instance[i] = Instance.missingValue();
         } else {
 
   	// Check if token is valid.
@@ -627,7 +626,7 @@ public class ArffLoader
       }
         
       // Add instance to dataset
-      Instance inst = new DenseInstance(weight, instance);
+      Instance inst = new Instance(weight, instance);
       inst.setDataset(m_Data);
       
       return inst;
@@ -659,7 +658,7 @@ public class ArffLoader
       }
 
       // Create vectors to hold information temporarily.
-      ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+      FastVector attributes = new FastVector();
    
       // Get attribute declarations.
       getFirstToken();
@@ -692,9 +691,9 @@ public class ArffLoader
      * @throws IOException 	if the information is not read 
      * 				successfully
      */
-    protected ArrayList<Attribute> parseAttribute(ArrayList<Attribute> attributes) throws IOException {
+    protected FastVector parseAttribute(FastVector attributes) throws IOException {
       String attributeName;
-      ArrayList<String> attributeValues;
+      FastVector attributeValues;
 
       // Get attribute name.
       getNextToken();
@@ -708,10 +707,11 @@ public class ArffLoader
         if (m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
             m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
             m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
-          attributes.add(new Attribute(attributeName, attributes.size()));
+          attributes.addElement(new Attribute(attributeName, attributes.size()));
           readTillEOL();
         } else if (m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
-          attributes.add(new Attribute(attributeName, (ArrayList<String>)null,
+          attributes.
+            addElement(new Attribute(attributeName, (FastVector)null,
                 attributes.size()));
           readTillEOL();
         } else if (m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
@@ -727,15 +727,16 @@ public class ArffLoader
           } else {
             m_Tokenizer.pushBack();
           }
-          attributes.add(new Attribute(attributeName, format, attributes.size()));
+          attributes.addElement(new Attribute(attributeName, format,
+              attributes.size()));
           
         } else if (m_Tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_RELATIONAL)) {
           readTillEOL();
           
           // Read attributes for subrelation
           // First, save current set of attributes
-          ArrayList<Attribute> atts = attributes;
-          attributes = new ArrayList<Attribute>();
+          FastVector atts = attributes;
+          attributes = new FastVector();
           
           // Now, read attributes until we hit end of declaration of relational value
           getFirstToken();
@@ -761,7 +762,8 @@ public class ArffLoader
           // Make relation and restore original set of attributes
           Instances relation = new Instances(attributeName, attributes, 0);
           attributes = atts;
-          attributes.add(new Attribute(attributeName, relation, attributes.size()));
+          attributes.addElement(new Attribute(attributeName, relation,
+              attributes.size()));
         } else {
           errorMessage("no valid attribute type or invalid "+
                 "enumeration");
@@ -769,7 +771,7 @@ public class ArffLoader
       } else {
         
         // Attribute is nominal.
-        attributeValues = new ArrayList<String>();
+        attributeValues = new FastVector();
         m_Tokenizer.pushBack();
         
         // Get values for nominal attribute.
@@ -780,10 +782,11 @@ public class ArffLoader
           if (m_Tokenizer.ttype == StreamTokenizer.TT_EOL) {
             errorMessage("} expected at end of enumeration");
           } else {
-            attributeValues.add(m_Tokenizer.sval);
+            attributeValues.addElement(m_Tokenizer.sval);
           }
         }
-        attributes.add(new Attribute(attributeName, attributeValues,
+        attributes.
+          addElement(new Attribute(attributeName, attributeValues,
               attributes.size()));
       }
       getLastToken(false);

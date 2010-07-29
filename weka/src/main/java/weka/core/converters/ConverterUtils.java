@@ -306,7 +306,7 @@ public class ConverterUtils
       else if (m_URL != null)
 	((URLSourcedLoader) m_Loader).setURL(m_URL.toString());
       else if (m_Loader != null)
-	m_Loader.reset();
+        m_Loader.reset();
       
       m_BatchCounter      = 0;
       m_IncrementalBuffer = null;
@@ -675,12 +675,10 @@ public class ConverterUtils
    * (comma-separated list). */
   public final static String CORE_FILE_LOADERS = 
       weka.core.converters.ArffLoader.class.getName() + ","
-    //    + weka.core.converters.C45Loader.class.getName() + ","
+    + weka.core.converters.C45Loader.class.getName() + ","
     + weka.core.converters.CSVLoader.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
-    //    + weka.core.converters.LibSVMLoader.class.getName() + ","
-    //    + weka.core.converters.MatlabLoader.class.getName() + ","
-    //    + weka.core.converters.SVMLightLoader.class.getName() + ","
+    + weka.core.converters.LibSVMLoader.class.getName() + ","
     + weka.core.converters.SerializedInstancesLoader.class.getName() + ","
     + weka.core.converters.TextDirectoryLoader.class.getName() + ","
     + weka.core.converters.XRFFLoader.class.getName();
@@ -689,12 +687,10 @@ public class ConverterUtils
    * (comma-separated list). */
   public final static String CORE_FILE_SAVERS =
       weka.core.converters.ArffSaver.class.getName() + ","
-    //    + weka.core.converters.C45Saver.class.getName() + ","
+    + weka.core.converters.C45Saver.class.getName() + ","
     + weka.core.converters.CSVSaver.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
-    //    + weka.core.converters.LibSVMSaver.class.getName() + ","
-    //    + weka.core.converters.MatlabSaver.class.getName() + ","
-    //    + weka.core.converters.SVMLightSaver.class.getName() + ","
+    + weka.core.converters.LibSVMSaver.class.getName() + ","
     + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
     + weka.core.converters.XRFFSaver.class.getName();
   
@@ -741,7 +737,6 @@ public class ConverterUtils
 	  		new String[]{FileSourcedConverter.class.getName()});
     }
     catch (Exception e) {
-      e.printStackTrace();
       // ignore
     }
     finally {
@@ -800,11 +795,11 @@ public class ConverterUtils
    * @return		hashtable with ExtensionFileFilters
    */
   protected static Hashtable<String,String> getFileConverters(String classnames, String[] intf) {
-    Vector<String>	list;
+    Vector	list;
     String[]	names;
     int		i;
     
-    list  = new Vector<String>();
+    list  = new Vector();
     names = classnames.split(",");
     for (i = 0; i < names.length; i++)
       list.add(names[i]);

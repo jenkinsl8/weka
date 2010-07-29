@@ -48,15 +48,10 @@ public class AttributeExpression
   static final long serialVersionUID = 402130123261736245L;
   
   /**
-   * Interface implemented by operators and operants.
-   */
-  private interface ExpressionComponent {};
-
-  /**
    * Inner class handling an attribute index as an operand
    */
-  private class AttributeOperand  
-    implements ExpressionComponent, Serializable, RevisionHandler {
+  private class AttributeOperand 
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -7674280127286031105L;
@@ -106,7 +101,7 @@ public class AttributeExpression
    * Inner class for storing numeric constant opperands
    */
   private class NumericOperand 
-    implements ExpressionComponent, Serializable, RevisionHandler {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 9037007836243662859L;
@@ -150,7 +145,7 @@ public class AttributeExpression
    * Inner class for storing operators
    */
   private class Operator 
-    implements ExpressionComponent, Serializable, RevisionHandler {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -2760353522666004638L;
@@ -242,7 +237,7 @@ public class AttributeExpression
   }
 
   /** Operator stack */
-  private Stack<String> m_operatorStack = new Stack<String>();
+  private Stack m_operatorStack = new Stack();
 
   /** Supported operators. l = log, b = abs, c = cos, e = exp, s = sqrt, 
       f = floor, h = ceil, r = rint, t = tan, n = sin */
@@ -255,7 +250,7 @@ public class AttributeExpression
   private String m_originalInfix;
   
   /** Holds the expression in postfix form */
-  private Vector<ExpressionComponent> m_postFixExpVector;
+  private Vector m_postFixExpVector;
 
   /** True if the next numeric constant or attribute index is negative */
   private boolean m_signMod = false;
@@ -359,7 +354,7 @@ public class AttributeExpression
     infixExp = Utils.replaceSubstring(infixExp,"sin","n");
 
     StringTokenizer tokenizer = new StringTokenizer(infixExp, OPERATORS, true);
-    m_postFixExpVector = new Vector<ExpressionComponent>();
+    m_postFixExpVector = new Vector();
 
     while (tokenizer.hasMoreTokens()) {
       String tok = tokenizer.nextToken();
@@ -400,7 +395,7 @@ public class AttributeExpression
     double [] vals = new double [instance.numAttributes()+1];
     for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	vals[i] = Utils.missingValue();
+	vals[i] = Instance.missingValue();
       } else {
 	vals[i] = instance.value(i);
       }
@@ -419,7 +414,7 @@ public class AttributeExpression
    * @throws Exception if something goes wrong
    */
   public void evaluateExpression(double [] vals) throws Exception {
-    Stack<Double> operands = new Stack<Double>();
+    Stack operands = new Stack();
 
     for (int i=0;i<m_postFixExpVector.size();i++) {
       Object nextob = m_postFixExpVector.elementAt(i);
@@ -427,8 +422,8 @@ public class AttributeExpression
 	operands.push(new Double(((NumericOperand)nextob).m_numericConst));
       } else if (nextob instanceof AttributeOperand) {
 	double value = vals[((AttributeOperand)nextob).m_attributeIndex];
-	/*if (Utils.isMissingValue(value)) {
-	  vals[vals.length-1] = Utils.missingValue();
+	/*if (Instance.isMissingValue(value)) {
+	  vals[vals.length-1] = Instance.missingValue();
 	  break;
 	}*/
 	if (((AttributeOperand)nextob).m_negative) {
@@ -458,7 +453,7 @@ public class AttributeExpression
 
     Double result = ((Double)operands.pop());
     if (result.isNaN() || result.isInfinite()) {
-      vals[vals.length-1] = Utils.missingValue();
+      vals[vals.length-1] = Instance.missingValue();
     } else {
       vals[vals.length-1] = result.doubleValue();
     }

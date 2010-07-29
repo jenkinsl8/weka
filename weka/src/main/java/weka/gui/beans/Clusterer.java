@@ -61,8 +61,7 @@ import javax.swing.JPanel;
 public class Clusterer
   extends JPanel
   implements BeanCommon, Visible, WekaWrapper, EventConstraints, 
-             UserRequestAcceptor, TrainingSetListener, 
-             TestSetListener, ConfigurationProducer {
+             UserRequestAcceptor, TrainingSetListener, TestSetListener{
 
   /** for serialization */
   private static final long serialVersionUID = 7729795159836843810L;
@@ -560,26 +559,6 @@ public class Clusterer
 	((TextListener)l.elementAt(i)).acceptText(ge);
       }
     }
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
   }
 
 

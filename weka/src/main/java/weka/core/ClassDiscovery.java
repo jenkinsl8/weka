@@ -24,10 +24,7 @@ package weka.core;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -53,7 +50,7 @@ public class ClassDiscovery
   public final static boolean VERBOSE = false;
   
   /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames). */
-  protected static Hashtable<String,Vector<String>> m_Cache;
+  protected static Hashtable<String,Vector> m_Cache;
   
   /** notify if VERBOSE is still on */
   static {
@@ -233,11 +230,11 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(String classname, String[] pkgnames) {
-    Vector<String>      result;
+  public static Vector find(String classname, String[] pkgnames) {
+    Vector      result;
     Class       cls;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     try {
       cls    = Class.forName(classname);
@@ -258,11 +255,11 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(String classname, String pkgname) {
-    Vector<String>      result;
+  public static Vector find(String classname, String pkgname) {
+    Vector      result;
     Class       cls;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     try {
       cls    = Class.forName(classname);
@@ -283,14 +280,14 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(Class cls, String[] pkgnames) {
-    Vector<String>	result;
+  public static Vector find(Class cls, String[] pkgnames) {
+    Vector	result;
     int		i;
-    HashSet<String>	names;
+    HashSet	names;
 
-    result = new Vector<String>();
+    result = new Vector();
 
-    names = new HashSet<String>();
+    names = new HashSet();
     for (i = 0; i < pkgnames.length; i++)
       names.addAll(find(cls, pkgnames[i]));
 
@@ -299,106 +296,6 @@ public class ClassDiscovery
     Collections.sort(result, new StringCompare());
 
     return result;
-  }
-  
-  /**
-   * Get all class files in a directory (recursively)
-   * 
-   * @param baseDir the directory to look for class files in
-   * @param files an array list to hold the found files
-   */
-  private static void getFiles(File baseDir, 
-      ArrayList<File> files) {
-    File[] contents = baseDir.listFiles();
-    for (int i = 0; i < contents.length; i++) {
-      if (contents[i].isFile() && contents[i].getName().endsWith(".class")) {
-        files.add(contents[i]);
-      } else if (contents[i].isDirectory()) {
-        getFiles(contents[i], files);
-      }
-    }
-  }
-  
-  /**
-   * Find all classes that have the supplied matchText String in
-   * their suffix.
-   * 
-   * @param matchText the text to match
-   * @return an array list of matching fully qualified class names.
-   */
-  public static ArrayList<String> find(String matchText) {
-    String                part;
-    File                  dir;
-    int                   i;
-    String                classname;
-    JarFile               jar;
-    JarEntry              entry;
-    
-    ClassloaderUtil clu = new ClassloaderUtil();
-    URLClassLoader sysLoader = (URLClassLoader)clu.getClass().getClassLoader();
-    URL[] cl_urls = sysLoader.getURLs();
-    ArrayList<String> matches = new ArrayList<String>();
-    
-    for (i = 0; i < cl_urls.length; i++) {
-      part = cl_urls[i].toString();
-      if (part.startsWith("file:")) {
-        part = part.replace(" ", "%20");
-        try {
-          File temp = new File(new java.net.URI(part));
-          part = temp.getAbsolutePath();
-        } catch (URISyntaxException e) {
-          e.printStackTrace();
-        }
-      }
-      if (VERBOSE)
-        System.out.println("Classpath-part: " + part);
-
-      // find classes
-      ArrayList<File> files = new ArrayList<File>();
-      
-      dir = new File(part);
-      if (dir.isDirectory()) {
-        getFiles(dir, files);
-        // process list looking for matchText
-        for (File f : files) {
-          String fName = f.getAbsolutePath().replaceAll("\\.class", "");
-          fName = fName.substring(part.length() + 1);
-          fName = fName.replaceAll(File.separator, ".");
-
-          //if (fName.endsWith(matchText)) {
-          if (fName.contains(matchText)) {
-            matches.add(fName);
-          }
-        }
-      }
-      else {
-        try {
-          jar = new JarFile(part);
-          Enumeration enm = jar.entries();
-          while (enm.hasMoreElements()) {
-            entry = (JarEntry) enm.nextElement();
-
-            // only class files
-            if (    (entry.isDirectory())
-                || (!entry.getName().endsWith(".class")) )
-              continue;
-
-            classname = entry.getName().replaceAll("\\.class", "");
-            classname = classname.replaceAll("/", ".");
-
-            //if (classname.endsWith(matchText)) {
-            if (classname.contains(matchText)) {
-              matches.add(classname);
-            }
-          }
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-    }
-    
-    return matches;
   }
 
   /**
@@ -409,8 +306,8 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(Class cls, String pkgname) {
-    Vector<String>                result;
+  public static Vector find(Class cls, String pkgname) {
+    Vector                result;
     StringTokenizer       tok;
     String                part;
     String                pkgpath;
@@ -429,7 +326,7 @@ public class ClassDiscovery
     result = getCache(cls, pkgname);
     
     if (result == null) {
-      result = new Vector<String>();
+      result = new Vector();
 
       if (VERBOSE)
 	System.out.println(
@@ -440,28 +337,12 @@ public class ClassDiscovery
 
       // check all parts of the classpath, to include additional classes from
       // "parallel" directories/jars, not just the first occurence
-      /* tok = new StringTokenizer(
+      tok = new StringTokenizer(
 	  System.getProperty("java.class.path"), 
-	  System.getProperty("path.separator")); */
-      
-      ClassloaderUtil clu = new ClassloaderUtil();
-      URLClassLoader sysLoader = (URLClassLoader)clu.getClass().getClassLoader();
-      URL[] cl_urls = sysLoader.getURLs();
+	  System.getProperty("path.separator"));
 
-      //while (tok.hasMoreTokens()) {
-      for (i = 0; i < cl_urls.length; i++) {
-	//part = tok.nextToken();
-        part = cl_urls[i].toString();
-        if (part.startsWith("file:")) {
-          part = part.replace(" ", "%20");
-          try {
-            File temp = new File(new java.net.URI(part));
-            part = temp.getAbsolutePath();
-          } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-        }
+      while (tok.hasMoreTokens()) {
+	part = tok.nextToken();
 	if (VERBOSE)
 	  System.out.println("Classpath-part: " + part);
 
@@ -480,15 +361,15 @@ public class ClassDiscovery
 	dir = new File(part + "/" + pkgpath);
 	if (dir.exists()) {
 	  files = dir.listFiles();
-	  for (int j = 0; j < files.length; j++) {
+	  for (i = 0; i < files.length; i++) {
 	    // only class files
-	    if (    (!files[j].isFile()) 
-		|| (!files[j].getName().endsWith(".class")) )
+	    if (    (!files[i].isFile()) 
+		|| (!files[i].getName().endsWith(".class")) )
 	      continue;
 
 	    try {
 	      classname =   pkgname + "." 
-	      + files[j].getName().replaceAll(".*/", "")
+	      + files[i].getName().replaceAll(".*/", "")
 	      .replaceAll("\\.class", "");
 	      result.add(classname);
 	    }
@@ -571,7 +452,7 @@ public class ClassDiscovery
    * @param list	the current list of sub-dirs
    * @return		the new list of sub-dirs
    */
-  protected static HashSet<String> getSubDirectories(String prefix, File dir, HashSet<String> list) {
+  protected static HashSet getSubDirectories(String prefix, File dir, HashSet list) {
     File[]	files;
     int		i;
     String 	newPrefix;
@@ -604,18 +485,18 @@ public class ClassDiscovery
    *
    * @return                a list with all the found packages
    */
-  public static Vector<String> findPackages() {
-    Vector<String>		result;
+  public static Vector findPackages() {
+    Vector		result;
     StringTokenizer	tok;
     String		part;
     File		file;
     JarFile		jar;
     JarEntry		entry;
-    Enumeration<JarEntry>		enm;
-    HashSet<String>		set;
+    Enumeration		enm;
+    HashSet		set;
 
-    result = new Vector<String>();
-    set    = new HashSet<String>();
+    result = new Vector();
+    set    = new HashSet();
     
     // check all parts of the classpath, to include additional classes from
     // "parallel" directories/jars, not just the first occurence
@@ -664,7 +545,7 @@ public class ClassDiscovery
    */
   protected static void initCache() {
     if (m_Cache == null)
-      m_Cache = new Hashtable<String,Vector<String>>();
+      m_Cache = new Hashtable<String,Vector>();
   }
   
   /**
@@ -674,7 +555,7 @@ public class ClassDiscovery
    * @param pkgname	the package name the classes were found in
    * @param classnames	the list of classnames to cache
    */
-  protected static void addCache(Class cls, String pkgname, Vector<String> classnames) {
+  protected static void addCache(Class cls, String pkgname, Vector classnames) {
     initCache();
     m_Cache.put(cls.getName() + "-" + pkgname, classnames);
   }
@@ -687,7 +568,7 @@ public class ClassDiscovery
    * @param pkgname	the package name for the classes 
    * @return		the classnames if found, otherwise null
    */
-  protected static Vector<String> getCache(Class cls, String pkgname) {
+  protected static Vector getCache(Class cls, String pkgname) {
     initCache();
     return m_Cache.get(cls.getName() + "-" + pkgname);
   }
@@ -725,8 +606,8 @@ public class ClassDiscovery
    * @param args	the commandline arguments
    */
   public static void main(String[] args) {
-    Vector<String>      	list;
-    Vector<String> 		packages;
+    Vector      	list;
+    Vector 		packages;
     int         	i;
     StringTokenizer	tok;
     
@@ -737,7 +618,7 @@ public class ClassDiscovery
     }
     else if (args.length == 2) {
       // packages
-      packages = new Vector<String>();
+      packages = new Vector();
       tok = new StringTokenizer(args[1], ",");
       while (tok.hasMoreTokens())
         packages.add(tok.nextToken());

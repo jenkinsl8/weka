@@ -23,7 +23,6 @@
 package weka.classifiers.trees.j48;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
@@ -39,7 +38,7 @@ import java.util.Random;
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public final class NBTreeNoSplit
   extends ClassifierSplitModel {
@@ -189,7 +188,7 @@ public final class NBTreeNoSplit
 			       Instances trainingSet,
 			       Random r) throws Exception {
     // make some copies for fast evaluation of 5-fold xval
-    Classifier [] copies = AbstractClassifier.makeCopies(fullModel, 5);
+    Classifier [] copies = Classifier.makeCopies(fullModel, 5);
     Evaluation eval = new Evaluation(trainingSet);
     // make some splits
     for (int j = 0; j < 5; j++) {
@@ -212,6 +211,6 @@ public final class NBTreeNoSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

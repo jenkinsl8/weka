@@ -23,7 +23,6 @@
 package weka.core;
 
 import java.util.Enumeration;
-import java.util.ArrayList;
 
 /**
  * Class for storing a binary-data-only instance as a sparse vector. A
@@ -36,7 +35,7 @@ import java.util.ArrayList;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class BinarySparseInstance
   extends SparseInstance {
@@ -55,7 +54,7 @@ public class BinarySparseInstance
    */
   public BinarySparseInstance(Instance instance) {
     
-    m_Weight = instance.weight();
+    m_Weight = instance.m_Weight;
     m_Dataset = null;
     m_NumAttributes = instance.numAttributes();
     if (instance instanceof SparseInstance) {
@@ -356,7 +355,7 @@ public class BinarySparseInstance
    *
    * @param position the attribute's position
    */
-  protected void forceDeleteAttributeAt(int position) {
+  void forceDeleteAttributeAt(int position) {
 
     int index = locateIndex(position);
 
@@ -384,7 +383,7 @@ public class BinarySparseInstance
    *
    * @param position the attribute's position
    */
-  protected void forceInsertAttributeAt(int position)  {
+  void forceInsertAttributeAt(int position)  {
 
     int index = locateIndex(position);
 
@@ -422,18 +421,18 @@ public class BinarySparseInstance
       Attribute weight = new Attribute("weight");
       
       // Create vector to hold nominal values "first", "second", "third" 
-      ArrayList<String> my_nominal_values = new ArrayList<String>(3); 
-      my_nominal_values.add("first"); 
-      my_nominal_values.add("second"); 
+      FastVector my_nominal_values = new FastVector(3); 
+      my_nominal_values.addElement("first"); 
+      my_nominal_values.addElement("second"); 
       
       // Create nominal attribute "position" 
       Attribute position = new Attribute("position", my_nominal_values);
       
       // Create vector of the above attributes 
-      ArrayList<Attribute> attributes = new ArrayList<Attribute>(3);
-      attributes.add(length);
-      attributes.add(weight);
-      attributes.add(position);
+      FastVector attributes = new FastVector(3);
+      attributes.addElement(length);
+      attributes.addElement(weight);
+      attributes.addElement(position);
       
       // Create the empty dataset "race" with above attributes
       Instances race = new Instances("race", attributes, 0);
@@ -551,7 +550,8 @@ public class BinarySparseInstance
       System.out.println("Length of copy missing: " + copy.isMissing(length));
       System.out.println("Weight of copy missing: " + copy.isMissing(weight.index()));
       System.out.println("Length of copy missing: " + 
-			 Utils.isMissingValue(copy.value(length)));
+			 Instance.isMissingValue(copy.value(length)));
+      System.out.println("Missing value coded as: " + Instance.missingValue());
 
       // Prints number of attributes and classes
       System.out.println("Number of attributes: " + copy.numAttributes());
@@ -600,6 +600,6 @@ public class BinarySparseInstance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

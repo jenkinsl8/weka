@@ -26,8 +26,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -291,7 +290,7 @@ public class StringToNominal
   /**
    * Sets range of indices of the attributes used.
    *
-   * @param rangeList the list of attribute indices
+   * @param attIndex the index of the attribute
    */
   public void setAttributeRange(String rangeList) {
     

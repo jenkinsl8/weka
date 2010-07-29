@@ -31,7 +31,7 @@ import java.util.HashSet;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public class SelectedTag
   implements RevisionHandler {
@@ -52,8 +52,8 @@ public class SelectedTag
    */
   public SelectedTag(int tagID, Tag[] tags) {
     // are IDs unique?
-    HashSet<Integer> ID = new HashSet<Integer>();
-    HashSet<String> IDStr = new HashSet<String>();
+    HashSet ID = new HashSet();
+    HashSet IDStr = new HashSet();
     for (int i = 0; i < tags.length; i++) {
       ID.add(new Integer(tags[i].getID()));
       IDStr.add(tags[i].getIDStr());
@@ -147,6 +147,6 @@ public class SelectedTag
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }

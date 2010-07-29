@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -80,7 +79,7 @@ import java.util.Vector;
  * @version $Revision$ 
  */
 public class REPTree 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
 

@@ -23,10 +23,8 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.visualize.JPEGWriter;
@@ -322,7 +320,7 @@ public class BoundaryPanel
 		Instance inst = m_trainingData.instance(i);
 		double x = inst.value(m_xAttribute);
 		double y = inst.value(m_yAttribute);
-		if (!Utils.isMissingValue(x) && !Utils.isMissingValue(y)) {
+		if (!Instance.isMissingValue(x) && !Instance.isMissingValue(y)) {
 			if (x < m_minX) {
 			m_minX = x;
 			}
@@ -461,7 +459,7 @@ public class BoundaryPanel
         // generate samples
         m_weightingAttsValues = new double [m_attsToWeightOn.length];
         m_vals = new double[m_trainingData.numAttributes()];
-        m_predInst = new DenseInstance(1.0, m_vals);
+        m_predInst = new Instance(1.0, m_vals);
         m_predInst.setDataset(m_trainingData);
 
 	
@@ -1050,7 +1048,7 @@ public class BoundaryPanel
 	double y = convertFromPanelY(mouseY);
 	
 	//build the training instance
-	Instance newInstance = new DenseInstance(m_trainingData.numAttributes());
+	Instance newInstance = new Instance(m_trainingData.numAttributes());
 	for (int i = 0; i < newInstance.numAttributes(); i++) {
 		if (i == classAttIndex) {
 			newInstance.setValue(i,classValue);
@@ -1221,7 +1219,7 @@ public class BoundaryPanel
 	  argsR[j-10] = args[j];
 	}
       }
-      Classifier c = AbstractClassifier.forName(args[9], argsR);
+      Classifier c = Classifier.forName(args[9], argsR);
       KDDataGenerator dataGen = new KDDataGenerator();
       dataGen.setKernelBandwidth(bandWidth);
       bv.setDataGenerator(dataGen);

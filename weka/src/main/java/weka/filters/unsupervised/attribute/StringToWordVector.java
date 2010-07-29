@@ -25,8 +25,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -1592,7 +1591,7 @@ public class StringToWordVector
 	} else {
 	  if (instance.isMissing(i)) {
 	    contained.put(new Integer(firstCopy),
-		new Double(Utils.missingValue()));
+		new Double(Instance.missingValue()));
 	  } else {
 
 	    // If this is a string attribute, we have to first add

@@ -27,9 +27,7 @@ import java.lang.reflect.Array;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  * Class implementing some simple utility methods.
@@ -38,7 +36,7 @@ import java.util.Vector;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision$
+ * @version $Revision: 1.60 $
  */
 public final class Utils
   implements RevisionHandler {
@@ -48,45 +46,14 @@ public final class Utils
 
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
-  
-  /**
-   * Tests if the given value codes "missing".
-   *
-   * @param val the value to be tested
-   * @return true if val codes "missing"
-   */
-  public static boolean isMissingValue(double val) {
 
-    return Double.isNaN(val);
-  }
-
-  /**
-   * Returns the value used to code a missing value.  Note that
-   * equality tests on this value will always return false, so use
-   * isMissingValue(double val) for testing..
-   *
-   * @return the value used as missing value.
-   */
-  public static double missingValue() {
-    
-    return Double.NaN;
-  }
-
-  /**
-   * Casting an object without "unchecked" compile-time warnings.
-   * Use only when absolutely necessary (e.g. when using clone()).
-   */
-  @SuppressWarnings("unchecked")
-    public static <T> T cast(Object x) {
-    return (T) x;
-  }
   
   /**
    * Reads properties that inherit from three locations. Properties
    * are first defined in the system resource location (i.e. in the
-   * CLASSPATH).  These default properties must exist. Properties optionally
-   * defined in the user properties location (WekaPackageManager.PROPERTIES_DIR) 
-   * override default settings. Properties defined in the current directory (optional)
+   * CLASSPATH).  These default properties must exist. Properties
+   * defined in the users home directory (optional) override default
+   * settings. Properties defined in the current directory (optional)
    * override all these settings.
    *
    * @param resourceName the location of the resource that should be
@@ -122,15 +89,11 @@ public final class Utils
       resourceName = resourceName.substring(slInd + 1);
     }
 
-    // Allow a properties file in the WekaPackageManager.PROPERTIES_DIR to override
-    Properties userProps = new Properties(defaultProps);
-    if (!WekaPackageManager.PROPERTIES_DIR.exists()) {
-      WekaPackageManager.PROPERTIES_DIR.mkdir();
-    }
-    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString()
-                             + File.separator
+    // Allow a properties file in the home directory to override
+    Properties userProps = new Properties(defaultProps);    
+    File propFile = new File(System.getProperties().getProperty("user.home")
+                             + File.separatorChar
                              + resourceName);
-
     if (propFile.exists()) {
       try {
         userProps.load(new FileInputStream(propFile));
@@ -929,7 +892,7 @@ public final class Utils
    */
   public static String[] splitOptions(String quotedOptionString) throws Exception{
 
-    Vector<String> optionsVec = new Vector<String>();
+    FastVector optionsVec = new FastVector();
     String str = new String(quotedOptionString);
     int i;
     
@@ -1040,11 +1003,11 @@ public final class Utils
    * class is not assignable to the desired class type, or the options
    * supplied are not acceptable to the object
    */
-  public static Object forName(Class<?> classType,
+  public static Object forName(Class classType,
 			       String className,
 			       String[] options) throws Exception {
 
-    Class<?> c = null;
+    Class c = null;
     try {
       c = Class.forName(className);
     } catch (Exception ex) {
@@ -1063,28 +1026,6 @@ public final class Utils
     return o;
   }
 
-  /**
-   * Generates a commandline of the given object. If the object is not 
-   * implementing OptionHandler, then it will only return the classname,
-   * otherwise also the options.
-   * 
-   * @param obj		the object to turn into a commandline
-   * @return		the commandline
-   */
-  public static String toCommandLine(Object obj) {
-    StringBuffer	result;
-    
-    result = new StringBuffer();
-    
-    if (obj != null) {
-      result.append(obj.getClass().getName());
-      if (obj instanceof OptionHandler)
-	result.append(" " + joinOptions(((OptionHandler) obj).getOptions()));
-    }
-    
-    return result.toString().trim();
-  }
-  
   /**
    * Computes entropy for an array of integers.
    *
@@ -1929,65 +1870,12 @@ public final class Utils
   }
   
   /**
-   * For a named dialog, returns true if the user has opted not to view
-   * it again in the future.
-   * 
-   * @param dialogName the name of the dialog to check (e.g.
-   * weka.gui.GUICHooser.HowToFindPackageManager).
-   * @return true if the user has opted not to view the named dialog
-   * in the future.
-   */
-  public static boolean getDontShowDialog(String dialogName) {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return false;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      return false;
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    
-    return dialogFile.exists();
-  }
-  
-  /**
-   * Specify that the named dialog is not to be displayed in the future.
-   * 
-   * @param dialogName the name of the dialog not to show again (e.g.
-   * weka.gui.GUIChooser.HowToFindPackageManager).
-   * @throws Exception if the marker file that is used to indicate that
-   * a named dialog is not to be shown can't be created. This file lives
-   * in $WEKA_HOME/systemDialogs
-   */
-  public static void setDontShowDialog(String dialogName) throws Exception {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      if (!dialogSubDir.mkdir()) {
-        return;
-      }
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    dialogFile.createNewFile();
-  }
-  
-  /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.60 $");
   }
 
   /**

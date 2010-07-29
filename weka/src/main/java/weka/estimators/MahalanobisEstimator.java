@@ -162,7 +162,6 @@ public class MahalanobisEstimator extends Estimator implements IncrementalEstima
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
-    
     // class
     if (!m_noClass) {
       result.enable(Capability.NOMINAL_CLASS);

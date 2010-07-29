@@ -22,7 +22,6 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
@@ -77,7 +76,7 @@ import java.util.Enumeration;
  * @version $Revision$ 
  */
 public class Id3 
-  extends AbstractClassifier 
+  extends Classifier 
   implements TechnicalInformationHandler, Sourcable {
 
   /** for serialization */
@@ -184,7 +183,7 @@ public class Id3
     // Check if no instances have reached this node.
     if (data.numInstances() == 0) {
       m_Attribute = null;
-      m_ClassValue = Utils.missingValue();
+      m_ClassValue = Instance.missingValue();
       m_Distribution = new double[data.numClasses()];
       return;
     }
@@ -361,7 +360,7 @@ public class Id3
     StringBuffer text = new StringBuffer();
     
     if (m_Attribute == null) {
-      if (Utils.isMissingValue(m_ClassValue)) {
+      if (Instance.isMissingValue(m_ClassValue)) {
         text.append(": null");
       } else {
         text.append(": " + m_ClassAttribute.value((int) m_ClassValue));
