@@ -16,86 +16,84 @@
 
 /*
  *    AssociationsPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
+
 package weka.gui.explorer;
 
-import weka.associations.AssociationRule;
-import weka.associations.AssociationRules;
-import weka.associations.Associator;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Attribute;
 import weka.core.Utils;
-import weka.core.Version;
-import weka.gui.GenericObjectEditor;
+import weka.associations.Associator;
+import weka.filters.Filter;
 import weka.gui.Logger;
+import weka.gui.TaskLogger;
+import weka.gui.SysErrLog;
+import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
+import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 
+import java.util.Random;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Vector;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeSupport;
 
-import javax.swing.BorderFactory;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.PrintWriter;
+
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.BorderFactory;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.JPopupMenu;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import java.awt.Point;
 
 /** 
  * This panel allows the user to select, configure, and run a scheme
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.17.2.2 $
  */
-public class AssociationsPanel 
-  extends JPanel
-  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6867871711865476971L;
-
-  /** the parent frame */
-  protected Explorer m_Explorer = null;
+public class AssociationsPanel extends JPanel {
 
   /** Lets the user configure the associator */
   protected GenericObjectEditor m_AssociatorEditor =
@@ -122,13 +120,6 @@ public class AssociationsPanel
   /** Click to stop a running associator */
   protected JButton m_StopBut = new JButton("Stop");
   
-  /** 
-   * Whether to store any graph or xml rules output in
-   * the history list
-   */
-  protected JCheckBox m_storeOutput = 
-    new JCheckBox("Store output for visualization");
-  
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
@@ -140,7 +131,7 @@ public class AssociationsPanel
 
   /* Register the property editors we need */
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
   
   /**
@@ -179,23 +170,9 @@ public class AssociationsPanel
       });
 
     m_AssociatorEditor.setClassType(Associator.class);
-    m_AssociatorEditor.setValue(ExplorerDefaults.getAssociator());
+    m_AssociatorEditor.setValue(new weka.associations.Apriori());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-        m_StartBut.setEnabled(true);
-        // Check capabilities
-        Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
-        Associator associator = (Associator) m_AssociatorEditor.getValue();
-        Capabilities currentSchemeCapabilities =  null;
-        if (associator != null && currentFilter != null && 
-            (associator instanceof CapabilitiesHandler)) {
-          currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
-          
-          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
-              !currentSchemeCapabilities.supports(currentFilter)) {
-            m_StartBut.setEnabled(false);
-          }
-        }
 	repaint();
       }
     });
@@ -214,14 +191,6 @@ public class AssociationsPanel
 	stopAssociator();
       }
     });
-    
-    // check for any visualization plugins so that we
-    // can add a checkbox for storing graphs or rules
-    boolean showStoreOutput = 
-      (GenericObjectEditor.
-        getClassnames(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
-       GenericObjectEditor.
-        getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -233,20 +202,13 @@ public class AssociationsPanel
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new BorderLayout());
-    JPanel buttonsP = new JPanel();
-    buttonsP.setLayout(new GridLayout(1,2));
-    
+    buttons.setLayout(new GridLayout(1,2));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
-    buttonsP.add(ssButs);
-    buttons.add(buttonsP, BorderLayout.SOUTH);
-    if (showStoreOutput) {
-      buttons.add(m_storeOutput, BorderLayout.NORTH);
-    }
+    buttons.add(ssButs);
 
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Associator output"));
@@ -315,7 +277,23 @@ public class AssociationsPanel
     m_Instances = inst;
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
+      String type = "";
+      switch (m_Instances.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = "(Nom) ";
+	break;
+      case Attribute.NUMERIC:
+	type = "(Num) ";
+	break;
+      case Attribute.STRING:
+	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
+	break;
+      default:
+	type = "(???) ";
+      }
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -338,9 +316,7 @@ public class AssociationsPanel
 	  // Copy the current state of things
 	  m_Log.statusMessage("Setting up...");
 	  Instances inst = new Instances(m_Instances);
-	  String grph = null;
-	  //String xmlRules = null;
-	  AssociationRules rulesList = null;
+
 	  Associator associator = (Associator) m_AssociatorEditor.getValue();
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -351,14 +327,10 @@ public class AssociationsPanel
 	  } else {
 	    name += cname;
 	  }
-          String cmd = m_AssociatorEditor.getValue().getClass().getName();
-          if (m_AssociatorEditor.getValue() instanceof OptionHandler)
-            cmd += " " + Utils.joinOptions(((OptionHandler) m_AssociatorEditor.getValue()).getOptions());
 	  try {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
-	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
@@ -389,43 +361,12 @@ public class AssociationsPanel
 	    outBuff.append("=== Associator model (full training set) ===\n\n");
 	    outBuff.append(associator.toString() + '\n');
 	    m_History.updateResult(name);
-	    if (m_storeOutput.isSelected()) {
-	      if (associator instanceof Drawable) {
-	        grph = null;
-	        try {
-	          grph = ((Drawable)associator).graph();
-	        } catch (Exception ex) {	        
-	        }
-	      }
-
-	      if (associator instanceof weka.associations.AssociationRulesProducer) {
-	        // xmlRules = null;
-	        rulesList = null;
-	        try {
-	          // xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
-	          rulesList = 
-	            ((weka.associations.AssociationRulesProducer)associator).getAssociationRules();
-	        } catch (Exception ex) {}
-	      }
-	    }
 	    m_Log.logMessage("Finished " + cname);
 	    m_Log.statusMessage("OK");
 	  } catch (Exception ex) {
 	    m_Log.logMessage(ex.getMessage());
 	    m_Log.statusMessage("See error log");
 	  } finally {
-	    if (grph != null || rulesList != null) {
-	      Vector<Object> visVect = new Vector<Object>();
-
-	      if (grph != null) {
-	        visVect.add(grph);
-	      }
-
-	      if (rulesList != null) {
-	        visVect.add(rulesList);
-	      }
-	      m_History.addObject(name, visVect);
-	    }
 	    if (isInterrupted()) {
 	      m_Log.logMessage("Interrupted " + cname);
 	      m_Log.statusMessage("See error log");
@@ -469,31 +410,6 @@ public class AssociationsPanel
 	m_Log.logMessage("Save successful.");
       }
     }
-  }
-  
-  /**
-   * Pops up a TreeVisualizer for the associator from the currently
-   * selected item in the results list
-   * @param dottyString the description of the tree in dotty format
-   * @param treeName the title to assign to the display
-   */
-  protected void visualizeTree(String dottyString, String treeName) {
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
-    jf.setSize(500,400);
-    jf.getContentPane().setLayout(new BorderLayout());
-    TreeVisualizer tv = new TreeVisualizer(null,
-                                           dottyString,
-                                           new PlaceNode2());
-    jf.getContentPane().add(tv, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-        public void windowClosing(java.awt.event.WindowEvent e) {
-          jf.dispose();
-        }
-      });
-    
-    jf.setVisible(true);
-    tv.fitToScreen();
   }
     
   /**
@@ -543,191 +459,7 @@ public class AssociationsPanel
     }
     resultListMenu.add(saveOutput);
 
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
-      deleteOutput.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  m_History.removeResult(selectedName);
-	}
-      });
-    } else {
-      deleteOutput.setEnabled(false);
-    }
-    resultListMenu.add(deleteOutput);
-    
-//    String grph = null;
-    Vector<Object> visVect = null;
-    if (selectedName != null) {
-      //grph = (String)m_History.getNamedObject(selectedName);
-      visVect = (Vector)m_History.getNamedObject(selectedName);      
-    }
-    
-/*    final String fgrph = grph;
-    JMenuItem visTree = new JMenuItem("Visualize tree");
-    if (grph != null) {
-      visTree.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          String title = selectedName;
-          visualizeTree(fgrph, title);
-        }
-      });
-      resultListMenu.add(visTree);
-    } */
-    
-    // plugins
-    JMenu visPlugins = new JMenu("Plugins");
-    boolean availablePlugins = false;
-    
-    // tree plugins
-    if (visVect != null) {
-      for (Object o : visVect) {
-        if (o instanceof AssociationRules) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
-          for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
-            try {
-              AssociationRuleVisualizePlugin plugin = 
-                (AssociationRuleVisualizePlugin)Class.forName(className).newInstance();
-              if (plugin == null) {
-                continue;
-              }
-              availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((AssociationRules)o, selectedName);
-              if (pluginMenuItem != null) {
-                visPlugins.add(pluginMenuItem);
-              }
-            } catch (Exception ex) {
-              //ex.printStackTrace();
-            }
-          }
-        } else if (o instanceof String) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
-          for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
-            try {
-              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
-              if (plugin == null)
-                continue;
-              availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((String)o, selectedName);
-              // Version version = new Version();
-              if (pluginMenuItem != null) {
-                /*  if (version.compareTo(plugin.getMinVersion()) < 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-            if (version.compareTo(plugin.getMaxVersion()) >= 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");*/
-                visPlugins.add(pluginMenuItem);
-              }
-            }
-            catch (Exception e) {
-              //e.printStackTrace();
-            }
-          }
-        }
-      }
-    }
-    
-    if (availablePlugins) {
-      resultListMenu.add(visPlugins);
-    }
-
     resultListMenu.show(m_History.getList(), x, y);
-  }
-  
-  /**
-   * updates the capabilities filter of the GOE
-   * 
-   * @param filter	the new filter to use
-   */
-  protected void updateCapabilitiesFilter(Capabilities filter) {
-    Instances           tempInst;
-    Capabilities        filterClass;
-    
-    if (filter == null) {
-      m_AssociatorEditor.setCapabilitiesFilter(new Capabilities(null));
-      return;
-    }
-    
-    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
-      tempInst = new Instances(m_Instances, 0);
-    else
-      tempInst = new Instances(m_Instances);
-    tempInst.setClassIndex(-1);
-    
-    try {
-      filterClass = Capabilities.forInstances(tempInst);
-    }
-    catch (Exception e) {
-      filterClass = new Capabilities(null);
-    }
-    
-    m_AssociatorEditor.setCapabilitiesFilter(filterClass);
-    
-    m_StartBut.setEnabled(true);
-    // Check capabilities
-    Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
-    Associator associator = (Associator) m_AssociatorEditor.getValue();
-    Capabilities currentSchemeCapabilities =  null;
-    if (associator != null && currentFilter != null && 
-        (associator instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
-      
-      if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
-          !currentSchemeCapabilities.supports(currentFilter)) {
-        m_StartBut.setEnabled(false);
-      }
-    }
-  }
-  
-  /**
-   * method gets called in case of a change event
-   * 
-   * @param e		the associated change event
-   */
-  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    if (e.getFilter() == null)
-      updateCapabilitiesFilter(null);
-    else
-      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
-  }
-
-  /**
-   * Sets the Explorer to use as parent frame (used for sending notifications
-   * about changes in the data)
-   * 
-   * @param parent	the parent frame
-   */
-  public void setExplorer(Explorer parent) {
-    m_Explorer = parent;
-  }
-  
-  /**
-   * returns the parent Explorer frame
-   * 
-   * @return		the parent
-   */
-  public Explorer getExplorer() {
-    return m_Explorer;
-  }
-  
-  /**
-   * Returns the title for the tab in the Explorer
-   * 
-   * @return 		the title of this tab
-   */
-  public String getTabTitle() {
-    return "Associate";
-  }
-  
-  /**
-   * Returns the tooltip for the tab in the Explorer
-   * 
-   * @return 		the tooltip of this tab
-   */
-  public String getTabTitleToolTip() {
-    return "Discover association rules";
   }
 
   /**

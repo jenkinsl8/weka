@@ -16,40 +16,29 @@
 
 /*
  * SearchAlgorithm.java
- * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2003 Remco Bouckaert
  * 
  */
 package weka.classifiers.bayes.net.search;
 
+import java.io.Serializable;
+import java.util.Vector;
+import java.util.Enumeration;
+
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * This is the base class for all search algorithms for learning Bayes networks.
  * It contains some common code, used by other network structure search algorithms,
  * and should not be used by itself.
- *
- <!-- options-start -->
- <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision$
+ * @version $Revision: 1.4.2.1 $
  */
-public class SearchAlgorithm 
-    implements OptionHandler, Serializable, RevisionHandler {
-  
-    /** for serialization */
-    static final long serialVersionUID = 6164792240778525312L;
-  
+public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
      * Holds upper bound on number of parents
      */
@@ -66,12 +55,6 @@ public class SearchAlgorithm
      */
     protected boolean m_bMarkovBlanketClassifier = false;
 
-    /**
-     * File name containing initial network structure. This can be used as starting point for structure search
-     * It will be ignored if not speficied. When specified, it overrides the InitAsNaivBayes flag.
-     */
-    protected String m_sInitalBIFFile;
-
     /** c'tor **/
     public SearchAlgorithm() {
     } // SearchAlgorithm
@@ -80,8 +63,6 @@ public class SearchAlgorithm
      * AddArcMakesSense checks whether adding the arc from iAttributeTail to iAttributeHead
      * does not already exists and does not introduce a cycle
      * 
-     * @param bayesNet
-     * @param instances
      * @param iAttributeHead index of the attribute that becomes head of the arrow
      * @param iAttributeTail index of the attribute that becomes tail of the arrow
      * @return true if adding arc is allowed, otherwise false
@@ -149,18 +130,14 @@ public class SearchAlgorithm
      * reverseArcMakesSense checks whether the arc from iAttributeTail to
      * iAttributeHead exists and reversing does not introduce a cycle
      * 
-     * @param bayesNet
-     * @param instances
-     * @param iAttributeHead index of the attribute that is head of the arrow
-     * @param iAttributeTail index of the attribute that is tail of the arrow
-     * @return true if the arc from iAttributeTail to iAttributeHead exists and reversing does not introduce a cycle 
+     * @param index of the attribute that is head of the arrow
+     * @param index of the attribute that is tail of the arrow
      */
     protected boolean reverseArcMakesSense(
         BayesNet bayesNet,
         Instances instances,
         int iAttributeHead,
         int iAttributeTail) {
-      
         if (iAttributeHead == iAttributeTail) {
             return false;
         }
@@ -220,10 +197,8 @@ public class SearchAlgorithm
     /**
      * IsArc checks whether the arc from iAttributeTail to iAttributeHead already exists
      * 
-     * @param bayesNet
-     * @param iAttributeHead index of the attribute that becomes head of the arrow
-     * @param iAttributeTail index of the attribute that becomes tail of the arrow
-     * @return true if the arc from iAttributeTail to iAttributeHead already exists
+     * @param index of the attribute that becomes head of the arrow
+     * @param index of the attribute that becomes tail of the arrow
      */
     protected boolean isArc(BayesNet bayesNet, int iAttributeHead, int iAttributeTail) {
         for (int iParent = 0; iParent < bayesNet.getParentSet(iAttributeHead).getNrOfParents(); iParent++) {
@@ -241,14 +216,13 @@ public class SearchAlgorithm
      * @return an enumeration of all the available options.
      */
     public Enumeration listOptions() {
-        return new Vector(0).elements();
+      return new Vector(0).elements();
     } // listOption
 
     /**
-     * Parses a given list of options. <p/>
-     * 
+     * Parses a given list of options. Valid options are:<p>
      * @param options the list of options as an array of strings
-     * @throws Exception if an option is not supported
+     * @exception Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
     } // setOptions
@@ -259,49 +233,22 @@ public class SearchAlgorithm
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-        return new String[0];
+      return new String[0];
     } // getOptions
 
-    /**
-     * a string representation of the algorithm
-     * 
-     * @return a string representation
-     */
     public String toString() {
         return "SearchAlgorithm\n";
     } // toString
 
-    
     /**
      * buildStructure determines the network structure/graph of the network.
      * The default behavior is creating a network where all nodes have the first
      * node as its parent (i.e., a BayesNet that behaves like a naive Bayes classifier).
      * This method can be overridden by derived classes to restrict the class
      * of network structures that are acceptable.
-     * 
-     * @param bayesNet the network
-     * @param instances the data to use
-     * @throws Exception if something goes wrong
      */
     public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
-    	if (m_sInitalBIFFile != null && !m_sInitalBIFFile.equals("")) {
-    		BIFReader initialNet = new BIFReader().processFile(m_sInitalBIFFile);
-            for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            	int iNode = initialNet.getNode(bayesNet.getNodeName(iAttribute));
-            	for (int iParent = 0; iParent < initialNet.getNrOfParents(iAttribute);iParent++) {
-            		String sParent = initialNet.getNodeName(initialNet.getParent(iNode, iParent));
-            		int nParent = 0;
-            		while (nParent < bayesNet.getNrOfNodes() && !bayesNet.getNodeName(nParent).equals(sParent)) {
-            			nParent++;
-            		}
-            		if (nParent< bayesNet.getNrOfNodes()) {
-            			bayesNet.getParentSet(iAttribute).addParent(nParent, instances);
-            		} else {
-            			System.err.println("Warning: Node " + sParent + " is ignored. It is found in initial network but not in data set.");
-            		}
-            	}
-            }
-    	} else if (m_bInitAsNaiveBayes) {
+        if (m_bInitAsNaiveBayes) {
             int iClass = instances.classIndex();
             // initialize parent sets to have arrow from classifier node to
             // each of the other nodes
@@ -317,24 +264,15 @@ public class SearchAlgorithm
         }
     } // buildStructure 
 
-    /**
-     * 
-     * @param bayesNet
-     * @param instances
-     */
     protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         // placeholder with implementation in derived classes
     } // search
 
-    /** 
-     * for each node in the network make sure it is in the
+    /* for each node in the network make sure it is in the
      * Markov blanket of the classifier node, and if not,
      * add arrows so that it is. If the node is an ancestor
      * of the classifier node, add arrow pointing to the classifier
      * node, otherwise, add arrow pointing to attribute node.
-     * 
-     * @param bayesNet
-     * @param instances
      */
     protected void doMarkovBlanketCorrection(BayesNet bayesNet, Instances instances) {
         // Add class node as parent if it is not in the Markov Boundary
@@ -354,9 +292,11 @@ public class SearchAlgorithm
                 }
             }
         }
+
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            boolean bIsInMarkovBoundary = (iAttribute == iClass)
-                    || bayesNet.getParentSet(iAttribute).contains(iClass)
+            boolean bIsInMarkovBoundary = (iAttribute == iClass);
+            bIsInMarkovBoundary =
+                bayesNet.getParentSet(iAttribute).contains(iClass)
                     || bayesNet.getParentSet(iClass).contains(iAttribute);
             for (int iAttribute2 = 0; !bIsInMarkovBoundary && iAttribute2 < instances.numAttributes(); iAttribute2++) {
                 bIsInMarkovBoundary =
@@ -364,12 +304,8 @@ public class SearchAlgorithm
                         && bayesNet.getParentSet(iAttribute2).contains(iClass);
             }
             if (!bIsInMarkovBoundary) {
-                if (ancestors.contains(iAttribute)) {
-                	if (bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
-                		bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
-                	} else {
-                		// too bad
-                	}
+                if (ancestors.contains(iAttribute) && bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
+                    bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
                 } else {
                     bayesNet.getParentSet(iAttribute).addParent(iClass, instances);
                 }
@@ -377,18 +313,10 @@ public class SearchAlgorithm
         }
     } // doMarkovBlanketCorrection
 
-    /**
-     * 
-     * @param bMarkovBlanketClassifier
-     */
     protected void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
         m_bMarkovBlanketClassifier = bMarkovBlanketClassifier;
     }
 
-    /**
-     * 
-     * @return
-     */
     protected boolean getMarkovBlanketClassifier() {
         return m_bMarkovBlanketClassifier;
     }
@@ -425,13 +353,4 @@ public class SearchAlgorithm
             + " that all nodes in the network are part of the Markov blanket of the classifier"
             + " node.";
     } // markovBlanketClassifierTipText
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
 } // class SearchAlgorithm

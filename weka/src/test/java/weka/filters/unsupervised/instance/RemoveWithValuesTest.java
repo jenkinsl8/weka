@@ -1,38 +1,23 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
- *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
- *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-/*
  * Copyright (C) 2002 University of Waikato 
  */
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Instances;
-import weka.filters.AbstractFilterTest;
-import weka.filters.Filter;
-
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.filters.Filter;
+import weka.filters.AbstractFilterTest;
 
 /**
  * Tests RemoveWithValues. Run from the command line with:<p>
- * java weka.filters.unsupervised.instance.RemoveWithValuesTest
+ * java weka.filters.RemoveWithValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.4 $
  */
 public class RemoveWithValuesTest extends AbstractFilterTest {
   
@@ -120,15 +105,6 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
       assertTrue("Should select only instances with missing values",
              result.instance(i).isMissing(4));
     }
-  }
-  
-  /**
-   * filter cannot be used in conjunction with the FilteredClassifier, since
-   * an instance used in distributionForInstance/classifyInstance might get
-   * deleted.
-   */
-  public void testFilteredClassifier() {
-    // nothing
   }
 
   public static Test suite() {

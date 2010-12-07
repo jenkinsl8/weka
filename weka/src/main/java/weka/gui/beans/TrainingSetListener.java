@@ -16,7 +16,7 @@
 
 /*
  *    TrainingSetListener.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can accept and process training set events
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.2.2.1 $
  */
 public interface TrainingSetListener extends EventListener {
 

@@ -16,14 +16,12 @@
 
 /*
  *    DatabaseUtils.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 package weka.experiment;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -34,10 +32,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -59,92 +54,88 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class DatabaseUtils
-  implements Serializable, RevisionHandler {
+  implements Serializable {
 
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = -8252351994547116729L;
   
-  /** The name of the table containing the index to experiments. */
+  /** The name of the table containing the index to experiments */
   public static final String EXP_INDEX_TABLE = "Experiment_index";
 
-  /** The name of the column containing the experiment type (ResultProducer). */
+  /** The name of the column containing the experiment type (ResultProducer) */
   public static final String EXP_TYPE_COL = "Experiment_type";
 
-  /** The name of the column containing the experiment setup (parameters). */
+  /** The name of the column containing the experiment setup (parameters) */
   public static final String EXP_SETUP_COL = "Experiment_setup";
   
-  /** The name of the column containing the results table name. */
+  /** The name of the column containing the results table name */
   public static final String EXP_RESULT_COL = "Result_table";
 
-  /** The prefix for result table names. */
+  /** The prefix for result table names */
   public static final String EXP_RESULT_PREFIX = "Results";
 
-  /** The name of the properties file. */
+  /** The name of the properties file */
   public final static String PROPERTY_FILE = "weka/experiment/DatabaseUtils.props";
 
-  /** Holds the jdbc drivers to be used (only to stop them being gc'ed). */
+  /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
   protected Vector DRIVERS = new Vector();
 
-  /** keeping track of drivers that couldn't be loaded. */
+  /** keeping track of drivers that couldn't be loaded */
   protected static Vector DRIVERS_ERRORS;
 
-  /** Properties associated with the database connection. */
+  /** Properties associated with the database connection */
   protected Properties PROPERTIES;
 
   /* Type mapping used for reading experiment results */
-  /** Type mapping for STRING used for reading experiment results. */
+  /** Type mapping for STRING used for reading experiment results */
   public static final int STRING = 0;
-  /** Type mapping for BOOL used for reading experiment results. */
+  /** Type mapping for BOOL used for reading experiment results */
   public static final int BOOL = 1;
-  /** Type mapping for DOUBLE used for reading experiment results. */
+  /** Type mapping for DOUBLE used for reading experiment results */
   public static final int DOUBLE = 2;
-  /** Type mapping for BYTE used for reading experiment results. */
+  /** Type mapping for BYTE used for reading experiment results */
   public static final int BYTE = 3;
-  /** Type mapping for SHORT used for reading experiment results. */
+  /** Type mapping for SHORT used for reading experiment results */
   public static final int SHORT = 4;
-  /** Type mapping for INTEGER used for reading experiment results. */
+  /** Type mapping for INTEGER used for reading experiment results */
   public static final int INTEGER = 5;
-  /** Type mapping for LONG used for reading experiment results. */
+  /** Type mapping for LONG used for reading experiment results */
   public static final int LONG = 6;
-  /** Type mapping for FLOAT used for reading experiment results. */
+  /** Type mapping for FLOAT used for reading experiment results */
   public static final int FLOAT = 7;
-  /** Type mapping for DATE used for reading experiment results. */
+  /** Type mapping for DATE used for reading experiment results */
   public static final int DATE = 8; 
-  /** Type mapping for TEXT used for reading, e.g., text blobs. */
-  public static final int TEXT = 9; 
-  /** Type mapping for TIME used for reading TIME columns. */
-  public static final int TIME = 10; 
   
-  /** Database URL. */
+  /** Database URL */
   protected String m_DatabaseURL;
  
   /** The prepared statement used for database queries. */
   protected transient PreparedStatement m_PreparedStatement;
    
-  /** The database connection. */
+  /** The database connection */
   protected transient Connection m_Connection;
 
-  /** True if debugging output should be printed. */
+  /** True if debugging output should be printed */
   protected boolean m_Debug = false;
   
-  /** Database username. */
+  /** Database username */
   protected String m_userName = "";
 
-  /** Database Password. */
+  /** Database Password */
   protected String m_password = "";
 
   /* mappings used for creating Tables. Can be overridden in DatabaseUtils.props*/
-  /** string type for the create table statement. */
+  /** string type for the create table statement */
   protected String m_stringType = "LONGVARCHAR";
-  /** integer type for the create table statement. */
+  /** integer type for the create table statement */
   protected String m_intType = "INT";
-  /** double type for the create table statement. */
+  /** double type for the create table statement */
   protected String m_doubleType = "DOUBLE";
 
-  /** For databases where Tables and Columns are created in upper case. */
+  /** For databases where Tables and Columns are created in upper case */
   protected boolean m_checkForUpperCaseNames = false;
 
-  /** For databases where Tables and Columns are created in lower case. */
+  /** For databases where Tables and Columns are created in lower case */
   protected boolean m_checkForLowerCaseNames = false;
 
   /** setAutoCommit on the database? */
@@ -153,14 +144,8 @@ public class DatabaseUtils
   /** create index on the database? */
   protected boolean m_createIndex = false;
 
-  /** the keywords for the current database type. */
-  protected HashSet<String> m_Keywords = new HashSet<String>();
-
-  /** the character to mask SQL keywords (by appending this character). */
-  protected String m_KeywordsMaskChar = "_";
-  
   /**
-   * Reads properties and sets up the database drivers.
+   * Reads properties and sets up the database drivers
    *
    * @throws Exception 	if an error occurs
    */
@@ -170,10 +155,10 @@ public class DatabaseUtils
 
     try {
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-
+      
       // Register the drivers in jdbc DriverManager
       String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
-
+      
       if (drivers == null) {
         throw new Exception("No database drivers (JDBC) specified");
       }
@@ -191,10 +176,10 @@ public class DatabaseUtils
         catch (Exception e) {
           result = false;
         }
-        if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
+        if (!result && !DRIVERS_ERRORS.contains(driver))
           System.err.println(
               "Trying to add database driver (JDBC): " + driver 
-              + " - " + (result ? "Success!" : "Warning, not in CLASSPATH?"));
+              + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
         if (!result)
           DRIVERS_ERRORS.add(driver);
       }
@@ -215,9 +200,6 @@ public class DatabaseUtils
 			"setAutoCommit", "false").equals("true");
     m_createIndex   = PROPERTIES.getProperty(
 			"createIndex", "false").equals("true");
-    setKeywords(PROPERTIES.getProperty(
-			"Keywords", "AND,ASC,BY,DESC,FROM,GROUP,INSERT,ORDER,SELECT,UPDATE,WHERE"));
-    setKeywordsMaskChar(PROPERTIES.getProperty("KeywordsMaskChar", "_"));
   }
   
   /** 
@@ -368,7 +350,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -396,7 +378,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -406,7 +388,7 @@ public class DatabaseUtils
   }
   
   /**
-   * Sets whether there should be printed some debugging output to stderr or not.
+   * Sets whether there should be printed some debugging output to stderr or not
    * 
    * @param d 		true if output should be printed
    */
@@ -415,7 +397,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Gets whether there should be printed some debugging output to stderr or not.
+   * Gets whether there should be printed some debugging output to stderr or not
    * 
    * @return 		true if output should be printed
    */
@@ -424,7 +406,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -434,7 +416,7 @@ public class DatabaseUtils
   }
 
   /** 
-   * Set the database username.
+   * Set the database username 
    *
    * @param username 	Username for Database.
    */
@@ -443,7 +425,7 @@ public class DatabaseUtils
   }
   
   /** 
-   * Get the database username.
+   * Get the database username 
    *
    * @return 		Database username
    */
@@ -452,7 +434,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property.
+   * Returns the tip text for this property
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -462,7 +444,7 @@ public class DatabaseUtils
   }
 
   /** 
-   * Set the database password.
+   * Set the database password
    *
    * @param password 	Password for Database.
    */
@@ -471,7 +453,7 @@ public class DatabaseUtils
   }
   
   /** 
-   * Get the database password.
+   * Get the database password
    *
    * @return  		Password for Database.
    */
@@ -480,7 +462,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Opens a connection to the database.
+   * Opens a connection to the database
    *
    * @throws Exception 	if an error occurs
    */
@@ -551,201 +533,34 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns whether the cursors only support forward movement or are
-   * scroll sensitive (with ResultSet.CONCUR_READ_ONLY concurrency).
-   * Returns always false if not connected
-   * 
-   * @return		true if connected and the cursor is scroll-sensitive
-   * @see		ResultSet#TYPE_SCROLL_SENSITIVE
-   * @see		ResultSet#TYPE_FORWARD_ONLY
-   * @see		ResultSet#CONCUR_READ_ONLY
-   */
-  public boolean isCursorScrollSensitive() {
-    boolean	result;
-    
-    result = false;
-    
-    try {
-      if (isConnected())
-	result = m_Connection.getMetaData().supportsResultSetConcurrency(
-	    		ResultSet.TYPE_SCROLL_SENSITIVE, 
-	    		ResultSet.CONCUR_READ_ONLY);
-    }
-    catch (Exception e) {
-      // ignored
-    }
-    
-    return result;
-  }
-  
-  /**
-   * Checks whether cursors are scrollable in general, false otherwise 
-   * (also if not connected).
-   * 
-   * @return		true if scrollable and connected
-   * @see		#getSupportedCursorScrollType()
-   */
-  public boolean isCursorScrollable() {
-    return (getSupportedCursorScrollType() != -1);
-  }
-  
-  /**
-   * Returns the type of scrolling that the cursor supports, -1 if not
-   * supported or not connected. Checks first for TYPE_SCROLL_SENSITIVE
-   * and then for TYPE_SCROLL_INSENSITIVE. In both cases CONCUR_READ_ONLY
-   * as concurrency is used.
-   * 
-   * @return		the scroll type, or -1 if not connected or no scrolling supported
-   * @see		ResultSet#TYPE_SCROLL_SENSITIVE
-   * @see		ResultSet#TYPE_SCROLL_INSENSITIVE
-   */
-  public int getSupportedCursorScrollType() {
-    int		result;
-    
-    result = -1;
-    
-    try {
-      if (isConnected()) {
-	if (m_Connection.getMetaData().supportsResultSetConcurrency(
-	    		ResultSet.TYPE_SCROLL_SENSITIVE, 
-	    		ResultSet.CONCUR_READ_ONLY))
-	  result = ResultSet.TYPE_SCROLL_SENSITIVE;
-	
-	if (result == -1) {
-	  if (m_Connection.getMetaData().supportsResultSetConcurrency(
-	      		ResultSet.TYPE_SCROLL_INSENSITIVE, 
-	      		ResultSet.CONCUR_READ_ONLY))
-	    result = ResultSet.TYPE_SCROLL_INSENSITIVE;
-	}
-      }
-    }
-    catch (Exception e) {
-      // ignored
-    }
-    
-    return result;
-  }
-
-  /**
-   * Executes a SQL query. Caller must clean up manually with 
-   * <code>close()</code>.
+   * Executes a SQL query.
    *
    * @param query 	the SQL query
    * @return 		true if the query generated results
    * @throws SQLException if an error occurs
-   * @see #close()
    */
   public boolean execute(String query) throws SQLException {
     if (!isConnected())
       throw new IllegalStateException("Not connected, please connect first!");
     
-    if (!isCursorScrollable())
-      m_PreparedStatement = m_Connection.prepareStatement(
-	  query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    else
-      m_PreparedStatement = m_Connection.prepareStatement(
-	  query, getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
+    m_PreparedStatement = m_Connection.prepareStatement(
+	query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     
     return(m_PreparedStatement.execute());
   }
 
   /**
-   * Gets the results generated by a previous query. Caller must clean up 
-   * manually with <code>close(ResultSet)</code>. Returns null if object has
-   * been deserialized.
+   * Gets the results generated by a previous query. Caller must close
+   * the ResultSet manually. Returns null if object has been deserialized.
    *
    * @return 		the result set.
    * @throws SQLException if an error occurs
-   * @see #close(ResultSet)
    */
   public ResultSet getResultSet() throws SQLException {
     if (m_PreparedStatement != null)
       return m_PreparedStatement.getResultSet();
     else
       return null;
-  }
-
-  /**
-   * Executes a SQL DDL query or an INSERT, DELETE or UPDATE.
-   *
-   * @param query 	the SQL DDL query
-   * @return 		the number of affected rows
-   * @throws SQLException if an error occurs
-   */
-  public int update(String query) throws SQLException {
-    if (!isConnected())
-      throw new IllegalStateException("Not connected, please connect first!");
-    
-    Statement statement;
-    if (!isCursorScrollable())
-      statement = m_Connection.createStatement(
-	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    else
-      statement = m_Connection.createStatement(
-	  getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
-    int result = statement.executeUpdate(query);
-    statement.close();
-    
-    return result;
-  }
-
-  /**
-   * Executes a SQL SELECT query that returns a ResultSet. Note: the ResultSet
-   * object must be closed by the caller.
-   *
-   * @param query 	the SQL query
-   * @return 		the generated ResultSet
-   * @throws SQLException if an error occurs
-   */
-  public ResultSet select(String query) throws SQLException {
-    if (!isConnected())
-      throw new IllegalStateException("Not connected, please connect first!");
-    
-    Statement statement;
-    if (!isCursorScrollable())
-      statement = m_Connection.createStatement(
-	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-    else
-      statement = m_Connection.createStatement(
-	  getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
-    ResultSet result = statement.executeQuery(query);
-    
-    return result;
-  }
-
-  /**
-   * closes the ResultSet and the statement that generated the ResultSet to
-   * avoid memory leaks in JDBC drivers - in contrast to the JDBC specs, a lot
-   * of JDBC drives don't clean up correctly.
-   * 
-   * @param rs		the ResultSet to clean up
-   */
-  public void close(ResultSet rs) {
-    try {
-      Statement statement = rs.getStatement();
-      rs.close();
-      statement.close();
-      statement = null;
-      rs = null;
-    }
-    catch (Exception e) {
-      // ignored
-    }
-  }
-  
-  /**
-   * closes the m_PreparedStatement to avoid memory leaks.
-   */
-  public void close() {
-    if (m_PreparedStatement != null) {
-      try {
-	m_PreparedStatement.close();
-	m_PreparedStatement = null;
-      }
-      catch (Exception e) {
-	// ignored
-      }
-    }
   }
   
   /**
@@ -839,15 +654,17 @@ public class DatabaseUtils
       }
     }
     boolean retval = false;
-    ResultSet rs = select(query);
-    if (rs.next()) {
-      retval = true;
+    if (execute(query)) {
+      ResultSet rs = m_PreparedStatement.getResultSet();
       if (rs.next()) {
-	throw new Exception("More than one result entry "
-	    + "for result key: " + query);
+	retval = true;
+	if (rs.next()) {
+	  throw new Exception("More than one result entry "
+			      + "for result key: " + query);
+	}
       }
+      rs.close();
     }
-    close(rs);
     return retval;
   }
 
@@ -898,7 +715,10 @@ public class DatabaseUtils
 	}
       }
     }
-    ResultSet rs = select(query);
+    if (!execute(query)) {
+      throw new Exception("Couldn't execute query: " + query);
+    }
+    ResultSet rs = m_PreparedStatement.getResultSet();
     ResultSetMetaData md = rs.getMetaData();
     int numAttributes = md.getColumnCount();
     if (!rs.next()) {
@@ -931,7 +751,7 @@ public class DatabaseUtils
       throw new Exception("More than one result entry "
 			  + "for result key: " + query);
     }
-    close(rs);
+    rs.close();
     return result;
   }
 
@@ -992,8 +812,11 @@ public class DatabaseUtils
     if (m_Debug) {
       System.err.println("Submitting result: " + query);
     }
-    update(query);
-    close();
+    if (execute(query)) {
+      if (m_Debug) {
+	System.err.println("...acceptResult returned resultset");
+      }
+    }
   }
   
   /**
@@ -1031,7 +854,7 @@ public class DatabaseUtils
   }
   
   /**
-   * Attempts to create the experiment index table.
+   * Attempts to create the experiment index table
    *
    * @throws Exception 	if an error occurs.
    */
@@ -1062,8 +885,11 @@ public class DatabaseUtils
     // Other possible fields:
     //   creator user name (from System properties)
     //   creation date
-    update(query);
-    close();
+    if (execute(query)) {
+      if (m_Debug) {
+	System.err.println("...create returned resultset");
+      }
+    }
   }
 
   /**
@@ -1095,14 +921,16 @@ public class DatabaseUtils
 
     // Get the number of rows
     String query = "SELECT COUNT(*) FROM " + EXP_INDEX_TABLE;
-    ResultSet rs = select(query);
-    if (m_Debug) {
-      System.err.println("...getting number of rows");
+    if (execute(query)) {
+      if (m_Debug) {
+	System.err.println("...getting number of rows");
+      }
+      ResultSet rs = m_PreparedStatement.getResultSet();
+      if (rs.next()) {
+	numRows = rs.getInt(1);
+      }
+      rs.close();
     }
-    if (rs.next()) {
-      numRows = rs.getInt(1);
-    }
-    close(rs);
 
     // Add an entry in the index table
     String expType = rp.getClass().getName();
@@ -1111,12 +939,11 @@ public class DatabaseUtils
       +" VALUES ('"
       + expType + "', '" + expParams
       + "', " + numRows + " )"; 
-    if (update(query) > 0) {
+    if (execute(query)) {
       if (m_Debug) {
 	System.err.println("...create returned resultset");
       }
     }
-    close();
     
     // Finished compound transaction
     // Workaround for MySQL (doesn't support transactions)
@@ -1144,7 +971,7 @@ public class DatabaseUtils
       if (m_Debug) {
 	System.err.println(query);
       }
-      update(query);
+      execute(query);
     } catch (SQLException ex) {
       System.err.println(ex.getMessage());
     }
@@ -1173,15 +1000,17 @@ public class DatabaseUtils
        + " WHERE " + EXP_TYPE_COL + "='" + expType 
       + "' AND " + EXP_SETUP_COL + "='" + expParams + "'";
     String tableName = null;
-    ResultSet rs = select(query);
-    if (rs.next()) {
-      tableName = rs.getString(1);
+    if (execute(query)) {
+      ResultSet rs = m_PreparedStatement.getResultSet();
       if (rs.next()) {
-	throw new Exception("More than one index entry "
-	    + "for experiment config: " + query);
+	tableName = rs.getString(1);
+	if (rs.next()) {
+	  throw new Exception("More than one index entry "
+			      + "for experiment config: " + query);
+	}
       }
+      rs.close();
     }
-    close(rs);
     if (m_Debug) {
       System.err.println("...results table = " + ((tableName == null) 
 						  ? "<null>" 
@@ -1268,10 +1097,13 @@ public class DatabaseUtils
     }
     query += " )";
     
-    update(query);
+    if (execute(query)) {
+      if (m_Debug) {
+	System.err.println("...create returned resultset");
+      }
+    }
     if (m_Debug) 
       System.err.println("table created");
-    close();
 
 
     if (m_createIndex) {
@@ -1292,103 +1124,12 @@ public class DatabaseUtils
       }
       query += ")";
     
-      update(query);
+      if (execute(query)) {
+	if (m_Debug) {
+	  System.err.println("...create index returned resultset");
+	}
+      }
     }
     return tableName;
-  }
-  
-  /**
-   * Sets the keywords (comma-separated list) to use.
-   * 
-   * @param value	the list of keywords
-   */
-  public void setKeywords(String value) {
-    String[] 	keywords;
-    int		i;
-    
-    m_Keywords.clear();
-    
-    keywords = value.replaceAll(" ", "").split(",");
-    for (i = 0; i < keywords.length; i++)
-      m_Keywords.add(keywords[i].toUpperCase());
-  }
-  
-  /**
-   * Returns the currently stored keywords (as comma-separated list).
-   * 
-   * @return		the list of keywords
-   */
-  public String getKeywords() {
-    String		result;
-    Vector<String>	list;
-    int			i;
-    
-    list = new Vector<String>(m_Keywords);
-    Collections.sort(list);
-    
-    result = "";
-    for (i = 0; i < list.size(); i++) {
-      if (i > 0)
-	result += ",";
-      result += list.get(i);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * Sets the mask character to append to table or attribute names that
-   * are a reserved keyword.
-   * 
-   * @param value	the new character
-   */
-  public void setKeywordsMaskChar(String value) {
-    m_KeywordsMaskChar = value;
-  }
-  
-  /**
-   * Returns the currently set mask character.
-   * 
-   * @return		the character
-   */
-  public String getKeywordsMaskChar() {
-    return m_KeywordsMaskChar;
-  }
-  
-  /**
-   * Checks whether the given string is a reserved keyword.
-   * 
-   * @param s		the string to check
-   * @return		true if the string is a keyword
-   * @see		#m_Keywords
-   */
-  public boolean isKeyword(String s) {
-    return m_Keywords.contains(s.toUpperCase());
-  }
-  
-  /**
-   * If the given string is a keyword, then the mask character will be 
-   * appended and returned. Otherwise, the same string will be returned
-   * unchanged.
-   * 
-   * @param s		the string to check
-   * @return		the potentially masked string
-   * @see		#m_KeywordsMaskChar
-   * @see		#isKeyword(String)
-   */
-  public String maskKeyword(String s) {
-    if (isKeyword(s))
-      return s + m_KeywordsMaskChar;
-    else
-      return s;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

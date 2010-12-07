@@ -16,34 +16,39 @@
 
 /*
  *    IncrementalClassifierEvaluator.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
-import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.Utils;
+import weka.gui.Logger;
 
+import java.io.Serializable;
 import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.BorderFactory;
+import java.awt.*;
 
 /**
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
   implements IncrementalClassifierListener,
 	     EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3105419818939541291L;
 
   private transient Evaluation m_eval;
 
@@ -61,37 +66,12 @@ public class IncrementalClassifierEvaluator
   private double m_min = Double.MAX_VALUE;
   private double m_max = Double.MIN_VALUE;
 
-  // how often to report # instances processed to the log
-  private int m_statusFrequency = 100;
-  private int m_instanceCount = 0;
-
-  // output info retrieval and auc stats for each class (if class is nominal)
-  private boolean m_outputInfoRetrievalStats = false;
-
   public IncrementalClassifierEvaluator() {
      m_visual.loadIcons(BeanVisual.ICON_PATH
 		       +"IncrementalClassifierEvaluator.gif",
 		       BeanVisual.ICON_PATH
 		       +"IncrementalClassifierEvaluator_animated.gif");
     m_visual.setText("IncrementalClassifierEvaluator");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -114,20 +94,11 @@ public class IncrementalClassifierEvaluator
       if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
 	//	m_eval = new Evaluation(ce.getCurrentInstance().dataset());
 	m_eval = new Evaluation(ce.getStructure());
-	m_eval.useNoPriors();
-	
 	m_dataLegend = new Vector();
 	m_reset = true;
 	m_dataPoint = new double[0];
 	Instances inst = ce.getStructure();
 	System.err.println("NEW BATCH");
-        m_instanceCount = 0;
-        if (m_logger != null) {
-          m_logger.statusMessage(statusMessagePrefix() 
-              + "IncrementalClassifierEvaluator: started processing...");
-          m_logger.logMessage("[IncrementalClassifierEvaluator]" +
-              statusMessagePrefix() + " started processing...");
-        }
 	/* if (inst.classIndex() >= 0) {
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
 	    if (inst.isMissing(inst.classIndex())) {
@@ -144,24 +115,12 @@ public class IncrementalClassifierEvaluator
 	  }
 	} */
       } else {
-        if (m_instanceCount > 0 && m_instanceCount % m_statusFrequency == 0) {
-          if (m_logger != null) {
-            m_logger.statusMessage(statusMessagePrefix() + "Processed "
-                                   + m_instanceCount + " instances.");
-          }
-        }
-        m_instanceCount++;
 	Instance inst = ce.getCurrentInstance();
 	//	if (inst.attribute(inst.classIndex()).isNominal()) {
 	double [] dist = ce.getClassifier().distributionForInstance(inst);
 	double pred = 0;
 	if (!inst.isMissing(inst.classIndex())) {
-          if (m_outputInfoRetrievalStats) {
-            // store predictions so AUC etc can be output.
-            m_eval.evaluateModelOnceAndRecordPrediction(dist, inst);
-          } else {
-            m_eval.evaluateModelOnce(dist, inst);
-          }
+	  m_eval.evaluateModelOnce(dist, inst);
 	} else {
 	  pred = ce.getClassifier().classifyInstance(inst);
 	}
@@ -247,11 +206,6 @@ public class IncrementalClassifierEvaluator
 	  notifyChartListeners(m_ce);
 
 	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
-            if (m_logger != null) {
-              m_logger.logMessage("[IncrementalClassifierEvaluator]"
-                  + statusMessagePrefix() + " Finished processing.");
-              m_logger.statusMessage(statusMessagePrefix() + "Done.");
-            }
 	    if (m_textListeners.size() > 0) {
 	      String textTitle = ce.getClassifier().getClass().getName();
 	      textTitle = 
@@ -261,16 +215,6 @@ public class IncrementalClassifierEvaluator
 		+  "Scheme:   " + textTitle + "\n"
 		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
 		+ m_eval.toSummaryString();
-              if (inst.classIndex() >= 0 && 
-                  inst.classAttribute().isNominal() &&
-                  (m_outputInfoRetrievalStats)) {
-                results += "\n" + m_eval.toClassDetailsString();
-              }
-
-              if (inst.classIndex() >= 0 && 
-                  inst.classAttribute().isNominal()) {
-                results += "\n" + m_eval.toMatrixString();
-              }
 	      textTitle = "Results: " + textTitle;
 	      TextEvent te = 
 		new TextEvent(this, 
@@ -282,15 +226,7 @@ public class IncrementalClassifierEvaluator
 	}
       }
     } catch (Exception ex) {
-      if (m_logger != null) {
-        m_logger.logMessage("[IncrementalClassifierEvaluator]"
-            + statusMessagePrefix() + " Error processing prediction " 
-            + ex.getMessage());
-        m_logger.statusMessage(statusMessagePrefix() 
-            + "ERROR: problem processing prediction (see log for details)");
-      }
       ex.printStackTrace();
-      stop();
     }
   }
 
@@ -321,21 +257,7 @@ public class IncrementalClassifierEvaluator
    * Stop all action
    */
   public void stop() {
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
-      ((BeanCommon)m_listenee).stop();
-    }
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return false;
+    // nothing to do
   }
 
   private void notifyChartListeners(ChartEvent ce) {
@@ -367,63 +289,6 @@ public class IncrementalClassifierEvaluator
 	((TextListener)l.elementAt(i)).acceptText(te);
       }
     }
-  }
-
-  /**
-   * Set how often progress is reported to the status bar.
-   * 
-   * @param s report progress every s instances
-   */
-  public void setStatusFrequency(int s) {
-    m_statusFrequency = s;
-  }
-
-  /**
-   * Get how often progress is reported to the status bar.
-   * 
-   * @return after how many instances, progress is reported to the
-   * status bar
-   */
-  public int getStatusFrequency() {
-    return m_statusFrequency;
-  }
-
-  /**
-   * Return a tip text string for this property
-   * 
-   * @return a string for the tip text
-   */
-  public String statusFrequencyTipText() {
-    return "How often to report progress to the status bar.";
-  }
-
-  /**
-   * Set whether to output per-class information retrieval
-   * statistics (nominal class only).
-   * 
-   * @param i true if info retrieval stats are to be output
-   */
-  public void setOutputPerClassInfoRetrievalStats(boolean i) {
-    m_outputInfoRetrievalStats = i;
-  }
-
-  /**
-   * Get whether per-class information retrieval stats are to be output.
-   * 
-   * @return true if info retrieval stats are to be output
-   */
-  public boolean getOutputPerClassInfoRetrievalStats() {
-    return m_outputInfoRetrievalStats;
-  }
-
-  /**
-   * Return a tip text string for this property
-   * 
-   * @return a string for the tip text
-   */
-  public String outputPerClassInfoRetrievalStatsTipText() {
-    return "Output per-class info retrieval stats. If set to true, predictions get "
-      +"stored so that stats such as AUC can be computed. Note: this consumes some memory.";
   }
 
   /**
@@ -460,9 +325,5 @@ public class IncrementalClassifierEvaluator
    */
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }

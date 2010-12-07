@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2006 University of Waikato 
+ * Copyright (C) 2010 University of Waikato
  */
 
 package weka.core;
@@ -23,26 +23,27 @@ package weka.core;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import junit.textui.TestRunner;
 
 /**
  * Tests SingleIndex. Run from the command line with:<p/>
  * java weka.core.SingleIndexTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
-public class SingleIndexTest 
+public class SingleIndexTest
   extends TestCase {
-  
+
   /**
    * Constructs the <code>SingleIndexTest</code>.
    *
    * @param name the name of the test class
    */
-  public SingleIndexTest(String name) { 
-    super(name); 
+  public SingleIndexTest(String name) {
+    super(name);
   }
-  
+
   /**
    * Called by JUnit before each test method.
    *
@@ -66,7 +67,7 @@ public class SingleIndexTest
    * @param upper       the upper limit
    */
   protected SingleIndex getIndex(String initial, int upper) {
-    SingleIndex   result; 
+    SingleIndex   result;
 
     if (initial == null) {
       result = new SingleIndex();
@@ -136,6 +137,6 @@ public class SingleIndexTest
   }
 
   public static void main(String[] args){
-    junit.textui.TestRunner.run(suite());
+    TestRunner.run(suite());
   }
 }

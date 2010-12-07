@@ -16,81 +16,39 @@
 
 /*
  *    RemoveUseless.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.AttributeStats;
-import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-
+import weka.filters.*;
+import weka.core.*;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * This filter removes attributes that do not vary at all or that vary too much. All constant attributes are deleted automatically, along with any that exceed the maximum percentage of variance parameter. The maximum variance test is only applied to nominal attributes.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -M &lt;max variance %&gt;
- *  Maximum variance percentage allowed (default 99)</pre>
- * 
- <!-- options-end -->
+ * This filter removes attributes that do not vary at all or that vary too much.
+ * All constant attributes are deleted automatically, along with any that exceed
+ * the maximum percentage of variance parameter. The maximum variance test is
+ * only applied to nominal attributes.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -M percentage <br>
+ * The maximum variance allowed before an attribute will be deleted (default 99).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.5.2.1 $
  */
-public class RemoveUseless 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8659417851407640038L;
+public class RemoveUseless extends Filter implements UnsupervisedFilter,
+						     OptionHandler {
 
   /** The filter used to remove attributes */
   protected Remove m_removeFilter = null;
 
   /** The type of attribute to delete */
   protected double m_maxVariancePercentage = 99.0;
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.STRING_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
 
   /**
    * Sets the format of the input instances.
@@ -99,7 +57,7 @@ public class RemoveUseless
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the inputFormat can't be set successfully 
+   * @exception Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -128,7 +86,6 @@ public class RemoveUseless
       m_removeFilter.input(instance);
       Instance processed = m_removeFilter.output();
       processed.setDataset(getOutputFormat());
-      copyValues(processed, false, instance.dataset(), getOutputFormat());
       push(processed);
       return true;
     }
@@ -140,7 +97,6 @@ public class RemoveUseless
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @throws Exception if no input format defined
    */  
   public boolean batchFinished() throws Exception {
 
@@ -219,18 +175,13 @@ public class RemoveUseless
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -M &lt;max variance %&gt;
-   *  Maximum variance percentage allowed (default 99)</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -M percentage <br>
+   * The maximum variance allowed before an attribute will be deleted (default 99).
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -272,11 +223,8 @@ public class RemoveUseless
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "This filter removes attributes that do not vary at all or that vary "
-      + "too much. All constant attributes are deleted automatically, along "
-      + "with any that exceed the maximum percentage of variance parameter. "
-      + "The maximum variance test is only applied to nominal attributes.";
+
+    return "Removes constant attributes, along with nominal attributes that vary too much.";
   }
 
   /**
@@ -313,15 +261,6 @@ public class RemoveUseless
 
     return m_maxVariancePercentage;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -329,6 +268,15 @@ public class RemoveUseless
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new RemoveUseless(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new RemoveUseless(), argv); 
+      } else {
+	Filter.filterFile(new RemoveUseless(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

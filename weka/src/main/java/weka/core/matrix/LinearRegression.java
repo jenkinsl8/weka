@@ -14,19 +14,16 @@
 
 package weka.core.matrix;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
  * Class for performing (ridged) linear regression.
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2.2.2 $
  */
  
-public class LinearRegression
-  implements RevisionHandler {
+public class LinearRegression {
 
   /** the coefficients */
   protected double[] m_Coefficients = null;
@@ -37,6 +34,7 @@ public class LinearRegression
    * @param a the matrix to perform the regression on
    * @param y the dependent variable vector
    * @param ridge the ridge parameter
+   * @return the coefficients 
    * @throws IllegalArgumentException if not successful
    */
   public LinearRegression(Matrix a, Matrix y, double ridge) {
@@ -50,6 +48,7 @@ public class LinearRegression
    * @param y the dependent variable vector
    * @param w the array of data point weights
    * @param ridge the ridge parameter
+   * @return the coefficients 
    * @throws IllegalArgumentException if the wrong number of weights were
    * provided.
    */
@@ -76,6 +75,7 @@ public class LinearRegression
    * @param a the matrix to perform the regression on
    * @param y the dependent variable vector
    * @param ridge the ridge parameter
+   * @return the coefficients 
    * @throws IllegalArgumentException if not successful
    */
   protected void calculate(Matrix a, Matrix y, double ridge) {
@@ -129,14 +129,5 @@ public class LinearRegression
    */
   public String toString() {
     return Utils.arrayToString(getCoefficients());
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

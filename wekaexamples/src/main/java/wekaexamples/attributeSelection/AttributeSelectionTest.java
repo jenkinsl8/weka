@@ -30,8 +30,8 @@ import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
+import wekaexamples.core.converters.DataSource;
 
 import java.util.Random;
 
@@ -103,8 +103,7 @@ public class AttributeSelectionTest {
   public static void main(String[] args) throws Exception {
     // load data
     System.out.println("\n0. Loading data");
-    DataSource source = new DataSource(args[0]);
-    Instances data = source.getDataSet();
+    Instances data = DataSource.read(args[0]);
     if (data.classIndex() == -1)
       data.setClassIndex(data.numAttributes() - 1);
 

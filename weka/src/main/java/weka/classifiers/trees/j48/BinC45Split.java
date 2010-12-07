@@ -16,39 +16,29 @@
 
 /*
  *    BinC45Split.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
-import java.util.Enumeration;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9.2.1 $
  */
-public class BinC45Split
-  extends ClassifierSplitModel {
 
-  /** for serialization */
-  private static final long serialVersionUID = -1278776919563022474L;
+public class BinC45Split extends ClassifierSplitModel{
 
   /** Attribute to split on. */
   private int m_attIndex;        
 
   /** Minimum number of objects in a split.   */ 
   private int m_minNoObj;         
-
-  /** Use MDL correction? */
-  private boolean m_useMDLcorrection;         
 
   /** Value of split point. */
   private double m_splitPoint;  
@@ -71,8 +61,7 @@ public class BinC45Split
   /**
    * Initializes the split model.
    */
-  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights,
-                     boolean useMDLcorrection) {
+  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights){
 
     // Get index of attribute to split on.
     m_attIndex = attIndex;
@@ -82,9 +71,6 @@ public class BinC45Split
 
     // Set sum of weights;
     m_sumOfWeights = sumOfWeights;
-
-    // Whether to use the MDL correction for numeric attributes
-    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -117,15 +103,6 @@ public class BinC45Split
   public final int attIndex(){
 
     return m_attIndex;
-  }
-  
-  /**
-   * Returns the split point (numeric attribute only).
-   * 
-   * @return the split point used for a test on a numeric attribute
-   */
-  public double splitPoint() {
-    return m_splitPoint;
   }
   
   /**
@@ -299,9 +276,7 @@ public class BinC45Split
       return;
     
     // Compute modified information gain for best split.
-    if (m_useMDLcorrection) {
-      m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
-    }
+    m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
     if (Utils.smOrEq(m_infoGain,0))
       return;
     
@@ -338,10 +313,8 @@ public class BinC45Split
   }
 
   /**
-   * Prints left side of condition.
-   * 
-   * @param data the data to get the attribute name from.
-   * @return the attribute name
+   * Prints left side of condition..
+   * @param index of subset and training set.
    */
   public final String leftSide(Instances data){
 
@@ -494,14 +467,5 @@ public class BinC45Split
 	else
 	  return 1;
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -16,80 +16,91 @@
 
 /*
  *    SimpleSetupPanel.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Richard Kirkby
  *
  */
 
 package weka.gui.experiment;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.xml.KOML;
-import weka.experiment.CSVResultListener;
-import weka.experiment.ClassifierSplitEvaluator;
-import weka.experiment.CrossValidationResultProducer;
-import weka.experiment.DatabaseResultListener;
+import javax.swing.JPanel;
 import weka.experiment.Experiment;
-import weka.experiment.InstancesResultListener;
-import weka.experiment.PropertyNode;
-import weka.experiment.RandomSplitResultProducer;
-import weka.experiment.RegressionSplitEvaluator;
-import weka.experiment.SplitEvaluator;
-import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.DatabaseConnectionDialog;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.IntrospectionException;
+import weka.classifiers.Classifier;
+import weka.core.xml.KOML;
+import weka.experiment.CrossValidationResultProducer;
+import weka.experiment.SplitEvaluator;
+import weka.experiment.ClassifierSplitEvaluator;
+import weka.experiment.RegressionSplitEvaluator;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.InstancesResultListener;
+import weka.experiment.CSVResultListener;
+import weka.experiment.PropertyNode;
+import weka.experiment.ResultProducer;
+import weka.experiment.RandomSplitResultProducer;
+import weka.experiment.xml.XMLExperiment;
+
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
+import java.beans.IntrospectionException;
 import java.io.File;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.io.BufferedInputStream;
+import java.awt.Component;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Dimension;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.Insets;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
 import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.Box;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+
 
 /** 
  * This panel controls the configuration of an experiment.
   * <p>
  * If <a href="http://koala.ilog.fr/XML/serialization/" target="_blank">KOML</a>
- * is in the classpath the experiments can also be serialized to XML instead of a
+ * is in the classpath the experiments can also be saved to XML instead of a
  * binary format.
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision$
+ * @version $Revision: 1.6.2.4 $
  */
-public class SimpleSetupPanel
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = 5257424515609176509L;
+public class SimpleSetupPanel extends JPanel {
 
   /** The experiment being configured */
   protected Experiment m_Exp;
@@ -260,7 +271,6 @@ public class SimpleSetupPanel
     } catch (Exception e) {}
 
     // create action listeners
-    m_NewBut.setMnemonic('N');
     m_NewBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  Experiment newExp = new Experiment();
@@ -310,13 +320,11 @@ public class SimpleSetupPanel
 	}
       });
     m_SaveBut.setEnabled(false);
-    m_SaveBut.setMnemonic('S');
     m_SaveBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  saveExperiment();
 	}
       });
-    m_OpenBut.setMnemonic('O');
     m_OpenBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  openExperiment();
@@ -828,7 +836,27 @@ public class SimpleSetupPanel
     }
     
     try {
-      Experiment exp = Experiment.read(expFile.getAbsolutePath());
+      Experiment exp; 
+      
+      // KOML?
+      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+         exp = (Experiment) KOML.read(expFile.getAbsolutePath());
+      }
+      else
+      // XML?
+      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
+         XMLExperiment xml = new XMLExperiment(); 
+         exp = (Experiment) xml.read(expFile);
+      }
+      // binary
+      else {
+         FileInputStream fi = new FileInputStream(expFile);
+         ObjectInputStream oi = new ObjectInputStream(
+                                new BufferedInputStream(fi));
+         exp = (Experiment)oi.readObject();
+         oi.close();
+      }
+      
       if (!setExperiment(exp)) {
 	if (m_modePanel != null) m_modePanel.switchToAdvanced(exp);
       }
@@ -871,7 +899,25 @@ public class SimpleSetupPanel
     }
     
     try {
-      Experiment.write(expFile.getAbsolutePath(), m_Exp);
+       // KOML?
+       if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+          KOML.write(expFile.getAbsolutePath(), m_Exp);
+       }
+       else
+       // XML?
+       if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
+          XMLExperiment xml = new XMLExperiment(); 
+          xml.write(expFile, m_Exp);
+       }
+       // binary
+       else {
+          FileOutputStream fo = new FileOutputStream(expFile);
+          ObjectOutputStream oo = new ObjectOutputStream(
+                                  new BufferedOutputStream(fo));
+          oo.writeObject(m_Exp);
+          oo.close();
+       }
+      
       System.err.println("Saved experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -1194,8 +1240,7 @@ public class SimpleSetupPanel
     ((DatabaseResultListener)m_Exp.getResultListener()).setUsername(dbd.getUsername());
     ((DatabaseResultListener)m_Exp.getResultListener()).setPassword(dbd.getPassword());
     ((DatabaseResultListener)m_Exp.getResultListener()).setDatabaseURL(dbd.getURL());
-    ((DatabaseResultListener)m_Exp.getResultListener()).setDebug(dbd.getDebug());
-    m_ResultsDestinationPathTField.setText(dbd.getURL());
+   
   }
   /**
    * Lets user browse for a destination file..
@@ -1214,5 +1259,14 @@ public class SimpleSetupPanel
       return;
     }
     m_ResultsDestinationPathTField.setText(m_DestFileChooser.getSelectedFile().toString());
+  }
+
+  /**
+   * Tests out the experiment setup from the command line.
+   *
+   * @param args arguments to the program.
+   */
+  public static void main(String [] args) {
+
   }
 }

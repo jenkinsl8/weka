@@ -1,3 +1,4 @@
+
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +17,12 @@
 
 /*
  * ParentSet.java
- * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2001 Remco Bouckaert
  * 
  */
 package weka.classifiers.bayes.net;
 
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
+import weka.core.*;
 import java.io.Serializable;
 
 /**
@@ -32,13 +30,9 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
-public class ParentSet 
-  implements Serializable, RevisionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 4155021284407181838L;
+public class ParentSet implements Serializable {
 
   /**
    * Holds indexes of parents
@@ -49,18 +43,16 @@ public class ParentSet
    * returns index parent of parent specified by index
    * 
    * @param iParent Index of parent
-   * @return index of parent
    */
   public int getParent(int iParent) {
     return m_nParents[iParent];
   } 
-  public int [] getParents() {return m_nParents;}
 
   /**
    * sets index parent of parent specified by index
    * 
    * @param iParent Index of parent
-   * @param nNode index of the node that becomes parent
+   * @param nNode: index of the node that becomes parent
    */
   public void SetParent(int iParent, int nNode) {
 	m_nParents[iParent] = nNode;
@@ -82,7 +74,7 @@ public class ParentSet
 
   /**
    * test if node is contained in parent set
-   * @param iNode node to test for
+   * @param iNode: node to test for
    * @return number of parents
    */
 	public boolean contains(int iNode) {
@@ -100,25 +92,11 @@ public class ParentSet
 
   /**
    * returns cardinality of parents
-   * 
-   * @return the cardinality
    */
   public int getCardinalityOfParents() {
     return m_nCardinalityOfParents;
   } 
 
-  /**
-   * returns cardinality of parents after recalculation
-   * 
-   * @return the cardinality
-   */
-  public int getFreshCardinalityOfParents(Instances _Instances) {
-	  m_nCardinalityOfParents = 1;
-	  for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
-		m_nCardinalityOfParents *= _Instances.attribute(m_nParents[iParent]).numValues();
-	  }
-      return m_nCardinalityOfParents;
-  }
   /**
    * default constructor
    */
@@ -168,9 +146,9 @@ public class ParentSet
    * @param _Instances used for updating the internals
    */
   public void addParent(int nParent, Instances _Instances) {
-    if (m_nNrOfParents == m_nParents.length) { // 10) {
+   if (m_nNrOfParents == 10) {
 	// reserve more memory
-      int [] nParents = new int[2 * m_nParents.length]; // 50];
+	int [] nParents = new int[50];
         for (int i = 0; i < m_nNrOfParents; i++) {
             nParents[i] = m_nParents[i];
         }
@@ -185,14 +163,14 @@ public class ParentSet
    * Add parent to parent set at specific location 
    * and update internals (specifically the cardinality of the parent set)
    * 
-   * @param nParent parent to add
-   * @param iParent location to add parent in parent set
+   * @param nParent: parent to add
+   * @param iParent: location to add parent in parent set
    * @param _Instances used for updating the internals
    */
   public void addParent(int nParent, int iParent, Instances _Instances) {
-    if (m_nNrOfParents == m_nParents.length) { // 10) {
+   if (m_nNrOfParents == 10) {
 	// reserve more memory
-      int [] nParents = new int[2 * m_nParents.length]; // 50];
+	int [] nParents = new int[50];
 		for (int i = 0; i < m_nNrOfParents; i++) {
 			nParents[i] = m_nParents[i];
 		}
@@ -207,8 +185,8 @@ public class ParentSet
   } // AddParent
 
   /** delete node from parent set
-   * @param nParent node number of the parent to delete
-   * @param _Instances data set
+   * @param nParent: node number of the parent to delete
+   * @param _Instances: data set
    * @return location of the parent in the parent set. This information can be 
    * used to restore the parent set using the addParent method.
    */
@@ -243,26 +221,21 @@ public class ParentSet
       m_nCardinalityOfParents 
       / _Instances.attribute(m_nParents[m_nNrOfParents]).numValues();
   }    // DeleteLastParent
-
-  /** Copy makes current parents set equal to other parent set
-   * 
-   * @param other : parent set to make a copy from
-   */
-  public void copy(ParentSet other) {
-    m_nCardinalityOfParents = other.m_nCardinalityOfParents;
-    m_nNrOfParents = other.m_nNrOfParents;
-    for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
-      m_nParents[iParent] = other.m_nParents[iParent];
-    }
-  } // Copy
-
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
+ 
+ 	/** Copy makes current parents set equal to other parent set
+ 	 * 
+ 	 * @param other : parent set to make a copy from
+ 	 */
+ 	public void copy(ParentSet other) {
+ 		m_nCardinalityOfParents = other.m_nCardinalityOfParents;
+ 		m_nNrOfParents = other.m_nNrOfParents;
+ 		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+			m_nParents[iParent] = other.m_nParents[iParent];
+ 		}
+ 	} // Copy
  
 }      // class ParentSet
+
+
+
+

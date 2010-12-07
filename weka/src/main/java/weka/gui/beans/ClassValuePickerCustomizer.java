@@ -16,37 +16,30 @@
 
 /*
  *    ClassValuePickerCustomizer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
+import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JLabel;
+import weka.core.Instances;
+import weka.core.Attribute;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class ClassValuePickerCustomizer
-  extends JPanel
+public class ClassValuePickerCustomizer extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8213423053861600469L;
 
   private boolean m_displayValNames = false;
 

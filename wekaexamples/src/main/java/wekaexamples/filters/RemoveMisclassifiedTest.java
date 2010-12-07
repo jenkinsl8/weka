@@ -21,13 +21,12 @@
 
 package wekaexamples.filters;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSink;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.instance.RemoveMisclassified;
+import wekaexamples.core.converters.DataSink;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * Runs the RemoveMisclassified filter over a given ARFF file and saves the
@@ -59,7 +58,7 @@ public class RemoveMisclassifiedTest {
     input.setClassIndex(input.numAttributes() - 1);
 
     // get classifier
-    Classifier c = AbstractClassifier.forName(args[1], new String[0]);
+    Classifier c = Classifier.forName(args[1], new String[0]);
 
     // setup and run filter
     RemoveMisclassified filter = new RemoveMisclassified();

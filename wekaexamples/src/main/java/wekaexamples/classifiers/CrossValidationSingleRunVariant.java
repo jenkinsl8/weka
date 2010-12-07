@@ -22,12 +22,11 @@
 
 package wekaexamples.classifiers;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSource;
 
 import java.util.Random;
 
@@ -98,7 +97,7 @@ public class CrossValidationSingleRunVariant {
     // perform cross-validation
     System.out.println();
     System.out.println("=== Setup ===");
-    System.out.println("Classifier: " + Utils.toCommandLine(cls));
+    System.out.println("Classifier: " + cls.getClass().getName() + " " + Utils.joinOptions(cls.getOptions()));
     System.out.println("Dataset: " + data.relationName());
     System.out.println("Folds: " + folds);
     System.out.println("Seed: " + seed);
@@ -113,7 +112,7 @@ public class CrossValidationSingleRunVariant {
       // Instances train = randData.trainCV(folds, n, rand);
 
       // build and evaluate classifier
-      Classifier clsCopy = AbstractClassifier.makeCopy(cls);
+      Classifier clsCopy = Classifier.makeCopy(cls);
       clsCopy.buildClassifier(train);
       eval.evaluateModel(clsCopy, test);
       evalAll.evaluateModel(clsCopy, test);

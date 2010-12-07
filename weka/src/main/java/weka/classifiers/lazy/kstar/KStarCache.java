@@ -16,7 +16,7 @@
 
 /**
  *    KStarCache.java
- *    Copyright (C) 1995 University of Waikato
+ *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
  *
  */
@@ -24,10 +24,8 @@
 
 package weka.classifiers.lazy.kstar;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 import java.io.Serializable;
+import java.util.*;
 
 /**
  * A class representing the caching system used to keep track of each attribute
@@ -35,13 +33,10 @@ import java.io.Serializable;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision 1.0 $
  */
-public class KStarCache
-  implements Serializable, RevisionHandler {
 
-  /** for serialization */
-  private static final long serialVersionUID = -7693632394267140678L;
+public class KStarCache implements Serializable {
   
   /**
    * cache table
@@ -90,11 +85,7 @@ public class KStarCache
    * A custom hashtable class to support the caching system.
    *
    */
-  public class CacheTable
-    implements Serializable, RevisionHandler {
-
-    /** for serialization */
-    private static final long serialVersionUID = -8086106452588253423L;
+  public class CacheTable implements Serializable {
 
     /** The hash table data. */
     private TableEntry [] m_Table;
@@ -255,26 +246,13 @@ public class KStarCache
       long bits = Double.doubleToLongBits(key);
       return (int)(bits ^ (bits >> 32));
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
-    }
+  
   } // CacheTable
   
   /**
    * Hashtable collision list.
    */
-  public class TableEntry
-    implements Serializable, RevisionHandler {
-
-    /** for serialization */
-    private static final long serialVersionUID = 4057602386766259138L;
-
+  public class TableEntry implements Serializable {
     /** attribute value hash code */
     public int hash;
 
@@ -299,24 +277,10 @@ public class KStarCache
       this.pmiss = pmiss;
       this.next  = next;
     }
-    
-    /**
-     * Returns the revision string.
-     * 
-     * @return		the revision
-     */
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.11 $");
-    }
   }  // TableEntry
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
-  }
-  
 } // Cache
+
+
+
+

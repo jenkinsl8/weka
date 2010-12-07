@@ -16,25 +16,31 @@
 
 /*
  *    Clusterer.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
 package weka.clusterers;
 
-import weka.core.Capabilities;
+import java.io.Serializable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
-/**
- * Interface for clusterers. Clients will typically extend either
- * AbstractClusterer or AbstractDensityBasedClusterer.
+
+/** 
+ * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.10 $
  */
-public interface Clusterer {
+public abstract class Clusterer implements Cloneable, Serializable {
 
+  // ===============
+  // Public methods.
+  // ===============
+ 
   /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
@@ -43,7 +49,7 @@ public interface Clusterer {
    * @exception Exception if the clusterer has not been 
    * generated successfully
    */
-  void buildClusterer(Instances data) throws Exception;
+  public abstract void buildClusterer(Instances data) throws Exception;
 
   /**
    * Classifies a given instance. Either this or distributionForInstance()
@@ -54,7 +60,19 @@ public interface Clusterer {
    * @exception Exception if instance could not be clustered
    * successfully
    */
-  int clusterInstance(Instance instance) throws Exception;
+  public int clusterInstance(Instance instance) throws Exception {
+
+    double [] dist = distributionForInstance(instance);
+
+    if (dist == null) {
+      throw new Exception("Null distribution predicted");
+    }
+
+    if (Utils.sum(dist) <= 0) {
+      throw new Exception("Unable to cluster instance");
+    }
+    return Utils.maxIndex(dist);
+  }
 
   /**
    * Predicts the cluster memberships for a given instance.  Either
@@ -67,7 +85,15 @@ public interface Clusterer {
    * @exception Exception if distribution could not be 
    * computed successfully 
    */
-  public double[] distributionForInstance(Instance instance) throws Exception;
+  public double[] distributionForInstance(Instance instance) 
+    throws Exception {
+
+    double[] d = new double[numberOfClusters()];
+
+    d[clusterInstance(instance)] = 1.0;
+    
+    return d;
+  }
 
   /**
    * Returns the number of clusters.
@@ -76,15 +102,51 @@ public interface Clusterer {
    * @exception Exception if number of clusters could not be returned
    * successfully
    */
-  int numberOfClusters() throws Exception;
+  public abstract int numberOfClusters() throws Exception;
 
-  /** 
-   * Returns the Capabilities of this clusterer. Derived classifiers have to
-   * override this method to enable capabilities.
+  /**
+   * Creates a new instance of a clusterer given it's class name and
+   * (optional) arguments to pass to it's setOptions method. If the
+   * clusterer implements OptionHandler and the options parameter is
+   * non-null, the clusterer will have it's options set.
    *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * @param searchName the fully qualified class name of the clusterer
+   * @param options an array of options suitable for passing to setOptions. May
+   * be null.
+   * @return the newly created search object, ready for use.
+   * @exception Exception if the clusterer class name is invalid, or the 
+   * options supplied are not acceptable to the clusterer.
    */
-  public Capabilities getCapabilities();
-  
+  public static Clusterer forName(String clustererName,
+				  String [] options) throws Exception {
+    return (Clusterer)Utils.forName(Clusterer.class,
+				    clustererName,
+				    options);
+  }
+
+  /**
+   * Creates copies of the current clusterer. Note that this method
+   * now uses Serialization to perform a deep copy, so the Clusterer
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
+   *
+   * @param model an example clusterer to copy
+   * @param num the number of clusterer copies to create.
+   * @return an array of clusterers.
+   * @exception Exception if an error occurs 
+   */
+  public static Clusterer [] makeCopies(Clusterer model,
+					int num) throws Exception {
+     if (model == null) {
+      throw new Exception("No model clusterer set");
+    }
+    Clusterer [] clusterers = new Clusterer [num];
+    SerializedObject so = new SerializedObject(model);
+    for(int i = 0; i < clusterers.length; i++) {
+      clusterers[i] = (Clusterer) so.getObject();
+    }
+    return clusterers;
+  }
 }
+
+

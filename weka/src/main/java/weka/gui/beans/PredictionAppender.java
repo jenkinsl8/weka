@@ -16,7 +16,7 @@
 
 /*
  *    PredictionAppender.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
@@ -24,7 +24,6 @@ package weka.gui.beans;
 
 import weka.clusterers.DensityBasedClusterer;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
@@ -41,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.9.2.5 $
  */
 public class PredictionAppender
   extends JPanel
@@ -111,24 +110,6 @@ public class PredictionAppender
   public PredictionAppender() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -281,6 +262,7 @@ public class PredictionAppender
   }
 
   protected InstanceEvent m_instanceEvent;
+  protected double [] m_instanceVals;
 
   
   /**
@@ -309,8 +291,9 @@ public class PredictionAppender
        if (!m_appendProbabilities 
 	   || oldStructure.classAttribute().isNumeric()) {
 	 try {
-	   m_format = makeDataSetClass(oldStructure, oldStructure, classifier,
+	   m_format = makeDataSetClass(oldStructure, classifier,
 						     relationNameModifier);
+	   m_instanceVals = new double [m_format.numAttributes()];
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
@@ -318,9 +301,9 @@ public class PredictionAppender
        } else if (m_appendProbabilities) {
 	 try {
 	   m_format = 
-	     makeDataSetProbabilities(oldStructure, oldStructure, classifier,
+	     makeDataSetProbabilities(oldStructure, classifier,
 				      relationNameModifier);
-
+	   m_instanceVals = new double [m_format.numAttributes()];
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
@@ -332,29 +315,28 @@ public class PredictionAppender
        return;
     }
 
-    double[] instanceVals = new double [m_format.numAttributes()];
-    Instance newInst = null;
+    Instance newInst;
     try {
       // process the actual instance
       for (int i = 0; i < oldNumAtts; i++) {
-	instanceVals[i] = currentI.value(i);
+	m_instanceVals[i] = currentI.value(i);
       }
       if (!m_appendProbabilities 
 	  || currentI.dataset().classAttribute().isNumeric()) {
 	double predClass = 
 	  classifier.classifyInstance(currentI);
-	instanceVals[instanceVals.length - 1] = predClass;
+	m_instanceVals[m_instanceVals.length - 1] = predClass;
       } else if (m_appendProbabilities) {
 	double [] preds = classifier.distributionForInstance(currentI);
-	for (int i = oldNumAtts; i < instanceVals.length; i++) {
-	  instanceVals[i] = preds[i-oldNumAtts];
+	for (int i = oldNumAtts; i < m_instanceVals.length; i++) {
+	  m_instanceVals[i] = preds[i-oldNumAtts];
 	}      
       }      
     } catch (Exception ex) {
       ex.printStackTrace();
       return;
     } finally {
-      newInst = new DenseInstance(currentI.weight(), instanceVals);
+      newInst = new Instance(currentI.weight(), m_instanceVals);
       newInst.setDataset(m_format);
       m_instanceEvent.setInstance(newInst);
       m_instanceEvent.setStatus(status);
@@ -365,6 +347,7 @@ public class PredictionAppender
     if (status == IncrementalClassifierEvent.BATCH_FINISHED) {
       // clean up
       //      m_incrementalStructure = null;
+      m_instanceVals = null;
       m_instanceEvent = null;
     }
   }
@@ -378,12 +361,6 @@ public class PredictionAppender
     if (m_dataSourceListeners.size() > 0 
 	|| m_trainingSetListeners.size() > 0
 	|| m_testSetListeners.size() > 0) {
-
-      if (e.getTestSet() == null) {
-        // can't append predictions
-        return;
-      }
-
       Instances testSet = e.getTestSet().getDataSet();
       Instances trainSet = e.getTrainSet().getDataSet();
       int setNum = e.getSetNumber();
@@ -394,10 +371,10 @@ public class PredictionAppender
 	+e.getMaxSetNumber();
       if (!m_appendProbabilities || testSet.classAttribute().isNumeric()) {
 	try {
-	  Instances newTestSetInstances = makeDataSetClass(testSet, trainSet, 
-	      classifier, relationNameModifier);
-	  Instances newTrainingSetInstances = makeDataSetClass(trainSet, trainSet, 
-	      classifier, relationNameModifier);
+	  Instances newTestSetInstances = makeDataSetClass(testSet, classifier,
+						    relationNameModifier);
+	  Instances newTrainingSetInstances = makeDataSetClass(trainSet, classifier,
+		    relationNameModifier);
 	  
 	  if (m_trainingSetListeners.size() > 0) {
 	    TrainingSetEvent tse = new TrainingSetEvent(this,
@@ -435,21 +412,8 @@ public class PredictionAppender
           if (m_dataSourceListeners.size() > 0 || m_testSetListeners.size() > 0) {
             // fill in predicted values
             for (int i = 0; i < testSet.numInstances(); i++) {
-              Instance tempInst = testSet.instance(i);
-              
-              // if the class value is missing, then copy the instance
-              // and set the data set to the training data. This is
-              // just in case this test data was loaded from a CSV file
-              // with all missing values for a nominal class (in this
-              // case we have no information on the legal class values
-              // in the test data)
-              if (tempInst.isMissing(tempInst.classIndex()) && 
-                  !(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
-                tempInst = (Instance)testSet.instance(i).copy();
-                tempInst.setDataset(trainSet);
-              }
               double predClass = 
-        	classifier.classifyInstance(tempInst);
+        	classifier.classifyInstance(testSet.instance(i));
               newTestSetInstances.instance(i).setValue(newTestSetInstances.numAttributes()-1,
         	  predClass);
             }
@@ -472,10 +436,10 @@ public class PredictionAppender
       if (m_appendProbabilities) {
 	try {
 	  Instances newTestSetInstances = 
-	    makeDataSetProbabilities(testSet, trainSet,
+	    makeDataSetProbabilities(testSet,
 				     classifier,relationNameModifier);
 	  Instances newTrainingSetInstances = 
-	    makeDataSetProbabilities(trainSet, trainSet,
+	    makeDataSetProbabilities(trainSet,
 				     classifier,relationNameModifier);
 	  if (m_trainingSetListeners.size() > 0) {
 	    TrainingSetEvent tse = new TrainingSetEvent(this,
@@ -514,23 +478,9 @@ public class PredictionAppender
           if (m_dataSourceListeners.size() > 0 || m_testSetListeners.size() > 0) {
             // fill in predicted probabilities
             for (int i = 0; i < testSet.numInstances(); i++) {
-              Instance tempInst = testSet.instance(i);
-              
-              // if the class value is missing, then copy the instance
-              // and set the data set to the training data. This is
-              // just in case this test data was loaded from a CSV file
-              // with all missing values for a nominal class (in this
-              // case we have no information on the legal class values
-              // in the test data)
-              if (tempInst.isMissing(tempInst.classIndex()) && 
-                  !(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
-                tempInst = (Instance)testSet.instance(i).copy();
-                tempInst.setDataset(trainSet);
-              }
-              
               double [] preds = classifier.
-              distributionForInstance(tempInst);
-              for (int j = 0; j < tempInst.classAttribute().numValues(); j++) {
+              distributionForInstance(testSet.instance(i));
+              for (int j = 0; j < testSet.classAttribute().numValues(); j++) {
         	newTestSetInstances.instance(i).setValue(testSet.numAttributes()+j,
         	    preds[j]);
               }
@@ -553,7 +503,6 @@ public class PredictionAppender
       }
     }
   }
-  
   
   /**
    * Accept and process a batch clusterer event
@@ -583,13 +532,7 @@ public class PredictionAppender
 	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
           System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
           if (m_logger != null) {
-            m_logger.logMessage("[PredictionAppender] "
-                + statusMessagePrefix() + " Only density based clusterers can "
-                +"append probabilities. Instead cluster will be assigned for each "
-                +"instance.");
-            m_logger.statusMessage(statusMessagePrefix()
-                +"WARNING: Only density based clusterers can append probabilities. "
-                +"Instead cluster will be assigned for each instance.");
+            m_logger.logMessage("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
           }
         }
         try {
@@ -671,26 +614,19 @@ public class PredictionAppender
 	}
       }
     }
-  }
+  }  
+
 
   private Instances 
-    makeDataSetProbabilities(Instances insts, Instances format,
+    makeDataSetProbabilities(Instances format,
 			     weka.classifiers.Classifier classifier,
 			     String relationNameModifier) 
   throws Exception {
-    
-    // adjust structure for InputMappedClassifier (if necessary)
-    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      format = 
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-        getModelHeader(new Instances(format, 0));
-    }
-    
     String classifierName = classifier.getClass().getName();
     classifierName = classifierName.
       substring(classifierName.lastIndexOf('.')+1, classifierName.length());
-    int numOrigAtts = insts.numAttributes();
-    Instances newInstances = new Instances(insts);
+    int numOrigAtts = format.numAttributes();
+    Instances newInstances = new Instances(format);
     for (int i = 0; i < format.classAttribute().numValues(); i++) {
       weka.filters.unsupervised.attribute.Add addF = new
 	weka.filters.unsupervised.attribute.Add();
@@ -699,21 +635,14 @@ public class PredictionAppender
       addF.setInputFormat(newInstances);
       newInstances = weka.filters.Filter.useFilter(newInstances, addF);
     }
-    newInstances.setRelationName(insts.relationName()+relationNameModifier);
+    newInstances.setRelationName(format.relationName()+relationNameModifier);
     return newInstances;
   }
 
-  private Instances makeDataSetClass(Instances insts, Instances structure,
+  private Instances makeDataSetClass(Instances format,
 				     weka.classifiers.Classifier classifier,
 				     String relationNameModifier) 
   throws Exception {
-    
-    // adjust structure for InputMappedClassifier (if necessary)
-    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      structure = 
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-        getModelHeader(new Instances(structure, 0));
-    }
     
     weka.filters.unsupervised.attribute.Add addF = new
       weka.filters.unsupervised.attribute.Add();
@@ -722,21 +651,21 @@ public class PredictionAppender
     classifierName = classifierName.
       substring(classifierName.lastIndexOf('.')+1, classifierName.length());
     addF.setAttributeName("class_predicted_by: "+classifierName);
-    if (structure.classAttribute().isNominal()) {
+    if (format.classAttribute().isNominal()) {
       String classLabels = "";
-      Enumeration enu = structure.classAttribute().enumerateValues();
+      Enumeration enu = format.classAttribute().enumerateValues();
       classLabels += (String)enu.nextElement();
       while (enu.hasMoreElements()) {
 	classLabels += ","+(String)enu.nextElement();
       }
       addF.setNominalLabels(classLabels);
     }
-    addF.setInputFormat(insts);
+    addF.setInputFormat(format);
 
 
     Instances newInstances = 
-      weka.filters.Filter.useFilter(insts, addF);
-    newInstances.setRelationName(insts.relationName()+relationNameModifier);
+      weka.filters.Filter.useFilter(format, addF);
+    newInstances.setRelationName(format.relationName()+relationNameModifier);
     return newInstances;
   }
   
@@ -873,20 +802,7 @@ public class PredictionAppender
   }
 
   public void stop() {
-    // tell the listenee (upstream bean) to stop
-    if (m_listenee instanceof BeanCommon) {
-      ((BeanCommon)m_listenee).stop();
-    }
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return false;
+    // cant really do anything meaningful here
   }
 
   /**
@@ -979,9 +895,5 @@ public class PredictionAppender
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }

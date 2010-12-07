@@ -16,7 +16,7 @@
 
 /*
  *    VisualizeUtils.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
@@ -34,7 +34,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.7 $
  */
 
 public class VisualizeUtils {
@@ -84,7 +84,7 @@ public class VisualizeUtils {
    * @param defaultColour the colour to return if parsing fails
    * @return the Color corresponding to the string.
    */
-  public static Color processColour(String colourDef, Color defaultColour) {
+  protected static Color processColour(String colourDef, Color defaultColour) {
     String colourDefBack = new String(colourDef);
     Color retC = defaultColour;
     if (colourDef.indexOf(",") >= 0) { 

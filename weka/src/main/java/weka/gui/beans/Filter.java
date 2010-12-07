@@ -16,49 +16,52 @@
 
 /*
  *    Filter.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.AllFilter;
-import weka.filters.StreamableFilter;
-import weka.filters.SupervisedFilter;
-import weka.gui.Logger;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-import java.util.Enumeration;
+import java.util.Vector;
 import java.util.EventObject;
 import java.util.Hashtable;
-import java.util.Vector;
-
+import java.util.Enumeration;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.beans.EventSetDescriptor;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.filters.*;
+import weka.gui.Logger;
 
 /**
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.11.2.2 $
  */
-public class Filter
-  extends JPanel
+public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
-	     InstanceListener, EventConstraints,
-	     ConfigurationProducer {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8249759470189439321L;
+	     InstanceListener, EventConstraints {
 
   protected BeanVisual m_visual = 
     new BeanVisual("Filter",
@@ -115,15 +118,7 @@ public class Filter
    */
   private InstanceEvent m_ie = new InstanceEvent(this);
 
-  /**
-   * Logging.
-   */
   private transient Logger m_log = null;
-  
-  /**
-   * Counts incoming streamed instances.
-   */
-  private transient int m_instanceCount;
   
   /**
    * Global info (if it exists) for the wrapped filter
@@ -138,24 +133,6 @@ public class Filter
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setFilter(m_Filter);
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -175,31 +152,19 @@ public class Filter
 				      indexOf('.')+1, 
 				      filterName.length());
     if (loadImages) {
-      if (m_Filter instanceof Visible) {
-        m_visual = ((Visible) m_Filter).getVisual();
-      } else {
-        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
-                                BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
-          useDefaultVisual();
-        }
+      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
+		       BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
+	useDefaultVisual();
       }
     }
     m_visual.setText(filterName.substring(filterName.lastIndexOf('.')+1,
 					  filterName.length()));
 
-    if (m_Filter instanceof LogWriter && m_log != null) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
-
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
-	m_log.logMessage("[Filter] " + 
-	    statusMessagePrefix() + " WARNING : "
-	    + m_Filter.getClass().getName()
-	    + " is not an incremental filter");
-	m_log.statusMessage(statusMessagePrefix()
-	    + "WARNING: Not an incremental filter.");
+	m_log.logMessage("WARNING : "+m_Filter.getClass().getName()
+			 +" is not an incremental filter");
       }
     }
     
@@ -253,31 +218,23 @@ public class Filter
   public void acceptInstance(InstanceEvent e) {
     // to do!
     if (m_filterThread != null) {
-      String messg = "[Filter] " + statusMessagePrefix() 
-        + " is currently batch processing!";
+      String messg = "Filter is currently batch processing!";
       if (m_log != null) {
 	m_log.logMessage(messg);
-	m_log.statusMessage(statusMessagePrefix()
-	    + "WARNING: Filter is currently batch processing.");
       } else {
 	System.err.println(messg);
       }
       return;
     }
     if (!(m_Filter instanceof StreamableFilter)) {
-      stop(); // stop all processing
       if (m_log != null) {
-	m_log.logMessage("[Filter] " + statusMessagePrefix() 
-	    + " ERROR : "+m_Filter.getClass().getName()
-	    +"can't process streamed instances; can't continue");
-	m_log.statusMessage(statusMessagePrefix()
-	    + "ERROR: Can't process streamed instances; can't continue.");
+	m_log.logMessage("ERROR : "+m_Filter.getClass().getName()
+			 +"can't process streamed instances; can't continue");
       }
       return;
     }
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       try {
-        m_instanceCount = 0;
         //notifyInstanceListeners(e);
 	//	Instances dataset = e.getInstance().dataset();
 	Instances dataset = e.getStructure();
@@ -295,24 +252,13 @@ public class Filter
 	m_structurePassedOn = false;
 	try {
 	  if (m_Filter.isOutputFormatDefined()) {
-//	    System.err.println("Filter - passing on output format...");
 	    //	    System.err.println(m_Filter.getOutputFormat());
 	    m_ie.setStructure(m_Filter.getOutputFormat());
 	    notifyInstanceListeners(m_ie);
 	    m_structurePassedOn = true;
 	  }
 	} catch (Exception ex) {
-	  stop(); // stop all processing
-	  if (m_log != null) {
-	    m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                + " Error in obtaining post-filter structure. " 
-                + ex.getMessage());
-	    m_log.statusMessage(statusMessagePrefix()
-	        +"ERROR (See log for details).");
-	  } else {
-	    System.err.println("[Filter] " + statusMessagePrefix() 
-	        + " Error in obtaining post-filter structure");
-	  }
+	  System.err.println("Error in obtaining post-filter structure: Filter.java");
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
@@ -320,144 +266,35 @@ public class Filter
       return;
     }
    
-    if (e.getStatus() == InstanceEvent.BATCH_FINISHED) {
-      // get the last instance (if available)
-      try {
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() 
-              + "Stream finished.");
-        }
-        if (m_Filter.input(e.getInstance())) {
-          Instance filteredInstance = m_Filter.output();
-          if (filteredInstance != null) {
-            if (!m_structurePassedOn) {
-              // pass on the new structure first
-              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-              notifyInstanceListeners(m_ie);
-              m_structurePassedOn = true;
-            }
-
-            m_ie.setInstance(filteredInstance);
-            
-            // if there are instances pending for output don't want to send
-            // a batch finisehd at this point...
-            //System.err.println("Filter - in batch finisehd...");
-            if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
-              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-            } else {
-              m_ie.setStatus(e.getStatus());
-            }
-            notifyInstanceListeners(m_ie);
-          }
-        }
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Done.");
-        }
-      } catch (Exception ex) {
-        stop(); // stop all processing
-        if (m_log != null) {
-          m_log.logMessage("[Filter] " 
-              + statusMessagePrefix() + ex.getMessage());
-          m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details).");
-        }
-        ex.printStackTrace();
+    // pass instance through the filter
+    try {
+      if (!m_Filter.input(e.getInstance())) {
+	if (m_log != null) {
+	  m_log.logMessage("ERROR : filter not ready to output instance");
+	}
+	return;
       }
       
-      // check for any pending instances that we might need to pass on
-      try {
-        if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
-          if (m_log != null) {
-            m_log.statusMessage(statusMessagePrefix() 
-                + "Passing on pending instances...");
-          }
-          Instance filteredInstance = m_Filter.output();
-          if (filteredInstance != null) {
-            if (!m_structurePassedOn) {
-              // pass on the new structure first
-              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-              notifyInstanceListeners(m_ie);
-              m_structurePassedOn = true;
-            }
-
-            m_ie.setInstance(filteredInstance);
-            
-            //TODO here is the problem I think
-            m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-            notifyInstanceListeners(m_ie);
-          }
-          while (m_Filter.numPendingOutput() > 0) {
-            filteredInstance = m_Filter.output();
-            m_ie.setInstance(filteredInstance);
-//            System.err.println("Filter - sending pending...");
-            if (m_Filter.numPendingOutput() == 0) {
-              m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
-            } else {
-              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-            }
-            notifyInstanceListeners(m_ie);
-          }
-          if (m_log != null) {
-            m_log.statusMessage(statusMessagePrefix() + "Finished.");
-          }
-        }
-      } catch (Exception ex) {
-        stop(); // stop all processing
-        if (m_log != null) {
-          m_log.logMessage("[Filter] " 
-              + statusMessagePrefix() 
-              + ex.toString());
-          m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details.");
-        }
-        ex.printStackTrace();
+      // collect output instance.
+      Instance filteredInstance = m_Filter.output();
+      if (filteredInstance == null) {
+	return;
       }
-    } else {
-      // pass instance through the filter
-      try {
-        if (!m_Filter.input(e.getInstance())) {
-//          System.err.println("Filter - inputing instance into filter...");
-          /* if (m_log != null) {
-            m_log.logMessage("ERROR : filter not ready to output instance");
-          } */
-          
-          // quietly return. Filter might be able to output some instances
-          // once the batch is finished.
-          return;
-        }
-
-        // collect output instance.
-        Instance filteredInstance = m_Filter.output();
-        if (filteredInstance == null) {
-          return;
-        }
-        m_instanceCount++;
-        
-        if (!m_structurePassedOn) {
-          // pass on the new structure first
-          m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-          notifyInstanceListeners(m_ie);
-          m_structurePassedOn = true;
-        }
-
-        m_ie.setInstance(filteredInstance);
-        m_ie.setStatus(e.getStatus());
-        
-        if (m_log != null && (m_instanceCount % 10000 == 0)) {
-          m_log.statusMessage(statusMessagePrefix()
-              + "Received " + m_instanceCount + " instances.");
-        }
-        notifyInstanceListeners(m_ie);
-      } catch (Exception ex) {
-        stop(); // stop all processing
-        if (m_log != null) {
-          m_log.logMessage("[Filter] " + statusMessagePrefix() 
-              + ex.toString());
-          m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details).");
-        }
-        ex.printStackTrace();
+      if (!m_structurePassedOn) {
+	// pass on the new structure first
+	m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+	notifyInstanceListeners(m_ie);
+	m_structurePassedOn = true;
       }
+
+      m_ie.setInstance(filteredInstance);
+      m_ie.setStatus(e.getStatus());
+      notifyInstanceListeners(m_ie);
+    } catch (Exception ex) {
+      if (m_log != null) {
+	m_log.logMessage(ex.toString());
+      }
+      ex.printStackTrace();
     }
   }
 
@@ -489,22 +326,21 @@ public class Filter
 	    ? ((TrainingSetEvent)e).getTrainingSet()
 	    : ((DataSetEvent)e).getDataSet();
 
-//	  final String oldText = m_visual.getText();
+	  final String oldText = m_visual.getText();
 	  m_filterThread = new Thread() {
 	      public void run() {
 		try {
 		  if (m_trainingSet != null) {
 		    m_visual.setAnimated();
-//		    m_visual.setText("Filtering training data...");
+		    m_visual.setText("Filtering training data...");
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() 
-		          + "Filtering training data ("
-		          + m_trainingSet.relationName() + ")");
+		      m_log.statusMessage("Filter : filtering training data ("
+					  +m_trainingSet.relationName());
 		    }
 		    m_Filter.setInputFormat(m_trainingSet);
 		    Instances filteredData = 
 		      weka.filters.Filter.useFilter(m_trainingSet, m_Filter);
-//		    m_visual.setText(oldText);
+		    m_visual.setText(oldText);
 		    m_visual.setStatic();
 		    EventObject ne;
 		    if (e instanceof TrainingSetEvent) {
@@ -523,29 +359,15 @@ public class Filter
 		  }
 		} catch (Exception ex) {
 		  ex.printStackTrace();
-                  if (m_log != null) {
-                    m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                        + ex.getMessage());
-                    m_log.statusMessage(statusMessagePrefix()
-                        + "ERROR (See log for details).");
-//                    m_log.statusMessage("Problem filtering: see log for details.");
-                  }
-                  Filter.this.stop(); // stop all processing
 		} finally {
-//		  m_visual.setText(oldText);
+		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  m_state = IDLE;
 		  if (isInterrupted()) {
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("[Filter] " + statusMessagePrefix()
-                                       + " training set interrupted!");
-		      m_log.statusMessage(statusMessagePrefix()
-		          + "INTERRUPTED");
-		    }		    
-		  } else {
-		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		      m_log.logMessage("Filter training set interrupted!");
+		      m_log.statusMessage("OK");
 		    }
 		  }
 		  block(false);
@@ -580,21 +402,20 @@ public class Filter
 	  m_state = FILTERING_TEST;
 	}
 	m_testingSet = e.getTestSet();
-        //	final String oldText = m_visual.getText();
+	final String oldText = m_visual.getText();
 	m_filterThread = new Thread() {
 	    public void run() {
 	      try {
 		if (m_testingSet != null) {
 		  m_visual.setAnimated();
-                  //		  m_visual.setText("Filtering test data...");
+		  m_visual.setText("Filtering test data...");
 		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix() 
-		        + "Filtering test data ("
-			+ m_testingSet.relationName() + ")");
+		    m_log.statusMessage("Filter : filtering test data ("
+					+m_testingSet.relationName());
 		  }
 		  Instances filteredTest = 
 		    weka.filters.Filter.useFilter(m_testingSet, m_Filter);
-                  //		  m_visual.setText(oldText);
+		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  TestSetEvent ne =
 		    new TestSetEvent(weka.gui.beans.Filter.this,
@@ -605,29 +426,15 @@ public class Filter
 		}
 	      } catch (Exception ex) {
 		ex.printStackTrace();
-                if (m_log != null) {
-                  m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                      + ex.getMessage());
-                  m_log.statusMessage(statusMessagePrefix() 
-                      + "ERROR (See log for details).");
-                }
-                Filter.this.stop();
 	      } finally {
-                //		m_visual.setText(oldText);
+		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_state = IDLE;
 		if (isInterrupted()) {
 		  m_trainingSet = null;
 		  if (m_log != null) {
-		      m_log.logMessage("[Filter] " + statusMessagePrefix()
-                                       + " test set interrupted!");
-		      m_log.statusMessage(statusMessagePrefix()
-		          + "INTERRUPTED");
-//		    m_log.statusMessage("OK");
-		  }
-		} else {
-		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_log.logMessage("Filter test set interrupted!");
+		    m_log.statusMessage("OK");
 		  }
 		}
 		block(false);
@@ -750,26 +557,6 @@ public class Filter
    */
   public synchronized void removeInstanceListener(InstanceListener tsl) {
     m_instanceListeners.removeElement(tsl);
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
   }
 
   private void notifyDataOrTrainingListeners(EventObject ce) {
@@ -895,10 +682,6 @@ public class Filter
 						  Object source) {
     if (connectionAllowed(eventName)) {
       m_listenees.put(eventName, source);
-      if (m_Filter instanceof ConnectionNotificationConsumer) {
-        ((ConnectionNotificationConsumer) m_Filter).
-          connectionNotification(eventName, source);
-      }
     }
   }
 
@@ -912,10 +695,6 @@ public class Filter
    */
   public synchronized void disconnectionNotification(String eventName,
 						     Object source) {
-    if (m_Filter instanceof ConnectionNotificationConsumer) {
-      ((ConnectionNotificationConsumer) m_Filter).
-        disconnectionNotification(eventName, source);
-    }
     m_listenees.remove(eventName);
   }
 
@@ -950,27 +729,12 @@ public class Filter
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
+	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
     
-    // stop the filter thread
-    if (m_filterThread != null) {
-      m_filterThread.interrupt();
-      m_filterThread.stop();
-      m_filterThread = null;
-      m_visual.setStatic();
-    }
-  }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_filterThread != null);
+    //
   }
   
   /**
@@ -980,10 +744,6 @@ public class Filter
    */
   public void setLog(Logger logger) {
     m_log = logger;
-
-    if (m_Filter != null && m_Filter instanceof LogWriter) {
-      ((LogWriter) m_Filter).setLog(m_log);
-    }
   }
 
   /**
@@ -1024,11 +784,6 @@ public class Filter
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    
-    if (eventName.equals("configuration") && m_Filter != null) {
-      return true;
-    }
-    
     // can't generate the named even if we are not receiving it as an
     // input!
     if (!m_listenees.containsKey(eventName)) {
@@ -1046,13 +801,5 @@ public class Filter
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Filter instanceof OptionHandler &&
-        Utils.joinOptions(((OptionHandler)m_Filter).getOptions()).length() > 0) 
-        ? Utils.joinOptions(((OptionHandler)m_Filter).getOptions()) + "|"
-            : "");
   }
 }

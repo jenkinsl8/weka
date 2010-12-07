@@ -16,29 +16,25 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
 
 package weka.classifiers.evaluation;
 
-import weka.classifiers.CostMatrix;
-import weka.core.FastVector;
 import weka.core.Matrix;
-import weka.core.RevisionUtils;
+import weka.core.FastVector;
 import weka.core.Utils;
+import weka.classifiers.CostMatrix;
 
 /**
  * Cells of this matrix correspond to counts of the number (or weight)
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class ConfusionMatrix extends Matrix {
-
-  /** for serialization */
-  private static final long serialVersionUID = -181789981401504090L;
 
   /** Stores the names of the classes */
   protected String [] m_ClassNames;
@@ -338,14 +334,5 @@ public class ConfusionMatrix extends Matrix {
     }
 
     return new String(ID);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 }

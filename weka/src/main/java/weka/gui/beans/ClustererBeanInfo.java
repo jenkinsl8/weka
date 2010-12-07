@@ -16,7 +16,7 @@
 
 /*
  *    ClustererBeanInfo.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class ClustererBeanInfo extends SimpleBeanInfo {
  
@@ -46,11 +46,7 @@ public class ClustererBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(Clusterer.class,
 			       "text",
 			       TextListener.class,
-			       "acceptText"),
-	new EventSetDescriptor(Clusterer.class,
-	                       "configuration",
-	                       ConfigurationListener.class,
-	                       "acceptConfiguration")
+			       "acceptText")
 	};
       return esds;
     } catch (Exception ex) {

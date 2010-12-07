@@ -16,42 +16,40 @@
 
 /*
  *    DataVisualizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
 import weka.core.Instances;
-import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
-import java.awt.BorderLayout;
-import java.beans.PropertyChangeListener;
-import java.beans.VetoableChangeListener;
-import java.beans.beancontext.BeanContext;
-import java.beans.beancontext.BeanContextChild;
-import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
-
-import javax.swing.JFrame;
+import java.util.Enumeration;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.*;
+import java.beans.beancontext.*;
 
 /**
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
 	     BeanContextChild {
-
-  /** for serialization */
-  private static final long serialVersionUID = 1949062132560159028L;
 
   protected BeanVisual m_visual;
 
@@ -72,11 +70,6 @@ public class DataVisualizer extends JPanel
   protected transient BeanContext m_beanContext = null;
 
   private VisualizePanel m_visPanel;
-
-  /**
-   * Objects listening for data set events
-   */
-  private Vector m_dataSetListeners = new Vector();
   
   /**
    * BeanContextChild support
@@ -85,11 +78,7 @@ public class DataVisualizer extends JPanel
     new BeanContextChildSupport(this);
 
   public DataVisualizer() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-    if (!ge.isHeadless()) {
-      appearanceFinal();
-    }
+    appearanceFinal();
   }
 
   /**
@@ -113,14 +102,9 @@ public class DataVisualizer extends JPanel
   }
 
   protected void appearanceFinal() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    
     removeAll();
-    if (!ge.isHeadless()) {
-      setLayout(new BorderLayout());
-      setUpFinal();
-    }
+    setLayout(new BorderLayout());
+    setUpFinal();
   }
 
   protected void setUpFinal() {
@@ -173,9 +157,6 @@ public class DataVisualizer extends JPanel
 	ex.printStackTrace();
       }
     }
-
-    // pass on the event to any listeners
-    notifyDataSetListeners(e);
   }
 
   /**
@@ -270,11 +251,7 @@ public class DataVisualizer extends JPanel
     if (m_design) {
       appearanceDesign();
     } else {
-      java.awt.GraphicsEnvironment ge = 
-        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-      if (!ge.isHeadless()) {
-        appearanceFinal();
-      }
+      appearanceFinal();
     }
   }
 
@@ -303,31 +280,13 @@ public class DataVisualizer extends JPanel
     }
     m_visualizeDataSet = inst;
     PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-    String relationName = m_visualizeDataSet.relationName();
-    pd1.setPlotName(relationName);
+    pd1.setPlotName(m_visualizeDataSet.relationName());
     try {
       m_visPanel.setMasterPlot(pd1);
     } catch (Exception ex) {
       System.err.println("Problem setting up "
 			 +"visualization (DataVisualizer)");
       ex.printStackTrace();
-    }
-  }
-
-  /**
-   * Notify all data set listeners of a data set event
-   *
-   * @param ge a <code>DataSetEvent</code> value
-   */
-  private void notifyDataSetListeners(DataSetEvent ge) {
-    Vector l;
-    synchronized (this) {
-      l = (Vector)m_dataSetListeners.clone();
-    }
-    if (l.size() > 0) {
-      for(int i = 0; i < l.size(); i++) {
-	((DataSourceListener)l.elementAt(i)).acceptDataSet(ge);
-      }
     }
   }
   
@@ -345,18 +304,7 @@ public class DataVisualizer extends JPanel
 	  m_framePoppedUp = true;
 	  final VisualizePanel vis = new VisualizePanel();
 	  PlotData2D pd1 = new PlotData2D(m_visualizeDataSet);
-	  
-	  String relationName = m_visualizeDataSet.relationName();
-	  
-	  // A bit of a nasty hack. Allows producers of instances-based
-	  // events to specify that the points should be connected
-	  if (relationName.startsWith("__")) {
-	    boolean[] connect = new boolean[m_visualizeDataSet.numInstances()];
-	    for (int i = 1; i < connect.length; i++) { connect[i] = true; }
-	    pd1.setConnectPoints(connect);
-	    relationName = relationName.substring(2);
-	  }
-	  pd1.setPlotName(relationName);
+	  pd1.setPlotName(m_visualizeDataSet.relationName());
 	  try {
 	    vis.setMasterPlot(pd1);
 	  } catch (Exception ex) {
@@ -387,24 +335,6 @@ public class DataVisualizer extends JPanel
       throw new IllegalArgumentException(request
 					 + " not supported (DataVisualizer)");
     }
-  }
-
-  /**
-   * Add a listener
-   *
-   * @param dsl a <code>DataSourceListener</code> value
-   */
-  public synchronized void addDataSourceListener(DataSourceListener dsl) {
-    m_dataSetListeners.addElement(dsl);
-  }
-
-  /**
-   * Remove a listener
-   *
-   * @param dsl a <code>DataSourceListener</code> value
-   */
-  public synchronized void removeDataSourceListener(DataSourceListener dsl) {
-    m_dataSetListeners.remove(dsl);
   }
 
   public static void main(String [] args) {

@@ -32,7 +32,6 @@ import java.util.Vector;
 
 import org.w3c.dom.Element;
 
-import weka.core.RevisionUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.experiment.Experiment;
@@ -53,11 +52,9 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.1.2.4 $ 
  */
-public class XMLExperiment
-   extends XMLBasicSerialization {
-  
+public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
    public final static String NAME_CLASSFIRST = "classFirst";
 
@@ -82,8 +79,6 @@ public class XMLExperiment
    /**
     * generates internally a new XML document and clears also the IgnoreList and
     * the mappings for the Read/Write-Methods
-    * 
-    * @throws Exception if initializing fails
     */
    public void clear() throws Exception {
       super.clear();
@@ -207,6 +202,7 @@ public class XMLExperiment
    /**
     * builds the PropertyNode from the given DOM node. 
     * 
+    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -262,15 +258,6 @@ public class XMLExperiment
       
       return result;
    }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
-   }
 
    /**
     * for testing only. if the first argument is a filename with ".xml"
@@ -279,9 +266,6 @@ public class XMLExperiment
     * Otherwise it loads the binary file, saves the XML representation in a 
     * file with the original filename appended by ".xml" and once again in a
     * binary file with the original filename appended by ".exp".
-    * 
-    * @param args 	the commandline arguments
-    * @throws Exception	if something goes wrong, e.g., file not found
     */
    public static void main(String[] args) throws Exception {
       if (args.length > 0) {

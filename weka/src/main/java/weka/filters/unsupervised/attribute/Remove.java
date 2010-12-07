@@ -16,7 +16,7 @@
 
 /*
  *    Remove.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -24,19 +24,14 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
-import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -45,33 +40,23 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * An filter that removes a range of attributes from the dataset.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to delete. First and last are valid
- *  indexes. (default none)</pre>
- * 
- * <pre> -V
- *  Invert matching sense (i.e. only keep specified columns)</pre>
- * 
- <!-- options-end -->
+ * A filter that deletes a range of attributes from the dataset.<p>
+ *
+ * Valid filter-specific options are:<p>
+ *
+ * -R index1,index2-index4,...<br>
+ * Specify list of columns to delete. First and last are valid indexes.
+ * (default none)<p>
+ *
+ * -V<br>
+ * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Remove 
-  extends Filter
+public class Remove extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 5011337331921522847L;
-  
   /** Stores which columns to select as a funky range */
   protected Range m_SelectCols = new Range();
 
@@ -80,6 +65,12 @@ public class Remove
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
+
+  /** 
+   * Contains an index of string attributes in the input format
+   * that will survive the filtering process 
+   */
+  protected int [] m_InputStringIndex;
 
   /**
    * Constructor so that we can initialize the Range variable properly.
@@ -110,22 +101,18 @@ public class Remove
   }
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of columns to delete. First and last are valid
-   *  indexes. (default none)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense (i.e. only keep specified columns)</pre>
-   * 
-   <!-- options-end -->
+   * Parses a given list of options controlling the behaviour of this object.
+   * Valid options are:<p>
+   *
+   * -R index1,index2-index4,...<br>
+   * Specify list of columns to delete. First and last are valid indexes.
+   * (default none)<p>
+   *
+   * -V<br>
+   * Invert matching sense (i.e. only keep specified columns)<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -163,28 +150,6 @@ public class Remove
     return options;
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -192,7 +157,7 @@ public class Remove
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the format couldn't be set successfully
+   * @exception Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -204,16 +169,21 @@ public class Remove
     FastVector attributes = new FastVector();
     int outputClass = -1;
     m_SelectedAttributes = m_SelectCols.getSelection();
+    int inStrKeepLen = 0;
+    int [] inStrKeep = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       if (instanceInfo.classIndex() == current) {
 	outputClass = attributes.size();
       }
       Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
+      if (keep.type() == Attribute.STRING) {
+        inStrKeep[inStrKeepLen++] = current;
+      }
       attributes.addElement(keep);
     }
-    //initInputLocators(instanceInfo, m_SelectedAttributes);
-    initInputLocators(getInputFormat(), m_SelectedAttributes);
+    m_InputStringIndex = new int [inStrKeepLen];
+    System.arraycopy(inStrKeep, 0, m_InputStringIndex, 0, inStrKeepLen);
     Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
@@ -230,7 +200,7 @@ public class Remove
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined.
+   * @exception IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -254,10 +224,10 @@ public class Remove
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
+    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
+                     getOutputFormat(), getOutputStringIndex());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
@@ -271,7 +241,7 @@ public class Remove
    */
   public String globalInfo() {
 
-    return "A filter that removes a range of"
+    return "An filter that removes a range of"
       + " attributes from the dataset.";
   }
 
@@ -358,15 +328,6 @@ public class Remove
     
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -374,6 +335,15 @@ public class Remove
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Remove(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Remove(), argv); 
+      } else {
+	Filter.filterFile(new Remove(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

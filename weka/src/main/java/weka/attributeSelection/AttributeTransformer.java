@@ -16,20 +16,20 @@
 
 /*
  *    AttributeTransformer.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 package weka.attributeSelection;
 
-import weka.core.Instance;
-import weka.core.Instances;
+import java.io.*;
+import weka.core.*;
 
 /** 
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public interface AttributeTransformer {
     // ===============
@@ -48,12 +48,11 @@ public interface AttributeTransformer {
   Instances transformedHeader() throws Exception;
 
   /**
-   * Transform the supplied data set (assumed to be the same format
-   * as the training data)
+   * Returns the transformed data
    * @return A set of instances representing the transformed data
    * @exception Exception if the attribute could not be evaluated
    */
-  Instances transformedData(Instances data) throws Exception;
+  Instances transformedData() throws Exception;
 
   /**
    * Transforms an instance in the format of the original data to the

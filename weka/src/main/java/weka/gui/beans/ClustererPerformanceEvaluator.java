@@ -16,32 +16,40 @@
 
 /*
  *    ClustererPerformanceEvaluator.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
-import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
+import weka.clusterers.ClusterEvaluation;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.FastVector;
+import weka.gui.Logger;
+import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import javax.swing.JFrame;
+import javax.swing.BorderFactory;
+import java.awt.*;
+import javax.swing.JScrollPane;
 
 /**
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
-public class ClustererPerformanceEvaluator
-  extends AbstractEvaluator
-  implements BatchClustererListener, Serializable, UserRequestAcceptor, 
-             EventConstraints {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8041163601333978584L;
+public class ClustererPerformanceEvaluator extends AbstractEvaluator implements BatchClustererListener, Serializable, UserRequestAcceptor, EventConstraints {
 
   /**
    * Evaluation object used for evaluating a clusterer
@@ -63,24 +71,6 @@ public class ClustererPerformanceEvaluator
 		       BeanVisual.ICON_PATH
 		       +"ClustererPerformanceEvaluator_animated.gif");
     m_visual.setText("ClustererPerformanceEvaluator");
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
   
   /**
@@ -107,20 +97,20 @@ public class ClustererPerformanceEvaluator
 	m_evaluateThread = new Thread() {
 	    public void run() {
               boolean numericClass = false;  
-//	      final String oldText = m_visual.getText();
+	      final String oldText = m_visual.getText();
 	      try {
-		if (ce.getSetNumber() == 1 /*|| 
-		    ce.getClusterer() != m_clusterer */) {
+		if (ce.getSetNumber() == 1 || 
+		    ce.getClusterer() != m_clusterer) {
 		  m_eval = new ClusterEvaluation();
 		  m_clusterer = ce.getClusterer();
                   m_eval.setClusterer(m_clusterer);
 		}
 		
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
-//		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
+		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix()
-					   +"Evaluating ("+ce.getSetNumber()
+		    m_logger.statusMessage("ClustererPerformaceEvaluator : "
+					   +"evaluating ("+ce.getSetNumber()
 					   +")...");
 		  }
 		  m_visual.setAnimated();
@@ -153,30 +143,19 @@ public class ClustererPerformanceEvaluator
 				  textTitle);
 		  notifyTextListeners(te);
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_logger.statusMessage("Done.");
 		  }
 		}
 	      } catch (Exception ex) {
-	        // stop all processing
-	        ClustererPerformanceEvaluator.this.stop();
-	        if (m_logger != null) {
-	          m_logger.statusMessage(statusMessagePrefix()
-	              + "ERROR (see log for details");
-	          m_logger.logMessage("[ClustererPerformanceEvaluator] " 
-	              + statusMessagePrefix()
-	              + " problem while evaluating clusterer. " + ex.getMessage());
-	        }
 		ex.printStackTrace();
 	      } finally {
-//		m_visual.setText(oldText);
+		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
 		if (isInterrupted()) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("[" + getCustomName() 
-		        + "] Evaluation interrupted!");
-		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "INTERRUPTED");
+		    m_logger.logMessage("Evaluation interrupted!");
+		    m_logger.statusMessage("OK");
 		  }
 		}
 		block(false);
@@ -196,16 +175,6 @@ public class ClustererPerformanceEvaluator
       ex.printStackTrace();
     }
   }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_evaluateThread != null);
-  }
 
   /**
    * Try and stop any action
@@ -213,7 +182,7 @@ public class ClustererPerformanceEvaluator
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      //      System.err.println("Listener is BeanCommon");
+      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
@@ -221,8 +190,6 @@ public class ClustererPerformanceEvaluator
     if (m_evaluateThread != null) {
       m_evaluateThread.interrupt();
       m_evaluateThread.stop();
-      m_evaluateThread = null;
-      m_visual.setStatic();
     }
   }
   
@@ -335,10 +302,6 @@ public class ClustererPerformanceEvaluator
       }
     }
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|";
   }
 }
 

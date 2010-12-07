@@ -16,37 +16,37 @@
 
 /*
  *    AbstractEvaluator.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.Logger;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
 import java.io.Serializable;
-
+import java.util.Vector;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.beans.EventSetDescriptor;
+
+import weka.gui.Logger;
 
 /**
  * Abstract class for objects that can provide some kind of evaluation for
  * classifier, clusterers etc.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Visible
  * @see Serializable
  */
-public abstract class AbstractEvaluator
-  extends JPanel
+public abstract class AbstractEvaluator extends JPanel
   implements Visible, BeanCommon, Serializable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 3983303541814121632L;
   
   /**
    * Default visual for evaluators

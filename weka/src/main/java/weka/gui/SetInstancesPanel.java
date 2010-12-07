@@ -16,90 +16,67 @@
 
 /*
  *    SetInstancesPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import weka.core.Instances;
+
+import java.net.URL;
+import java.io.File;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.awt.GridLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.net.URL;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.FileSourcedConverter;
-import weka.core.converters.IncrementalConverter;
-import weka.core.converters.URLSourcedLoader;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.BorderFactory;
 
 /** 
  * A panel that displays an instance summary for a set of instances and
  * lets the user open a set of instances from either a file or URL.
  *
- * Instances may be obtained either in a batch or incremental fashion.
- * If incremental reading is used, then
- * the client should obtain the Loader object (by calling
- * getLoader()) and read the instances one at a time. If
- * batch loading is used, then SetInstancesPanel will load
- * the data into memory inside of a separate thread and notify
- * the client when the operation is complete. The client can
- * then retrieve the instances by calling getInstances().
- *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7 $
  */
-public class SetInstancesPanel
-  extends JPanel {
-
-  /** for serialization. */
-  private static final long serialVersionUID = -384804041420453735L;
-
-  /** the text denoting "no class" in the class combobox. */
-  public final static String NO_CLASS = "No class";
+public class SetInstancesPanel extends JPanel {
   
-  /** Click to open instances from a file. */
+  /** Click to open instances from a file */
   protected JButton m_OpenFileBut = new JButton("Open file...");
 
-  /** Click to open instances from a URL. */
+  /** Click to open instances from a URL */
   protected JButton m_OpenURLBut = new JButton("Open URL...");
 
-  /** Click to close the dialog. */
-  protected JButton m_CloseBut = new JButton("Close");
-
-  /** The instance summary component. */
+  /** The instance summary component */
   protected InstancesSummaryPanel m_Summary = new InstancesSummaryPanel();
-
-  /** the label for the class combobox. */
-  protected JLabel m_ClassLabel = new JLabel("Class");
   
-  /** the class combobox. */
-  protected JComboBox m_ClassComboBox = new JComboBox(new DefaultComboBoxModel(new String[]{NO_CLASS}));
-  
-  /** The file chooser for selecting arff files. */
-  protected ConverterFileChooser m_FileChooser
-    = new ConverterFileChooser(new File(System.getProperty("user.dir")));
+  /** Filter to ensure only arff files are selected */  
+  protected FileFilter m_ArffFilter =
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
-  /** Stores the last URL that instances were loaded from. */
+  /** The file chooser for selecting arff files */
+  protected JFileChooser m_FileChooser
+    = new JFileChooser(new File(System.getProperty("user.dir")));
+
+  /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
 
-  /** The thread we do loading in. */
+  /** The thread we do loading in */
   protected Thread m_IOThread;
 
   /**
@@ -108,52 +85,17 @@ public class SetInstancesPanel
    */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
-  /** The current set of instances loaded. */
+  /** The current set of instances loaded */
   protected Instances m_Instances;
-
-  /** The current loader used to obtain the current instances. */
-  protected weka.core.converters.Loader m_Loader;
-  
-  /** the parent frame. if one is provided, the close-button is displayed */
-  protected JFrame m_ParentFrame = null;
-
-  /** the panel the Close-Button is located in. */
-  protected JPanel m_CloseButPanel = null;
-
-  /** whether to read the instances incrementally, if possible. */
-  protected boolean m_readIncrementally = true;
-  
-  /** whether to display zero instances as unknown ("?"). */
-  protected boolean m_showZeroInstancesAsUnknown = false;
-  
-  /** whether to display a combobox that allows the user to choose the class
-   * attribute. */
-  protected boolean m_showClassComboBox;
-  
-  /**
-   * Default constructor.
-   */
-  public SetInstancesPanel() {
-    this(false, false);
-  }
   
   /**
    * Create the panel.
-   * 
-   * @param showZeroInstancesAsUnknown	whether to display zero instances
-   * 					as unknown (e.g., when reading data
-   * 					incrementally)
-   * @param showClassComboBox		whether to display a combobox
-   * 					allowing the user to choose the class
-   * 					attribute
    */
-  public SetInstancesPanel(boolean showZeroInstancesAsUnknown, boolean showClassComboBox) {
-    m_showZeroInstancesAsUnknown = showZeroInstancesAsUnknown;
-    m_showClassComboBox = showClassComboBox;
-    
+  public SetInstancesPanel() {
+
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
-    m_CloseBut.setToolTipText("Closes the dialog");
+    m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -165,81 +107,16 @@ public class SetInstancesPanel
 	setInstancesFromFileQ();
       }
     });
-    m_CloseBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        closeFrame();
-      }
-    });
     m_Summary.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-    m_ClassComboBox.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	if ((m_Instances != null) && (m_ClassComboBox.getSelectedIndex() != -1)) {
-	  if (m_Instances.numAttributes() >= m_ClassComboBox.getSelectedIndex()) {
-	    m_Instances.setClassIndex(m_ClassComboBox.getSelectedIndex() - 1);   // -1 because of NO_CLASS element
-	    m_Support.firePropertyChange("", null, null);
-	  }
-	}
-      }
-    });
-    
-    JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    panelButtons.add(m_OpenFileBut);
-    panelButtons.add(m_OpenURLBut);
-
-    JPanel panelClass = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    panelClass.add(m_ClassLabel);
-    panelClass.add(m_ClassComboBox);
-
-    JPanel panelButtonsAndClass;
-    if (m_showClassComboBox) {
-      panelButtonsAndClass = new JPanel(new GridLayout(2, 1));
-      panelButtonsAndClass.add(panelButtons);
-      panelButtonsAndClass.add(panelClass);
-    }
-    else {
-      panelButtonsAndClass = new JPanel(new GridLayout(1, 1));
-      panelButtonsAndClass.add(panelButtons);
-    }
-    
-    m_CloseButPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    m_CloseButPanel.add(m_CloseBut);
-    m_CloseButPanel.setVisible(false);
-    
-    JPanel panelButtonsAll = new JPanel(new BorderLayout());
-    panelButtonsAll.add(panelButtonsAndClass, BorderLayout.CENTER);
-    panelButtonsAll.add(m_CloseButPanel, BorderLayout.SOUTH);
+    JPanel buttons = new JPanel();
+    buttons.setLayout(new GridLayout(1, 2));
+    buttons.add(m_OpenFileBut);
+    buttons.add(m_OpenURLBut);
     
     setLayout(new BorderLayout());
     add(m_Summary, BorderLayout.CENTER);
-    add(panelButtonsAll, BorderLayout.SOUTH);
-  }
-
-  /**
-   * Sets the frame, this panel resides in. Used for displaying the close 
-   * button, i.e., the close-button is visible if the given frame is not null.
-   * @param parent        the parent frame
-   */
-  public void setParentFrame(JFrame parent) {
-    m_ParentFrame = parent;
-    m_CloseButPanel.setVisible(m_ParentFrame != null);
-  }
-  
-  /**
-   * Returns the current frame the panel knows of, that it resides in. Can be
-   * null.
-   * @return the current parent frame
-   */
-  public JFrame getParentFrame() {
-    return m_ParentFrame;
-  }
-
-  /**
-   * closes the frame, i.e., the visibility is set to false.
-   */
-  public void closeFrame() {
-    if (m_ParentFrame != null)
-      m_ParentFrame.setVisible(false);
+    add(buttons, BorderLayout.SOUTH);
   }
 
   /**
@@ -315,6 +192,7 @@ public class SetInstancesPanel
     }
   }
   
+
   /**
    * Loads results from a set of instances contained in the supplied
    * file.
@@ -322,28 +200,11 @@ public class SetInstancesPanel
    * @param f a value of type 'File'
    */
   protected void setInstancesFromFile(File f) {
-    boolean incremental = m_readIncrementally;
-    
-    try {
-      m_Loader = ConverterUtils.getLoaderForFile(f);
-      if (m_Loader == null)
-	throw new Exception("No suitable FileSourcedConverter found for file!\n" + f);
       
-      // not an incremental loader?
-      if (!(m_Loader instanceof IncrementalConverter))
-	incremental = false;
-
-      // load
-      ((FileSourcedConverter) m_Loader).setFile(f);
-      if (incremental) {
-        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
-	setInstances(m_Loader.getStructure());
-      } else {
-        // If we are batch loading then we will know for sure that
-        // the data has no instances
-        m_Summary.setShowZeroInstancesAsUnknown(false);
-	setInstances(m_Loader.getDataSet());
-      }
+    try {
+      Reader r = new BufferedReader(new FileReader(f));
+      setInstances(new Instances(r));
+      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from file:\n"
@@ -359,26 +220,11 @@ public class SetInstancesPanel
    * @param u the URL to load from.
    */
   protected void setInstancesFromURL(URL u) {
-    boolean incremental = m_readIncrementally;
-    
-    try {
-      m_Loader = ConverterUtils.getURLLoaderForFile(u.toString());
-      if (m_Loader == null)
-	throw new Exception("No suitable URLSourcedLoader found for URL!\n" + u);
-      
-      // not an incremental loader?
-      if (!(m_Loader instanceof IncrementalConverter))
-	incremental = false;
 
-      // load
-      ((URLSourcedLoader) m_Loader).setURL(u.toString());
-      if (incremental) {
-        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
-	setInstances(m_Loader.getStructure());
-      } else {
-        m_Summary.setShowZeroInstancesAsUnknown(false);
-	setInstances(m_Loader.getDataSet());
-      }
+    try {
+      Reader r = new BufferedReader(new InputStreamReader(u.openStream()));
+      setInstances(new Instances(r));
+      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from URL:\n"
@@ -389,7 +235,7 @@ public class SetInstancesPanel
   }
 
   /**
-   * Updates the set of instances that is currently held by the panel.
+   * Updates the set of instances that is currently held by the panel
    *
    * @param i a value of type 'Instances'
    */
@@ -397,28 +243,12 @@ public class SetInstancesPanel
 
     m_Instances = i;
     m_Summary.setInstances(m_Instances);
-    
-    if (m_showClassComboBox) {
-      DefaultComboBoxModel model = (DefaultComboBoxModel) m_ClassComboBox.getModel();
-      model.removeAllElements();
-      model.addElement(NO_CLASS);
-      for (int n = 0; n < m_Instances.numAttributes(); n++) {
-	Attribute att = m_Instances.attribute(n);
-	String type = "(" + Attribute.typeToStringShort(att) + ")";
-	model.addElement(type + " " + att.name());
-      }
-      if (m_Instances.classIndex() == -1)
-	m_ClassComboBox.setSelectedIndex(m_Instances.numAttributes());
-      else
-	m_ClassComboBox.setSelectedIndex(m_Instances.classIndex() + 1);   // +1 because of NO_CLASS element
-    }
-    
     // Fire property change event for those interested.
     m_Support.firePropertyChange("", null, null);
   }
 
   /**
-   * Gets the set of instances currently held by the panel.
+   * Gets the set of instances currently held by the panel
    *
    * @return a value of type 'Instances'
    */
@@ -428,60 +258,12 @@ public class SetInstancesPanel
   }
 
   /**
-   * Returns the currently selected class index.
-   * 
-   * @return		the class index, -1 if none selected
-   */
-  public int getClassIndex() {
-    if (m_ClassComboBox.getSelectedIndex() <= 0)
-      return -1;
-    else
-      return m_ClassComboBox.getSelectedIndex() - 1;
-  }
-  
-  /**
-   * Gets the currently used Loader.
-   *
-   * @return a value of type 'Loader'
-   */
-  public weka.core.converters.Loader getLoader() {
-    return m_Loader;
-  }
-
-  /**
    * Gets the instances summary panel associated with
-   * this panel.
-   * 
+   * this panel
    * @return the instances summary panel
    */
   public InstancesSummaryPanel getSummary() {
     return m_Summary;
-  }
-
-  /**
-   * Sets whether or not instances should be read incrementally
-   * by the Loader. If incremental reading is used, then
-   * the client should obtain the Loader object (by calling
-   * getLoader()) and read the instances one at a time. If
-   * batch loading is used, then SetInstancesPanel will load
-   * the data into memory inside of a separate thread and notify
-   * the client when the operation is complete. The client can
-   * then retrieve the instances by calling getInstances().
-   *
-   * @param incremental true if instances are to be read incrementally
-   * 
-   */
-  public void setReadIncrementally(boolean incremental) {
-    m_readIncrementally = incremental;
-  }
-
-  /**
-   * Gets whether instances are to be read incrementally or not.
-   *
-   * @return true if instances are to be read incrementally
-   */
-  public boolean getReadIncrementally() {
-    return m_readIncrementally;
   }
   
   /**

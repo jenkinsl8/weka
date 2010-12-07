@@ -16,32 +16,25 @@
 
 /*
  *    AllFilter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
 
 package weka.filters;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.Capabilities.Capability;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
  * A simple instance filter that passes all instances directly
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
-public class AllFilter
-  extends Filter
-  implements Sourcable {
-
-  /** for serialization */
-  static final long serialVersionUID = 5022109283147503266L;
+public class AllFilter extends Filter {
 
   /**
    * Returns a string describing this filter
@@ -54,37 +47,13 @@ public class AllFilter
       + " Primarily for testing purposes.";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
-   * @param instanceInfo 	an Instances object containing the input 
-   * 				instance structure (any instances contained 
-   * 				in the object are ignored - only the structure 
-   * 				is required).
-   * @return true 		if the outputFormat may be collected immediately
-   * @throws Exception 		if something goes wrong
+   * @param instanceInfo an Instances object containing the input instance
+   * structure (any instances contained in the object are ignored - only the
+   * structure is required).
+   * @return true if the outputFormat may be collected immediately
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -102,7 +71,7 @@ public class AllFilter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -116,66 +85,6 @@ public class AllFilter
     push((Instance)instance.copy());
     return true;
   }
-  
-  /**
-   * Returns a string that describes the filter as source. The
-   * filter will be contained in a class with the given name (there may
-   * be auxiliary classes),
-   * and will contain two methods with these signatures:
-   * <pre><code>
-   * // converts one row
-   * public static Object[] filter(Object[] i);
-   * // converts a full dataset (first dimension is row index)
-   * public static Object[][] filter(Object[][] i);
-   * </code></pre>
-   * where the array <code>i</code> contains elements that are either
-   * Double, String, with missing values represented as null. The generated
-   * code is public domain and comes with no warranty.
-   *
-   * @param className   the name that should be given to the source class.
-   * @param data	the dataset used for initializing the filter
-   * @return            the object source described by a string
-   * @throws Exception  if the source can't be computed
-   */
-  public String toSource(String className, Instances data) throws Exception {
-    StringBuffer        result;
-    
-    result = new StringBuffer();
-    
-    result.append("class " + className + " {\n");
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * filters a single row\n");
-    result.append("   * \n");
-    result.append("   * @param i the row to process\n");
-    result.append("   * @return the processed row\n");
-    result.append("   */\n");
-    result.append("  public static Object[] filter(Object[] i) {\n");
-    result.append("    return i;\n");
-    result.append("  }\n");
-    result.append("\n");
-    result.append("  /**\n");
-    result.append("   * filters multiple rows\n");
-    result.append("   * \n");
-    result.append("   * @param i the rows to process\n");
-    result.append("   * @return the processed rows\n");
-    result.append("   */\n");
-    result.append("  public static Object[][] filter(Object[][] i) {\n");
-    result.append("    return i;\n");
-    result.append("  }\n");
-    result.append("}\n");
-    
-    return result.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -183,6 +92,15 @@ public class AllFilter
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new AllFilter(), argv);
+    
+    try {
+      if (Utils.getFlag('b', argv)) {
+	Filter.batchFilterFile(new AllFilter(), argv);
+      } else {
+	Filter.filterFile(new AllFilter(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }

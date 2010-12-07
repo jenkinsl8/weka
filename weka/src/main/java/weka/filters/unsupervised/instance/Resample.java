@@ -16,90 +16,62 @@
 
 /*
  *    Resample.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato
  *
  */
+
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
+import weka.filters.*;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
+import weka.core.Option;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
 
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.Random;
+import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- <!-- globalinfo-start -->
- * Produces a random subsample of a dataset using either sampling with replacement or without replacement. The original dataset must fit entirely in memory. The number of instances in the generated dataset may be specified. When used in batch mode, subsequent batches are NOT resampled.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -S &lt;num&gt;
- *  Specify the random number seed (default 1)</pre>
- * 
- * <pre> -Z &lt;num&gt;
- *  The size of the output dataset, as a percentage of
- *  the input dataset (default 100)</pre>
- * 
- * <pre> -no-replacement
- *  Disables replacement of instances
- *  (default: with replacement)</pre>
- * 
- * <pre> -V
- *  Inverts the selection - only available with '-no-replacement'.</pre>
- * 
- <!-- options-end -->
+ * Produces a random subsample of a dataset using sampling with
+ * replacement. The original dataset must fit entirely in memory. The
+ * number of instances in the generated dataset may be specified. When
+ * used in batch mode, subsequent batches are <b>not</b> resampled.
+ *
+ * Valid options are:<p>
+ *
+ * -S num <br>
+ * Specify the random number seed (default 1).<p>
+ *
+ * -Z percent <br>
+ * Specify the size of the output dataset, as a percentage of the input
+ * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.4.2.1 $ 
+ *
  */
-public class Resample 
-  extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 3119607037607101160L;
+public class Resample extends Filter implements UnsupervisedFilter,
+						OptionHandler {
 
   /** The subsample size, percent of original set, default 100% */
-  protected double m_SampleSizePercent = 100;
+  private double m_SampleSizePercent = 100;
   
   /** The random number generator seed */
-  protected int m_RandomSeed = 1;
+  private int m_RandomSeed = 1;
 
-  /** Whether to perform sampling with replacement or without */
-  protected boolean m_NoReplacement = false;
-
-  /** Whether to invert the selection (only if instances are drawn WITHOUT 
-   * replacement)
-   * @see #m_NoReplacement */
-  protected boolean m_InvertSelection = false;
-  
   /**
    * Returns a string describing this classifier
    * @return a description of the classifier suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Produces a random subsample of a dataset using either sampling with "
-      + "replacement or without replacement. The original dataset must fit "
-      + "entirely in memory. The number of instances in the generated dataset "
-      + "may be specified. When used in batch mode, subsequent batches are "
-      + "NOT resampled.";
+    return "Produces a random subsample of a dataset using sampling with"
+      + "replacement. The original dataset must "
+      +"fit entirely in memory. The number of instances in the generated "
+      +"dataset may be specified.";
   }
 
   /**
@@ -108,77 +80,53 @@ public class Resample
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector result = new Vector();
 
-    result.addElement(new Option(
-	"\tSpecify the random number seed (default 1)",
-	"S", 1, "-S <num>"));
+    Vector newVector = new Vector(1);
 
-    result.addElement(new Option(
-	"\tThe size of the output dataset, as a percentage of\n"
-	+"\tthe input dataset (default 100)",
-	"Z", 1, "-Z <num>"));
+    newVector.addElement(new Option(
+              "\tSpecify the random number seed (default 1)",
+              "S", 1, "-S <num>"));
+    newVector.addElement(new Option(
+              "\tThe size of the output dataset, as a percentage of\n"
+              +"\tthe input dataset (default 100)",
+              "Z", 1, "-Z <num>"));
 
-    result.addElement(new Option(
-	"\tDisables replacement of instances\n"
-	+"\t(default: with replacement)",
-	"no-replacement", 0, "-no-replacement"));
-
-    result.addElement(new Option(
-	"\tInverts the selection - only available with '-no-replacement'.",
-	"V", 0, "-V"));
-
-    return result.elements();
+    return newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Specify the random number seed (default 1)</pre>
-   * 
-   * <pre> -Z &lt;num&gt;
-   *  The size of the output dataset, as a percentage of
-   *  the input dataset (default 100)</pre>
-   * 
-   * <pre> -no-replacement
-   *  Disables replacement of instances
-   *  (default: with replacement)</pre>
-   * 
-   * <pre> -V
-   *  Inverts the selection - only available with '-no-replacement'.</pre>
-   * 
-   <!-- options-end -->
+   * Parses a list of options for this object. Valid options are:<p>
+   *
+   * -S num <br>
+   * Specify the random number seed (default 1).<p>
+   *
+   * -Z percent <br>
+   * Specify the size of the output dataset, as a percentage of the input
+   * dataset (default 100). <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
     
-    tmpStr = Utils.getOption('S', options);
-    if (tmpStr.length() != 0)
-      setRandomSeed(Integer.parseInt(tmpStr));
-    else
+    String seedString = Utils.getOption('S', options);
+    if (seedString.length() != 0) {
+      setRandomSeed(Integer.parseInt(seedString));
+    } else {
       setRandomSeed(1);
+    }
 
-    tmpStr = Utils.getOption('Z', options);
-    if (tmpStr.length() != 0)
-      setSampleSizePercent(Double.parseDouble(tmpStr));
-    else
+    String sizeString = Utils.getOption('Z', options);
+    if (sizeString.length() != 0) {
+      setSampleSizePercent(Double.valueOf(sizeString).doubleValue());
+    } else {
       setSampleSizePercent(100);
+    }
 
-    setNoReplacement(Utils.getFlag("no-replacement", options));
-
-    if (getNoReplacement())
-      setInvertSelection(Utils.getFlag('V', options));
-
-    if (getInputFormat() != null)
+    if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
+    }
   }
 
   /**
@@ -187,28 +135,22 @@ public class Resample
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector<String>	result;
 
-    result = new Vector<String>();
+    String [] options = new String [6];
+    int current = 0;
 
-    result.add("-S");
-    result.add("" + getRandomSeed());
+    options[current++] = "-S"; options[current++] = "" + getRandomSeed();
 
-    result.add("-Z");
-    result.add("" + getSampleSizePercent());
+    options[current++] = "-Z"; options[current++] = "" + getSampleSizePercent();
 
-    if (getNoReplacement()) {
-      result.add("-no-replacement");
-      if (getInvertSelection())
-	result.add("-V");
+    while (current < options.length) {
+      options[current++] = "";
     }
-    
-    return result.toArray(new String[result.size()]);
+    return options;
   }
 
   /**
    * Returns the tip text for this property
-   * 
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -222,6 +164,7 @@ public class Resample
    * @return the random number seed.
    */
   public int getRandomSeed() {
+
     return m_RandomSeed;
   }
   
@@ -231,12 +174,12 @@ public class Resample
    * @param newSeed the new random number seed.
    */
   public void setRandomSeed(int newSeed) {
+
     m_RandomSeed = newSeed;
   }
   
   /**
    * Returns the tip text for this property
-   * 
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -250,6 +193,7 @@ public class Resample
    * @return the subsample size
    */
   public double getSampleSizePercent() {
+
     return m_SampleSizePercent;
   }
   
@@ -259,90 +203,10 @@ public class Resample
    * @param newSampleSizePercent the subsample set size, between 0 and 100.
    */
   public void setSampleSizePercent(double newSampleSizePercent) {
+
     m_SampleSizePercent = newSampleSizePercent;
   }
   
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String noReplacementTipText() {
-    return "Disables the replacement of instances.";
-  }
-
-  /**
-   * Gets whether instances are drawn with or without replacement.
-   * 
-   * @return true if the replacement is disabled
-   */
-  public boolean getNoReplacement() {
-    return m_NoReplacement;
-  }
-  
-  /**
-   * Sets whether instances are drawn with or with out replacement.
-   * 
-   * @param value if true then the replacement of instances is disabled
-   */
-  public void setNoReplacement(boolean value) {
-    m_NoReplacement = value;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String invertSelectionTipText() {
-    return "Inverts the selection (only if instances are drawn WITHOUT replacement).";
-  }
-
-  /**
-   * Gets whether selection is inverted (only if instances are drawn WIHTOUT 
-   * replacement).
-   * 
-   * @return true if the replacement is disabled
-   * @see #m_NoReplacement
-   */
-  public boolean getInvertSelection() {
-    return m_InvertSelection;
-  }
-  
-  /**
-   * Sets whether the selection is inverted (only if instances are drawn WIHTOUT 
-   * replacement).
-   * 
-   * @param value if true then selection is inverted
-   */
-  public void setInvertSelection(boolean value) {
-    m_InvertSelection = value;
-  }
-  
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -350,7 +214,7 @@ public class Resample
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -368,7 +232,7 @@ public class Resample
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean input(Instance instance) {
 
@@ -379,7 +243,7 @@ public class Resample
       resetQueue();
       m_NewBatch = false;
     }
-    if (isFirstBatchDone()) {
+    if (m_FirstBatchDone) {
       push(instance);
       return true;
     } else {
@@ -394,7 +258,7 @@ public class Resample
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -402,7 +266,7 @@ public class Resample
       throw new IllegalStateException("No input instance format defined");
     }
 
-    if (!isFirstBatchDone()) {
+    if (!m_FirstBatchDone) {
       // Do the subsample, and clear the input instances.
       createSubsample();
     }
@@ -414,89 +278,22 @@ public class Resample
   }
 
   /**
-   * creates the subsample with replacement
-   * 
-   * @param random	the random number generator to use
-   * @param origSize	the original size of the dataset
-   * @param sampleSize	the size to generate
-   */
-  public void createSubsampleWithReplacement(Random random, int origSize, 
-      int sampleSize) {
-    
-    for (int i = 0; i < sampleSize; i++) {
-	int index = random.nextInt(origSize);
-	push((Instance) getInputFormat().instance(index).copy());
-    }
-  }
-
-  /**
-   * creates the subsample without replacement
-   * 
-   * @param random	the random number generator to use
-   * @param origSize	the original size of the dataset
-   * @param sampleSize	the size to generate
-   */
-  public void createSubsampleWithoutReplacement(Random random, int origSize, 
-      int sampleSize) {
-    
-    if (sampleSize > origSize) {
-      sampleSize = origSize;
-      System.err.println(
-	  "Resampling with replacement can only use percentage <=100% - "
-	  + "Using full dataset!");
-    }
-
-    Vector<Integer> indices = new Vector<Integer>(origSize);
-    Vector<Integer> indicesNew = new Vector<Integer>(sampleSize);
-
-    // generate list of all indices to draw from
-    for (int i = 0; i < origSize; i++)
-      indices.add(i);
-
-    // draw X random indices (selected ones get removed before next draw)
-    for (int i = 0; i < sampleSize; i++) {
-      int index = random.nextInt(indices.size());
-      indicesNew.add(indices.get(index));
-      indices.remove(index);
-    }
-
-    if (getInvertSelection())
-      indicesNew = indices;
-    else
-      Collections.sort(indicesNew);
-
-    for (int i = 0; i < indicesNew.size(); i++)
-      push((Instance) getInputFormat().instance(indicesNew.get(i)).copy());
-
-    // clean up
-    indices.clear();
-    indicesNew.clear();
-    indices = null;
-    indicesNew = null;
-  }
-  
-  /**
    * Creates a subsample of the current set of input instances. The output
    * instances are pushed onto the output queue for collection.
    */
-  protected void createSubsample() {
+  private void createSubsample() {
+
     int origSize = getInputFormat().numInstances();
     int sampleSize = (int) (origSize * m_SampleSizePercent / 100);
-    Random random = new Random(m_RandomSeed);
     
-    if (getNoReplacement())
-      createSubsampleWithoutReplacement(random, origSize, sampleSize);
-    else
-      createSubsampleWithReplacement(random, origSize, sampleSize);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    // Simple subsample
+    
+    Random random = new Random(m_RandomSeed);
+    // Convert pending input instances
+    for(int i = 0; i < sampleSize; i++) {
+      int index = random.nextInt(origSize);
+      push((Instance)getInputFormat().instance(index).copy());
+    }
   }
   
   /**
@@ -506,6 +303,23 @@ public class Resample
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new Resample(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new Resample(), argv);
+      } else {
+	Filter.filterFile(new Resample(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

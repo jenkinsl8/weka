@@ -22,10 +22,7 @@ package weka.core;
 
 import weka.test.WekaTestSuite;
 
-import java.util.Vector;
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -33,43 +30,29 @@ import junit.framework.TestSuite;
  * java weka.core.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
-public class AllTests 
+public class AllTests
   extends WekaTestSuite {
 
   /**
    * generates all the tests
-   * 
+   *
    * @return		all the tests
    */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    
-    // all test in core package
-    Vector packages = new Vector();
-    packages.add("weka.core");
-    suite.addTest(suite(TestCase.class.getName(), packages));
 
-    // all OptionHandler's
-    // TODO: fix all errors
-    //suite.addTest(OptionHandlersTest.suite());
-    
-    // converters
-    suite.addTest(weka.core.converters.AllTests.suite());
-    
-    // neighboursearch
-    suite.addTest(weka.core.neighboursearch.AllTests.suite());
-    
-    // tokenizers
-    suite.addTest(weka.core.tokenizers.AllTests.suite());
+    suite.addTest(InstancesTest.suite());
+    suite.addTest(RangeTest.suite());
+    suite.addTest(SingleIndexTest.suite());
 
     return suite;
   }
 
   /**
    * for running the tests from commandline
-   * 
+   *
    * @param args	the commandline arguments - ignored
    */
   public static void main(String []args) {

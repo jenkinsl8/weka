@@ -16,29 +16,39 @@
 
 /*
  *   BoundaryPanelDistrubuted.java
- *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003 Mark Hall
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.experiment.Compute;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.experiment.TaskStatusInfo;
-
-import java.awt.BorderLayout;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.ObjectInputStream;
-import java.rmi.Naming;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 import java.util.Vector;
+import java.util.Random;
+import java.rmi.*;
+
+import com.sun.image.codec.jpeg.*;
+import java.awt.image.*;
+import java.io.*;
+
+import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayesSimple;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.J48;
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.functions.Logistic;
+import weka.clusterers.EM;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.Add;
+import weka.experiment.RemoteExperimentListener;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.Compute;
+import weka.experiment.TaskStatusInfo;
 
 /**
  * This class extends BoundaryPanel with code for distributing the
@@ -47,15 +57,11 @@ import java.util.Vector;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see BoundaryPanel
  */
-public class BoundaryPanelDistributed
-  extends BoundaryPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1743284397893937776L;
+public class BoundaryPanelDistributed extends BoundaryPanel {
 
   /** a list of RemoteExperimentListeners */
   protected Vector m_listeners = new Vector();
@@ -95,7 +101,7 @@ public class BoundaryPanelDistributed
   /** The queue of sub-tasks waiting to be processed */
   private weka.core.Queue m_subExpQueue = new weka.core.Queue();
 
-  /** number of seconds between polling server */
+  // number of seconds between polling server
   private int m_minTaskPollTime = 1000;
 
   private int [] m_hostPollingTime;
@@ -631,7 +637,7 @@ public class BoundaryPanelDistributed
 	  argsR[j-10] = args[j];
 	}
       }
-      Classifier c = AbstractClassifier.forName(args[9], argsR);
+      Classifier c = Classifier.forName(args[9], argsR);
       KDDataGenerator dataGen = new KDDataGenerator();
       dataGen.setKernelBandwidth(bandWidth);
       bv.setDataGenerator(dataGen);

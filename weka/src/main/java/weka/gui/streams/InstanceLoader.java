@@ -16,40 +16,37 @@
 
 /*
  *    InstanceLoader.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
+
 package weka.gui.streams;
+
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import java.awt.Color;
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.util.Vector;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import weka.core.Instance;
 import weka.core.Instances;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
-import java.util.Vector;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 /** 
  * A bean that produces a stream of instances from a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.3 $
  */
-public class InstanceLoader
-  extends JPanel 
-  implements ActionListener, InstanceProducer {
-
-  /** for serialization */
-  private static final long serialVersionUID = -8725567310271862492L;
+public class InstanceLoader extends JPanel 
+  implements Serializable, ActionListener, InstanceProducer {
   
   private Vector m_Listeners;
   private Thread m_LoaderThread;

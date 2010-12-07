@@ -16,85 +16,68 @@
 
 /*
  *    EM.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.clusterers;
+package  weka.clusterers;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.estimators.DiscreteEstimator;
-import weka.estimators.Estimator;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import  weka.estimators.*;
 
 /**
- <!-- globalinfo-start -->
- * Simple EM (expectation maximisation) class.<br/>
- * <br/>
- * EM assigns a probability distribution to each instance which indicates the probability of it belonging to each of the clusters. EM can decide how many clusters to create by cross validation, or you may specify apriori how many clusters to generate.<br/>
- * <br/>
- * The cross validation performed to determine the number of clusters is done in the following steps:<br/>
- * 1. the number of clusters is set to 1<br/>
- * 2. the training set is split randomly into 10 folds.<br/>
- * 3. EM is performed 10 times using the 10 folds the usual CV way.<br/>
- * 4. the loglikelihood is averaged over all 10 results.<br/>
- * 5. if loglikelihood has increased the number of clusters is increased by 1 and the program continues at step 2. <br/>
- * <br/>
- * The number of folds is fixed to 10, as long as the number of instances in the training set is not smaller 10. If this is the case the number of folds is set equal to the number of instances.
- * <p/>
- <!-- globalinfo-end -->
+ * Simple EM (expectation maximisation) class. <p>
+ * 
+ * EM assigns a probability distribution to each instance which
+ * indicates the probability of it belonging to each of the clusters.
+ * EM can decide how many clusters to create by cross validation, or you
+ * may specify apriori how many clusters to generate. <p>
+ * <br>
+ * The cross validation performed to determine the number of clusters
+ * is done in the following steps:<br>
+ * 1. the number of clusters is set to 1<br>
+ * 2. the training set is split randomly into 10 folds.<br>
+ * 3. EM is performed 10 times using the 10 folds the usual CV way.<br>
+ * 4. the loglikelihood is averaged over all 10 results.<br>
+ * 5. if loglikelihood has increased the number of clusters is increased by 1
+ * and the program continues at step 2. <br>
+ *<br>
+ * The number of folds is fixed to 10, as long as the number of instances in
+ * the training set is not smaller 10. If this is the case the number of folds
+ * is set equal to the number of instances.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -N &lt;num&gt;
- *  number of clusters. If omitted or -1 specified, then 
- *  cross validation is used to select the number of clusters.</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  max iterations.
- * (default 100)</pre>
- * 
- * <pre> -V
- *  verbose.</pre>
- * 
- * <pre> -M &lt;num&gt;
- *  minimum allowable standard deviation for normal density
- *  computation
- *  (default 1e-6)</pre>
- * 
- * <pre> -O
- *  Display model in old format (good when there are many clusters)
- * </pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 100)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -V <br>
+ * Verbose. <p>
+ *
+ * -N <number of clusters> <br>
+ * Specify the number of clusters to generate. If omitted,
+ * EM will use cross validation to select the number of clusters
+ * automatically. <p>
+ *
+ * -I <max iterations> <br>
+ * Terminate after this many iterations if EM has not converged. <p>
+ *
+ * -S <seed> <br>
+ * Specify random number seed. <p>
+ *
+ * -M <num> <br>
+ * Set the minimum allowable standard deviation for normal density calculation.
+ * <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public class EM
-  extends RandomizableDensityBasedClusterer
-  implements NumberOfClustersRequestable, WeightedInstancesHandler {
+  extends DensityBasedClusterer
+  implements NumberOfClustersRequestable,
+	     OptionHandler, WeightedInstancesHandler {
 
-  /** for serialization */
-  static final long serialVersionUID = 8348181483812829475L;
-  
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
 
@@ -140,8 +123,9 @@ public class EM
   /** attribute max values */
   private double [] m_maxValues;
 
-  /** random number generator */
+  /** random numbers and seed */
   private Random m_rr;
+  private int m_rseed;
 
   /** Verbose? */
   private boolean m_verbose;
@@ -149,110 +133,68 @@ public class EM
  /** globally replace missing values */
   private ReplaceMissingValues m_replaceMissing;
 
-  /** display model output in old-style format */
-  private boolean m_displayModelInOldFormat;
-
   /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-        "Simple EM (expectation maximisation) class.\n\n"
-      + "EM assigns a probability distribution to each instance which "
-      + "indicates the probability of it belonging to each of the clusters. "
-      + "EM can decide how many clusters to create by cross validation, or you "
-      + "may specify apriori how many clusters to generate.\n\n"
-      + "The cross validation performed to determine the number of clusters "
-      + "is done in the following steps:\n"
-      + "1. the number of clusters is set to 1\n"
-      + "2. the training set is split randomly into 10 folds.\n"
-      + "3. EM is performed 10 times using the 10 folds the usual CV way.\n"
-      + "4. the loglikelihood is averaged over all 10 results.\n"
-      + "5. if loglikelihood has increased the number of clusters is increased "
-      + "by 1 and the program continues at step 2. \n\n"
-      + "The number of folds is fixed to 10, as long as the number of "
-      + "instances in the training set is not smaller 10. If this is the case "
-      + "the number of folds is set equal to the number of instances.";
+    return "Cluster data using expectation maximization";
   }
 
+
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options.. <p>
+   *
+   * Valid options are:<p>
+   *
+   * -V <br>
+   * Verbose. <p>
+   *
+   * -N <number of clusters> <br>
+   * Specify the number of clusters to generate. If omitted,
+   * EM will use cross validation to select the number of clusters
+   * automatically. <p>
+   *
+   * -I <max iterations> <br>
+   * Terminate after this many iterations if EM has not converged. <p>
+   *
+   * -S <seed> <br>
+   * Specify random number seed. <p>
+   *
+   * -M <num> <br>
+   *  Set the minimum allowable standard deviation for normal density 
+   * calculation. <p>
    *
    * @return an enumeration of all the available options.
-   */
+   *
+   **/
   public Enumeration listOptions () {
-    Vector result = new Vector();
-    
-    result.addElement(new Option(
-	"\tnumber of clusters. If omitted or -1 specified, then \n"
-	+ "\tcross validation is used to select the number of clusters.", 
-	"N", 1, "-N <num>"));
-
-    result.addElement(new Option(
-	"\tmax iterations."
-	+ "\n(default 100)", 
-	"I", 1, "-I <num>"));
-    
-    result.addElement(new Option(
-	"\tverbose.",
-	"V", 0, "-V"));
-    
-    result.addElement(new Option(
-	"\tminimum allowable standard deviation for normal density\n"
-	+ "\tcomputation\n"
-	+ "\t(default 1e-6)",
-	"M",1,"-M <num>"));
-
-    result.addElement(
-              new Option("\tDisplay model in old format (good when there are "
-                         + "many clusters)\n",
-                         "O", 0, "-O"));
-
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
-    
-    return  result.elements();
+    Vector newVector = new Vector(6);
+    newVector.addElement(new Option("\tnumber of clusters. If omitted or" 
+				    + "\n\t-1 specified, then cross " 
+				    + "validation is used to\n\tselect the " 
+				    + "number of clusters.", "N", 1
+				    , "-N <num>"));
+    newVector.addElement(new Option("\tmax iterations.\n(default 100)", "I"
+				    , 1, "-I <num>"));
+    newVector.addElement(new Option("\trandom number seed.\n(default 1)"
+				    , "S", 1, "-S <num>"));
+    newVector.addElement(new Option("\tverbose.", "V", 0, "-V"));
+    newVector.addElement(new Option("\tminimum allowable standard deviation "
+				    +"for normal density computation "
+				    +"\n\t(default 1e-6)"
+				    ,"M",1,"-M <num>"));
+    return  newVector.elements();
   }
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -N &lt;num&gt;
-   *  number of clusters. If omitted or -1 specified, then 
-   *  cross validation is used to select the number of clusters.</pre>
-   * 
-   * <pre> -I &lt;num&gt;
-   *  max iterations.
-   * (default 100)</pre>
-   * 
-   * <pre> -V
-   *  verbose.</pre>
-   * 
-   * <pre> -M &lt;num&gt;
-   *  minimum allowable standard deviation for normal density
-   *  computation
-   *  (default 1e-6)</pre>
-   * 
-   * <pre> -O
-   *  Display model in old format (good when there are many clusters)
-   * </pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 100)</pre>
-   * 
-   <!-- options-end -->
-   * 
+   * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     resetOptions();
@@ -264,49 +206,21 @@ public class EM
     }
 
     optionString = Utils.getOption('N', options);
+
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
+    }
+
+    optionString = Utils.getOption('S', options);
+
+    if (optionString.length() != 0) {
+      setSeed(Integer.parseInt(optionString));
     }
 
     optionString = Utils.getOption('M', options);
     if (optionString.length() != 0) {
       setMinStdDev((new Double(optionString)).doubleValue());
     }
-
-    setDisplayModelInOldFormat(Utils.getFlag('O', options));
-    
-    super.setOptions(options);
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String displayModelInOldFormatTipText() {
-    return "Use old format for model output. The old format is "
-      + "better when there are many clusters. The new format "
-      + "is better when there are fewer clusters and many attributes.";
-  }
-
-  /**
-   * Set whether to display model output in the old, original
-   * format.
-   *
-   * @param d true if model ouput is to be shown in the old format
-   */
-  public void setDisplayModelInOldFormat(boolean d) {
-    m_displayModelInOldFormat = d;
-  }
-
-  /**
-   * Get whether to display model output in the old, original
-   * format.
-   *
-   * @return true if model ouput is to be shown in the old format
-   */
-  public boolean getDisplayModelInOldFormat() {
-    return m_displayModelInOldFormat;
   }
 
   /**
@@ -347,6 +261,35 @@ public class EM
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String seedTipText() {
+    return "random number seed";
+  }
+
+
+  /**
+   * Set the random number seed
+   *
+   * @param s the seed
+   */
+  public void setSeed (int s) {
+    m_rseed = s;
+  }
+
+
+  /**
+   * Get the random number seed
+   *
+   * @return the seed
+   */
+  public int getSeed () {
+    return  m_rseed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String numClustersTipText() {
     return "set number of clusters. -1 to select number of clusters "
       +"automatically by cross validation.";
@@ -356,7 +299,7 @@ public class EM
    * Set the number of clusters (-1 to select by CV).
    *
    * @param n the number of clusters
-   * @throws Exception if n is 0
+   * @exception Exception if n is 0
    */
   public void setNumClusters (int n)
     throws Exception {
@@ -399,7 +342,7 @@ public class EM
    * Set the maximum number of iterations to perform
    *
    * @param i the number of iterations
-   * @throws Exception if i is less than 1
+   * @exception Exception if i is less than 1
    */
   public void setMaxIterations (int i)
     throws Exception {
@@ -418,17 +361,6 @@ public class EM
    */
   public int getMaxIterations () {
     return  m_max_iterations;
-  }
-
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String debugTipText() {
-    return "If set to true, clusterer may output additional info to " +
-      "the console.";
   }
 
 
@@ -458,34 +390,33 @@ public class EM
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
+    String[] options = new String[9];
+    int current = 0;
 
-    result = new Vector();
-
-    result.add("-I");
-    result.add("" + m_max_iterations);
-    result.add("-N");
-    result.add("" + getNumClusters());
-    result.add("-M");
-    result.add("" + getMinStdDev());
-    if (m_displayModelInOldFormat) {
-      result.add("-O");
+    if (m_verbose) {
+      options[current++] = "-V";
     }
 
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    options[current++] = "-I";
+    options[current++] = "" + m_max_iterations;
+    options[current++] = "-N";
+    options[current++] = "" + getNumClusters();
+    options[current++] = "-S";
+    options[current++] = "" + m_rseed;
+    options[current++] = "-M";
+    options[current++] = ""+getMinStdDev();
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    while (current < options.length) {
+      options[current++] = "";
+    }
+
+    return  options;
   }
 
   /**
    * Initialise estimators and storage.
    *
    * @param inst the instances
-   * @throws Exception if initialization fails
    **/
   private void EM_Init (Instances inst)
     throws Exception {
@@ -498,7 +429,6 @@ public class EM
       SimpleKMeans sk = new SimpleKMeans();
       sk.setSeed(m_rr.nextInt());
       sk.setNumClusters(m_num_clusters);
-      sk.setDisplayStdDevs(true);
       sk.buildClusterer(inst);
       if (sk.getSquaredError() < bestSqE) {
 	bestSqE = sk.getSquaredError();
@@ -570,7 +500,7 @@ public class EM
    * calculate prior probabilites for the clusters
    *
    * @param inst the instances
-   * @throws Exception if priors can't be calculated
+   * @exception Exception if priors can't be calculated
    **/
   private void estimate_priors (Instances inst)
     throws Exception {
@@ -597,7 +527,6 @@ public class EM
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
-   * @return the density
    */
   private double logNormalDens (double x, double mean, double stdDev) {
 
@@ -610,6 +539,8 @@ public class EM
 
   /**
    * New probability estimators for an iteration
+   *
+   * @param num_cl the numbe of clusters
    */
   private void new_estimators () {
     for (int i = 0; i < m_num_clusters; i++) {
@@ -631,7 +562,6 @@ public class EM
   /**
    * The M step of the EM algorithm.
    * @param inst the training instances
-   * @throws Exception if something goes wrong
    */
   private void M (Instances inst)
     throws Exception {
@@ -716,9 +646,7 @@ public class EM
    * probabilities.
    *
    * @param inst the training instances
-   * @param change_weights whether to change the weights
    * @return the average log likelihood
-   * @throws Exception if computation fails
    */
   private double E (Instances inst, boolean change_weights)
     throws Exception {
@@ -740,7 +668,7 @@ public class EM
     // reestimate priors
     /*if (change_weights) {
       estimate_priors(inst);
-    }*/
+    } */
     return  loglk / sOW;
   }
   
@@ -750,9 +678,6 @@ public class EM
    *
    **/
   public EM () {
-    super();
-    
-    m_SeedDefault = 100;
     resetOptions();
   }
 
@@ -763,7 +688,7 @@ public class EM
   protected void resetOptions () {
     m_minStdDev = 1e-6;
     m_max_iterations = 100;
-    m_Seed = m_SeedDefault;
+    m_rseed = 100;
     m_num_clusters = -1;
     m_initialNumClusters = -1;
     m_verbose = false;
@@ -789,219 +714,34 @@ public class EM
 
   /**
    * Outputs the generated clusters into a string.
-   * 
-   * @return the clusterer in string representation
    */
-  public String toString() {
-    if (m_displayModelInOldFormat) {
-      return toStringOriginal();
-    }
-
+  public String toString () {
     if (m_priors == null) {
       return "No clusterer built yet!";
     }
-    StringBuffer temp = new StringBuffer();
-    temp.append("\nEM\n==\n");
+    StringBuffer text = new StringBuffer();
+    text.append("\nEM\n==\n");
     if (m_initialNumClusters == -1) {
-      temp.append("\nNumber of clusters selected by cross validation: "
+      text.append("\nNumber of clusters selected by cross validation: "
 		  +m_num_clusters+"\n");
     } else {
-      temp.append("\nNumber of clusters: " + m_num_clusters + "\n");
-    }
-
-    int maxWidth = 0;
-    int maxAttWidth = 0;
-    boolean containsKernel = false;
-    
-    // set up max widths
-    // attributes
-    for (int i = 0; i < m_num_attribs; i++) {
-      Attribute a = m_theInstances.attribute(i);
-      if (a.name().length() > maxAttWidth) {
-        maxAttWidth = m_theInstances.attribute(i).name().length();
-      }
-      if (a.isNominal()) {
-        // check values
-        for (int j = 0; j < a.numValues(); j++) {
-          String val = a.value(j) + "  ";
-          if (val.length() > maxAttWidth) {
-            maxAttWidth = val.length();
-          }
-        }
-      }
-    }
-
-    for (int i = 0; i < m_num_clusters; i++) {
-      for (int j = 0; j < m_num_attribs; j++) {
-        if (m_theInstances.attribute(j).isNumeric()) {
-          // check mean and std. dev. against maxWidth
-          double mean = Math.log(Math.abs(m_modelNormal[i][j][0])) / Math.log(10.0);
-          double stdD = Math.log(Math.abs(m_modelNormal[i][j][1])) / Math.log(10.0);
-          double width = (mean > stdD)
-            ? mean
-            : stdD;
-          if (width < 0) {
-            width = 1;
-          }
-          // decimal + # decimal places + 1
-          width += 6.0;
-          if ((int)width > maxWidth) {
-            maxWidth = (int)width;
-          }
-        } else {
-          // nominal distributions
-          DiscreteEstimator d = (DiscreteEstimator)m_model[i][j];
-          for (int k = 0; k < d.getNumSymbols(); k++) {
-            String size = Utils.doubleToString(d.getCount(k), maxWidth, 4).trim();
-            if (size.length() > maxWidth) {
-              maxWidth = size.length();
-            }
-          }
-          int sum = 
-            Utils.doubleToString(d.getSumOfCounts(), maxWidth, 4).trim().length();
-          if (sum > maxWidth) {
-            maxWidth = sum;
-          }
-        }
-      }
-    }
-
-    if (maxAttWidth < "Attribute".length()) {
-      maxAttWidth = "Attribute".length();
-    }    
-    
-    maxAttWidth += 2;
-
-    temp.append("\n\n");
-    temp.append(pad("Cluster", " ", 
-                    (maxAttWidth + maxWidth + 1) - "Cluster".length(), 
-                    true));
-    
-    temp.append("\n");
-    temp.append(pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
-
-    // cluster #'s
-    for (int i = 0; i < m_num_clusters; i++) {
-      String classL = "" + i;
-      temp.append(pad(classL, " ", maxWidth + 1 - classL.length(), true));
-    }
-    temp.append("\n");
-
-    // cluster priors
-    temp.append(pad("", " ", maxAttWidth, true));
-    for (int i = 0; i < m_num_clusters; i++) {
-      String priorP = Utils.doubleToString(m_priors[i], maxWidth, 2).trim();
-      priorP = "(" + priorP + ")";
-      temp.append(pad(priorP, " ", maxWidth + 1 - priorP.length(), true));
-    }
-
-    temp.append("\n");
-    temp.append(pad("", "=", maxAttWidth + 
-                    (maxWidth * m_num_clusters)
-                    + m_num_clusters + 1, true));
-    temp.append("\n");
-
-    for (int i = 0; i < m_num_attribs; i++) {
-      String attName = m_theInstances.attribute(i).name();
-      temp.append(attName + "\n");
-
-      if (m_theInstances.attribute(i).isNumeric()) {
-        String meanL = "  mean";
-        temp.append(pad(meanL, " ", maxAttWidth + 1 - meanL.length(), false));
-        for (int j = 0; j < m_num_clusters; j++) {
-          // means
-          String mean = 
-            Utils.doubleToString(m_modelNormal[j][i][0], maxWidth, 4).trim();
-          temp.append(pad(mean, " ", maxWidth + 1 - mean.length(), true));
-        }
-        temp.append("\n");            
-        // now do std deviations
-        String stdDevL = "  std. dev.";
-        temp.append(pad(stdDevL, " ", maxAttWidth + 1 - stdDevL.length(), false));
-        for (int j = 0; j < m_num_clusters; j++) {
-          String stdDev = 
-            Utils.doubleToString(m_modelNormal[j][i][1], maxWidth, 4).trim();
-          temp.append(pad(stdDev, " ", maxWidth + 1 - stdDev.length(), true));
-        }
-        temp.append("\n\n");
-      } else {
-        Attribute a = m_theInstances.attribute(i);
-        for (int j = 0; j < a.numValues(); j++) {
-          String val = "  " + a.value(j);
-          temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
-          for (int k = 0; k < m_num_clusters; k++) {
-            DiscreteEstimator d = (DiscreteEstimator)m_model[k][i];
-            String count = Utils.doubleToString(d.getCount(j), maxWidth, 4).trim();
-            temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
-          }
-          temp.append("\n");
-        }
-        // do the totals
-        String total = "  [total]";
-        temp.append(pad(total, " ", maxAttWidth + 1 - total.length(), false));
-        for (int k = 0; k < m_num_clusters; k++) {
-          DiscreteEstimator d = (DiscreteEstimator)m_model[k][i];
-          String count = 
-            Utils.doubleToString(d.getSumOfCounts(), maxWidth, 4).trim();
-            temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
-        }
-        temp.append("\n");        
-      }
-    }
-
-    return temp.toString();
-  }
-
-  private String pad(String source, String padChar, 
-                     int length, boolean leftPad) {
-    StringBuffer temp = new StringBuffer();
-
-    if (leftPad) {
-      for (int i = 0; i< length; i++) {
-        temp.append(padChar);
-      }
-      temp.append(source);
-    } else {
-      temp.append(source);
-      for (int i = 0; i< length; i++) {
-        temp.append(padChar);
-      }
-    }
-    return temp.toString();
-  }
-
-  /**
-   * Outputs the generated clusters into a string.
-   * 
-   * @return the clusterer in string representation
-   */
-  protected String toStringOriginal () {
-    if (m_priors == null) {
-      return "No clusterer built yet!";
-    }
-    StringBuffer temp = new StringBuffer();
-    temp.append("\nEM\n==\n");
-    if (m_initialNumClusters == -1) {
-      temp.append("\nNumber of clusters selected by cross validation: "
-		  +m_num_clusters+"\n");
-    } else {
-      temp.append("\nNumber of clusters: " + m_num_clusters + "\n");
+      text.append("\nNumber of clusters: " + m_num_clusters + "\n");
     }
 
     for (int j = 0; j < m_num_clusters; j++) {
-      temp.append("\nCluster: " + j + " Prior probability: " 
+      text.append("\nCluster: " + j + " Prior probability: " 
 		  + Utils.doubleToString(m_priors[j], 4) + "\n\n");
 
       for (int i = 0; i < m_num_attribs; i++) {
-        temp.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
+        text.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
 
         if (m_theInstances.attribute(i).isNominal()) {
           if (m_model[j][i] != null) {
-            temp.append(m_model[j][i].toString());
+            text.append(m_model[j][i].toString());
           }
         }
         else {
-          temp.append("Normal Distribution. Mean = " 
+          text.append("Normal Distribution. Mean = " 
 		      + Utils.doubleToString(m_modelNormal[j][i][0], 4) 
 		      + " StdDev = " 
 		      + Utils.doubleToString(m_modelNormal[j][i][1], 4) 
@@ -1010,7 +750,7 @@ public class EM
       }
     }
 
-    return  temp.toString();
+    return  text.toString();
   }
 
 
@@ -1061,7 +801,6 @@ public class EM
    * estimate the number of clusters by cross validation on the training
    * data.
    *
-   * @throws Exception if something goes wrong
    */
   private void CVClusters ()
     throws Exception {
@@ -1078,13 +817,13 @@ public class EM
       : 10;
 
     boolean ok = true;
-    int seed = getSeed();
+    int seed = m_rseed;
     int restartCount = 0;
     CLUSTER_SEARCH: while (CVincreased) {
       // theInstances.stratify(10);
         
       CVincreased = false;
-      cvr = new Random(getSeed());
+      cvr = new Random(m_rseed);
       trainCopy = new Instances(m_theInstances);
       trainCopy.randomize(cvr);
       templl = 0.0;
@@ -1138,7 +877,7 @@ public class EM
 
       if (ok) {
         restartCount = 0;
-        seed = getSeed();
+        seed = m_rseed;
         templl /= (double)numFolds;
         
         if (m_verbose) {
@@ -1171,7 +910,7 @@ public class EM
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @throws Exception if number of clusters could not be returned
+   * @exception Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters ()
@@ -1208,33 +947,21 @@ public class EM
       }
     }
   }
-
-  /**
-   * Returns default capabilities of the clusterer (i.e., the ones of 
-   * SimpleKMeans).
-   *
-   * @return      the capabilities of this clusterer
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = new SimpleKMeans().getCapabilities();
-    result.setOwner(this);
-    return result;
-  }
   
   /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @throws Exception if the clusterer has not been 
+   * @exception Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer (Instances data)
     throws Exception {
+    if (data.checkForStringAttributes()) {
+      throw  new Exception("Can't handle string attributes!");
+    }
     
-    // can clusterer handle the data?
-    getCapabilities().testWithFail(data);
-
     m_replaceMissing = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);
@@ -1262,8 +989,6 @@ public class EM
 
   /**
    * Returns the cluster priors.
-   * 
-   * @return the cluster priors
    */
   public double[] clusterPriors() {
 
@@ -1276,9 +1001,10 @@ public class EM
   /**
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
-   * @param inst the instance to compute the density for
+   * @param instance the instance to compute the density for
+   * @return the density.
    * @return an array containing the estimated densities
-   * @throws Exception if the density could not be computed
+   * @exception Exception if the density could not be computed
    * successfully
    */
   public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
@@ -1319,17 +1045,14 @@ public class EM
 
   /**
    * Perform the EM algorithm
-   * 
-   * @throws Exception if something goes wrong
    */
   private void doEM ()
     throws Exception {
-    
     if (m_verbose) {
-      System.out.println("Seed: " + getSeed());
+      System.out.println("Seed: " + m_rseed);
     }
 
-    m_rr = new Random(getSeed());
+    m_rr = new Random(m_rseed);
 
     // throw away numbers to avoid problem of similar initial numbers
     // from a similar seed
@@ -1351,7 +1074,7 @@ public class EM
     if (m_initialNumClusters == -1) {
       if (m_theInstances.numInstances() > 9) {
 	CVClusters();
-	m_rr = new Random(getSeed());
+	m_rr = new Random(m_rseed);
 	for (int i=0; i<10; i++) m_rr.nextDouble();
       } else {
 	m_num_clusters = 1;
@@ -1369,13 +1092,12 @@ public class EM
    * converges.
    *
    * @param inst the training instances.
+   * @param num_cl the number of clusters.
    * @param report be verbose.
    * @return the log likelihood of the data
-   * @throws Exception if something goes wrong
    */
   private double iterate (Instances inst, boolean report)
     throws Exception {
-    
     int i;
     double llkold = 0.0;
     double llk = 0.0;
@@ -1385,7 +1107,7 @@ public class EM
     }
 
     boolean ok = false;
-    int seed = getSeed();
+    int seed = m_rseed;
     int restartCount = 0;
     while (!ok) {
       try {
@@ -1429,15 +1151,7 @@ public class EM
 
     return  llk;
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
+
 
   // ============
   // Test method.
@@ -1449,7 +1163,13 @@ public class EM
    * -t training file [-T test file] [-N number of clusters] [-S random seed]
    */
   public static void main (String[] argv) {
-    runClusterer(new EM(), argv);
+    try {
+      System.out.println(ClusterEvaluation.
+			 evaluateClusterer(new EM(), argv));
+    }
+    catch (Exception e) {
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
   }
 }
-

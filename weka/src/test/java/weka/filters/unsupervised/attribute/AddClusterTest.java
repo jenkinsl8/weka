@@ -20,12 +20,9 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.classifiers.meta.FilteredClassifier;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
-import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
@@ -37,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.AddClusterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class AddClusterTest 
   extends AbstractFilterTest {
@@ -53,9 +50,8 @@ public class AddClusterTest
     // remove attributes that are not nominal/numeric
     int i = 0;
     while (i < m_Instances.numAttributes()) {
-      if (   (    !m_Instances.attribute(i).isNominal()
-               && !m_Instances.attribute(i).isNumeric() )
-           || m_Instances.attribute(i).isDate() )
+      if (    !m_Instances.attribute(i).isNominal()
+           && !m_Instances.attribute(i).isNumeric() )
         m_Instances.deleteAttributeAt(i);
       else
         i++;
@@ -82,42 +78,6 @@ public class AddClusterTest
     AddCluster f = new AddCluster();
     f.setClusterer(getClusterer());
     return f;
-  }
-
-  /**
-   * returns the configured FilteredClassifier. Since the base classifier is
-   * determined heuristically, derived tests might need to adjust it.
-   * 
-   * @return the configured FilteredClassifier
-   */
-  protected FilteredClassifier getFilteredClassifier() {
-    FilteredClassifier	result;
-    
-    result = new FilteredClassifier();
-    
-    result.setFilter(getFilter());
-    result.setClassifier(new weka.classifiers.trees.J48());
-    
-    return result;
-  }
-  
-  /**
-   * returns data generated for the FilteredClassifier test
-   * 
-   * @return		the dataset for the FilteredClassifier
-   * @throws Exception	if generation of data fails
-   */
-  protected Instances getFilteredClassifierData() throws Exception{
-    TestInstances	test;
-    Instances		result;
-
-    test = TestInstances.forCapabilities(m_FilteredClassifier.getCapabilities());
-    test.setClassType(Attribute.NOMINAL);
-    test.setClassIndex(TestInstances.CLASS_IS_LAST);
-
-    result = test.generate();
-    
-    return result;
   }
 
   public void testTypical() {

@@ -26,7 +26,7 @@ import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.DensityBasedClusterer;
 import weka.clusterers.EM;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * An example class that shows the use of Weka clusterers from Java.

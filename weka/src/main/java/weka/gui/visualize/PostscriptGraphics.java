@@ -16,7 +16,7 @@
 
 /*
  *    PostscriptGraphics.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Dale Fletcher
  *
  */
 
@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2.2.2 $
  */
 
 public class PostscriptGraphics extends Graphics2D {
@@ -596,7 +596,7 @@ public class PostscriptGraphics extends Graphics2D {
   /**
    * Draw text in current pen color.
    *
-   * @param str Text to output
+   * @param String Text to output
    * @param x starting x coord
    * @param y starting y coord
    */

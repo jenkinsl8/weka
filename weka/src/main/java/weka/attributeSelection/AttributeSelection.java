@@ -16,79 +16,72 @@
 
 /*
  *    AttributeSelection.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
+import  weka.filters.Filter;
+import  weka.filters.unsupervised.attribute.Remove;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
+import java.beans.IntrospectionException;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Random;
 
 /** 
  * Attribute selection class. Takes the name of a search class and
- * an evaluation class on the command line. <p/>
+ * an evaluation class on the command line. <p>
  *
- * Valid options are: <p/>
+ * Valid options are: <p>
  *
- * -h <br/>
- * Display help. <p/>
+ * -h <br>
+ * Display help. <p>
  *
- * -i &lt;name of input file&gt; <br/>
- * Specify the training data file. <p/>
+ * -i &lt;name of input file&gt; <br>
+ * Specify the training arff file. <p>
  * 
- * -c &lt;class index&gt; <br/>
- * The index of the attribute to use as the class. <p/>
+ * -c &lt;class index&gt; <br>
+ * The index of the attribute to use as the class. <p>
  * 
- * -s &lt;search method&gt; <br/>
+ * -s &lt;search method&gt; <br>
  * The full class name of the search method followed by search method options
- * (if any).<br/>
- * Eg. -s "weka.attributeSelection.BestFirst -N 10" <p/>
+ * (if any).<br>
+ * Eg. -s "weka.attributeSelection.BestFirst -N 10" <p>
  *
- * -x &lt;number of folds&gt; <br/>
- * Perform a cross validation. <p/>
+ * -x &lt;number of folds&gt; <br>
+ * Perform a cross validation. <p>
  *
- * -n &lt;random number seed&gt; <br/>
- * Specify a random number seed. Use in conjuction with -x. (Default = 1). <p/>
+ * -n &lt;random number seed&gt; <br>
+ * Specify a random number seed. Use in conjuction with -x. (Default = 1). <p>
  * 
- * ------------------------------------------------------------------------ <p/>
+ * ------------------------------------------------------------------------ <p>
  * 
  * Example usage as the main of an attribute evaluator (called FunkyEvaluator):
  * <pre>
  * public static void main(String [] args) {
- *   runEvaluator(new FunkyEvaluator(), args);
+ *   try {
+ *     ASEvaluator eval = new FunkyEvaluator();
+ *     System.out.println(SelectAttributes(Evaluator, args));
+ *   } catch (Exception e) {
+ *     System.err.println(e.getMessage());
+ *   }
  * }
  * </pre>
- * <p/>
+ * <p>
  *
- * ------------------------------------------------------------------------ <p/>
+ * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.47 $
+ * @version  $Revision: 1.35.2.5 $
  */
-public class AttributeSelection 
-  implements Serializable, RevisionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = 4170171824147584330L;
+public class AttributeSelection implements Serializable {
 
   /** the instances to select attributes from */
   private Instances m_trainInstances;
@@ -315,7 +308,7 @@ public class AttributeSelection
       // get basic options (options the same for all attribute selectors
       trainFileName = Utils.getOption('i', options);
       helpRequested = Utils.getFlag('h', optionsTmp);
-
+      
       if (helpRequested || (trainFileName.length() == 0)) {
         searchName = Utils.getOption('s', optionsTmp);
         if (searchName.length() != 0) {
@@ -330,12 +323,11 @@ public class AttributeSelection
       }
     }
     catch (Exception e) {
-      throw  new Exception('\n' + e.getMessage() 
+      throw new Exception('\n' + e.getMessage() 
 			   + makeOptionString(ASEvaluator, searchMethod));
     }
 
-    DataSource source = new DataSource(trainFileName);
-    train = source.getDataSet();
+    train = new Instances(new FileReader(trainFileName));
     return SelectAttributes(ASEvaluator, options, train);
   }
 
@@ -525,6 +517,9 @@ public class AttributeSelection
   public String CrossValidateAttributes () throws Exception {
     Instances cvData = new Instances(m_trainInstances);
     Instances train;
+    double[][] rankResults;
+    double[] subsetResults;
+    double[][] attributeRanking = null;
 
     Random random = new Random(m_seed);
     cvData.randomize(random);
@@ -795,6 +790,8 @@ public class AttributeSelection
    * @param ASEvaluator an evaluator object
    * @param options an array of options, not only for the evaluator
    * but also the search method (if any) and an input data file
+   * @param outAttributes index 0 will contain the array of selected
+   * attribute indices
    * @param train the input instances
    * @return the results of attribute selection as a String
    * @exception Exception if incorrect options are supplied
@@ -804,24 +801,26 @@ public class AttributeSelection
 					 Instances train)
     throws Exception {
     int seed = 1, folds = 10;
-    String foldsString, seedString, searchName;
+    String cutString, foldsString, seedString, searchName;
     String classString;
     String searchClassName;
     String[] searchOptions = null; //new String [1];
+    Random random;
     ASSearch searchMethod = null;
     boolean doCrossVal = false;
+    Range initialRange;
     int classIndex = -1;
+    int[] selectedAttributes;
+    double cutoff = -Double.MAX_VALUE;
     boolean helpRequested = false;
+    StringBuffer text = new StringBuffer();
+    initialRange = new Range();
     AttributeSelection trainSelector = new AttributeSelection();
 
     try {
       if (Utils.getFlag('h', options)) {
 	helpRequested = true;
       }
-
-      // does data already have a class attribute set?
-      if (train.classIndex() != -1)
-	classIndex = train.classIndex() + 1;
 
       // get basic options (options the same for all attribute selectors
       classString = Utils.getOption('c', options);
@@ -1010,27 +1009,25 @@ public class AttributeSelection
    * @param ASEvaluator the attribute evaluator to include options for
    * @param searchMethod the search method to include options for
    * @return a string detailing the valid command line options
-   * @throws Exception if something goes wrong
    */
   private static String makeOptionString (ASEvaluation ASEvaluator, 
 					  ASSearch searchMethod)
     throws Exception {
-    
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
-    optionsText.append("-h\n\tdisplay this help\n");
+    optionsText.append("-h display this help\n");
     optionsText.append("-i <name of input file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-c <class index>\n");
     optionsText.append("\tSets the class index for supervised attribute\n");
     optionsText.append("\tselection. Default=last column.\n");
-    optionsText.append("-s <class name>\n");
+    optionsText.append("-s <Class name>\n");
     optionsText.append("\tSets search method for subset evaluators.\n");
     optionsText.append("-x <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
     optionsText.append("-n <random number seed>\n");
-    optionsText.append("\tUse in conjunction with -x.\n");
+    optionsText.append("\tUse in conjunction with -X.\n");
 
     // Get attribute evaluator-specific options
     if (ASEvaluator instanceof OptionHandler) {
@@ -1091,13 +1088,6 @@ public class AttributeSelection
       System.out.println(e.getMessage());
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.47 $");
-  }
+
 }
+

@@ -16,14 +16,10 @@
 
 /*
  *    TaskStatusInfo.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Mark Hall
  *
  */
-
 package weka.experiment;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -36,13 +32,9 @@ import java.io.Serializable;
  * execute.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
-public class TaskStatusInfo
-  implements Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6129343303703560015L;
+public class TaskStatusInfo implements Serializable {
   
   public static final int TO_BE_RUN = 0;
   public static final int PROCESSING=1;
@@ -118,14 +110,5 @@ public class TaskStatusInfo
    */
   public Object getTaskResult() {
     return m_TaskResult;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }
