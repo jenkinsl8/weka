@@ -62,7 +62,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class CheckOptionHandler
   extends Check {
@@ -82,11 +82,11 @@ public class CheckOptionHandler
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(new Option(
         "\tFull name of the OptionHandler analysed.\n"
@@ -102,7 +102,7 @@ public class CheckOptionHandler
       
       Enumeration enm = m_OptionHandler.listOptions();
       while (enm.hasMoreElements())
-        result.addElement((Option)enm.nextElement());
+        result.addElement(enm.nextElement());
     }
     
     return result.elements();
@@ -158,11 +158,11 @@ public class CheckOptionHandler
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>        result;
+    Vector        result;
     String[]      options;
     int           i;
     
-    result = new Vector<String>();
+    result = new Vector();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -581,7 +581,7 @@ public class CheckOptionHandler
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /** 

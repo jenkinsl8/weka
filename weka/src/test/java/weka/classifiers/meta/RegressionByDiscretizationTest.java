@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.meta.RegressionByDiscretizationTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class RegressionByDiscretizationTest extends AbstractClassifierTest {
 

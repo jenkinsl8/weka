@@ -22,6 +22,16 @@
 
 package weka.gui.arffviewer;
 
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Reorder;
+import weka.gui.ComponentHelper;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -37,32 +47,18 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Reorder;
-import weka.gui.ComponentHelper;
+import javax.swing.table.TableModel;
 
 /**
  * The model for the Arff-Viewer.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.8 $ 
  */
 public class ArffTableModel 
-  extends DefaultTableModel
-  implements Undoable {
+  implements TableModel, Undoable {
   
-  /** for serialization. */
-  private static final long serialVersionUID = 3411795562305994946L;
   /** the listeners */
   private HashSet m_Listeners;
   /** the data */
@@ -77,8 +73,6 @@ public class ArffTableModel
   private Vector m_UndoList;
   /** whether the table is read-only */
   private boolean m_ReadOnly;
-  /** whether to display the attribute index in the table header. */
-  private boolean m_ShowAttributeIndex;
   
   /**
    * performs some initialization
@@ -93,7 +87,6 @@ public class ArffTableModel
     m_IgnoreChanges       = false;
     m_UndoEnabled         = true;
     m_ReadOnly            = false;
-    m_ShowAttributeIndex  = false;
   }
   
   /**
@@ -530,11 +523,6 @@ public class ArffTableModel
         if (m_Data != null) {
           if ( (columnIndex - 1 < m_Data.numAttributes()) ) {
             result = "<html><center>";
-
-            // index
-            if (m_ShowAttributeIndex)
-              result += columnIndex + ": ";
-            
             // name
             if (isClassIndex(columnIndex))
               result +=   "<b>" 
@@ -731,7 +719,7 @@ public class ArffTableModel
     
     // missing?
     if (aValue == null) {
-      inst.setValue(index, Utils.missingValue());
+      inst.setValue(index, Instance.missingValue());
     }
     else {
       tmp = aValue.toString();
@@ -906,26 +894,5 @@ public class ArffTableModel
         e.printStackTrace();
       }
     }
-  }
-
-  /**
-   * Sets whether to display the attribute index in the header.
-   * 
-   * @param value	if true then the attribute indices are displayed in the
-   * 			table header
-   */
-  public void setShowAttributeIndex(boolean value) {
-    m_ShowAttributeIndex = value;
-    fireTableStructureChanged();
-  }
-  
-  /**
-   * Returns whether to display the attribute index in the header.
-   * 
-   * @return		true if the attribute indices are displayed in the
-   * 			table header
-   */
-  public boolean getShowAttributeIndex() {
-    return m_ShowAttributeIndex;
   }
 }

@@ -29,7 +29,7 @@ import java.util.*;
  * calculated by evaluation modules. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public interface AdditionalMeasureProducer {
 

@@ -23,11 +23,6 @@
 package weka.gui.beans;
 
 import weka.associations.Apriori;
-import weka.associations.AssociationRules;
-import weka.associations.AssociationRulesProducer;
-import weka.core.Attribute;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -36,7 +31,6 @@ import weka.gui.Logger;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -44,10 +38,7 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 /**
- * Bean that wraps around weka.associations. If used in a non-graphical environment,
- * options for the wrapped associator can be provided by setting an environment
- * variable: weka.gui.beans.associator.schemeOptions. The value of this environment
- * variable needs to be a string containing command-line option settings.
+ * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
  * @version $Revision$
@@ -67,8 +58,7 @@ public class Associator
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
              DataSourceListener,
-	     TrainingSetListener, ConfigurationProducer,
-	     StructureProducer, EnvironmentHandler {
+	     TrainingSetListener {
 
   /** for serialization */
   private static final long serialVersionUID = -7843500322130210057L;
@@ -104,17 +94,10 @@ public class Associator
    * Objects listening for graph events
    */
   private Vector m_graphListeners = new Vector();
-  
-  /** The objects listening for batchAssociationRules events **/
-  private Vector<BatchAssociationRulesListener> m_rulesListeners 
-    = new Vector<BatchAssociationRulesListener>();
 
   private weka.associations.Associator m_Associator = new Apriori();
 
   private transient Logger m_log = null;
-  
-  /** The environment variables */
-  private transient Environment m_env = null;
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -132,16 +115,6 @@ public class Associator
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setAssociator(m_Associator);
-  }
-  
-  /**
-   * Set environment variables to use.
-   * 
-   * @param env the environment variables to
-   * use
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
   }
 
   /**
@@ -301,16 +274,6 @@ public class Associator
                                                      grphType);
 		      notifyGraphListeners(ge);
 		    }
-                    
-                    if ((m_Associator instanceof AssociationRulesProducer) &&
-                        m_rulesListeners.size() > 0) {
-                      AssociationRules rules = 
-                        ((AssociationRulesProducer)m_Associator).getAssociationRules();                      
-
-                      BatchAssociationRulesEvent bre = 
-                        new BatchAssociationRulesEvent(Associator.this, rules);
-                      notifyRulesListeners(bre);
-                    }
 		  }
 		} catch (Exception ex) {
 		  Associator.this.stop();
@@ -362,29 +325,6 @@ public class Associator
 
   private void buildAssociations(Instances data) 
     throws Exception {
-    
-    // see if there is an environment variable with
-    // options for the associator
-    if (m_env != null && m_Associator instanceof OptionHandler) {
-      String opts = m_env.getVariableValue("weka.gui.beans.associator.schemeOptions");
-      if (opts != null && opts.length() > 0) {
-        String[] options = Utils.splitOptions(opts);
-        if (options.length > 0) {
-          try {
-            ((OptionHandler)m_Associator).setOptions(options);
-          } catch (Exception ex) {
-            String warningMessage = "[Associator] WARNING: unable to set options \""
-              + opts + "\"for " + m_Associator.getClass().getName();
-            if (m_log != null) {
-              m_log.logMessage(warningMessage);
-            } else {
-              System.err.print(warningMessage);
-            }
-          }
-        }
-      }
-    }
-    
     m_Associator.buildAssociations(data);
   }
 
@@ -410,26 +350,6 @@ public class Associator
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultAssociator.gif",
 		       BeanVisual.ICON_PATH+"DefaultAssociator_animated.gif");
-  }
-  
-  /**
-   * Add a batch association rules listener
-   * 
-   * @param al a <code>BatchAssociationRulesListener</code>
-   */
-  public synchronized void 
-    addBatchAssociationRulesListener(BatchAssociationRulesListener al) {
-    m_rulesListeners.add(al);
-  }
-  
-  /**
-   * Remove a batch association rules listener
-   * 
-   * @param al a <code>BatchAssociationRulesListener</code>
-   */
-  public synchronized void 
-    removeBatchAssociationRulesListener(BatchAssociationRulesListener al) {
-    m_rulesListeners.remove(al);
   }
 
   /**
@@ -467,26 +387,6 @@ public class Associator
   public synchronized void removeGraphListener(GraphListener cl) {
     m_graphListeners.remove(cl);
   }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
-  }
 
   /**
    * Notify all text listeners of a text event
@@ -518,23 +418,6 @@ public class Associator
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
 	((GraphListener)l.elementAt(i)).acceptGraph(ge);
-      }
-    }
-  }
-  
-  /**
-   * Notify all batch association rules listeners of
-   * a rules event.
-   * 
-   * @param are a <code>BatchAssociationRulesEvent</code> value
-   */
-  private void notifyRulesListeners(BatchAssociationRulesEvent are) {
-    Vector<BatchAssociationRulesListener> l;
-   
-    synchronized (this) {
-      l = (Vector<BatchAssociationRulesListener>)m_rulesListeners.clone();
-      for (int i = 0; i < l.size(); i++) {
-        l.get(i).acceptAssociationRules(are);
       }
     }
   }
@@ -697,52 +580,6 @@ public class Associator
     String eventName = esd.getName();
     return eventGeneratable(eventName);
   }
-  
-  /**
-   * Get the structure of the output encapsulated in the named
-   * event. If the structure can't be determined in advance of
-   * seeing input, or this StructureProducer does not generate
-   * the named event, null should be returned.
-   * 
-   * @param eventName the name of the output event that encapsulates
-   * the requested output.
-   * 
-   * @return the structure of the output encapsulated in the named
-   * event or null if it can't be determined in advance of seeing input
-   * or the named event is not generated by this StructureProduce.
-   */
-  public Instances getStructure(String eventName) {
-    
-    Instances structure = null;
-    
-    if (eventName.equals("text")) {
-      ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
-      attInfo.add(new Attribute("Title", (ArrayList<String>)null));
-      attInfo.add(new Attribute("Text", (ArrayList<String>)null));
-      structure = new Instances("TextEvent", attInfo, 0);
-    } else if (eventName.equals("batchAssociationRules")) {
-      if (m_Associator != null && m_Associator instanceof AssociationRulesProducer) {
-        // we make the assumption here that consumers of 
-        // batchAssociationRules events will utilize a structure
-        // consisting of the RHS of the rule (String), LHS of the
-        // rule (String) and one numeric attribute for each metric
-        // associated with the rules.
-        
-        String[] metricNames = 
-          ((AssociationRulesProducer)m_Associator).getRuleMetricNames();
-        ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
-        attInfo.add(new Attribute("LHS", (ArrayList<String>)null));
-        attInfo.add(new Attribute("RHS", (ArrayList<String>)null));
-        attInfo.add(new Attribute("Support"));
-        for (int i = 0; i < metricNames.length; i++) {
-          attInfo.add(new Attribute(metricNames[i]));
-        }
-        structure = new Instances("batchAssociationRulesEvent", attInfo, 0);
-      }
-    }
-    
-    return structure;
-  }
 
   /**
    * Returns true, if at the current time, the named event could
@@ -755,8 +592,7 @@ public class Associator
    */
   public boolean eventGeneratable(String eventName) {
     if (eventName.compareTo("text") == 0 ||
-        eventName.compareTo("graph") == 0 ||
-        eventName.equals("batchAssociationRules")) {
+        eventName.compareTo("graph") == 0) {
       if (!m_listenees.containsKey("dataSet") &&
 	  !m_listenees.containsKey("trainingSet")) {
 	return false;
@@ -778,16 +614,6 @@ public class Associator
           !(m_Associator instanceof weka.core.Drawable)) {
         return false;
       }
-      
-      if (eventName.equals("batchAssociationRules")) {
-        if (!(m_Associator instanceof AssociationRulesProducer)) {
-          return false;
-        }
-        
-        if (!((AssociationRulesProducer)m_Associator).canProduceRules()) {
-          return false;
-        }
-      }                    
     }
     return true;
   }

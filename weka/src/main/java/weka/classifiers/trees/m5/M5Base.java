@@ -23,7 +23,6 @@
 package weka.classifiers.trees.m5;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -74,7 +73,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public abstract class M5Base 
-  extends AbstractClassifier 
+  extends Classifier 
   implements AdditionalMeasureProducer,
 	     TechnicalInformationHandler {
 

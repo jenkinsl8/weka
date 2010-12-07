@@ -30,7 +30,7 @@ import java.util.Arrays;
  * A vector specialized on integers.
  * 
  * @author Yong Wang
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class  IntVector
   implements Cloneable, RevisionHandler {
@@ -338,7 +338,7 @@ public class  IntVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /** 

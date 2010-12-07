@@ -23,10 +23,9 @@
 package wekaexamples.core;
 
 import weka.core.Attribute;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
-
-import java.util.ArrayList;
 
 /**
  * Generates an weka.core.Instances object with different attribute types.
@@ -43,40 +42,40 @@ public class CreateInstances {
    * @throws Exception	if generation of instances fails
    */
   public static void main(String[] args) throws Exception {
-    ArrayList<Attribute>	atts;
-    ArrayList<Attribute>	attsRel;
-    ArrayList<String>		attVals;
-    ArrayList<String>		attValsRel;
-    Instances			data;
-    Instances			dataRel;
-    double[]			vals;
-    double[]			valsRel;
-    int				i;
+    FastVector      atts;
+    FastVector      attsRel;
+    FastVector      attVals;
+    FastVector      attValsRel;
+    Instances       data;
+    Instances       dataRel;
+    double[]        vals;
+    double[]        valsRel;
+    int             i;
 
     // 1. set up attributes
-    atts = new ArrayList<Attribute>();
+    atts = new FastVector();
     // - numeric
-    atts.add(new Attribute("att1"));
+    atts.addElement(new Attribute("att1"));
     // - nominal
-    attVals = new ArrayList<String>();
+    attVals = new FastVector();
     for (i = 0; i < 5; i++)
-      attVals.add("val" + (i+1));
-    atts.add(new Attribute("att2", attVals));
+      attVals.addElement("val" + (i+1));
+    atts.addElement(new Attribute("att2", attVals));
     // - string
-    atts.add(new Attribute("att3", (ArrayList<String>) null));
+    atts.addElement(new Attribute("att3", (FastVector) null));
     // - date
-    atts.add(new Attribute("att4", "yyyy-MM-dd"));
+    atts.addElement(new Attribute("att4", "yyyy-MM-dd"));
     // - relational
-    attsRel = new ArrayList<Attribute>();
+    attsRel = new FastVector();
     // -- numeric
-    attsRel.add(new Attribute("att5.1"));
+    attsRel.addElement(new Attribute("att5.1"));
     // -- nominal
-    attValsRel = new ArrayList<String>();
+    attValsRel = new FastVector();
     for (i = 0; i < 5; i++)
-      attValsRel.add("val5." + (i+1));
-    attsRel.add(new Attribute("att5.2", attValsRel));
+      attValsRel.addElement("val5." + (i+1));
+    attsRel.addElement(new Attribute("att5.2", attValsRel));
     dataRel = new Instances("att5", attsRel, 0);
-    atts.add(new Attribute("att5", dataRel, 0));
+    atts.addElement(new Attribute("att5", dataRel, 0));
 
     // 2. create Instances object
     data = new Instances("MyRelation", atts, 0);
@@ -98,15 +97,15 @@ public class CreateInstances {
     valsRel = new double[2];
     valsRel[0] = Math.PI + 1;
     valsRel[1] = attValsRel.indexOf("val5.3");
-    dataRel.add(new DenseInstance(1.0, valsRel));
+    dataRel.add(new Instance(1.0, valsRel));
     // -- second instance
     valsRel = new double[2];
     valsRel[0] = Math.PI + 2;
     valsRel[1] = attValsRel.indexOf("val5.2");
-    dataRel.add(new DenseInstance(1.0, valsRel));
+    dataRel.add(new Instance(1.0, valsRel));
     vals[4] = data.attribute(4).addRelation(dataRel);
     // add
-    data.add(new DenseInstance(1.0, vals));
+    data.add(new Instance(1.0, vals));
 
     // second instance
     vals = new double[data.numAttributes()];  // important: needs NEW array!
@@ -124,15 +123,15 @@ public class CreateInstances {
     valsRel = new double[2];
     valsRel[0] = Math.E + 1;
     valsRel[1] = attValsRel.indexOf("val5.4");
-    dataRel.add(new DenseInstance(1.0, valsRel));
+    dataRel.add(new Instance(1.0, valsRel));
     // -- second instance
     valsRel = new double[2];
     valsRel[0] = Math.E + 2;
     valsRel[1] = attValsRel.indexOf("val5.1");
-    dataRel.add(new DenseInstance(1.0, valsRel));
+    dataRel.add(new Instance(1.0, valsRel));
     vals[4] = data.attribute(4).addRelation(dataRel);
     // add
-    data.add(new DenseInstance(1.0, vals));
+    data.add(new Instance(1.0, vals));
 
     // 4. output data
     System.out.println(data);

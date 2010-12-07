@@ -20,13 +20,13 @@
  *
  */
 
+
 package weka.gui;
 
-import weka.gui.scripting.ScriptingPanel;
-
 import java.awt.BorderLayout;
-
-import javax.swing.JFrame;
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  * Creates a very simple command line for invoking the main method of
@@ -36,41 +36,47 @@ import javax.swing.JFrame;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.10 $
  */
 public class SimpleCLI
-  extends JFrame {
+  extends Frame {
   
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = -50661410800566036L;
   
   /**
-   * Constructor.
+   * Constructor
    *
    * @throws Exception if an error occurs
    */
   public SimpleCLI() throws Exception {
-    SimpleCLIPanel	panel;
-
-    panel = new SimpleCLIPanel();
-    
+    setTitle("SimpleCLI");
     setLayout(new BorderLayout());
-    setTitle(panel.getTitle());
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    setIconImage(panel.getIcon().getImage());
-    add(panel);
+    add(new SimpleCLIPanel());
     pack();
     setSize(600, 500);
-    setLocationRelativeTo(null);
     setVisible(true);
   }
 
   /**
-   * Method to start up the simple cli.
+   * Method to start up the simple cli
    *
-   * @param args 	Not used.
+   * @param args array of command line arguments. Not used.
    */
   public static void main(String[] args) {
-    ScriptingPanel.showPanel(new SimpleCLIPanel(), args, 600, 500);
+    
+    try {
+      final SimpleCLI frame = new SimpleCLI();
+      frame.addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent param1) {
+	  System.err.println("window closed");
+	  frame.dispose();
+	}
+      });
+      frame.setVisible(true);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      System.exit(0);
+    }
   }
 }

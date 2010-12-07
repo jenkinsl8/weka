@@ -542,9 +542,9 @@ public class BeanConnection
           final BeanInstance tempTarget = 
             (BeanInstance)receivers.elementAt(i);
           String tName = ""+(i+1)+": " 
-            + ((tempTarget.getBean() instanceof BeanCommon) 
-                ? ((BeanCommon)tempTarget.getBean()).getCustomName() 
-                : tempTarget.getBean().getClass().getName());
+          + ((tempTarget.getBean() instanceof BeanCommon) 
+              ? ((BeanCommon)tempTarget.getBean()).getCustomName() 
+              : tempTarget.getBean().getClass().getName());
           JMenuItem targetItem = new JMenuItem(tName);
           targetItem.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent e) {

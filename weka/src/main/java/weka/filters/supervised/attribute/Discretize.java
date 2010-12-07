@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.ContingencyTables;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -961,7 +960,7 @@ public class Discretize
 	double currentVal = instance.value(i);
 	if (m_CutPoints[i] == null) {
 	  if (instance.isMissing(i)) {
-	    vals[index] = Utils.missingValue();
+	    vals[index] = Instance.missingValue();
 	  } else {
 	    vals[index] = 0;
 	  }
@@ -969,7 +968,7 @@ public class Discretize
 	} else {
 	  if (!m_MakeBinary) {
 	    if (instance.isMissing(i)) {
-	      vals[index] = Utils.missingValue();
+	      vals[index] = Instance.missingValue();
 	    } else {
 	      for (j = 0; j < m_CutPoints[i].length; j++) {
 		if (currentVal <= m_CutPoints[i][j]) {
@@ -982,7 +981,7 @@ public class Discretize
 	  } else {
 	    for (j = 0; j < m_CutPoints[i].length; j++) {
 	      if (instance.isMissing(i)) {
-                vals[index] = Utils.missingValue();
+                vals[index] = Instance.missingValue();
 	      } else if (currentVal <= m_CutPoints[i][j]) {
                 vals[index] = 0;
 	      } else {
@@ -1002,7 +1001,7 @@ public class Discretize
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());

@@ -509,7 +509,7 @@ public class Rule
    */
   public Instances notCoveredInstances() {
     return m_notCovered;
-  }
+  } 
   
   /**
    * Free up memory consumed by the set of instances

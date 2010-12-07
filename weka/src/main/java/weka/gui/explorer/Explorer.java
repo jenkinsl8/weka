@@ -354,9 +354,6 @@ public class Explorer
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     
     LookAndFeel.setLookAndFeel();
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    weka.gui.GenericObjectEditor.determineClasses();
     
     try {
       // uncomment to disable the memory management:

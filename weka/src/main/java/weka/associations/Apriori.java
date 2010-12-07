@@ -40,10 +40,8 @@ import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 
 /**
  <!-- globalinfo-start -->
@@ -132,8 +130,7 @@ import java.util.List;
  */
 public class Apriori 
   extends AbstractAssociator 
-  implements OptionHandler, AssociationRulesProducer, 
-    CARuleMiner, TechnicalInformationHandler {
+  implements OptionHandler, CARuleMiner, TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = 3277498842319212687L;
@@ -211,12 +208,6 @@ public class Apriori
   
   /** Flag indicating whether class association rules are mined. */
   protected boolean m_car;
-  
-  /** 
-   * Treat zeros as missing (rather than a value in their
-   * own right)
-   */
-  protected boolean m_treatZeroAsMissing = false;
 
   /**
    * Returns a string describing this associator
@@ -359,8 +350,6 @@ public class Apriori
     Capabilities result = super.getCapabilities();
     result.disableAll();
 
-    // enable what we can handle
-    
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
@@ -385,7 +374,7 @@ public class Apriori
     double[] confidences, supports;
     int[] indices;
     FastVector[] sortedRuleSet;
-    double necSupport=0;
+    int necSupport=0;
 
     instances = new Instances(instances);
     
@@ -448,20 +437,20 @@ public class Apriori
       m_allTheRules[0] = new FastVector();
       m_allTheRules[1] = new FastVector();
       m_allTheRules[2] = new FastVector();
-      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	m_allTheRules[3] = new FastVector();
 	m_allTheRules[4] = new FastVector();
 	m_allTheRules[5] = new FastVector();
-     // }
+      }
       sortedRuleSet = new FastVector[6];
       sortedRuleSet[0] = new FastVector();
       sortedRuleSet[1] = new FastVector();
       sortedRuleSet[2] = new FastVector();
-      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	sortedRuleSet[3] = new FastVector();
 	sortedRuleSet[4] = new FastVector();
 	sortedRuleSet[5] = new FastVector();
-      //}
+      }
       if(!m_car){
         // Find large itemsets and rules
         findLargeItemSets();
@@ -499,24 +488,22 @@ public class Apriori
 	sortedRuleSet[0].addElement(m_allTheRules[0].elementAt(indices[j-i]));
 	sortedRuleSet[1].addElement(m_allTheRules[1].elementAt(indices[j-i]));
 	sortedRuleSet[2].addElement(m_allTheRules[2].elementAt(indices[j-i]));
-	if (!m_car) {
-	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	  sortedRuleSet[3].addElement(m_allTheRules[3].elementAt(indices[j-i]));
 	  sortedRuleSet[4].addElement(m_allTheRules[4].elementAt(indices[j-i]));
 	  sortedRuleSet[5].addElement(m_allTheRules[5].elementAt(indices[j-i]));
 	}
-	//}
       }
 
       // Sort rules according to their confidence
       m_allTheRules[0].removeAllElements();
       m_allTheRules[1].removeAllElements();
       m_allTheRules[2].removeAllElements();
-      //if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
+      if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	m_allTheRules[3].removeAllElements();
 	m_allTheRules[4].removeAllElements();
 	m_allTheRules[5].removeAllElements();
-      //}
+      }
       confidences = new double[sortedRuleSet[2].size()];
       int sortType = 2 + m_metricType;
 
@@ -529,13 +516,11 @@ public class Apriori
 	m_allTheRules[0].addElement(sortedRuleSet[0].elementAt(indices[i]));
 	m_allTheRules[1].addElement(sortedRuleSet[1].elementAt(indices[i]));
 	m_allTheRules[2].addElement(sortedRuleSet[2].elementAt(indices[i]));
-	//if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
-	if (!m_car) {
+	if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
 	  m_allTheRules[3].addElement(sortedRuleSet[3].elementAt(indices[i]));
 	  m_allTheRules[4].addElement(sortedRuleSet[4].elementAt(indices[i]));
 	  m_allTheRules[5].addElement(sortedRuleSet[5].elementAt(indices[i]));
 	}
-	//}
       }
 
       if (m_verbose) {
@@ -548,8 +533,8 @@ public class Apriori
       else
         m_minSupport = lowerBoundMinSupportToUse;
       
-      
-      necSupport = Math.rint(m_minSupport * (double)m_instances.numInstances());
+      necSupport = Math.round((float)((m_minSupport * 
+			 (double)m_instances.numInstances())+0.5));
 
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules) &&
@@ -618,9 +603,7 @@ public class Apriori
       string9 = "\tIf set class association rules are mined. (default = no)",
       string10 = "\tThe class index. (default = last)",
       stringType = "\tThe metric type by which to rank rules. (default = "
-      +"confidence)",
-      stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as " +
-      		"missing";
+      +"confidence)";
     
 
     FastVector newVector = new FastVector(11);
@@ -652,8 +635,6 @@ public class Apriori
 				    "-V"));
     newVector.addElement(new Option(string9, "A", 0,
 				    "-A"));
-    newVector.addElement(new Option(stringZeroAsMissing, "Z", 0,
-        "-Z"));
     newVector.addElement(new Option(string10, "c", 1,
 				    "-c <the class index>"));
     
@@ -719,7 +700,6 @@ public class Apriori
       minSupportString = Utils.getOption('M', options),
       significanceLevelString = Utils.getOption('S', options),
       classIndexString = Utils.getOption('c',options);
-    
     String metricTypeString = Utils.getOption('T', options);
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
@@ -756,8 +736,6 @@ public class Apriori
     m_outputItemSets = Utils.getFlag('I', options);
     m_car = Utils.getFlag('A', options);
     m_verbose = Utils.getFlag('V', options);
-    m_treatZeroAsMissing = Utils.getFlag('Z', options);
-    
     setRemoveAllMissingCols(Utils.getFlag('R', options));
   }
 
@@ -768,7 +746,7 @@ public class Apriori
    */
   public String [] getOptions() {
 
-    String [] options = new String [21];
+    String [] options = new String [20];
     int current = 0;
 
     if (m_outputItemSets) {
@@ -790,10 +768,6 @@ public class Apriori
       options[current++] = "-A";
     if (m_verbose)
       options[current++] = "-V";
-    
-    if (m_treatZeroAsMissing) {
-      options[current++] = "-Z";
-    }
     options[current++] = "-c"; options[current++] = "" + m_classIndex;
     
     while (current < options.length) {
@@ -859,13 +833,10 @@ public class Apriori
 		  ". " + ((AprioriItemSet)m_allTheRules[0].elementAt(i)).
 		  toString(m_instances) 
 		  + " ==> " + ((AprioriItemSet)m_allTheRules[1].elementAt(i)).
-		  toString(m_instances));
-                  text.append("    " + ((m_metricType == CONFIDENCE) ? "<" : "") 
-                      + "conf:(" + Utils.doubleToString(((Double)m_allTheRules[2].
-                          elementAt(i)).doubleValue(),2)+")" 
-                          + ((m_metricType == CONFIDENCE) ? ">" : ""));   
-		  
-            //if (/*m_metricType != CONFIDENCE ||*/ m_significanceLevel != -1) {
+		  toString(m_instances) +"    conf:("+  
+		  Utils.doubleToString(((Double)m_allTheRules[2].
+					elementAt(i)).doubleValue(),2)+")");
+            if (m_metricType != CONFIDENCE || m_significanceLevel != -1) {
                 text.append((m_metricType == LIFT ? " <" : "")+" lift:("+  
 		    Utils.doubleToString(((Double)m_allTheRules[3].
 					  elementAt(i)).doubleValue(),2)
@@ -882,7 +853,7 @@ public class Apriori
 		    Utils.doubleToString(((Double)m_allTheRules[5].
 					  elementAt(i)).doubleValue(),2)
 		    +")"+(m_metricType == CONVICTION ? ">" : ""));
-            //}
+            }
             text.append('\n');
         }
     }
@@ -914,7 +885,6 @@ public class Apriori
             text.append('\n');
         }
     }
-        
     return text.toString();
   }
   
@@ -1298,36 +1268,6 @@ public class Apriori
   public String verboseTipText() {
     return "If enabled the algorithm will be run in verbose mode.";
   }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String treatZeroAsMissingTipText() {
-    return "If enabled, zero (that is, the first value of a nominal) is "
-    + "treated in the same way as a missing value.";
-  }
-  
-  /**
-   * Sets whether zeros (i.e. the first value of a nominal attribute)
-   * should be treated as missing values.
-   * 
-   * @param z true if zeros should be treated as missing values.
-   */
-  public void setTreatZeroAsMissing(boolean z) {
-    m_treatZeroAsMissing = z;
-  }
-  
-  /**
-   * Gets whether zeros (i.e. the first value of a nominal attribute)
-   * is to be treated int he same way as missing values.
-   * 
-   * @return true if zeros are to be treated like missing values.
-   */
-  public boolean getTreatZeroAsMissing() {
-    return m_treatZeroAsMissing;
-  }
 
   /** 
    * Method that finds all large itemsets for the given set of instances.
@@ -1348,7 +1288,7 @@ public class Apriori
     necSupport = (int)(m_minSupport * (double)m_instances.numInstances()+0.5);
     necMaxSupport = (int)(m_upperBoundMinSupport * (double)m_instances.numInstances()+0.5);
    
-    kSets = AprioriItemSet.singletons(m_instances, m_treatZeroAsMissing);
+    kSets = AprioriItemSet.singletons(m_instances);
     AprioriItemSet.upDateCounters(kSets,m_instances);
     kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
     if (kSets.size() == 0)
@@ -1407,6 +1347,7 @@ public class Apriori
   private void findRulesQuickly() throws Exception {
 
     FastVector[] rules;
+
     // Build rules
     for (int j = 1; j < m_Ls.size(); j++) {
       FastVector currentItemSets = (FastVector)m_Ls.elementAt(j);
@@ -1419,12 +1360,6 @@ public class Apriori
 	  m_allTheRules[0].addElement(rules[0].elementAt(k));
 	  m_allTheRules[1].addElement(rules[1].elementAt(k));
 	  m_allTheRules[2].addElement(rules[2].elementAt(k));
-	  
-	  if (rules.length > 3) {
-	    m_allTheRules[3].addElement(rules[3].elementAt(k));
-	    m_allTheRules[4].addElement(rules[4].elementAt(k));
-	    m_allTheRules[5].addElement(rules[5].elementAt(k));
-	  }
 	}
       }
     }
@@ -1514,108 +1449,6 @@ public class Apriori
    */
   public FastVector[] getAllTheRules() {
     return m_allTheRules;
-  }
-  
-  public AssociationRules getAssociationRules() {
-    List<AssociationRule> rules = new ArrayList<AssociationRule>();
-    
-    if (m_allTheRules != null && m_allTheRules.length > 3) {
-      for (int i = 0 ; i < m_allTheRules[0].size(); i++) {
-        // Construct the Lists for the premise and consequence
-        List<Item> premise = new ArrayList<Item>();
-        List<Item> consequence = new ArrayList<Item>();
-        
-        AprioriItemSet premiseSet = (AprioriItemSet)m_allTheRules[0].get(i);
-        AprioriItemSet consequenceSet = (AprioriItemSet)m_allTheRules[1].get(i);
-        for (int j = 0; j < m_instances.numAttributes(); j++) {
-          if (premiseSet.m_items[j] != -1) {
-            try {
-              Item newItem = new NominalItem(m_instances.attribute(j), premiseSet.m_items[j]);
-              premise.add(newItem);
-            } catch (Exception ex) {
-              ex.printStackTrace();
-            }
-          }
-          
-          if (consequenceSet.m_items[j] != -1) {
-            try {
-              Item newItem = new NominalItem(m_instances.attribute(j), consequenceSet.m_items[j]);
-              consequence.add(newItem);
-            } catch (Exception ex) {
-              ex.printStackTrace();
-            }
-          }
-        }
-        
-        // get the constituents of the metrics
-        int totalTrans = premiseSet.m_totalTransactions;
-        int totalSupport = consequenceSet.m_counter;
-        int premiseSupport = premiseSet.m_counter;
-        // reconstruct consequenceSupport using Lift:
-        double lift = ((Double)m_allTheRules[3].get(i)).doubleValue();
-        double conf = ((Double)m_allTheRules[2].get(i)).doubleValue();
-        int consequenceSupport = (int)((totalTrans * conf) / lift);
-        
-        // map the primary metric
-        DefaultAssociationRule.METRIC_TYPE metric = null;
-        switch(m_metricType) {
-        case CONFIDENCE:
-          metric = DefaultAssociationRule.METRIC_TYPE.CONFIDENCE;
-          break;
-        case LIFT:
-          metric = DefaultAssociationRule.METRIC_TYPE.LIFT;
-          break;
-        case LEVERAGE:
-          metric = DefaultAssociationRule.METRIC_TYPE.LEVERAGE;
-          break;
-        case CONVICTION:
-          metric = DefaultAssociationRule.METRIC_TYPE.CONVICTION;
-          break;
-        }
-        
-        DefaultAssociationRule newRule = 
-          new DefaultAssociationRule(premise, consequence, metric, 
-              premiseSupport, consequenceSupport, totalSupport, totalTrans);
-        
-        rules.add(newRule);
-      }
-    }
-    
-    return new AssociationRules(rules, this);
-  }
-  
-  /**
-   * Gets a list of the names of the metrics output for
-   * each rule. This list should be the same (in terms of
-   * the names and order thereof) as that produced by
-   * AssociationRule.getMetricNamesForRule().
-   * 
-   * @return an array of the names of the metrics available
-   * for each rule learned by this producer.
-   */
-  public String[] getRuleMetricNames() {
-    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length];
-    
-    for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
-      metricNames[i] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
-    }
-    
-    return metricNames;
-  }
-  
-  /**
-   * Returns true if this AssociationRulesProducer can actually
-   * produce rules. Most implementing classes will always return
-   * true from this method (obviously :-)). However, an implementing
-   * class that actually acts as a wrapper around things that may
-   * or may not implement AssociationRulesProducer will want to
-   * return false if the thing they wrap can't produce rules.
-   * 
-   * @return true if this producer can produce rules in its current
-   * configuration
-   */
-  public boolean canProduceRules() {
-    return true;
   }
   
   /**

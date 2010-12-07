@@ -523,9 +523,9 @@ public class CVParameterSelection
 
     if (m_InitOptions != null) {
       try {
-	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
+	m_Classifier.setOptions((String[])m_InitOptions.clone());
 	superOptions = super.getOptions();
-	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
+	m_Classifier.setOptions((String[])m_BestClassifierOptions.clone());
       } catch (Exception e) {
 	throw new RuntimeException("CVParameterSelection: could not set options " +
 				   "in getOptions().");

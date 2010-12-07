@@ -15,7 +15,7 @@
  */
 
 /*
- *    Associator.java
+ *    AbstractAssociator.java
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
@@ -34,7 +34,7 @@ import java.io.Serializable;
 
 /** 
  * Abstract scheme for learning associations. All schemes for learning
- * associations implemement this class
+ * associations extend this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$ 
@@ -112,10 +112,10 @@ public abstract class AbstractAssociator
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities defaultC = new Capabilities(this);
-    defaultC.enableAll();
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
     
-    return defaultC;
+    return result;
   }
   
   /**
@@ -133,7 +133,7 @@ public abstract class AbstractAssociator
    * @param associator	the associator to run
    * @param options	the commandline options
    */
-  public static void runAssociator(Associator associator, String[] options) {
+  protected static void runAssociator(Associator associator, String[] options) {
     try {
       System.out.println(
 	  AssociatorEvaluation.evaluate(associator, options));

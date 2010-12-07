@@ -2390,7 +2390,26 @@ public class VisualizePanel
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
     for (int i = 0; i < XNames.length; i++) {
-      String type = " (" + Attribute.typeToStringShort(inst.attribute(i)) + ")";
+      String type = "";
+      switch (inst.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = " (Nom)";
+	break;
+      case Attribute.NUMERIC:
+	type = " (Num)";
+	break;
+      case Attribute.STRING:
+	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      case Attribute.RELATIONAL:
+	type = " (Rel)";
+	break;
+      default:
+	type = " (???)";
+      }
       XNames[i] = "X: "+ inst.attribute(i).name()+type;
       YNames[i] = "Y: "+ inst.attribute(i).name()+type;
       CNames[i] = "Colour: "+ inst.attribute(i).name()+type;

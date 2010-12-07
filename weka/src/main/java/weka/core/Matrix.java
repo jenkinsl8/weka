@@ -37,7 +37,7 @@ import java.io.Writer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.25 $
  * @deprecated Use <code>weka.core.matrix.Matrix</code> instead - only for
  * backwards compatibility. 
  */
@@ -476,7 +476,7 @@ public class Matrix
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.25 $");
   }
   
   /**

@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class ClustererBeanInfo extends SimpleBeanInfo {
  
@@ -46,11 +46,7 @@ public class ClustererBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(Clusterer.class,
 			       "text",
 			       TextListener.class,
-			       "acceptText"),
-	new EventSetDescriptor(Clusterer.class,
-	                       "configuration",
-	                       ConfigurationListener.class,
-	                       "acceptConfiguration")
+			       "acceptText")
 	};
       return esds;
     } catch (Exception ex) {

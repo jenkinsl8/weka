@@ -28,7 +28,7 @@ import java.util.Vector;
  * Lists the options of an OptionHandler
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class ListOptions
   implements OptionHandler, RevisionHandler {
@@ -42,7 +42,7 @@ public class ListOptions
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
 
     result.addElement(new Option(
         "\tThe class to load.",
@@ -73,9 +73,9 @@ public class ListOptions
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
 
-    result = new Vector<String>();
+    result = new Vector();
     
     result.add("-W");
     result.add(getClassname());
@@ -153,7 +153,7 @@ public class ListOptions
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
   
   /**

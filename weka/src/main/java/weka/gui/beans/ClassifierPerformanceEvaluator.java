@@ -23,15 +23,13 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.gui.explorer.ClassifierErrorsPlotInstances;
-import weka.gui.explorer.ExplorerDefaults;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
@@ -103,49 +101,14 @@ public class ClassifierPerformanceEvaluator
 
   // ----- Stuff for ROC curves
   private boolean m_rocListenersConnected = false;
-  
-  /** for generating plottable instance with predictions appended. */
-  private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
-  
-  protected static Evaluation adjustForInputMappedClassifier(Evaluation eval, 
-      weka.classifiers.Classifier classifier,
-      Instances inst, ClassifierErrorsPlotInstances plotInstances) throws Exception {
-
-    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = 
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-        getModelHeader(new Instances(inst, 0));
-
-      eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
-
-      if (!eval.getHeader().equalHeaders(inst)) {
-        // When the InputMappedClassifier is loading a model, 
-        // we need to make a new dataset that maps the test instances to
-        // the structure expected by the mapped classifier - this is only
-        // to ensure that the ClassifierPlotInstances object is configured
-        // in accordance with what the embeded classifier was trained with
-        Instances mappedClassifierDataset = 
-          ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          getModelHeader(new Instances(mappedClassifierHeader, 0));
-        for (int zz = 0; zz < inst.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          constructMappedInstance(inst.instance(zz));
-          mappedClassifierDataset.add(mapped);
-        }
-        
-        eval.setPriors(mappedClassifierDataset);
-        plotInstances.setInstances(mappedClassifierDataset);
-        plotInstances.setClassifier(classifier);
-        plotInstances.setClassIndex(mappedClassifierDataset.classIndex());
-        plotInstances.setEvaluation(eval);
-      }
-    }
-    
-    return eval;
-  }
+  // Plottable Instances with predictions appended
+  private transient Instances m_predInstances = null;
+  // Actual predictions
+  private transient FastVector m_plotShape = null;
+  private transient FastVector m_plotSize = null;
 
   /**
-   * Accept a classifier to be evaluated.
+   * Accept a classifier to be evaluated
    *
    * @param ce a <code>BatchClassifierEvent</code> value
    */
@@ -161,50 +124,37 @@ public class ClassifierPerformanceEvaluator
 //	      final String oldText = m_visual.getText();
 	      Classifier classifier = ce.getClassifier();
 	      try {
-		// if (ce.getSetNumber() == 1) {
+		//if (ce.getSetNumber() == 1) {
 	        if (ce.getGroupIdentifier() != m_currentBatchIdentifier) {
-		  
-		  if (ce.getTrainSet().getDataSet() == null ||
-		      ce.getTrainSet().getDataSet().numInstances() == 0) {
-		    // we have no training set to estimate majority class
-		    // or mean of target from
-		    m_eval = new Evaluation(ce.getTestSet().getDataSet());
-		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-		    m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
-		    m_PlotInstances.setClassifier(ce.getClassifier());
-		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
-		    m_PlotInstances.setEvaluation(m_eval);
+                  if (ce.getTrainSet().getDataSet() == null ||
+                      ce.getTrainSet().getDataSet().numInstances() == 0) {
+                    // we have no training set to estimate majority class
+                    // or mean of target from
+                    m_eval = new Evaluation(ce.getTestSet().getDataSet());
+                    m_eval.useNoPriors();
+                  } else {
+                    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
+                  }
 
-		    m_eval = adjustForInputMappedClassifier(m_eval, ce.getClassifier(),
-		        ce.getTestSet().getDataSet(), m_PlotInstances);
-		    m_eval.useNoPriors();
-		  } else {
-		    // we can set up with the training set here
-		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
-		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-		    m_PlotInstances.setInstances(ce.getTrainSet().getDataSet());
-		    m_PlotInstances.setClassifier(ce.getClassifier());
-		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
-		    m_PlotInstances.setEvaluation(m_eval);
-		    
-		    m_eval = adjustForInputMappedClassifier(m_eval, ce.getClassifier(),
-                        ce.getTrainSet().getDataSet(), m_PlotInstances);
-		  }
 //		  m_classifier = ce.getClassifier();
-
-		  m_PlotInstances.setUp();
+		  if (m_visualizableErrorListeners.size() > 0) {
+		    m_predInstances = 
+		      weka.gui.explorer.ClassifierPanel.
+		      setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
+		    m_plotShape = new FastVector();
+		    m_plotSize = new FastVector();
+		  }
 		  
 		  m_currentBatchIdentifier = ce.getGroupIdentifier();
-		  m_setsComplete = 0;
+                  m_setsComplete = 0;
 		}
 //		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 	        if (m_setsComplete < ce.getMaxSetNumber()) {
-		  
-		  /*if (ce.getTrainSet().getDataSet() != null &&
-		      ce.getTrainSet().getDataSet().numInstances() > 0) {
-		    // set the priors
-		    m_eval.setPriors(ce.getTrainSet().getDataSet());
-		  } */
+		  if (ce.getTrainSet().getDataSet() != null &&
+                      ce.getTrainSet().getDataSet().numInstances() > 0) {
+                    // set the priors
+                    m_eval.setPriors(ce.getTrainSet().getDataSet());
+                  }
 		  
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
@@ -218,14 +168,16 @@ public class ClassifierPerformanceEvaluator
 		  ce.getTestSet().getDataSet()); */
 		  for (int i = 0; i < ce.getTestSet().getDataSet().numInstances(); i++) {
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
-		    m_PlotInstances.process(temp, ce.getClassifier(), m_eval);
+		    weka.gui.explorer.ClassifierPanel.
+		    processClassifierPrediction(temp, ce.getClassifier(),
+						m_eval, m_predInstances, m_plotShape,
+						m_plotSize);
 		  }
 		  
 		  m_setsComplete++;
 		}
 		
-//		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
-	        if (m_setsComplete == ce.getMaxSetNumber()) {
+		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
                   //		  System.err.println(m_eval.toSummaryString());
 		  // m_resultsString.append(m_eval.toSummaryString());
 		  // m_outText.setText(m_resultsString.toString());
@@ -258,12 +210,17 @@ public class ClassifierPerformanceEvaluator
 
                   // set up visualizable errors
                   if (m_visualizableErrorListeners.size() > 0) {
-                    PlotData2D errorD = m_PlotInstances.getPlotData(
-                	textTitle + " " + textOptions);
+                    PlotData2D errorD = new PlotData2D(m_predInstances);
+                    errorD.setShapeSize(m_plotSize);
+                    errorD.setShapeType(m_plotShape);
+                    errorD.setPlotName(textTitle + " " +textOptions + " ("
+                                       +ce.getTestSet().getDataSet().relationName()
+                                       +")");
+                    errorD.addInstanceNumberAttribute();
                     VisualizableErrorEvent vel = 
-                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this, errorD);
+                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this,
+                                                 errorD);
                     notifyVisualizableErrorListeners(vel);
-                    m_PlotInstances.cleanUp();
                   }
                   
 
@@ -324,7 +281,9 @@ public class ClassifierPerformanceEvaluator
 		  }
 
 		  // save memory
-		  m_PlotInstances = null;
+		  m_predInstances = null;
+		  m_plotShape = null;
+		  m_plotSize = null;
 		}
 	      } catch (Exception ex) {
 	        errorOccurred = true;
@@ -340,7 +299,7 @@ public class ClassifierPerformanceEvaluator
 //		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
-						
+				
 		if (m_logger != null) {
 		  if (errorOccurred) {
 		    m_logger.statusMessage(statusMessagePrefix() 

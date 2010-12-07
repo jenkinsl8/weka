@@ -107,13 +107,13 @@ public class SVMLightSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option>      result;
+    Vector      result;
     
-    result = new Vector<Option>();
+    result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(
         new Option(
@@ -131,10 +131,10 @@ public class SVMLightSaver
    */
   public String[] getOptions(){
     int       	i;
-    Vector<String>    	result;
+    Vector    	result;
     String[]  	options;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     result.add("-c");
     result.add(getClassIndex());

@@ -25,7 +25,6 @@ package weka.datagenerators.clusterers;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -113,7 +112,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.5 $ 
  */
 public class SubspaceCluster 
   extends ClusterGenerator {
@@ -715,7 +714,7 @@ public class SubspaceCluster
     int numAtts = m_NumAttributes;
     if (getClassFlag()) numAtts++;
 
-    example = new DenseInstance(numAtts);
+    example = new Instance(numAtts);
     example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
@@ -775,7 +774,7 @@ public class SubspaceCluster
     int numAtts = m_NumAttributes;
     if (getClassFlag()) numAtts++;
 
-    example = new DenseInstance(numAtts);
+    example = new Instance(numAtts);
     example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
@@ -819,7 +818,7 @@ public class SubspaceCluster
     int numAtts = m_NumAttributes;
     if (getClassFlag()) numAtts++;
 
-    example = new DenseInstance(numAtts);
+    example = new Instance(numAtts);
     example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
@@ -903,7 +902,7 @@ public class SubspaceCluster
     int numAtts = m_NumAttributes;
     if (getClassFlag()) numAtts++;
 
-    example = new DenseInstance(numAtts);
+    example = new Instance(numAtts);
     example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] meanValue = cl.getMeanValue();
@@ -989,7 +988,7 @@ public class SubspaceCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

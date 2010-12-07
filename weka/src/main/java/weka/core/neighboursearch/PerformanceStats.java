@@ -34,7 +34,7 @@ import java.util.Vector;
  * neighbour search (NNS) algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class PerformanceStats
   implements AdditionalMeasureProducer, Serializable, RevisionHandler {
@@ -263,7 +263,7 @@ public class PerformanceStats
    * @return An enumeration of the measure names.
    */
   public Enumeration enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+    Vector newVector = new Vector();
     
     newVector.addElement("measureTotal_points_visited");
     newVector.addElement("measureMean_points_visited");
@@ -339,6 +339,6 @@ public class PerformanceStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

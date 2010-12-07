@@ -36,7 +36,6 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -104,9 +103,6 @@ public class SerializedModelSaver
 
   /** relative path for the directory (relative to the user.dir (startup directory))? */
   private boolean m_useRelativePath = false;
-  
-  /** include relation name in filename */
-  private boolean m_includeRelationName = false;
 
   /**
    * Available file formats. Reflection is used to check if classes
@@ -305,9 +301,6 @@ public class SerializedModelSaver
                 titleString.length());
 
     String prefix = "";
-    String relationName = (m_includeRelationName)
-    ? trainHeader.relationName()
-    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
@@ -327,7 +320,6 @@ public class SerializedModelSaver
     }
     String fileName = "" 
       + prefix
-      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -374,10 +366,6 @@ public class SerializedModelSaver
                   titleString.length());
 
       String prefix = "";
-      String relationName = (m_includeRelationName)
-        ? header.relationName()
-        : "";
-        
       try {
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
@@ -395,7 +383,7 @@ public class SerializedModelSaver
         return;
       }
       
-      String fileName = "" + prefix + relationName + titleString;
+      String fileName = "" + prefix + titleString;
       fileName = sanitizeFilename(fileName);
 
       String dirName = m_directory.getPath();
@@ -436,26 +424,12 @@ public class SerializedModelSaver
       return;
     }
     Instances trainHeader = new Instances(ce.getTrainSet().getDataSet(), 0);
-    
-    // adjust for InputMappedClassifier (if necessary)
-    if (ce.getClassifier() instanceof weka.classifiers.misc.InputMappedClassifier) {
-      try {
-        trainHeader = 
-          ((weka.classifiers.misc.InputMappedClassifier)ce.getClassifier()).
-            getModelHeader(trainHeader);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
     String titleString = ce.getClassifier().getClass().getName();		      
     titleString = titleString.
       substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
 
     String prefix = "";
-    String relationName = (m_includeRelationName)
-    ? trainHeader.relationName()
-    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
@@ -475,7 +449,6 @@ public class SerializedModelSaver
 
     String fileName = "" 
       + prefix
-      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -639,30 +612,6 @@ public class SerializedModelSaver
    */
   public boolean getUseRelativePath() {
     return m_useRelativePath;
-  }
-  
-  /**
-   * Set whether the relation name of the training data
-   * used to create the model should be included as part
-   * of the filename for the serialized model.
-   * 
-   * @param rn true if the relation name should be included
-   * in the file name
-   */
-  public void setIncludeRelationName(boolean rn) {
-    m_includeRelationName = rn;
-  }
-  
-  /**
-   * Get whether the relation name of the training
-   * data used to create the model is to be included
-   * in the filename of the serialized model.
-   * 
-   * @return true if the relation name is to be included
-   * in the file name
-   */
-  public boolean getIncludeRelationName() {
-    return m_includeRelationName;
   }
 
   /**

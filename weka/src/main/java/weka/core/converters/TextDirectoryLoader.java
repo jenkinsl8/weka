@@ -23,8 +23,8 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -37,7 +37,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -122,7 +121,7 @@ public class TextDirectoryLoader
    */  
   public Enumeration listOptions() {
     
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     result.add(new Option(
 	"\tEnables debug output.\n"
@@ -179,7 +178,7 @@ public class TextDirectoryLoader
    * @return the current setting
    */  
   public String[] getOptions() {
-    Vector<String> options = new Vector<String>();
+    Vector options = new Vector();
     
     if (getDebug())
       options.add("-D");
@@ -320,8 +319,8 @@ public class TextDirectoryLoader
     // determine class labels, i.e., sub-dirs
     if (m_structure == null) {
       String directoryPath = getDirectory().getAbsolutePath();
-      ArrayList<Attribute> atts = new ArrayList<Attribute>();
-      ArrayList<String> classes = new ArrayList<String>();
+      FastVector atts = new FastVector();
+      FastVector classes = new FastVector();
       
       File dir = new File(directoryPath);
       String[] subdirs = dir.list();
@@ -329,15 +328,15 @@ public class TextDirectoryLoader
       for (int i = 0; i < subdirs.length; i++) {
 	File subdir = new File(directoryPath + File.separator + subdirs[i]);
 	if (subdir.isDirectory())
-	  classes.add(subdirs[i]);
+	  classes.addElement(subdirs[i]);
       }
       
-      atts.add(new Attribute("text", (ArrayList<String>) null));
+      atts.addElement(new Attribute("text", (FastVector) null));
       if (m_OutputFilename)
-	atts.add(new Attribute("filename", (ArrayList<String>) null));
+	atts.addElement(new Attribute("filename", (FastVector) null));
       // make sure that the name of the class attribute is unlikely to 
       // clash with any attribute created via the StringToWordVector filter
-      atts.add(new Attribute("@@class@@", classes));
+      atts.addElement(new Attribute("@@class@@", classes));
       
       String relName = directoryPath.replaceAll("/", "_");
       relName = relName.replaceAll("\\\\", "_").replaceAll(":", "_");
@@ -361,15 +360,15 @@ public class TextDirectoryLoader
       throw new IOException("No directory/source has been specified");
     
     String directoryPath = getDirectory().getAbsolutePath();
-    ArrayList<String> classes = new ArrayList<String>();
+    FastVector classes = new FastVector();
     Enumeration enm = getStructure().classAttribute().enumerateValues();
     while (enm.hasMoreElements())
-      classes.add((String)enm.nextElement());
+      classes.addElement(enm.nextElement());
     
     Instances data = getStructure();
     int fileCount = 0;
     for (int k = 0; k < classes.size(); k++) {
-      String subdirPath = (String) classes.get(k);
+      String subdirPath = (String) classes.elementAt(k);
       File subdir = new File(directoryPath + File.separator + subdirPath);
       String[] files = subdir.list();
       for (int j = 0; j < files.length; j++) {
@@ -397,7 +396,7 @@ public class TextDirectoryLoader
 	  if (m_OutputFilename)
 	    newInst[1] = (double) data.attribute(1).addStringValue(subdirPath + File.separator + files[j]);
 	  newInst[data.classIndex()] = (double) k;
-	  data.add(new DenseInstance(1.0, newInst));
+	  data.add(new Instance(1.0, newInst));
           is.close();
 	}
 	catch (Exception e) {

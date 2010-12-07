@@ -20,14 +20,14 @@
 
 package weka.core;
 
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * Tests Instances. Run from the command line with:<p/>
@@ -38,19 +38,19 @@ import weka.core.converters.ConverterUtils.DataSource;
  */
 public class InstancesTest
   extends TestCase {
-  
+
   /** the test instances to work with. */
   protected Instances m_Instances;
-  
+
   /**
    * Constructs the <code>InstancesTest</code>.
    *
    * @param name 	the name of the test
    */
-  public InstancesTest(String name) { 
-    super(name); 
+  public InstancesTest(String name) {
+    super(name);
   }
-  
+
   /**
    * Called by JUnit before each test method.
    *
@@ -58,7 +58,7 @@ public class InstancesTest
    */
   protected void setUp() throws Exception {
     super.setUp();
-    
+
     m_Instances = DataSource.read(ClassLoader.getSystemResourceAsStream("weka/core/data/InstancesTest.arff"));
   }
 
@@ -75,56 +75,72 @@ public class InstancesTest
 
   /**
    * Returns the test suite.
-   * 
+   *
    * @return		the test suite
    */
   public static Test suite() {
     return new TestSuite(InstancesTest.class);
   }
-  
+
   /**
    * Tests the creation of a dataset (unique attribute names).
-   * 
+   *
    * @see Instances#Instances(String, ArrayList, int)
    */
   public void testCreationUnique() {
-    Instances			data;
-    ArrayList<Attribute>	atts;
-    String			relName;
-    
+    Instances	data;
+    FastVector	atts;
+    FastVector	labels;
+    String	relName;
+
     relName = "testCreationUnique";
-    atts    = new ArrayList<Attribute>();
-    atts.add(new Attribute("att-numeric_1"));
-    atts.add(new Attribute("att-numeric_2"));
-    atts.add(new Attribute("att-data_1", "yyyy-MM-dd HH:mm"));
-    atts.add(new Attribute("att-nominal_1", new ArrayList<String>(Arrays.asList(new String[]{"1", "2", "3"}))));
-    atts.add(new Attribute("att-nominal_2", new ArrayList<String>(Arrays.asList(new String[]{"yes", "no"}))));
-    atts.add(new Attribute("att-string_1", (ArrayList<String>) null));
+    atts    = new FastVector();
+    atts.addElement(new Attribute("att-numeric_1"));
+    atts.addElement(new Attribute("att-numeric_2"));
+    atts.addElement(new Attribute("att-data_1", "yyyy-MM-dd HH:mm"));
+    labels = new FastVector();
+    labels.addElement("1");
+    labels.addElement("2");
+    labels.addElement("3");
+    atts.addElement(new Attribute("att-nominal_1", labels));
+    labels = new FastVector();
+    labels.addElement("yes");
+    labels.addElement("no");
+    atts.addElement(new Attribute("att-nominal_2", labels));
+    atts.addElement(new Attribute("att-string_1", (FastVector) null));
     data = new Instances(relName, atts, 0);
-    
+
     assertEquals("relation name differs", relName, data.relationName());
     assertEquals("# of attributes differ", atts.size(), data.numAttributes());
   }
-  
+
   /**
    * Tests the creation of a dataset (ambiguous attribute names).
-   * 
+   *
    * @see Instances#Instances(String, ArrayList, int)
    */
   public void testCreationAmbiguous() {
-    Instances			data;
-    ArrayList<Attribute>	atts;
-    String			relName;
-    
+    Instances	data;
+    FastVector	atts;
+    FastVector	labels;
+    String	relName;
+
     relName = "testCreationAmbiguous";
-    atts    = new ArrayList<Attribute>();
-    atts.add(new Attribute("att-numeric_1"));
-    atts.add(new Attribute("att-numeric_1"));
-    atts.add(new Attribute("att-data_1", "yyyy-MM-dd HH:mm"));
-    atts.add(new Attribute("att-nominal_1", new ArrayList<String>(Arrays.asList(new String[]{"1", "2", "3"}))));
-    atts.add(new Attribute("att-nominal_1", new ArrayList<String>(Arrays.asList(new String[]{"yes", "no"}))));
-    atts.add(new Attribute("att-string_1", (ArrayList<String>) null));
-    
+    atts    = new FastVector();
+    atts.addElement(new Attribute("att-numeric_1"));
+    atts.addElement(new Attribute("att-numeric_1"));
+    atts.addElement(new Attribute("att-data_1", "yyyy-MM-dd HH:mm"));
+    labels = new FastVector();
+    labels.addElement("1");
+    labels.addElement("2");
+    labels.addElement("3");
+    atts.addElement(new Attribute("att-nominal_1", labels));
+    labels = new FastVector();
+    labels.addElement("yes");
+    labels.addElement("no");
+    atts.addElement(new Attribute("att-nominal_1", labels));
+    atts.addElement(new Attribute("att-string_1", (FastVector) null));
+
     try {
       data = new Instances(relName, atts, 0);
     }
@@ -133,15 +149,15 @@ public class InstancesTest
     }
     assertNull("dataset created with ambiguous attribute names", data);
   }
-  
+
   /**
    * Tests the copying of the header of a dataset.
-   * 
+   *
    * @see Instances#Instances(Instances, int)
    */
   public void testHeaderCopy() {
     Instances 	data;
-    
+
     data = new Instances(m_Instances, 0);
     assertEquals("# of attributes differ", m_Instances.numAttributes(), data.numAttributes());
     assertEquals("class index differs", m_Instances.classIndex(), data.classIndex());
@@ -151,15 +167,15 @@ public class InstancesTest
     data = new Instances(m_Instances, 0);
     assertEquals("class index differs", m_Instances.classIndex(), data.classIndex());
   }
-  
+
   /**
    * Tests the full copy of a dataset.
-   * 
+   *
    * @see Instances#Instances(Instances)
    */
   public void testFullCopy() {
     Instances data;
-    
+
     data = new Instances(m_Instances);
     assertEquals("# of attributes differ", m_Instances.numAttributes(), data.numAttributes());
     assertEquals("class index differs", m_Instances.classIndex(), data.classIndex());
@@ -169,15 +185,15 @@ public class InstancesTest
     data = new Instances(m_Instances);
     assertEquals("class index differs", m_Instances.classIndex(), data.classIndex());
   }
-  
+
   /**
    * Tests the partial copy of a dataset.
-   * 
+   *
    * @see Instances#Instances(Instances, int, int)
    */
   public void testPartialCopy() {
     Instances data;
-    
+
     data = new Instances(m_Instances, 0, m_Instances.numInstances());
     assertEquals("# of instances differ", m_Instances.numInstances(), data.numInstances());
 
@@ -187,7 +203,7 @@ public class InstancesTest
 
   /**
    * Executes the test from command-line.
-   * 
+   *
    * @param args	ignored
    */
   public static void main(String[] args){

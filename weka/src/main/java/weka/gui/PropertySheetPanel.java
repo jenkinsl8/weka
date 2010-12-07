@@ -25,8 +25,6 @@ package weka.gui;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
 import weka.core.MultiInstanceCapabilitiesHandler;
 
 import java.awt.BorderLayout;
@@ -79,7 +77,7 @@ import javax.swing.SwingConstants;
  * @version $Revision$
  */
 public class PropertySheetPanel extends JPanel
-  implements PropertyChangeListener, EnvironmentHandler {
+  implements PropertyChangeListener {
 
   /** for serialization. */
   private static final long serialVersionUID = -8939835593429918345L;
@@ -293,9 +291,6 @@ public class PropertySheetPanel extends JPanel
   /** The panel holding global info and help, if provided by
       the object being editied. */
   private JPanel m_aboutPanel;
-  
-  /** Environment variables to pass on to any editors that can handle them */
-  private transient Environment m_env;
 
   /**
    * Creates the property sheet panel.
@@ -304,7 +299,6 @@ public class PropertySheetPanel extends JPanel
 
     //    setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-    m_env = Environment.getSystemWide();
   }
 
   /**
@@ -356,10 +350,6 @@ public class PropertySheetPanel extends JPanel
    * @param targ a value of type 'Object'
    */
   public synchronized void setTarget(Object targ) {
-    
-    if (m_env == null) {
-      m_env = Environment.getSystemWide();
-    }
 
     // used to offset the components for the properties of targ
     // if there happens to be globalInfo available in targ
@@ -540,10 +530,6 @@ public class PropertySheetPanel extends JPanel
 	if (editor instanceof GenericObjectEditor) {
 	  ((GenericObjectEditor) editor).setClassType(type);
 	}
-	
-	if (editor instanceof EnvironmentHandler) {
-	  ((EnvironmentHandler)editor).setEnvironment(m_env);
-	}
 
 	// Don't try to set null values:
 	if (value == null) {
@@ -593,14 +579,14 @@ public class PropertySheetPanel extends JPanel
 	  }
 	}	  
 
+	
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
-	} else if (editor.supportsCustomEditor() && (editor.getCustomEditor() instanceof JComponent)) {
-	  view = (JComponent) editor.getCustomEditor();
 	} else if (editor.getTags() != null) {
 	  view = new PropertyValueSelector(editor);
 	} else if (editor.getAsText() != null) {
+	  //String init = editor.getAsText();
 	  view = new PropertyText(editor);
 	} else {
 	  System.err.println("Warning: Property \"" + name 
@@ -664,16 +650,6 @@ public class PropertySheetPanel extends JPanel
     }
 
     validate();
-
-    // sometimes, the calculated dimensions seem to be too small and the
-    // scrollbars show up, though there is still plenty of space on the
-    // screen. hence we increase the dimensions a bit to fix this.
-    Dimension dim = scrollablePanel.getPreferredSize();
-    dim.height += 20;
-    dim.width  += 20;
-    scrollPane.setPreferredSize(dim);
-    validate();
-
     setVisible(true);	
   }
 
@@ -855,17 +831,6 @@ public class PropertySheetPanel extends JPanel
     if (Beans.isInstanceOf(m_Target, Component.class)) {
       ((Component)(Beans.getInstanceOf(m_Target, Component.class))).repaint();
     }
-  }
-
-  /**
-   * Set environment variables to pass on to any editor that
-   * can use them
-   * 
-   * @param env the variables to pass on to individual property
-   * editors
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
   }
 }
 

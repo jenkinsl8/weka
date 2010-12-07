@@ -23,7 +23,6 @@
 package weka.classifiers.evaluation;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -37,7 +36,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public class EvaluationUtils
   implements RevisionHandler {
@@ -148,7 +147,7 @@ public class EvaluationUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }
 

@@ -16,7 +16,7 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002-2010 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,6 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
-import weka.core.WekaPackageManager;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -78,16 +77,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.CustomDisplayStringProvider;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.gui.CheckBoxList.CheckBoxListModel;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -167,78 +156,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
   
-  public static void determineClasses() {
-    try {
-      // make sure we load all packages first!!!
-      WekaPackageManager.loadPackages(false);
-
-
-        
-      EDITOR_PROPERTIES = GenericPropertiesCreator.getGlobalOutputProperties();
-      if (EDITOR_PROPERTIES == null) {
-        // try creating a new one from scratch
-        GenericPropertiesCreator creator = new GenericPropertiesCreator();
-
-        // dynamic approach?
-        if (creator.useDynamic()) {
-          try {
-            creator.execute(false);
-            EDITOR_PROPERTIES = creator.getOutputProperties();
-          }
-          catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Could not determine the properties for the generic object\n"
-                + "editor. This exception was produced:\n"
-                + e.toString(),
-                "GenericObjectEditor",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        }
-        else {
-          // Allow a properties file in the current directory to override
-          try {
-            EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-            java.util.Enumeration keys = 
-              (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-            if (!keys.hasMoreElements()) {
-              throw new Exception("Failed to read a property file for the "
-                  +"generic object editor");
-            }
-          }
-          catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Could not read a configuration file for the generic object\n"
-                +"editor. An example file is included with the Weka distribution.\n"
-                +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-                +"should be placed either in your user home (which is set\n"
-                + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-                + "or the directory that java was started from\n",
-                "GenericObjectEditor",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        }
-      }
-      
-      if (EDITOR_PROPERTIES == null) {
-        JOptionPane.showMessageDialog(
-            null,
-            "Could not initialize the GenericPropertiesCreator. ",
-            "GenericObjectEditor",
-            JOptionPane.ERROR_MESSAGE);
-      }
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(
-          null,
-          "Could not initialize the GenericPropertiesCreator. "
-          + "This exception was produced:\n"
-          + e.toString(),
-          "GenericObjectEditor",
-          JOptionPane.ERROR_MESSAGE);
-    }
-  }
-  
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
    * the classes dynamically (USE_DYNAMIC is TRUE)
@@ -246,7 +163,60 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @see GenericPropertiesCreator
    */
   static {
-    determineClasses();
+
+    try {
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+
+      // dynamic approach?
+      if (creator.useDynamic()) {
+	try {
+	  creator.execute(false);
+	  EDITOR_PROPERTIES = creator.getOutputProperties();
+	}
+	catch (Exception e) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      "Could not determine the properties for the generic object\n"
+	      + "editor. This exception was produced:\n"
+	      + e.toString(),
+	      "GenericObjectEditor",
+	      JOptionPane.ERROR_MESSAGE);
+	}
+      }
+      else {
+	// Allow a properties file in the current directory to override
+	try {
+	  EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+	  java.util.Enumeration keys = 
+	    (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+	  if (!keys.hasMoreElements()) {
+	    throw new Exception("Failed to read a property file for the "
+		+"generic object editor");
+	  }
+	}
+	catch (Exception ex) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      "Could not read a configuration file for the generic object\n"
+	      +"editor. An example file is included with the Weka distribution.\n"
+	      +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+	      +"should be placed either in your user home (which is set\n"
+	      + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+	      + "or the directory that java was started from\n",
+	      "GenericObjectEditor",
+	      JOptionPane.ERROR_MESSAGE);
+	}
+      }
+    }
+    catch (Exception e) {
+      JOptionPane.showMessageDialog(
+	  null,
+	  "Could not initialize the GenericPropertiesCreator. "
+	  + "This exception was produced:\n"
+	  + e.toString(),
+	  "GenericObjectEditor",
+	  JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   /**
@@ -1034,29 +1004,21 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (enm.hasMoreElements()) {
       name  = enm.nextElement().toString();
       value = props.getProperty(name, "");
-      
-      registerEditor(name, value);
-    }
-  }
-  
-  public static void registerEditor(String name, String value) {
-    Class              baseCls;
-    Class               cls;
-    
-    try {
-      // array class?
-      if (name.endsWith("[]")) {
-        baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
-        cls = Array.newInstance(baseCls, 1).getClass();
+      try {
+	// array class?
+	if (name.endsWith("[]")) {
+	  baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
+	  cls = Array.newInstance(baseCls, 1).getClass();
+	}
+	else {
+	  cls = Class.forName(name);
+	}
+	// register
+	PropertyEditorManager.registerEditor(cls, Class.forName(value));
       }
-      else {
-        cls = Class.forName(name);
+      catch (Exception e) {
+	System.err.println("Problem registering " + name + "/" + value + ": " + e);
       }
-      // register
-      PropertyEditorManager.registerEditor(cls, Class.forName(value));
-    }
-    catch (Exception e) {
-      System.err.println("Problem registering " + name + "/" + value + ": " + e);
     }
   }
 
@@ -1389,19 +1351,20 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     if (m_Enabled) {
       String rep;
       if (m_Object != null) {
-	if (m_Object instanceof CustomDisplayStringProvider) {
-	  rep = ((CustomDisplayStringProvider) m_Object).toDisplay();
-	}
-	else {
-	  rep = m_Object.getClass().getName();
-	  int dotPos = rep.lastIndexOf('.');
-	  if (dotPos != -1) {
-	    rep = rep.substring(dotPos + 1);
-	  }
-	}
+	rep = m_Object.getClass().getName();
       } else {
 	rep = "None";
       }
+      int dotPos = rep.lastIndexOf('.');
+      if (dotPos != -1) {
+	rep = rep.substring(dotPos + 1);
+      }
+      /*
+      if (m_Object instanceof OptionHandler) {
+	rep += " " + Utils.joinOptions(((OptionHandler)m_Object)
+				       .getOptions());
+      }
+      */
       java.awt.Font originalFont = gfx.getFont();
       gfx.setFont(originalFont.deriveFont(java.awt.Font.BOLD));
 
@@ -1411,7 +1374,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       int repwidth = fm.stringWidth(rep);
 
       gfx.setFont(originalFont);
-      if ((m_Object instanceof OptionHandler) && !(m_Object instanceof CustomDisplayStringProvider)) {
+      if (m_Object instanceof OptionHandler) {
 	gfx.drawString(" " + Utils.joinOptions(((OptionHandler)m_Object).getOptions()),
 					       repwidth + 2, fm.getAscent() + vpad);
       }
@@ -1598,6 +1561,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
+	    /*if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
+	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
+	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
+	        return;
+	      }
+	    } */
 	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
