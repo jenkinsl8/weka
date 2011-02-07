@@ -44,9 +44,6 @@ public class C45PruneableClassifierTree
   
   /** True if the tree is to be pruned. */
   boolean m_pruneTheTree = false;
-  
-  /** True if the tree is to be collapsed. */
-  boolean m_collapseTheTree = false;
 
   /** The confidence factor for pruning. */
   float m_CF = 0.25f;
@@ -71,8 +68,7 @@ public class C45PruneableClassifierTree
   public C45PruneableClassifierTree(ModelSelection toSelectLocModel,
 				    boolean pruneTree,float cf,
 				    boolean raiseTree,
-				    boolean cleanup,
-                                    boolean collapseTree)
+				    boolean cleanup)
        throws Exception {
 
     super(toSelectLocModel);
@@ -81,7 +77,6 @@ public class C45PruneableClassifierTree
     m_CF = cf;
     m_subtreeRaising = raiseTree;
     m_cleanup = cleanup;
-    m_collapseTheTree = collapseTree;
   }
 
   /**
@@ -125,9 +120,7 @@ public class C45PruneableClassifierTree
     data.deleteWithMissingClass();
     
    buildTree(data, m_subtreeRaising);
-   if (m_collapseTheTree) {
-     collapse();
-   }
+   collapse();
    if (m_pruneTheTree) {
      prune();
    }
@@ -235,7 +228,7 @@ public class C45PruneableClassifierTree
     
     C45PruneableClassifierTree newTree = 
       new C45PruneableClassifierTree(m_toSelectModel, m_pruneTheTree, m_CF,
-				     m_subtreeRaising, m_cleanup, m_collapseTheTree);
+				     m_subtreeRaising, m_cleanup);
     newTree.buildTree((Instances)data, m_subtreeRaising);
 
     return newTree;

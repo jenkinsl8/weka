@@ -23,11 +23,9 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
-import weka.core.DenseInstance;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -267,7 +265,6 @@ public class BoundaryVisualizer
 
   // plot area dimensions
   protected int m_plotAreaWidth = 384;
-  //protected int m_plotAreaHeight = 384;
   protected int m_plotAreaHeight = 384;
 
   /** the plotting panel */
@@ -645,7 +642,7 @@ public class BoundaryVisualizer
 			if (m_trainingInstances != null)
 				newTrainingData = new Instances(m_trainingInstances);
 			if (m_classifier != null)
-				newClassifier = AbstractClassifier.makeCopy(m_classifier);
+				newClassifier = Classifier.makeCopy(m_classifier);
 			createNewVisualizerWindow(newClassifier, newTrainingData);
 		} catch (Exception ex) {  ex.printStackTrace();}
 	}
@@ -885,7 +882,26 @@ public class BoundaryVisualizer
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
       classAttNames[i] = m_trainingInstances.attribute(i).name();
-      String type = " (" + Attribute.typeToStringShort(m_trainingInstances.attribute(i)) + ")";
+      String type = "";
+      switch (m_trainingInstances.attribute(i).type()) {
+	case Attribute.NOMINAL:
+	  type = " (Nom)";
+	  break;
+	case Attribute.NUMERIC:
+	  type = " (Num)";
+	  break;
+	case Attribute.STRING:
+	  type = " (Str)";
+	  break;
+	case Attribute.DATE:
+	  type = " (Dat)";
+	  break;
+	case Attribute.RELATIONAL:
+	  type = " (Rel)";
+	  break;
+	default:
+	  type = " (???)";
+      }
       classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement("X: "+classAttNames[i]);
@@ -1210,7 +1226,7 @@ public class BoundaryVisualizer
 			argsR[j-2] = args[j];
 			}
 		}
-		Classifier c = AbstractClassifier.forName(args[1], argsR);
+		Classifier c = Classifier.forName(args[1], argsR);
 		
 		System.err.println("Loading instances from : "+args[0]);
 		java.io.Reader r = new java.io.BufferedReader(

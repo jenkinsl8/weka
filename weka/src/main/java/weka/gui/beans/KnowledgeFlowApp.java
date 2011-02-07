@@ -136,32 +136,13 @@ public class KnowledgeFlowApp
   /** Contains the editor properties */
   protected static Properties BEAN_PROPERTIES;
 
-  private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES = 
-    new ArrayList<Properties>();
+  private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES;
 
   /**
    * Holds the details needed to construct button bars for various supported
    * classes of weka algorithms/tools 
    */
   private static Vector TOOLBARS = new Vector();
-  
-  public static void addToPluginBeanProps(File beanPropsFile) throws Exception {
-    Properties tempP = new Properties();
-    
-    tempP.load(new FileInputStream(beanPropsFile));
-    if (!BEAN_PLUGINS_PROPERTIES.contains(tempP)) {
-      BEAN_PLUGINS_PROPERTIES.add(tempP);
-    }
-  }
-  
-  public static void removeFromPluginBeanProps(File beanPropsFile) throws Exception {
-    Properties tempP = new Properties();
-    
-    tempP.load(new FileInputStream(beanPropsFile));
-    if (BEAN_PLUGINS_PROPERTIES.contains(tempP)) {
-      BEAN_PLUGINS_PROPERTIES.remove(tempP);
-    }
-  }
 
   /**
    * Loads KnowledgeFlow properties and any plugins (adds jars to
@@ -169,7 +150,6 @@ public class KnowledgeFlowApp
    */
   public static void loadProperties() {
     if (BEAN_PROPERTIES == null) {
-      weka.core.WekaPackageManager.loadPackages(false);
       System.out.println("[KnowledgeFlow] Loading properties and plugins...");
       /** Loads the configuration property file */
       //  static {
@@ -198,7 +178,7 @@ public class KnowledgeFlowApp
       File pluginDir = new File(System.getProperty("user.home")
                                 +File.separator+".knowledgeFlow"
                                 +File.separator+"plugins");
-      /*if (pluginDir.exists() && pluginDir.isDirectory()) {
+      if (pluginDir.exists() && pluginDir.isDirectory()) {
         BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
         // How many sub-dirs are there?
         File[] contents = pluginDir.listFiles();
@@ -234,15 +214,8 @@ public class KnowledgeFlowApp
       } else {
         // make the plugin directory for the user
         pluginDir.mkdir();
-      } */
+      }
     }
-  }
-  
-  public static void reInitialize() {
-    if (BEAN_PROPERTIES == null) {
-      loadProperties();
-    }
-    init();
   }
 
   /**
@@ -253,25 +226,19 @@ public class KnowledgeFlowApp
     System.out.println("[KnowledgeFlow] Initializing KF...");
 
     try {
-      TOOLBARS = new Vector();
-      
       TreeMap wrapList = new TreeMap();
-      Properties GEOProps = GenericPropertiesCreator.getGlobalOutputProperties();
-      
-      if (GEOProps == null) {
-        GenericPropertiesCreator creator = new GenericPropertiesCreator();
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+      Properties GEOProps = null;
 
-
-        if (creator.useDynamic()) {
-          creator.execute(false);
-          /* now process the keys in the GenericObjectEditor.props. For each
+      if (creator.useDynamic()) {
+        creator.execute(false);
+        /* now process the keys in the GenericObjectEditor.props. For each
            key that has an entry in the Beans.props associating it with a
            bean component a button tool bar will be created */
-          GEOProps = creator.getOutputProperties();
-        } else {
-          // Read the static information from the GenericObjectEditor.props
-          GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
-        }
+        GEOProps = creator.getOutputProperties();
+      } else {
+        // Read the static information from the GenericObjectEditor.props
+        GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
       }
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
@@ -319,7 +286,7 @@ public class KnowledgeFlowApp
             weka.gui.HierarchyPropertyParser hpp = 
               new weka.gui.HierarchyPropertyParser();
             hpp.build(classes, ", ");
-            //System.err.println(hpp.showTree());
+            //            System.err.println(hpp.showTree());
             hpps.put(root, hpp);
           }
 
@@ -3015,10 +2982,6 @@ public class KnowledgeFlowApp
     }
 
     // end modifications 
-  }
-  
-  public static void disposeSingleton() {
-    m_knowledgeFlow = null;
   }
 
   /**

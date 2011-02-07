@@ -100,7 +100,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.28 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -423,24 +423,8 @@ public class FilteredClassifier
     t.start();
     */
     if (!m_Filter.input(instance)) {
-      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
-        throw new Exception("Filter didn't make the test instance"
-            + " immediately available!");
-      } else {
-        // filter has consumed the instance (e.g. RemoveWithValues
-        // may do this). We will indicate no prediction for this
-        // instance
-        double[] unclassified = null;
-        if (instance.classAttribute().isNumeric()) {
-          unclassified = new double[1];
-          unclassified[0] = Utils.missingValue();
-        } else {
-          // all zeros
-          unclassified = new double[instance.classAttribute().numValues()];
-        }
-        m_Filter.batchFinished();
-        return unclassified;
-      }
+      throw new Exception("Filter didn't make the test instance"
+			  + " immediately available!");
     }
     m_Filter.batchFinished();
     Instance newInstance = m_Filter.output();
@@ -481,7 +465,7 @@ public class FilteredClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 
   /**
@@ -490,7 +474,7 @@ public class FilteredClassifier
    * @param argv should contain the following arguments:
    * -t training file [-T test file] [-c class index]
    */
-  public static void main(String [] argv)  {
+  public static void main(String [] argv) {
     runClassifier(new FilteredClassifier(), argv);
   }
 }

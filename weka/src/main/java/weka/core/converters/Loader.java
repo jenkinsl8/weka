@@ -36,7 +36,7 @@ import java.io.Serializable;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public interface Loader
   extends Serializable, RevisionHandler {

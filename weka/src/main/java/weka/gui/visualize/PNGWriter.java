@@ -40,18 +40,18 @@ import javax.swing.JComponent;
 public class PNGWriter
   extends JComponentWriter {
 
-  /** the background color. */
+  /** the background color */
   protected Color m_Background;
   
   /**
-   * initializes the object.
+   * initializes the object 
    */
   public PNGWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component.
+   * initializes the object with the given Component
    * 
    * @param c		the component to print in the output format
    */
@@ -60,7 +60,7 @@ public class PNGWriter
   }
 
   /**
-   * initializes the object with the given Component and filename.
+   * initializes the object with the given Component and filename
    * 
    * @param c		the component to print in the output format
    * @param f		the file to store the output in
@@ -70,7 +70,7 @@ public class PNGWriter
   }
   
   /**
-   * further initialization.
+   * further initialization 
    */
   public void initialize() {
     super.initialize();
@@ -99,7 +99,7 @@ public class PNGWriter
   }
   
   /**
-   * returns the current background color.
+   * returns the current background color
    * 
    * @return		the current background color
    */
@@ -108,7 +108,7 @@ public class PNGWriter
   }
   
   /**
-   * sets the background color to use in creating the PNG.
+   * sets the background color to use in creating the JPEG
    * 
    * @param c 		the color to use for background
    */
@@ -117,7 +117,7 @@ public class PNGWriter
   }
   
   /**
-   * generates the actual output.
+   * generates the actual output
    * 
    * @throws Exception	if something goes wrong
    */
@@ -137,7 +137,7 @@ public class PNGWriter
   }
   
   /**
-   * for testing only.
+   * for testing only 
    * 
    * @param args 	the commandline arguments
    * @throws Exception 	if something goes wrong

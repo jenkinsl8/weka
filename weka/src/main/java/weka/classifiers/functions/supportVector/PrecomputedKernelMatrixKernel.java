@@ -21,19 +21,21 @@
  */
 package weka.classifiers.functions.supportVector;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.matrix.Matrix;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
-import java.io.File;
-import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Vector;
+
+import java.io.FileReader;
+import java.io.File;
 
 /**
  *
@@ -234,7 +236,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
   /**
    * Sets the file holding the kernel matrix
    * 
-   * @param f	the file holding the matrix
+   * @param value	the exponent value
    */
   public void setKernelMatrixFile(File f) {
     m_KernelMatrixFile = f;

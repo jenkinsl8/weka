@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class CheckGOE
   extends Check {
@@ -96,11 +96,11 @@ public class CheckGOE
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(new Option(
         "\tSkipped properties.\n"
@@ -164,11 +164,11 @@ public class CheckGOE
    * @return 		an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>        result;
+    Vector        result;
     String[]      options;
     int           i;
     
-    result = new Vector<String>();
+    result = new Vector();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -267,7 +267,7 @@ public class CheckGOE
    */
   public boolean checkGlobalInfo() {
     boolean 	result;
-    Class<?>	cls;
+    Class	cls;
     
     print("Global info...");
     
@@ -298,7 +298,7 @@ public class CheckGOE
    */
   public boolean checkToolTips() {
     boolean 			result;
-    Class<?>			cls;
+    Class			cls;
     BeanInfo			info;
     PropertyDescriptor[]	desc;
     int				i;
@@ -375,7 +375,7 @@ public class CheckGOE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /** 

@@ -200,9 +200,9 @@ public class LogWindow
       }
 
       if (x == null)
-	print("null");
+        print("null");
       else
-	print(x.toString());
+        print(x.toString());
     }
 
     /**

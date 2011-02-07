@@ -27,7 +27,6 @@ import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -54,10 +53,8 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -C
- *  Center (rather than standardize) the
- *  data and compute PCA using the covariance (rather
- *   than the correlation) matrix.</pre>
+ * <pre> -D
+ *  Don't normalize input data.</pre>
  * 
  * <pre> -R
  *  Retain enough PC attributes to account 
@@ -144,6 +141,9 @@ public class PrincipalComponents
 
   /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
+  
+  /** normalize the input data? */
+  //private boolean m_normalize = true;
 
   /** the amount of variance to cover in the original data when
       retaining the best n PC's */
@@ -210,10 +210,8 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -C
-   *  Center (rather than standardize) the
-   *  data and compute PCA using the covariance (rather
-   *   than the correlation) matrix.</pre>
+   * <pre> -D
+   *  Don't normalize input data.</pre>
    * 
    * <pre> -R
    *  Retain enough PC attributes to account 
@@ -709,7 +707,7 @@ public class PrincipalComponents
         if (i == j) {
           m_correlation[i][j] = 1.0;
             // store the standard deviation
-          m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
+            m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
         } else {
           corr = Utils.correlation(att1,att2,m_numInstances);
           m_correlation[i][j] = corr;
@@ -852,7 +850,7 @@ public class PrincipalComponents
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new DenseInstance(inst.weight(), newVals);
+      return new Instance(inst.weight(), newVals);
     }      
   }
 
@@ -875,7 +873,7 @@ public class PrincipalComponents
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: header's don't match: "
                           +"PrincipalComponents\n"
-                          + instance.dataset().equalHeadersMsg(m_trainHeader));
+                          + "Can't convert instance: header's don't match.");
     }
 
     m_replaceMissingFilter.input(tempInst);
@@ -930,14 +928,14 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new DenseInstance(instance.weight(), newVals);
+        return new Instance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
         return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
                                                             newVals));
       } else {
-        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
+        return convertInstanceToOriginal(new Instance(instance.weight(),
                                                       newVals));
       }
     }
@@ -1057,4 +1055,3 @@ public class PrincipalComponents
     runEvaluator(new PrincipalComponents(), argv);
   }
 }
-

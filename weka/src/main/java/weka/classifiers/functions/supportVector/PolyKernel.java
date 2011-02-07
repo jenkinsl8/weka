@@ -88,16 +88,6 @@ public class PolyKernel
   public PolyKernel() {
     super();
   }
-
-  /**
-   * Frees the cache used by the kernel.
-   */
-  public void clean() {
-    if (getExponent() == 1.0) {
-      m_data = null;
-    }    
-    super.clean();
-  }
   
   /**
    * Creates a new <code>PolyKernel</code> instance.

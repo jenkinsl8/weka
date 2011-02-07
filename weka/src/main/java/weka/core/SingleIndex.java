@@ -16,7 +16,7 @@
 
 /*
  *    SingleIndex.java
- *    Copyright (C) 2003-2010 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,18 +38,18 @@ import java.io.Serializable;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class SingleIndex
-  implements Serializable, RevisionHandler, CustomDisplayStringProvider {
+  implements Serializable, RevisionHandler {
   
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = 5285169134430839303L;
 
-  /** Record the string representation of the number. */
+  /** Record the string representation of the number */
   protected /*@non_null spec_public@*/ String m_IndexString = "";
 
-  /** The selected index. */
+  /** The selected index */
   protected /*@ spec_public @*/ int m_SelectedIndex = -1;
 
   /** Store the maximum value permitted. -1 indicates that no upper
@@ -98,7 +98,7 @@ public class SingleIndex
   }
 
   /**
-   * Gets the string representing the selected range of values.
+   * Gets the string representing the selected range of values
    *
    * @return the range selection string
    */
@@ -144,7 +144,7 @@ public class SingleIndex
   }
 
   /**
-   * Gets the selected index.
+   * Gets the selected index
    *
    * @return the selected index
    * @throws RuntimeException if the upper limit of the index hasn't been defined
@@ -178,7 +178,7 @@ public class SingleIndex
   }
 
   /**
-   * Translates a single string selection into it's internal 0-based equivalent.
+   * Translates a single string selection into it's internal 0-based equivalent
    */
   //@ assignable m_SelectedIndex, m_IndexString;
   protected void setValue() {
@@ -209,16 +209,7 @@ public class SingleIndex
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-
-  /**
-   * Returns the custom display string.
-   * 
-   * @return		the string
-   */
-  public String toDisplay() {
-    return getSingleIndex();
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

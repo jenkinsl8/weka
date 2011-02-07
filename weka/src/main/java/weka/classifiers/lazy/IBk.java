@@ -23,7 +23,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
@@ -114,7 +113,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class IBk 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler,
              TechnicalInformationHandler, AdditionalMeasureProducer {
 
@@ -164,9 +163,6 @@ public class IBk
    * error when cross-validating on numeric prediction tasks.
    */
   protected boolean m_MeanSquared;
-  
-  /** Default ZeroR model to use when there are no training instances */
-  protected ZeroR m_defaultModel;
 
   /** no weighting. */
   public static final int WEIGHT_NONE = 1;
@@ -186,6 +182,9 @@ public class IBk
 
   /** The number of attributes the contribute to a prediction. */
   protected double m_NumAttributesUsed;
+  
+  /** Default ZeroR model to use when there are no training instances */
+  protected ZeroR m_defaultModel;
   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -530,7 +529,7 @@ public class IBk
   public void updateClassifier(Instance instance) throws Exception {
 
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (instance.classIsMissing()) {
       return;
@@ -801,12 +800,14 @@ public class IBk
     
     if (m_Train.numInstances() == 0) {
       return "Warning: no training instances - ZeroR model used.";
-    }
+    }    
 
     if (!m_kNNValid && m_CrossValidate) {
       crossValidate();
     }
     
+    
+
     String result = "IB1 instance-based classifier\n" +
       "using " + m_kNN;
 

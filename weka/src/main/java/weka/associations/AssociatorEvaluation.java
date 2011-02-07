@@ -38,7 +38,7 @@ import java.io.FileWriter;
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
 public class AssociatorEvaluation
   implements RevisionHandler {
@@ -169,7 +169,7 @@ public class AssociatorEvaluation
       writer.flush();
       writer.close();
     }
-    
+
     return results;
   }
   
@@ -265,7 +265,7 @@ public class AssociatorEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

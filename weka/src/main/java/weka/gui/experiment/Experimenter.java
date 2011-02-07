@@ -112,12 +112,7 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-    
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    weka.gui.GenericObjectEditor.determineClasses();
-    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");    
     LookAndFeel.setLookAndFeel();
     
     try {

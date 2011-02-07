@@ -22,6 +22,57 @@
 
 package weka.gui.explorer;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
+import weka.classifiers.evaluation.CostCurve;
+import weka.classifiers.evaluation.MarginCurve;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.converters.IncrementalConverter;
+import weka.core.converters.Loader;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.pmml.PMMLFactory;
+import weka.core.pmml.PMMLModel;
+import weka.gui.CostMatrixEditor;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.beans.CostBenefitAnalysis;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.Plot2D;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.VisualizePlugin;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -77,62 +128,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
-import weka.classifiers.evaluation.CostCurve;
-import weka.classifiers.evaluation.MarginCurve;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.classifiers.evaluation.output.prediction.AbstractOutput;
-import weka.classifiers.evaluation.output.prediction.Null;
-import weka.classifiers.pmml.consumer.PMMLClassifier;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.converters.IncrementalConverter;
-import weka.core.converters.Loader;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.pmml.PMMLFactory;
-import weka.core.pmml.PMMLModel;
-import weka.gui.CostMatrixEditor;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.SetInstancesPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.beans.CostBenefitAnalysis;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.ErrorVisualizePlugin;
-import weka.gui.visualize.plugins.GraphVisualizePlugin;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.VisualizePlugin;
-
 /** 
  * This panel allows the user to select and configure a classifier, set the
  * attribute of the current dataset to be used as the class, and evaluate
@@ -150,113 +145,119 @@ public class ClassifierPanel
   extends JPanel
   implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
    
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = 6959973704963624003L;
 
-  /** the parent frame. */
+  /** the parent frame */
   protected Explorer m_Explorer = null;
 
-  /** The filename extension that should be used for model files. */
+  /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
   
-  /** The filename extension that should be used for PMML xml files. */
+  /** The filename extension that should be used for PMML xml files */
   public static String PMML_FILE_EXTENSION = ".xml";
 
-  /** Lets the user configure the classifier. */
+  /** Lets the user configure the classifier */
   protected GenericObjectEditor m_ClassifierEditor =
     new GenericObjectEditor();
 
-  /** The panel showing the current classifier selection. */
+  /** The panel showing the current classifier selection */
   protected PropertyPanel m_CEPanel = new PropertyPanel(m_ClassifierEditor);
   
-  /** The output area for classification results. */
+  /** The output area for classification results */
   protected JTextArea m_OutText = new JTextArea(20, 40);
 
-  /** The destination for log/status messages. */
+  /** The destination for log/status messages */
   protected Logger m_Log = new SysErrLog();
 
-  /** The buffer saving object for saving output. */
+  /** The buffer saving object for saving output */
   SaveBuffer m_SaveOut = new SaveBuffer(m_Log, this);
 
-  /** A panel controlling results viewing. */
+  /** A panel controlling results viewing */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
-  /** Lets the user select the class column. */
+  /** Lets the user select the class column */
   protected JComboBox m_ClassCombo = new JComboBox();
 
-  /** Click to set test mode to cross-validation. */
+  /** Click to set test mode to cross-validation */
   protected JRadioButton m_CVBut = new JRadioButton("Cross-validation");
 
-  /** Click to set test mode to generate a % split. */
+  /** Click to set test mode to generate a % split */
   protected JRadioButton m_PercentBut = new JRadioButton("Percentage split");
 
-  /** Click to set test mode to test on training data. */
+  /** Click to set test mode to test on training data */
   protected JRadioButton m_TrainBut = new JRadioButton("Use training set");
 
-  /** Click to set test mode to a user-specified test set. */
+  /** Click to set test mode to a user-specified test set */
   protected JRadioButton m_TestSplitBut =
     new JRadioButton("Supplied test set");
 
   /** Check to save the predictions in the results list for visualizing
-      later on. */
+      later on */
   protected JCheckBox m_StorePredictionsBut = 
     new JCheckBox("Store predictions for visualization");
 
-  /** Check to output the model built from the training data. */
+  /** Check to output the model built from the training data */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
-  /** Check to output true/false positives, precision/recall for each class. */
+  /** Check to output true/false positives, precision/recall for each class */
   protected JCheckBox m_OutputPerClassBut =
     new JCheckBox("Output per-class stats");
 
-  /** Check to output a confusion matrix. */
+  /** Check to output a confusion matrix */
   protected JCheckBox m_OutputConfusionBut =
     new JCheckBox("Output confusion matrix");
 
-  /** Check to output entropy statistics. */
+  /** Check to output entropy statistics */
   protected JCheckBox m_OutputEntropyBut =
     new JCheckBox("Output entropy evaluation measures");
 
-  /** Lets the user configure the ClassificationOutput. */
-  protected GenericObjectEditor m_ClassificationOutputEditor = new GenericObjectEditor(true);
-
-  /** ClassificationOutput configuration. */
-  protected PropertyPanel m_ClassificationOutputPanel = new PropertyPanel(m_ClassificationOutputEditor);
+  /** Check to output text predictions */
+  protected JCheckBox m_OutputPredictionsTextBut =
+    new JCheckBox("Output predictions");
   
-  /** the range of attributes to output. */
+  /** Lists indices for additional attributes to output */
+  protected JTextField m_OutputAdditionalAttributesText =
+    new JTextField("", 10);
+
+  /** Label for the text field with additional attributes in the output */
+  protected JLabel m_OutputAdditionalAttributesLab = 
+    new JLabel("Output additional attributes");
+  
+  /** the range of attributes to output */
   protected Range m_OutputAdditionalAttributesRange = null;
   
-  /** Check to evaluate w.r.t a cost matrix. */
+  /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
     new JCheckBox("Cost-sensitive evaluation");
 
-  /** for the cost matrix. */
+  /** for the cost matrix */
   protected JButton m_SetCostsBut = new JButton("Set...");
 
-  /** Label by where the cv folds are entered. */
+  /** Label by where the cv folds are entered */
   protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
 
-  /** The field where the cv folds are entered. */
+  /** The field where the cv folds are entered */
   protected JTextField m_CVText = new JTextField("10", 3);
 
-  /** Label by where the % split is entered. */
+  /** Label by where the % split is entered */
   protected JLabel m_PercentLab = new JLabel("%", SwingConstants.RIGHT);
 
-  /** The field where the % split is entered. */
+  /** The field where the % split is entered */
   protected JTextField m_PercentText = new JTextField("66", 3);
 
-  /** The button used to open a separate test dataset. */
+  /** The button used to open a separate test dataset */
   protected JButton m_SetTestBut = new JButton("Set...");
 
-  /** The frame used to show the test set selection panel. */
+  /** The frame used to show the test set selection panel */
   protected JFrame m_SetTestFrame;
 
-  /** The frame used to show the cost matrix editing panel. */
+  /** The frame used to show the cost matrix editing panel */
   protected PropertyDialog m_SetCostsFrame;
 
   /**
    * Alters the enabled/disabled status of elements associated with each
-   * radio button.
+   * radio button
    */
   ActionListener m_RadioListener = new ActionListener() {
     public void actionPerformed(ActionEvent e) {
@@ -264,61 +265,58 @@ public class ClassifierPanel
     }
   };
 
-  /** Button for further output/visualize options. */
+  /** Button for further output/visualize options */
   JButton m_MoreOptions = new JButton("More options...");
 
-  /** User specified random seed for cross validation or % split. */
+  /** User specified random seed for cross validation or % split */
   protected JTextField m_RandomSeedText = new JTextField("1", 3);
   
-  /** the label for the random seed textfield. */
+  /** the label for the random seed textfield */
   protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split", 
 					    SwingConstants.RIGHT);
 
-  /** Whether randomization is turned off to preserve order. */
+  /** Whether randomization is turned off to preserve order */
   protected JCheckBox m_PreserveOrderBut = new JCheckBox("Preserve order for % Split");
 
-  /** Whether to output the source code (only for classifiers importing Sourcable). */
+  /** Whether to output the source code (only for classifiers importing Sourcable) */
   protected JCheckBox m_OutputSourceCode = new JCheckBox("Output source code");
 
-  /** The name of the generated class (only applicable to Sourcable schemes). */
+  /** The name of the generated class (only applicable to Sourcable schemes) */
   protected JTextField m_SourceCodeClass = new JTextField("WekaClassifier", 10);
   
-  /** Click to start running the classifier. */
+  /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
 
-  /** Click to stop a running classifier. */
+  /** Click to stop a running classifier */
   protected JButton m_StopBut = new JButton("Stop");
 
-  /** Stop the class combo from taking up to much space. */
+  /** Stop the class combo from taking up to much space */
   private Dimension COMBO_SIZE = new Dimension(150, m_StartBut
 					       .getPreferredSize().height);
 
-  /** The cost matrix editor for evaluation costs. */
+  /** The cost matrix editor for evaluation costs */
   protected CostMatrixEditor m_CostMatrixEditor = new CostMatrixEditor();
 
-  /** The main set of instances we're playing with. */
+  /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
-  /** The loader used to load the user-supplied test set (if any). */
+  /** The loader used to load the user-supplied test set (if any) */
   protected Loader m_TestLoader;
   
-  /** the class index for the supplied test set. */
-  protected int m_TestClassIndex = -1;
-  
-  /** A thread that classification runs in. */
+  /** A thread that classification runs in */
   protected Thread m_RunThread;
 
-  /** The current visualization object. */
+  /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
 
-  /** Filter to ensure only model files are selected. */  
+  /** Filter to ensure only model files are selected */  
   protected FileFilter m_ModelFilter =
     new ExtensionFileFilter(MODEL_FILE_EXTENSION, "Model object files");
   
   protected FileFilter m_PMMLModelFilter =
     new ExtensionFileFilter(PMML_FILE_EXTENSION, "PMML model files");
 
-  /** The file chooser for selecting model files. */
+  /** The file chooser for selecting model files */
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
@@ -328,7 +326,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Creates the classifier panel.
+   * Creates the classifier panel
    */
   public ClassifierPanel() {
 
@@ -389,6 +387,10 @@ public class ClassifierPanel
       .setToolTipText("Output entropy-based evaluation measures");
     m_EvalWRTCostsBut
       .setToolTipText("Evaluate errors with respect to a cost matrix");
+    m_OutputPredictionsTextBut
+      .setToolTipText("Include the predictions in the output buffer");
+    m_OutputAdditionalAttributesText.setToolTipText(
+	"Outputs additional attributes for the predictions, 'first' and 'last' are valid indices.");
     m_RandomLab.setToolTipText("The seed value for randomization");
     m_RandomSeedText.setToolTipText(m_RandomLab.getToolTipText());
     m_PreserveOrderBut.setToolTipText("Preserves the order in a percentage split");
@@ -401,15 +403,20 @@ public class ClassifierPanel
     
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    m_ClassificationOutputEditor.setClassType(AbstractOutput.class);
-    m_ClassificationOutputEditor.setValue(new Null());
-    
     m_StorePredictionsBut.setSelected(ExplorerDefaults.getClassifierStorePredictionsForVis());
     m_OutputModelBut.setSelected(ExplorerDefaults.getClassifierOutputModel());
     m_OutputPerClassBut.setSelected(ExplorerDefaults.getClassifierOutputPerClassStats());
     m_OutputConfusionBut.setSelected(ExplorerDefaults.getClassifierOutputConfusionMatrix());
     m_EvalWRTCostsBut.setSelected(ExplorerDefaults.getClassifierCostSensitiveEval());
     m_OutputEntropyBut.setSelected(ExplorerDefaults.getClassifierOutputEntropyEvalMeasures());
+    m_OutputPredictionsTextBut.setSelected(ExplorerDefaults.getClassifierOutputPredictions());
+    m_OutputPredictionsTextBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
+      }
+    });
+    m_OutputAdditionalAttributesText.setText(ExplorerDefaults.getClassifierOutputAdditionalAttributes());
+    m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
     m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     m_PreserveOrderBut.setSelected(ExplorerDefaults.getClassifierPreserveOrder());
     m_OutputSourceCode.addActionListener(new ActionListener() {
@@ -542,16 +549,17 @@ public class ClassifierPanel
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(10, 1));
+	moreOptionsPanel.setLayout(new GridLayout(11, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
-	JPanel classOutPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	classOutPanel.add(new JLabel("Output predictions"));
-	classOutPanel.add(m_ClassificationOutputPanel);
-	moreOptionsPanel.add(classOutPanel);
+	moreOptionsPanel.add(m_OutputPredictionsTextBut);
+	JPanel additionalAttsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	additionalAttsPanel.add(m_OutputAdditionalAttributesLab);
+	additionalAttsPanel.add(m_OutputAdditionalAttributesText);
+	moreOptionsPanel.add(additionalAttsPanel);
 	JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	costMatrixOption.add(m_EvalWRTCostsBut);
 	costMatrixOption.add(m_SetCostsBut);
@@ -597,11 +605,6 @@ public class ClassifierPanel
 	  }
 	});
 	jd.pack();
-	
-	// panel height is only available now
-	m_ClassificationOutputPanel.setPreferredSize(new Dimension(300, m_ClassificationOutputPanel.getHeight()));
-	jd.pack();
-	
 	jd.setLocation(m_MoreOptions.getLocationOnScreen());
 	jd.setVisible(true);
       }
@@ -779,7 +782,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Sets the Logger to receive informational messages.
+   * Sets the Logger to receive informational messages
    *
    * @param newLog the Logger that will now get info messages
    */
@@ -798,7 +801,26 @@ public class ClassifierPanel
 
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
+      String type = "";
+      switch (m_Instances.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = "(Nom) ";
+	break;
+      case Attribute.NUMERIC:
+	type = "(Num) ";
+	break;
+      case Attribute.STRING:
+	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
+	break;
+      case Attribute.RELATIONAL:
+	type = "(Rel) ";
+	break;
+      default:
+	type = "(???) ";
+      }
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
@@ -825,21 +847,19 @@ public class ClassifierPanel
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel(true, true);
+      final SetInstancesPanel sp = new SetInstancesPanel();
 
       if (m_TestLoader != null) {
         try {
-          if (m_TestLoader.getStructure() != null) {
+          if (m_TestLoader.getStructure() != null)
             sp.setInstances(m_TestLoader.getStructure());
-          }
         } catch (Exception ex) {
           ex.printStackTrace();
         }
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
-	  m_TestLoader     = sp.getLoader();
-	  m_TestClassIndex = sp.getClassIndex();
+	  m_TestLoader = sp.getLoader();
 	}
       });
       // Add propertychangelistener to update m_TestLoader whenever
@@ -854,92 +874,185 @@ public class ClassifierPanel
   }
 
   /**
-   * outputs the header for the predictions on the data.
-   * 
-   * @param outBuff			the buffer to add the output to
-   * @param classificationOutput	for generating the classification output
-   * @param title			the title to print
+   * Process a classifier's prediction for an instance and update a
+   * set of plotting instances and additional plotting info. plotInfo
+   * for nominal class datasets holds shape types (actual data points have
+   * automatic shape type assignment; classifier error data points have
+   * box shape type). For numeric class datasets, the actual data points
+   * are stored in plotInstances and plotInfo stores the error (which is
+   * later converted to shape size values)
+   * @param toPredict the actual data point
+   * @param classifier the classifier
+   * @param eval the evaluation object to use for evaluating the classifier on
+   * the instance to predict
+   * @param plotInstances a set of plottable instances
+   * @param plotShape additional plotting information (shape)
+   * @param plotSize additional plotting information (size)
    */
-  protected void printPredictionsHeader(StringBuffer outBuff, AbstractOutput classificationOutput, String title) {
-    if (classificationOutput.generatesOutput())
-      outBuff.append("=== Predictions on " + title + " ===\n\n");
-    classificationOutput.printHeader();
-  }
-  
-  protected static Evaluation setupEval(Evaluation eval, Classifier classifier, 
-      Instances inst, CostMatrix costMatrix, 
-      ClassifierErrorsPlotInstances plotInstances, 
-      AbstractOutput classificationOutput, 
-      boolean onlySetPriors) throws Exception {
-        
-    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = 
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          getModelHeader(new Instances(inst, 0));
-      
-      if (classificationOutput != null) {
-        classificationOutput.setHeader(mappedClassifierHeader);
-      }
-      
-      if (!onlySetPriors) {
-        if (costMatrix != null) {
-          eval = new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
+  public static void processClassifierPrediction(Instance toPredict,
+                                           Classifier classifier,
+					   Evaluation eval,
+					   Instances plotInstances,
+					   FastVector plotShape,
+					   FastVector plotSize) {
+    try {
+      double pred = eval.evaluateModelOnceAndRecordPrediction(classifier, 
+							      toPredict);
+
+      if (plotInstances != null) {
+        double [] values = new double[plotInstances.numAttributes()];
+        for (int i = 0; i < plotInstances.numAttributes(); i++) {
+          if (i < toPredict.classIndex()) {
+            values[i] = toPredict.value(i);
+          } else if (i == toPredict.classIndex()) {
+            values[i] = pred;
+            values[i+1] = toPredict.value(i);
+            /* // if the class value of the instances to predict is missing then
+            // set it to the predicted value
+            if (toPredict.isMissing(i)) {
+	    values[i+1] = pred;
+	    } */
+            i++;
+          } else {
+            values[i] = toPredict.value(i-1);
+          }
+        }
+
+        plotInstances.add(new Instance(1.0, values));
+        if (toPredict.classAttribute().isNominal()) {
+          if (toPredict.isMissing(toPredict.classIndex()) 
+              || Instance.isMissingValue(pred)) {
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          } else if (pred != toPredict.classValue()) {
+            // set to default error point shape
+            plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
+          } else {
+            // otherwise set to constant (automatically assigned) point shape
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          }
+          plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
         } else {
-          eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
+          // store the error (to be converted to a point size later)
+          Double errd = null;
+          if (!toPredict.isMissing(toPredict.classIndex()) && 
+              !Instance.isMissingValue(pred)) {
+            errd = new Double(pred - toPredict.classValue());
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          } else {
+            // missing shape if actual class not present or prediction is missing
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          }
+          plotSize.addElement(errd);
         }
       }
-      
-      if (!eval.getHeader().equalHeaders(inst)) {
-        // When the InputMappedClassifier is loading a model, 
-        // we need to make a new dataset that maps the training instances to
-        // the structure expected by the mapped classifier - this is only
-        // to ensure that the structure and priors computed by
-        // evaluation object is correct with respect to the mapped classifier
-        Instances mappedClassifierDataset = 
-          ((weka.classifiers.misc.InputMappedClassifier)classifier).
-            getModelHeader(new Instances(mappedClassifierHeader, 0));
-        for (int zz = 0; zz < inst.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier)classifier).
-            constructMappedInstance(inst.instance(zz));
-          mappedClassifierDataset.add(mapped);
-        }
-        eval.setPriors(mappedClassifierDataset);
-        if (!onlySetPriors) {
-          if (plotInstances != null) {
-            plotInstances.setInstances(mappedClassifierDataset);
-            plotInstances.setClassifier(classifier);
-            /*          int mappedClass = 
-            ((weka.classifiers.misc.InputMappedClassifier)classifier).getMappedClassIndex();
-          System.err.println("Mapped class index " + mappedClass); */
-            plotInstances.setClassIndex(mappedClassifierDataset.classIndex());
-            plotInstances.setEvaluation(eval);
-          }
-        }
-      } else {
-        eval.setPriors(inst);
-        if (!onlySetPriors) {
-          if (plotInstances != null) {
-            plotInstances.setInstances(inst);
-            plotInstances.setClassifier(classifier);
-            plotInstances.setClassIndex(inst.classIndex());
-            plotInstances.setEvaluation(eval);
-          }
-        }
-      }
-    } else {
-      eval.setPriors(inst);
-      if (!onlySetPriors) {
-        if (plotInstances != null) {
-          plotInstances.setInstances(inst);
-          plotInstances.setClassifier(classifier);
-          plotInstances.setClassIndex(inst.classIndex());
-          plotInstances.setEvaluation(eval);
-        }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Post processes numeric class errors into shape sizes for plotting
+   * in the visualize panel
+   * @param plotSize a FastVector of numeric class errors
+   */
+  private void postProcessPlotInfo(FastVector plotSize) {
+    int maxpSize = 20;
+    double maxErr = Double.NEGATIVE_INFINITY;
+    double minErr = Double.POSITIVE_INFINITY;
+    double err;
+    
+    for (int i = 0; i < plotSize.size(); i++) {
+      Double errd = (Double)plotSize.elementAt(i);
+      if (errd != null) {
+	err = Math.abs(errd.doubleValue());
+        if (err < minErr) {
+	  minErr = err;
+	}
+	if (err > maxErr) {
+	  maxErr = err;
+	}
       }
     }
     
-    return eval;
-  }  
+    for (int i = 0; i < plotSize.size(); i++) {
+      Double errd = (Double)plotSize.elementAt(i);
+      if (errd != null) {
+	err = Math.abs(errd.doubleValue());
+	if (maxErr - minErr > 0) {
+	  double temp = (((err - minErr) / (maxErr - minErr)) 
+			 * maxpSize);
+	  plotSize.setElementAt(new Integer((int)temp), i);
+	} else {
+	  plotSize.setElementAt(new Integer(1), i);
+	}
+      } else {
+	plotSize.setElementAt(new Integer(1), i);
+      }
+    }
+  }
+
+  /**
+   * Sets up the structure for the visualizable instances. This dataset
+   * contains the original attributes plus the classifier's predictions
+   * for the class as an attribute called "predicted+WhateverTheClassIsCalled".
+   * @param trainInstances the instances that the classifier is trained on
+   * @return a new set of instances containing one more attribute (predicted
+   * class) than the trainInstances
+   */
+  public static Instances setUpVisualizableInstances(Instances trainInstances) {
+    FastVector hv = new FastVector();
+    Attribute predictedClass;
+
+    Attribute classAt = trainInstances.attribute(trainInstances.classIndex());
+    if (classAt.isNominal()) {
+      FastVector attVals = new FastVector();
+      for (int i = 0; i < classAt.numValues(); i++) {
+	attVals.addElement(classAt.value(i));
+      }
+      predictedClass = new Attribute("predicted"+classAt.name(), attVals);
+    } else {
+      predictedClass = new Attribute("predicted"+classAt.name());
+    }
+
+    for (int i = 0; i < trainInstances.numAttributes(); i++) {
+      if (i == trainInstances.classIndex()) {
+	hv.addElement(predictedClass);
+      }
+      hv.addElement(trainInstances.attribute(i).copy());
+    }
+    return new Instances(trainInstances.relationName()+"_predicted", hv, 
+			 trainInstances.numInstances());
+  }
+
+  /**
+   * outputs the header for the predictions on the data
+   * 
+   * @param outBuff	the buffer to add the output to
+   * @param inst	the data header
+   * @param title	the title to print
+   */
+  protected void printPredictionsHeader(StringBuffer outBuff, Instances inst, String title) {
+    outBuff.append("=== Predictions on " + title + " ===\n\n");
+    outBuff.append(" inst#,    actual, predicted, error");
+    if (inst.classAttribute().isNominal()) {
+      outBuff.append(", probability distribution");
+    }
+    if (m_OutputAdditionalAttributesRange != null) {
+      outBuff.append(" (");
+      boolean first = true;
+      for (int i = 0; i < inst.numAttributes() - 1; i++) {
+	if (m_OutputAdditionalAttributesRange.isInRange(i)) {
+	  if (!first)
+	    outBuff.append(",");
+	  else
+	    first = false;
+	  outBuff.append(inst.attribute(i).name());
+	}
+      }
+      outBuff.append(")");
+    }
+    outBuff.append("\n");
+  }
   
   /**
    * Starts running the currently configured classifier with the current
@@ -962,8 +1075,11 @@ public class ClassifierPanel
 	  Instances inst = new Instances(m_Instances);
 	  DataSource source = null;
           Instances userTestStructure = null;
-	  ClassifierErrorsPlotInstances plotInstances = null;
-	  
+	  // additional vis info (either shape type or point size)
+	  FastVector plotShape = new FastVector();
+	  FastVector plotSize = new FastVector();
+	  Instances predInstances = null;
+	 
 	  // for timing
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
 
@@ -972,7 +1088,6 @@ public class ClassifierPanel
               m_TestLoader.reset();
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
-              userTestStructure.setClassIndex(m_TestClassIndex);
             }
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -987,7 +1102,14 @@ public class ClassifierPanel
 	  boolean outputSummary = true;
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
-	  boolean outputPredictionsText = (m_ClassificationOutputEditor.getValue().getClass() != Null.class);
+	  boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
+	  if (m_OutputAdditionalAttributesText.getText().equals("")) {
+	    m_OutputAdditionalAttributesRange = null;
+	  }
+	  else {
+	    m_OutputAdditionalAttributesRange = new Range(m_OutputAdditionalAttributesText.getText());
+	    m_OutputAdditionalAttributesRange.setUpper(inst.numAttributes() - 1);
+	  }
 
 	  String grph = null;
 
@@ -995,27 +1117,26 @@ public class ClassifierPanel
 	  int numFolds = 10;
           double percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
-	  inst.setClassIndex(classIndex);
 	  Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
 	  Classifier template = null;
 	  try {
-	    template = AbstractClassifier.makeCopy(classifier);
+	    template = Classifier.makeCopy(classifier);
 	  } catch (Exception ex) {
 	    m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 	  }
 	  Classifier fullClassifier = null;
 	  StringBuffer outBuff = new StringBuffer();
-	  AbstractOutput classificationOutput = null; 
-	  if (outputPredictionsText) {
-	    classificationOutput = (AbstractOutput) m_ClassificationOutputEditor.getValue();
-	    Instances header = new Instances(inst, 0);
-	    header.setClassIndex(classIndex);
-	    classificationOutput.setHeader(header);
-	    classificationOutput.setBuffer(outBuff);
+	  String name = (new SimpleDateFormat("HH:mm:ss - "))
+	  .format(new Date());
+	  String cname = classifier.getClass().getName();
+	  if (cname.startsWith("weka.classifiers.")) {
+	    name += cname.substring("weka.classifiers.".length());
+	  } else {
+	    name += cname;
 	  }
-	  String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
-	  String cname = "";
-          String cmd = "";
+          String cmd = m_ClassifierEditor.getValue().getClass().getName();
+          if (m_ClassifierEditor.getValue() instanceof OptionHandler)
+            cmd += " " + Utils.joinOptions(((OptionHandler) m_ClassifierEditor.getValue()).getOptions());
 	  Evaluation eval = null;
 	  try {
 	    if (m_CVBut.isSelected()) {
@@ -1036,81 +1157,23 @@ public class ClassifierPanel
 	      testMode = 4;
 	      // Check the test instance compatibility
 	      if (source == null) {
-	        throw new Exception("No user test set has been specified");
+		throw new Exception("No user test set has been specified");
 	      }
-	      
-	      if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
-	        if (!inst.equalHeaders(userTestStructure)) {
-	          boolean wrapClassifier = false;
-	          if (!Utils.
-	              getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
-	            JCheckBox dontShow = new JCheckBox("Do not show this message again");
-	            Object[] stuff = new Object[2];
-	            stuff[0] = "Train and test set are not compatible.\n" +
-	            "Would you like to automatically wrap the classifier in\n" + 
-	            "an \"InputMappedClassifier\" before proceeding?.\n";
-	            stuff[1] = dontShow;
-
-	            int result = JOptionPane.showConfirmDialog(ClassifierPanel.this, stuff, 
-	                "ClassifierPanel", JOptionPane.YES_OPTION);
-	            
-	            if (result == JOptionPane.YES_OPTION) {
-	              wrapClassifier = true;
-	            }
-	            
-	            if (dontShow.isSelected()) {
-	              String response = (wrapClassifier) ? "yes" : "no";
-	              Utils.
-	                setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
-	                    response);
-	            }
-
-	          } else {
-	            // What did the user say - do they want to autowrap or not?
-	            String response = 
-	              Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
-	            if (response != null && response.equalsIgnoreCase("yes")) {
-	              wrapClassifier = true;
-	            }
-	          }
-
-	          if (wrapClassifier) {
-	            weka.classifiers.misc.InputMappedClassifier temp =
-	              new weka.classifiers.misc.InputMappedClassifier();
-
-	            // pass on the known test structure so that we get the
-	            // correct mapping report from the toString() method
-	            // of InputMappedClassifier
-	            temp.setClassifier(classifier);
-	            temp.setTestStructure(userTestStructure);
-	            classifier = temp;
-	          } else {
-	            throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTestStructure));
-	          }
-	        }
+	      if (!inst.equalHeaders(userTestStructure)) {
+		throw new Exception("Train and test set are not compatible");
 	      }
-              
+              userTestStructure.setClassIndex(classIndex);
 	    } else {
 	      throw new Exception("Unknown test mode");
 	    }
+	    inst.setClassIndex(classIndex);
 
-	    cname = classifier.getClass().getName();
-	    if (cname.startsWith("weka.classifiers.")) {
-	      name += cname.substring("weka.classifiers.".length());
-	    } else {
-	      name += cname;
-	    }
-	    cmd = classifier.getClass().getName();
-	    if (classifier instanceof OptionHandler)
-	      cmd += " " + Utils.joinOptions(((OptionHandler) classifier).getOptions());
-	    
 	    // set up the structure of the plottable instances for 
 	    // visualization
-	    plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-	    plotInstances.setInstances(inst);
-	    plotInstances.setClassifier(classifier);
-	    plotInstances.setClassIndex(inst.classIndex());
-	    plotInstances.setSaveForVisualization(saveVis);
+            if (saveVis) {
+              predInstances = setUpVisualizableInstances(inst);
+              predInstances.setClassIndex(inst.classIndex()+1);
+            } 
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
@@ -1199,31 +1262,24 @@ public class ClassifierPanel
 	      m_Log.statusMessage("Evaluating on training data...");
 	      eval = new Evaluation(inst, costMatrix);
 	      
-	      // make adjustments if the classifier is an InputMappedClassifier
-	      eval = setupEval(eval, classifier, inst, costMatrix, 
-	          plotInstances, classificationOutput, false);
-	      
-	      //plotInstances.setEvaluation(eval);
-              plotInstances.setUp();
-	      
 	      if (outputPredictionsText) {
-		printPredictionsHeader(outBuff, classificationOutput, "training set");
+		printPredictionsHeader(outBuff, inst, "training set");
 	      }
 
 	      for (int jj=0;jj<inst.numInstances();jj++) {
-		plotInstances.process(inst.instance(jj), classifier, eval);
+		processClassifierPrediction(inst.instance(jj), classifier,
+					    eval, predInstances, plotShape, 
+					    plotSize);
 		
-		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifier, inst.instance(jj), jj);
+		if (outputPredictionsText) { 
+		  outBuff.append(predictionText(classifier, inst.instance(jj), jj+1));
 		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on training data. Processed "
 				      +jj+" instances...");
 		}
 	      }
-	      if (outputPredictionsText)
-		classificationOutput.printFooter();
-	      if (outputPredictionsText && classificationOutput.generatesOutput()) {
+	      if (outputPredictionsText) {
 		outBuff.append("\n");
 	      } 
 	      outBuff.append("=== Evaluation on training set ===\n");
@@ -1246,16 +1302,9 @@ public class ClassifierPanel
 		inst.stratify(numFolds);
 	      }
 	      eval = new Evaluation(inst, costMatrix);
-	      
-	       // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, inst, costMatrix, 
-                  plotInstances, classificationOutput, false);
-	      
-//	      plotInstances.setEvaluation(eval);
-              plotInstances.setUp();
       
 	      if (outputPredictionsText) {
-		printPredictionsHeader(outBuff, classificationOutput, "test data");
+		printPredictionsHeader(outBuff, inst, "test data");
 	      }
 
 	      // Make some splits and do a CV
@@ -1263,17 +1312,12 @@ public class ClassifierPanel
 		m_Log.statusMessage("Creating splits for fold "
 				    + (fold + 1) + "...");
 		Instances train = inst.trainCV(numFolds, fold, random);
-		
-		// make adjustments if the classifier is an InputMappedClassifier
-	        eval = setupEval(eval, classifier, train, costMatrix, 
-	            plotInstances, classificationOutput, true);
-	        
-//		eval.setPriors(train);
+		eval.setPriors(train);
 		m_Log.statusMessage("Building model for fold "
 				    + (fold + 1) + "...");
 		Classifier current = null;
 		try {
-		  current = AbstractClassifier.makeCopy(template);
+		  current = Classifier.makeCopy(template);
 		} catch (Exception ex) {
 		  m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 		}
@@ -1282,14 +1326,14 @@ public class ClassifierPanel
 		m_Log.statusMessage("Evaluating model for fold "
 				    + (fold + 1) + "...");
 		for (int jj=0;jj<test.numInstances();jj++) {
-		  plotInstances.process(test.instance(jj), current, eval);
-		  if (outputPredictionsText) {
-		    classificationOutput.printClassification(current, test.instance(jj), jj);
+		  processClassifierPrediction(test.instance(jj), current,
+					      eval, predInstances, plotShape,
+					      plotSize);
+		  if (outputPredictionsText) { 
+		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
 		  }
 		}
 	      }
-	      if (outputPredictionsText)
-		classificationOutput.printFooter();
 	      if (outputPredictionsText) {
 		outBuff.append("\n");
 	      } 
@@ -1318,37 +1362,30 @@ public class ClassifierPanel
 	      m_Log.statusMessage("Building model on training split ("+trainSize+" instances)...");
 	      Classifier current = null;
 	      try {
-		current = AbstractClassifier.makeCopy(template);
+		current = Classifier.makeCopy(template);
 	      } catch (Exception ex) {
 		m_Log.logMessage("Problem copying classifier: " + ex.getMessage());
 	      }
 	      current.buildClassifier(train);
 	      eval = new Evaluation(train, costMatrix);
-	      
-	      // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, train, costMatrix, 
-                  plotInstances, classificationOutput, false);
-              	      
-//	      plotInstances.setEvaluation(eval);
-              plotInstances.setUp();
 	      m_Log.statusMessage("Evaluating on test split...");
 	     
 	      if (outputPredictionsText) {
-		printPredictionsHeader(outBuff, classificationOutput, "test split");
+		printPredictionsHeader(outBuff, inst, "test split");
 	      }
      
 	      for (int jj=0;jj<test.numInstances();jj++) {
-		plotInstances.process(test.instance(jj), current, eval);
+		processClassifierPrediction(test.instance(jj), current,
+					    eval, predInstances, plotShape,
+					    plotSize);
 		if (outputPredictionsText) { 
-		  classificationOutput.printClassification(current, test.instance(jj), jj);
+		    outBuff.append(predictionText(current, test.instance(jj), jj+1));
 		}
 		if ((jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test split. Processed "
 				      +jj+" instances...");
 		}
 	      }
-	      if (outputPredictionsText)
-		classificationOutput.printFooter();
 	      if (outputPredictionsText) {
 		outBuff.append("\n");
 	      } 
@@ -1358,24 +1395,20 @@ public class ClassifierPanel
 	      case 4: // Test on user split
 	      m_Log.statusMessage("Evaluating on test data...");
 	      eval = new Evaluation(inst, costMatrix);
-	      // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifier, inst, costMatrix, 
-                  plotInstances, classificationOutput, false);
-              
-//	      plotInstances.setEvaluation(eval);
-              plotInstances.setUp();
 	      
 	      if (outputPredictionsText) {
-		printPredictionsHeader(outBuff, classificationOutput, "test set");
+		printPredictionsHeader(outBuff, inst, "test set");
 	      }
 
 	      Instance instance;
 	      int jj = 0;
 	      while (source.hasMoreElements(userTestStructure)) {
 		instance = source.nextElement(userTestStructure);
-		plotInstances.process(instance, classifier, eval);
-		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifier, instance, jj);
+		processClassifierPrediction(instance, classifier,
+		    eval, predInstances, plotShape,
+		    plotSize);
+		if (outputPredictionsText) { 
+		  outBuff.append(predictionText(classifier, instance, jj+1));
 		}
 		if ((++jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
@@ -1383,8 +1416,6 @@ public class ClassifierPanel
 		}
 	      }
 
-	      if (outputPredictionsText)
-		classificationOutput.printFooter();
 	      if (outputPredictionsText) {
 		outBuff.append("\n");
 	      } 
@@ -1443,14 +1474,24 @@ public class ClassifierPanel
 		    vv.addElement(grph);
 		  }
 		  m_History.addObject(name, vv);
-              } else if (saveVis && plotInstances != null && plotInstances.getPlotInstances().numInstances() > 0) {
+              } else if (saveVis && predInstances != null && 
+                  predInstances.numInstances() > 0) {
+		if (predInstances.attribute(predInstances.classIndex())
+		    .isNumeric()) {
+		  postProcessPlotInfo(plotSize);
+		}
 		m_CurrentVis = new VisualizePanel();
 		m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 		m_CurrentVis.setLog(m_Log);
-		m_CurrentVis.addPlot(plotInstances.getPlotData(cname));
-		//m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
-	        m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
-		plotInstances.cleanUp();
+		PlotData2D tempd = new PlotData2D(predInstances);
+		tempd.setShapeSize(plotSize);
+		tempd.setShapeType(plotShape);
+		tempd.setPlotName(name+" ("+inst.relationName()+")");
+		//tempd.addInstanceNumberAttribute();
+		
+		m_CurrentVis.addPlot(tempd);
+		//m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+		m_CurrentVis.setColourIndex(predInstances.classIndex());
 	    
                 FastVector vv = new FastVector();
                 if (outputModel) {
@@ -1493,6 +1534,90 @@ public class ClassifierPanel
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
       m_RunThread.start();
     }
+  }
+
+  /**
+   * generates a prediction row for an instance
+   * 
+   * @param classifier the classifier to use for making the prediction
+   * @param inst the instance to predict
+   * @param instNum the index of the instance
+   * @throws Exception if something goes wrong
+   * @return the generated row
+   */
+  protected String predictionText(Classifier classifier, Instance inst, int instNum) throws Exception {
+
+    //> inst#   actual   predicted   error  probability distribution
+
+    StringBuffer text = new StringBuffer();
+    // inst #
+    text.append(Utils.padLeft("" + instNum, 6) + " ");
+    if (inst.classAttribute().isNominal()) {
+
+      // actual
+      if (inst.classIsMissing()) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.padLeft("" + ((int) inst.classValue()+1) + ":"
+				+ inst.stringValue(inst.classAttribute()), 10) + " ");
+
+      // predicted
+      double[] probdist = null;
+      double pred;
+      if (inst.classAttribute().isNominal()) {
+	probdist = classifier.distributionForInstance(inst);
+	pred = (double) Utils.maxIndex(probdist);
+	if (probdist[(int) pred] <= 0.0) pred = Instance.missingValue();
+      } else {
+	pred = classifier.classifyInstance(inst);
+      }
+      text.append(Utils.padLeft((Instance.isMissingValue(pred) ? "?" :
+				 (((int) pred+1) + ":"
+				 + inst.classAttribute().value((int) pred))), 10) + " ");
+      // error
+      if (pred == inst.classValue()) text.append(Utils.padLeft(" ", 6) + " ");
+      else text.append(Utils.padLeft("+", 6) + " ");
+
+      // prob dist
+      if (inst.classAttribute().type() == Attribute.NOMINAL) {
+	for (int i=0; i<probdist.length; i++) {
+	  if (i == (int) pred) text.append(" *");
+	  else text.append("  ");
+	  text.append(Utils.doubleToString(probdist[i], 5, 3));
+	}
+      }
+    } else {
+
+      // actual
+      if (inst.classIsMissing()) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.doubleToString(inst.classValue(), 10, 3) + " ");
+
+      // predicted
+      double pred = classifier.classifyInstance(inst);
+      if (Instance.isMissingValue(pred)) text.append(Utils.padLeft("?", 10) + " ");
+      else text.append(Utils.doubleToString(pred, 10, 3) + " ");
+
+      // err
+      if (!inst.classIsMissing() && !Instance.isMissingValue(pred))
+	text.append(Utils.doubleToString(pred - inst.classValue(), 10, 3));
+    }
+    
+    // additional Attributes
+    if (m_OutputAdditionalAttributesRange != null) {
+      text.append(" (");
+      boolean first = true;
+      for (int i = 0; i < inst.numAttributes() - 1; i++) {
+	if (m_OutputAdditionalAttributesRange.isInRange(i)) {
+	  if (!first)
+	    text.append(",");
+	  else
+	    first = false;
+	  text.append(inst.toString(i));
+	}
+      }
+      text.append(")");
+    }
+    
+    text.append("\n");
+    return text.toString();
   }
 
   /**
@@ -1683,7 +1808,7 @@ public class ClassifierPanel
     resultListMenu.add(visGrph);
 
     JMenuItem visMargin = new JMenuItem("Visualize margin curve");
-    if ((preds != null) && (classAtt != null) && (classAtt.isNominal())) {
+    if (preds != null) {
       visMargin.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
 	    try {
@@ -1708,7 +1833,7 @@ public class ClassifierPanel
     resultListMenu.add(visMargin);
 
     JMenu visThreshold = new JMenu("Visualize threshold curve");
-    if ((preds != null) && (classAtt != null) && (classAtt.isNominal())) {
+    if (preds != null && classAtt != null) {
       for (int i = 0; i < classAtt.numValues(); i++) {
 	JMenuItem clv = new JMenuItem(classAtt.value(i));
 	final int classValue = i;
@@ -1790,7 +1915,7 @@ public class ClassifierPanel
                     windowTitle = "" + cname.substring("weka.classifiers.".length()) + " ";
                   }
                 }
-                windowTitle += " (class = " + classAttToUse.value(0) + ")";                
+                windowTitle += " (class = " + classAttToUse.value(0) + ")";
                 
                 // add plot
                 cbAnalysis.setCurveData(tempd, classAttToUse);
@@ -1808,7 +1933,7 @@ public class ClassifierPanel
     resultListMenu.add(visCostBenefit);
 
     JMenu visCost = new JMenu("Visualize cost curve");
-    if ((preds != null) && (classAtt != null) && (classAtt.isNominal())) {
+    if (preds != null && classAtt != null) {
       for (int i = 0; i < classAtt.numValues(); i++) {
 	JMenuItem clv = new JMenuItem(classAtt.value(i));
 	final int classValue = i;
@@ -1845,14 +1970,11 @@ public class ClassifierPanel
     }
     resultListMenu.add(visCost);
     
-    // visualization plugins
     JMenu visPlugins = new JMenu("Plugins");
-    boolean availablePlugins = false;
-    
-    // predictions
     Vector pluginsVector = GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
-    for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (String) (pluginsVector.elementAt(i));
+    boolean availablePlugins = false;
+    for (int i=0; i<pluginsVector.size(); i++) {
+      String className = (String)(pluginsVector.elementAt(i));
       try {
         VisualizePlugin plugin = (VisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null)
@@ -1861,96 +1983,23 @@ public class ClassifierPanel
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
         Version version = new Version();
         if (pluginMenuItem != null) {
-          /*if (version.compareTo(plugin.getMinVersion()) < 0)
+          if (version.compareTo(plugin.getMinVersion()) < 0)
             pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
           if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
           visPlugins.add(pluginMenuItem);
         }
       }
-      catch (Exception e) {
-	  //e.printStackTrace();
+      catch (ClassNotFoundException cnfe) {
+        //System.out.println("Visualize plugin ClassNotFoundException " + cnfe.getMessage());
+      }
+      catch (InstantiationException ie) {
+        //System.out.println("Visualize plugin InstantiationException " + ie.getMessage());
+      }
+      catch (IllegalAccessException iae) {
+        //System.out.println("Visualize plugin IllegalAccessException " + iae.getMessage());
       }
     }
-    
-    // errros
-    pluginsVector = GenericObjectEditor.getClassnames(ErrorVisualizePlugin.class.getName());
-    for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (String) (pluginsVector.elementAt(i));
-      try {
-        ErrorVisualizePlugin plugin = (ErrorVisualizePlugin) Class.forName(className).newInstance();
-        if (plugin == null)
-          continue;
-        availablePlugins = true;
-        JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(vp.getInstances());
-        Version version = new Version();
-        if (pluginMenuItem != null) {
-          /*if (version.compareTo(plugin.getMinVersion()) < 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-          if (version.compareTo(plugin.getMaxVersion()) >= 0)
-            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
-          visPlugins.add(pluginMenuItem);
-        }
-      }
-      catch (Exception e) {
-	  //e.printStackTrace();
-      }
-    }
-    
-    // graphs+trees
-    if (grph != null) {
-      // trees
-      if (((Drawable) temp_classifier).graphType() == Drawable.TREE) {
-	pluginsVector = GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
-	for (int i = 0; i < pluginsVector.size(); i++) {
-	  String className = (String) (pluginsVector.elementAt(i));
-	  try {
-	    TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
-	    if (plugin == null)
-	      continue;
-	    availablePlugins = true;
-	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
-	    Version version = new Version();
-	    if (pluginMenuItem != null) {
-	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
-	      visPlugins.add(pluginMenuItem);
-	    }
-	  }
-	  catch (Exception e) {
-	    //e.printStackTrace();
-	  }
-	}
-      }
-      // graphs
-      else {
-	pluginsVector = GenericObjectEditor.getClassnames(GraphVisualizePlugin.class.getName());
-	for (int i = 0; i < pluginsVector.size(); i++) {
-	  String className = (String) (pluginsVector.elementAt(i));
-	  try {
-	    GraphVisualizePlugin plugin = (GraphVisualizePlugin) Class.forName(className).newInstance();
-	    if (plugin == null)
-	      continue;
-	    availablePlugins = true;
-	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
-	    Version version = new Version();
-	    if (pluginMenuItem != null) {
-	      /*if (version.compareTo(plugin.getMinVersion()) < 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
-		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)"); */
-	      visPlugins.add(pluginMenuItem);
-	    }
-	  }
-	  catch (Exception e) {
-	    //e.printStackTrace();
-	  }
-	}
-      }
-    }
-
     if (availablePlugins)
       resultListMenu.add(visPlugins);
 
@@ -1959,8 +2008,7 @@ public class ClassifierPanel
 
   /**
    * Pops up a TreeVisualizer for the classifier from the currently
-   * selected item in the results list.
-   * 
+   * selected item in the results list
    * @param dottyString the description of the tree in dotty format
    * @param treeName the title to assign to the display
    */
@@ -1985,7 +2033,7 @@ public class ClassifierPanel
 
   /**
    * Pops up a GraphVisualizer for the BayesNet classifier from the currently
-   * selected item in the results list.
+   * selected item in the results list
    * 
    * @param XMLBIF the description of the graph in XMLBIF ver. 0.3
    * @param graphName the name of the graph
@@ -2009,6 +2057,32 @@ public class ClassifierPanel
       });
     
     jf.setVisible(true);
+  }
+
+
+  /**
+   * Pops up a VisualizePanel for visualizing the data and errors for 
+   * the classifier from the currently selected item in the results list
+   * @param sp the VisualizePanel to pop up.
+   */
+  protected void visualizeClassifierErrors(VisualizePanel sp) {
+   
+    if (sp != null) {
+      String plotName = sp.getName(); 
+	final javax.swing.JFrame jf = 
+	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
+	jf.setSize(600,400);
+	jf.getContentPane().setLayout(new BorderLayout());
+
+	jf.getContentPane().add(sp, BorderLayout.CENTER);
+	jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    jf.dispose();
+	  }
+	});
+
+    jf.setVisible(true);
+    }
   }
   
   /**
@@ -2034,33 +2108,6 @@ public class ClassifierPanel
             jf.dispose();
           }
         });
-
-    jf.setVisible(true);
-    }
-  }
-
-
-  /**
-   * Pops up a VisualizePanel for visualizing the data and errors for 
-   * the classifier from the currently selected item in the results list.
-   * 
-   * @param sp the VisualizePanel to pop up.
-   */
-  protected void visualizeClassifierErrors(VisualizePanel sp) {
-   
-    if (sp != null) {
-      String plotName = sp.getName(); 
-	final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
-	jf.setSize(600,400);
-	jf.getContentPane().setLayout(new BorderLayout());
-
-	jf.getContentPane().add(sp, BorderLayout.CENTER);
-	jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    jf.dispose();
-	  }
-	});
 
     jf.setVisible(true);
     }
@@ -2094,7 +2141,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Saves the currently selected classifier.
+   * Saves the currently selected classifier
    * 
    * @param name the name of the run
    * @param classifier the classifier to save
@@ -2139,7 +2186,7 @@ public class ClassifierPanel
   }
 
   /**
-   * Loads a classifier.
+   * Loads a classifier
    */
   protected void loadClassifier() {
 
@@ -2257,12 +2304,14 @@ public class ClassifierPanel
           public void run() {
             // Copy the current state of things
             m_Log.statusMessage("Setting up...");
-            Classifier classifierToUse = classifier;
 
             StringBuffer outBuff = m_History.getNamedBuffer(name);
             DataSource source = null;
             Instances userTestStructure = null;
-            ClassifierErrorsPlotInstances plotInstances = null;
+            // additional vis info (either shape type or point size)
+            FastVector plotShape = new FastVector();
+            FastVector plotSize = new FastVector();
+            Instances predInstances = null;
 
             CostMatrix costMatrix = null;
             if (m_EvalWRTCostsBut.isSelected()) {
@@ -2274,7 +2323,8 @@ public class ClassifierPanel
             boolean outputSummary = true;
             boolean outputEntropy = m_OutputEntropyBut.isSelected();
             boolean saveVis = m_StorePredictionsBut.isSelected();
-            boolean outputPredictionsText = (m_ClassificationOutputEditor.getValue().getClass() != Null.class);
+            boolean outputPredictionsText = 
+              m_OutputPredictionsTextBut.isSelected();
             String grph = null;    
             Evaluation eval = null;
 
@@ -2285,78 +2335,24 @@ public class ClassifierPanel
                 m_TestLoader.reset();
                 source = new DataSource(m_TestLoader);
                 userTestStructure = source.getStructure();
-                userTestStructure.setClassIndex(m_TestClassIndex);
               }
               // Check the test instance compatibility
               if (source == null) {
                 throw new Exception("No user test set has been specified");
               }
               if (trainHeader != null) {
-                boolean compatibilityProblem = false;
                 if (trainHeader.classIndex() > 
-                    userTestStructure.numAttributes()-1) {
-                  compatibilityProblem = true;
-                  //throw new Exception("Train and test set are not compatible");
-                }
+                    userTestStructure.numAttributes()-1)
+                  throw new Exception("Train and test set are not compatible");
                 userTestStructure.setClassIndex(trainHeader.classIndex());
                 if (!trainHeader.equalHeaders(userTestStructure)) {
-                  compatibilityProblem = true;
-                  // throw new Exception("Train and test set are not compatible:\n" + trainHeader.equalHeadersMsg(userTestStructure));
-                  
-                  if (compatibilityProblem && 
-                      !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
-
-                    boolean wrapClassifier = false;
-                    if (!Utils.
-                        getDontShowDialog("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier")) {
-                      JCheckBox dontShow = new JCheckBox("Do not show this message again");
-                      Object[] stuff = new Object[2];
-                      stuff[0] = "Data used to train model and test set are not compatible.\n" +
-                      "Would you like to automatically wrap the classifier in\n" + 
-                      "an \"InputMappedClassifier\" before proceeding?.\n";
-                      stuff[1] = dontShow;
-
-                      int result = JOptionPane.showConfirmDialog(ClassifierPanel.this, stuff, 
-                          "ClassifierPanel", JOptionPane.YES_OPTION);
-                      
-                      if (result == JOptionPane.YES_OPTION) {
-                        wrapClassifier = true;
-                      }
-                      
-                      if (dontShow.isSelected()) {
-                        String response = (wrapClassifier) ? "yes" : "no";
-                        Utils.
-                          setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
-                              response);
-                      }
-
-                    } else {
-                      // What did the user say - do they want to autowrap or not?
-                      String response = 
-                        Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
-                      if (response != null && response.equalsIgnoreCase("yes")) {
-                        wrapClassifier = true;
-                      }
-                    }
-
-                    if (wrapClassifier) {
-                      weka.classifiers.misc.InputMappedClassifier temp =
-                        new weka.classifiers.misc.InputMappedClassifier();
-
-                      temp.setClassifier(classifierToUse);
-                      temp.setModelHeader(trainHeader);
-                      classifierToUse = temp;
-                    } else {
-                      throw new Exception("Train and test set are not compatible\n" + 
-                          trainHeader.equalHeadersMsg(userTestStructure));
-                    }
-                  }
+                  throw new Exception("Train and test set are not compatible");
                 }
               } else {
-        	if (classifierToUse instanceof PMMLClassifier) {
+        	if (classifier instanceof PMMLClassifier) {
         	  // set the class based on information in the mining schema
         	  Instances miningSchemaStructure = 
-        	    ((PMMLClassifier)classifierToUse).getMiningSchema().getMiningSchemaAsInstances();
+        	    ((PMMLClassifier)classifier).getMiningSchema().getMiningSchemaAsInstances();
         	  String className = miningSchemaStructure.classAttribute().name();
         	  Attribute classMatch = userTestStructure.attribute(className);
         	  if (classMatch == null) {
@@ -2377,18 +2373,14 @@ public class ClassifierPanel
               m_Log.logMessage("Re-evaluating classifier (" + name 
                                + ") on test set");
               eval = new Evaluation(userTestStructure, costMatrix);
+              eval.useNoPriors();
       
               // set up the structure of the plottable instances for 
               // visualization if selected
               if (saveVis) {
-        	plotInstances = new ClassifierErrorsPlotInstances();
-        	plotInstances.setInstances(userTestStructure);
-        	plotInstances.setClassifier(classifierToUse);
-        	plotInstances.setClassIndex(userTestStructure.classIndex());
-        	plotInstances.setEvaluation(eval);
-        	plotInstances.setUp();
+                predInstances = setUpVisualizableInstances(userTestStructure);
+                predInstances.setClassIndex(userTestStructure.classIndex()+1);
               }
-              
       
               outBuff.append("\n=== Re-evaluation on test set ===\n\n");
               outBuff.append("User supplied test set\n");  
@@ -2401,39 +2393,31 @@ public class ClassifierPanel
               outBuff.append("Attributes:   " 
         	  + userTestStructure.numAttributes() 
         	  + "\n\n");
-              if (trainHeader == null && 
-                  !(classifierToUse instanceof 
+              if (trainHeader == null &&
+                  !(classifier instanceof
                       weka.classifiers.pmml.consumer.PMMLClassifier)) {
                 outBuff.append("NOTE - if test set is not compatible then results are "
-                               + "unpredictable\n\n");
+                    + "unpredictable\n\n");
               }
 
-              AbstractOutput classificationOutput = null;
               if (outputPredictionsText) {
-        	classificationOutput = (AbstractOutput) m_ClassificationOutputEditor.getValue();
-        	classificationOutput.setHeader(userTestStructure);
-        	classificationOutput.setBuffer(outBuff);
-/*        	classificationOutput.setAttributes("");
-        	classificationOutput.setOutputDistribution(false);*/
-//        	classificationOutput.printHeader();        	
-              }
-              
-              // make adjustments if the classifier is an InputMappedClassifier
-              eval = setupEval(eval, classifierToUse, userTestStructure, costMatrix,
-                  plotInstances, classificationOutput, false);
-              eval.useNoPriors();
-              
-              if (outputPredictionsText) {
-                printPredictionsHeader(outBuff, classificationOutput, "user test set");
+                outBuff.append("=== Predictions on test set ===\n\n");
+                outBuff.append(" inst#,    actual, predicted, error");
+                if (userTestStructure.classAttribute().isNominal()) {
+                  outBuff.append(", probability distribution");
+                }
+                outBuff.append("\n");
               }
 
 	      Instance instance;
 	      int jj = 0;
 	      while (source.hasMoreElements(userTestStructure)) {
 		instance = source.nextElement(userTestStructure);
-		plotInstances.process(instance, classifierToUse, eval);
-		if (outputPredictionsText) {
-		  classificationOutput.printClassification(classifierToUse, instance, jj);
+		processClassifierPrediction(instance, classifier,
+		    eval, predInstances, plotShape,
+		    plotSize);
+		if (outputPredictionsText) { 
+		  outBuff.append(predictionText(classifier, instance, jj+1));
 		}
 		if ((++jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
@@ -2441,9 +2425,7 @@ public class ClassifierPanel
 		}
 	      }
 
-	      if (outputPredictionsText)
-		classificationOutput.printFooter();
-              if (outputPredictionsText && classificationOutput.generatesOutput()) {
+              if (outputPredictionsText) {
                 outBuff.append("\n");
               } 
       
@@ -2473,33 +2455,44 @@ public class ClassifierPanel
               ex.printStackTrace();
               m_Log.logMessage(ex.getMessage());
               JOptionPane.showMessageDialog(ClassifierPanel.this,
-                                            "Problem evaluating classifier:\n"
+                                            "Problem evaluationg classifier:\n"
                                             + ex.getMessage(),
                                             "Evaluate classifier",
                                             JOptionPane.ERROR_MESSAGE);
               m_Log.statusMessage("Problem evaluating classifier");
             } finally {
               try {
-        	if (classifierToUse instanceof PMMLClassifier) {
+        	if (classifier instanceof PMMLClassifier) {
         	  // signal the end of the scoring run so
         	  // that the initialized state can be reset
         	  // (forces the field mapping to be recomputed
         	  // for the next scoring run).
-        	  ((PMMLClassifier)classifierToUse).done();
+        	  ((PMMLClassifier)classifier).done();
         	}
         	
-                if (plotInstances != null && plotInstances.getPlotInstances().numInstances() > 0) {
+                if (predInstances != null && predInstances.numInstances() > 0) {
+                  if (predInstances.attribute(predInstances.classIndex())
+                      .isNumeric()) {
+                    postProcessPlotInfo(plotSize);
+                  }
                   m_CurrentVis = new VisualizePanel();
-                  m_CurrentVis.setName(name + " (" + userTestStructure.relationName() + ")");
+                  m_CurrentVis.setName(name+" ("
+                                       +userTestStructure.relationName()+")");
                   m_CurrentVis.setLog(m_Log);
-                  m_CurrentVis.addPlot(plotInstances.getPlotData(name));
-                  //m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
-                  m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex());
-                  plotInstances.cleanUp();
+                  PlotData2D tempd = new PlotData2D(predInstances);
+                  tempd.setShapeSize(plotSize);
+                  tempd.setShapeType(plotShape);
+                  tempd.setPlotName(name+" ("+userTestStructure.relationName()
+                                    +")");
+                  //tempd.addInstanceNumberAttribute();
 	  
-                  if (classifierToUse instanceof Drawable) {
+                  m_CurrentVis.addPlot(tempd);
+                  m_CurrentVis.setColourIndex(predInstances.classIndex());
+                  //m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+	  
+                  if (classifier instanceof Drawable) {
                     try {
-                      grph = ((Drawable)classifierToUse).graph();
+                      grph = ((Drawable)classifier).graph();
                     } catch (Exception ex) {
                     }
                   }
@@ -2519,7 +2512,7 @@ public class ClassifierPanel
                     m_History.addObject(name, vv);
                   } else {
                     FastVector vv = new FastVector();
-                    vv.addElement(classifierToUse);
+                    vv.addElement(classifier);
                     if (trainHeader != null) vv.addElement(trainHeader);
                     m_History.addObject(name, vv);
                   }
@@ -2551,7 +2544,7 @@ public class ClassifierPanel
   }
   
   /**
-   * updates the capabilities filter of the GOE.
+   * updates the capabilities filter of the GOE
    * 
    * @param filter	the new filter to use
    */
@@ -2579,16 +2572,16 @@ public class ClassifierPanel
     
     // set new filter
     m_ClassifierEditor.setCapabilitiesFilter(filterClass);
-    
-    // Check capabilities
+
     m_StartBut.setEnabled(true);
+    // Check capabilities
     Capabilities currentFilter = m_ClassifierEditor.getCapabilitiesFilter();
     Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
     Capabilities currentSchemeCapabilities =  null;
     if (classifier != null && currentFilter != null && 
         (classifier instanceof CapabilitiesHandler)) {
       currentSchemeCapabilities = ((CapabilitiesHandler)classifier).getCapabilities();
-      
+          
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
           !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);
@@ -2597,7 +2590,7 @@ public class ClassifierPanel
   }
   
   /**
-   * method gets called in case of a change event.
+   * method gets called in case of a change event
    * 
    * @param e		the associated change event
    */
@@ -2610,7 +2603,7 @@ public class ClassifierPanel
 
   /**
    * Sets the Explorer to use as parent frame (used for sending notifications
-   * about changes in the data).
+   * about changes in the data)
    * 
    * @param parent	the parent frame
    */
@@ -2619,7 +2612,7 @@ public class ClassifierPanel
   }
   
   /**
-   * returns the parent Explorer frame.
+   * returns the parent Explorer frame
    * 
    * @return		the parent
    */
@@ -2628,7 +2621,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Returns the title for the tab in the Explorer.
+   * Returns the title for the tab in the Explorer
    * 
    * @return 		the title of this tab
    */
@@ -2637,7 +2630,7 @@ public class ClassifierPanel
   }
   
   /**
-   * Returns the tooltip for the tab in the Explorer.
+   * Returns the tooltip for the tab in the Explorer
    * 
    * @return 		the tooltip of this tab
    */

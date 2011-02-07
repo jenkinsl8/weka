@@ -571,8 +571,28 @@ public class AttributeSelectionPanel
     m_Instances = inst;
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
+      String type = "";
+      switch (m_Instances.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = "(Nom) ";
+	break;
+      case Attribute.NUMERIC:
+	type = "(Num) ";
+	break;
+      case Attribute.STRING:
+	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
+	break;
+      case Attribute.RELATIONAL:
+	type = "(Rel) ";
+	break;
+      default:
+	type = "(???) ";
+      }
       String attnm = m_Instances.attribute(i).name();
+     
       attribNames[i] = type + attnm;
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -1061,7 +1081,7 @@ public class AttributeSelectionPanel
     // set new filter
     m_AttributeEvaluatorEditor.setCapabilitiesFilter(filterClass);
     m_AttributeSearchEditor.setCapabilitiesFilter(filterClass);
-    
+
     m_StartBut.setEnabled(true);
     // check capabilities...
     Capabilities currentFilter = m_AttributeEvaluatorEditor.getCapabilitiesFilter();
@@ -1070,7 +1090,7 @@ public class AttributeSelectionPanel
     if (evaluator != null && currentFilter != null && 
         (evaluator instanceof CapabilitiesHandler)) {
       currentSchemeCapabilities = ((CapabilitiesHandler)evaluator).getCapabilities();
-      
+          
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
           !currentSchemeCapabilities.supports(currentFilter)) {
         m_StartBut.setEnabled(false);

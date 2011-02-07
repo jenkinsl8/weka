@@ -26,10 +26,8 @@ package weka.experiment;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -53,7 +51,7 @@ import java.util.Hashtable;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public class InstancesResultListener 
   extends CSVResultListener {
@@ -221,7 +219,7 @@ public class InstancesResultListener
       throw new Error("Unrecognized ResultProducer sending results!!");
     }
     
-    Instance newInst = new DenseInstance(m_AttributeTypes.length);
+    Instance newInst = new Instance(m_AttributeTypes.length);
     for(int i = 0; i < m_AttributeTypes.length; i++) {
       Object val = null;
       if (i < key.length) {
@@ -230,7 +228,7 @@ public class InstancesResultListener
 	val = result[i - key.length];
       }
       if (val == null) {
-	newInst.setValue(i, Utils.missingValue());
+	newInst.setValue(i, Instance.missingValue());
       } else {
 	switch (m_AttributeTypes[i]) {
 	case Attribute.NOMINAL:
@@ -248,7 +246,7 @@ public class InstancesResultListener
 	  newInst.setValue(i, (double)dou);
 	  break;
 	default:
-	  newInst.setValue(i, Utils.missingValue());
+	  newInst.setValue(i, Instance.missingValue());
 	}
       }
     }
@@ -261,6 +259,6 @@ public class InstancesResultListener
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 } // InstancesResultListener

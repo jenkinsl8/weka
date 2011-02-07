@@ -31,7 +31,7 @@ import java.text.FieldPosition;
  * Class for the format of floating point numbers
  *
  * @author Yong Wang
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class FloatingPointFormat
   extends DecimalFormat
@@ -128,6 +128,6 @@ public class FloatingPointFormat
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

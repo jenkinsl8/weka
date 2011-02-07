@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class for selecting a C4.5-type split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public class C45ModelSelection
   extends ModelSelection {
@@ -43,9 +43,6 @@ public class C45ModelSelection
 
   /** Minimum number of objects in interval. */
   private int m_minNoObj;               
-
-  /** Use MDL correction? */
-  private boolean m_useMDLcorrection;         
 
   /** All the training data */
   private Instances m_allData; // 
@@ -57,14 +54,10 @@ public class C45ModelSelection
    * subsets induced by split
    * @param allData FULL training dataset (necessary for
    * selection of split points).
-   * @param useMDLcorrection whether to use MDL adjustement when
-   * finding splits on numeric attributes
    */
-  public C45ModelSelection(int minNoObj, Instances allData,
-                             boolean useMDLcorrection) {
+  public C45ModelSelection(int minNoObj, Instances allData) {
     m_minNoObj = minNoObj;
     m_allData = allData;
-    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -129,7 +122,7 @@ public class C45ModelSelection
 	if (i != (data).classIndex()){
 	  
 	  // Get models for current attribute.
-	  currentModel[i] = new C45Split(i,m_minNoObj,sumOfWeights,m_useMDLcorrection);
+	  currentModel[i] = new C45Split(i,m_minNoObj,sumOfWeights);
 	  currentModel[i].buildClassifier(data);
 	  
 	  // Check if useful split for current attribute
@@ -205,6 +198,6 @@ public class C45ModelSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }

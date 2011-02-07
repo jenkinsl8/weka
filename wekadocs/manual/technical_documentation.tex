@@ -56,8 +56,9 @@ What is ANT? This is how the ANT homepage (\url{http://ant.apache.org/}{}) defin
   \end{itemize}
 \end{itemize}
 
-\newpage
+% $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
 
+\newpage
 \section{CLASSPATH}
 \label{CLASSPATH}
 The CLASSPATH environment variable tells Java where to look for
@@ -180,8 +181,6 @@ you need to use the \textbf{-classpath} option and specify the main class.\\
 \item Win32\\ \verb=java -Xmx128m -classpath "%CLASSPATH%;weka.jar" weka.gui.Main=
 \end{itemize}
 
-%$http://weka.sourceforge.net/wekadoc/index.php/en:CLASSPATH_(3.5.6)$
-
 \section{Subversion}
 
 \subsection{General}
@@ -259,9 +258,9 @@ the Windows Explorer. TortoiseSVN
 Subversion.
 
 \newpage
-
 \section{GenericObjectEditor}
 \label{genericobjecteditor}
+
 \subsection{Introduction}
 As of version 3.4.4 it is possible for WEKA to dynamically discover
 classes at runtime (rather than using only those specified in the
@@ -306,7 +305,6 @@ archive with the WEKA classes is in your CLASSPATH (otherwise you have to add it
 to the \texttt{java} call using the \texttt{-classpath} option). \\
 
 \newpage
-
 \noindent For generating the GOE file, execute the following steps:
 \begin{tight_itemize}
 	\item generate a new \verb=GenericObjectEditor.props= file using the
@@ -373,7 +371,6 @@ weka.classifiers.Classifier=\
 \end{verbatim}
 
 \newpage
-
 \subsection{Exclusion}
 It may not always be desired to list all the classes that can be found
 along the \verb=CLASSPATH=. Sometimes, classes cannot be declared \verb=abstract=
@@ -381,35 +378,40 @@ but still shouldn't be listed in the GOE. For that reason one can list
 classes, interfaces, superclasses for certain packages to be excluded
 from display. This exclusion is done with the following file:\\
 
-{\small \verb=weka/gui/GenericPropertiesCreator.excludes=\\}
+\verb=weka/gui/GenericPropertiesCreator.excludes=\\
 
 \noindent The format of this properties file is fairly simple:\\
 
-{\small \verb^<key>=<prefix>:<class>[,<prefix>:<class>]^\\}
+\verb^<key>=<prefix>:<class>[,<prefix>:<class>]^\\
 
 \noindent Where the \verb=<key>= corresponds to a key in the
 \verb=GenericPropertiesCreator.props= file and the \verb=<prefix>= can
 be one of the following:
-\begin{tight_itemize}
-\item \textbf{S} = \textit{Superclass}\\
+
+\begin{itemize}
+\item \textbf{S} -- \textit{Superclass}\\
   any class derived from this will be excluded
-\item \textbf{I} = \textit{Interface}\\
+\item \textbf{I} -- \textit{Interface}\\
   any class implementing this interface will be excluded
-\item \textbf{C} = \textit{Class}\\
+\item \textbf{C} -- \textit{Class}\\
   exactly this class will be excluded
-\end{tight_itemize}
-Here are a few examples:
-{\small \begin{verbatim}
+\end{itemize}
+
+\noindent Here are a few examples:
+
+\begin{verbatim}
 # exclude all ResultListeners that also implement the ResultProducer interface
 # (all ResultProducers do that!)
 weka.experiment.ResultListener=\
   I:weka.experiment.ResultProducer
+
 # exclude J48 and all SingleClassifierEnhancers
 weka.classifiers.Classifier=\
   C:weka.classifiers.trees.J48,\
   S:weka.classifiers.SingleClassifierEnhancer
-\end{verbatim}}
+\end{verbatim}
 
+\newpage
 \subsection{Class Discovery}
 Unlike the \verb=Class.forName(String)= method that grabs the first class it
 can find in the \verb=CLASSPATH=, and therefore fixes the location of the
@@ -423,12 +425,11 @@ the GUI. In case of a name conflict, i.e., two directories contain the
 same class, the first one that can be found is used. In a nutshell,
 your \texttt{java} call of the GUIChooser can look like this:\\
 
-{\small \verb=java -classpath "/development:/distribution/weka.jar" weka.gui.GUIChooser=\\}
+\verb=java -classpath "/development:/distribution/weka.jar" weka.gui.GUIChooser=\\
 
 \noindent \textit{Note:} Windows users have to replace the ``:'' with ``;''
 and the forward slashes with backslashes.
 
-\newpage
 \subsection{Multiple Class Hierarchies}
 In case you are developing your own framework, but still want to use
 your classifiers within WEKA that was not possible with WEKA prior to 3.4.4.
@@ -437,7 +438,8 @@ hierarchies being displayed in the GUI. If you have developed a modified version
 of NaiveBayes, let us call it \textit{DummyBayes} and it is located in the
 package \verb=dummy.classifiers= then you will have to add this package to the
 classifiers list in the GPC file like this:
-{\small \begin{verbatim}
+
+\begin{verbatim}
 weka.classifiers.Classifier=\
  weka.classifiers.bayes,\
  weka.classifiers.functions,\
@@ -446,8 +448,10 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees,\
  weka.classifiers.rules,\
  dummy.classifiers
-\end{verbatim}}
-Your java call for the GUIChooser might look like this:
+\end{verbatim}
+
+\newpage
+\noindent Your java call for the GUIChooser might look like this:
 
 \verb=java -classpath "weka.jar:dummy.jar" weka.gui.GUIChooser=\\
 
@@ -578,6 +582,7 @@ The option takes exactly one parameter,
   default value for the type tag we don't need to specify it
   explicitly.\\\\
 \verb^<option name="t">somefile.arff</option>^
+\newpage
 \item \textbf{hyphens}\\
 Meta-Classifiers like \verb=AdaBoostM1= take another classifier as option
 with the \verb=-W= option, where the options for the base classifier follow
@@ -613,9 +618,10 @@ then get this XML:\\
 anymore about the level of quotes one is using and therefore doesn't
 have to care about the correct escaping (i.e. \verb=`` ... \" ... \" ...''=)
 since this is done automatically.
+\end{itemize}
 
 \newpage
-And if we now put all together we can transform this more complicated
+\noindent And if we now put all together we can transform this more complicated
 command line (\verb=java= and the \verb=CLASSPATH= omitted):
 
 {\small \begin{verbatim}
@@ -653,9 +659,9 @@ command line (\verb=java= and the \verb=CLASSPATH= omitted):
    <option name="t">test/datasets/hepatitis.arff</option>
 </options>
 \end{verbatim}}
-\end{itemize}
 
-\noindent \textbf{Note}: The \verb=type= and \verb=value= attribute of the outermost
+\noindent \textbf{Note}: The \verb=type= and \verb=value= attribute of the
+outermost
 \verb=option=s tag is not used while reading the parameters. It is merely for
 documentation purposes, so that one knows which class was actually
 started from the command line.\\

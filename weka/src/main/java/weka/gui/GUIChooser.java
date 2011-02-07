@@ -22,35 +22,6 @@
 
 package weka.gui;
 
-import weka.classifiers.bayes.net.GUI;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.SystemInfo;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
-import weka.gui.arffviewer.ArffViewer;
-import weka.gui.beans.KnowledgeFlow;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.boundaryvisualizer.BoundaryVisualizer;
-import weka.gui.experiment.Experimenter;
-import weka.gui.explorer.Explorer;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
-import weka.gui.scripting.JythonPanel;
-import weka.gui.sql.SqlViewer;
-import weka.gui.treevisualizer.Node;
-import weka.gui.treevisualizer.NodePlace;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeBuild;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -80,7 +51,6 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -93,6 +63,31 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+
+import weka.classifiers.bayes.net.GUI;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.SystemInfo;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.gui.arffviewer.ArffViewer;
+import weka.gui.beans.KnowledgeFlow;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.boundaryvisualizer.BoundaryVisualizer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.sql.SqlViewer;
+import weka.gui.treevisualizer.Node;
+import weka.gui.treevisualizer.NodePlace;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeBuild;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
 
 /** 
  * The main class for the Weka GUIChooser. Lets the user choose
@@ -148,12 +143,6 @@ public class GUIChooser
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
 
-  /** The frame containing the Groovy console. */
-  protected JFrame m_GroovyConsoleFrame;
-
-  /** The frame containing the Jython console. */
-  protected JFrame m_JythonConsoleFrame;
-
   /** keeps track of the opened ArffViewer instancs */
   protected Vector m_ArffViewers = new Vector();
 
@@ -165,9 +154,6 @@ public class GUIChooser
   
   /** The frame containing the ensemble library interface */
   protected JFrame m_EnsembleLibraryFrame;
-  
-  /** The frame containing the package manager */
-  protected JFrame m_PackageManagerFrame;
 
   // Visualization
 
@@ -248,8 +234,8 @@ public class GUIChooser
 	      "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
 
     // general layout
-    m_Icon = Toolkit.getDefaultToolkit().
-      getImage(GUIChooser.class.getClassLoader().getResource("weka/gui/weka_icon.gif"));
+    m_Icon = Toolkit.getDefaultToolkit().getImage(
+	GUIChooser.class.getClassLoader().getResource("weka/gui/weka_icon.gif"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
     
@@ -614,6 +600,7 @@ public class GUIChooser
           m_BoundaryVisualizerFrame = new JFrame("BoundaryVisualizer");
           m_BoundaryVisualizerFrame.setIconImage(m_Icon);
           m_BoundaryVisualizerFrame.getContentPane().setLayout(new BorderLayout());
+          
           final BoundaryVisualizer bv = new BoundaryVisualizer();
           m_BoundaryVisualizerFrame.getContentPane().add(bv, BorderLayout.CENTER);
           m_BoundaryVisualizerFrame.setSize(bv.getMinimumSize());
@@ -708,45 +695,6 @@ public class GUIChooser
     m_jMenuTools.setText("Tools");
     m_jMenuTools.setMnemonic('T');
     
-    // Package Manager
-    final JMenuItem jMenuItemToolsPackageManager = new JMenuItem();
-    m_jMenuTools.add(jMenuItemToolsPackageManager);
-    jMenuItemToolsPackageManager.setText("Package manager");
-    jMenuItemToolsPackageManager.
-      setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_MASK));
-    jMenuItemToolsPackageManager.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_PackageManagerFrame == null) {
-          jMenuItemToolsPackageManager.setEnabled(false);
-          Thread temp = new Thread() {
-            public void run() {
-              final weka.gui.PackageManager pm;
-              pm = new weka.gui.PackageManager();
-              m_PackageManagerFrame = new JFrame("Package Manager");
-              m_PackageManagerFrame.setIconImage(m_Icon);
-              m_PackageManagerFrame.getContentPane().setLayout(new BorderLayout());
-              m_PackageManagerFrame.getContentPane().add(pm, BorderLayout.CENTER);
-              m_PackageManagerFrame.addWindowListener(new WindowAdapter() {
-                public void windowClosing(WindowEvent w) {
-                  m_PackageManagerFrame.dispose();
-                  m_PackageManagerFrame = null;
-                  jMenuItemToolsPackageManager.setEnabled(true);
-                  checkExit();
-                }                
-              });
-              Dimension screenSize = m_PackageManagerFrame.getToolkit().getScreenSize();
-              int width = screenSize.width * 8 / 10;
-              int height = screenSize.height * 8 / 10;
-              m_PackageManagerFrame.setBounds(width/8, height/8, width, height);
-              m_PackageManagerFrame.setVisible(true);
-              pm.setInitialSplitPaneDividerLocation();
-            }
-          };
-          temp.start();
-        }
-      }
-    });
-    
     // Tools/ArffViewer
     JMenuItem jMenuItemToolsArffViewer = new JMenuItem();
     m_jMenuTools.add(jMenuItemToolsArffViewer);
@@ -830,66 +778,6 @@ public class GUIChooser
         }
       }
     });
-    
-    // Tools/Groovy console
-    if (Groovy.isPresent()) {
-      final JMenuItem jMenuItemGroovyConsole = new JMenuItem();
-      m_jMenuTools.add(jMenuItemGroovyConsole);
-      jMenuItemGroovyConsole.setText("Groovy console");
-      jMenuItemGroovyConsole.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_MASK));
-      jMenuItemGroovyConsole.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (m_BayesNetGUIFrame == null) {
-	    jMenuItemGroovyConsole.setEnabled(false);
-	    final GroovyPanel groovyPanel = new GroovyPanel();
-	    m_GroovyConsoleFrame = new JFrame(groovyPanel.getPlainTitle());
-	    m_GroovyConsoleFrame.setIconImage(m_Icon);
-	    m_GroovyConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-	    m_GroovyConsoleFrame.setJMenuBar(groovyPanel.getMenuBar());
-	    m_GroovyConsoleFrame.getContentPane().add(groovyPanel, BorderLayout.CENTER);
-	    m_GroovyConsoleFrame.addWindowListener(new WindowAdapter() {
-	      public void windowClosed(WindowEvent w) {
-		m_GroovyConsoleFrame = null;
-		jMenuItemGroovyConsole.setEnabled(true);
-		checkExit();
-	      }
-	    });
-	    m_GroovyConsoleFrame.setSize(800, 600);
-	    m_GroovyConsoleFrame.setVisible(true);
-	  }
-	}
-    });
-    }
-    
-    // Tools/Jython console
-    if (Jython.isPresent()) {
-      final JMenuItem jMenuItemJythonConsole = new JMenuItem();
-      m_jMenuTools.add(jMenuItemJythonConsole);
-      jMenuItemJythonConsole.setText("Jython console");
-      jMenuItemJythonConsole.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
-      jMenuItemJythonConsole.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  if (m_BayesNetGUIFrame == null) {
-	    jMenuItemJythonConsole.setEnabled(false);
-	    final JythonPanel jythonPanel = new JythonPanel();
-	    m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
-	    m_JythonConsoleFrame.setIconImage(m_Icon);
-	    m_JythonConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-	    m_JythonConsoleFrame.setJMenuBar(jythonPanel.getMenuBar());
-	    m_JythonConsoleFrame.getContentPane().add(jythonPanel, BorderLayout.CENTER);
-	    m_JythonConsoleFrame.addWindowListener(new WindowAdapter() {
-	      public void windowClosed(WindowEvent w) {
-		m_JythonConsoleFrame = null;
-		jMenuItemJythonConsole.setEnabled(true);
-		checkExit();
-	      }
-	    });
-	    m_JythonConsoleFrame.setSize(800, 600);
-	    m_JythonConsoleFrame.setVisible(true);
-	  }
-	}
-    });
-    }
     
     // Help
     m_jMenuHelp = new JMenu();
@@ -1131,32 +1019,6 @@ public class GUIChooser
       }
     });
     pack();
-    
-    if (!Utils.getDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager")) {
-      Thread tipThread = new Thread() {
-        public void run() {
-          JCheckBox dontShow = new JCheckBox("Do not show this message again");
-          Object[] stuff = new Object[2];
-          stuff[0] = "Weka has a package manager that you\n"
-            + "can use to install many learning schemes and tools.\nThe package manager can be "
-            + "found under the \"Tools\" menu.\n";
-          stuff[1] = dontShow;
-          // Display the tip on finding/using the package manager
-          JOptionPane.showMessageDialog(GUIChooser.this, stuff, 
-              "Weka GUIChooser", JOptionPane.OK_OPTION);
-          
-          if (dontShow.isSelected()) {
-            try {
-              Utils.setDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager");
-            } catch (Exception ex) {
-              // quietly ignore
-            }
-          }
-        }
-      };
-      tipThread.setPriority(Thread.MIN_PRIORITY);
-      tipThread.start();
-    }
   }
   
   /**
@@ -1382,8 +1244,6 @@ public class GUIChooser
 	// tools
 	&& (m_ArffViewers.size() == 0)
 	&& (m_SqlViewerFrame == null)
-	&& (m_GroovyConsoleFrame == null)
-	&& (m_JythonConsoleFrame == null)
 	&& (m_EnsembleLibraryFrame == null)
 	// visualization
 	&& (m_Plots.size() == 0)

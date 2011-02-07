@@ -275,9 +275,8 @@ public class ClusterEvaluation
     loglk /= sum;
     m_logL = loglk;
     m_clusterAssignments = new double [clusterAssignments.size()];
-    for (i = 0; i < clusterAssignments.size(); i++) {
+    for (i = 0; i < clusterAssignments.size(); i++)
       m_clusterAssignments[i] = clusterAssignments.get(i);
-    }
     int numInstFieldWidth = (int)((Math.log(clusterAssignments.size())/Math.log(10))+1);
     
     m_clusteringResults.append(m_Clusterer.toString());
@@ -303,11 +302,10 @@ public class ClusterEvaluation
     if (m_Clusterer instanceof DensityBasedClusterer)
       m_clusteringResults.append("\n\nLog likelihood: " 
 				 + Utils.doubleToString(loglk, 1, 5) 
-				 + "\n");       
+				 + "\n");
     
-    if (hasClass) {
+    if (hasClass)
       evaluateClustersWithRespectToClass(test, testFileName);
-    }
   }
 
   /**
@@ -323,8 +321,6 @@ public class ClusterEvaluation
   private void evaluateClustersWithRespectToClass(Instances inst, String fileName)
     throws Exception {
     
-    
-    
     int numClasses = inst.classAttribute().numValues();
     int[][] counts = new int [m_numClusters][numClasses];
     int[] clusterTotals = new int[m_numClusters];
@@ -335,14 +331,12 @@ public class ClusterEvaluation
     Instance instance = null;
     int i;
     int numInstances;
-        
 
     if (fileName == null)
       fileName = "";
     
-    if (fileName.length() != 0) {
+    if (fileName.length() != 0)
       source = new DataSource(fileName);
-    }
     else
       source = new DataSource(inst);
     instances = source.getStructure(inst.classIndex());
@@ -352,7 +346,7 @@ public class ClusterEvaluation
       instance = source.nextElement(instances);
       if (m_clusterAssignments[i] >= 0) {
         counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
-        clusterTotals[(int)m_clusterAssignments[i]]++;        
+        clusterTotals[(int)m_clusterAssignments[i]]++;
       }
       i++;
     }
@@ -756,7 +750,7 @@ public class ClusterEvaluation
       DataSource test = new DataSource(testFileName);
       Instances testStructure = test.getStructure();
       if (!trainHeader.equalHeaders(testStructure)) {
-        throw new Exception("Training and testing data are not compatible\n" + trainHeader.equalHeadersMsg(testStructure));
+        throw new Exception("Training and testing data are not compatible");
       }
 
       text.append("\n\n=== Clustering stats for testing data ===\n\n" 

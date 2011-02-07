@@ -24,7 +24,6 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -71,7 +70,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.25 $
  */
 public class RegressionSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer,
@@ -107,7 +106,7 @@ public class RegressionSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 23;
+  private static final int RESULT_SIZE = 21;
 
   /**
    * No args constructor.
@@ -191,7 +190,7 @@ public class RegressionSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClassifier(AbstractClassifier.forName(cName, null));
+    setClassifier(Classifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier())
 	.setOptions(Utils.partitionOptions(options));
@@ -396,10 +395,6 @@ public class RegressionSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
-    // Prediction interval statistics
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -454,10 +449,6 @@ public class RegressionSplitEvaluator
     resultNames[current++] = "Serialized_Train_Set_Size";
     resultNames[current++] = "Serialized_Test_Set_Size";
     
-    // Prediction interval statistics
-    resultNames[current++] = "Coverage_of_Test_Cases_By_Regions";
-    resultNames[current++] = "Size_of_Predicted_Regions";
-
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -501,7 +492,7 @@ public class RegressionSplitEvaluator
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
          trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
     Evaluation eval = new Evaluation(train);
-    m_Classifier = AbstractClassifier.makeCopy(m_Template);
+    m_Classifier = Classifier.makeCopy(m_Template);
 
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)
@@ -547,8 +538,8 @@ public class RegressionSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Utils.missingValue());
-      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
     }
     
     // sizes
@@ -565,10 +556,6 @@ public class RegressionSplitEvaluator
     oostream.writeObject(test);
     result[current++] = new Double(bastream.size());
     
-    // Prediction interval statistics
-    result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
-    result[current++] = new Double(eval.sizeOfPredictedRegions());
-
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -580,7 +567,7 @@ public class RegressionSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Utils.isMissingValue(dv)) {
+          if (!Instance.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {
@@ -693,7 +680,7 @@ public class RegressionSplitEvaluator
 	    try {
 	      double dv = ((AdditionalMeasureProducer)m_Classifier).
 		getMeasure(m_AdditionalMeasures[i]);
-	      if (!Utils.isMissingValue(dv)) {
+	      if (!Instance.isMissingValue(dv)) {
 		Double value = new Double(dv);
 		result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
 	      } else {
@@ -730,6 +717,6 @@ public class RegressionSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.25 $");
   }
 } // RegressionSplitEvaluator

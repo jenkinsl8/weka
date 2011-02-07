@@ -26,7 +26,7 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class ContingencyTables
   implements RevisionHandler {
@@ -578,7 +578,7 @@ public class ContingencyTables
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

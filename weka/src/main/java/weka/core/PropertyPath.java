@@ -153,7 +153,7 @@ public class PropertyPath
     implements RevisionHandler {
     
     /** the structure */
-    protected Vector<PathElement> m_Elements;
+    protected Vector m_Elements;
     
     /**
      * default constructor, only used internally
@@ -161,7 +161,7 @@ public class PropertyPath
     protected Path() {
       super();
       
-      m_Elements = new Vector<PathElement>();
+      m_Elements = new Vector();
     }
     
     /**
@@ -180,11 +180,11 @@ public class PropertyPath
      * 
      * @param elements	the PathElements to use
      */
-    public Path(Vector<PathElement> elements) {
+    public Path(Vector elements) {
       this();
       
       for (int i = 0; i < elements.size(); i++)
-	m_Elements.add((PathElement) elements.get(i).clone());
+	m_Elements.add(((PathElement) elements.get(i)).clone());
     }
     
     /**
@@ -205,11 +205,11 @@ public class PropertyPath
      * @param path	the path to break up
      * @return		the single elements of the path
      */
-    protected Vector<PathElement> breakUp(String path) {
-      Vector<PathElement>		result;
+    protected Vector breakUp(String path) {
+      Vector		result;
       StringTokenizer	tok;
       
-      result = new Vector<PathElement>();
+      result = new Vector();
       
       tok = new StringTokenizer(path, ".");
       while (tok.hasMoreTokens())
@@ -269,10 +269,10 @@ public class PropertyPath
      * @return			the new subpath
      */
     public Path subpath(int startIndex, int endIndex) {
-      Vector<PathElement>	list;
+      Vector	list;
       int	i;
       
-      list = new Vector<PathElement>();
+      list = new Vector();
       for (i = startIndex; i < endIndex; i++)
 	list.add(get(i));
       
