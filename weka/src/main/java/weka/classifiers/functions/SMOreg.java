@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RegOptimizer;
@@ -160,7 +159,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class SMOreg 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, AdditionalMeasureProducer, 
              TechnicalInformationHandler {
   

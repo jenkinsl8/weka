@@ -22,35 +22,29 @@
 
 package weka.core.pmml;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.BufferedOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.pmml.consumer.GeneralRegression;
-import weka.classifiers.pmml.consumer.NeuralNetwork;
-import weka.classifiers.pmml.consumer.PMMLClassifier;
-import weka.classifiers.pmml.consumer.Regression;
-import weka.classifiers.pmml.consumer.RuleSetModel;
-import weka.classifiers.pmml.consumer.SupportVectorMachineModel;
-import weka.classifiers.pmml.consumer.TreeModel;
-import weka.core.Attribute;
-import weka.core.Instance;
+import weka.classifiers.Classifier;
+import weka.classifiers.pmml.consumer.*;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Utils;
 import weka.gui.Logger;
 
@@ -68,10 +62,7 @@ public class PMMLFactory {
     UNKNOWN_MODEL ("unknown"),
     REGRESSION_MODEL ("Regression"),
     GENERAL_REGRESSION_MODEL ("GeneralRegression"),
-    NEURAL_NETWORK_MODEL ("NeuralNetwork"),
-    TREE_MODEL ("TreeModel"),
-    RULESET_MODEL("RuleSetModel"),
-    SVM_MODEL ("SupportVectorMachineModel");
+    NEURAL_NETWORK_MODEL ("NeuralNetwork");
     
     private final String m_stringVal;
     
@@ -155,7 +146,7 @@ public class PMMLFactory {
    *
    * @param stream the <code>InputStream</code> to read from
    * @param log the logging object to use (or null if none is to be used)
-   * @return a PMML model
+   * @returns a PMML model
    * @throws Exception if there is a problem while reading from the stream
    */
   public static PMMLModel getPMMLModel(InputStream stream, Logger log) throws Exception {
@@ -181,7 +172,7 @@ public class PMMLFactory {
 
     // Construct mining schema and meta data
     MiningSchema ms = new MiningSchema(model, dataDictionary, transDict);
-    
+
     //System.out.println(ms);
     //System.exit(1);
     //    Instances miningSchema = getMiningSchemaAsInstances(model, dataDictionary);
@@ -217,7 +208,6 @@ public class PMMLFactory {
     
     return transDict;
   }
-  
 
   /**
    * Serialize a <code>PMMLModel</code> object that encapsulates a PMML model
@@ -289,15 +279,6 @@ public class PMMLFactory {
     case NEURAL_NETWORK_MODEL:
       pmmlM = new NeuralNetwork(model, dataDictionary, miningSchema);
       break;
-    case TREE_MODEL:
-      pmmlM = new TreeModel(model, dataDictionary, miningSchema);
-      break;
-    case RULESET_MODEL:
-      pmmlM = new RuleSetModel(model, dataDictionary, miningSchema);
-      break;
-    case SVM_MODEL:
-      pmmlM = new SupportVectorMachineModel(model, dataDictionary, miningSchema);
-      break;
     default:
       throw new Exception("[PMMLFactory] Unknown model type!!");
     }
@@ -327,21 +308,6 @@ public class PMMLFactory {
     if (temp.getLength() > 0) {
       return ModelType.NEURAL_NETWORK_MODEL;
     }
-    
-    temp = doc.getElementsByTagName("TreeModel");
-    if (temp.getLength() > 0) {
-      return ModelType.TREE_MODEL;
-    }
-    
-    temp = doc.getElementsByTagName("RuleSetModel");
-    if (temp.getLength() > 0) {
-      return ModelType.RULESET_MODEL;
-    }
-    
-    temp = doc.getElementsByTagName("SupportVectorMachineModel");
-    if (temp.getLength() > 0) {
-      return ModelType.SVM_MODEL;
-    }
 
     return ModelType.UNKNOWN_MODEL;
   }
@@ -366,15 +332,6 @@ public class PMMLFactory {
       break;
     case NEURAL_NETWORK_MODEL:
       temp = doc.getElementsByTagName("NeuralNetwork");
-      break;
-    case TREE_MODEL:
-      temp = doc.getElementsByTagName("TreeModel");
-      break;
-    case RULESET_MODEL:
-      temp = doc.getElementsByTagName("RuleSetModel");
-      break;
-    case SVM_MODEL:
-      temp = doc.getElementsByTagName("SupportVectorMachineModel");
       break;
     default:
       throw new Exception("[PMMLFactory] unknown/unsupported model type.");
@@ -402,7 +359,7 @@ public class PMMLFactory {
   protected static Instances getMiningSchemaAsInstances(Element model,
                                                         Instances dataDictionary) 
     throws Exception {
-    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
+    FastVector attInfo = new FastVector();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
     int addedCount = 0;
@@ -418,7 +375,7 @@ public class PMMLFactory {
         Attribute miningAtt = dataDictionary.attribute(name);
         if (miningAtt != null) {
           if (usage.length() == 0 || usage.equals("active") || usage.equals("predicted")) {
-            attInfo.add(miningAtt);
+            attInfo.addElement(miningAtt);
             addedCount++;
           }
           if (usage.equals("predicted")) {
@@ -454,7 +411,7 @@ public class PMMLFactory {
 
     // TO-DO: definition of missing values (see below)
 
-    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
+    FastVector attInfo = new FastVector();
     NodeList dataDictionary = doc.getElementsByTagName("DataField");
     for (int i = 0; i < dataDictionary.getLength(); i++) {
       Node dataField = dataDictionary.item(i);
@@ -471,11 +428,11 @@ public class PMMLFactory {
             if (valueList == null || valueList.getLength() == 0) {
               // assume that categorical values will be revealed in the actual model.
               // Create a string attribute for now
-              ArrayList<String> nullV = null;
-              tempAtt = new Attribute(name, (ArrayList<String>)nullV);
+              FastVector nullV = null;
+              tempAtt = new Attribute(name, nullV);
             } else {
               // add the values (if defined as "valid")
-              ArrayList<String> valueVector = new ArrayList<String>();
+              FastVector valueVector = new FastVector();
               for (int j = 0; j < valueList.getLength(); j++) {
                 Node val = valueList.item(j);
                 if (val.getNodeType() == Node.ELEMENT_NODE) {
@@ -483,7 +440,7 @@ public class PMMLFactory {
                   String property = ((Element)val).getAttribute("property");
                   if (property == null || property.length() == 0 || property.equals("valid")) {
                     String value = ((Element)val).getAttribute("value");
-                    valueVector.add(value);
+                    valueVector.addElement(value);
                   } else {
                     // Just ignore invalid or missing value definitions for now...
                     // TO-DO: implement Value meta data with missing/invalid value defs.
@@ -495,7 +452,7 @@ public class PMMLFactory {
           } else {
             throw new Exception("[PMMLFactory] can't handle " + type + "attributes.");
           }
-          attInfo.add(tempAtt);
+          attInfo.addElement(tempAtt);
         }
       }
     }
@@ -537,7 +494,7 @@ public class PMMLFactory {
     return buff.toString();
   }
   
-  private static class PMMLClassifierRunner extends AbstractClassifier {
+  private static class PMMLClassifierRunner extends Classifier {
     public double[] distributionForInstance(Instance test) throws Exception {
       throw new Exception("Don't call this method!!");
     }
@@ -566,17 +523,15 @@ public class PMMLFactory {
         throw new Exception("[PMMLFactory] must specify a PMML file using the -l option.");
       }
       // see if it is supported before going any further
-      getPMMLModel(pmmlFile, null);
+      PMMLModel model = getPMMLModel(pmmlFile, null);
       
       PMMLClassifierRunner pcr = new PMMLClassifierRunner();
       pcr.evaluatePMMLClassifier(args);
 
-      
-      /*PMMLModel model = getPMMLModel(args[0], null);
-      System.out.println(model);
+/*      System.out.println(model);
       if (args.length == 2) {
         // load an arff file
-        Instances testData = new Instances(new java.io.BufferedReader(new java.io.FileReader(args[1])));
+        Instances testData = new Instances(new BufferedReader(new FileReader(args[1])));
         Instances miningSchemaI = model.getMiningSchema().getFieldsAsInstances();
         if (miningSchemaI.classIndex() >= 0) {
           String className = miningSchemaI.classAttribute().name();
@@ -589,7 +544,7 @@ public class PMMLFactory {
           }
         }
         System.out.println(applyClassifier(model, testData));
-      }*/
+      } */
     } catch (Exception ex) {
       ex.printStackTrace();
     }

@@ -79,7 +79,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class Matrix 
   implements Cloneable, Serializable, RevisionHandler {
@@ -1260,7 +1260,7 @@ public class Matrix
     tokenizer.wordChars(0,255);
     tokenizer.whitespaceChars(0, ' ');
     tokenizer.eolIsSignificant(true);
-    java.util.Vector<Object> v = new java.util.Vector<Object>();
+    java.util.Vector v = new java.util.Vector();
 
     // Ignore initial empty lines
     while (tokenizer.nextToken() == StreamTokenizer.TT_EOL);
@@ -1442,7 +1442,7 @@ public class Matrix
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
   
   /**

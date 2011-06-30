@@ -28,7 +28,7 @@ import java.lang.Math;
  * Class implementing some mathematical functions.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public final class SpecialFunctions
   implements RevisionHandler {
@@ -92,7 +92,7 @@ public final class SpecialFunctions
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

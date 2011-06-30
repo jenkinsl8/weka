@@ -119,7 +119,7 @@ public class Cobweb
    *
    * @see Serializable
    */
-  public class CNode 
+  private class CNode 
     implements Serializable, RevisionHandler {
 
     /** for serialization */
@@ -308,7 +308,7 @@ public class Cobweb
       double bestHostCU = categoryUtility();
       CNode finalBestHost = newLeaf;
       
-      // remove new leaf when searching for best and second best nodes to
+      // remove new leaf when seaching for best and second best nodes to
       // consider for merging and splitting
       m_children.removeElementAt(m_children.size()-1);
 
@@ -949,9 +949,9 @@ public class Cobweb
 	break;
       }
 
-//      host.updateStats(instance, false);
+      //host.updateStats(instance, false);
       temp = host.findHost(instance, true);
-//      host.updateStats(instance, true);
+      // host.updateStats(instance, true);
       
       if (temp != null) {
 	host = temp;
@@ -993,15 +993,6 @@ public class Cobweb
   public int numberOfClusters() {
     determineNumberOfClusters();
     return m_numberOfClusters;
-  }
-  
-  /**
-   * Get the root of the tree.
-   * 
-   * @return the root of the tree.
-   */
-  public CNode getTreeRoot() {
-    return m_cobwebTree;
   }
 
   /**

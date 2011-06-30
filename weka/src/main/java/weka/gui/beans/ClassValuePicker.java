@@ -40,7 +40,7 @@ import javax.swing.JPanel;
 public class ClassValuePicker
   extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
-	     EventConstraints, Serializable, StructureProducer {
+	     EventConstraints, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = -1196143276710882989L;
@@ -69,8 +69,7 @@ public class ClassValuePicker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate which class value is to be considered the \"positive\" "
-      +"class value (useful for ROC style curves).";
+    return Messages.getInstance().getString("ClassValuePicker_GlobalInfo_Text");
   }
 
   public ClassValuePicker() {
@@ -95,28 +94,6 @@ public class ClassValuePicker
   public String getCustomName() {
     return m_visual.getText();
   }
-  
-  public Instances getStructure(String eventName) {
-    if (!eventName.equals("dataSet")) {
-      return null;
-    }
-    if (m_dataProvider == null) {
-      return null;
-    }
-    if (m_dataProvider != null && m_dataProvider instanceof StructureProducer) {
-      return ((StructureProducer)m_dataProvider).getStructure("dataSet");
-    }
-    
-    return null;
-  }
-  
-  protected Instances getStructure() {
-    if (m_dataProvider != null) {
-      return getStructure("dataSet");
-    }
-    
-    return null;
-  }
 
   /**
    * Returns the structure of the incoming instances (if any)
@@ -124,19 +101,8 @@ public class ClassValuePicker
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
-    // loaders will push instances format to us
-    // when the user makes configuration changes
-    // to the loader in the gui. However, if a fully
-    // configured flow is loaded then we won't get
-    // this information pushed to us until the
-    // flow is run. In this case we want to pull
-    // it (if possible) from upstream steps so
-    // that our customizer can provide the nice
-    // UI with the drop down box of class names.
-    if (m_connectedFormat == null) {
-      // try and pull the incoming structure
-      // from the upstream step (if possible)
-      m_connectedFormat = getStructure();
+    if (m_connectedFormat ==null) {
+      System.err.println(Messages.getInstance().getString("ClassValuePicker_GetConnectedFormat_Error_Text"));
     }
     return m_connectedFormat;
   }
@@ -183,11 +149,11 @@ public class ClassValuePicker
     if (dataSet.classIndex() < 0) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] " 
+	  logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_First") 
 	      + statusMessagePrefix() 
-	      + " No class attribute defined in data set.");
+	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Second"));
 	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: No class attribute defined in data set.");
+	    + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_First"));
       }
       return dataSet;
     }
@@ -195,16 +161,17 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] "
+	  logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Third")
 	      + statusMessagePrefix()
-	      + " Class attribute must be nominal (ClassValuePicker)");
+	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Fourth"));
 	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: Class attribute must be nominal.");
+	    + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Second"));
       }
+      
       return dataSet;
     } else {
       if (m_logger != null) {
-        m_logger.statusMessage(statusMessagePrefix() + "remove");
+        m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Third"));
       }
     }
 
@@ -222,11 +189,11 @@ public class ClassValuePicker
       } catch (Exception ex) {
 	if (m_logger != null) {
 	  m_logger.
-	    logMessage("[ClassValuePicker] "
+	    logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Fifth")
 	        +statusMessagePrefix()
-	        + " Unable to swap class attibute values.");
+	        + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Sixth"));
 	  m_logger.statusMessage(statusMessagePrefix()
-	      + "ERROR (See log for details)");
+	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Fourth"));
 	}
       }
     }
@@ -240,8 +207,7 @@ public class ClassValuePicker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying data listeners "
-			   +"(ClassValuePicker)");
+	System.err.println(Messages.getInstance().getString("ClassValuePicker_NotifyDataListeners_Text"));
 	((DataSourceListener)l.elementAt(i)).acceptDataSet(tse);
       }
     }

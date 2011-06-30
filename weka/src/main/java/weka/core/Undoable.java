@@ -26,7 +26,7 @@ package weka.core;
  * Interface implemented by classes that support undo.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public interface Undoable {
   /**

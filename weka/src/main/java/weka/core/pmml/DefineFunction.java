@@ -61,7 +61,7 @@ public class DefineFunction extends Function {
         return new Attribute(m_fieldName);
       }
       // return a string attribute for categorical/ordinal optypes
-      return new Attribute(m_fieldName, (ArrayList<String>)null);
+      return new Attribute(m_fieldName, (weka.core.FastVector)null);
     }
   }
   
@@ -126,15 +126,6 @@ public class DefineFunction extends Function {
       throw new Exception("[DefineFunction] optype is categorical/ordinal but our Expression's optype "
           + "is not."); 
     }
-  }
-  
-  public void pushParameterDefs() throws Exception {
-    if (m_parameterDefs == null) {
-      throw new Exception("[DefineFunction] parameter definitions are null! Can't "
-          + "push them to encapsulated expression.");
-    }
-    
-    m_expression.setFieldDefs(m_parameterDefs);
   }
 
   /**

@@ -27,7 +27,6 @@ import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -46,7 +45,7 @@ import javax.swing.JPanel;
  */
 public class AssociatorCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 5767664969353495974L;
@@ -64,12 +63,10 @@ public class AssociatorCustomizer
   private PropertySheetPanel m_AssociatorEditor = 
     new PropertySheetPanel();
   
-  protected Window m_parentWindow;
+  protected JFrame m_parentFrame;
   
   /** Backup is user presses cancel */
   private weka.associations.Associator m_backup;
-  
-  private ModifyListener m_modifyListener;
 
   public AssociatorCustomizer() {
     setLayout(new BorderLayout());
@@ -77,19 +74,14 @@ public class AssociatorCustomizer
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
-    JButton OKBut = new JButton("OK");
+    JButton OKBut = new JButton(Messages.getInstance().getString("AssociatorCustomizer_OKBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(AssociatorCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
 
-    JButton CancelBut = new JButton("Cancel");
+    JButton CancelBut = new JButton(Messages.getInstance().getString("AssociatorCustomizer_CancelBut_JButton_Text"));
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // cancel requested, so revert to backup and then
@@ -97,12 +89,7 @@ public class AssociatorCustomizer
         if (m_backup != null) {
           m_dsAssociator.setAssociator(m_backup);
         }
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(AssociatorCustomizer.this, false);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
     
@@ -147,12 +134,7 @@ public class AssociatorCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 }

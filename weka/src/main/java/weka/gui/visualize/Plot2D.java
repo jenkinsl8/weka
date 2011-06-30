@@ -23,7 +23,6 @@
 package weka.gui.visualize;
 
 import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 
@@ -38,10 +37,11 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Random;
-import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * This class plots datasets in two dimensions. It can also plot
@@ -81,7 +81,7 @@ public class Plot2D
   protected PlotData2D m_masterPlot = null;
 
   /** The name of the master plot */
-  protected String m_masterName = "master plot";
+  protected String m_masterName = Messages.getInstance().getString("Plot2D_MasterName_Text");
 
   /** The instances to be plotted */
   protected Instances m_plotInstances=null;
@@ -92,11 +92,9 @@ public class Plot2D
       to draw polygons etc. before we draw plot axis and data points */
   protected Plot2DCompanion m_plotCompanion=null;
 
-  /** the class for displaying instance info. */
-  protected Class m_InstanceInfoFrameClass = null;
-  
   /** For popping up text info on data points */
   protected JFrame m_InstanceInfo = null;
+  protected JTextArea m_InstanceInfoText = new JTextArea();
 
   /** The list of the colors used */
   protected FastVector m_colorList;
@@ -174,6 +172,8 @@ public class Plot2D
     super();
     setProperties();
     this.setBackground(m_backgroundColour);
+    m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));
+    m_InstanceInfoText.setEditable(false);
 
     m_drawnPoints = new int[this.getWidth()][this.getHeight()];
 
@@ -223,14 +223,6 @@ public class Plot2D
 	//System.err.println("Setting background colour to: "+backgroundColour);
 	m_backgroundColour = VisualizeUtils.processColour(backgroundColour, 
 							  m_backgroundColour);
-      }
-      
-      try {
-	m_InstanceInfoFrameClass = Class.forName(VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(thisClass + ".instanceInfoFrame", "weka.gui.visualize.InstanceInfoFrame"));
-      }
-      catch (Exception e) {
-	e.printStackTrace();
-	m_InstanceInfoFrameClass = InstanceInfoFrame.class;
       }
     }
   }
@@ -409,7 +401,7 @@ public class Plot2D
   public void setInstances(Instances inst) throws Exception {
     //System.err.println("Setting Instances");
     PlotData2D tempPlot = new PlotData2D(inst);
-    tempPlot.setPlotName("master plot");
+    tempPlot.setPlotName(Messages.getInstance().getString("Plot2D_SetInstances_TempPlot_SetPlotName_Text"));
     setMasterPlot(tempPlot);
   }
 
@@ -420,7 +412,7 @@ public class Plot2D
    */
   public void setMasterPlot(PlotData2D master) throws Exception {
     if (master.m_plotInstances == null) {
-      throw new Exception("No instances in plot data!");
+      throw new Exception(Messages.getInstance().getString("Plot2D_SetMasterPlot_Exception_Text"));
     }
     removeAllPlots();
     m_masterPlot = master;
@@ -451,14 +443,13 @@ public class Plot2D
    */
   public void addPlot(PlotData2D newPlot) throws Exception {
     if (newPlot.m_plotInstances == null) {
-      throw new Exception("No instances in plot data!");
+      throw new Exception(Messages.getInstance().getString("Plot2D_AddPlot_Exception_Text_First"));
     }
 
     if (m_masterPlot != null) {
       if (m_masterPlot.m_plotInstances.
 	  equalHeaders(newPlot.m_plotInstances) == false) {
-	throw new Exception("Plot2D :Plot data's instances are incompatable "
-			    +" with master plot");
+	throw new Exception(Messages.getInstance().getString("Plot2D_AddPlot_Exception_Text_Second"));
       }
     } else {
       m_masterPlot = newPlot;
@@ -502,10 +493,8 @@ public class Plot2D
       }
 
       StringBuffer insts = new StringBuffer(); 
-      Vector<Instances> data = new Vector<Instances>();
       for (int jj=0;jj<m_plots.size();jj++) {
 	PlotData2D temp_plot = (PlotData2D)(m_plots.elementAt(jj));
-	data.add(new Instances(temp_plot.m_plotInstances, 0));
 	
 	for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
 	  if (temp_plot.m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
@@ -518,9 +507,8 @@ public class Plot2D
 	    if ((x >= px-size) && (x <= px+size) &&
 		(y >= py-size) && (y <= py+size)) {
 	      {
-		data.get(jj).add((Instance)temp_plot.m_plotInstances.instance(i).copy());
-		insts.append("\nPlot : "+temp_plot.m_plotName
-			     + "\nInstance: " + (i + 1 ) + "\n");
+		insts.append(Messages.getInstance().getString("Plot2D_SearchPoints_Text_First") + temp_plot.m_plotName
+			     + Messages.getInstance().getString("Plot2D_SearchPoints_Text_Second") + (i + 1 ) + Messages.getInstance().getString("Plot2D_SearchPoints_Text_Third"));
 		for (int j=0;j<temp_plot.m_plotInstances.numAttributes();j++) {
 		  for (int k = 0;k < 
 			 (longest-temp_plot.m_plotInstances.
@@ -528,10 +516,10 @@ public class Plot2D
 		    insts.append(" ");
 		  }
 		  insts.append(temp_plot.m_plotInstances.attribute(j).name());  
-		  insts.append(" : ");
+		  insts.append(Messages.getInstance().getString("Plot2D_SearchPoints_Text_Fourth"));
 		  
 		  if (temp_plot.m_plotInstances.instance(i).isMissing(j)) {
-		    insts.append("Missing");
+		    insts.append(Messages.getInstance().getString("Plot2D_SearchPoints_Text_Fifth"));
 		  } else if (temp_plot.m_plotInstances.attribute(j).
 			     isNominal()) {
 		    insts.append(temp_plot.m_plotInstances.
@@ -542,31 +530,24 @@ public class Plot2D
 		    insts.append(temp_plot.m_plotInstances.
 				 instance(i).value(j));
 		  }
-		  insts.append("\n");
+		  insts.append(Messages.getInstance().getString("Plot2D_SearchPoints_Text_Sixth"));
 		}
 	      }
 	    }
 	  }
 	}
       }
-      // remove datasets that contain no instances
-      int i = 0;
-      while (data.size() > i) {
-	if (data.get(i).numInstances() == 0)
-	  data.remove(i);
-	else
-	  i++;
-      }
 
       if (insts.length() > 0) {
 	// Pop up a new frame
 	if (newFrame || m_InstanceInfo == null) {
-	  try {
-	    final JFrame jf = (JFrame) m_InstanceInfoFrameClass.newInstance();
-	    ((InstanceInfo) jf).setInfoText(insts.toString());
-	    ((InstanceInfo) jf).setInfoData(data);
-	    final JFrame testf = m_InstanceInfo;
-	    jf.addWindowListener(new WindowAdapter() {
+	  JTextArea jt = new JTextArea();
+	  jt.setFont(new Font("Monospaced", Font.PLAIN,12));
+	  jt.setEditable(false);
+	  jt.setText(insts.toString());
+	  final JFrame jf = new JFrame(Messages.getInstance().getString("Plot2D_SearchPoints_JFrame_Text"));
+	  final JFrame testf = m_InstanceInfo;
+	  jf.addWindowListener(new WindowAdapter() {
 	      public void windowClosing(WindowEvent e) {
 		if (!newFrame || testf == null) {
 		  m_InstanceInfo = null;
@@ -574,18 +555,18 @@ public class Plot2D
 		jf.dispose();
 	      }
 	    });
-	    jf.setVisible(true);
-	    if (m_InstanceInfo == null)
-	      m_InstanceInfo = jf;
+	  jf.getContentPane().setLayout(new BorderLayout());
+	  jf.getContentPane().add(new JScrollPane(jt), BorderLayout.CENTER);
+	  jf.pack();
+	  jf.setSize(320, 400);
+	  jf.setVisible(true);
+	  if (m_InstanceInfo == null) {
+	    m_InstanceInfo = jf;
+	    m_InstanceInfoText = jt;
 	  }
-	  catch (Exception e) {
-	    e.printStackTrace();
-	  }
-	}
-	else {
+	}  else {
 	  // Overwrite info in existing frame	  
-	  ((InstanceInfo) m_InstanceInfo).setInfoText(insts.toString());
-	  ((InstanceInfo) m_InstanceInfo).setInfoData(data);
+	  m_InstanceInfoText.setText(insts.toString());
 	}
       }
     }
@@ -996,7 +977,7 @@ public class Plot2D
 	  if (x_range >= 0 && y_range >= 0) {
 	    if (m_drawnPoints[x_range][y_range] == i 
 		|| m_drawnPoints[x_range][y_range] == 0
-		|| temp_plot.m_shapeSize[i] == temp_plot.m_alwaysDisplayPointsOfThisSize 
+		|| temp_plot.m_shapeSize[i] == temp_plot.m_alwaysDisplayPointsOfThisSize
 		|| temp_plot.m_displayAllPoints == true) {
 	      m_drawnPoints[x_range][y_range] = i;
 	      if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal()) {
@@ -1534,7 +1515,7 @@ public class Plot2D
       paintData(gx);
     }
   }
-  
+
   protected static Color checkAgainstBackground(Color c, Color background) {
     if (background == null) {
       return c;
@@ -1559,13 +1540,12 @@ public class Plot2D
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println("Usage : weka.gui.visualize.Plot2D "
-			   +"<dataset> [<dataset> <dataset>...]");
+	System.err.println(Messages.getInstance().getString("Plot2D_Main_Error_Text_First"));
 	System.exit(1);
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Explorer: Visualize");
+	new javax.swing.JFrame(Messages.getInstance().getString("Plot2D_Main_JFrame_Text"));
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final Plot2D p2 = new Plot2D();
@@ -1591,7 +1571,7 @@ public class Plot2D
       jf.setVisible(true);
       if (args.length >= 1) {
 	for (int j = 0; j < args.length; j++) {
-	  System.err.println("Loading instances from " + args[j]);
+	  System.err.println(Messages.getInstance().getString("Plot2D_Main_Error_Text_Second") + args[j]);
 	  java.io.Reader r = new java.io.BufferedReader(
 			     new java.io.FileReader(args[j]));
 	  Instances i = new Instances(r);
@@ -1599,13 +1579,13 @@ public class Plot2D
 	  PlotData2D pd1 = new PlotData2D(i);
 
 	  if (j == 0) {
-	    pd1.setPlotName("Master plot");
+	    pd1.setPlotName(Messages.getInstance().getString("Plot2D_Main_Pd1_SetPlotName_Text_First"));
 	    p2.setMasterPlot(pd1);
 	    p2.setXindex(2);
 	    p2.setYindex(3);
 	    p2.setCindex(i.classIndex());
 	  } else {
-	    pd1.setPlotName("Plot "+(j+1));
+	    pd1.setPlotName(Messages.getInstance().getString("Plot2D_Main_Pd1_SetPlotName_Text_Second") + (j+1));
 	    pd1.m_useCustomColour = true;
 	    pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue; 
 	    p2.addPlot(pd1);

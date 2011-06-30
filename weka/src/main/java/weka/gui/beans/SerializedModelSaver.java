@@ -36,7 +36,6 @@ import java.util.Vector;
 import javax.swing.JPanel;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -104,9 +103,6 @@ public class SerializedModelSaver
 
   /** relative path for the directory (relative to the user.dir (startup directory))? */
   private boolean m_useRelativePath = false;
-  
-  /** include relation name in filename */
-  private boolean m_includeRelationName = false;
 
   /**
    * Available file formats. Reflection is used to check if classes
@@ -115,18 +111,18 @@ public class SerializedModelSaver
   public static ArrayList<Tag> s_fileFormatsAvailable;
   static {
     s_fileFormatsAvailable = new ArrayList<Tag>();
-    s_fileFormatsAvailable.add(new Tag(BINARY, "Binary serialized model file (*"
-                                       + FILE_EXTENSION + ")", "", false));
+    s_fileFormatsAvailable.add(new Tag(BINARY, Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_First")
+                                       + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Second"), "", false));
     if (KOML.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(KOMLV,
-                                         "XML serialized model file (*"
-                                         + KOML.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
+    		  Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Third")
+                                         + KOML.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Fourth"), "", false));
     }
 
     if (XStream.isPresent()) {
       s_fileFormatsAvailable.add(new Tag(XSTREAM,
-                                         "XML serialized model file (*"
-                                         + XStream.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
+    		  Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Fifth")
+                                         + XStream.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("SerializedModelSaver_FileFormatsAvailable_Text_Sixth"), "", false));
     }
   }
   
@@ -305,21 +301,18 @@ public class SerializedModelSaver
                 titleString.length());
 
     String prefix = "";
-    String relationName = (m_includeRelationName)
-    ? trainHeader.relationName()
-    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop all processing
-      String message = "[SerializedModelSaver] " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_First") 
         + statusMessagePrefix() 
-        + " Can't save model. Reason: " 
+        + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Second")
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_StatusMessage_Text_First"));
       } else {
         System.err.println(message);
       }
@@ -327,7 +320,6 @@ public class SerializedModelSaver
     }
     String fileName = "" 
       + prefix
-      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -339,13 +331,13 @@ public class SerializedModelSaver
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop all processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Third")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_Message_Text_Fourth") 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClusterer_StatusMessage_Text_Second"));
       } else {
         System.err.println(message);
       }
@@ -374,28 +366,24 @@ public class SerializedModelSaver
                   titleString.length());
 
       String prefix = "";
-      String relationName = (m_includeRelationName)
-        ? header.relationName()
-        : "";
-        
       try {
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
         stop(); // stop processing
-        String message = "[SerializedModelSaver] "
-          + statusMessagePrefix() + " Can't save model. Reason: " 
+        String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_First")
+          + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Second") 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+              + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_First"));
         } else {
           System.err.println(message);
         }
         return;
       }
       
-      String fileName = "" + prefix + relationName + titleString;
+      String fileName = "" + prefix + titleString;
       fileName = sanitizeFilename(fileName);
 
       String dirName = m_directory.getPath();
@@ -403,13 +391,13 @@ public class SerializedModelSaver
         dirName = m_env.substitute(dirName);
       } catch (Exception ex) {
         stop(); // stop processing
-        String message = "[SerializedModelSaver] "
-          + statusMessagePrefix() + " Can't save model. Reason: " 
+        String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Third")
+          + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Fourth") 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
+              + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Second"));
         } else {
           System.err.println(message);
         }
@@ -436,37 +424,23 @@ public class SerializedModelSaver
       return;
     }
     Instances trainHeader = new Instances(ce.getTrainSet().getDataSet(), 0);
-    
-    // adjust for InputMappedClassifier (if necessary)
-    if (ce.getClassifier() instanceof weka.classifiers.misc.InputMappedClassifier) {
-      try {
-        trainHeader = 
-          ((weka.classifiers.misc.InputMappedClassifier)ce.getClassifier()).
-            getModelHeader(trainHeader);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
     String titleString = ce.getClassifier().getClass().getName();		      
     titleString = titleString.
       substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
 
     String prefix = "";
-    String relationName = (m_includeRelationName)
-    ? trainHeader.relationName()
-    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Fifth")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Sixth") 
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Third"));
       } else {
         System.err.println(message);
       }
@@ -475,7 +449,6 @@ public class SerializedModelSaver
 
     String fileName = "" 
       + prefix
-      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -487,13 +460,13 @@ public class SerializedModelSaver
       dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop processing
-      String message = "[SerializedModelSaver] "
-        + statusMessagePrefix() + " Can't save model. Reason: " 
+      String message = Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Seventh")
+        + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_Message_Text_Eighth") 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_AcceptClassifier_StatusMessage_Text_Fourth"));
       } else {
         System.err.println(message);
       }
@@ -511,6 +484,8 @@ public class SerializedModelSaver
   /**
    * Helper routine to actually save the models.
    */
+  
+  
   private void saveModel(String fileName, Instances trainHeader, Object model) {
     m_fileFormat = validateFileFormat(m_fileFormat);
     if (m_fileFormat == null) {
@@ -534,12 +509,12 @@ public class SerializedModelSaver
       }        
     } catch (Exception ex) {
       stop(); // stop all processing
-      System.err.println("[SerializedModelSaver] Problem saving model");
+      System.err.println(Messages.getInstance().getString("SerializedModelSaver_SaveModel_Error_Text"));
       if (m_logger != null) {
-        m_logger.logMessage("[SerializedModelSaver] "
-            + statusMessagePrefix() + " Problem saving model");
+        m_logger.logMessage(Messages.getInstance().getString("SerializedModelSaver_SaveModel_LogMessage_Text_First")
+            + statusMessagePrefix() + Messages.getInstance().getString("SerializedModelSaver_SaveModel_LogMessage_Text_Second"));
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
+            + Messages.getInstance().getString("SerializedModelSaver_SaveModel_StatusMessage_Text"));
       }
     }
   }
@@ -640,30 +615,6 @@ public class SerializedModelSaver
   public boolean getUseRelativePath() {
     return m_useRelativePath;
   }
-  
-  /**
-   * Set whether the relation name of the training data
-   * used to create the model should be included as part
-   * of the filename for the serialized model.
-   * 
-   * @param rn true if the relation name should be included
-   * in the file name
-   */
-  public void setIncludeRelationName(boolean rn) {
-    m_includeRelationName = rn;
-  }
-  
-  /**
-   * Get whether the relation name of the training
-   * data used to create the model is to be included
-   * in the filename of the serialized model.
-   * 
-   * @return true if the relation name is to be included
-   * in the file name
-   */
-  public boolean getIncludeRelationName() {
-    return m_includeRelationName;
-  }
 
   /**
    * Get the prefix to prepend to the model file names.
@@ -689,7 +640,7 @@ public class SerializedModelSaver
    * @return information about this bean.
    */
   public String globalInfo() {
-    return "Save trained models to serialized object files.";
+    return Messages.getInstance().getString("SerializedModelSaver_GlobalInfo_Text");
   }
 
   /**

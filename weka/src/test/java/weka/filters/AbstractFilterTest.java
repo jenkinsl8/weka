@@ -43,7 +43,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.14 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -586,12 +586,6 @@ public abstract class AbstractFilterTest
   public void testFilteredClassifier() {
     Instances		data;
     int			i;
-    
-    // skip this test if a subclass has set the
-    // filtered classifier to null
-    if (m_FilteredClassifier == null) {
-      return;
-    }
     
     try {
       // generate data

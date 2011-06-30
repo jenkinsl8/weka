@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.trees.j48.C45ModelSelection;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.lmt.LMTNode;
@@ -120,7 +119,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class LMT 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, AdditionalMeasureProducer, Drawable,
              TechnicalInformationHandler {
     
@@ -229,7 +228,7 @@ public class LMT
     if (m_splitOnResiduals) {
       modSelection = new ResidualModelSelection(minNumInstances);
     } else {
-      modSelection = new C45ModelSelection(minNumInstances, filteredData, true);
+      modSelection = new C45ModelSelection(minNumInstances, filteredData);
     }
 	
     //create tree root

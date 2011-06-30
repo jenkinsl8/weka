@@ -28,7 +28,7 @@ import java.util.Properties;
  * A class for providing centralized Copyright information.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class Copyright {
   

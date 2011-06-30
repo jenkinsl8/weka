@@ -27,7 +27,8 @@ import weka.clusterers.Clusterer;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
-import weka.gui.explorer.ClustererAssignmentsPlotInstances;
+import weka.gui.explorer.ClustererPanel;
+import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
@@ -82,11 +83,7 @@ public class VisualizeClusterAssignments {
 
     // setup visualization
     // taken from: ClustererPanel.startClusterer()
-    ClustererAssignmentsPlotInstances plotInstances = new ClustererAssignmentsPlotInstances();
-    plotInstances.setClusterer(clusterer);
-    plotInstances.setInstances(train);
-    plotInstances.setClusterEvaluation(eval);
-    plotInstances.setUp();
+    PlotData2D predData = ClustererPanel.setUpVisualizableInstances(train, eval);
     String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
     String cname = clusterer.getClass().getName();
     if (cname.startsWith("weka.clusterers."))
@@ -94,9 +91,11 @@ public class VisualizeClusterAssignments {
     else
       name += cname;
     name = name + " (" + train.relationName() + ")";
+
     VisualizePanel vp = new VisualizePanel();
     vp.setName(name);
-    vp.addPlot(plotInstances.getPlotData(cname));
+    predData.setPlotName(name);
+    vp.addPlot(predData);
 
     // display data
     // taken from: ClustererPanel.visualizeClusterAssignments(VisualizePanel)

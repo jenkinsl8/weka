@@ -27,7 +27,6 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.DenseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
@@ -83,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision$
+ * @version $Revision: 1.14 $
  */
 public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
@@ -336,7 +335,7 @@ public class BayesNetGenerator extends EditableBayesNet {
 	    int [] order = getOrder();
 		for (int iInstance = 0; iInstance < m_nNrOfInstances; iInstance++) {
 		    int nNrOfAtts = m_Instances.numAttributes();
-			Instance instance = new DenseInstance(nNrOfAtts);
+			Instance instance = new Instance(nNrOfAtts);
 			instance.setDataset(m_Instances);
 			for (int iAtt2 = 0; iAtt2 < nNrOfAtts; iAtt2++) {
 			    int iAtt = order[iAtt2];
@@ -375,7 +374,7 @@ public class BayesNetGenerator extends EditableBayesNet {
 		    allParentsDone = true;
 		    int iParent = 0;
 		    while (allParentsDone && iParent < m_ParentSets[iAtt2].getNrOfParents()) {
-			allParentsDone = bDone[m_ParentSets[iAtt2].getParent(iParent++)];
+			allParentsDone = bDone[m_ParentSets[iAtt].getParent(iParent++)];
 		    }
 		    if (allParentsDone && iParent == m_ParentSets[iAtt2].getNrOfParents()) {
 			order[iAtt] = iAtt2;
@@ -583,7 +582,7 @@ public class BayesNetGenerator extends EditableBayesNet {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.14 $");
     }
 
     /**

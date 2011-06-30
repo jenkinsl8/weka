@@ -27,8 +27,6 @@ import weka.core.Instances;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -37,7 +35,6 @@ import java.beans.PropertyChangeSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
@@ -49,8 +46,7 @@ import javax.swing.JPanel;
  */
 public class ClassAssignerCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, 
-  CustomizerCloseRequester, DataFormatListener {
+  implements Customizer, CustomizerClosingListener, DataFormatListener {
 
   /** for serialization */
   private static final long serialVersionUID = 476539385765301907L;
@@ -67,21 +63,15 @@ public class ClassAssignerCustomizer
 
   private JComboBox m_ClassCombo = new JComboBox();
   private JPanel m_holderP = new JPanel();
-  
-  private ModifyListener m_modifyListener;
-  
-  private Window m_parent;
-  
-  private String m_backup;
 
   public ClassAssignerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassAssignerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("ClassAssignerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
-    m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class attribute"));
+    m_holderP.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassAssignerCustomizer_HolderP_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     m_holderP.add(m_ClassCombo, BorderLayout.CENTER);
     m_ClassCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -91,35 +81,6 @@ public class ClassAssignerCustomizer
 	}
       });
     add(m_caEditor, BorderLayout.CENTER);
-    addButtons();
-  }
-  
-  private void addButtons() {
-    JButton okBut = new JButton("OK");
-    JButton cancelBut = new JButton("Cancel");
-    
-    JPanel butHolder = new JPanel();
-    butHolder.setLayout(new GridLayout(1, 2));
-    butHolder.add(okBut); butHolder.add(cancelBut);
-    add(butHolder, BorderLayout.SOUTH);
-    
-    okBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_modifyListener.setModifiedStatus(ClassAssignerCustomizer.this, true);
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
-    
-    cancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        customizerClosing();
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
   }
 
   private void setUpStandardSelection() {
@@ -141,9 +102,28 @@ public class ClassAssignerCustomizer
       existingClassCol = 0;
     }
     String [] attribNames = new String [format.numAttributes()+1];
-    attribNames[0] = "NO CLASS";
+    attribNames[0] = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttribNames0_Text");
     for (int i = 1; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(format.attribute(i-1)) + ") ";
+      String type = "";
+      switch (format.attribute(i-1).type()) {
+      case Attribute.NOMINAL:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNOMINAL_Text");
+	break;
+      case Attribute.NUMERIC:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNUMERIC_Text");
+	break;
+      case Attribute.STRING:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeSTRING_Text");
+	break;
+      case Attribute.DATE:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDATE_Text");
+	break;
+      case Attribute.RELATIONAL:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeRELATIONAL_Text");
+	break;
+      default:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDEFAULT_Text");
+      }
       attribNames[i] = type + format.attribute(i-1).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
@@ -175,19 +155,14 @@ public class ClassAssignerCustomizer
       if (m_classAssigner.getConnectedFormat() != null) {
 	setUpColumnSelection(m_classAssigner.getConnectedFormat());
       }
-      m_backup = m_classAssigner.getClassColumn();
     }
   }
 
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassAssigner (if necessary)
     if (m_classAssigner != null) {
-      //System.out.println("Customizer deregistering with class assigner");
+      System.err.println(Messages.getInstance().getString("ClassAssignerCustomizer_CustomizerClosing_Error_Text"));
       m_classAssigner.removeDataFormatListener(this);
-    }
-    
-    if (m_backup != null) {
-      m_classAssigner.setClassColumn(m_backup);
     }
   }
 
@@ -216,15 +191,5 @@ public class ClassAssignerCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
-
-  @Override
-  public void setParentWindow(Window parent) {
-    m_parent = parent;
   }
 }

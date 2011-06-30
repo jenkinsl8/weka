@@ -140,10 +140,10 @@ public class SortedTableModel
      * @return		the string representation (value + index)
      */
     public String toString() {
-      return "value=" + m_Value + ", index=" + m_Index;
+      return Messages.getInstance().getString("SortedTableModel_ToString_Text_First") + m_Value + Messages.getInstance().getString("SortedTableModel_ToString_Text_Second") + m_Index;
     }
   }
-  
+
   /** the actual table model */
   protected TableModel mModel;
 
@@ -155,7 +155,7 @@ public class SortedTableModel
 
   /** whether sorting is ascending or descending */
   protected boolean mAscending;
-  
+
   /**
    * initializes with no model
    */
@@ -234,7 +234,7 @@ public class SortedTableModel
   /**
    * Returns the actual underlying row the given visible one represents. Useful
    * for retrieving "non-visual" data that is also stored in a TableModel.
-   * 
+   *
    * @param visibleRow	the displayed row to retrieve the original row for
    * @return		the original row
    */
@@ -244,7 +244,7 @@ public class SortedTableModel
     else
       return mIndices[visibleRow];
   }
-  
+
   /**
    * Returns the most specific superclass for all the cell values in the
    * column.
@@ -363,7 +363,7 @@ public class SortedTableModel
          || (getModel().getRowCount() != mIndices.length) ) {
 
       System.out.println(
-          this.getClass().getName() + ": Table model not initialized!");
+          this.getClass().getName() + Messages.getInstance().getString("SortedTableModel_Sort_Text_Firt"));
 
       return;
     }
@@ -372,7 +372,7 @@ public class SortedTableModel
     mSortColumn = columnIndex;
     mAscending  = ascending;
     initializeIndices();
-    
+
     // determine the column type: 0=string/other, 1=comparable
     if (ClassDiscovery.hasInterface(Comparable.class, getColumnClass(mSortColumn)))
       columnType = 1;
@@ -412,10 +412,10 @@ public class SortedTableModel
     initializeIndices();
     if (isSorted())
       sort(mSortColumn, mAscending);
-    
+
     fireTableChanged(e);
   }
-  
+
   /**
    * Adds a mouselistener to the header: left-click on the header sorts in
    * ascending manner, using shift-left-click in descending manner.
@@ -434,8 +434,8 @@ public class SortedTableModel
           TableColumnModel columnModel = tableFinal.getColumnModel();
           int viewColumn = columnModel.getColumnIndexAtX(e.getX());
           int column = tableFinal.convertColumnIndexToModel(viewColumn);
-          if (    e.getButton() == MouseEvent.BUTTON1 
-               && e.getClickCount() == 1 
+          if (    e.getButton() == MouseEvent.BUTTON1
+               && e.getClickCount() == 1
                && !e.isAltDown()
                && column != -1 ) {
             int shiftPressed = e.getModifiers() & InputEvent.SHIFT_MASK;
@@ -444,7 +444,7 @@ public class SortedTableModel
           }
         }
       };
-      
+
       header.addMouseListener(listMouseListener);
     }
   }

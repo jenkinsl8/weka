@@ -29,6 +29,7 @@ import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -77,19 +78,12 @@ public class MetaBean
   
   // Holds a preview image of the encapsulated sub-flow
   protected ImageIcon m_subFlowPreview = null;
-  
-  // offset from where originally grouped if the meta bean 
-  // dropped onto the canvas from the user toolbar
-  protected int m_xCreate = 0;
-  protected int m_yCreate = 0;
-  protected int m_xDrop = 0;
-  protected int m_yDrop = 0;
 
   public MetaBean() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
-  
+
   /**
    * Set a custom (descriptive) name for this bean
    * 
@@ -301,15 +295,14 @@ public class MetaBean
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (save) {
-        // save offsets from this point
-        Point p = new Point(temp.getX() - targetX, temp.getY() - targetY);
+        Point p = new Point(temp.getX(), temp.getY());
         m_originalCoords.add(p);
       }
       temp.setX(targetX); temp.setY(targetY);
     }
   }
 
-  public void restoreBeans(int x, int y) {
+  public void restoreBeans() {
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       Point p = (Point)m_originalCoords.elementAt(i);
@@ -317,8 +310,8 @@ public class MetaBean
       Dimension d = c.getPreferredSize();
       int dx = (int)(d.getWidth() / 2);
       int dy = (int)(d.getHeight() / 2);
-      temp.setX(x + (int)p.getX());// + (m_xDrop - m_xCreate));
-      temp.setY(y + (int)p.getY());// + (m_yDrop - m_yCreate));
+      temp.setX((int)p.getX()+dx);
+      temp.setY((int)p.getY()+dy);
     }
   }
 

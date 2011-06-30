@@ -20,7 +20,7 @@
   <property name="wekadocs" value="wekadocs"/>
   <property name="wekaexamples" value="wekaexamples"/>
   <property name="dist"  value="dist"/>
-  <property name="branch" value="weka-development-3-7-distribution"/>
+  <property name="branch" value="weka-stable-3-6-distribution"/>
 
   <!-- load the last release date -->
   <property file="last-release.props"/>
@@ -76,12 +76,12 @@
   </target>
 
   <!-- changelog will need -DstartDate property -->
-  <target name="changelog" depends="init_all" description="Create a changelog for Weka development-3-7. Creates a changelog with changes from the date in last-release-props to today">
+  <target name="changelog" depends="init_all" description="Create a changelog for Weka stable-3-6. Creates a changelog with changes from the date in last-release-props to today">
     <echo message="Creating a changelog for {${lastReleaseDate}}:{${TODAY}}"/>
     <ant antfile="build.xml" dir="${weka}" target="changelog" inheritall="false">
       <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
       <property name="release" value="SNAPSHOT"/>
-      <property name="weka_branch" value="trunk"/>
+      <property name="weka_branch" value="branches/stable-3-6"/>
     </ant>
   </target>
 

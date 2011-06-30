@@ -824,7 +824,7 @@ public class NeuralNetwork extends PMMLClassifier {
    *                                                                                                              
    * @param inst the instance to be classified                                                                
    * @return the predicted most likely class for the instance or                                                  
-   * Utils.missingValue() if no prediction is made                                                             
+   * Instance.missingValue() if no prediction is made                                                             
    * @exception Exception if an error occurred during the prediction                                              
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
@@ -868,7 +868,7 @@ public class NeuralNetwork extends PMMLClassifier {
         }
         
         if (m_miningSchema.getFieldsAsInstances().classAttribute().isNumeric()) {
-          preds[0] = Utils.missingValue();
+          preds[0] = Instance.missingValue();
         }
         return preds;
       } else {

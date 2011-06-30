@@ -22,28 +22,20 @@
 
 package weka.gui.beans;
 
+import weka.core.Instances;
+import weka.gui.AttributeVisualizationPanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.beans.beancontext.BeanContext;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.AttributeVisualizationPanel;
 
 /**
  * Bean that encapsulates displays bar graph summaries for attributes in
@@ -53,7 +45,7 @@ import weka.gui.AttributeVisualizationPanel;
  * @version $Revision$
  */
 public class AttributeSummarizer
-  extends DataVisualizer implements KnowledgeFlowApp.KFPerspective {
+  extends DataVisualizer {
 
   /** for serialization */
   private static final long serialVersionUID = -294354961169372758L;
@@ -72,10 +64,6 @@ public class AttributeSummarizer
    * Index on which to color the plots.
    */
   protected int m_coloringIndex = -1;
-  
-  protected boolean m_showClassCombo = false;
-  
-  protected transient List<AttributeVisualizationPanel> m_plots;
 
   /**
    * Creates a new <code>AttributeSummarizer</code> instance.
@@ -94,7 +82,7 @@ public class AttributeSummarizer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Plot summary bar charts for incoming data/training/test sets.";
+    return Messages.getInstance().getString("AttributeSummarizer_GlobalInfo_Text");
   }
 
   /**
@@ -187,51 +175,8 @@ public class AttributeSummarizer
 
   protected void setUpFinal() {
     removeAll();
-    final JScrollPane hp = makePanel();
+    JScrollPane hp = makePanel();
     add(hp, BorderLayout.CENTER);
-    
-    if (m_showClassCombo) {
-      Vector<String> atts = new Vector<String>();
-      for (int i = 0; i < m_visualizeDataSet.numAttributes(); i++) {
-        atts.add("(" + Attribute.typeToStringShort(m_visualizeDataSet.attribute(i)) + ") "
-            + m_visualizeDataSet.attribute(i).name());
-      }
-      
-      final JComboBox classCombo = new JComboBox();
-      classCombo.setModel(new DefaultComboBoxModel(atts));      
-      
-      if (atts.size() > 0) {
-        if (m_visualizeDataSet.classIndex() < 0) {
-          classCombo.setSelectedIndex(atts.size() - 1);
-        } else {
-          classCombo.setSelectedIndex(m_visualizeDataSet.classIndex());
-        }
-        classCombo.setEnabled(true);
-        for (int i = 0; i < m_plots.size(); i++) {
-          m_plots.get(i).setColoringIndex(classCombo.getSelectedIndex());
-        }
-      }
-      
-      JPanel comboHolder = new JPanel();
-      comboHolder.setLayout(new BorderLayout());
-      JPanel tempHolder = new JPanel();
-      tempHolder.setLayout(new BorderLayout());
-      tempHolder.add(new JLabel("Class: "), BorderLayout.WEST);
-      tempHolder.add(classCombo, BorderLayout.EAST);
-      comboHolder.add(tempHolder, BorderLayout.WEST);
-      add(comboHolder, BorderLayout.NORTH);
-            
-      classCombo.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          int selected = classCombo.getSelectedIndex();
-          if (selected >= 0) {
-            for (int i = 0; i < m_plots.size(); i++) {
-              m_plots.get(i).setColoringIndex(selected);
-            }
-          }
-        }
-      });
-    }
   }
 
   /**
@@ -268,9 +213,6 @@ public class AttributeSummarizer
       gridHeight++;
     }
     hp.setLayout(new GridLayout(gridHeight, 4));
-    
-    m_plots = new ArrayList<AttributeVisualizationPanel>();      
-    
     for (int i = 0; i < numPlots; i++) {
       JPanel temp = new JPanel();
       temp.setLayout(new BorderLayout());
@@ -278,7 +220,6 @@ public class AttributeSummarizer
 						      attribute(i).name()));
 
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
-      m_plots.add(ap);
       ap.setInstances(m_visualizeDataSet);
       if (m_coloringIndex < 0 && m_visualizeDataSet.classIndex() >= 0) {
         ap.setColoringIndex(m_visualizeDataSet.classIndex());
@@ -322,93 +263,10 @@ public class AttributeSummarizer
    */
   public void setInstances(Instances inst) throws Exception {
     if (m_design) {
-      throw new Exception("This method is not to be used during design "
-			  +"time. It is meant to be used if this "
-			  +"bean is being used programatically as as "
-			  +"stand alone component.");
+      throw new Exception(Messages.getInstance().getString("AttributeSummarizer_SetInstances_Exception_Text"));
     }
     m_visualizeDataSet = inst;
     setUpFinal();
-  }
-  
-  /**
-   * Returns true if this perspective accepts instances
-   * 
-   * @return true if this perspective can accept instances
-   */
-  public boolean acceptsInstances() {
-    return true;
-  }
-  
-  /**
-   * Get the title of this perspective
-   * 
-   * @return the title of this perspective
-   */
-  public String getPerspectiveTitle() {
-    return "Attribute summary";
-  }
-  
-  /**
-   * Get the tool tip text for this perspective.
-   * 
-   * @return the tool tip text for this perspective
-   */
-  public String getPerspectiveTipText() {
-    return "Matrix of attribute summary histograms";
-  }
-  
-  /**
-   * Get the icon for this perspective.
-   * 
-   * @return the Icon for this perspective (or null if the
-   * perspective does not have an icon)
-   */
-  public Icon getPerspectiveIcon() {
-    java.awt.Image pic = null;
-    java.net.URL imageURL = this.getClass().getClassLoader().
-      getResource("weka/gui/beans/icons/chart_bar.png");
-
-    if (imageURL == null) {
-    } else {
-      pic = java.awt.Toolkit.getDefaultToolkit().
-        getImage(imageURL);
-    }
-    return new javax.swing.ImageIcon(pic);
-  }
-  
-  /**
-   * Set active status of this perspective. True indicates
-   * that this perspective is the visible active perspective
-   * in the KnowledgeFlow
-   * 
-   * @param active true if this perspective is the active one
-   */
-  public void setActive(boolean active) {
-    
-  }
-  
-  /**
-   * Set whether this perspective is "loaded" - i.e. whether
-   * or not the user has opted to have it available in the
-   * perspective toolbar. The perspective can make the decision
-   * as to allocating or freeing resources on the basis of this.
-   * 
-   * @param loaded true if the perspective is available in
-   * the perspective toolbar of the KnowledgeFlow
-   */
-  public void setLoaded(boolean loaded) {
-    
-  }
-  
-  /**
-   * Set a reference to the main KnowledgeFlow perspective - i.e.
-   * the perspective that manages flow layouts.
-   * 
-   * @param main the main KnowledgeFlow perspective.
-   */
-  public void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main) {
-    m_showClassCombo = true;
   }
 
   /**
@@ -430,7 +288,7 @@ public class AttributeSummarizer
 	  final JScrollPane holderP = makePanel();
 
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame("Visualize");
+	    new javax.swing.JFrame(Messages.getInstance().getString("AttributeSummarizer_PerformRequest_Jf_JFrame_Text"));
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(holderP, BorderLayout.CENTER);
@@ -451,14 +309,14 @@ public class AttributeSummarizer
       }
     } else {
       throw new IllegalArgumentException(request
-		+ " not supported (AttributeSummarizer)");
+		+ Messages.getInstance().getString("AttributeSummarizer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println("Usage: AttributeSummarizer <dataset>");
+	System.err.println(Messages.getInstance().getString("AttributeSummarizer_Main_Error_Text_First"));
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

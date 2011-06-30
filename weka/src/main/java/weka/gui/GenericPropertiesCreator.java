@@ -129,11 +129,6 @@ public class GenericPropertiesCreator {
   /** the output properties file with the filled in classes */
   protected Properties m_OutputProperties;
   
-  /** Globally available properties */
-  protected static GenericPropertiesCreator GLOBAL_CREATOR;
-  protected static Properties GLOBAL_INPUT_PROPERTIES;
-  protected static Properties GLOBAL_OUTPUT_PROPERTIES;
-  
   /** whether an explicit input file was given - if false, the Utils class
    * is used to locate the props-file */
   protected boolean m_ExplicitPropsFile;
@@ -141,59 +136,6 @@ public class GenericPropertiesCreator {
   /** the hashtable that stores the excludes: 
    * key -&gt; Hashtable(prefix -&gt; Vector of classnames) */
   protected Hashtable m_Excludes;
-  
-  static {
-    try {
-      GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      GLOBAL_CREATOR = creator;
-      if (creator.useDynamic()) {
-        creator.execute(false, true);
-        GLOBAL_INPUT_PROPERTIES = creator.getInputProperties();
-        GLOBAL_OUTPUT_PROPERTIES = creator.getOutputProperties();
-      } else {
-        // Read the static information from the GenericObjectEditor.props
-        GLOBAL_OUTPUT_PROPERTIES = 
-          Utils.readProperties("weka/gui/GenericObjectEditor.props");
-      }
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-  }
-  
-  /**
-   * Get the global output properties
-   * 
-   * @return the global output properties
-   */
-  public static Properties getGlobalOutputProperties() {
-    return GLOBAL_OUTPUT_PROPERTIES;
-  }
-  
-  /**
-   * Get the global input properties
-   * 
-   * @return the global input properties
-   */
-  public static Properties getGlobalInputProperties() {
-    return GLOBAL_INPUT_PROPERTIES;
-  }
-  
-  /**
-   * Regenerate the global output properties. Does not load the
-   * input properties, instead uses the GLOBAL_INPUT_PROPERTIES
-   */
-  public static void regenerateGlobalOutputProperties() {
-    if (GLOBAL_CREATOR != null) {
-      try {
-        GLOBAL_CREATOR.execute(false, false);
-        GLOBAL_OUTPUT_PROPERTIES = GLOBAL_CREATOR.getOutputProperties();
-      } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
-  }
   
   /**
    * initializes the creator, locates the props file with the Utils class.
@@ -321,7 +263,7 @@ public class GenericPropertiesCreator {
    */
   protected void loadInputProperties()  {
     if (VERBOSE)
-      System.out.println("Loading '" + getInputFilename() + "'...");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_LoadInputProperties_Text_First") + getInputFilename() + Messages.getInstance().getString("GenericPropertiesCreator_LoadInputProperties_Text_Second"));
     m_InputProperties = new Properties();
     try {
       File f = new File(getInputFilename());
@@ -377,14 +319,12 @@ public class GenericPropertiesCreator {
     // check our classloader against the system one - if different then
     // return false (as dynamic classloading only works for classes discoverable
     // in the system classpath
-    /*if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
+    if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
       if (Boolean.parseBoolean(getInputProperties().getProperty(USE_DYNAMIC, "true")) == true) {
-        System.out.println("[GenericPropertiesCreator] classloader in use is not the system "
-            + "classloader: using static entries in weka/gui/GenericObjectEditor.props rather "
-            + "than dynamic class discovery.");
+        System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_UseDynamic_Text"));
       }
       return false;
-    }*/
+    }
     
     return Boolean.parseBoolean(
 	getInputProperties().getProperty(USE_DYNAMIC, "true"));
@@ -515,7 +455,7 @@ public class GenericPropertiesCreator {
           classes = ClassDiscovery.find(Class.forName(key), pkg);
         }
         catch (Exception e) {
-          System.out.println("Problem with '" + key + "': " + e);
+          System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_GenerateOutputProperties_Text_First") + key + Messages.getInstance().getString("GenericPropertiesCreator_GenerateOutputProperties_Text_Second") + e);
           classes = new Vector();
         }
         
@@ -557,10 +497,10 @@ public class GenericPropertiesCreator {
    */
   protected void storeOutputProperties() throws Exception {
     if (VERBOSE)
-      System.out.println("Saving '" + getOutputFilename() + "'...");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_First") + getOutputFilename() + Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_Second"));
     m_OutputProperties.store(
         new FileOutputStream(getOutputFilename()), 
-        " Customises the list of options given by the GenericObjectEditor\n# for various superclasses.");
+        Messages.getInstance().getString("GenericPropertiesCreator_StoreOutputProperties_Text_Third"));
   }
   
   /**
@@ -570,17 +510,7 @@ public class GenericPropertiesCreator {
    * @see #execute(boolean)
    */
   public void execute() throws Exception {
-    execute(true, true);
-  }
-  
-  /**
-   * generates the props-file for the GenericObjectEditor
-   * 
-   * @param store true if the generated props should be stored
-   * @throws Exception
-   */
-  public void execute(boolean store) throws Exception {
-    execute(store, true);
+    execute(true);
   }
   
   /**
@@ -591,17 +521,14 @@ public class GenericPropertiesCreator {
    * 
    * @param store     	if TRUE then the properties file is stored to the stored 
    *                  	filename
-   * @param loadInputProps true if the input properties should be loaded
    * @throws Exception	if something goes wrong
    * @see #getOutputFilename()
    * @see #setOutputFilename(String)
    * @see #getOutputProperties()
    */
-  public void execute(boolean store, boolean loadInputProps) throws Exception {
+  public void execute(boolean store) throws Exception {
     // read properties file
-    if (loadInputProps) {
-      loadInputProperties();
-    }
+    loadInputProperties();
     
     // generate the props file
     generateOutputProperties();
@@ -649,7 +576,7 @@ public class GenericPropertiesCreator {
       c.setOutputFilename(args[1]);
     }
     else {
-      System.out.println("usage: " + GenericPropertiesCreator.class.getName() + " [<input.props>] [<output.props>]");
+      System.out.println(Messages.getInstance().getString("GenericPropertiesCreator_Main_Text_First") + GenericPropertiesCreator.class.getName() + Messages.getInstance().getString("GenericPropertiesCreator_Main_Text_Second"));
       System.exit(1);
     }
     

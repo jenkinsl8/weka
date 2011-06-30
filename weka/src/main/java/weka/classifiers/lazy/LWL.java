@@ -23,7 +23,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
@@ -144,12 +143,12 @@ public class LWL
   protected NearestNeighbourSearch m_NNSearch =  new LinearNNSearch();
   
   /** The available kernel weighting methods. */
-  public static final int LINEAR       = 0;
-  public static final int EPANECHNIKOV = 1;
-  public static final int TRICUBE      = 2;  
-  public static final int INVERSE      = 3;
-  public static final int GAUSS        = 4;
-  public static final int CONSTANT     = 5;
+  protected static final int LINEAR       = 0;
+  protected static final int EPANECHNIKOV = 1;
+  protected static final int TRICUBE      = 2;  
+  protected static final int INVERSE      = 3;
+  protected static final int GAUSS        = 4;
+  protected static final int CONSTANT     = 5;
 
   /** a ZeroR model in case no model can be built from the data. */
   protected Classifier m_ZeroR;
@@ -488,11 +487,10 @@ public class LWL
   public Capabilities getCapabilities() {
     Capabilities      result;
     
-    if (m_Classifier != null) {
+    if (m_Classifier != null)
       result = m_Classifier.getCapabilities();
-    } else {
+    else
       result = super.getCapabilities();
-    }
     
     result.setMinimumNumberInstances(0);
     
@@ -554,7 +552,7 @@ public class LWL
       throw new Exception("No training instance structure set!");
     }
     else if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (!instance.classIsMissing()) {
       m_NNSearch.update(instance);
@@ -583,9 +581,9 @@ public class LWL
     m_NNSearch.addInstanceInfo(instance);
     
     int k = m_Train.numInstances();
-    if( (!m_UseAllK && (m_kNN < k)) /*&&
+    if( (!m_UseAllK && (m_kNN < k)) &&
        !(m_WeightKernel==INVERSE ||
-         m_WeightKernel==GAUSS)*/ ) {
+         m_WeightKernel==GAUSS) ) {
       k = m_kNN;
     }
     

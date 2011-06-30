@@ -23,11 +23,9 @@
 package weka.classifiers.evaluation;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -40,7 +38,7 @@ import weka.core.RevisionUtils;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 
 public class CostCurve 
@@ -113,10 +111,10 @@ public class CostCurve
       thresh = threshInst.instance(i).value(threshind);
       vals = new double [3];
       vals[0] = 0; vals[1] = fpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
       vals = new double [3];
       vals[0] = 1; vals[1] = 1.0 - tpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
     }
     
     return insts;
@@ -142,7 +140,7 @@ public class CostCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

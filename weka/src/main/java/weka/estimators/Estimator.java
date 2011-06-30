@@ -690,15 +690,6 @@ public abstract class Estimator
     return result;
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return            the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
-  
   /** 
    * Test if the estimator can handle the data.
    * @param data the dataset the estimator takes an attribute from

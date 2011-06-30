@@ -2,7 +2,7 @@
 # in this file.
 #
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision$
+# version: $Revision: 1.1 $
 
 # are Capabilities tests enabled at all?
 Test=true

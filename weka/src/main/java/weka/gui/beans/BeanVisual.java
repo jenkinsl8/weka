@@ -26,10 +26,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -47,7 +45,7 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.10 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -159,23 +157,6 @@ public class BeanVisual
       setMaximumSize(d2);   
     }
   }
-  
-  public Image scale(double percent) {
-    if (m_icon != null) {
-      Image pic = m_icon.getImage();
-      double width = m_icon.getIconWidth();
-      double height = m_icon.getIconHeight();
-      
-      width *= percent;
-      height *= percent;
-      
-      pic = pic.getScaledInstance((int)width, (int)height, Image.SCALE_SMOOTH);
-      
-      return pic;
-    }
-    
-    return null;
-  }
 
   /**
    * Loads static and animated versions of a beans icons. These are
@@ -246,8 +227,7 @@ public class BeanVisual
    *
    */
   public void setStatic() {
-    setDisplayConnectors(false);
-    //m_visualLabel.setIcon(m_icon);
+    m_visualLabel.setIcon(m_icon);
   }
 
   /**
@@ -255,8 +235,7 @@ public class BeanVisual
    *
    */
   public void setAnimated() {
-    setDisplayConnectors(true);
-    //m_visualLabel.setIcon(m_animatedIcon);
+    m_visualLabel.setIcon(m_animatedIcon);
   }
 
   /**
@@ -391,9 +370,6 @@ public class BeanVisual
   }
 
   public void paintComponent(Graphics gx) {
-    ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-        RenderingHints.VALUE_ANTIALIAS_ON);
-    
     super.paintComponent(gx);
     if (m_displayConnectors) {
       gx.setColor(m_connectorColor);

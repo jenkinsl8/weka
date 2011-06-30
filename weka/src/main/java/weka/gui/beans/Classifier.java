@@ -40,15 +40,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 import weka.classifiers.rules.ZeroR;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -73,7 +70,6 @@ import weka.gui.Logger;
  * @see UserRequestAcceptor
  * @see TrainingSetListener
  * @see TestSetListener
- * @see EnvironmentHandler
  */
 public class Classifier
   extends JPanel
@@ -81,8 +77,7 @@ public class Classifier
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
-	     InstanceListener, ConfigurationProducer,
-	     EnvironmentHandler {
+	     InstanceListener {
 
   /** for serialization */
   private static final long serialVersionUID = 659603893917736008L;
@@ -150,20 +145,18 @@ public class Classifier
   private transient JFileChooser m_fileChooser = null; 
 
   protected FileFilter m_binaryFilter =
-    new ExtensionFileFilter("."+FILE_EXTENSION, "Binary serialized model file (*"
-                            + FILE_EXTENSION + ")");
+    new ExtensionFileFilter("."+FILE_EXTENSION, Messages.getInstance().getString("Classifier_BinaryFilter_ExtensionFileFilter_Text_First")
+                            + FILE_EXTENSION + Messages.getInstance().getString("Classifier_BinaryFilter_ExtensionFileFilter_Text_Second"));
 
   protected FileFilter m_KOMLFilter =
     new ExtensionFileFilter(KOML.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + KOML.FILE_EXTENSION + FILE_EXTENSION + ")");
+    		Messages.getInstance().getString("Classifier_KOMLFilter_ExtensionFileFilter_Text_First")
+                            + KOML.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("Classifier_KOMLFilter_ExtensionFileFilter_Text_Second"));
 
   protected FileFilter m_XStreamFilter =
     new ExtensionFileFilter(XStream.FILE_EXTENSION + FILE_EXTENSION,
-                            "XML serialized model file (*"
-                            + XStream.FILE_EXTENSION + FILE_EXTENSION + ")");
-  
-  protected transient Environment m_env;
+    		Messages.getInstance().getString("Classifier_XStreamFilter_ExtensionFileFilter_Text_First")
+                            + XStream.FILE_EXTENSION + FILE_EXTENSION + Messages.getInstance().getString("Classifier_XStreamFilter_ExtensionFileFilter_Text_Second"));
 
   /**
    * If the classifier is an incremental classifier, should we
@@ -215,16 +208,7 @@ public class Classifier
   protected String m_oldText = "";
   
   /**
-   * true if we should reject any further training 
-   * data sets, until all processing has been finished,
-   *  once we've received the last fold of
-   * the last run.
-   */
-  protected boolean m_reject = false;
-  
-  /** 
-   * True if we should block rather reject until
-   * all processing has been completed.
+   * true if we should block any further training data sets.
    */
   protected boolean m_block = false;
 
@@ -311,33 +295,9 @@ public class Classifier
   public void setExecutionSlots(int slots) {
     m_executionSlots = slots;
   }
-  
-  /**
-   * Set whether to block on receiving the last fold
-   * of the last run rather than rejecting any further
-   * data until all processing is complete.
-   * 
-   * @param block true if we should block on the
-   * last fold of the last run.
-   */
-  public void setBlockOnLastFold(boolean block) {
-    m_block = block;
-  }
-  
-  /**
-   * Gets whether we are blocking on the last fold of the
-   * last run rather than rejecting any further data until
-   * all processing has been completed.
-   * 
-   * @return true if we are blocking on the last fold
-   * of the last run
-   */
-  public boolean getBlockOnLastFold() {
-    return m_block;
-  }
 
   /**
-   * Set the template classifier for this wrapper
+   * Set the classifier for this wrapper
    *
    * @param c a <code>weka.classifiers.Classifier</code> value
    */
@@ -367,21 +327,12 @@ public class Classifier
     if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
-	m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING : "
-	    + getCustomName() +" is not an incremental classifier");
+	m_log.logMessage(Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_First") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_Second")
+	    + getCustomName() + Messages.getInstance().getString("Classifier_SetClassifierTemplate_LogMessage_Text_Third"));
       }
     }
     // get global info
     m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_ClassifierTemplate);
-    
-    try {
-      if (m_ClassifierTemplate instanceof weka.classifiers.misc.InputMappedClassifier) {
-        m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
-      }
-    } catch (Exception e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
   }
   
   /**
@@ -394,24 +345,24 @@ public class Classifier
   }
   
   private void setTrainedClassifier(weka.classifiers.Classifier tc) {
+    m_Classifier = tc;
     
     // set the template
     weka.classifiers.Classifier newTemplate = null;
     try {
-      String[] options = ((OptionHandler)tc).getOptions();
-      newTemplate = weka.classifiers.AbstractClassifier.forName(tc.getClass().getName(), options);
+      String[] options = tc.getOptions();
+      newTemplate = weka.classifiers.Classifier.forName(tc.getClass().getName(), options);
       setClassifierTemplate(newTemplate);
     } catch (Exception ex) {
       if (m_log != null) {
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() + ex.getMessage());
+        m_log.logMessage(Messages.getInstance().getString("Classifier_SetTrainedClassifier_LogMessage_Text_First") + statusMessagePrefix() + ex.getMessage());
         String errorMessage = statusMessagePrefix()
-        + "ERROR: see log for details.";
+        + Messages.getInstance().getString("Classifier_SetTrainedClassifier_ErrorMessage_Text_First");
         m_log.statusMessage(errorMessage);        
       } else {
         ex.printStackTrace();
       }
-    }
-    m_Classifier = tc;
+    }    
   }
 
   /**
@@ -448,7 +399,7 @@ public class Classifier
   }
 
   /**
-   * Get the currently trained classifier.
+   * Get the classifier currently set for this wrapper
    *
    * @return a <code>weka.classifiers.Classifier</code> value
    */
@@ -466,8 +417,8 @@ public class Classifier
     {
 
     if (!(algorithm instanceof weka.classifiers.Classifier)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Classifier)");
+      throw new IllegalArgumentException(algorithm.getClass()
+					 + Messages.getInstance().getString("Classifier_SetWrappedAlgorithm_IllegalArgumentException_Text_First"));
     }
     setClassifierTemplate((weka.classifiers.Classifier)algorithm);
   }
@@ -519,12 +470,11 @@ public class Classifier
         (m_executorPool.getQueue().size() > 0 || 
             m_executorPool.getActiveCount() > 0)) {
       
-      String messg = "[Classifier] " + statusMessagePrefix() 
-        + " is currently batch training!";
+      String messg = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Messg_Text_First") + statusMessagePrefix() 
+        + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Messg_Text_Second");
       if (m_log != null) {
 	m_log.logMessage(messg);
-	m_log.statusMessage(statusMessagePrefix() + "WARNING: "
-	    + "Can't accept instance - batch training in progress.");
+	m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_First"));
       } else {
 	System.err.println(messg);
       }
@@ -536,71 +486,50 @@ public class Classifier
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "remove");
       }
-      
+
       //      Instances dataset = m_incrementalEvent.getInstance().dataset();
       Instances dataset = m_incrementalEvent.getStructure();
       // default to the last column if no class is set
       if (dataset.classIndex() < 0) {
         stop();
         String errorMessage = statusMessagePrefix()
-            + "ERROR: no class attribute set in incoming stream!";
+            + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ErrorMessage_Text_First");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[" + getCustomName() + "] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_First") + getCustomName() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Second") + errorMessage);
         } else {
-          System.err.println("[" + getCustomName() + "] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Error_Text_First") + getCustomName() + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Error_Text_Second") + errorMessage);
         }
         return;
-        
+
 	// System.err.println("Classifier : setting class index...");
-	//dataset.setClassIndex(dataset.numAttributes()-1);
+        //	dataset.setClassIndex(dataset.numAttributes()-1);
       }
       try {
 	// initialize classifier if m_trainingSet is null
 	// otherwise assume that classifier has been pre-trained in batch
 	// mode, *if* headers match
-	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset)) {
+	if (m_trainingSet == null || (!dataset.equalHeaders(m_trainingSet))) {
 	  if (!(m_ClassifierTemplate instanceof 
-		weka.classifiers.UpdateableClassifier) &&
-		!(m_ClassifierTemplate instanceof 
-		    weka.classifiers.misc.InputMappedClassifier)) {
+		weka.classifiers.UpdateableClassifier)) {
 	    stop(); // stop all processing
 	    if (m_log != null) {
 	      String msg = (m_trainingSet == null)
 		? statusMessagePrefix()
-		+ "ERROR: classifier has not been batch "
-		+"trained; can't process instance events."
+		+ Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_First")
 		: statusMessagePrefix() 
-		  + "ERROR: instance event's structure is different from "
-		  +"the data that "
-		  + "was used to batch train this classifier; can't continue.";
-	      m_log.logMessage("[Classifier] " + msg);
+		  + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_Second");
+	      m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Third") + msg);
 	      m_log.statusMessage(msg);
 	    }
 	    return;
 	  }
-	  
-	  if (m_ClassifierTemplate instanceof 
-	      weka.classifiers.misc.InputMappedClassifier) {
-	    m_trainingSet = ((weka.classifiers.misc.InputMappedClassifier)m_Classifier).
-	      getModelHeader(m_trainingSet);
-	    
-/*	    // check to see if the classifier that gets loaded is updateable
-	    weka.classifiers.Classifier tempC = 
-	      ((weka.classifiers.misc.InputMappedClassifier)m_Classifier).getClassifier();
-	    if (!(tempC instanceof weka.classifiers.UpdateableClassifier)) {
-	      
-	    } */
-	  }
-	  
 	  if (m_trainingSet != null && 
 	      (!dataset.equalHeaders(m_trainingSet))) {
 	    if (m_log != null) {
 	      String msg = statusMessagePrefix() 
-              + " WARNING : structure of instance events differ "
-              +"from data used in batch training this "
-              +"classifier. Resetting classifier...";
-	      m_log.logMessage("[Classifier] " + msg);
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_Msg_Text_Third");
+	      m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Fourth") + msg);
 	      m_log.statusMessage(msg);
 	    }
 	    m_trainingSet = null;
@@ -608,10 +537,7 @@ public class Classifier
 	  if (m_trainingSet == null) {
 	    // initialize the classifier if it hasn't been trained yet
 	    m_trainingSet = new Instances(dataset, 0);
-	    m_Classifier = weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
-	    if (m_Classifier instanceof EnvironmentHandler && m_env != null) {
-	      ((EnvironmentHandler)m_Classifier).setEnvironment(m_env);
-	    }
+	    m_Classifier = weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
 	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
@@ -619,9 +545,9 @@ public class Classifier
         stop();
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix()
-              + " problem during incremental processing. " 
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_Second"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Fifth") + statusMessagePrefix()
+              + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Sixth") 
               + ex.getMessage());
         }
 	ex.printStackTrace();
@@ -684,11 +610,10 @@ public class Classifier
 	  titleString = titleString.
 	    substring(titleString.lastIndexOf('.') + 1,
 		      titleString.length());
-	  modelString = "=== Classifier model ===\n\n" +
-	    "Scheme:   " +titleString+"\n" +
-	    "Relation: "  + m_trainingSet.relationName() + "\n\n"
+	  modelString = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ModelString_Text_First") + titleString+"\n" +
+	  Messages.getInstance().getString("Classifier_HandleIncrementalEvent_ModelString_Text_Second")  + m_trainingSet.relationName() + "\n\n"
 	    + modelString;
-	  titleString = "Model: " + titleString;
+	  titleString = Messages.getInstance().getString("Classifier_HandleIncrementalEvent_TitleString_Text_First") + titleString;
 	  TextEvent nt = new TextEvent(this,
 				       modelString,
 				       titleString);
@@ -698,10 +623,10 @@ public class Classifier
     } catch (Exception ex) {
       stop();
       if (m_log != null) {
-	m_log.logMessage("[Classifier] " + statusMessagePrefix()
+	m_log.logMessage(Messages.getInstance().getString("Classifier_HandleIncrementalEvent_LogMessage_Text_Seventh") + statusMessagePrefix()
 	    + ex.getMessage());
 	m_log.statusMessage(statusMessagePrefix()
-	    + "ERROR (see log for details)");
+	    + Messages.getInstance().getString("Classifier_HandleIncrementalEvent_StatusMessage_Text_Third"));
 	ex.printStackTrace();
       } else {
         ex.printStackTrace();
@@ -738,22 +663,22 @@ public class Classifier
             // stop all processing
             stop();
             String errorMessage = statusMessagePrefix()
-                + "ERROR: no class attribute set in test data!";
+                + Messages.getInstance().getString("Classifier_TrainingTask_Execute_ErrorMessage_Text_First");
             if (m_log != null) {
               m_log.statusMessage(errorMessage);
-              m_log.logMessage("[Classifier] " + errorMessage);
+              m_log.logMessage(Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_First") + errorMessage);
             } else {
-              System.err.println("[Classifier] " + errorMessage);
+              System.err.println(Messages.getInstance().getString("Classifier_TrainingTask_Execute_Error_Text_First") + errorMessage);
             }
             return;
-            
-            // assume last column is the class
-/*            m_train.setClassIndex(m_train.numAttributes()-1);
+
+            /*            // assume last column is the class
+            m_train.setClassIndex(m_train.numAttributes()-1);
             if (m_log != null) {
               m_log.logMessage("[Classifier] " + statusMessagePrefix() 
                   + " : assuming last "
                   +"column is the class");
-            } */
+                  } */
           }
           if (m_runNum == 1 && m_setNum == 1) {
             // set this back to idle once the last fold
@@ -767,7 +692,7 @@ public class Classifier
           //m_visual.setAnimated();
           //m_visual.setText("Building model...");
           String msg = statusMessagePrefix()
-            + "Building model for run " + m_runNum + " fold " + m_setNum;
+            + Messages.getInstance().getString("Classifier_TrainingTask_Execute_Msg_Text_First") + m_runNum + Messages.getInstance().getString("Classifier_TrainingTask_Execute_Msg_Text_Second") + m_setNum;
           if (m_log != null) {
             m_log.statusMessage(msg);
           } else {
@@ -777,10 +702,7 @@ public class Classifier
           
           // copy the classifier configuration
           weka.classifiers.Classifier classifierCopy = 
-            weka.classifiers.AbstractClassifier.makeCopy(m_ClassifierTemplate);
-          if (classifierCopy instanceof EnvironmentHandler && m_env != null) {
-            ((EnvironmentHandler)classifierCopy).setEnvironment(m_env);
-          }
+            weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
           
           // build this model
           classifierCopy.buildClassifier(m_train);
@@ -803,12 +725,6 @@ public class Classifier
             notifyBatchClassifierListeners(ce);
                         
             // store in the output queue (if we have incoming test set events)
-            ce = 
-              new BatchClassifierEvent(Classifier.this, classifierCopy, 
-                  new DataSetEvent(this, m_train),
-                  null, // no test set (yet)
-                  m_setNum, m_maxSetNum);
-            ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
             classifierTrainingComplete(ce);
           //}
 
@@ -821,8 +737,8 @@ public class Classifier
             grphTitle = grphTitle.substring(grphTitle.
                 lastIndexOf('.')+1, 
                 grphTitle.length());
-            grphTitle = "Set " + m_setNum + " ("
-            + m_train.relationName() + ") "
+            grphTitle = Messages.getInstance().getString("Classifier_TrainingTask_Execute_GrphTitle_Text_First") + m_setNum 
+            + " (" + m_train.relationName() + ") "
             + grphTitle;
 
             GraphEvent ge = new GraphEvent(Classifier.this, 
@@ -839,15 +755,14 @@ public class Classifier
             titleString = titleString.
             substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
-            modelString = "=== Classifier model ===\n\n" +
-            "Scheme:   " +titleString+"\n" +
-            "Relation: "  + m_train.relationName() + 
+            modelString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_First") + titleString+"\n" +
+            Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_Second") + m_train.relationName() + 
             ((m_maxSetNum > 1) 
-                ? "\nTraining Fold: " + m_setNum
+                ? Messages.getInstance().getString("Classifier_TrainingTask_Execute_ModelString_Text_Third") + m_setNum
                     :"")
                     + "\n\n"
                     + modelString;
-            titleString = "Model: " + titleString;
+            titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_First") + titleString;
 
             TextEvent nt = new TextEvent(Classifier.this,
                 modelString,
@@ -856,60 +771,61 @@ public class Classifier
           }
         }
       } catch (Exception ex) {
+        // Stop all processing
+        stop();
         ex.printStackTrace();
         if (m_log != null) {
-          String titleString = "[Classifier] " + statusMessagePrefix();
+          String titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Second") + statusMessagePrefix();
 
-          titleString += " run " + m_runNum + " fold " + m_setNum
-          + " failed to complete.";
-          m_log.logMessage(titleString + " (build classifier). " 
+          titleString += Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Third") + m_runNum 
+          + Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Fourth") + m_setNum
+          + Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Fifth");
+          m_log.logMessage(titleString + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Fourth") 
               + ex.getMessage());
           m_log.statusMessage(statusMessagePrefix() 
-              + "ERROR (see log for details)");
+              + Messages.getInstance().getString("Classifier_TrainingTask_Execute_StatusMessage_Text_First"));
           ex.printStackTrace();
         }
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
-        // Stop all processing
-        stop();
       } finally {
         m_visual.setStatic();
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_TrainingTask_Execute_StatusMessage_Text_Second"));
         }
         m_state = IDLE;
+
         if (Thread.currentThread().isInterrupted()) {
           // prevent any classifier events from being fired
           m_trainingSet = null;
           if (m_log != null) {
-            String titleString = "[Classifier] " + statusMessagePrefix();                 
+            String titleString = Messages.getInstance().getString("Classifier_TrainingTask_Execute_TitleString_Text_Sixth") + statusMessagePrefix();                 
          
-            m_log.logMessage(titleString + " ("
-               + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
-            m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
+            m_log.logMessage(titleString + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Fifth") 
+            		+ m_runNum + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Sixth") + m_setNum 
+            		+ Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Seventh"));
+            m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_TrainingTask_Execute_LogMessage_Text_Seventh"));
             
-            /* // are we the last active thread?
+            /*
+            // are we the last active thread?
             if (m_executorPool.getActiveCount() == 1) {
               String msg = "[Classifier] " + statusMessagePrefix() 
               + " last classifier unblocking...";
-              System.err.println(msg + " (interrupted)");
-              m_log.logMessage(msg + " (interrupted)");
+              m_log.logMessage(msg);
 //              m_log.statusMessage(statusMessagePrefix() + "finished.");
               m_block = false;
-              m_state = IDLE;
-              block(false);
+//              block(false);
             } */
           }
           /*System.err.println("Queue size: " + m_executorPool.getQueue().size() +
               " Active count: " + m_executorPool.getActiveCount()); */
         } /* else {
           // check to see if we are the last active thread
-          if (m_executorPool == null || 
+           if (m_executorPool == null || 
               (m_executorPool.getQueue().size() == 0 && 
                   m_executorPool.getActiveCount() == 1)) {
 
             String msg = "[Classifier] " + statusMessagePrefix() 
             + " last classifier unblocking...";
-            System.err.println(msg);
             if (m_log != null) {
               m_log.logMessage(msg);
             } else {
@@ -922,9 +838,10 @@ public class Classifier
             }
             // m_outputQueues = null; // free memory
             m_block = false;
-            block(false);
+            m_state = IDLE;
+  //          block(false);
           }
-        } */
+          } */
       }
     }
   
@@ -956,13 +873,13 @@ public class Classifier
       return;
     }
     
-    if (m_reject) {
+    if (m_block) {
       //block(true);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
-            + "at this time.");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix()
-            + " BUSY. Can't accept data at this time.");
+        m_log.statusMessage(statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_First"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix()
+            + Messages.getInstance().getString("Classifier_AcceptTrainingSet_LogMessage_Text_Second"));
       }
       return;
     }
@@ -973,10 +890,10 @@ public class Classifier
       // store the training header
       m_trainingSet = new Instances(e.getTrainingSet(), 0);
       m_state = BUILDING_MODEL;
-      
-      String msg = "[Classifier] " + statusMessagePrefix() 
-        + " starting executor pool ("
-        + getExecutionSlots() + " slots)...";
+
+      String msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_First") + statusMessagePrefix() 
+        + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Second")
+        + getExecutionSlots() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Third");
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -988,7 +905,7 @@ public class Classifier
       }
             
       // setup output queues
-      msg = "[Classifier] " + statusMessagePrefix() + " setup output queues.";
+      msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fourth") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Fifth");
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -1004,8 +921,8 @@ public class Classifier
     // create a new task and schedule for execution
     TrainingTask newTask = new TrainingTask(e.getRunNumber(), e.getMaxRunNumber(),
         e.getSetNumber(), e.getMaxSetNumber(), e.getTrainingSet());
-    String msg = "[Classifier] " + statusMessagePrefix() + " scheduling run " 
-    + e.getRunNumber() +" fold " + e.getSetNumber() + " for execution...";
+    String msg = Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Sixth") + statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Seventh") 
+    + e.getRunNumber() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Eighth") + e.getSetNumber() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Nineth");
     if (m_log != null) {
       m_log.logMessage(msg);
     } else {
@@ -1025,153 +942,76 @@ public class Classifier
    * @param e a <code>TestSetEvent</code> value
    */    
   public synchronized void acceptTestSet(TestSetEvent e) {
-    if (m_reject) {
+
+    if (m_block) {
+      //block(true);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
-            + "at this time.");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix()
-            + " BUSY. Can't accept data at this time.");
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTrainingSet_Msg_Text_Nineth") + statusMessagePrefix()
+                         + Messages.getInstance().getString("Classifier_AcceptTrainingSet_StatusMessage_Text_Second"));
       }
       return;
     }
-    
-    
-    weka.classifiers.Classifier classifierToUse = m_Classifier;
-    
+
     Instances testSet = e.getTestSet();
     if (testSet != null) {
       if (testSet.classIndex() < 0) {
-  //        testSet.setClassIndex(testSet.numAttributes() - 1);
+//        testSet.setClassIndex(testSet.numAttributes() - 1);
         // stop all processing
         stop();
         String errorMessage = statusMessagePrefix()
-            + "ERROR: no class attribute set in test data!";
+            + Messages.getInstance().getString("Classifier_AcceptTestSet_ErrorMessage_Text_First");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[Classifier] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTestSet_LogMessage_Text_First") + errorMessage);
         } else {
-          System.err.println("[Classifier] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_AcceptTestSet_Error_Text_First") + errorMessage);
         }
         return;
       }
     }
-
+  
     // If we just have a test set connection or
     // there is just one run involving one set (and we are not
     // currently building a model), then use the
     // last saved model
-    if (classifierToUse != null && m_state == IDLE && 
+    if (m_Classifier != null && m_state == IDLE && 
         (!m_listenees.containsKey("trainingSet") || 
-        (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1))) {
+         (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1))) {
+
       // if this is structure only then just return at this point
       if (e.getTestSet() != null && e.isStructureOnly()) {
         return;
       }
-      
-      if (classifierToUse instanceof EnvironmentHandler && m_env != null) {
-        ((EnvironmentHandler)classifierToUse).setEnvironment(m_env);
-      }
-      
-      if (classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier) {
-        // make sure that we have the correct training header (if InputMappedClassifier
-        // is loading a model from a file).
-        try {
-          m_trainingSet = 
-            ((weka.classifiers.misc.InputMappedClassifier)classifierToUse).
-              getModelHeader(m_trainingSet); // this returns the argument if a model is not being loaded
-        } catch (Exception e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
-      }
-      
-      // check that we have a training set/header (if we don't,
+
+      // first check that we have a training set/header (if we don't,
       // then it means that no model has been loaded
       if (m_trainingSet == null) {
         stop();
         String errorMessage = statusMessagePrefix()
-            + "ERROR: no trained/loaded classifier to use for prediction!";
+          + Messages.getInstance().getString("Classifier_AcceptTestSet_ErrorMessage_Text_First_Alpha");
         if (m_log != null) {
           m_log.statusMessage(errorMessage);
-          m_log.logMessage("[Classifier] " + errorMessage);
+          m_log.logMessage(Messages.getInstance().getString("Classifier_AcceptTestSet_LogMessage_Text_Second") + errorMessage);
         } else {
-          System.err.println("[Classifier] " + errorMessage);
+          System.err.println(Messages.getInstance().getString("Classifier_AcceptTestSet_Error_Text_Second") + errorMessage);
         }
         return;
       }
-      
+
       testSet = e.getTestSet();
       if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
         m_currentBatchIdentifier = new Date();
       }
       
-      if (testSet != null) {        
-        if (!m_trainingSet.equalHeaders(testSet) && 
-            !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
-          boolean wrapClassifier = false;
-          if (!Utils.
-              getDontShowDialog("weka.gui.beans.Classifier.AutoWrapInInputMappedClassifier")) {
-            
-            java.awt.GraphicsEnvironment ge = 
-              java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-            if (!ge.isHeadless()) {
-              JCheckBox dontShow = new JCheckBox("Do not show this message again");
-              Object[] stuff = new Object[2];
-              stuff[0] = "Data used to train model and test set are not compatible.\n" +
-              "Would you like to automatically wrap the classifier in\n" + 
-              "an \"InputMappedClassifier\" before proceeding?.\n";
-              stuff[1] = dontShow;
-
-              int result = JOptionPane.showConfirmDialog(this, stuff, 
-                  "KnowledgeFlow:Classifier", JOptionPane.YES_OPTION);
-
-              if (result == JOptionPane.YES_OPTION) {
-                wrapClassifier = true;
-              }
-
-              if (dontShow.isSelected()) {
-                String response = (wrapClassifier) ? "yes" : "no";
-                try {
-                  Utils.
-                  setDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier", 
-                      response);
-                } catch (Exception e1) {
-                  // TODO Auto-generated catch block
-                  e1.printStackTrace();
-                }
-              }
-            } else {
-              // running headless, so just go ahead and wrap anyway
-              wrapClassifier = true;
-            }
-          } else {
-            // What did the user say - do they want to autowrap or not?
-            String response;
-            try {
-              response = Utils.getDontShowDialogResponse("weka.gui.explorer.ClassifierPanel.AutoWrapInInputMappedClassifier");
-              if (response != null && response.equalsIgnoreCase("yes")) {
-                wrapClassifier = true;
-              }
-            } catch (Exception e1) {
-              // TODO Auto-generated catch block
-              e1.printStackTrace();
-            }
-          }
-          
-          if (wrapClassifier) {
-            weka.classifiers.misc.InputMappedClassifier temp =
-              new weka.classifiers.misc.InputMappedClassifier();
-
-            temp.setClassifier(classifierToUse);
-            temp.setModelHeader(new Instances(m_trainingSet, 0));
-            classifierToUse = temp;
-          }          
-        }         
+      if (testSet != null) {
+        /*        if (testSet.classIndex() < 0) {
+          testSet.setClassIndex(testSet.numAttributes() - 1);
+          } */
         
-        if (m_trainingSet.equalHeaders(testSet) || 
-            (classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
+        if (m_trainingSet.equalHeaders(testSet)) {
           BatchClassifierEvent ce =
-            new BatchClassifierEvent(this, classifierToUse,                                       
+            new BatchClassifierEvent(this, m_Classifier,                                       
                 new DataSetEvent(this, m_trainingSet),
                 new DataSetEvent(this, e.getTestSet()),
            e.getRunNumber(), e.getMaxRunNumber(), 
@@ -1179,55 +1019,9 @@ public class Classifier
           ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
           
           if (m_log != null && !e.isStructureOnly()) {
-            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+            m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTestSet_StatusMessage_Text_First"));
           }
-          notifyBatchClassifierListeners(ce);          
-        } else {
-          // if headers do not match check to see if it's
-          // just the class that is different and that
-          // all class values are missing
-          if (testSet.numInstances() > 0) {
-            if (testSet.classIndex() == m_trainingSet.classIndex() && 
-                testSet.attributeStats(testSet.classIndex()).missingCount ==
-                testSet.numInstances()) {
-              // now check the other attributes against the training
-              // structure
-              boolean ok = true;
-              for (int i = 0; i < testSet.numAttributes(); i++) {
-                if (i != testSet.classIndex()) {
-                  ok = testSet.attribute(i).equals(m_trainingSet.attribute(i));
-                  if (!ok) {
-                    break;
-                  }
-                }
-              }
-              
-              if (ok) {
-                BatchClassifierEvent ce =
-                  new BatchClassifierEvent(this, classifierToUse,                                       
-                      new DataSetEvent(this, m_trainingSet),
-                      new DataSetEvent(this, e.getTestSet()),
-                 e.getRunNumber(), e.getMaxRunNumber(), 
-                 e.getSetNumber(), e.getMaxSetNumber());
-                ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
-                
-                if (m_log != null && !e.isStructureOnly()) {
-                  m_log.statusMessage(statusMessagePrefix() + "Finished.");
-                }
-                notifyBatchClassifierListeners(ce);
-              } else {
-                stop();
-                String errorMessage = statusMessagePrefix()
-                + "ERROR: structure of training and test sets is not compatible!";
-                if (m_log != null) {
-                  m_log.statusMessage(errorMessage);
-                  m_log.logMessage("[Classifier] " + errorMessage);
-                } else {
-                  System.err.println("[Classifier] " + errorMessage);
-                }
-              }
-            }
-          }
+          notifyBatchClassifierListeners(ce);
         }
       }
     } else {
@@ -1241,16 +1035,14 @@ public class Classifier
               new DataSetEvent(this, e.getTestSet()),
               e.getRunNumber(), e.getMaxRunNumber(),
               e.getSetNumber(), e.getMaxSetNumber());
+
         if (e.getRunNumber() == e.getMaxRunNumber() && 
-            e.getSetNumber() == e.getMaxSetNumber()) {
-          
+        e.getSetNumber() == e.getMaxSetNumber()) {
+      
           // block on the last fold of the last run
           /* System.err.println("[Classifier] blocking on last fold of last run...");
-          block(true); */
-          m_reject = true;
-          if (m_block) {
-            block(true);
-          }
+             block(true); */
+          m_block = true;
         }
       } else {
         // Otherwise, there is a model here waiting for a test set...
@@ -1264,9 +1056,9 @@ public class Classifier
   private synchronized void classifierTrainingComplete(BatchClassifierEvent ce) {
     // check the output queues if we have an incoming test set connection
     if (m_listenees.containsKey("testSet")) {
-      String msg = "[Classifier] " + statusMessagePrefix() 
-      + " storing model for run " + ce.getRunNumber() 
-      + " fold " + ce.getSetNumber();
+      String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_First") + statusMessagePrefix() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Second") + ce.getRunNumber() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Third") + ce.getSetNumber();
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -1295,8 +1087,8 @@ public class Classifier
       if (m_outputQueues[runNum - 1][i] != null) {
         if (m_outputQueues[runNum - 1][i].getClassifier() != null &&
             m_outputQueues[runNum - 1][i].getTestSet() != null) {
-          String msg = "[Classifier] " + statusMessagePrefix() 
-          + " dispatching run/set " + runNum + "/" + (i+1) + " to listeners.";
+          String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Fourth") + statusMessagePrefix() 
+          + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Fifth") + runNum + "/" + (i+1) + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Sixth");
           if (m_log != null) {
             m_log.logMessage(msg);
           } else {
@@ -1329,8 +1121,8 @@ public class Classifier
     }
     
     if (done) {
-      String msg = "[Classifier] " + statusMessagePrefix() 
-      + " last classifier unblocking...";
+      String msg = Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Seventh") + statusMessagePrefix() 
+      + Messages.getInstance().getString("Classifier_AcceptTestSet_Msg_Text_Eighth");
 
       if (m_log != null) {
         m_log.logMessage(msg);
@@ -1340,11 +1132,12 @@ public class Classifier
       //m_visual.setText(m_oldText);
 
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_AcceptTestSet_StatusMessage_Text_Second"));
       }
       // m_outputQueues = null; // free memory
-      m_reject = false;
+
       block(false);
+      m_block = false;
       m_state = IDLE;
     }
   }
@@ -1376,12 +1169,12 @@ public class Classifier
         // save memory
         m_outputQueues[runNum - 1][i] = null;
       }
-      
+
       if (runNum == maxRunNum) {
         // unblock
         msg = "[Classifier] " + statusMessagePrefix() 
-        + " last classifier unblocking...";
-
+          + " last classifier unblocking...";
+        System.err.println(msg);
         if (m_log != null) {
           m_log.logMessage(msg);
         } else {
@@ -1393,8 +1186,8 @@ public class Classifier
           m_log.statusMessage(statusMessagePrefix() + "Finished.");
         }
         // m_outputQueues = null; // free memory
-        m_reject = false;
-        block(false);
+        m_block = false;
+        //        block(false);
         m_state = IDLE;
       }
     }
@@ -1462,12 +1255,12 @@ public class Classifier
    *
    * @param ce a <code>BatchClassifierEvent</code> value
    */
-  private synchronized void notifyBatchClassifierListeners(BatchClassifierEvent ce) {
-    
+  private void notifyBatchClassifierListeners(BatchClassifierEvent ce) {
     // don't do anything if the thread that we've been running in has been interrupted
     if (Thread.currentThread().isInterrupted()) {
       return;
     }
+    
     Vector l;
     synchronized (this) {
       l = (Vector)m_batchClassifierListeners.clone();
@@ -1530,26 +1323,6 @@ public class Classifier
    */
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
   }
 
   /**
@@ -1657,12 +1430,10 @@ public class Classifier
     if (eventName.compareTo("instance") == 0) {
       if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
-	  String msg = statusMessagePrefix() + "WARNING: "
-          + m_ClassifierTemplate.getClass().getName() 
-          + " Is not an updateable classifier. This "
-          +"classifier will only be evaluated on incoming "
-          +"instance events and not trained on them.";
-	  m_log.logMessage("[Classifier] " + msg);
+	  String msg = statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_Msg_Text_First")
+	  + m_ClassifierTemplate.getClass().getName()
+          + Messages.getInstance().getString("Classifier_ConnectionNotification_Msg_Text_Second");
+	  m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_First") + msg);
 	  m_log.statusMessage(msg);
 	}
       }
@@ -1704,9 +1475,9 @@ public class Classifier
     if (tf) {
       try {
 	  // only block if thread is still doing something useful!
-//	if (m_state != IDLE) {
+	if (m_state != IDLE) {
 	  wait();
-	  //}
+	  }
       } catch (InterruptedException ex) {
       }
     } else {
@@ -1734,8 +1505,7 @@ public class Classifier
       m_executorPool.purge();
       m_executorPool = null;
     }
-    m_reject = false;
-    block(false);
+    m_block = false;
     m_visual.setStatic();
     if (m_oldText.length() > 0) {
       //m_visual.setText(m_oldText);
@@ -1818,7 +1588,7 @@ public class Classifier
             // quietly ignore
           }
           is.close();
-        }        
+        }
 
         // Update name and icon
         setTrainedClassifier(temp);
@@ -1826,22 +1596,21 @@ public class Classifier
         m_trainingSet = tempHeader;
 
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Loaded model.");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-              + "Loaded classifier: "
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_StatusMessage_Text_First"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Second") + statusMessagePrefix() 
+              + Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Third")
               + m_Classifier.getClass().toString());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem loading classifier.\n",
-                                    "Load Model",
+    		  Messages.getInstance().getString("Classifier_ConnectionNotification_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Classifier_ConnectionNotification_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to load " +
-        		"model (see log).");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-            + "Problem loading classifier. " 
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_ConnectionNotification_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Fourth") + statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_ConnectionNotification_LogMessage_Text_Fifth")
             + ex.getMessage());
       }
     }
@@ -1917,21 +1686,20 @@ public class Classifier
           os.close();
         }
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Model saved.");
-          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-              + " Saved classifier " + getCustomName());
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_SaveModel_StatusMessage_Text_First"));
+          m_log.logMessage(Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_First") + statusMessagePrefix() 
+              + Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Second") + getCustomName());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Classifier.this,
-                                    "Problem saving classifier.\n",
-                                    "Save Model",
+    		  Messages.getInstance().getString("Classifier_SaveModel_JOptionPane_ShowMessageDialog_Text_First"),
+    		  Messages.getInstance().getString("Classifier_SaveModel_JOptionPane_ShowMessageDialog_Text_Second"),
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to" +
-        		" save model (see log).");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-            + " Problem saving classifier " + getCustomName() 
+        m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Classifier_SaveModel_StatusMessage_Text_Second"));
+        m_log.logMessage(Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Third") + statusMessagePrefix() 
+            + Messages.getInstance().getString("Classifier_SaveModel_LogMessage_Text_Fourth") + getCustomName() 
             + ex.getMessage());
       }
     }
@@ -1989,7 +1757,7 @@ public class Classifier
       loadModel();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Classifier)");
+					 + Messages.getInstance().getString("Classifier_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -2014,8 +1782,7 @@ public class Classifier
     if (eventName.compareTo("graph") == 0
 	|| eventName.compareTo("text") == 0
 	|| eventName.compareTo("batchClassifier") == 0
-	|| eventName.compareTo("incrementalClassifier") == 0
-	|| eventName.compareTo("configuration") == 0) {
+	|| eventName.compareTo("incrementalClassifier") == 0) {
       return true;
     }
     return false;
@@ -2113,11 +1880,6 @@ public class Classifier
 	}
       }
     }
-    
-    if (eventName.equals("configuration") && m_Classifier == null) {
-      return false;
-    }
-    
     return true;
   }
     
@@ -2144,13 +1906,5 @@ public class Classifier
         Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()).length() > 0) 
         ? Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()) + "|"
             : "");
-  }
-
-  /**
-   * Set environment variables to pass on to the classifier (if
-   * if is an EnvironmentHandler)
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
   }
 }

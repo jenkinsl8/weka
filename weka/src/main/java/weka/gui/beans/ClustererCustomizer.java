@@ -27,7 +27,6 @@ import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -46,7 +45,7 @@ import javax.swing.JPanel;
  */
 public class ClustererCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -2035688458149534161L;
@@ -63,12 +62,10 @@ public class ClustererCustomizer
   private PropertySheetPanel m_ClustererEditor = 
     new PropertySheetPanel();
   
-  private Window m_parentWindow;
+  private JFrame m_parentFrame;
   
   /** Backup if the user presses cancel */
   private weka.clusterers.Clusterer m_backup;
-  
-  private ModifyListener m_modifyListener;
 
   
   public ClustererCustomizer() {
@@ -78,18 +75,14 @@ public class ClustererCustomizer
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
-    JButton OKBut = new JButton("OK");
+    JButton OKBut = new JButton(Messages.getInstance().getString("ClustererCustomizer_OKBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClustererCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
 
-    JButton CancelBut = new JButton("Cancel");
+    JButton CancelBut = new JButton(Messages.getInstance().getString("ClustererCustomizer_CancelBut_JButton_Text"));
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // cancel requested, so revert to backup and then
@@ -97,12 +90,7 @@ public class ClustererCustomizer
         if (m_backup != null) {
           m_dsClusterer.setClusterer(m_backup);
         }
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClustererCustomizer.this, false);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
     
@@ -147,12 +135,7 @@ public class ClustererCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 }

@@ -22,7 +22,6 @@
 package weka.core.logging;
 
 import weka.core.RevisionUtils;
-import weka.core.WekaPackageManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -75,11 +74,10 @@ public class FileLogger
     String	filename;
     File	result;
     
-    filename = m_Properties.getProperty("LogFile", "%w/weka.log");
+    filename = m_Properties.getProperty("LogFile", "%h/weka.log");
     filename = filename.replaceAll("%t", System.getProperty("java.io.tmpdir"));
     filename = filename.replaceAll("%h", System.getProperty("user.home"));
     filename = filename.replaceAll("%c", System.getProperty("user.dir"));
-    filename = filename.replaceAll("%w", WekaPackageManager.WEKA_HOME.toString());
     filename = filename.replaceAll("%%", System.getProperty("%"));
     
     result = new File(filename);

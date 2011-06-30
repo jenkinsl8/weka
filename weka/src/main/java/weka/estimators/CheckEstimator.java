@@ -137,7 +137,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @see TestInstances
  */
 public class CheckEstimator implements OptionHandler, RevisionHandler {
@@ -173,7 +173,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
   
@@ -268,7 +268,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
 
@@ -304,7 +304,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
 
@@ -1681,7 +1681,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
   protected void compareDatasets(Instances data1, Instances data2)
   throws Exception {
     if (!data2.equalHeaders(data1)) {
-      throw new Exception("header has been modified\n" + data2.equalHeadersMsg(data1));
+      throw new Exception("header has been modified");
     }
     if (!(data2.numInstances() == data1.numInstances())) {
       throw new Exception("number of instances has changed");
@@ -2118,7 +2118,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

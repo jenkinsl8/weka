@@ -44,7 +44,7 @@ import java.util.Vector;
  * all the available options.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.3 $
  */
 public class Stemming
   implements RevisionHandler {
@@ -56,11 +56,11 @@ public class Stemming
    * @return 		the option string
    */
   protected static String makeOptionsString(Stemmer stemmer) {
-    Vector<Option>          options;
+    Vector          options;
     Enumeration     enm;
     StringBuffer    result;
 
-    options = new Vector<Option>();
+    options = new Vector();
     
     // general options
     options.add(
@@ -87,7 +87,7 @@ public class Stemming
     if (stemmer instanceof OptionHandler) {
       enm = ((OptionHandler) stemmer).listOptions();
       while (enm.hasMoreElements())
-        options.add((Option)enm.nextElement());
+        options.add(enm.nextElement());
     }
 
     // print options
@@ -190,6 +190,6 @@ public class Stemming
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

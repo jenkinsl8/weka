@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.functions.GaussianProcessesTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class GaussianProcessesTest 
   extends AbstractClassifierTest {

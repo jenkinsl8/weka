@@ -22,37 +22,34 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
 import weka.core.converters.DatabaseConverter;
 import weka.core.converters.DatabaseLoader;
 import weka.core.converters.FileSourcedConverter;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.JCheckBox;
 
 /**
  * GUI Customizer for the loader bean
@@ -62,7 +59,7 @@ import weka.gui.PropertySheetPanel;
  */
 public class LoaderCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 6990446313118930298L;
@@ -85,28 +82,19 @@ public class LoaderCustomizer
     new JDialog((JFrame)getTopLevelAncestor(),
     true); */
 
-  private Window m_parentWindow;
-  private JDialog m_fileChooserFrame;
+  private JFrame m_parentFrame;
   
-  private EnvironmentField m_dbaseURLText;
+  private JTextField m_dbaseURLText;
   
-  private EnvironmentField m_userNameText;
+  private JTextField m_userNameText;
   
-  private EnvironmentField m_queryText;
+  private JTextField m_queryText;
    
-  private EnvironmentField m_keyText;
+  private JTextField m_keyText;
   
   private JPasswordField m_passwordText;
 
   private JCheckBox m_relativeFilePath;
-  
-  private EnvironmentField m_fileText;
-  
-  private Environment m_env = Environment.getSystemWide();
-  
-  private ModifyListener m_modifyListener;
-  
-  private weka.core.converters.Loader m_backup = null;
 
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -125,7 +113,7 @@ public class LoaderCustomizer
 	      public void propertyChange(PropertyChangeEvent e) {
 		repaint();
 		if (m_dsLoader != null) {
-		  System.err.println("Property change!!");
+		  System.err.println(Messages.getInstance().getString("LoaderCustomizer_Error_Text_First"));
 		  m_dsLoader.setLoader(m_dsLoader.getLoader());
 		}
 	      }
@@ -144,30 +132,26 @@ public class LoaderCustomizer
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
               File selectedFile = m_fileChooser.getSelectedFile();
-/*              EnvironmentField ef = m_environmentFields.get(0);
-              ef.setText(selectedFile.toString()); */
-              m_fileText.setText(selectedFile.toString());
-              
-/*	      ((FileSourcedConverter)m_dsLoader.getLoader()).
+	      ((FileSourcedConverter)m_dsLoader.getLoader()).
 		setFile(selectedFile);
 	      // tell the loader that a new file has been selected so
 	      // that it can attempt to load the header
 	      //m_dsLoader.setLoader(m_dsLoader.getLoader());
-	      m_dsLoader.newFileSelected(); */
+	      m_dsLoader.newFileSelected();
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
-	  }	  
+	  }
 	  // closing
-	  if (m_fileChooserFrame != null) {
-	    m_fileChooserFrame.dispose();
+	  if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
 	  }
 	}
       });   
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
   
   private void setUpOther() {
@@ -180,196 +164,116 @@ public class LoaderCustomizer
   
   /** Sets up a customizer window for a Database Connection*/
   private void setUpDatabase() {
+  
+      removeAll();
+      
+      JPanel db = new JPanel();
+      db.setLayout(new GridLayout(6, 1));
+      m_dbaseURLText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUrl(),50); 
+      JLabel dbaseURLLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_DbaseURLLab_JLabel_Text"), SwingConstants.LEFT);
+      dbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-    removeAll();
+      m_userNameText = new JTextField(((DatabaseConverter)m_dsLoader.getLoader()).getUser(),50); 
+      JLabel userNameLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_UserNameLab_JLabel_Text"), SwingConstants.LEFT);
+      userNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-    JPanel db = new JPanel();
-    GridBagLayout gbLayout = new GridBagLayout();
-    //db.setLayout(new GridLayout(6, 1));
-    db.setLayout(gbLayout);
+      m_passwordText = new JPasswordField(50); 
+      JLabel passwordLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_PasswordLab_JLabel_Text"), SwingConstants.LEFT);
+      passwordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
+      
+      m_queryText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getQuery(),50); 
+      JLabel queryLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_QueryLab_JLabel_Text"), SwingConstants.LEFT);
+      queryLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-    JLabel urlLab = new JLabel("Database URL", SwingConstants.RIGHT);
-    urlLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    GridBagConstraints gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(urlLab, gbConstraints);
-    db.add(urlLab);
+      m_keyText = new JTextField(((DatabaseLoader)m_dsLoader.getLoader()).getKeys(),50); 
+      JLabel keyLab = new JLabel(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_KeyLab_JLabel_Text"), SwingConstants.LEFT);
+      keyLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
 
-    m_dbaseURLText = new EnvironmentField();
-    m_dbaseURLText.setEnvironment(m_env);
-/*    int width = m_dbaseURLText.getPreferredSize().width;
-    int height = m_dbaseURLText.getPreferredSize().height;
-    m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
-    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_dbaseURLText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUrl());
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 0; gbConstraints.gridx = 1;
-    gbConstraints.weightx = 5;
-    gbLayout.setConstraints(m_dbaseURLText, gbConstraints);
-    db.add(m_dbaseURLText);
-    
-    JLabel userLab = new JLabel("Username", SwingConstants.RIGHT);
-    userLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(userLab, gbConstraints);
-    db.add(userLab);
-    
-    m_userNameText = new EnvironmentField();
-    m_userNameText.setEnvironment(m_env);
-/*    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
-    m_userNameText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_userNameText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUser()); 
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 1; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_userNameText, gbConstraints);
-    db.add(m_userNameText);
+      JPanel urlP = new JPanel();   
 
-    JLabel passwordLab = new JLabel("Password ", SwingConstants.RIGHT);
-    passwordLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 2; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(passwordLab, gbConstraints);
-    db.add(passwordLab);
-    
-    m_passwordText = new JPasswordField();     
-    JPanel passwordHolder = new JPanel();
-    passwordHolder.setLayout(new BorderLayout());
-    passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-//    passwordHolder.add(passwordLab, BorderLayout.WEST);
-    passwordHolder.add(m_passwordText, BorderLayout.CENTER);
-/*    passwordHolder.setMinimumSize(new Dimension(width * 2, height));
-    passwordHolder.setPreferredSize(new Dimension(width * 2, height)); */
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 2; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(passwordHolder, gbConstraints);
-    db.add(passwordHolder);
+      urlP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      urlP.add(dbaseURLLab);
+      urlP.add(m_dbaseURLText);
+      db.add(urlP);
 
-    JLabel queryLab = new JLabel("Query", SwingConstants.RIGHT);
-    queryLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 3; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(queryLab, gbConstraints);
-    db.add(queryLab);
-    
-    m_queryText = new EnvironmentField();
-    m_queryText.setEnvironment(m_env);
-/*    m_queryText.setMinimumSize(new Dimension(width * 2, height));
-    m_queryText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_queryText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getQuery());
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 3; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_queryText, gbConstraints);
-    db.add(m_queryText);
-    
-    JLabel keyLab = new JLabel("Key columns", SwingConstants.RIGHT);
-    keyLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 4; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(keyLab, gbConstraints);
-    db.add(keyLab);
-    
-    m_keyText = new EnvironmentField();
-    m_keyText.setEnvironment(m_env);
-    /*m_keyText.setMinimumSize(new Dimension(width * 2, height));
-    m_keyText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_keyText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getKeys());
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 4; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_keyText, gbConstraints);
-    db.add(m_keyText);
+      JPanel usernameP = new JPanel();   
+      //usernameP.setLayout(new BorderLayout());
+      usernameP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      usernameP.add(userNameLab);
+      usernameP.add(m_userNameText);
+      db.add(usernameP);
 
-    JPanel buttonsP = new JPanel();
-    buttonsP.setLayout(new FlowLayout());
-    JButton ok,cancel;
-    buttonsP.add(ok = new JButton("OK"));
-    buttonsP.add(cancel=new JButton("Cancel"));
-    ok.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
-        ((DatabaseConverter)m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
-        ((DatabaseConverter)m_dsLoader.getLoader()).setUser(m_userNameText.getText());
-        ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new String(m_passwordText.getPassword()));
-        ((DatabaseLoader)m_dsLoader.getLoader()).setQuery(m_queryText.getText());
-        ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText());
-        try{
-          m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
-          //database connection has been configured
-          m_dsLoader.setDB(true);
-        }catch (Exception ex){
-        }
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
-        }
+      JPanel passwordP = new JPanel();   
+      //passwordP.setLayout(new BorderLayout());
+      passwordP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      passwordP.add(passwordLab);
+      passwordP.add(m_passwordText);
+      db.add(passwordP);
+      
+      JPanel queryP = new JPanel();   
+
+      queryP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      queryP.add(queryLab);
+      queryP.add(m_queryText);
+      db.add(queryP);
+      
+      JPanel keyP = new JPanel();   
+
+      keyP.setLayout(new FlowLayout(FlowLayout.LEFT));
+      keyP.add(keyLab);
+      keyP.add(m_keyText);
+      db.add(keyP);
+
+      JPanel buttonsP = new JPanel();
+      buttonsP.setLayout(new FlowLayout());
+      JButton ok,cancel;
+      buttonsP.add(ok = new JButton(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_ButtonsP_Ok_JButton_Text")));
+      buttonsP.add(cancel=new JButton(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_ButtonsP_Cancel_JButton_Text")));
+      ok.addActionListener(new ActionListener(){
+	public void actionPerformed(ActionEvent evt){
+          ((DatabaseLoader)m_dsLoader.getLoader()).resetStructure();  
+	  ((DatabaseConverter)m_dsLoader.getLoader()).setUrl(m_dbaseURLText.getText());
+          ((DatabaseConverter)m_dsLoader.getLoader()).setUser(m_userNameText.getText());
+          ((DatabaseConverter)m_dsLoader.getLoader()).setPassword(new String(m_passwordText.getPassword()));
+	  ((DatabaseLoader)m_dsLoader.getLoader()).setQuery(m_queryText.getText());
+          ((DatabaseLoader)m_dsLoader.getLoader()).setKeys(m_keyText.getText());
+          try{
+           m_dsLoader.notifyStructureAvailable(((DatabaseLoader)m_dsLoader.getLoader()).getStructure());
+           //database connection has been configured
+           m_dsLoader.setDB(true);
+          }catch (Exception ex){
+          }
+          if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
+	  }
+      }
+     });
+     cancel.addActionListener(new ActionListener(){
+	public void actionPerformed(ActionEvent evt){
+	  if (m_parentFrame != null) {
+	    m_parentFrame.dispose();
+	  }
       }
     });
-    cancel.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        if (m_backup != null) {
-          m_dsLoader.setLoader(m_backup);
-        }
-        
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
-        }
-      }
-    });
-    
-    JPanel holderP = new JPanel();
-    holderP.setLayout(new BorderLayout());
-    holderP.add(db, BorderLayout.NORTH);
-    holderP.add(buttonsP, BorderLayout.SOUTH);
-    
-    //db.add(buttonsP);
+   
+    db.add(buttonsP);
     JPanel about = m_LoaderEditor.getAboutPanel();
     if (about != null) {
       add(about, BorderLayout.NORTH);
     }
-    add(holderP, BorderLayout.SOUTH);
+    add(db,BorderLayout.SOUTH);
   }
 
   public void setUpFile() {
     removeAll();
 
-    boolean currentFileIsDir = false;
     File tmp = ((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile();
-    String tmpString = tmp.toString();
-    if (Environment.containsEnvVariables(tmpString)) {
-      try {
-        tmpString = m_env.substitute(tmpString);
-      } catch (Exception ex) {
-        // ignore
-      }
-    }
-    File tmp2 = new File((new File(tmpString)).getAbsolutePath());
-
-    if (tmp2.isDirectory()) {
-      m_fileChooser.setCurrentDirectory(tmp2);
-      currentFileIsDir = true;
+    tmp = new File(tmp.getAbsolutePath());
+    if (tmp.isDirectory()) {
+      m_fileChooser.setCurrentDirectory(tmp);
     } else {
-      m_fileChooser.setSelectedFile(tmp2);
+      m_fileChooser.setSelectedFile(tmp);
     }
-    
     FileSourcedConverter loader = (FileSourcedConverter) m_dsLoader.getLoader();
     String[] ext = loader.getFileExtensions();
     ExtensionFileFilter firstFilter = null;
@@ -384,114 +288,25 @@ public class LoaderCustomizer
     if (firstFilter != null)
       m_fileChooser.setFileFilter(firstFilter);
     JPanel about = m_LoaderEditor.getAboutPanel();
-    JPanel northPanel = new JPanel();
-    northPanel.setLayout(new BorderLayout());
     if (about != null) {
-      northPanel.add(about, BorderLayout.NORTH);
+      add(about, BorderLayout.NORTH);
     }
-    add(northPanel, BorderLayout.NORTH);
-    
-    final EnvironmentField ef = new EnvironmentField();
-    JPanel efHolder = new JPanel();
-    efHolder.setLayout(new BorderLayout());
+    add(m_fileChooser, BorderLayout.CENTER);
 
-    ef.setEnvironment(m_env);
-    /*int width = ef.getPreferredSize().width;
-    int height = ef.getPreferredSize().height;
-//    ef.setMinimumSize(new Dimension(width * 2, height));
-    ef.setPreferredSize(new Dimension(width * 2, height)); */
-    m_fileText = ef;
-    
-    // only set the text on the EnvironmentField if the current file is not a directory
-    if (!currentFileIsDir) {
-      ef.setText(tmp.toString());
-    }
-    
-    efHolder.add(ef, BorderLayout.CENTER);
-    JButton browseBut = new JButton("Browse...");
-    browseBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        try {
-          //final JFrame jf = new JFrame("Choose file");
-          final JDialog jf = new JDialog((JDialog)LoaderCustomizer.this.getTopLevelAncestor(), 
-              "Choose file", true);
-          jf.setLayout(new BorderLayout());
-          //jf.getContentPane().setLayout(new BorderLayout());
-          jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
-          m_fileChooserFrame = jf;
-          jf.pack();
-          jf.setVisible(true);
-        } catch (Exception ex) {
-          ex.printStackTrace();
-        }
-      }
-    });
-    
-    JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
-    bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
-    bP.add(browseBut, BorderLayout.CENTER);
-    efHolder.add(bP, BorderLayout.EAST);
-    JPanel alignedP = new JPanel();
-    alignedP.setBorder(BorderFactory.createTitledBorder("File"));
-    alignedP.setLayout(new BorderLayout());
-    JLabel efLab = new JLabel("Filename", SwingConstants.RIGHT);
-    efLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    alignedP.add(efLab, BorderLayout.WEST);    
-    alignedP.add(efHolder, BorderLayout.CENTER);
-    
-    northPanel.add(alignedP, BorderLayout.SOUTH);
-        
-    JPanel butHolder = new JPanel();
-    //butHolder.setLayout(new GridLayout(1,2));
-    butHolder.setLayout(new FlowLayout());
-    JButton OKBut = new JButton("OK");
-    OKBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        try {
+    m_relativeFilePath = new JCheckBox(Messages.getInstance().getString("LoaderCustomizer_SetUpDatabase_RelativeFilePath_JCheckBox_Text"));
+    m_relativeFilePath.
+      setSelected(((FileSourcedConverter)m_dsLoader.getLoader()).getUseRelativePath());
+
+    m_relativeFilePath.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
           ((FileSourcedConverter)m_dsLoader.getLoader()).
-          setFile(new File(ef.getText()));
-          // tell the loader that a new file has been selected so
-          // that it can attempt to load the header
-          //m_dsLoader.setLoader(m_dsLoader.getLoader());
-          m_dsLoader.newFileSelected();
-        } catch (Exception ex) {
-          ex.printStackTrace();
+            setUseRelativePath(m_relativeFilePath.isSelected());
         }
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(LoaderCustomizer.this, true);
-        }
-        m_parentWindow.dispose();
-      }
-    });
-
-    JButton CancelBut = new JButton("Cancel");
-    CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {                
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(LoaderCustomizer.this, false);
-        }
-        
-        if (m_backup != null) {
-          m_dsLoader.setLoader(m_backup);
-        }
-        
-        m_parentWindow.dispose();
-      }
-    });
-    
-    butHolder.add(OKBut);
-    butHolder.add(CancelBut);
-    
-    JPanel optionsHolder = new JPanel();
-    optionsHolder.setLayout(new BorderLayout());
-    optionsHolder.setBorder(BorderFactory.createTitledBorder("Other options"));
-
-    optionsHolder.add(m_LoaderEditor, BorderLayout.SOUTH);
-    JScrollPane scroller = new JScrollPane(optionsHolder);
-    
-    add(scroller, BorderLayout.CENTER);
-    
-    add(butHolder, BorderLayout.SOUTH);
+      });
+    JPanel holderPanel = new JPanel();
+    holderPanel.setLayout(new FlowLayout());
+    holderPanel.add(m_relativeFilePath);
+    add(holderPanel, BorderLayout.SOUTH);
   }
 
   /**
@@ -501,17 +316,8 @@ public class LoaderCustomizer
    */
   public void setObject(Object object) {
     m_dsLoader = (weka.gui.beans.Loader)object;
-    
-    try {
-      m_backup = 
-        (weka.core.converters.Loader)GenericObjectEditor.makeCopy(m_dsLoader.getLoader());
-    } catch (Exception ex) {
-      // ignore
-    }
-    
     m_LoaderEditor.setTarget(m_dsLoader.getLoader());
     //    m_fileEditor.setValue(m_dsLoader.getDataSetFile());
-    m_LoaderEditor.setEnvironment(m_env);
     if (m_dsLoader.getLoader() instanceof FileSourcedConverter) {
       setUpFile();
     } else{ 
@@ -520,11 +326,7 @@ public class LoaderCustomizer
         }
         else
       setUpOther();
-    }    
-  }
-  
-  public void setEnvironment(Environment env) {
-    m_env = env;
+    }
   }
 
   /**
@@ -543,10 +345,5 @@ public class LoaderCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;    
   }
 }

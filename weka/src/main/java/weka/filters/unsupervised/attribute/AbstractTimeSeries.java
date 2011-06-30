@@ -24,8 +24,7 @@ package weka.filters.unsupervised.attribute;
 
 import java.util.Enumeration;
 import java.util.Vector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -63,7 +62,7 @@ import weka.filters.UnsupervisedFilter;
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public abstract class AbstractTimeSeries
   extends Filter

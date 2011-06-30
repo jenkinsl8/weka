@@ -37,7 +37,6 @@ weka.core.converters.Saver=\
  weka.core.converters.CSVSaver,\
  weka.core.converters.DatabaseSaver,\
  weka.core.converters.LibSVMSaver,\
- weka.core.converters.MatlabSaver,\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
  
@@ -84,25 +83,11 @@ weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.PrincipalComponents,\
  weka.attributeSelection.ReliefFAttributeEval,\
  weka.attributeSelection.SVMAttributeEval,\
- weka.attributeSelection.SignificanceAttributeEval,\
  weka.attributeSelection.SymmetricalUncertAttributeEval,\
- weka.attributeSelection.SymmetricalUncertAttributeSetEval,\
  weka.attributeSelection.WrapperSubsetEval
  
 # Lists the VisualizePlugins I want to choose from
 weka.gui.visualize.plugins.VisualizePlugin=\
-
-
-# Lists the TreeVisualizePlugins I want to choose from
-weka.gui.visualize.plugins.TreeVisualizePlugin=\
-
-
-# Lists the GraphVisualizePlugins I want to choose from
-weka.gui.visualize.plugins.GraphVisualizePlugin=\
-
-
-# Lists the ErrorVisualizePlugins I want to choose from
-weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  
  
 # Lists the Loaders I want to choose from
@@ -112,7 +97,6 @@ weka.core.converters.Loader=\
  weka.core.converters.CSVLoader,\
  weka.core.converters.DatabaseLoader,\
  weka.core.converters.LibSVMLoader,\
- weka.core.converters.MatlabLoader,\
  weka.core.converters.SerializedInstancesLoader,\
  weka.core.converters.TextDirectoryLoader,\
  weka.core.converters.XRFFLoader
@@ -153,6 +137,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.SimpleLogistic,\
  weka.classifiers.functions.SMO,\
  weka.classifiers.functions.SMOreg,\
+ weka.classifiers.functions.SPegasos,\
  weka.classifiers.functions.VotedPerceptron,\
  weka.classifiers.functions.Winnow,\
  weka.classifiers.lazy.IB1,\
@@ -171,7 +156,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.Dagging,\
  weka.classifiers.meta.Decorate,\
  weka.classifiers.meta.END,\
- weka.classifiers.meta.EnsembleSelection,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.Grading,\
  weka.classifiers.meta.GridSearch,\
@@ -205,15 +189,9 @@ weka.classifiers.Classifier=\
  weka.classifiers.mi.MISVM,\
  weka.classifiers.mi.MIWrapper,\
  weka.classifiers.mi.SimpleMI,\
- weka.classifiers.mi.TLD,\
- weka.classifiers.mi.TLDSimple,\
- weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
- weka.classifiers.misc.OSDL,\
  weka.classifiers.misc.SerializedClassifier,\
  weka.classifiers.misc.VFI,\
- weka.classifiers.scripting.GroovyClassifier,\
- weka.classifiers.scripting.JythonClassifier,\
  weka.classifiers.trees.ADTree,\
  weka.classifiers.trees.BFTree,\
  weka.classifiers.trees.DecisionStump,\
@@ -236,19 +214,11 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.JRip,\
  weka.classifiers.rules.M5Rules,\
  weka.classifiers.rules.NNge,\
- weka.classifiers.rules.OLM,\
  weka.classifiers.rules.OneR,\
  weka.classifiers.rules.PART,\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
  weka.classifiers.rules.ZeroR
-
-# Lists the AbstractOutput classes I want to choose from
-weka.classifiers.evaluation.output.prediction.AbstractOutput=\
-  weka.classifiers.evaluation.output.prediction.CSV,\
-  weka.classifiers.evaluation.output.prediction.HTML,\
-  weka.classifiers.evaluation.output.prediction.Null,\
-  weka.classifiers.evaluation.output.prediction.PlainText
  
 # Lists the DistanceFunctions I want to choose from
 weka.core.DistanceFunction=\
@@ -284,7 +254,6 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.attribute.ClusterMembership,\
  weka.filters.unsupervised.attribute.Copy,\
  weka.filters.unsupervised.attribute.Discretize,\
- weka.filters.unsupervised.attribute.EMImputation,\
  weka.filters.unsupervised.attribute.FirstOrder,\
  weka.filters.unsupervised.attribute.KernelFilter,\
  weka.filters.unsupervised.attribute.MakeIndicator,\
@@ -366,7 +335,6 @@ weka.experiment.Tester=\
 weka.attributeSelection.ASSearch=\
  weka.attributeSelection.BestFirst,\
  weka.attributeSelection.ExhaustiveSearch,\
- weka.attributeSelection.FCBFSearch,\
  weka.attributeSelection.GeneticSearch,\
  weka.attributeSelection.GreedyStepwise,\
  weka.attributeSelection.LinearForwardSelection,\
@@ -402,7 +370,6 @@ weka.core.converters.AbstractFileLoader=\
  weka.core.converters.C45Loader,\
  weka.core.converters.CSVLoader,\
  weka.core.converters.LibSVMLoader,\
- weka.core.converters.MatlabLoader,\
  weka.core.converters.SerializedInstancesLoader,\
  weka.core.converters.XRFFLoader
  
@@ -412,7 +379,6 @@ weka.core.converters.AbstractFileSaver=\
  weka.core.converters.C45Saver,\
  weka.core.converters.CSVSaver,\
  weka.core.converters.LibSVMSaver,\
- weka.core.converters.MatlabSaver,\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
  
@@ -438,8 +404,8 @@ weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=\
 weka.associations.Associator=\
  weka.associations.Apriori,\
  weka.associations.FilteredAssociator,\
+ weka.associations.FPGrowth,\
  weka.associations.GeneralizedSequentialPatterns,\
- weka.associations.HotSpot,\
  weka.associations.PredictiveApriori,\
  weka.associations.Tertius
  
@@ -482,7 +448,6 @@ weka.filters.Filter=\
  weka.filters.unsupervised.attribute.ClusterMembership,\
  weka.filters.unsupervised.attribute.Copy,\
  weka.filters.unsupervised.attribute.Discretize,\
- weka.filters.unsupervised.attribute.EMImputation,\
  weka.filters.unsupervised.attribute.FirstOrder,\
  weka.filters.unsupervised.attribute.InterquartileRange,\
  weka.filters.unsupervised.attribute.KernelFilter,\

@@ -33,7 +33,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -51,7 +50,6 @@ import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -99,10 +97,10 @@ public class MatrixPanel
   protected JSplitPane jp;
   /** The button that updates the display to reflect the changes made by the user. 
       E.g. changed attribute set for the matrix    */
-  protected JButton m_updateBt = new JButton("Update");
+  protected JButton m_updateBt = new JButton(Messages.getInstance().getString("MatrixPanel_UpdateBt_JButton_Text"));
 
   /** The button to display a window to select attributes */
-  protected JButton m_selAttrib = new JButton("Select Attributes");
+  protected JButton m_selAttrib = new JButton(Messages.getInstance().getString("MatrixPanel_SelAttrib_JButton_Text"));
 
   /** The dataset for which this panel will display the plot matrix for  */
   protected Instances m_data=null;
@@ -117,7 +115,7 @@ public class MatrixPanel
   protected JComboBox m_classAttrib = new JComboBox();
 
   /** The slider to adjust the size of the cells in the matrix  */  
-  protected JSlider m_plotSize = new JSlider(50, 200, 100);
+  protected JSlider m_plotSize = new JSlider(50, 500, 100);
 
   /** The slider to adjust the size of the datapoints  */  
   protected JSlider m_pointSize = new JSlider(1, 10, 1);
@@ -138,16 +136,16 @@ public class MatrixPanel
   protected JTextField m_resamplePercent = new JTextField(5);
 
   /** The label for resample percentage */
-  protected JButton m_resampleBt =  new JButton("SubSample % :");
+  protected JButton m_resampleBt =  new JButton(Messages.getInstance().getString("MatrixPanel_ResampleBt_JButton_Text"));
 
   /** Random seed for random subsample */
   protected JTextField m_rseed = new JTextField(5);
  
   /** Displays the current size beside the slider bar for cell size */
-  private final JLabel m_plotSizeLb = new JLabel("PlotSize: [100]");
+  private final JLabel m_plotSizeLb = new JLabel(Messages.getInstance().getString("MatrixPanel_PlotSizeLb_JLabel_Text"));
 
   /** Displays the current size beside the slider bar for point size */
-  private final JLabel m_pointSizeLb = new JLabel("PointSize: [10]");
+  private final JLabel m_pointSizeLb = new JLabel(Messages.getInstance().getString("MatrixPanel_PointSizeLb_JLabel_Text"));
 
   /** This array contains the indices of the attributes currently selected  */
   private int [] m_selectedAttribs;
@@ -204,14 +202,7 @@ public class MatrixPanel
   /** font used in column and row names */
   private final java.awt.Font f = new java.awt.Font("Dialog", java.awt.Font.BOLD, 11);
 
-  protected transient Image m_osi = null;
-  protected boolean[][] m_plottedCells;
-  protected boolean m_regenerateOSI = true;
-  protected boolean m_clearOSIPlottedCells;
-  protected double m_previousPercent = -1;
-  
-  protected JCheckBox m_fastScroll = 
-    new JCheckBox("Fast scrolling (uses more memory)");
+
 
   /** 
    * Constructor
@@ -223,13 +214,13 @@ public class MatrixPanel
     m_selAttrib.addActionListener( new ActionListener() {
 	public void actionPerformed(ActionEvent ae) {
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
-					 "Attribute Selection Panel",
+			  Messages.getInstance().getString("MatrixPanel_Jd_JDialog_Text"),
 					 true);
 
 	  JPanel jp = new JPanel();
 	  JScrollPane js = new JScrollPane(m_attribList);
-	  JButton okBt = new JButton("OK");
-	  JButton cancelBt = new JButton("Cancel");
+	  JButton okBt = new JButton(Messages.getInstance().getString("MatrixPanel_OkBt_JButton_Text"));
+	  JButton cancelBt = new JButton(Messages.getInstance().getString("MatrixPanel_CancelBt_JButton_Text"));
 	  final int [] savedSelection = m_attribList.getSelectedIndices();
 					
 	  okBt.addActionListener( new ActionListener() {	
@@ -280,65 +271,44 @@ public class MatrixPanel
 	  a.setPreferredSize(d);
 	  a.setSize( a.getPreferredSize() );
 	  a.setJitter( m_jitter.getValue() );
-	  
-	  if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
-	    m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
-	    m_clearOSIPlottedCells = false;
-	  }
-	  
-	  if (m_regenerateOSI) {
-	    m_osi = null;
-	  }
+					
 	  m_js.revalidate();
 	  m_cp.setColours(m_colorList);
 	  m_cp.setCindex(m_classIndex);
-	  m_regenerateOSI = false;
 					
 	  repaint();
 	}
       });
     m_updateBt.setPreferredSize( m_selAttrib.getPreferredSize() );
-    
-    m_jitter.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent ce) {
-        if (m_fastScroll.isSelected()) {
-          m_clearOSIPlottedCells = true;
-        }
-      }
-    });
       
     m_plotSize.addChangeListener( new ChangeListener() {
 	public void stateChanged(ChangeEvent ce) {
-	  m_plotSizeLb.setText("PlotSize: ["+m_plotSize.getValue()+"]");
+	  m_plotSizeLb.setText(Messages.getInstance().getString("MatrixPanel_StateChanged_PlotSizeLb_Text_First") + m_plotSize.getValue() + Messages.getInstance().getString("MatrixPanel_StateChanged_PlotSizeLb_Text_Second"));
 	  m_plotSizeLb.setPreferredSize( m_plotLBSizeD );
 	  m_jitter.setMaximum( m_plotSize.getValue()/5 ); //20% of cell Size
-	  m_regenerateOSI = true;
 	}
       });
  
     m_pointSize.addChangeListener( new ChangeListener() {
 	public void stateChanged(ChangeEvent ce) {
-	  m_pointSizeLb.setText("PointSize: ["+m_pointSize.getValue()+"]");
+	  m_pointSizeLb.setText(Messages.getInstance().getString("MatrixPanel_StateChanged_PointSizeLb_Text_First") + m_pointSize.getValue() + Messages.getInstance().getString("MatrixPanel_StateChanged_PointSizeLb_Text_Second"));
 	  m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
 	  datapointSize = m_pointSize.getValue();
-	  if (m_fastScroll.isSelected()) {
-	    m_clearOSIPlottedCells = true;
-	  }
 	}
       });
  
     m_resampleBt.addActionListener( new ActionListener() { 
-	public void actionPerformed(ActionEvent e) {	  	  
-	  JLabel rseedLb = new JLabel("Random Seed: ");
+	public void actionPerformed(ActionEvent e) {
+	  JLabel rseedLb = new JLabel(Messages.getInstance().getString("MatrixPanel_ActionPerformed_RseedLb_JLabel_Text"));
 	  JTextField rseedTxt = m_rseed;
-	  JLabel percentLb = new JLabel("Subsample as");
-	  JLabel percent2Lb = new JLabel("% of input: ");
+	  JLabel percentLb = new JLabel(Messages.getInstance().getString("MatrixPanel_ActionPerformed_PercentLb_JLabel_Text"));
+	  JLabel percent2Lb = new JLabel(Messages.getInstance().getString("MatrixPanel_ActionPerformed_Percent2Lb_JLabel_Text"));
 	  final JTextField percentTxt = new JTextField(5);
 	  percentTxt.setText( m_resamplePercent.getText() );
-	  JButton doneBt = new JButton("Done");
+	  JButton doneBt = new JButton(Messages.getInstance().getString("MatrixPanel_ActionPerformed_DoneBt_JButton_Text"));
 
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
-					 "Subsample % Panel",
+			  Messages.getInstance().getString("MatrixPanel_ActionPerformed_Jd_JDialog_Text"),
 					 true) {
 	      private static final long serialVersionUID = -269823533147146296L;
 	      
@@ -384,7 +354,7 @@ public class MatrixPanel
 	  jd.setLocation( m_resampleBt.getLocationOnScreen().x,
 			  m_resampleBt.getLocationOnScreen().y-jd.getHeight() );
 	  jd.setVisible(true);
-	}		
+	}
       });
 
     optionsPanel = new JPanel( new GridBagLayout() ); //all the rest of the panels are in here.
@@ -395,7 +365,7 @@ public class MatrixPanel
      
     m_plotLBSizeD = m_plotSizeLb.getPreferredSize();
     m_pointLBSizeD = m_pointSizeLb.getPreferredSize();
-    m_pointSizeLb.setText("PointSize: [1]");
+    m_pointSizeLb.setText(Messages.getInstance().getString("MatrixPanel_ActionPerformed_PointSizeLb_Text"));
     m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
     m_resampleBt.setPreferredSize( m_selAttrib.getPreferredSize() );
 
@@ -410,7 +380,7 @@ public class MatrixPanel
     gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
     p4.add(m_pointSize, gbc);
     gbc.weightx=0; gbc.gridwidth = GridBagConstraints.RELATIVE;
-    p4.add( new JLabel("Jitter: "), gbc);
+    p4.add( new JLabel(Messages.getInstance().getString("MatrixPanel_ActionPerformed_P4_Text")), gbc);
     gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
     p4.add(m_jitter, gbc);
     p4.add(m_classAttrib, gbc);
@@ -418,7 +388,6 @@ public class MatrixPanel
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx=1;
     gbc.fill = GridBagConstraints.NONE;
-    p3.add(m_fastScroll, gbc);
     p3.add(m_updateBt, gbc);
     p3.add(m_selAttrib, gbc);
     gbc.gridwidth = GridBagConstraints.RELATIVE;
@@ -429,7 +398,7 @@ public class MatrixPanel
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     p3.add(m_resamplePercent, gbc);
     
-    p2.setBorder(BorderFactory.createTitledBorder("Class Colour"));
+    p2.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("MatrixPanel_ActionPerformed_P2_BorderFactoryCreateTitledBorder_Text")));
     p2.add(m_cp, BorderLayout.SOUTH);
 
     gbc.insets = new Insets(8,5,2,5);
@@ -439,19 +408,6 @@ public class MatrixPanel
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     optionsPanel.add(p3, gbc);
     optionsPanel.add(p2, gbc);
-    
-    m_fastScroll.setSelected(false);
-    m_fastScroll.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (!m_fastScroll.isSelected()) {
-          m_osi = null;
-        } else {
-          m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
-        }
-        MatrixPanel.this.invalidate();
-        MatrixPanel.this.repaint();
-      }
-    });
 
     this.addComponentListener( new ComponentAdapter() {
 	public void componentResized(ComponentEvent cv) {
@@ -482,7 +438,7 @@ public class MatrixPanel
     m_js.setViewportView( m_plotsPanel );
     m_js.setColumnHeaderView( m_plotsPanel.getColHeader() );
     m_js.setRowHeaderView( m_plotsPanel.getRowHeader() );
-    final JLabel lb = new JLabel(" Plot Matrix");
+    final JLabel lb = new JLabel(Messages.getInstance().getString("MatrixPanel_ActionPerformed_Lb_JLabel_Text"));
     lb.setFont(f); lb.setForeground(fontColor);
     lb.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
     m_js.setCorner(JScrollPane.UPPER_LEFT_CORNER, lb);
@@ -503,11 +459,7 @@ public class MatrixPanel
     double minC=0, maxC=0;
 
     /** Resampling  **/
-    double currentPercent = Double.parseDouble(m_resamplePercent.getText());
-    if(currentPercent <= 100) {
-      if (currentPercent != m_previousPercent) {
-        m_clearOSIPlottedCells = true;
-      }
+    if(Double.parseDouble(m_resamplePercent.getText())<100) {
         inst = new Instances(m_data, 0, m_data.numInstances());
         inst.randomize( new Random(Integer.parseInt(m_rseed.getText())) );
         
@@ -520,11 +472,11 @@ public class MatrixPanel
         
         inst = new Instances(inst, 
                  0,
-                 (int)Math.round(currentPercent
+                 (int)Math.round(Double.parseDouble(m_resamplePercent.getText())
                  / 100D*inst.numInstances())
                             );
-        m_previousPercent = currentPercent;
     }
+    
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
     m_pointColors = new int[inst.numInstances()];
     m_missing = new boolean[inst.numInstances()][m_selectedAttribs.length+1]; //changed
@@ -671,8 +623,26 @@ public class MatrixPanel
 
     m_classAttrib.removeAllItems();
     for(int i=0; i<tempAttribNames.length; i++) {
-      type = " (" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
-      tempAttribNames[i] = new String("Colour: "+m_data.attribute(i).name()+" "+type);
+      switch (m_data.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeNOMINAL_Text");
+	break;
+      case Attribute.NUMERIC:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeNUMERIC_Text");
+	break;
+      case Attribute.STRING:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeSTRING_Text");
+	break;
+      case Attribute.DATE:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeDATE_Text");
+	break;
+      case Attribute.RELATIONAL:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeRELATIONAL_Text");
+	break;
+      default:
+	type = Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Type_AttributeDEFAULT_Text");
+      }
+      tempAttribNames[i] = new String(Messages.getInstance().getString("MatrixPanel_SetupAttribLists_Text_First") + m_data.attribute(i).name()+" "+type);
       m_classAttrib.addItem(tempAttribNames[i]);
     }
     if (m_data.classIndex() == -1)
@@ -695,7 +665,7 @@ public class MatrixPanel
       m_resamplePercent.setText(""+percnt);
     }
     else
-      m_resamplePercent.setText("100");
+      m_resamplePercent.setText(Messages.getInstance().getString("MatrixPanel_SetPercent_Text_First"));
   }
 
 
@@ -705,8 +675,6 @@ public class MatrixPanel
   */
   public void setInstances(Instances newInst) {
 
-    m_osi = null;
-    m_fastScroll.setSelected(false);
     m_data = newInst;
     setPercent();
     setupAttribLists();
@@ -722,14 +690,14 @@ public class MatrixPanel
      Main method for testing this class
   */
   public static void main(String [] args)  {
-    final JFrame jf = new JFrame("Weka Explorer: MatrixPanel");
-    final JButton setBt = new JButton("Set Instances");
+    final JFrame jf = new JFrame(Messages.getInstance().getString("MatrixPanel_Main_JFRame_Text"));
+    final JButton setBt = new JButton(Messages.getInstance().getString("MatrixPanel_Main_SetBt_JButton_Text"));
     Instances data = null;
     try {
       if(args.length==1)
 	data = new Instances( new BufferedReader( new FileReader(args[0])) ); 
       else {
-	System.out.println("Usage: MatrixPanel <arff file>"); 
+	System.out.println(Messages.getInstance().getString("MatrixPanel_Main_Text")); 
 	System.exit(-1);
       }
     } catch(IOException ex) { ex.printStackTrace(); System.exit(-1); }
@@ -739,14 +707,14 @@ public class MatrixPanel
     setBt.addActionListener( new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  JFileChooser chooser = new JFileChooser(new java.io.File(System.getProperty("user.dir")));
-	  ExtensionFileFilter myfilter = new ExtensionFileFilter("arff", "Arff data files");
+	  ExtensionFileFilter myfilter = new ExtensionFileFilter(Messages.getInstance().getString("MatrixPanel_Main_ActionPerformed_ExtensionFileFilter_Text_First"), Messages.getInstance().getString("MatrixPanel_Main_ActionPerformed_ExtensionFileFilter_Text_Second"));
 	  chooser.setFileFilter(myfilter);
 	  int returnVal = chooser.showOpenDialog(jf);
 		  
 	  if(returnVal == JFileChooser.APPROVE_OPTION)
 	    {
 	      try{
-		System.out.println("You chose to open this file: " +chooser.getSelectedFile().getName());
+		System.out.println(Messages.getInstance().getString("MatrixPanel_Main_ActionPerformed_Text_First") + chooser.getSelectedFile().getName());
 		Instances in = new Instances ( new FileReader(chooser.getSelectedFile().getAbsolutePath()) );
 		mp.setInstances(in);
 	      }
@@ -794,7 +762,7 @@ public class MatrixPanel
      */
     public Plot() {
       super();
-      this.setToolTipText("blah");
+      this.setToolTipText(Messages.getInstance().getString("MatrixPanel_Plot_SetToolTipText_Text"));
       this.addMouseMotionListener( this );
       this.addMouseListener( this );
       initialize();
@@ -943,11 +911,11 @@ public class MatrixPanel
       if(found==0)
 	return;
 
-      JFrame jf = new JFrame("Weka Explorer: Visualizing "+m_data.relationName() );
+      JFrame jf = new JFrame(Messages.getInstance().getString("MatrixPanel_Plot_JFrame_Text") + m_data.relationName() );
       VisualizePanel vp = new VisualizePanel();
       try {
 	PlotData2D pd = new PlotData2D(m_data);
-	pd.setPlotName("Master Plot");
+	pd.setPlotName(Messages.getInstance().getString("MatrixPanel_Plot_Pd_SetPlotName_Text"));
 	vp.setMasterPlot(pd);
 	//System.out.println("x: "+i+" y: "+j);
 	vp.setXIndex(m_selectedAttribs[i]);
@@ -988,17 +956,16 @@ public class MatrixPanel
 	for(int i=0; i<m_selectedAttribs.length; i++) {
 	  if(event.getX()>=xpos && event.getX()<=xpos+cellSize+extpad)
 	    if(event.getY()>=ypos && event.getY()<=ypos+cellSize+extpad)
-	      return("X: "+m_data.attribute(m_selectedAttribs[i]).name()+
-		     " Y: "+m_data.attribute(m_selectedAttribs[j]).name()+
-		     " (click to enlarge)");
+	      return(Messages.getInstance().getString("MatrixPanel_Plot_GetToolTipText_Text_First") + m_data.attribute(m_selectedAttribs[i]).name()+
+		     Messages.getInstance().getString("MatrixPanel_Plot_GetToolTipText_Text_Second") + m_data.attribute(m_selectedAttribs[j]).name()+
+		     Messages.getInstance().getString("MatrixPanel_Plot_GetToolTipText_Text_Third"));
 	  xpos+=cellSize+extpad;
 	}
 	xpos=extpad;
 	ypos+=cellSize+extpad;
       }
-      return ("Matrix Panel");
+      return (Messages.getInstance().getString("MatrixPanel_Plot_GetToolTipText_Text_Fourth"));
     }
-        
 
     /**  Paints a single Plot at xpos, ypos. and xattrib and yattrib on X and
 	 Y axes
@@ -1051,37 +1018,11 @@ public class MatrixPanel
       g.setColor( fontColor );
     }
     
-    private void createOSI() {
-      int iwidth = this.getWidth();
-      int iheight = this.getHeight();
-      m_osi = this.createImage(iwidth, iheight);
-      clearOSI();
-    }
-    
-    private void clearOSI() {
-      if (m_osi == null) {
-        return;
-      }
-      
-      int iwidth = this.getWidth();
-      int iheight = this.getHeight();
-      Graphics m = m_osi.getGraphics();
-      m.setColor(this.getBackground().darker().darker());
-      m.fillRect(0, 0, iwidth, iheight);
-    }
-    
 
     /**
        Paints the matrix of plots in the current visible region
     */
     public void paintME(Graphics g) {
-      Graphics g2 = g;
-      if (m_osi == null && m_fastScroll.isSelected()) {
-        createOSI();
-      }
-      if (m_osi != null && m_fastScroll.isSelected()) {
-        g2 = m_osi.getGraphics();
-      }
       r = g.getClipBounds();
       
       g.setColor( this.getBackground() );
@@ -1105,14 +1046,8 @@ public class MatrixPanel
               xpos += cellSize+extpad; continue; }
             else if(xpos > r.x+r.width)
               break;
-            else if (m_fastScroll.isSelected()) {
-              if (!m_plottedCells[i][j]) {
-                paintGraph(g2, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
-                m_plottedCells[i][j] = true;
-              }
-            } else {
-              paintGraph(g2, i, j, xpos, ypos);
-            }
+            else
+              paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
             xpos += cellSize+extpad;
           }
         }
@@ -1125,9 +1060,6 @@ public class MatrixPanel
      */
     public void paintComponent(Graphics g) {
       paintME(g);
-      if (m_osi != null && m_fastScroll.isSelected()) {
-        g.drawImage(m_osi, 0, 0, this);
-      }
     }
   }
 }

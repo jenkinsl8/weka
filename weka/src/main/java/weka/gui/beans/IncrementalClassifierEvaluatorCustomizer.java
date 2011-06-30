@@ -25,15 +25,10 @@ package weka.gui.beans;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
@@ -44,8 +39,7 @@ import javax.swing.JPanel;
  */
 public class IncrementalClassifierEvaluatorCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester, 
-  CustomizerClosingListener {
+  implements Customizer {
 
   /** for serialization */
   //  private static final long serialVersionUID = 1229878140258668581L;
@@ -55,52 +49,14 @@ public class IncrementalClassifierEvaluatorCustomizer
 
   private PropertySheetPanel m_ieEditor = 
     new PropertySheetPanel();
-  
-  private IncrementalClassifierEvaluator m_evaluator;
-  private ModifyListener m_modifyListener;
-  
-  private Window m_parent;
-  
-  private int m_freqBackup;
-  private boolean m_perClassBackup;
 
   public IncrementalClassifierEvaluatorCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
     add(m_ieEditor, BorderLayout.CENTER);
-    add(new javax.swing.JLabel("IncrementalClassifierEvaluatorCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("IncrementalClassifierEvaluatorCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
-    addButtons();
-  }
-  
-  private void addButtons() {
-    JButton okBut = new JButton("OK");
-    JButton cancelBut = new JButton("Cancel");
-    
-    JPanel butHolder = new JPanel();
-    butHolder.setLayout(new GridLayout(1, 2));
-    butHolder.add(okBut); butHolder.add(cancelBut);
-    add(butHolder, BorderLayout.SOUTH);
-    
-    okBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_modifyListener.
-        setModifiedStatus(IncrementalClassifierEvaluatorCustomizer.this, true);
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
-    
-    cancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        customizerClosing();
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
   }
   
   /**
@@ -109,10 +65,7 @@ public class IncrementalClassifierEvaluatorCustomizer
    * @param object a IncrementalClassifierEvaluator object
    */
   public void setObject(Object object) {
-    m_evaluator = ((IncrementalClassifierEvaluator)object);
-    m_ieEditor.setTarget(m_evaluator);
-    m_freqBackup = m_evaluator.getStatusFrequency();
-    m_perClassBackup = m_evaluator.getOutputPerClassInfoRetrievalStats();
+    m_ieEditor.setTarget((IncrementalClassifierEvaluator)object);
   }
 
   /**
@@ -131,22 +84,5 @@ public class IncrementalClassifierEvaluatorCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
-
-  @Override
-  public void setParentWindow(Window parent) {
-    m_parent = parent;
-  }
-
-  @Override
-  public void customizerClosing() {
-    // restore original state (window closed or cancel pressed)
-    m_evaluator.setStatusFrequency(m_freqBackup);
-    m_evaluator.setOutputPerClassInfoRetrievalStats(m_perClassBackup);
   }
 }
