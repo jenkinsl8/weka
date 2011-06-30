@@ -16,30 +16,39 @@
 
 /*
  *    LegendPanel.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
+
 
 package weka.gui.visualize;
 
 import weka.core.FastVector;
+import weka.core.Utils;
 import weka.core.Instances;
 
+import java.util.Random;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Dimension;
 
-import javax.swing.JColorChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JColorChooser;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Component;
 
 /**
  * This panel displays legends for a list of plots. If a given plot
@@ -47,13 +56,9 @@ import javax.swing.JScrollPane;
  * be changed.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
-public class LegendPanel
-  extends JScrollPane {
-
-  /** for serialization */
-  private static final long serialVersionUID = -1262384440543001505L;
+public class LegendPanel extends JScrollPane {
 
   /** the list of plot elements */
   protected FastVector m_plots;
@@ -68,11 +73,7 @@ public class LegendPanel
   /**
    * Inner class for handling legend entries
    */
-  protected class LegendEntry
-    extends JPanel {
-
-    /** for serialization */
-    private static final long serialVersionUID = 3879990289042935670L;
+  protected class LegendEntry extends JPanel {
 
     /** the data for this legend entry */
     private PlotData2D m_plotData=null;
@@ -88,7 +89,6 @@ public class LegendPanel
     private JPanel m_pointShape;
 
     public LegendEntry(PlotData2D data, int dataIndex) {
-      javax.swing.ToolTipManager.sharedInstance().setDismissDelay(5000);
       m_plotData = data;
       m_dataIndex = dataIndex;
       //      this.setBackground(Color.black);
@@ -121,7 +121,6 @@ public class LegendPanel
       }
 
       m_legendText = new JLabel(m_plotData.m_plotName);
-      m_legendText.setToolTipText(m_plotData.getPlotNameHTML());
       if (m_plotData.m_useCustomColour) {
 	m_legendText.setForeground(m_plotData.m_customColour);
       }
@@ -132,8 +131,6 @@ public class LegendPanel
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.gridx=0;constraints.gridy=0;constraints.weightx=5; */
       m_pointShape = new JPanel() {
-	private static final long serialVersionUID = -7048435221580488238L;
-	
 	public void paintComponent(Graphics gx) {
 	  super.paintComponent(gx);
 	  if (!m_plotData.m_useCustomColour) {
@@ -224,14 +221,10 @@ public class LegendPanel
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
     constraints.insets = new Insets(2,4,2,4);
-    //int numLines = ((PlotData2D)m_plots.elementAt(0)).getPlotName().split("<br>").length;
+
      for (int i=0;i<m_plots.size();i++) {
        tmp = new LegendEntry((PlotData2D)m_plots.elementAt(i),i);
        constraints.gridy = i;
-/*       constraints.gridheight = 1;
-       if (numLines > 0) {
-         constraints.gridheight = (numLines + 2);
-       } */
        m_span.add(tmp, constraints);
      }
   }

@@ -21,7 +21,6 @@
 
 package weka.classifiers.xml;
 
-import weka.core.RevisionUtils;
 import weka.core.xml.XMLBasicSerialization;
 
 /**
@@ -29,10 +28,9 @@ import weka.core.xml.XMLBasicSerialization;
  * fro XML.<br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.3.2.2 $ 
  */
-public class XMLClassifier
-   extends XMLBasicSerialization {
+public class XMLClassifier extends XMLBasicSerialization {
 
    /**
     * initializes the serialization
@@ -53,14 +51,5 @@ public class XMLClassifier
       // allow
       m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
       m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
    }
 }

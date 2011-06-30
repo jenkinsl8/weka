@@ -16,246 +16,54 @@
 
 /*
  *    CSVSaver.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.core.converters;
 
-import weka.core.Capabilities;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Writes to a destination that is in CSV (comma-separated values) format. The column separator can be chosen (default is ',') as well as the value representing missing values (default is '?').
- * <p/>
- <!-- globalinfo-end -->
+ * Writes to a destination in csv format.
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options:
+ *
+ * -i input arff file <br>
+ * The input filw in ARFF format. <p>
+ *
+ * -o the output file <br>
+ * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  * 
- * <pre> -F &lt;separator&gt;
- *  The field separator to be used.
- *  '\t' can be used as well.
- *  (default: ',')</pre>
- * 
- * <pre> -M &lt;str&gt;
- *  The string representing a missing value.
- *  (default: ?)</pre>
- * 
- * <pre> -i &lt;the input file&gt;
- *  The input file</pre>
- * 
- * <pre> -o &lt;the output file&gt;
- *  The output file</pre>
- * 
- <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.2.2.2 $
  * @see Saver
  */
-public class CSVSaver 
-  extends AbstractFileSaver 
-  implements BatchConverter, IncrementalConverter, FileSourcedConverter {
+public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
 
-  /** for serialization. */
-  static final long serialVersionUID = 476636654410701807L;
-  
-  /** the field separator. */
-  protected String m_FieldSeparator = ",";
-  
-  /** The placeholder for missing values. */
-  protected String m_MissingValue = "?";
-  
-  /** 
-   * Constructor.
-   */  
+    /** Constructor */  
   public CSVSaver(){
-    resetOptions();
+  
+      resetOptions();
   }
    
   /**
-   * Returns a string describing this Saver.
-   * 
-   * @return 		a description of the Saver suitable for
-   * 			displaying in the explorer/experimenter gui
+   * Returns a string describing this Saver
+   * @return a description of the Saver suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Writes to a destination that is in CSV (comma-separated values) format. "
-      + "The column separator can be chosen (default is ',') as well as the value "
-      + "representing missing values (default is '?').";
+    return "Writes to a destination that is in csv format";
   }
 
-  /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
-    
-    result.addElement(new Option(
-        "\tThe field separator to be used.\n"
-        + "\t'\\t' can be used as well.\n"
-        + "\t(default: ',')",
-        "F", 1, "-F <separator>"));
-    
-    result.addElement(new Option(
-        "\tThe string representing a missing value.\n"
-        + "\t(default: ?)",
-        "M", 1, "-M <str>"));
-    
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
-      
-    return result.elements();
-  }
-
-  /**
-   * Parses a given list of options. <p/>
-   *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -F &lt;separator&gt;
-   *  The field separator to be used.
-   *  '\t' can be used as well.
-   *  (default: ',')</pre>
-   * 
-   * <pre> -M &lt;str&gt;
-   *  The string representing a missing value.
-   *  (default: ?)</pre>
-   * 
-   * <pre> -i &lt;the input file&gt;
-   *  The input file</pre>
-   * 
-   * <pre> -o &lt;the output file&gt;
-   *  The output file</pre>
-   * 
-   <!-- options-end -->
-   *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-    String	tmpStr;
-    
-    tmpStr = Utils.getOption('F', options);
-    if (tmpStr.length() != 0)
-      setFieldSeparator(tmpStr);
-    else
-      setFieldSeparator(",");
-
-    tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
-      setMissingValue(tmpStr);
-    else
-      setMissingValue("?");
-    
-    super.setOptions(options);
-  }
-
-  /**
-   * Gets the current settings of the Classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String[] getOptions() {
-    Vector<String>	result;
-    String[]		options;
-    int			i;
-    
-    result  = new Vector<String>();
-
-    result.add("-F");
-    result.add(getFieldSeparator());
-
-    result.add("-M");
-    result.add(getMissingValue());
-    
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
-    
-    return result.toArray(new String[result.size()]);
-  }
-  
-  /**
-   * Sets the character used as column separator.
-   * 
-   * @param value	the character to use
-   */
-  public void setFieldSeparator(String value) {
-    m_FieldSeparator = Utils.unbackQuoteChars(value);
-    if (m_FieldSeparator.length() != 1) {
-      m_FieldSeparator = ",";
-      System.err.println(
-	  "Field separator can only be a single character (exception being '\t'), "
-	  + "defaulting back to '" + m_FieldSeparator + "'!");
-    }
-  }
-  
-  /**
-   * Returns the character used as column separator.
-   * 
-   * @return		the character to use
-   */
-  public String getFieldSeparator() {
-    return Utils.backQuoteChars(m_FieldSeparator);
-  }
-
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   *         		displaying in the explorer/experimenter gui
-   */
-  public String fieldSeparatorTipText() {
-    return "The character to use as separator for the columns/fields (use '\\t' for TAB).";
-  }
-  
-  /**
-   * Sets the placeholder for missing values.
-   * 
-   * @param value	the placeholder
-   */
-  public void setMissingValue(String value) {
-    m_MissingValue = value;
-  }
-  
-  /**
-   * Returns the current placeholder for missing values.
-   * 
-   * @return		the placeholder
-   */
-  public String getMissingValue() {
-    return m_MissingValue;
-  }
-
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   *         		displaying in the explorer/experimenter gui
-   */
-  public String missingValueTipText() {
-    return "The placeholder for missing values, default is '?'.";
-  }
   
   /**
    * Returns a description of the file type.
@@ -267,40 +75,14 @@ public class CSVSaver
   }
 
   /**
-   * Resets the Saver.
+   * Resets the Saver 
    */
   public void resetOptions() {
+
     super.resetOptions();
-    
     setFileExtension(".csv");
   }
 
-  /** 
-   * Returns the Capabilities of this saver.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.STRING_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.STRING_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
 
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
@@ -341,7 +123,7 @@ public class CSVSaver
               for (int i = 0; i < structure.numAttributes(); i++) {
                 System.out.print(structure.attribute(i).name());
                 if (i < structure.numAttributes()-1) {
-                    System.out.print(m_FieldSeparator);
+                    System.out.print(",");
                 } else {
                     System.out.println();
                 }
@@ -351,7 +133,7 @@ public class CSVSaver
               for (int i = 0; i < structure.numAttributes(); i++) {
                 outW.print(structure.attribute(i).name());
                 if (i < structure.numAttributes()-1) {
-                    outW.print(m_FieldSeparator);
+                    outW.print(",");
                 } else {
                     outW.println();
                 }
@@ -385,15 +167,11 @@ public class CSVSaver
               }
               m_incrementalCounter = 0;
               resetStructure();
-              outW = null;
-              resetWriter();
           }
       }
   }  
 
-  /**
-   * Writes a Batch of instances.
-   * 
+  /** Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
@@ -409,7 +187,7 @@ public class CSVSaver
           for (int i = 0; i < getInstances().numAttributes(); i++) {
             System.out.print(getInstances().attribute(i).name());
             if (i < getInstances().numAttributes()-1) {
-                System.out.print(m_FieldSeparator);
+                System.out.print(",");
             } else {
             System.out.println();
             }
@@ -425,7 +203,7 @@ public class CSVSaver
       for (int i = 0; i < getInstances().numAttributes(); i++) {
 	outW.print(getInstances().attribute(i).name());
 	if (i < getInstances().numAttributes()-1) {
-	  outW.print(m_FieldSeparator);
+	  outW.print(",");
 	} else {
 	  outW.println();
 	}
@@ -436,68 +214,68 @@ public class CSVSaver
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
-      outW = null;
-      resetWriter();
-      setWriteMode(CANCEL);
   }
 
   /**
    * turns an instance into a string. takes care of sparse instances as well.
    *
    * @param inst the instance to turn into a string
-   * @return the generated string
    */
   protected String instanceToString(Instance inst) {
-    StringBuffer	result;
-    Instance 		outInst;
-    int			i;
-    String		field;
+    Instance outInst;
 
-    result = new StringBuffer();
-    
     if (inst instanceof SparseInstance) {
-      outInst = new DenseInstance(inst.weight(), inst.toDoubleArray());
+      outInst = new Instance(inst.weight(), inst.toDoubleArray());
       outInst.setDataset(inst.dataset());
     }
     else {
       outInst = inst;
     }
-    
-    for (i = 0; i < outInst.numAttributes(); i++) {
-      if (i > 0)
-	result.append(m_FieldSeparator);
-      
-      if (outInst.isMissing(i))
-	field = m_MissingValue;
-      else
-	field = outInst.toString(i);
-      
-      // make sure that custom field separators, like ";" get quoted correctly
-      // as well
-      if ((field.indexOf(m_FieldSeparator) > -1) && !field.startsWith("'") && !field.endsWith("'"))
-	field = "'" + field + "'";
-      
-      result.append(field);
-    }
 
-    return result.toString();
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return outInst.toString();
   }
 
   /**
    * Main method.
    *
-   * @param args should contain the options of a Saver.
+   * @param options should contain the options of a Saver.
    */
-  public static void main(String[] args) {
-    runFileSaver(new CSVSaver(), args);
-  }
+  public static void main(String [] options) {
+      
+      StringBuffer text = new StringBuffer();
+      try {
+	CSVSaver csv = new CSVSaver();
+        text.append("\n\nCSVSaver options:\n\n");
+        Enumeration enumi = csv.listOptions();
+        while (enumi.hasMoreElements()) {
+            Option option = (Option)enumi.nextElement();
+            text.append(option.synopsis()+'\n');
+            text.append(option.description()+'\n');
+        }
+        try {
+          csv.setOptions(options);  
+        } catch (Exception ex) {
+            System.out.println("\n"+text);
+            System.exit(1);
+	}
+        //incremental
+        /*
+        csv.setRetrieval(INCREMENTAL);
+        Instances instances = csv.getInstances();
+        csv.setStructure(instances);
+        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
+            csv.writeIncremental(instances.instance(i));
+        }
+        csv.writeIncremental(null);
+        */
+        
+        //batch
+        csv.writeBatch();
+      } catch (Exception ex) {
+	ex.printStackTrace();
+	}
+      
+    }
 }
+  
+  

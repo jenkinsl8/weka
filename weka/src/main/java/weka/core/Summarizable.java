@@ -16,7 +16,7 @@
 
 /*
  *    Summarizable.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -27,7 +27,7 @@ package weka.core;
  * to toString() which is usually a fairly complete description) of itself.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
 public interface Summarizable {
 

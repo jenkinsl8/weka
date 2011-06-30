@@ -16,13 +16,10 @@
 
 /*
  * SerialUIDChanger.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -41,11 +38,9 @@ import java.io.ObjectOutputStream;
  * not losing the data stored in the binary format.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.1.2.2 $ 
  */
-public class SerialUIDChanger
-   implements RevisionHandler {
-  
+public class SerialUIDChanger {
    /**
     * checks whether KOML is present
     * 
@@ -214,15 +209,6 @@ public class SerialUIDChanger
       // remove tempFile
       file = new File(tempFile);
       file.delete();
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
    
    /**

@@ -16,22 +16,21 @@
 
 /*
  *    RuleStats.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 Xin Xu
  */
 
 package weka.classifiers.rules;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
+import java.io.Serializable;
+
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.Utils;
 
 /**
  * This class implements the statistics functions used in the 
@@ -47,11 +46,7 @@ import java.util.Random;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RuleStats 
-  implements Serializable, RevisionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -5708153367675298624L;
+public class RuleStats implements Serializable {
 
   /** The data on which the stats calculation is based */
   private Instances m_Data;
@@ -371,7 +366,7 @@ public class RuleStats
   /** 
    * Add a rule to the ruleset and update the stats
    *
-   * @param lastRule the rule to be added
+   * @param the rule to be added
    */
   public void addAndUpdate(Rule lastRule){
     if(m_Ruleset == null)
@@ -408,7 +403,6 @@ public class RuleStats
    * @param t the number of elements in a known set
    * @param k the number of elements in a subset
    * @param p the expected proportion of subset known by recipient
-   * @return the subset description length
    */
   public static double subsetDL(double t, double k, double p){
     double rt = Utils.gr(p, 0.0) ? (- k*Utils.log2(p)) : 0.0;
@@ -428,6 +422,7 @@ public class RuleStats
    * Details see Quilan: "MDL and categorical theories (Continued)",ML95
    *
    * @param index the index of the given rule (assuming correct)
+   * @exception if index out of range or object not initialized yet
    * @return the theory DL, weighted if weight != 1.0
    */
   public double theoryDL(int index){
@@ -456,7 +451,6 @@ public class RuleStats
    * @param uncover uncoverage
    * @param fp False Positive
    * @param fn False Negative
-   * @return the description length
    */
   public static double dataDL(double expFPOverErr, double cover, 
 			      double uncover, double fp, double fn){
@@ -557,7 +551,7 @@ public class RuleStats
    * @param index the index of the rule in question
    * @param expFPRate expected FP/(FP+FN), used in dataDL calculation
    * @param checkErr whether check if error rate >= 0.5
-   * @return the minDataDL
+   * @param return the minDataDL
    */
   public double minDataDLIfDeleted(int index, double expFPRate,
 				   boolean checkErr){
@@ -642,7 +636,7 @@ public class RuleStats
    * @param index the index of the rule in question
    * @param expFPRate expected FP/(FP+FN), used in dataDL calculation
    * @param checkErr whether check if error rate >= 0.5
-   * @return the minDataDL
+   * @param return the minDataDL
    */
   public double minDataDLIfExists(int index, double expFPRate,
 				  boolean checkErr){
@@ -727,6 +721,7 @@ public class RuleStats
     }
 	
     // Potential 
+    double potential = 0;
     for(int k=m_SimpleStats.size()-1; k>=0; k--){
 	    	
       double[] ruleStat = (double[])m_SimpleStats.elementAt(k);
@@ -907,13 +902,4 @@ public class RuleStats
     
     return rt;
   }  
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 }

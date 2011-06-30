@@ -27,12 +27,9 @@
    <property name="dist"          value="dist" />
    <property name="build"         value="build/classes" />
    <property name="build.java"    value="${build}/java" />
-   <property name="build.groovy"  value="${build}/groovy" />
    <property name="doc"           value="doc/api" />
    <property name="src"           value="src/main" />
    <property name="src.java"      value="${src}/java" />
-   <property name="src.groovy"    value="${src}/groovy" />
-   <property name="src.jython"    value="${src}/jython" />
    <property name="lib"           value="lib" />
    <property name="documentation" value="doc/documentation" />
 
@@ -44,14 +41,6 @@
          <include name="*.zip"/>
       </fileset>
    </path>
-
-   <!-- tasks -->
-   <taskdef name="groovy"
-            classname="org.codehaus.groovy.ant.Groovy"
-            classpathref="project.class.path"/>
-   <taskdef name="groovyc"
-            classname="org.codehaus.groovy.ant.Groovyc"
-            classpathref="project.class.path"/>
    
    <!-- targets -->
    <target name="init" depends="setup, copyFiles" description="Initializes the Project."/>
@@ -60,7 +49,6 @@
       <tstamp />
       <mkdir dir="${build}" />
       <mkdir dir="${build.java}" />
-      <mkdir dir="${build.groovy}" />
       <mkdir dir="${dist}" />
       <mkdir dir="${doc}" />
    </target>
@@ -118,7 +106,7 @@
       <javac srcdir="${src.java}" destdir="${build.java}" optimize="${optimization}" 
              debug="${debug}" deprecation="${deprecation}"
              fork="yes" memoryMaximumSize="256m"
-             source="1.5" target="1.5">
+             source="1.4" target="1.4">
          <include name="**/*"/>
 
          <classpath refid="project.class.path" />
@@ -127,18 +115,6 @@
             <pathelement location="." />
          </classpath>
       </javac>
-
-      <!-- Groovy -->
-      <groovyc srcdir="${src.groovy}" destdir="${build.groovy}" 
-               fork="yes" memoryMaximumSize="256m">
-         <include name="**/*"/>
-
-         <classpath refid="project.class.path" />
-         <classpath>
-            <pathelement path="${java.class.path}" />
-            <pathelement location="." />
-         </classpath>
-      </groovyc>
    </target>
 
    <!-- update -->
@@ -191,19 +167,6 @@
             <attribute name="Class-Path" value="${libs.project}"/>
          </manifest>
       </jar>
-      
-      <!-- Groovy -->
-      <jar jarfile="${dist}/${ant.project.name}-groovy.jar">
-         <fileset dir="${build.groovy}">
-            <include name="*" />
-            <include name="**/*" />
-         </fileset>
-
-         <manifest>
-            <attribute name="Built-By"   value="${user.name}"/>
-            <attribute name="Class-Path" value="${libs.project}"/>
-         </manifest>
-      </jar>
    </target>
 
    <!-- archive -->
@@ -237,7 +200,7 @@
             <pathelement path="${java.class.path}" />
             <pathelement location="." />
          </classpath>
-      </javadoc>
+     </javadoc>    
    </target>
 
    <!-- run-java -->

@@ -16,30 +16,24 @@
 
 /*
  *    BeanVisual.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import java.io.Serializable;
+import java.awt.*;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+
 
 /**
  * BeanVisual encapsulates icons and label for a given bean. Has methods
@@ -47,16 +41,12 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.4.2.3 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
-public class BeanVisual
-  extends JPanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6677473561687129614L;
+public class BeanVisual extends JPanel implements Serializable {
 
   public static final String ICON_PATH="weka/gui/beans/icons/";
 
@@ -159,23 +149,6 @@ public class BeanVisual
       setMaximumSize(d2);   
     }
   }
-  
-  public Image scale(double percent) {
-    if (m_icon != null) {
-      Image pic = m_icon.getImage();
-      double width = m_icon.getIconWidth();
-      double height = m_icon.getIconHeight();
-      
-      width *= percent;
-      height *= percent;
-      
-      pic = pic.getScaledInstance((int)width, (int)height, Image.SCALE_SMOOTH);
-      
-      return pic;
-    }
-    
-    return null;
-  }
 
   /**
    * Loads static and animated versions of a beans icons. These are
@@ -192,8 +165,7 @@ public class BeanVisual
    */
   public boolean loadIcons(String iconPath, String animatedIconPath) {
     boolean success = true;
-    //    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
-    java.net.URL imageURL = this.getClass().getClassLoader().getResource(iconPath);
+    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+iconPath);
     } else {
@@ -206,8 +178,7 @@ public class BeanVisual
       }
     }
     
-    //    imageURL = ClassLoader.getSystemResource(animatedIconPath);
-    imageURL = this.getClass().getClassLoader().getResource(animatedIconPath);
+    imageURL = ClassLoader.getSystemResource(animatedIconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+animatedIconPath);
       success = false;
@@ -246,8 +217,7 @@ public class BeanVisual
    *
    */
   public void setStatic() {
-    setDisplayConnectors(false);
-    //m_visualLabel.setIcon(m_icon);
+    m_visualLabel.setIcon(m_icon);
   }
 
   /**
@@ -255,8 +225,7 @@ public class BeanVisual
    *
    */
   public void setAnimated() {
-    setDisplayConnectors(true);
-    //m_visualLabel.setIcon(m_animatedIcon);
+    m_visualLabel.setIcon(m_animatedIcon);
   }
 
   /**
@@ -391,9 +360,6 @@ public class BeanVisual
   }
 
   public void paintComponent(Graphics gx) {
-    ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-        RenderingHints.VALUE_ANTIALIAS_ON);
-    
     super.paintComponent(gx);
     if (m_displayConnectors) {
       gx.setColor(m_connectorColor);

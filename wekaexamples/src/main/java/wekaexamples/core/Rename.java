@@ -24,8 +24,8 @@ package wekaexamples.core;
 
 import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSink;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSink;
+import wekaexamples.core.converters.DataSource;
 
 import java.util.Vector;
 

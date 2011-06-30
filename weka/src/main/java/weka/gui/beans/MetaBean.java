@@ -16,32 +16,29 @@
 
 /*
  *    MetaBean.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.gui.Logger;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.EventSetDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyChangeListener;
-import java.io.Serializable;
-import java.util.Enumeration;
 import java.util.Vector;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import javax.swing.JPanel;
-import javax.swing.JWindow;
+import javax.swing.JLabel;
+import javax.swing.JComponent;
+import java.awt.BorderLayout;
+import java.awt.Point;
+import java.awt.Dimension;
+import java.io.Serializable;
+import java.beans.EventSetDescriptor;
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.IntrospectionException;
+import java.beans.PropertyChangeListener;
+
+import weka.gui.Logger;
 
 /**
  * A meta bean that encapsulates several other regular beans, useful for 
@@ -49,15 +46,11 @@ import javax.swing.JWindow;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4.2.4 $
  */
-public class MetaBean
-  extends JPanel 
-  implements BeanCommon, Visible, EventConstraints,
-             Serializable, UserRequestAcceptor {
-
-  /** for serialization */
-  private static final long serialVersionUID = -6582768902038027077L;
+public class MetaBean extends JPanel 
+implements BeanCommon, Visible, EventConstraints,
+           Serializable, UserRequestAcceptor {
 
   protected BeanVisual m_visual = 
     new BeanVisual("Group",
@@ -65,8 +58,6 @@ public class MetaBean
 		   BeanVisual.ICON_PATH+"DiamondPlain.gif");
 
   private transient Logger m_log = null;
-  private transient JWindow m_previewWindow = null;
-  private transient javax.swing.Timer m_previewTimer = null;
 
   protected Vector m_subFlow = new Vector();
   protected Vector m_inputs = new Vector();
@@ -74,38 +65,10 @@ public class MetaBean
 
   // the internal connections for the grouping
   protected Vector m_associatedConnections = new Vector();
-  
-  // Holds a preview image of the encapsulated sub-flow
-  protected ImageIcon m_subFlowPreview = null;
-  
-  // offset from where originally grouped if the meta bean 
-  // dropped onto the canvas from the user toolbar
-  protected int m_xCreate = 0;
-  protected int m_yCreate = 0;
-  protected int m_xDrop = 0;
-  protected int m_yDrop = 0;
 
   public MetaBean() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-  }
-  
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   public void setAssociatedConnections(Vector ac) {
@@ -162,31 +125,6 @@ public class MetaBean
       }
     }
     return comps;
-  }
-  
-  private boolean beanSetContains(Vector set, BeanInstance toCheck) {
-    boolean ok = false;
-    
-    for (int i = 0; i < set.size(); i++) {
-      BeanInstance temp = (BeanInstance)set.elementAt(i);
-      if (toCheck == temp) {
-        ok = true;
-        break;
-      }
-    }
-    return ok;
-  }
-  
-  public boolean subFlowContains(BeanInstance toCheck) {
-    return beanSetContains(m_subFlow, toCheck);
-  }
-  
-  public boolean inputsContains(BeanInstance toCheck) {
-    return beanSetContains(m_inputs, toCheck);
-  }
-  
-  public boolean outputsContains(BeanInstance toCheck) {
-    return beanSetContains(m_outputs, toCheck);
   }
 
   /**
@@ -301,15 +239,14 @@ public class MetaBean
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (save) {
-        // save offsets from this point
-        Point p = new Point(temp.getX() - targetX, temp.getY() - targetY);
+        Point p = new Point(temp.getX(), temp.getY());
         m_originalCoords.add(p);
       }
       temp.setX(targetX); temp.setY(targetY);
     }
   }
 
-  public void restoreBeans(int x, int y) {
+  public void restoreBeans() {
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       Point p = (Point)m_originalCoords.elementAt(i);
@@ -317,8 +254,8 @@ public class MetaBean
       Dimension d = c.getPreferredSize();
       int dx = (int)(d.getWidth() / 2);
       int dy = (int)(d.getHeight() / 2);
-      temp.setX(x + (int)p.getX());// + (m_xDrop - m_xCreate));
-      temp.setY(y + (int)p.getY());// + (m_yDrop - m_yCreate));
+      temp.setX((int)p.getX()+dx);
+      temp.setY((int)p.getY()+dy);
     }
   }
 
@@ -344,8 +281,8 @@ public class MetaBean
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    for (int i = 0; i < m_subFlow.size(); i++) {
-      BeanInstance output = (BeanInstance)m_subFlow.elementAt(i);
+    for (int i = 0; i < m_outputs.size(); i++) {
+      BeanInstance output = (BeanInstance)m_outputs.elementAt(i);
       if (output.getBean() instanceof EventConstraints) {
         if (((EventConstraints)output.getBean()).eventGeneratable(eventName)) {
           return true;
@@ -368,7 +305,6 @@ public class MetaBean
     for (int i = 0; i < targets.size(); i++) {
       BeanInstance input = (BeanInstance)targets.elementAt(i);
       if (input.getBean() instanceof BeanCommon) {
-        //if (((BeanCommon)input.getBean()).connectionAllowed(esd.getName())) {
         if (((BeanCommon)input.getBean()).connectionAllowed(esd)) {
           return true;
         }
@@ -423,26 +359,6 @@ public class MetaBean
       }
     }
   }
-  
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    boolean result = false;
-    for (int i = 0; i < m_subFlow.size(); i++) {
-      Object temp = m_subFlow.elementAt(i);
-      if (temp instanceof BeanCommon) {
-        if (((BeanCommon)temp).isBusy()) {
-          result = true;
-          break;
-        }
-      }
-    }
-    return result;
-  }
 
   /**
    * Sets the visual appearance of this wrapper bean
@@ -475,23 +391,13 @@ public class MetaBean
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector();
-    if (m_subFlowPreview != null) {
-      String text = "Show preview";
-      if (m_previewWindow != null) {
-	text = "$"+text;
-      }
-      newVector.addElement(text);
-    }
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (temp.getBean() instanceof UserRequestAcceptor) {
-        String prefix = "";
-        if ((temp.getBean() instanceof BeanCommon)) {
-          prefix = ((BeanCommon)temp.getBean()).getCustomName();
-        } else {
-          prefix = temp.getBean().getClass().getName();
-          prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
-        }
+        String prefix = (temp.getBean() instanceof WekaWrapper)
+          ? ((WekaWrapper)temp.getBean()).getWrappedAlgorithm().getClass().getName()
+          : temp.getBean().getClass().getName();
+        prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
         prefix = ""+(i+1)+": ("+prefix+")";
         Enumeration en = ((UserRequestAcceptor)temp.getBean()).enumerateRequests();
         while (en.hasMoreElements()) {
@@ -500,77 +406,12 @@ public class MetaBean
             prefix = '$'+prefix;
             req = req.substring(1, req.length());
           }
-          
-          if (req.charAt(0) == '?') {
-            prefix = '?' + prefix;
-            req = req.substring(1, req.length());
-          }
           newVector.add(prefix+" "+req);
         }          
-      } else if (temp.getBean() instanceof Startable) {
-        String prefix = "";
-        if ((temp.getBean() instanceof BeanCommon)) {
-          prefix = ((BeanCommon)temp.getBean()).getCustomName();
-        } else {
-          prefix = temp.getBean().getClass().getName();
-          prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
-        }
-        prefix = ""+(i+1)+": ("+prefix+")";
-        String startMessage = ((Startable)temp.getBean()).getStartMessage();
-        if (startMessage.charAt(0) == '$') {
-          prefix = '$'+prefix;
-          startMessage = startMessage.substring(1, startMessage.length());
-        }
-        newVector.add(prefix + " " + startMessage);
       }
     }
     
     return newVector.elements();
-  }
-  
-  public void setSubFlowPreview(ImageIcon sfp) {
-    m_subFlowPreview = sfp;
-  }
-  
-  private void showPreview() {
-    if (m_previewWindow == null) {
-      
-      JLabel jl = new JLabel(m_subFlowPreview);
-      //Dimension d = jl.getPreferredSize();
-      jl.setLocation(0,0);
-      m_previewWindow = new JWindow();
-      //popup.getContentPane().setLayout(null);
-      m_previewWindow.getContentPane().add(jl);
-      m_previewWindow.validate();
-      m_previewWindow.setSize(m_subFlowPreview.getIconWidth(), m_subFlowPreview.getIconHeight());
-      
-      m_previewWindow.addMouseListener(new MouseAdapter() {
-	  public void mouseClicked(MouseEvent e) {
-	    m_previewWindow.dispose();
-	    m_previewWindow = null;
-	  }
-	});
-      
-      m_previewWindow.setLocation(
-	  getParent().getLocationOnScreen().x + getX() + getWidth() / 2 - 
-	  m_subFlowPreview.getIconWidth() / 2, 
-	  getParent().getLocationOnScreen().y + getY() + getHeight() / 2 - 
-	  m_subFlowPreview.getIconHeight() / 2);
-      //popup.pack();
-      m_previewWindow.setVisible(true);
-      m_previewTimer = 
-	new javax.swing.Timer(8000, new java.awt.event.ActionListener() {
-	  public void actionPerformed(java.awt.event.ActionEvent e) {
-	    if (m_previewWindow != null) {
-	      m_previewWindow.dispose();
-	      m_previewWindow = null;
-	      m_previewTimer = null;
-	    }
-	  }
-	});
-      m_previewTimer.setRepeats(false);
-      m_previewTimer.start();
-    }
   }
 
   /**
@@ -580,10 +421,6 @@ public class MetaBean
    * @exception IllegalArgumentException if an error occurs
    */
   public void performRequest(String request) {
-    if (request.compareTo("Show preview") == 0) {
-      showPreview();
-      return;
-    }
     // first grab the index if any
     if (request.indexOf(":") < 0) {
       return;
@@ -593,20 +430,10 @@ public class MetaBean
     index--;
     String req = request.substring(request.indexOf(')')+1, 
                                    request.length()).trim();
-    
-    Object target = (((BeanInstance)m_subFlow.elementAt(index)).getBean());
-    if (target instanceof Startable && req.equals(((Startable)target).getStartMessage())) {
-      try {
-        ((Startable)target).start();
-      } catch (Exception ex) {
-        if (m_log != null) {
-          String compName = (target instanceof BeanCommon) ? ((BeanCommon)target).getCustomName() : "";
-          m_log.logMessage("Problem starting subcomponent " + compName);
-        }
-      }
-    } else {    
-      ((UserRequestAcceptor)target).performRequest(req);
-    }                                   
+    UserRequestAcceptor target = 
+      (UserRequestAcceptor)(((BeanInstance)m_subFlow.elementAt(index)).getBean());
+    target.performRequest(req);
+                                   
   }
 
   /**

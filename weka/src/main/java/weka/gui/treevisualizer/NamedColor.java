@@ -16,7 +16,7 @@
 
 /*
  *    NamedColor.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware
  *
  */
 
@@ -29,7 +29,7 @@ import java.awt.*;
  * This class contains a color name and the rgb values of that color
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class NamedColor {
 

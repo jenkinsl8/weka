@@ -14,17 +14,20 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
 /*
  *    Matrix.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg, Gabi Schmidberger
  *
  */
 
 package weka.core;
 
-import java.io.Reader;
-import java.io.Serializable;
 import java.io.Writer;
+import java.io.Reader;
+import java.io.LineNumberReader;
+import java.io.Serializable;
+import java.util.StringTokenizer;
 
 /**
  * Class for performing operations on a matrix of floating-point values.
@@ -37,15 +40,12 @@ import java.io.Writer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
- * @deprecated Use <code>weka.core.matrix.Matrix</code> instead - only for
+ * @version $Revision: 1.18.2.2 $
+ * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
  * backwards compatibility. 
  */
 public class Matrix 
-  implements Cloneable, Serializable, RevisionHandler {
-
-  /** for serialization */
-  private static final long serialVersionUID = -3604757095849145838L;
+  implements Cloneable, Serializable {
 
   /**
    * The actual matrix */
@@ -341,7 +341,7 @@ public class Matrix
     int nr = numRows();    // num of rows
     int nc = numColumns(); // num of columns
     double[][] ud = new double[nr][nc];
-
+    
     for (int i = 0; i < nr; i++) {
       for (int j = i; j < nc ; j++) {
         ud[i][j] = getElement(i, j);
@@ -382,7 +382,7 @@ public class Matrix
 
     u = null;
     l = null;
-    
+
     return lu.getPivot();
   }
   
@@ -437,7 +437,7 @@ public class Matrix
 
     for (int i = 0; i < d2.length; i++)
       d[i] = d2[i];
-  } 
+  }   
 
   /**
    * Returns sqrt(a^2 + b^2) without under/overflow.
@@ -468,15 +468,6 @@ public class Matrix
    */
   public static Matrix parseMatlab(String matlab) throws Exception {
     return new Matrix(weka.core.matrix.Matrix.parseMatlab(matlab).getArray());
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
   
   /**

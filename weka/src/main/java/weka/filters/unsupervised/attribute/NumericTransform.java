@@ -16,67 +16,44 @@
 
 /*
  *    NumericTransform.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.filters.Filter;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import java.lang.reflect.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Transforms numeric attributes using a given transformation method.
- * <p/>
- <!-- globalinfo-end -->
- * 
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to transform. First and last are
- *  valid indexes (default none). Non-numeric columns are 
- *  skipped.</pre>
- * 
- * <pre> -V
- *  Invert matching sense.</pre>
- * 
- * <pre> -C &lt;string&gt;
- *  Sets the class containing transformation method.
- *  (default java.lang.Math)</pre>
- * 
- * <pre> -M &lt;string&gt;
- *  Sets the method. (default abs)</pre>
- * 
- <!-- options-end -->
+ * Transforms numeric attributes using a
+ * given transformation method.<p>
+ *
+ * Valid filter-specific options are: <p>
+ *
+ * -R index1,index2-index4,...<br>
+ * Specify list of columns to transform. First and last are valid indexes.
+ * (default none). Non-numeric columns are skipped.<p>
+ *
+ * -V<br>
+ * Invert matching sense.<p>
+ *
+ * -C string <br>
+ * Name of the class containing the method used for transformation. 
+ * (default java.lang.Math) <p>
+ *
+ * -M string <br>
+ * Name of the method used for the transformation.
+ * (default abs) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
-public class NumericTransform 
-  extends Filter
+public class NumericTransform extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -8561413333351366934L;
 
   /** Stores which columns to transform. */
   private Range m_Cols = new Range();
@@ -86,6 +63,9 @@ public class NumericTransform
 
   /** Transformation method. */
   private String m_Method;
+
+  /** Parameter types. */
+  private static Class[] PARAM = new Class[] {Double.TYPE};
 
   /**
    * Returns a string describing this filter
@@ -108,28 +88,6 @@ public class NumericTransform
     m_Method = "abs";
   }
 
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
-  }
-
   /**
    * Sets the format of the input instances.
    *
@@ -137,7 +95,7 @@ public class NumericTransform
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -162,8 +120,8 @@ public class NumericTransform
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
-   * @throws InvocationTargetException if there is a problem applying
+   * @exception IllegalStateException if no input format has been set.
+   * @exception InvocationTargetException if there is a problem applying
    * the configured transform method.
    */
   public boolean input(Instance instance) throws Exception {
@@ -183,14 +141,14 @@ public class NumericTransform
     Double newVal;
     for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	vals[i] = Utils.missingValue();
+	vals[i] = Instance.missingValue();
       } else {
 	if (m_Cols.isInRange(i) &&
 	    instance.attribute(i).isNumeric()) {
 	  params[0] = new Double(instance.value(i));
 	  newVal = (Double) m.invoke(null, (Object[])params);
 	  if (newVal.isNaN() || newVal.isInfinite()) {
-	    vals[i] = Utils.missingValue();
+	    vals[i] = Instance.missingValue();
 	  } else {
 	    vals[i] = newVal.doubleValue(); 
 	  }
@@ -203,7 +161,7 @@ public class NumericTransform
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);
@@ -243,30 +201,25 @@ public class NumericTransform
 
 
   /**
-   * Parses a given list of options. <p/>
-   * 
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of columns to transform. First and last are
-   *  valid indexes (default none). Non-numeric columns are 
-   *  skipped.</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense.</pre>
-   * 
-   * <pre> -C &lt;string&gt;
-   *  Sets the class containing transformation method.
-   *  (default java.lang.Math)</pre>
-   * 
-   * <pre> -M &lt;string&gt;
-   *  Sets the method. (default abs)</pre>
-   * 
-   <!-- options-end -->
+   * Parses the options for this object. Valid options are: <p>
+   *
+   * -R index1,index2-index4,...<br>
+   * Specify list of columns to transform. First and last are valid indexes.
+   * (default none). Non-numeric columns are skipped.<p>
+   *
+   * -V<br>
+   * Invert matching sense.<p>
+   *
+   * -C string <br>
+   * Name of the class containing the method used for transformation.
+   * (default java.lang.Math) <p>
+   *
+   * -M string <br>
+   * Name of the method used for the transformation.
+   * (default abs) <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -339,7 +292,7 @@ public class NumericTransform
    * Sets the class containing the transformation method.
    *
    * @param name the name of the class
-   * @throws ClassNotFoundException if class can't be found
+   * @exception ClassNotFoundException if class can't be found
    */
   public void setClassName(String name) throws ClassNotFoundException {
   
@@ -370,7 +323,7 @@ public class NumericTransform
    * Set the transformation method.
    *
    * @param name the name of the method
-   * @throws NoSuchMethodException if method can't be found in class
+   * @exception NoSuchMethodException if method can't be found in class
    */
   public void setMethodName(String name) throws NoSuchMethodException {
 
@@ -437,7 +390,7 @@ public class NumericTransform
    * the string will typically come from a user, attributes are indexed from
    * 1. <br> eg: 
    * first-3,5,6-last
-   * @throws InvalidArgumentException if an invalid range list is supplied
+   * @exception InvalidArgumentException if an invalid range list is supplied
    */
 
   public void setAttributeIndices(String rangeList) {
@@ -451,21 +404,13 @@ public class NumericTransform
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @throws InvalidArgumentException if an invalid set of ranges is supplied
+   * @exception InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) {
 
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
   
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -473,6 +418,23 @@ public class NumericTransform
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new NumericTransform(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+	Filter.batchFilterFile(new NumericTransform(), argv);
+      } else {
+	Filter.filterFile(new NumericTransform(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

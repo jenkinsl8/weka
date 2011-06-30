@@ -16,50 +16,31 @@
 
 /*
  *    NumericToBinary.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.FastVector;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Capabilities.Capability;
-import weka.filters.StreamableFilter;
-import weka.filters.UnsupervisedFilter;
+import weka.filters.*;
+import java.io.*;
+import java.util.*;
+import weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * Converts all numeric attributes into binary attributes (apart from the class attribute, if set): if the value of the numeric attribute is exactly zero, the value of the new attribute will be zero. If the value of the numeric attribute is missing, the value of the new attribute will be missing. Otherwise, the value of the new attribute will be one. The new attributes will be nominal.
- * <p/>
- <!-- globalinfo-end -->
+ * Converts all numeric attributes into binary attributes (apart from
+ * the class attribute): if the value of the numeric attribute is
+ * exactly zero, the value of the new attribute will be zero. If the
+ * value of the numeric attribute is missing, the value of the new
+ * attribute will be missing. Otherwise, the value of the new
+ * attribute will be one. The new attributes will nominal.<p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -unset-class-temporarily
- *  Unsets the class index temporarily before the filter is
- *  applied to the data.
- *  (default: no)</pre>
- * 
- <!-- options-end -->
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision$ 
+ * @version $Revision: 1.3 $ 
  */
-public class NumericToBinary 
-  extends PotentialClassIgnorer
+public class NumericToBinary extends PotentialClassIgnorer
   implements UnsupervisedFilter, StreamableFilter {
 
-  /** for serialization */
-  static final long serialVersionUID = 2616879323359470802L;
-  
   /**
    * Returns a string describing this filter
    *
@@ -73,29 +54,7 @@ public class NumericToBinary
       + "exactly zero, the value of the new attribute will be zero. If the "
       + "value of the numeric attribute is missing, the value of the new "
       + "attribute will be missing. Otherwise, the value of the new "
-      + "attribute will be one. The new attributes will be nominal.";
-  }
-
-  /** 
-   * Returns the Capabilities of this filter.
-   *
-   * @return            the capabilities of this object
-   * @see               Capabilities
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enableAllAttributes();
-    result.enable(Capability.MISSING_VALUES);
-    
-    // class
-    result.enableAllClasses();
-    result.enable(Capability.MISSING_CLASS_VALUES);
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+      + "attribute will be one. The new attributes will nominal.";
   }
 
   /**
@@ -105,7 +64,7 @@ public class NumericToBinary
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
+   * @exception Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
@@ -121,7 +80,7 @@ public class NumericToBinary
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been defined.
+   * @exception IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -207,19 +166,10 @@ public class NumericToBinary
 	  }
 	} 
       }
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -229,6 +179,23 @@ public class NumericToBinary
    * use -h for help
    */
   public static void main(String [] argv) {
-    runFilter(new NumericToBinary(), argv);
+
+    try {
+      if (Utils.getFlag('b', argv)) {
+ 	Filter.batchFilterFile(new NumericToBinary(), argv);
+      } else {
+	Filter.filterFile(new NumericToBinary(), argv);
+      }
+    } catch (Exception ex) {
+      System.out.println(ex.getMessage());
+    }
   }
 }
+
+
+
+
+
+
+
+

@@ -16,7 +16,7 @@
 
 /*
  * ComponentHelper.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 FracPete
  *
  */
 
@@ -35,7 +35,7 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.1.2.1 $ 
  */
 
 public class ComponentHelper {
@@ -127,7 +127,7 @@ public class ComponentHelper {
    * it returns the pressed button.
    * @param parent         the parent component 
    * @param title          the title of the message box
-   * @param msg            the text to display
+   * @param text           the text to display
    * @param buttons        the captions of the buttons to display
    * @param messageType    the type of message like defined in <code>JOptionPane</code> (the icon is determined on this basis)
    * @return               the button that was pressed

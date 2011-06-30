@@ -16,13 +16,12 @@
 
 /*
  *    PairedStatsCorrected.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Richard Kirkby
  *
  */
 
 package weka.experiment;
 
-import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Statistics;
 
@@ -37,10 +36,9 @@ import weka.core.Statistics;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.2 $
  */
-public class PairedStatsCorrected
-  extends PairedStats {
+public class PairedStatsCorrected extends PairedStats {
 
   /** The ratio used to correct the significane test */
   protected double m_testTrainRatio;
@@ -50,7 +48,7 @@ public class PairedStatsCorrected
    * significance level and train/test ratio.
    *
    * @param sig the significance level for comparisons
-   * @param testTrainRatio the number test examples/training examples
+   * @param trainTestRatio the number test examples/training examples
    */
   public PairedStatsCorrected(double sig, double testTrainRatio) {
       
@@ -105,13 +103,5 @@ public class PairedStatsCorrected
       }
     }
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
-  }
+
 }

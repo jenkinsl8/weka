@@ -16,56 +16,70 @@
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Mark Hall, Malcolm Ware
  *
  */
 
 package weka.gui.visualize;
 
+import weka.gui.*;
+import weka.classifiers.*;
+import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
+import weka.core.Utils;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.Writer;
 import java.util.Random;
+import java.io.File;
+import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import java.awt.FlowLayout;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Font;
+import java.awt.event.InputEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.Dimension;
+
 import javax.swing.JPanel;
-import javax.swing.JSlider;
+import javax.swing.JLabel;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.BorderFactory;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import javax.swing.JColorChooser;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JOptionPane;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JFrame;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.JViewport;
+import javax.swing.JSlider;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
+
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a
@@ -86,21 +100,12 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.21.2.4 $
  */
-public class VisualizePanel
-  extends PrintablePanel {
-
-  /** for serialization */
-  private static final long serialVersionUID = 240108358588153943L;
+public class VisualizePanel extends PrintablePanel {
 
   /** Inner class to handle plotting */
-  protected class PlotPanel
-    extends PrintablePanel
-    implements Plot2DCompanion {
-
-    /** for serialization */
-    private static final long serialVersionUID = -4823674171136494204L;
+  protected class PlotPanel extends PrintablePanel implements Plot2DCompanion {
 
     /** The actual generic plotting panel */
     protected Plot2D m_plot2D = new Plot2D();
@@ -117,6 +122,12 @@ public class VisualizePanel
     protected int m_yIndex=0;
     protected int m_cIndex=0;
     protected int m_sIndex=0;
+ 
+    /** Axis padding */
+    private final int m_axisPad = 5;
+
+    /** Tick size */
+    private final int m_tickSize = 5;
 
     /**the offsets of the axes once label metrics are calculated */
     private int m_XaxisStart=0;
@@ -136,6 +147,7 @@ public class VisualizePanel
     /** contains the position of the mouse (used for rubberbanding). */
     private Dimension m_newMousePos;
 
+    //////
     /** Constructor */
     public PlotPanel() {
       this.setBackground(m_plot2D.getBackground());
@@ -151,7 +163,7 @@ public class VisualizePanel
       this.addMouseListener(new MouseAdapter() {
 	  ///////      
 	  public void mousePressed(MouseEvent e) {
-	    if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK) {
+	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
 	      //
 	      if (m_sIndex == 0) {
 		//do nothing it will get dealt to in the clicked method
@@ -185,14 +197,14 @@ public class VisualizePanel
 	    
 	    if ((m_sIndex == 2 || m_sIndex == 3) && 
 		(m_createShape || 
-		 (e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK)) {
+		 (e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK)) {
 	      if (m_createShape) {
 		//then it has been started already.
 
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
-		if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK &&
+		if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK &&
                     !e.isAltDown()) {
 		  m_shapePoints.addElement(new 
 		    Double(m_plot2D.convertToAttribX(e.getX())));
@@ -367,7 +379,7 @@ public class VisualizePanel
 		g.dispose();
 		//repaint();
 	      }
-	      else if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK) {
+	      else if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
 		//then this is the first point
 		m_createShape = true;
 		m_shapePoints = new FastVector(17);
@@ -677,14 +689,6 @@ public class VisualizePanel
 	});
       ////////////
     }
-
-    /**
-     * Removes all the plots.
-     */
-    public void removeAllPlots() {
-      m_plot2D.removeAllPlots();
-      m_legendPanel.setPlotList(m_plot2D.getPlots());
-    }
     
     /**
      * @return The FastVector containing all the shapes.
@@ -755,7 +759,6 @@ public class VisualizePanel
      * that they land on the screen
      * @param x1 The x coord.
      * @param y1 The y coord.
-     * @return true if the point would land on the screen
      */
     private boolean checkPoints(double x1, double y1) {
       if (x1 < 0 || x1 > this.getSize().width || y1 < 0 
@@ -1034,7 +1037,7 @@ public class VisualizePanel
       m_sIndex = s;
       this.repaint();
     }
-    
+
     /**
      * Clears all existing plots and sets a new master plot
      * @param newPlot the new master plot
@@ -1077,7 +1080,7 @@ public class VisualizePanel
 	    m_attrib.setInstances(newPlot.m_plotInstances);
 	    m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
 	    GridBagConstraints constraints = new GridBagConstraints();
-	    constraints.fill = GridBagConstraints.BOTH;
+	    constraints.fill = constraints.BOTH;
 	    constraints.insets = new Insets(0, 0, 0, 0);
 	    constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
 	    constraints.gridwidth=1;constraints.gridheight=1;
@@ -1095,14 +1098,14 @@ public class VisualizePanel
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
 	plotReset(newPlot.m_plotInstances, newPlot.getCindex());
-	if (newPlot.m_useCustomColour && m_showClassPanel) {
+	if (newPlot.m_useCustomColour) {
 	  VisualizePanel.this.remove(m_classSurround);
 	  switchToLegend();
 	  m_legendPanel.setPlotList(m_plot2D.getPlots());
 	  m_ColourCombo.setEnabled(false);
 	}
       } else  {
-	if (!newPlot.m_useCustomColour && m_showClassPanel) {
+	if (!newPlot.m_useCustomColour) {
 	  VisualizePanel.this.add(m_classSurround, BorderLayout.SOUTH);
 	  m_ColourCombo.setEnabled(true);
 	}
@@ -1130,7 +1133,7 @@ public class VisualizePanel
       }
 
       GridBagConstraints constraints = new GridBagConstraints();
-      constraints.fill = GridBagConstraints.BOTH;
+      constraints.fill = constraints.BOTH;
       constraints.insets = new Insets(0, 0, 0, 0);
       constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
       constraints.gridwidth=1;constraints.gridheight=1;
@@ -1139,45 +1142,9 @@ public class VisualizePanel
       setSindex(0);
       m_ShapeCombo.setEnabled(false);
     }
-    
-    protected void switchToBars() {
-      if (m_plotSurround.getComponentCount() > 1 && 
-          m_plotSurround.getComponent(1) == m_legendPanel) {
-        m_plotSurround.remove(m_legendPanel);
-      }
-      
-      if (m_plotSurround.getComponentCount() > 1 &&
-          m_plotSurround.getComponent(1) == m_attrib) {
-        return;
-      }
-      
-      if (m_showAttBars) {
-        try {
-          m_attrib.setInstances(m_plot2D.getMasterPlot().m_plotInstances);
-          m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
-          GridBagConstraints constraints = new GridBagConstraints();
-          constraints.fill = GridBagConstraints.BOTH;
-          constraints.insets = new Insets(0, 0, 0, 0);
-          constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
-          constraints.gridwidth=1;constraints.gridheight=1;
-          constraints.weighty=5;
-          m_plotSurround.add(m_attrib, constraints);
-        } catch (Exception ex) {
-          System.err.println("Warning : data contains more attributes "
-                             +"than can be displayed as attribute bars.");
-          if (m_Log != null) {
-            m_Log.logMessage("Warning : data contains more attributes "
-                             +"than can be displayed as attribute bars.");
-          }
-        }
-      }
-    }
 
     /**
      * Reset the visualize panel's buttons and the plot panels instances
-     * 
-     * @param inst	the data
-     * @param cIndex	the color index
      */
     private void plotReset(Instances inst, int cIndex) {
       if (m_splitListener == null) {
@@ -1628,9 +1595,6 @@ public class VisualizePanel
   /** Button for the user to remove all splits. */
   protected JButton m_cancel = new JButton("Clear");
 
-  /** Button for the user to open the visualized set of instances */
-  protected JButton m_openBut = new JButton("Open");
-
   /** Button for the user to save the visualized set of instances */
   protected JButton m_saveBut = new JButton("Save");
 
@@ -1657,8 +1621,7 @@ public class VisualizePanel
 
   /** The panel that displays the attributes , using color to represent 
    * another attribute. */
-  protected AttributePanel m_attrib = 
-    new AttributePanel(m_plot.m_plot2D.getBackground());
+  protected AttributePanel m_attrib = new AttributePanel();
 
   /** The panel that displays legend info if there is more than one plot */
   protected LegendPanel m_legendPanel = new LegendPanel();
@@ -1682,8 +1645,7 @@ public class VisualizePanel
   protected String m_plotName = "";
 
   /** The panel that displays the legend for the colouring attribute */
-  protected ClassPanel m_classPanel = 
-    new ClassPanel(m_plot.m_plot2D.getBackground());
+  protected ClassPanel m_classPanel = new ClassPanel();
   
   /** The list of the colors used */
   protected FastVector m_colorList;
@@ -1696,9 +1658,6 @@ public class VisualizePanel
 
   /** Show the attribute bar panel */
   protected boolean m_showAttBars = true;
-  
-  /** Show the class panel **/
-  protected boolean m_showClassPanel = true;
 
   /** the logger */
   protected Logger m_Log;
@@ -1711,66 +1670,8 @@ public class VisualizePanel
   public void setLog(Logger newLog) {
     m_Log = newLog;
   }
-  
-  /**
-   * Set whether the attribute bars should be shown or not.
-   * If turned off via this method then any setting in the
-   * properties file (if exists) is ignored.
-   * 
-   * @param sab false if attribute bars are not to be displayed.
-   */
-  public void setShowAttBars(boolean sab) {
-    if (!sab && m_showAttBars) {
-      m_plotSurround.remove(m_attrib);
-    } else if (sab && !m_showAttBars) {
-      GridBagConstraints constraints = new GridBagConstraints();
-      constraints.insets = new Insets(0, 0, 0, 0);
-      constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
-      constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
-      m_plotSurround.add(m_attrib, constraints);
-    }
-    m_showAttBars = sab;
-    repaint();
-  }
-  
-  /**
-   * Gets whether or not attribute bars are being displayed.
-   * 
-   * @return true if attribute bars are being displayed.
-   */
-  public boolean getShowAttBars() {
-    return m_showAttBars;
-  }
-  
-  /**
-   * Set whether the class panel should be shown or not.
-   * 
-   * @param scp false if class panel is not to be displayed
-   */
-  public void setShowClassPanel(boolean scp) {
-    if (!scp && m_showClassPanel) {
-      remove(m_classSurround);
-    } else if (scp && !m_showClassPanel) {
-      add(m_classSurround, BorderLayout.SOUTH);
-    }
-    m_showClassPanel = scp;
-    repaint();
-  }
-  
-  /**
-   * Gets whether or not the class panel is being displayed.
-   * 
-   * @return true if the class panel is being displayed.
-   */
-  public boolean getShowClassPanel() {
-    return m_showClassPanel;
-  }
 
-  /** 
-   * This constructor allows a VisualizePanelListener to be set. 
-   * 
-   * @param ls		the listener to use
-   */
+  /** This constructor allows a VisualizePanelListener to be set. */
   public VisualizePanel(VisualizePanelListener ls) {
     this();
     m_splitListener = ls;
@@ -1778,8 +1679,6 @@ public class VisualizePanel
 
   /**
    * Set the properties for the VisualizePanel
-   * 
-   * @param relationName	the name of the relation, can be null
    */
   private void setProperties(String relationName) {
     if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
@@ -1792,16 +1691,13 @@ public class VisualizePanel
 	  getProperty(showAttBars);
 	if (val == null) {
 	  //System.err.println("Displaying attribute bars ");
-//	  m_showAttBars = true;
+	  m_showAttBars = true;
 	} else {
-	  // only check if this hasn't been turned off programatically 
-	  if (m_showAttBars) {
-	    if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
-	      //System.err.println("Displaying attribute bars ");
-	      m_showAttBars = true;
-	    } else {
-	      m_showAttBars = false;
-	    }
+	  if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
+	    //System.err.println("Displaying attribute bars ");
+	    m_showAttBars = true;
+	  } else {
+	    m_showAttBars = false;
 	  }
 	}
       } else {
@@ -1888,24 +1784,6 @@ public class VisualizePanel
     // colours change
     m_classPanel.addRepaintNotify(this);
     m_legendPanel.addRepaintNotify(this);
-    
-    // Check the default colours against the background colour of the
-    // plot panel. If any are equal to the background colour then
-    // change them (so they are visible :-)
-    for (int i = 0; i < m_DefaultColors.length; i++) {
-      Color c = m_DefaultColors[i];
-      if (c.equals(m_plot.m_plot2D.getBackground())) {
-        int red = c.getRed();
-        int blue = c.getBlue();
-        int green = c.getGreen();
-        red += (red < 128) ? (255 - red) / 2 : -(red / 2);
-        blue += (blue < 128) ? (blue - red) / 2 : -(blue / 2);
-        green += (green< 128) ? (255 - green) / 2 : -(green / 2);
-        m_DefaultColors[i] = new Color(red, green, blue);
-      }
-    }
-    m_classPanel.setDefaultColourList(m_DefaultColors);
-    m_attrib.setDefaultColourList(m_DefaultColors);
 
     m_colorList = new FastVector(10);
     for (int noa = m_colorList.size(); noa < 10; noa++) {
@@ -1999,13 +1877,6 @@ public class VisualizePanel
 	}
       });
 
-    m_openBut.setToolTipText("Loads previously saved instances from a file");
-    m_openBut.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  openVisibleInstances();
-	}
-      });
-    
     m_saveBut.setEnabled(false);
     m_saveBut.setToolTipText("Save the visible instances to a file");
     m_saveBut.addActionListener(new ActionListener() {
@@ -2044,8 +1915,8 @@ public class VisualizePanel
 
    
     JPanel mbts = new JPanel();
-    mbts.setLayout(new GridLayout(1,4));
-    mbts.add(m_submit); mbts.add(m_cancel); mbts.add(m_openBut); mbts.add(m_saveBut);
+    mbts.setLayout(new GridLayout(1,3));
+    mbts.add(m_submit); mbts.add(m_cancel); mbts.add(m_saveBut);
 
     constraints.gridx=0;constraints.gridy=2;constraints.weightx=5;
     constraints.gridwidth=2;constraints.gridheight=1;
@@ -2073,7 +1944,7 @@ public class VisualizePanel
     m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot"));
     m_plotSurround.setLayout(gb2);
 
-    constraints.fill = GridBagConstraints.BOTH;
+    constraints.fill = constraints.BOTH;
     constraints.insets = new Insets(0, 0, 0, 10);
     constraints.gridx=0;constraints.gridy=0;constraints.weightx=3;
     constraints.gridwidth=4;constraints.gridheight=1;constraints.weighty=5;
@@ -2099,62 +1970,6 @@ public class VisualizePanel
 
     m_ShapeCombo.setModel(new DefaultComboBoxModel(SNames));
     m_ShapeCombo.setEnabled(true);
-  }
-
-  /**
-   * displays the previously saved instances
-   * 
-   * @param insts	the instances to display
-   * @throws Exception	if display is not possible
-   */
-  protected void openVisibleInstances(Instances insts) throws Exception {
-    PlotData2D tempd = new PlotData2D(insts);
-    tempd.setPlotName(insts.relationName());
-    tempd.addInstanceNumberAttribute();
-    m_plot.m_plot2D.removeAllPlots();
-    addPlot(tempd);
-    
-    // modify title
-    Component parent = getParent();
-    while (parent != null) {
-      if (parent instanceof JFrame) {
-	((JFrame) parent).setTitle(
-	    "Weka Classifier Visualize: " 
-	    + insts.relationName() 
-	    + " (display only)");
-	break;
-      }
-      else {
-	parent = parent.getParent();
-      }
-    }
-  }
-  
-  /**
-   * Loads previously saved instances from a file
-   */
-  protected void openVisibleInstances() {
-    try {
-      int returnVal = m_FileChooser.showOpenDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = m_FileChooser.getSelectedFile();
-	if (!sFile.getName().toLowerCase().
-	    endsWith(Instances.FILE_EXTENSION)) {
-	  sFile = new File(sFile.getParent(), sFile.getName() + Instances.FILE_EXTENSION);
-	}
-	File selected = sFile;
-	Instances insts = new Instances(new BufferedReader(new FileReader(selected)));
-	openVisibleInstances(insts);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      m_plot.m_plot2D.removeAllPlots();
-      JOptionPane.showMessageDialog(
-	  this, 
-	  ex.getMessage(), 
-	  "Error loading file...", 
-	  JOptionPane.ERROR_MESSAGE);
-    }
   }
 
   /**
@@ -2373,11 +2188,6 @@ public class VisualizePanel
     } 
   }
 
-  /**
-   * initializes the comboboxes based on the data
-   * 
-   * @param inst	the data to base the combobox-setup on
-   */
   public void setUpComboBoxes(Instances inst) {
     setProperties(inst.relationName());
     int prefX = -1;
@@ -2389,8 +2199,25 @@ public class VisualizePanel
     String [] XNames = new String [inst.numAttributes()];
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
+    String [] SNames = new String [4];
     for (int i = 0; i < XNames.length; i++) {
-      String type = " (" + Attribute.typeToStringShort(inst.attribute(i)) + ")";
+      String type = "";
+      switch (inst.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = " (Nom)";
+	break;
+      case Attribute.NUMERIC:
+	type = " (Num)";
+	break;
+      case Attribute.STRING:
+	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      default:
+	type = " (???)";
+      }
       XNames[i] = "X: "+ inst.attribute(i).name()+type;
       YNames[i] = "Y: "+ inst.attribute(i).name()+type;
       CNames[i] = "Colour: "+ inst.attribute(i).name()+type;
@@ -2445,13 +2272,6 @@ public class VisualizePanel
   }
 
   /**
-   * Removes all the plots.
-   */
-  public void removeAllPlots() {
-    m_plot.removeAllPlots();
-  }
-  
-  /**
    * Set the master plot for the visualize panel
    * @param newPlot the new master plot
    * @exception Exception if the master plot could not be set
@@ -2476,20 +2296,9 @@ public class VisualizePanel
     m_saveBut.setEnabled(true);
     repaint();
   }
-  
-  /**
-   * Returns the underlying plot panel.
-   * 
-   * @return		the plot panel
-   */
-  public PlotPanel getPlotPanel() {
-    return m_plot;
-  }
 
   /**
    * Main method for testing this class
-   * 
-   * @param args	the commandline parameters
    */
   public static void main(String [] args) {
     try {
@@ -2499,7 +2308,6 @@ public class VisualizePanel
 	System.exit(1);
       }
 
-      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
       final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500,400);

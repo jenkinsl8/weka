@@ -16,55 +16,62 @@
 
 /*
  *    MatrixPanel.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Ashraf M. Kibriya
  *
  */
 
+
 package weka.gui.visualize;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.lang.ref.SoftReference;
+import java.util.Random;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.GridBagLayout;
-import java.awt.Image;
+import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.WindowAdapter;
+import java.awt.event.MouseAdapter;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Random;
+import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.ComponentAdapter;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
+import javax.swing.JDialog;
 import javax.swing.JSplitPane;
+import javax.swing.ButtonGroup;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JList;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JComboBox;
+import javax.swing.JRadioButton;
+import javax.swing.BorderFactory;
+import javax.swing.JFileChooser;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
+
+import weka.gui.*;
+import weka.gui.visualize.*;
+import weka.core.*;
 
 /** 
  * This panel displays a plot matrix of the user selected attributes
@@ -77,13 +84,11 @@ import javax.swing.event.ChangeListener;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11.2.3 $
  */
-public class MatrixPanel
-  extends JPanel{
 
-  /** for serialization */
-  private static final long serialVersionUID = -1232642719869188740L;
+
+public class MatrixPanel extends JPanel{
 
   /** The that panel contains the actual matrix */
   private final Plot m_plotsPanel;
@@ -117,7 +122,7 @@ public class MatrixPanel
   protected JComboBox m_classAttrib = new JComboBox();
 
   /** The slider to adjust the size of the cells in the matrix  */  
-  protected JSlider m_plotSize = new JSlider(50, 200, 100);
+  protected JSlider m_plotSize = new JSlider(50, 500, 100);
 
   /** The slider to adjust the size of the datapoints  */  
   protected JSlider m_pointSize = new JSlider(1, 10, 1);
@@ -204,18 +209,11 @@ public class MatrixPanel
   /** font used in column and row names */
   private final java.awt.Font f = new java.awt.Font("Dialog", java.awt.Font.BOLD, 11);
 
-  protected transient Image m_osi = null;
-  protected boolean[][] m_plottedCells;
-  protected boolean m_regenerateOSI = true;
-  protected boolean m_clearOSIPlottedCells;
-  protected double m_previousPercent = -1;
-  
-  protected JCheckBox m_fastScroll = 
-    new JCheckBox("Fast scrolling (uses more memory)");
 
-  /** 
-   * Constructor
-   */
+
+  /** Constructor
+      @param ins The instances object for the matrix
+  */
   public MatrixPanel() {
     m_rseed.setText("1");
 
@@ -280,39 +278,21 @@ public class MatrixPanel
 	  a.setPreferredSize(d);
 	  a.setSize( a.getPreferredSize() );
 	  a.setJitter( m_jitter.getValue() );
-	  
-	  if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
-	    m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
-	    m_clearOSIPlottedCells = false;
-	  }
-	  
-	  if (m_regenerateOSI) {
-	    m_osi = null;
-	  }
+					
 	  m_js.revalidate();
 	  m_cp.setColours(m_colorList);
 	  m_cp.setCindex(m_classIndex);
-	  m_regenerateOSI = false;
 					
 	  repaint();
 	}
       });
     m_updateBt.setPreferredSize( m_selAttrib.getPreferredSize() );
-    
-    m_jitter.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent ce) {
-        if (m_fastScroll.isSelected()) {
-          m_clearOSIPlottedCells = true;
-        }
-      }
-    });
       
     m_plotSize.addChangeListener( new ChangeListener() {
 	public void stateChanged(ChangeEvent ce) {
 	  m_plotSizeLb.setText("PlotSize: ["+m_plotSize.getValue()+"]");
 	  m_plotSizeLb.setPreferredSize( m_plotLBSizeD );
 	  m_jitter.setMaximum( m_plotSize.getValue()/5 ); //20% of cell Size
-	  m_regenerateOSI = true;
 	}
       });
  
@@ -321,14 +301,11 @@ public class MatrixPanel
 	  m_pointSizeLb.setText("PointSize: ["+m_pointSize.getValue()+"]");
 	  m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
 	  datapointSize = m_pointSize.getValue();
-	  if (m_fastScroll.isSelected()) {
-	    m_clearOSIPlottedCells = true;
-	  }
 	}
       });
  
     m_resampleBt.addActionListener( new ActionListener() { 
-	public void actionPerformed(ActionEvent e) {	  	  
+	public void actionPerformed(ActionEvent e) {
 	  JLabel rseedLb = new JLabel("Random Seed: ");
 	  JTextField rseedTxt = m_rseed;
 	  JLabel percentLb = new JLabel("Subsample as");
@@ -340,8 +317,6 @@ public class MatrixPanel
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
 					 "Subsample % Panel",
 					 true) {
-	      private static final long serialVersionUID = -269823533147146296L;
-	      
 	      public void dispose() { 
 		m_resamplePercent.setText(percentTxt.getText());
 		super.dispose();
@@ -357,22 +332,22 @@ public class MatrixPanel
 	  GridBagLayout gbl = new GridBagLayout();
 	  GridBagConstraints gbc = new GridBagConstraints();
 	  JPanel p1 = new JPanel( gbl );		
-	  gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
+	  gbc.anchor = gbc.WEST; gbc.fill = gbc.HORIZONTAL;
 	  gbc.insets = new Insets(0,2,2,2);
-	  gbc.gridwidth = GridBagConstraints.RELATIVE;
+	  gbc.gridwidth = gbc.RELATIVE;
 	  p1.add(rseedLb, gbc); gbc.weightx = 0;
-	  gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.weightx=1;
+	  gbc.gridwidth = gbc.REMAINDER; gbc.weightx=1;
 	  p1.add(rseedTxt, gbc);
 	  gbc.insets = new Insets(8,2,0,2); gbc.weightx=0;
 	  p1.add(percentLb, gbc);
-	  gbc.insets = new Insets(0,2,2,2); gbc.gridwidth = GridBagConstraints.RELATIVE;
+	  gbc.insets = new Insets(0,2,2,2); gbc.gridwidth = gbc.RELATIVE;
 	  p1.add(percent2Lb, gbc);
-	  gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.weightx=1;
+	  gbc.gridwidth = gbc.REMAINDER; gbc.weightx=1;
 	  p1.add(percentTxt, gbc);
 	  gbc.insets = new Insets(8,2,2,2);
 
 	  JPanel p3 = new JPanel( gbl );
-	  gbc.fill = GridBagConstraints.HORIZONTAL; gbc.gridwidth = GridBagConstraints.REMAINDER;
+	  gbc.fill = gbc.HORIZONTAL; gbc.gridwidth = gbc.REMAINDER;
 	  gbc.weightx = 1;  gbc.weighty = 0;
 	  p3.add(p1, gbc);
 	  gbc.insets = new Insets(8,4,8,4);
@@ -384,7 +359,7 @@ public class MatrixPanel
 	  jd.setLocation( m_resampleBt.getLocationOnScreen().x,
 			  m_resampleBt.getLocationOnScreen().y-jd.getHeight() );
 	  jd.setVisible(true);
-	}		
+	}
       });
 
     optionsPanel = new JPanel( new GridBagLayout() ); //all the rest of the panels are in here.
@@ -399,59 +374,45 @@ public class MatrixPanel
     m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
     m_resampleBt.setPreferredSize( m_selAttrib.getPreferredSize() );
 
-    gbc.fill = GridBagConstraints.HORIZONTAL;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
+    gbc.fill = gbc.HORIZONTAL;
+    gbc.anchor = gbc.NORTHWEST;
     gbc.insets = new Insets(2,2,2,2);
     p4.add(m_plotSizeLb, gbc);
-    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
     p4.add(m_plotSize, gbc);
-    gbc.weightx=0; gbc.gridwidth = GridBagConstraints.RELATIVE;
+    gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
     p4.add(m_pointSizeLb, gbc);
-    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
     p4.add(m_pointSize, gbc);
-    gbc.weightx=0; gbc.gridwidth = GridBagConstraints.RELATIVE;
+    gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
     p4.add( new JLabel("Jitter: "), gbc);
-    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
     p4.add(m_jitter, gbc);
     p4.add(m_classAttrib, gbc);
       
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = gbc.REMAINDER;
     gbc.weightx=1;
-    gbc.fill = GridBagConstraints.NONE;
-    p3.add(m_fastScroll, gbc);
+    gbc.fill = gbc.NONE;
     p3.add(m_updateBt, gbc);
     p3.add(m_selAttrib, gbc);
-    gbc.gridwidth = GridBagConstraints.RELATIVE;
+    gbc.gridwidth = gbc.RELATIVE;
     gbc.weightx = 0;
-    gbc.fill = GridBagConstraints.VERTICAL;
-    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = gbc.VERTICAL;
+    gbc.anchor = gbc.WEST;
     p3.add(m_resampleBt, gbc);
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = gbc.REMAINDER;
     p3.add(m_resamplePercent, gbc);
     
     p2.setBorder(BorderFactory.createTitledBorder("Class Colour"));
     p2.add(m_cp, BorderLayout.SOUTH);
 
     gbc.insets = new Insets(8,5,2,5);
-    gbc.anchor = GridBagConstraints.SOUTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx=1;
-    gbc.gridwidth = GridBagConstraints.RELATIVE;
+    gbc.anchor = gbc.SOUTHWEST; gbc.fill = gbc.HORIZONTAL; gbc.weightx=1;
+    gbc.gridwidth = gbc.RELATIVE;
     optionsPanel.add(p4, gbc);
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbc.gridwidth = gbc.REMAINDER;
     optionsPanel.add(p3, gbc);
     optionsPanel.add(p2, gbc);
-    
-    m_fastScroll.setSelected(false);
-    m_fastScroll.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (!m_fastScroll.isSelected()) {
-          m_osi = null;
-        } else {
-          m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
-        }
-        MatrixPanel.this.invalidate();
-        MatrixPanel.this.repaint();
-      }
-    });
 
     this.addComponentListener( new ComponentAdapter() {
 	public void componentResized(ComponentEvent cv) {
@@ -503,11 +464,7 @@ public class MatrixPanel
     double minC=0, maxC=0;
 
     /** Resampling  **/
-    double currentPercent = Double.parseDouble(m_resamplePercent.getText());
-    if(currentPercent <= 100) {
-      if (currentPercent != m_previousPercent) {
-        m_clearOSIPlottedCells = true;
-      }
+    if(Double.parseDouble(m_resamplePercent.getText())<100) {
         inst = new Instances(m_data, 0, m_data.numInstances());
         inst.randomize( new Random(Integer.parseInt(m_rseed.getText())) );
         
@@ -520,11 +477,11 @@ public class MatrixPanel
         
         inst = new Instances(inst, 
                  0,
-                 (int)Math.round(currentPercent
+                 (int)Math.round(Double.parseDouble(m_resamplePercent.getText())
                  / 100D*inst.numInstances())
                             );
-        m_previousPercent = currentPercent;
     }
+    
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; //changed
     m_pointColors = new int[inst.numInstances()];
     m_missing = new boolean[inst.numInstances()][m_selectedAttribs.length+1]; //changed
@@ -671,14 +628,26 @@ public class MatrixPanel
 
     m_classAttrib.removeAllItems();
     for(int i=0; i<tempAttribNames.length; i++) {
-      type = " (" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
+      switch (m_data.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = " (Nom)";
+	break;
+      case Attribute.NUMERIC:
+	type = " (Num)";
+	break;
+      case Attribute.STRING:
+	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      default:
+	type = " (???)";
+      }
       tempAttribNames[i] = new String("Colour: "+m_data.attribute(i).name()+" "+type);
       m_classAttrib.addItem(tempAttribNames[i]);
     }
-    if (m_data.classIndex() == -1)
-      m_classAttrib.setSelectedIndex(tempAttribNames.length - 1);
-    else
-      m_classAttrib.setSelectedIndex(m_data.classIndex());
+    m_classAttrib.setSelectedIndex( tempAttribNames.length-1 );
     m_attribList.setListData(tempAttribNames);
     m_attribList.setSelectionInterval(0, tempAttribNames.length-1);
   }
@@ -705,8 +674,6 @@ public class MatrixPanel
   */
   public void setInstances(Instances newInst) {
 
-    m_osi = null;
-    m_fastScroll.setSelected(false);
     m_data = newInst;
     setPercent();
     setupAttribLists();
@@ -776,12 +743,7 @@ public class MatrixPanel
      Requires the internal data fields of the parent class to be properly initialized
      before being created
   */
-  private class Plot
-    extends JPanel
-    implements MouseMotionListener, MouseListener {
-
-    /** for serialization */
-    private static final long serialVersionUID = -1721245738439420882L;    
+  private class Plot extends JPanel implements MouseMotionListener, MouseListener {
 
     int extpad=3, intpad=4, cellSize=100, cellRange=100, lastx=0, lasty=0, jitter=0;
     java.awt.Rectangle r;
@@ -806,79 +768,76 @@ public class MatrixPanel
       cellRange = cellSize; cellSize = cellRange + 2*intpad;
 
       jPlColHeader = new JPanel() {
-	private static final long serialVersionUID = -9098547751937467506L;
-        java.awt.Rectangle r;
-        public void paint(Graphics g) {
-          r = g.getClipBounds();
-          g.setColor(this.getBackground());
-          g.fillRect(r.x, r.y, r.width, r.height);
-          g.setFont( f );
-          fm = g.getFontMetrics();
-          int xpos = 0, ypos = 0, attribWidth=0;
-          
-          g.setColor(fontColor);
-          xpos = extpad;
-          ypos=extpad+fm.getHeight();
-          
-          for(int i=0; i<m_selectedAttribs.length; i++) {
-            if( xpos+cellSize < r.x)
-            { xpos += cellSize+extpad; continue; }
-            else if(xpos > r.x+r.width)
-            { break; }
-            else {
-              attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
-              g.drawString(m_data.attribute(m_selectedAttribs[i]).name(),
-              (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos,
-              ypos);
-            }
-            xpos += cellSize+extpad;
-          }
-          fm = null; r=null;
-        }
-        
-        public Dimension getPreferredSize() {
-          fm = this.getFontMetrics(this.getFont());
-          return new Dimension( m_selectedAttribs.length*(cellSize+extpad),
-          2*extpad + fm.getHeight() );
-        }
-      };
+	      java.awt.Rectangle r;     
+	      public void paint(Graphics g) {
+		  r = g.getClipBounds();
+		  g.setColor(this.getBackground());
+		  g.fillRect(r.x, r.y, r.width, r.height);
+		  g.setFont( f );
+		  fm = g.getFontMetrics();
+		  int xpos = 0, ypos = 0, attribWidth=0;
+		  
+		  g.setColor(fontColor);
+		  xpos = extpad;
+		  ypos=extpad+fm.getHeight();
+
+		  for(int i=0; i<m_selectedAttribs.length; i++) {
+		      if( xpos+cellSize < r.x)
+			  { xpos += cellSize+extpad; continue; }
+		      else if(xpos > r.x+r.width)
+			  { break; }
+		      else {
+			  attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttribs[i]).name());
+			  g.drawString(m_data.attribute(m_selectedAttribs[i]).name(), 
+				       (attribWidth<cellSize) ? (xpos + (cellSize/2 - attribWidth/2)):xpos, 
+				       ypos);
+		      }
+		      xpos += cellSize+extpad;
+		  }
+		  fm = null; r=null;
+	      }
+	      
+	      public Dimension getPreferredSize() {
+		  fm = this.getFontMetrics(this.getFont());
+		  return new Dimension( m_selectedAttribs.length*(cellSize+extpad),
+						       2*extpad + fm.getHeight() );
+	      }
+	  };
 
       jPlRowHeader = new JPanel() {
-	private static final long serialVersionUID = 8474957069309552844L;
-	
-        java.awt.Rectangle r;
-        public void paint(Graphics g) {
-          r = g.getClipBounds();
-          g.setColor(this.getBackground());
-          g.fillRect(r.x, r.y, r.width, r.height);
-          g.setFont( f );
-          fm = g.getFontMetrics();
-          int xpos = 0, ypos = 0;
-          
-          g.setColor(fontColor);
-          xpos = extpad;
-          ypos=extpad;
-          
-          for(int j=m_selectedAttribs.length-1; j>=0; j--) {
-            if( ypos+cellSize < r.y )
-            { ypos += cellSize+extpad;  continue; }
-            else if( ypos > r.y+r.height )
-              break;
-            else {
-              g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2);
-            }
-            xpos = extpad;
-            ypos += cellSize+extpad;
-          }
-          r=null;
-        }
-        
-        public Dimension getPreferredSize() {
-          return new Dimension( 100+extpad,
-          m_selectedAttribs.length*(cellSize+extpad)
-          );
-        }
-      };
+	      java.awt.Rectangle r; 	      
+	      public void paint(Graphics g) {
+		  r = g.getClipBounds();
+		  g.setColor(this.getBackground());
+		  g.fillRect(r.x, r.y, r.width, r.height);
+		  g.setFont( f );
+		  fm = g.getFontMetrics();
+		  int xpos = 0, ypos = 0, attribWidth=0;
+		  
+		  g.setColor(fontColor);
+		  xpos = extpad;
+		  ypos=extpad; 
+		  
+		  for(int j=m_selectedAttribs.length-1; j>=0; j--) {
+		      if( ypos+cellSize < r.y )
+			  { ypos += cellSize+extpad;  continue; }
+		      else if( ypos > r.y+r.height )
+			  break;
+		      else {
+			  g.drawString(m_data.attribute(m_selectedAttribs[j]).name(), xpos+extpad, ypos+cellSize/2);
+		      }
+		      xpos = extpad;
+		      ypos += cellSize+extpad;
+		  }		 
+		  r=null; 
+	      }
+	      
+	      public Dimension getPreferredSize() {
+		  return new Dimension( 100+extpad,
+					m_selectedAttribs.length*(cellSize+extpad)
+					);
+	      }
+	  };      
       jPlColHeader.setFont(f);
       jPlRowHeader.setFont(f);
       this.setFont(f);
@@ -998,7 +957,6 @@ public class MatrixPanel
       }
       return ("Matrix Panel");
     }
-        
 
     /**  Paints a single Plot at xpos, ypos. and xattrib and yattrib on X and
 	 Y axes
@@ -1010,114 +968,82 @@ public class MatrixPanel
       g.setColor(Color.white);
       g.fillRect(xpos, ypos, cellSize, cellSize);
       for(int i=0; i<m_points.length; i++) {
-        
-        if( !(m_missing[i][yattrib] || m_missing[i][xattrib]) ) {
-          
-          if(m_type[0]==0)
-            if(m_missing[i][m_missing[0].length-1])
-              g.setColor(m_defaultColors[m_defaultColors.length-1]);
-            else
-              g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
-          else
-            g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
-          
-          if(m_points[i][xattrib]+jitterVals[i][0]<0 || m_points[i][xattrib]+jitterVals[i][0]>cellRange)
-            if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
-              //both x and y out of range don't add jitter
-              x=intpad+m_points[i][xattrib];
-              y=intpad+(cellRange - m_points[i][yattrib]);
-            }
-            else {
-              //only x out of range
-              x=intpad+m_points[i][xattrib];
-              y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
-            }
-          else if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
-            //only y out of range
-            x=intpad+m_points[i][xattrib]+jitterVals[i][0];
-            y=intpad+(cellRange - m_points[i][yattrib]);
-          }
-          else {
-            //none out of range
-            x=intpad+m_points[i][xattrib]+jitterVals[i][0];
-            y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
-          }
-          if(datapointSize==1)
-            g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
-          else
-            g.drawOval(x+xpos-datapointSize/2, y+ypos-datapointSize/2, datapointSize, datapointSize);
-        }
+
+	if( !(m_missing[i][yattrib] || m_missing[i][xattrib]) ) {      
+
+	  if(m_type[0]==0)
+	    if(m_missing[i][m_missing[0].length-1])
+	      g.setColor(m_defaultColors[m_defaultColors.length-1]);
+	    else
+	      g.setColor( new Color(m_pointColors[i],150,(255-m_pointColors[i])) );
+	  else 
+	    g.setColor((Color)m_colorList.elementAt(m_pointColors[i]));
+
+	  if(m_points[i][xattrib]+jitterVals[i][0]<0 || m_points[i][xattrib]+jitterVals[i][0]>cellRange)
+	    if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
+	      //both x and y out of range don't add jitter
+	      x=intpad+m_points[i][xattrib];
+	      y=intpad+(cellRange - m_points[i][yattrib]);
+	    }
+	    else {
+	      //only x out of range
+	      x=intpad+m_points[i][xattrib];
+	      y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
+	    }
+	  else if(cellRange-m_points[i][yattrib]+jitterVals[i][1]<0 || cellRange-m_points[i][yattrib]+jitterVals[i][1]>cellRange) {
+	    //only y out of range
+	    x=intpad+m_points[i][xattrib]+jitterVals[i][0];
+	    y=intpad+(cellRange - m_points[i][yattrib]);
+	  }
+	  else {
+	    //none out of range
+	    x=intpad+m_points[i][xattrib]+jitterVals[i][0];
+	    y=intpad+(cellRange - m_points[i][yattrib])+jitterVals[i][1];
+	  }
+	  if(datapointSize==1)
+	      g.drawLine(x+xpos, y+ypos, x+xpos, y+ypos);
+	  else 
+	      g.drawOval(x+xpos-datapointSize/2, y+ypos-datapointSize/2, datapointSize, datapointSize);
+	}
       }
       g.setColor( fontColor );
     }
-    
-    private void createOSI() {
-      int iwidth = this.getWidth();
-      int iheight = this.getHeight();
-      m_osi = this.createImage(iwidth, iheight);
-      clearOSI();
-    }
-    
-    private void clearOSI() {
-      if (m_osi == null) {
-        return;
-      }
-      
-      int iwidth = this.getWidth();
-      int iheight = this.getHeight();
-      Graphics m = m_osi.getGraphics();
-      m.setColor(this.getBackground().darker().darker());
-      m.fillRect(0, 0, iwidth, iheight);
-    }
-    
+
 
     /**
        Paints the matrix of plots in the current visible region
     */
     public void paintME(Graphics g) {
-      Graphics g2 = g;
-      if (m_osi == null && m_fastScroll.isSelected()) {
-        createOSI();
-      }
-      if (m_osi != null && m_fastScroll.isSelected()) {
-        g2 = m_osi.getGraphics();
-      }
       r = g.getClipBounds();
-      
+
       g.setColor( this.getBackground() );
       g.fillRect(r.x, r.y, r.width, r.height);
       g.setColor( fontColor );
-      
-      int xpos = 0, ypos = 0;
-      
+
+      int xpos = 0, ypos = 0, attribWidth=0;
+	  
       xpos = extpad;
       ypos=extpad;
-      
-      
+	
+	  
       for(int j=m_selectedAttribs.length-1; j>=0; j--) {
-        if( ypos+cellSize < r.y )
-        { ypos += cellSize+extpad;  continue; }
-        else if( ypos > r.y+r.height )
-          break;
-        else {
-          for(int i=0; i<m_selectedAttribs.length; i++) {
-            if( xpos+cellSize < r.x) {
-              xpos += cellSize+extpad; continue; }
-            else if(xpos > r.x+r.width)
-              break;
-            else if (m_fastScroll.isSelected()) {
-              if (!m_plottedCells[i][j]) {
-                paintGraph(g2, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
-                m_plottedCells[i][j] = true;
-              }
-            } else {
-              paintGraph(g2, i, j, xpos, ypos);
-            }
-            xpos += cellSize+extpad;
-          }
-        }
-        xpos = extpad;
-        ypos += cellSize+extpad;
+	if( ypos+cellSize < r.y )
+	  { ypos += cellSize+extpad;  continue; }
+	else if( ypos > r.y+r.height )
+	  break;
+	else {
+	    for(int i=0; i<m_selectedAttribs.length; i++) {
+		if( xpos+cellSize < r.x) {
+		    xpos += cellSize+extpad; continue; }
+		else if(xpos > r.x+r.width)
+		    break;
+		else
+		    paintGraph(g, i, j, xpos, ypos); //m_selectedAttribs[i], m_selectedAttribs[j], xpos, ypos);
+		xpos += cellSize+extpad;
+	    }
+	}
+	xpos = extpad;
+	ypos += cellSize+extpad;
       }
     }
       
@@ -1125,9 +1051,6 @@ public class MatrixPanel
      */
     public void paintComponent(Graphics g) {
       paintME(g);
-      if (m_osi != null && m_fastScroll.isSelected()) {
-        g.drawImage(m_osi, 0, 0, this);
-      }
     }
   }
 }

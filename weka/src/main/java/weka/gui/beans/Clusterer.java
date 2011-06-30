@@ -16,39 +16,47 @@
 
 /*
  *    Clusterer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Stefan Mutter
  *
  */
 
 package weka.gui.beans;
 
-import weka.clusterers.EM;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.Logger;
-import weka.gui.ExtensionFileFilter;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.*;
+import java.util.Vector;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
-
 import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.InputEvent;
+import java.awt.*;
+import java.io.Serializable;
+import java.io.Reader;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.beans.EventSetDescriptor;
 
-import javax.swing.JPanel;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.clusterers.*;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+//import weka.classifiers.*;
+//import weka.classifiers.rules.ZeroR;
+import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision$
+ * @version $Revision: 1.1.2.2 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -58,14 +66,7 @@ import javax.swing.JPanel;
  * @see TrainingSetListener
  * @see TestSetListener
  */
-public class Clusterer
-  extends JPanel
-  implements BeanCommon, Visible, WekaWrapper, EventConstraints, 
-             UserRequestAcceptor, TrainingSetListener, 
-             TestSetListener, ConfigurationProducer {
-
-  /** for serialization */
-  private static final long serialVersionUID = 7729795159836843810L;
+public class Clusterer extends JPanel implements BeanCommon, Visible, WekaWrapper, EventConstraints, Serializable, UserRequestAcceptor, TrainingSetListener, TestSetListener{
 
   protected BeanVisual m_visual = 
     new BeanVisual("Clusterer",
@@ -118,8 +119,6 @@ public class Clusterer
 
   private Double m_dummy = new Double(0.0);
 
-  private transient JFileChooser m_fileChooser = null;
-
   /**
    * Global info (if it exists) for the wrapped classifier
    *
@@ -136,24 +135,6 @@ public class Clusterer
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setClusterer(m_Clusterer);
-  }
-
-  /**
-   * Set a custom (descriptive) name for this bean
-   * 
-   * @param name the name to use
-   */
-  public void setCustomName(String name) {
-    m_visual.setText(name);
-  }
-
-  /**
-   * Get the custom (descriptive) name for this bean (if one has been set)
-   * 
-   * @return the custom name (or the default name)
-   */
-  public String getCustomName() {
-    return m_visual.getText();
   }
 
   /**
@@ -267,16 +248,15 @@ public class Clusterer
 	    m_state = BUILDING_MODEL;
 	  }
 	  m_trainingSet = e.getTrainingSet();
-//	  final String oldText = m_visual.getText();
+	  final String oldText = m_visual.getText();
 	  m_buildThread = new Thread() {
 	      public void run() {
 		try {
 		  if (m_trainingSet != null) {  
 		    m_visual.setAnimated();
-//		    m_visual.setText("Building clusters...");
+		    m_visual.setText("Building clusters...");
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() 
-		          + "Building clusters...");
+		      m_log.statusMessage("Clusterer : building clusters...");
 		    }
 		    buildClusterer();
                     if(m_batchClustererListeners.size() > 0){
@@ -330,33 +310,24 @@ public class Clusterer
 		    }
 		  }
 		} catch (Exception ex) {
-		  Clusterer.this.stop(); // stop processing
-		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix()
-		        + "ERROR (See log for details");
-		    m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-		        + " problem training clusterer. " + ex.getMessage());
-		  }
 		  ex.printStackTrace();
 		} finally {
-//		  m_visual.setText(oldText);
+		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  m_state = IDLE;
 		  if (isInterrupted()) {
 		    // prevent any clusterer events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("[Clusterer]" + statusMessagePrefix() 
-		          + " Build clusterer interrupted!");
-		      m_log.statusMessage(statusMessagePrefix() 
-		          + "INTERRUPTED");
+		      m_log.logMessage("Build clusterer interrupted!");
+		      m_log.statusMessage("OK");
 		    }
 		  } else {
 		    // save header
 		    m_trainingSet = new Instances(m_trainingSet, 0);
-		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
-		    }
+		  }
+		  if (m_log != null) {
+		    m_log.statusMessage("OK");
 		  }
 		  block(false);
 		}
@@ -403,13 +374,6 @@ public class Clusterer
 	  m_state = IDLE;
 	}
       } catch (Exception ex) {
-        stop(); // stop any processing
-        if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (see log for details");
-          m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-              + " problem during testing. " + ex.getMessage());
-        }
 	ex.printStackTrace();
       }
     }
@@ -561,26 +525,6 @@ public class Clusterer
       }
     }
   }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
-  }
 
 
   /**
@@ -668,16 +612,7 @@ public class Clusterer
     }
   }
 
-  /**
-   * Returns true if. at this time, the bean is busy with some
-   * (i.e. perhaps a worker thread is performing some calculation).
-   * 
-   * @return true if the bean is busy.
-   */
-  public boolean isBusy() {
-    return (m_buildThread != null);
-  }
-  
+
   /**
    * Stop any clusterer action
    */
@@ -687,6 +622,7 @@ public class Clusterer
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
+	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
@@ -709,93 +645,6 @@ public class Clusterer
     m_log = logger;
   }
 
-  public void saveModel() {
-    try {
-      if (m_fileChooser == null) {
-        // i.e. after de-serialization
-        m_fileChooser = 
-          new JFileChooser(new File(System.getProperty("user.dir")));
-        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka clusterer");
-      m_fileChooser.setFileFilter(ef);
-      }
-      int returnVal = m_fileChooser.showSaveDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File saveTo = m_fileChooser.getSelectedFile();
-        String fn = saveTo.getAbsolutePath();
-        if (!fn.endsWith(".model")) {
-          fn += ".model";
-          saveTo = new File(fn);
-        }
-        ObjectOutputStream os = 
-          new ObjectOutputStream(new BufferedOutputStream(
-                                                          new FileOutputStream(saveTo)));
-        os.writeObject(m_Clusterer);
-        if (m_trainingSet != null) {
-          Instances header = new Instances(m_trainingSet, 0);
-          os.writeObject(header);
-        }
-        os.close();
-        if (m_log != null) {
-          m_log.logMessage("[Clusterer] Saved clusterer " + getCustomName());
-        }
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(Clusterer.this,
-                                    "Problem saving clusterer.\n",
-                                    "Save Model",
-                                    JOptionPane.ERROR_MESSAGE);
-      if (m_log != null) {
-        m_log.logMessage("[Clusterer] Problem saving clusterer. " 
-            + getCustomName() + ex.getMessage());
-      }
-    }
-  }
-
-  public void loadModel() {
-    try {
-      if (m_fileChooser == null) {
-        // i.e. after de-serialization
-        m_fileChooser = 
-          new JFileChooser(new File(System.getProperty("user.dir")));
-        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka clusterer");
-        m_fileChooser.setFileFilter(ef);
-      }
-      int returnVal = m_fileChooser.showOpenDialog(this);
-      if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File loadFrom = m_fileChooser.getSelectedFile();
-        ObjectInputStream is = 
-          new ObjectInputStream(new BufferedInputStream(
-                                new FileInputStream(loadFrom)));
-        // try and read the model
-        weka.clusterers.Clusterer temp = (weka.clusterers.Clusterer)is.readObject();
-
-        // Update name and icon
-        setClusterer(temp);
-        
-        // try and read the header (if present)
-        try {
-          m_trainingSet = (Instances)is.readObject();
-        } catch (Exception ex) {
-          // quietly ignore
-        }
-        is.close();
-        if (m_log != null) {
-          m_log.logMessage("[Clusterer] Loaded clusterer: "
-                           + m_Clusterer.getClass().toString());
-        }
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(Clusterer.this,
-                                    "Problem loading classifier.\n",
-                                    "Load Model",
-                                    JOptionPane.ERROR_MESSAGE);
-      if (m_log != null) {
-        m_log.logMessage("[Clusterer] Problem loading classifier. " 
-            + ex.getMessage());
-      }
-    }
-  }
-
   /**
    * Return an enumeration of requests that can be made by the user
    *
@@ -806,16 +655,6 @@ public class Clusterer
     if (m_buildThread != null) {
       newVector.addElement("Stop");
     }
-
-    if (m_buildThread == null &&
-        m_Clusterer != null) {
-      newVector.addElement("Save model");
-    }
-
-    if (m_buildThread == null) {
-      newVector.addElement("Load model");
-    }
-    
     return newVector.elements();
   }
 
@@ -828,13 +667,9 @@ public class Clusterer
   public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
-    }  else if (request.compareTo("Save model") == 0) {
-      saveModel();
-    } else if (request.compareTo("Load model") == 0) {
-      loadModel();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Clusterer)");
+					 + " not supported (Classifier)");
     }
   }
 
@@ -911,13 +746,5 @@ public class Clusterer
         return false;
     
     return true;
-  }
-  
-  private String statusMessagePrefix() {
-    return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Clusterer instanceof OptionHandler &&
-        Utils.joinOptions(((OptionHandler)m_Clusterer).getOptions()).length() > 0)
-        ? Utils.joinOptions(((OptionHandler)m_Clusterer).getOptions()) + "|"
-            : "");
   }
 }

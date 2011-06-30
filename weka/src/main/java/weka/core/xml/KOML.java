@@ -16,13 +16,10 @@
 
 /*
  * KOML.java
- * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 FracPete
  */
 
 package weka.core.xml;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +34,7 @@ import java.io.OutputStream;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision 1.0$
  */
-public class KOML
-   implements RevisionHandler {
+public class KOML {
   
    /**
     * indicates whether <a href="http://koala.ilog.fr/XML/serialization/" target="_blank">KOML</a> 
@@ -79,7 +75,7 @@ public class KOML
    
    /**
     * reads the XML-serialized object from the given file
-    * @param filename the file to deserialize the object from
+    * @filename the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -89,7 +85,7 @@ public class KOML
    
    /**
     * reads the XML-serialized object from the given file
-    * @param file the file to deserialize the object from
+    * @file the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -99,12 +95,12 @@ public class KOML
    
    /**
     * reads the XML-serialized object from a stream
-    * @param stream the stream to deserialize the object from
+    * @stream the stream to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the stream
     */
    public static Object read(InputStream stream) throws Exception {
-      Class<?>                            komlClass;
+      Class                            komlClass;
       Class[]                          komlClassArgs;
       Object[]                         komlArgs;
       java.lang.reflect.Constructor    constructor;
@@ -152,8 +148,8 @@ public class KOML
    
    /**
     * writes the XML-serialized object to the given file
-    * @param filename the file to serialize the object to
-    * @param o the object to write to the file
+    * @filename the file to serialize the object to
+    * @o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -163,8 +159,8 @@ public class KOML
    
    /**
     * write the XML-serialized object to the given file
-    * @param file the file to serialize the object to
-    * @param o the object to write to the file
+    * @file the file to serialize the object to
+    * @o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -174,13 +170,13 @@ public class KOML
    
    /**
     * writes the XML-serialized object to a stream
-    * @param stream the stream to serialize the object to
-    * @param o the object to write to the stream
+    * @stream the stream to serialize the object to
+    * @o the object to write to the stream
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the stream
     */
    public static boolean write(OutputStream stream, Object o) throws Exception {
-      Class<?>                            komlClass;
+      Class                            komlClass;
       Class[]                          komlClassArgs;
       Object[]                         komlArgs;
       java.lang.reflect.Constructor    constructor;
@@ -227,14 +223,5 @@ public class KOML
       }
       
       return result;
-   }
-   
-   /**
-    * Returns the revision string.
-    * 
-    * @return		the revision
-    */
-   public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
    }
 }

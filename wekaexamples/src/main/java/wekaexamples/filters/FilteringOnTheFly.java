@@ -24,8 +24,8 @@ package wekaexamples.filters;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.unsupervised.attribute.Remove;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * Example class to demonstrate filtering on-the-fly using the 
@@ -53,7 +53,7 @@ public class FilteringOnTheFly {
     test.setClassIndex(test.numAttributes() - 1);
     if (!train.equalHeaders(test))
       throw new IllegalArgumentException(
-	  "Datasets are not compatible:\n" + train.equalHeadersMsg(test));
+	  "Datasets are not compatible!");
     
     // filter
     Remove rm = new Remove();

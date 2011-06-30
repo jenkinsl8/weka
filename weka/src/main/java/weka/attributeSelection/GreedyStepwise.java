@@ -16,69 +16,40 @@
 
 /*
  *    GreedyStepwise.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
-package weka.attributeSelection;
+package  weka.attributeSelection;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Vector;
+import  java.io.*;
+import  java.util.*;
+import  weka.core.*;
 
 /** 
- <!-- globalinfo-start -->
- * GreedyStepwise :<br/>
- * <br/>
- * Performs a greedy forward or backward search through the space of attribute subsets. May start with no/all attributes or from an arbitrary point in the space. Stops when the addition/deletion of any remaining attributes results in a decrease in evaluation. Can also produce a ranked list of attributes by traversing the space from one side to the other and recording the order that attributes are selected.<br/>
- * <p/>
- <!-- globalinfo-end -->
+ * Class for performing a hill climbing search (either forwards or backwards). <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
+ * -B <br>
+ * Use a backward search instead of a forward one. <p>
+ *
+ * -P <start set> <br>
+ * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+ *
+ * -R <br>
+ * Produce a ranked list of attributes. <p>
  * 
- * <pre> -C
- *  Use conservative forward search</pre>
- * 
- * <pre> -B
- *  Use a backward search instead of a
- *  forward one.</pre>
- * 
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
- * 
- * <pre> -R
- *  Produce a ranked list of attributes.</pre>
- * 
- * <pre> -T &lt;threshold&gt;
- *  Specify a theshold by which attributes
- *  may be discarded from the ranking.
- *  Use in conjuction with -R</pre>
- * 
- * <pre> -N &lt;num to select&gt;
- *  Specify number of attributes to select</pre>
- * 
- <!-- options-end -->
+ * -T <threshold> <br>
+ * Specify a threshold by which the AttributeSelection module can. <br>
+ * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
  * @version $Revision$
  */
-public class GreedyStepwise 
-  extends ASSearch 
+public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
-  
-  /** for serialization */
-  static final long serialVersionUID = -6312951970168325471L;
 
-  /** does the data have a class */
+ /** does the data have a class */
   protected boolean m_hasClass;
  
   /** holds the class index */
@@ -133,21 +104,6 @@ public class GreedyStepwise
   /** Use a backwards search instead of a forwards one */
   protected boolean m_backward = false;
 
-  /** If set then attributes will continue to be added during a forward
-      search as long as the merit does not degrade */
-  protected boolean m_conservativeSelection = false;
-
-  /**
-   * Constructor
-   */
-  public GreedyStepwise () {
-    m_threshold = -Double.MAX_VALUE;
-    m_doneRanking = false;
-    m_startRange = new Range();
-    m_starting = null;
-    resetOptions();
-  }
-
   /**
    * Returns a string describing this search method
    * @return a description of the search suitable for
@@ -162,6 +118,14 @@ public class GreedyStepwise
       +"Can also produce a ranked list of "
       +"attributes by traversing the space from one side to the other and "
       +"recording the order that attributes are selected.\n";
+  }
+
+  public GreedyStepwise () {
+    m_threshold = -Double.MAX_VALUE;
+    m_doneRanking = false;
+    m_startRange = new Range();
+    m_starting = null;
+    resetOptions();
   }
 
   /**
@@ -309,7 +273,7 @@ public class GreedyStepwise
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @throws Exception if start set can't be set.
+   * @exception Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -324,44 +288,13 @@ public class GreedyStepwise
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String conservativeForwardSelectionTipText() {
-    return "If true (and forward search is selected) then attributes "
-      +"will continue to be added to the best subset as long as merit does "
-      +"not degrade.";
-  }
-
-  /**
-   * Set whether attributes should continue to be added during
-   * a forward search as long as merit does not decrease
-   * @param c true if atts should continue to be atted
-   */
-  public void setConservativeForwardSelection(boolean c) {
-    m_conservativeSelection = c;
-  }
-
-  /**
-   * Gets whether conservative selection has been enabled
-   * @return true if conservative forward selection is enabled
-   */
-  public boolean getConservativeForwardSelection() {
-    return m_conservativeSelection;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(5);
+    Vector newVector = new Vector(4);
 
-    newVector.addElement(new Option("\tUse conservative forward search"
-				    ,"-C", 0, "-C"));
-
-    newVector.addElement(new Option("\tUse a backward search instead of a"
+    newVector.addElement(new Option("\tUse a backward search instead  of a"
 				    +"\n\tforward one."
 				    ,"-B", 0, "-B"));
     newVector
@@ -388,46 +321,37 @@ public class GreedyStepwise
   }
   
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options.
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
+   *
+   * -B <br>
+   * Use a backward search instead of a forward one. <p>
    * 
-   * <pre> -C
-   *  Use conservative forward search</pre>
+   * -P <start set> <br>
+   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
+   *
+   * -R <br>
+   * Produce a ranked list of attributes. <p>
    * 
-   * <pre> -B
-   *  Use a backward search instead of a
-   *  forward one.</pre>
-   * 
-   * <pre> -P &lt;start set&gt;
-   *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7.</pre>
-   * 
-   * <pre> -R
-   *  Produce a ranked list of attributes.</pre>
-   * 
-   * <pre> -T &lt;threshold&gt;
-   *  Specify a theshold by which attributes
-   *  may be discarded from the ranking.
-   *  Use in conjuction with -R</pre>
-   * 
-   * <pre> -N &lt;num to select&gt;
-   *  Specify number of attributes to select</pre>
-   * 
-   <!-- options-end -->
+   * -T <threshold> <br>
+   * Specify a threshold by which the AttributeSelection module can <br>
+   * discard attributes. Use in conjunction with -R <p>
+   *
+   * -N <number to retain> <br>
+   * Specify the number of attributes to retain. Overides any threshold. <br>
+   * <p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   */
+   * @exception Exception if an option is not supported
+   *
+   **/
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
     resetOptions();
 
     setSearchBackwards(Utils.getFlag('B', options));
-
-    setConservativeForwardSelection(Utils.getFlag('C', options));
 
     optionString = Utils.getOption('P', options);
     if (optionString.length() != 0) {
@@ -455,15 +379,11 @@ public class GreedyStepwise
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[9];
+    String[] options = new String[8];
     int current = 0;
     
     if (getSearchBackwards()) {
       options[current++] = "-B";
-    }
-
-    if (getConservativeForwardSelection()) {
-      options[current++] = "-C";
     }
 
     if (!(getStartSet().equals(""))) {
@@ -551,15 +471,15 @@ public class GreedyStepwise
     } else {
       if (m_backward) {
         FString.append("\n\tRanking is the order that attributes were removed, " +
-        		"starting \n\twith all attributes. The merit scores in the left" +
-        		"\n\tcolumn are the goodness of the remaining attributes in the" +
-        		"\n\tsubset after removing the corresponding in the right column" +
-        		"\n\tattribute from the subset.\n");
+                        "starting \n\twith all attributes. The merit scores in the left" +
+                        "\n\tcolumn are the goodness of the remaining attributes in the" +
+                        "\n\tsubset after removing the corresponding in the right column" +
+                        "\n\tattribute from the subset.\n");
       } else {
         FString.append("\n\tRanking is the order that attributes were added, starting " +
-        		"\n\twith no attributes. The merit scores in the left column" +
-        		"\n\tare the goodness of the subset after the adding the" +
-        		"\n\tcorresponding attribute in the right column to the subset.\n");
+                        "\n\twith no attributes. The merit scores in the left column" +
+                        "\n\tare the goodness of the subset after the adding the" +
+                        "\n\tcorresponding attribute in the right column to the subset.\n");
       }
     }
     
@@ -575,15 +495,15 @@ public class GreedyStepwise
   /**
    * Searches the attribute subset space by forward selection.
    *
-   * @param ASEval the attribute evaluator to guide the search
+   * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @throws Exception if the search can't be completed
+   * @exception Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
 
-    int i;
+    int i, j;
     double best_merit = -Double.MAX_VALUE;
     double temp_best,temp_merit;
     int temp_index=0;
@@ -637,7 +557,7 @@ public class GreedyStepwise
       }
     } else {
       if (m_backward && m_rankedSoFar <= 0) {
-	for (i = 0; i < m_numAttribs; i++) {
+	for (i = 0, j = 0; i < m_numAttribs; i++) {
 	  if (i != m_classIndex) {
 	    m_best_group.set(i);
 	  }
@@ -677,18 +597,13 @@ public class GreedyStepwise
 	  if (m_backward) {
 	    z = (temp_merit >= temp_best);
 	  } else {
-            if (m_conservativeSelection) {
-              z = (temp_merit >= temp_best);
-            } else {
-              z = (temp_merit > temp_best);
-            }
+	    z = (temp_merit > temp_best);
 	  }
-
 	  if (z) {
-            temp_best = temp_merit;
-            temp_index = i;
-            addone = true;
-            done = false;
+	    temp_best = temp_merit;
+	    temp_index = i;
+	    addone = true;
+	    done = false;
 	  }
 
 	  // unset this addition/deletion
@@ -730,7 +645,7 @@ public class GreedyStepwise
    * "passed by" on the way to the far side of the search space.
    *
    * @return an array of attribute indexes and associated merit values
-   * @throws Exception if something goes wrong.
+   * @exception Exception if something goes wrong.
    */
   public double [][] rankedAttributes() throws Exception {
     
@@ -738,7 +653,6 @@ public class GreedyStepwise
       throw new Exception("Search must be performed before attributes "
 			  +"can be ranked.");
     }
-    
     m_doRank = true;
     search (m_ASEval, null);
 
@@ -813,14 +727,5 @@ public class GreedyStepwise
     m_Instances = null;
     m_rankedSoFar = -1;
     m_rankedAtts = null;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

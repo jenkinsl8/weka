@@ -16,30 +16,22 @@
 
 /*
  *    C45Split.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
-import java.util.Enumeration;
+import java.util.*;
+import weka.core.*;
 
 /**
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9.2.1 $
  */
-public class C45Split
-  extends ClassifierSplitModel{
-
-  /** for serialization */
-  private static final long serialVersionUID = 3064079330067903161L;
+public class C45Split extends ClassifierSplitModel{
 
   /** Desired number of branches. */
   private int m_complexityIndex;  
@@ -49,9 +41,6 @@ public class C45Split
 
   /** Minimum number of objects in a split.   */
   private int m_minNoObj;         
-
-  /** Use MDL correction? */
-  private boolean m_useMDLcorrection;         
 
   /** Value of split point. */
   private double m_splitPoint;   
@@ -77,8 +66,7 @@ public class C45Split
   /**
    * Initializes the split model.
    */
-  public C45Split(int attIndex,int minNoObj, double sumOfWeights,
-                  boolean useMDLcorrection) {
+  public C45Split(int attIndex,int minNoObj, double sumOfWeights) {
 
     // Get index of attribute to split on.
     m_attIndex = attIndex;
@@ -88,9 +76,6 @@ public class C45Split
 
     // Set the sum of the weights
     m_sumOfWeights = sumOfWeights;
-
-    // Whether to use the MDL correction for numeric attributes
-    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -128,15 +113,6 @@ public class C45Split
   public final int attIndex() {
 
     return m_attIndex;
-  }
-  
-  /**
-   * Returns the split point (numeric attribute only).
-   * 
-   * @return the split point used for a test on a numeric attribute
-   */
-  public double splitPoint() {
-    return m_splitPoint;
   }
 
   /**
@@ -297,9 +273,7 @@ public class C45Split
       return;
     
     // Compute modified information gain for best split.
-    if (m_useMDLcorrection) {
-      m_infoGain = m_infoGain-(Utils.log2(m_index)/m_sumOfWeights);
-    }
+    m_infoGain = m_infoGain-(Utils.log2(m_index)/m_sumOfWeights);
     if (Utils.smOrEq(m_infoGain,0))
       return;
     
@@ -503,14 +477,5 @@ public class C45Split
 	else
 	  return 1;
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 }

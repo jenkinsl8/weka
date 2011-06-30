@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.10 $
+# Version: $Revision: 1.3.2.6 $
 
 # Start: Weka
 !define WEKA_WEKA "Weka"
@@ -69,7 +69,6 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-
 # required so that Vista/Win 7 uninstaller will remove start menu shortcuts
 RequestExecutionLevel admin
 
@@ -118,23 +117,6 @@ Section "Associate Files" SectionAssociations
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
     WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
-    # XRFF
-    WriteRegStr HKCR ".xrff" "" "XRFFDataFile"
-    WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
-    WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
-    # kf
-    WriteRegStr HKCR ".kf" "" "KFFlowFile"
-    WriteRegStr HKCR "KFFlowFile" "" "KF Flow File"
-    WriteRegStr HKCR "KFFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "KFFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
-    # kfml
-    WriteRegStr HKCR ".kfml" "" "KFMLFlowFile"
-    WriteRegStr HKCR "KFMLFlowFile" "" "KFML Flow File"
-    WriteRegStr HKCR "KFMLFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "KFMLFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
-
-Call RefreshShellIcons
 SectionEnd
 
 # Start: JRE
@@ -209,9 +191,6 @@ Section /o un.Main UNSEC0000
     # ARFF
     DeleteRegKey HKCR ".arff"
     DeleteRegKey HKCR "ARFFDataFile"
-    # XRFF
-    DeleteRegKey HKCR ".xrff"
-    DeleteRegKey HKCR "XRFFDataFile"
 SectionEnd
 
 Section un.post UNSEC0001
@@ -228,7 +207,7 @@ SectionEnd
 
 # Section overview
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff and .xrff files with the Weka Explorer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff files with the Weka Explorer."
   # Start: JRE
   !insertmacro MUI_DESCRIPTION_TEXT ${SectionJRE} "Installs the Java Runtime Environment (JRE)."
   # End: JRE
@@ -244,12 +223,6 @@ Function un.onInit
     ReadRegStr $INSTDIR HKLM "${REGKEY}" Path
     ReadRegStr $StartMenuGroup HKLM "${REGKEY}" StartMenuGroup
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
-FunctionEnd
-
-Function RefreshShellIcons
-  !define SHCNE_ASSOCCHANGED 0x08000000
-  !define SHCNF_IDLIST 0
-  System::Call 'shell32.dll::SHChangeNotify(i, i, i, i) v (${SHCNE_ASSOCCHANGED}, ${SHCNF_IDLIST}, 0, 0)'
 FunctionEnd
 
 # launches program

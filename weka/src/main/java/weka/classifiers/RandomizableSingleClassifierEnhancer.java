@@ -16,32 +16,31 @@
 
 /*
  *    RandomizableSingleClassifierEnhancer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Eibe Frank
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Option;
-import weka.core.Randomizable;
+import weka.classifiers.Classifier;
+import weka.core.OptionHandler;
 import weka.core.Utils;
-
-import java.util.Enumeration;
+import weka.core.Option;
+import weka.core.Instances;
+import weka.core.Randomizable;
 import java.util.Vector;
+import java.util.Enumeration;
 
 /**
  * Abstract utility class for handling settings common to randomizable
- * meta classifiers that build an ensemble from a single base learner.
+ * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
-public abstract class RandomizableSingleClassifierEnhancer
+public abstract class RandomizableSingleClassifierEnhancer 
   extends SingleClassifierEnhancer implements Randomizable {
-
-  /** for serialization */
-  private static final long serialVersionUID = 558286687096157160L;
-
+  
   /** The random number seed. */
   protected int m_Seed = 1;
 
@@ -55,9 +54,9 @@ public abstract class RandomizableSingleClassifierEnhancer
     Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-          "\tRandom number seed.\n"
-          + "\t(default 1)",
-          "S", 1, "-S <num>"));
+	      "\tRandom number seed.\n"
+	      + "\t(default 1)",
+	      "S", 1, "-S <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -84,7 +83,7 @@ public abstract class RandomizableSingleClassifierEnhancer
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     String seed = Utils.getOption('S', options);
     if (seed.length() != 0) {
       setSeed(Integer.parseInt(seed));
@@ -106,15 +105,15 @@ public abstract class RandomizableSingleClassifierEnhancer
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-S";
+    options[current++] = "-S"; 
     options[current++] = "" + getSeed();
 
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
     return options;
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -127,7 +126,7 @@ public abstract class RandomizableSingleClassifierEnhancer
   /**
    * Set the seed for random number generation.
    *
-   * @param seed the seed
+   * @param seed the seed 
    */
   public void setSeed(int seed) {
 
@@ -140,7 +139,7 @@ public abstract class RandomizableSingleClassifierEnhancer
    * @return the seed for the random number generation
    */
   public int getSeed() {
-
+    
     return m_Seed;
   }
 }

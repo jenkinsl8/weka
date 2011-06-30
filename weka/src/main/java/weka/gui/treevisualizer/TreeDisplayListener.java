@@ -16,7 +16,7 @@
 
 /*
  *    TreeDisplayListener.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware
  *
  */
 
@@ -31,7 +31,7 @@ package weka.gui.treevisualizer;
  * from a tree displayer.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.4 $
  */
 public interface TreeDisplayListener {
 

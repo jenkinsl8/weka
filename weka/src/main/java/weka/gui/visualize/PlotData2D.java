@@ -16,15 +16,18 @@
 
 /*
  *    PlotData2D.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 
 package weka.gui.visualize;
 
-import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.Instance;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
@@ -45,12 +48,6 @@ public class PlotData2D {
 
   /** The name of this plot */
   protected String m_plotName = "new plot";
-  
-  /**
-   * The name of this plot (possibly in html) suitable for using in a 
-   * tool tip text.
-   */
-  protected String m_plotNameHTML = null;
 
   /** Custom colour for this plot */
   public boolean m_useCustomColour = false;
@@ -58,12 +55,6 @@ public class PlotData2D {
 
   /** Display all points (ie. those that map to the same display coords) */
   public boolean m_displayAllPoints = false;
-  
-  /**
-   *  If the shape size of a point equals this size then always plot
-   * it (i.e. even if it is obscured by other points)
-   */
-  public int m_alwaysDisplayPointsOfThisSize = -1;
 
   /** Panel coordinate cache for data points */
   protected double [][] m_pointLookup;
@@ -168,31 +159,6 @@ public class PlotData2D {
   public String getPlotName() {
     return m_plotName;
   }
-  
-  /**
-   * Set the plot name for use in a tool tip text.
-   * 
-   * @param name the name of the plot for potential use in a tool
-   * tip text (may use html).
-   */
-  public void setPlotNameHTML(String name) {
-    m_plotNameHTML = name;
-  }
-  
-  /**
-   * Get the name of the plot for use in a tool tip text.
-   * Defaults to the standard plot name if it hasn't been set.
-   * 
-   * @return the name of this plot (possibly in html) for use
-   * in a tool tip text.
-   */
-  public String getPlotNameHTML() {
-    if (m_plotNameHTML == null) {
-      return m_plotName;
-    }
-    
-    return m_plotNameHTML;
-  }
 
   /**
    * Set the shape type for the plot data
@@ -233,7 +199,7 @@ public class PlotData2D {
 
   /**
    * Set the shape sizes for the plot data
-   * @param ss an array of integers specifying the size of data points
+   * @param st an array of integers specifying the size of data points
    */
   public void setShapeSize(int [] ss) throws Exception {
     m_shapeSize = ss;
@@ -245,7 +211,7 @@ public class PlotData2D {
   
   /**
    * Set the shape sizes for the plot data
-   * @param ss a FastVector of integers specifying the size of data points
+   * @param st a FastVector of integers specifying the size of data points
    */
   public void setShapeSize(FastVector ss) throws Exception {
     if (ss.size() != m_plotInstances.numInstances()) {

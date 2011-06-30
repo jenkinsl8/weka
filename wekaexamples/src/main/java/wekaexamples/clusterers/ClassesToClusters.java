@@ -25,9 +25,9 @@ package wekaexamples.clusterers;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.EM;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+import wekaexamples.core.converters.DataSource;
 
 /**
  * This class shows how to perform a "classes-to-clusters"

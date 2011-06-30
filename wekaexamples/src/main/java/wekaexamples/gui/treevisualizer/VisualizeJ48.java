@@ -23,9 +23,9 @@ package wekaexamples.gui.treevisualizer;
 
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
+import wekaexamples.core.converters.DataSource;
 
 import java.awt.BorderLayout;
 

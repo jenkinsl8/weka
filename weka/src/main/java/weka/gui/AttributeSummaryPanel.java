@@ -16,7 +16,7 @@
 
 /*
  *    AttributeSummaryPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Len Trigg
  *
  */
 
@@ -24,23 +24,31 @@
 package weka.gui;
 
 import weka.core.Attribute;
-import weka.core.AttributeStats;
 import weka.core.Instances;
+import weka.core.AttributeStats;
 import weka.core.Utils;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JLabel;
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import javax.swing.BorderFactory;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /** 
@@ -50,13 +58,9 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7.2.3 $
  */
-public class AttributeSummaryPanel 
-  extends JPanel {
-  
-  /** for serialization */
-  static final long serialVersionUID = -5434987925737735880L;
+public class AttributeSummaryPanel extends JPanel {
 
   /** Message shown when no instances have been loaded and no attribute set */
   protected static final String NO_SOURCE = "None";
@@ -78,9 +82,6 @@ public class AttributeSummaryPanel
 
   /** Displays other stats in a table */
   protected JTable m_StatsTable = new JTable() {
-    /** for serialization */
-    private static final long serialVersionUID = 7165142874670048578L;
-
     /**
      * returns always false, since it's just information for the user
      * 
@@ -98,9 +99,6 @@ public class AttributeSummaryPanel
 
   /** Cached stats on the attributes we've summarized so far */
   protected AttributeStats [] m_AttributeStats;
-  
-  /** Do all instances have the same weight */
-  protected boolean m_allEqualWeights = true;
   
   /**
    * Creates the instances panel with no initial instances.
@@ -217,15 +215,6 @@ public class AttributeSummaryPanel
     m_UniqueLab.setText(NO_SOURCE);
     m_DistinctLab.setText(NO_SOURCE);
     m_StatsTable.setModel(new DefaultTableModel());
-    
-    m_allEqualWeights = true;
-    double w = m_Instances.instance(0).weight();
-    for (int i = 1; i < m_Instances.numInstances(); i++) {
-      if (m_Instances.instance(i).weight() != w) {
-        m_allEqualWeights = false;
-        break;
-      }
-    }
   }
 
   /**
@@ -261,8 +250,6 @@ public class AttributeSummaryPanel
   /**
    * Sets the gui elements for fields that are stored in the AttributeStats
    * structure.
-   * 
-   * @param index	the index of the attribute
    */
   protected void setDerived(int index) {
     
@@ -277,48 +264,34 @@ public class AttributeSummaryPanel
 
   /**
    * Creates a tablemodel for the attribute being displayed
-   * 
-   * @param as		the attribute statistics
-   * @param index	the index of the attribute
    */
   protected void setTable(AttributeStats as, int index) {
 
     if (as.nominalCounts != null) {
       Attribute att = m_Instances.attribute(index);
-      Object [] colNames = {"No.", "Label", "Count", "Weight"};
-      Object [][] data = new Object [as.nominalCounts.length][4];
+      Object [] colNames = {"Label", "Count"};
+      Object [][] data = new Object [as.nominalCounts.length][2];
       for (int i = 0; i < as.nominalCounts.length; i++) {
-	data[i][0] = new Integer(i + 1);
-	data[i][1] = att.value(i);
-	data[i][2] = new Integer(as.nominalCounts[i]);
-	data[i][3] = new Double(Utils.doubleToString(as.nominalWeights[i], 3));
+	data[i][0] = att.value(i);
+	data[i][1] = new Integer(as.nominalCounts[i]);
       }
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
-      m_StatsTable.getColumnModel().getColumn(0).setMaxWidth(60);
-      DefaultTableCellRenderer tempR = new DefaultTableCellRenderer();
-      tempR.setHorizontalAlignment(JLabel.RIGHT);
-      m_StatsTable.getColumnModel().getColumn(0).setCellRenderer(tempR);
     } else if (as.numericStats != null) {
       Object [] colNames = {"Statistic", "Value"};
       Object [][] data = new Object [4][2];
       data[0][0] = "Minimum"; data[0][1] = Utils.doubleToString(as.numericStats.min, 3);
       data[1][0] = "Maximum"; data[1][1] = Utils.doubleToString(as.numericStats.max, 3);
-      data[2][0] = "Mean" + ((!m_allEqualWeights) ? " (weighted)" : "");    
-      data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
-      data[3][0] = "StdDev" + ((!m_allEqualWeights) ? " (weighted)" : "");  
-      data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
+      data[2][0] = "Mean";    data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
+      data[3][0] = "StdDev";  data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
     } else {
       m_StatsTable.setModel(new DefaultTableModel());
     }
-    m_StatsTable.getColumnModel().setColumnMargin(4);
   }
   
   /**
    * Sets the labels for fields we can determine just from the instance
    * header.
-   * 
-   * @param index	the index of the attribute
    */
   protected void setHeader(int index) {
     
@@ -336,9 +309,6 @@ public class AttributeSummaryPanel
       break;
     case Attribute.DATE:
       m_AttributeTypeLab.setText("Date");
-      break;
-    case Attribute.RELATIONAL:
-      m_AttributeTypeLab.setText("Relational");
       break;
     default:
       m_AttributeTypeLab.setText("Unknown");

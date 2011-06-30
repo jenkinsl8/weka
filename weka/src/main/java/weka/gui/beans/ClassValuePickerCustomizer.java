@@ -16,41 +16,30 @@
 
 /*
  *    ClassValuePickerCustomizer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.Customizer;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
+import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JLabel;
+import weka.core.Instances;
+import weka.core.Attribute;
 
 /**
  * @author Mark Hall
- * @version $Revision$
+ * @version $Revision: 1.3.2.1 $
  */
-public class ClassValuePickerCustomizer
-  extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, 
-  CustomizerCloseRequester, DataFormatListener {
-
-  /** for serialization */
-  private static final long serialVersionUID = 8213423053861600469L;
+public class ClassValuePickerCustomizer extends JPanel
+  implements Customizer, CustomizerClosingListener, DataFormatListener {
 
   private boolean m_displayValNames = false;
 
@@ -63,12 +52,6 @@ public class ClassValuePickerCustomizer
   private JPanel m_holderP = new JPanel();
 
   private JLabel m_messageLabel = new JLabel("No customization possible at present.");
-  
-  private ModifyListener m_modifyListener;
-  private boolean m_modified = false;
-  
-  private Window m_parent;
-  private int m_backup;
 
   public ClassValuePickerCustomizer() {
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
@@ -83,46 +66,11 @@ public class ClassValuePickerCustomizer
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classValuePicker != null) {
 	    m_classValuePicker.setClassValueIndex(m_ClassValueCombo.getSelectedIndex());
-	    m_modified = true;
 	  }
 	}
       });
 
     add(m_messageLabel, BorderLayout.CENTER);
-    addButtons();
-  }
-  
-  private void addButtons() {
-    JButton okBut = new JButton("OK");
-    JButton cancelBut = new JButton("Cancel");
-    
-    JPanel butHolder = new JPanel();
-    butHolder.setLayout(new GridLayout(1, 2));
-    butHolder.add(okBut); butHolder.add(cancelBut);
-    add(butHolder, BorderLayout.SOUTH);
-    
-    okBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClassValuePickerCustomizer.this, m_modified);
-        }
-        
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
-    
-    cancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        m_classValuePicker.setClassValueIndex(m_backup);
-        
-        customizerClosing();
-        if (m_parent != null) {
-          m_parent.dispose();
-        }
-      }
-    });
   }
 
   private void setUpNoCustPossible() {
@@ -178,17 +126,15 @@ public class ClassValuePickerCustomizer
       if (m_classValuePicker.getConnectedFormat() != null) {
 	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
       }
-      m_backup = m_classValuePicker.getClassValueIndex();
     }
   }
   
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
     if (m_classValuePicker != null) {
-//      System.out.println("Customizer deregistering with class value picker");
+      System.err.println("Customizer deregistering with class value picker");
       m_classValuePicker.removeDataFormatListener(this);
-    }    
-    m_classValuePicker.setClassValueIndex(m_backup);
+    }
   }
 
   public void newDataFormat(DataSetEvent dse) {
@@ -215,15 +161,5 @@ public class ClassValuePickerCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
-  
-  @Override
-  public void setParentWindow(Window parent) {
-    m_parent = parent;
   }
 }

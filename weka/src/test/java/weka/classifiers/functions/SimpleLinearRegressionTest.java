@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests SimpleLinearRegression. Run from the command line with:<p/>
- * java weka.classifiers.functions.SimpleLinearRegressionTest
+ * java weka.classifiers.functions.SimpleLinearRegression
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class SimpleLinearRegressionTest 
   extends AbstractClassifierTest {

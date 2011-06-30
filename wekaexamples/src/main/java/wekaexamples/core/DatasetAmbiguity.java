@@ -22,10 +22,9 @@
 
 package wekaexamples.core;
 
-import weka.core.Instance;
 import weka.core.InstanceComparator;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
+import wekaexamples.core.converters.DataSource;
 
 import java.util.TreeSet;
 
@@ -65,7 +64,7 @@ public class DatasetAmbiguity {
 
     // output total number of unique instances (incl. class)
     InstanceComparator comp = new InstanceComparator(true);
-    TreeSet<Instance> set = new TreeSet<Instance>(comp);
+    TreeSet set = new TreeSet(comp);
     for (int i = 0; i < data.numInstances(); i++)
       set.add(data.instance(i));
     int uniqueWithClass = set.size();
@@ -73,7 +72,7 @@ public class DatasetAmbiguity {
 
     // output total number of unique instances (incl. class)
     comp = new InstanceComparator(false);
-    set = new TreeSet<Instance>(comp);
+    set = new TreeSet(comp);
     for (int i = 0; i < data.numInstances(); i++)
       set.add(data.instance(i));
     int uniqueWithoutClass = set.size();

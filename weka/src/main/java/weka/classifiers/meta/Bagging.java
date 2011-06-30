@@ -16,107 +16,51 @@
 
 /*
  *    Bagging.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Eibe Frank
  *
  */
 
 package weka.classifiers.meta;
 
-import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
-import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Randomizable;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
+import weka.classifiers.*;
 
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
+import java.util.Random;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.WeightedInstancesHandler;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.Randomizable;
+import weka.core.UnsupportedAttributeTypeException;
 
 /**
- <!-- globalinfo-start -->
- * Class for bagging a classifier to reduce variance. Can do classification and regression depending on the base learner. <br/>
- * <br/>
- * For more information, see<br/>
- * <br/>
- * Leo Breiman (1996). Bagging predictors. Machine Learning. 24(2):123-140.
- * <p/>
- <!-- globalinfo-end -->
+ * Class for bagging a classifier. For more information, see<p>
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Breiman1996,
- *    author = {Leo Breiman},
- *    journal = {Machine Learning},
- *    number = {2},
- *    pages = {123-140},
- *    title = {Bagging predictors},
- *    volume = {24},
- *    year = {1996}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
+ * Leo Breiman (1996). <i>Bagging predictors</i>. Machine
+ * Learning, 24(2):123-140. <p>
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -P
- *  Size of each bag, as a percentage of the
- *  training set size. (default 100)</pre>
- * 
- * <pre> -O
- *  Calculate the out of bag error.</pre>
- * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  Number of iterations.
- *  (default 10)</pre>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -W
- *  Full name of base classifier.
- *  (default: weka.classifiers.trees.REPTree)</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.REPTree:
- * </pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf (default 2).</pre>
- * 
- * <pre> -V &lt;minimum variance for split&gt;
- *  Set minimum numeric class variance proportion
- *  of train variance for split (default 1e-3).</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Number of folds for reduced error pruning (default 3).</pre>
- * 
- * <pre> -S &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
- * <pre> -P
- *  No pruning.</pre>
- * 
- * <pre> -L
- *  Maximum tree depth (default -1, no maximum)</pre>
- * 
- <!-- options-end -->
+ * Valid options are:<p>
+ *
+ * -W classname <br>
+ * Specify the full class name of a weak classifier as the basis for 
+ * bagging (required).<p>
+ *
+ * -I num <br>
+ * Set the number of bagging iterations (default 10). <p>
+ *
+ * -S seed <br>
+ * Random number seed for resampling (default 1). <p>
+ *
+ * -P num <br>
+ * Size of each bag, as a percentage of the training size (default 100). <p>
+ *
+ * -O <br>
+ * Compute out of bag error. <p>
  *
  * Options after -- are passed to the designated classifier.<p>
  *
@@ -125,14 +69,9 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Bagging
-  extends RandomizableParallelIteratedSingleClassifierEnhancer 
-  implements WeightedInstancesHandler, AdditionalMeasureProducer,
-             TechnicalInformationHandler {
+public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
+  implements WeightedInstancesHandler, AdditionalMeasureProducer {
 
-  /** for serialization */
-  static final long serialVersionUID = -505879962237199703L;
-  
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
 
@@ -143,14 +82,6 @@ public class Bagging
   protected double m_OutOfBagError;  
     
   /**
-   * Constructor.
-   */
-  public Bagging() {
-    
-    m_Classifier = new weka.classifiers.trees.REPTree();
-  }
-  
-  /**
    * Returns a string describing classifier
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
@@ -158,37 +89,21 @@ public class Bagging
   public String globalInfo() {
  
     return "Class for bagging a classifier to reduce variance. Can do classification "
-      + "and regression depending on the base learner. \n\n"
-      + "For more information, see\n\n"
-      + getTechnicalInformation().toString();
+      + "and regression depending on the base learner. For more information, see\n\n"
+      + "Leo Breiman (1996). \"Bagging predictors\". Machine "
+      + "Learning, 24(2):123-140.";
   }
-
+    
   /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
+   * Constructor.
    */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+  public Bagging() {
     
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Leo Breiman");
-    result.setValue(Field.YEAR, "1996");
-    result.setValue(Field.TITLE, "Bagging predictors");
-    result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "24");
-    result.setValue(Field.NUMBER, "2");
-    result.setValue(Field.PAGES, "123-140");
-    
-    return result;
+    m_Classifier = new weka.classifiers.trees.REPTree();
   }
 
   /**
    * String describing default classifier.
-   * 
-   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -221,63 +136,28 @@ public class Bagging
 
 
   /**
-   * Parses a given list of options. <p/>
+   * Parses a given list of options. Valid options are:<p>
    *
-   <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -P
-   *  Size of each bag, as a percentage of the
-   *  training set size. (default 100)</pre>
-   * 
-   * <pre> -O
-   *  Calculate the out of bag error.</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -I &lt;num&gt;
-   *  Number of iterations.
-   *  (default 10)</pre>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -W
-   *  Full name of base classifier.
-   *  (default: weka.classifiers.trees.REPTree)</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.REPTree:
-   * </pre>
-   * 
-   * <pre> -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf (default 2).</pre>
-   * 
-   * <pre> -V &lt;minimum variance for split&gt;
-   *  Set minimum numeric class variance proportion
-   *  of train variance for split (default 1e-3).</pre>
-   * 
-   * <pre> -N &lt;number of folds&gt;
-   *  Number of folds for reduced error pruning (default 3).</pre>
-   * 
-   * <pre> -S &lt;seed&gt;
-   *  Seed for random data shuffling (default 1).</pre>
-   * 
-   * <pre> -P
-   *  No pruning.</pre>
-   * 
-   * <pre> -L
-   *  Maximum tree depth (default -1, no maximum)</pre>
-   * 
-   <!-- options-end -->
+   * -W classname <br>
+   * Specify the full class name of a weak classifier as the basis for 
+   * bagging (required).<p>
+   *
+   * -I num <br>
+   * Set the number of bagging iterations (default 10). <p>
+   *
+   * -S seed <br>
+   * Random number seed for resampling (default 1).<p>
+   *
+   * -P num <br>
+   * Size of each bag, as a percentage of the training size (default 100). <p>
+   *
+   * -O <br>
+   * Compute out of bag error. <p>
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -406,9 +286,9 @@ public class Bagging
   /**
    * Returns the value of the named measure.
    *
-   * @param additionalMeasureName the name of the measure to query for its value
+   * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @throws IllegalArgumentException if the named measure is not supported
+   * @exception IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     
@@ -432,7 +312,7 @@ public class Bagging
    * @param random a random number generator
    * @param sampled indicating which instance has been sampled
    * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
+   * @exception IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
   public final Instances resampleWithWeights(Instances data,
@@ -475,115 +355,89 @@ public class Bagging
     }
     return newData;
   }
-  
-  protected Random m_random;
-  protected boolean[][] m_inBag;
-  protected Instances m_data;
-  
-  /**
-   * Returns a training set for a particular iteration.
-   * 
-   * @param iteration the number of the iteration for the requested training set.
-   * @return the training set for the supplied iteration number
-   * @throws Exception if something goes wrong when generating a training set.
-   */
-  protected synchronized Instances getTrainingSet(int iteration) throws Exception {
-    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
-    Instances bagData = null;
-    Random r = new Random(m_Seed + iteration);
 
-    // create the in-bag dataset
-    if (m_CalcOutOfBag) {
-      m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = resampleWithWeights(m_data, r, m_inBag[iteration]);
-    } else {
-      bagData = m_data.resampleWithWeights(r);
-      if (bagSize < m_data.numInstances()) {
-        bagData.randomize(r);
-        Instances newBagData = new Instances(bagData, 0, bagSize);
-        bagData = newBagData;
-      }
-    }
-    
-    return bagData;
-  }
-  
   /**
    * Bagging method.
    *
    * @param data the training data to be used for generating the
    * bagged classifier.
-   * @throws Exception if the classifier could not be built successfully
+   * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    m_data = new Instances(data);
-    m_data.deleteWithMissingClass();
-    
-    super.buildClassifier(m_data);
+    super.buildClassifier(data);
 
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
       throw new IllegalArgumentException("Bag size needs to be 100% if " +
 					 "out-of-bag error is to be calculated!");
     }
 
-    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
-    m_random = new Random(m_Seed);
-    
-    m_inBag = null;
+    int bagSize = data.numInstances() * m_BagSizePercent / 100;
+    Random random = new Random(m_Seed);
+
+    boolean[][] inBag = null;
     if (m_CalcOutOfBag)
-      m_inBag = new boolean[m_Classifiers.length][];
+      inBag = new boolean[m_Classifiers.length][];
     
-    for (int j = 0; j < m_Classifiers.length; j++) {      
-      if (m_Classifier instanceof Randomizable) {
-	((Randomizable) m_Classifiers[j]).setSeed(m_random.nextInt());
+    for (int j = 0; j < m_Classifiers.length; j++) {
+      Instances bagData = null;
+      // create the in-bag dataset
+      if (m_CalcOutOfBag) {
+	inBag[j] = new boolean[data.numInstances()];
+	bagData = resampleWithWeights(data, random, inBag[j]);
+      } else {
+	bagData = data.resampleWithWeights(random);
+	if (bagSize < data.numInstances()) {
+	  bagData.randomize(random);
+	  Instances newBagData = new Instances(bagData, 0, bagSize);
+	  bagData = newBagData;
+	}
       }
+      if (m_Classifier instanceof Randomizable) {
+	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
+      }
+      // build the classifier
+      m_Classifiers[j].buildClassifier(bagData);
     }
-    
-    buildClassifiers();
     
     // calc OOB error?
     if (getCalcOutOfBag()) {
       double outOfBagCount = 0.0;
       double errorSum = 0.0;
-      boolean numeric = m_data.classAttribute().isNumeric();
+      boolean numeric = data.classAttribute().isNumeric();
       
-      for (int i = 0; i < m_data.numInstances(); i++) {
-        double vote;
-        double[] votes;
-        if (numeric)
-          votes = new double[1];
-        else
-          votes = new double[m_data.numClasses()];
-        
-        // determine predictions for instance
-        int voteCount = 0;
-        for (int j = 0; j < m_Classifiers.length; j++) {
-          if (m_inBag[j][i])
-            continue;
-          
-          voteCount++;
-//          double pred = m_Classifiers[j].classifyInstance(m_data.instance(i));
-          if (numeric) {
-            // votes[0] += pred;
-            votes[0] += m_Classifiers[j].classifyInstance(m_data.instance(i));
-          } else {
-            //  votes[(int) pred]++;
-            double[] newProbs = m_Classifiers[j].distributionForInstance(m_data.instance(i));
+      for (int i = 0; i < data.numInstances(); i++) {
+	double vote;
+	double[] votes;
+	if (numeric)
+	  votes = new double[1];
+	else
+	  votes = new double[data.numClasses()];
+	
+	// determine predictions for instance
+	int voteCount = 0;
+	for (int j = 0; j < m_Classifiers.length; j++) {
+	  if (inBag[j][i])
+	    continue;
+	  
+	  voteCount++;
+	//  double pred = m_Classifiers[j].classifyInstance(data.instance(i));
+	  if (numeric) {
+	    // votes[0] += pred;
+	    votes[0] = m_Classifiers[j].classifyInstance(data.instance(i));
+	  } else {
+	    // votes[(int) pred]++;
+	    double[] newProbs = m_Classifiers[j].distributionForInstance(data.instance(i));
             // average the probability estimates
             for (int k = 0; k < newProbs.length; k++) {
               votes[k] += newProbs[k];
             }
-          }
-        }
-        
-        // "vote"
-        if (numeric) {
-          vote = votes[0];
+	  }
+	}
+	
+	// "vote"
+	if (numeric) {
+	  vote = votes[0];
           if (voteCount > 0) {
             vote  /= voteCount;    // average
           }
@@ -592,19 +446,19 @@ public class Bagging
           } else {
             Utils.normalize(votes);
           }
-          vote = Utils.maxIndex(votes);   // predicted class
+	  vote = Utils.maxIndex(votes);   // predicted class
         }
-        
-        // error for instance
-        outOfBagCount += m_data.instance(i).weight();
-        if (numeric) {
-          errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 
-          * m_data.instance(i).weight();
-        }
-        else {
-          if (vote != m_data.instance(i).classValue())
-            errorSum += m_data.instance(i).weight();
-        }
+	
+	// error for instance
+	outOfBagCount += data.instance(i).weight();
+	if (numeric) {
+	  errorSum += StrictMath.abs(vote - data.instance(i).classValue()) 
+	  * data.instance(i).weight();
+	}
+	else {
+	  if (vote != data.instance(i).classValue())
+	    errorSum += data.instance(i).weight();
+	}
       }
       
       m_OutOfBagError = errorSum / outOfBagCount;
@@ -612,9 +466,6 @@ public class Bagging
     else {
       m_OutOfBagError = 0;
     }
-    
-    // save memory
-    m_data = null;
   }
 
   /**
@@ -623,7 +474,7 @@ public class Bagging
    *
    * @param instance the instance to be classified
    * @return preedicted class probability distribution
-   * @throws Exception if distribution can't be computed successfully 
+   * @exception Exception if distribution can't be computed successfully 
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -672,15 +523,6 @@ public class Bagging
 
     return text.toString();
   }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
-  }
 
   /**
    * Main method for testing this class.
@@ -688,6 +530,12 @@ public class Bagging
    * @param argv the options
    */
   public static void main(String [] argv) {
-    runClassifier(new Bagging(), argv);
+   
+    try {
+      System.out.println(Evaluation.
+			 evaluateModel(new Bagging(), argv));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+    }
   }
 }

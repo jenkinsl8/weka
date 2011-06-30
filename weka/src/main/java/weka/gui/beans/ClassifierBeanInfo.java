@@ -16,7 +16,7 @@
 
 /*
  *    ClassifierBeanInfo.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class ClassifierBeanInfo extends SimpleBeanInfo {
  
@@ -50,12 +50,7 @@ public class ClassifierBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(Classifier.class,
 			       "incrementalClassifier",
 			       IncrementalClassifierListener.class,
-			       "acceptClassifier"),
-	new EventSetDescriptor(Classifier.class,
-	                       "configuration",
-	                        ConfigurationListener.class,
-	                        "acceptConfiguration")
-			       
+			       "acceptClassifier")
 	};
       return esds;
     } catch (Exception ex) {

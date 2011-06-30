@@ -16,22 +16,20 @@
 
 /*
  *    OutputZipper.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 Mark Hall
  *
  */
 
 
 package weka.experiment;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
-import java.io.DataOutputStream;
 import java.io.File;
+import java.io.DataOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
 
 /**
  * OutputZipper writes output to either gzipped files or to a
@@ -42,10 +40,9 @@ import java.util.zip.ZipOutputStream;
  * finished() is called to close the file.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.5 $
  */
-public class OutputZipper
-  implements RevisionHandler {
+public class OutputZipper {
   
   File m_destination;
   DataOutputStream m_zipOut = null;
@@ -53,9 +50,8 @@ public class OutputZipper
 
   /**
    * Constructor.
-   * 
-   * @param destination a destination file or directory
-   * @throws Exception if something goes wrong.
+   * @param a destination file or directory
+   * @exception Exception if something goes wrong.
    */
   public OutputZipper(File destination) throws Exception { 
 
@@ -72,10 +68,9 @@ public class OutputZipper
   /**
    * Saves a string to either an individual gzipped file or as
    * an entry in a zip file.
-   * 
    * @param outString the output string to save
-   * @param name the name of the file/entry to save it to
-   * @throws Exception if something goes wrong
+   * @param the name of the file/entry to save it to
+   * @exception Exception if something goes wrong
    */
   public void zipit(String outString, String name) throws Exception {
     File saveFile;
@@ -99,22 +94,12 @@ public class OutputZipper
 
   /**
    * Closes the zip file.
-   * 
-   * @throws Exception if something goes wrong
+   * @exception Exception if something goes wrong
    */
   public void finished() throws Exception {
     if (m_zipOut != null) {
       m_zipOut.close();
     }
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return		the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

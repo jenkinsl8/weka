@@ -16,7 +16,7 @@
 
 /*
  *    Tree_build.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 Malcolm Ware
  *
  */
 
@@ -31,7 +31,7 @@ import java.awt.*;
  * with Edge's and Node's
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.3 $
  */
 public class TreeBuild {
   //this class will parse the tree into relevant strings

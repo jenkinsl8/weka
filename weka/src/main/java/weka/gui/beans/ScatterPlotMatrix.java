@@ -16,7 +16,7 @@
 
 /*
  *    ScatterPlotMatrix.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 Mark Hall
  *
  */
 
@@ -24,32 +24,33 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 import weka.gui.visualize.MatrixPanel;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.PlotData2D;
 
+import java.io.Serializable;
+import java.util.Vector;
+import java.util.Enumeration;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import java.awt.BorderLayout;
-
-import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
+import java.awt.*;
 
 /**
  * Bean that encapsulates weka.gui.visualize.MatrixPanel for displaying a
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
-public class ScatterPlotMatrix
-  extends DataVisualizer implements KnowledgeFlowApp.KFPerspective {
-
-  /** for serialization */
-  private static final long serialVersionUID = -657856527563507491L;
+public class ScatterPlotMatrix extends DataVisualizer {
 
   protected MatrixPanel m_matrixPanel;
 
   public ScatterPlotMatrix() {
-    java.awt.GraphicsEnvironment ge = 
-      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
-    if (!ge.isHeadless()) {
-      appearanceFinal();
-    }
+    appearanceFinal();
   }
 
   /**
@@ -102,86 +103,6 @@ public class ScatterPlotMatrix
     }
     m_visualizeDataSet = inst;
     m_matrixPanel.setInstances(m_visualizeDataSet);
-  }
-  
-  /**
-   * Returns true if this perspective accepts instances
-   * 
-   * @return true if this perspective can accept instances
-   */
-  public boolean acceptsInstances() {
-    return true;
-  }
-  
-  /**
-   * Get the title of this perspective
-   * 
-   * @return the title of this perspective
-   */
-  public String getPerspectiveTitle() {
-    return "Scatter plot matrix";
-  }
-  
-  /**
-   * Get the tool tip text for this perspective.
-   * 
-   * @return the tool tip text for this perspective
-   */
-  public String getPerspectiveTipText() {
-    return "Scatter plot matrix";
-  }
-  
-  /**
-   * Get the icon for this perspective.
-   * 
-   * @return the Icon for this perspective (or null if the
-   * perspective does not have an icon)
-   */
-  public Icon getPerspectiveIcon() {
-    java.awt.Image pic = null;
-    java.net.URL imageURL = this.getClass().getClassLoader().
-      getResource("weka/gui/beans/icons/application_view_tile.png");
-
-    if (imageURL == null) {
-    } else {
-      pic = java.awt.Toolkit.getDefaultToolkit().
-        getImage(imageURL);
-    }
-    return new javax.swing.ImageIcon(pic);
-  }
-  
-  /**
-   * Set active status of this perspective. True indicates
-   * that this perspective is the visible active perspective
-   * in the KnowledgeFlow
-   * 
-   * @param active true if this perspective is the active one
-   */
-  public void setActive(boolean active) {
-    
-  }
-  
-  /**
-   * Set whether this perspective is "loaded" - i.e. whether
-   * or not the user has opted to have it available in the
-   * perspective toolbar. The perspective can make the decision
-   * as to allocating or freeing resources on the basis of this.
-   * 
-   * @param loaded true if the perspective is available in
-   * the perspective toolbar of the KnowledgeFlow
-   */
-  public void setLoaded(boolean loaded) {
-    
-  }
-  
-  /**
-   * Set a reference to the main KnowledgeFlow perspective - i.e.
-   * the perspective that manages flow layouts.
-   * 
-   * @param main the main KnowledgeFlow perspective.
-   */
-  public void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main) {
-    
   }
 
   /**

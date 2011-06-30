@@ -16,102 +16,65 @@
 
 /*
  *    FilterCustomizer.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 Mark Hall
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Utils;
+import weka.core.OptionHandler;
+import java.beans.*;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
-
 import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
+import weka.gui.PropertyPanel;
+import weka.filters.Filter;
 
 /**
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.4.2.1 $
  */
-public class FilterCustomizer
-  extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester {
-
-  /** for serialization */
-  private static final long serialVersionUID = 2049895469240109738L;
+public class FilterCustomizer extends JPanel
+  implements Customizer {
   
   static {
-     GenericObjectEditor.registerEditors();
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
 
   private weka.gui.beans.Filter m_filter;
-/*  private GenericObjectEditor m_filterEditor = 
-    new GenericObjectEditor(true); */
-  
-  /** Backup if user presses cancel */
-  private weka.filters.Filter m_backup;
-  
-  private PropertySheetPanel m_filterEditor = 
-    new PropertySheetPanel();
-  
-  private Window m_parentWindow;
-  
-  private ModifyListener m_modifyListener;
+  private GenericObjectEditor m_filterEditor = 
+    new GenericObjectEditor(true);
  
   public FilterCustomizer() {
-    m_filterEditor.
-    setBorder(BorderFactory.createTitledBorder("Filter options"));
-
-
+    try {
+      m_filterEditor.
+	setClassType(Filter.class);      
+      m_filterEditor.setValue(new weka.filters.unsupervised.attribute.Add());
+      m_filterEditor.addPropertyChangeListener(new PropertyChangeListener() {
+	  public void propertyChange(PropertyChangeEvent e) {
+	    repaint();
+	    if (m_filter != null) {
+	      Filter editedF = (Filter)m_filterEditor.getValue();
+	      m_filter.setFilter(editedF);
+	      // should pass on the property change to any other interested
+	      // listeners
+	    }
+	  }
+	});
+      //      System.out.println("Here");
+      repaint();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
 
     setLayout(new BorderLayout());
-    add(m_filterEditor, BorderLayout.CENTER);
-
-    JPanel butHolder = new JPanel();
-    butHolder.setLayout(new GridLayout(1,2));
-    JButton OKBut = new JButton("OK");
-    OKBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(FilterCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
-      }
-    });
-
-    JButton CancelBut = new JButton("Cancel");
-    CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // cancel requested, so revert to backup and then
-        // close the dialog
-        if (m_backup != null) {
-          m_filter.setFilter(m_backup);
-        }
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(FilterCustomizer.this, false);
-        }
-        m_parentWindow.dispose();
-      }
-    });
-    
-    butHolder.add(OKBut);
-    butHolder.add(CancelBut);
-    add(butHolder, BorderLayout.SOUTH);
+    add(m_filterEditor.getCustomEditor(), BorderLayout.CENTER);
   }
   
   /**
@@ -121,13 +84,7 @@ public class FilterCustomizer
    */
   public void setObject(Object object) {
     m_filter = (weka.gui.beans.Filter)object;
-    try {
-      m_backup = 
-        (weka.filters.Filter)GenericObjectEditor.makeCopy(m_filter.getFilter());
-    } catch (Exception ex) {
-      // ignore
-    }
-    m_filterEditor.setTarget(m_filter.getFilter());
+    m_filterEditor.setValue(m_filter.getFilter());
   }
 
   /**
@@ -146,15 +103,6 @@ public class FilterCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
-  }
-
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
   }
 }
 
