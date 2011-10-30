@@ -22,10 +22,11 @@
 
 package weka.experiment;
 
-import java.io.File;
-import java.io.FileInputStream;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+
 import java.io.Serializable;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -36,15 +37,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * DatabaseUtils provides utility functions for accessing the experiment
@@ -169,55 +165,11 @@ public class DatabaseUtils
    * @throws Exception 	if an error occurs
    */
   public DatabaseUtils() throws Exception {
-    this((Properties) null);
-  }
-  
-  /**
-   * Reads the properties from the specified file and sets up the database drivers.
-   *
-   * @param propsFile	the props file to load, ignored if null or pointing 
-   * 			to a directory
-   * @throws Exception 	if an error occurs
-   */
-  public DatabaseUtils(File propsFile) throws Exception {
-    this(loadProperties(propsFile));
-  }
-  
-  /**
-   * Uses the specified properties to set up the database drivers.
-   *
-   * @param props	the properties to use, ignored if null
-   * @throws Exception 	if an error occurs
-   */
-  public DatabaseUtils(Properties props) throws Exception {
     if (DRIVERS_ERRORS == null)
       DRIVERS_ERRORS = new Vector();
 
-    initialize(props);
-  }
-  
-  /**
-   * Initializes the database connection.
-   * 
-   * @param propsFile	the props file to load, ignored if null or pointing 
-   * 			to a directory
-   */
-  public void initialize(File propsFile) {
-    initialize(loadProperties(propsFile));
-  }
-  
-  /**
-   * Initializes the database connection.
-   * 
-   * @param props	the properties to obtain the parameters from, 
-   * 			ignored if null
-   */
-  public void initialize(Properties props) {
     try {
-      if (props != null)
-	PROPERTIES = props;
-      else
-	PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
 
       // Register the drivers in jdbc DriverManager
       String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
@@ -242,12 +194,11 @@ public class DatabaseUtils
         if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
           System.err.println(
               "Trying to add database driver (JDBC): " + driver 
-              + " - " + (result ? "Success!" : "Warning, not in CLASSPATH?"));
+              + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
         if (!result)
           DRIVERS_ERRORS.add(driver);
       }
-    } 
-    catch (Exception ex) {
+    } catch (Exception ex) {
       System.err.println("Problem reading properties. Fix before continuing.");
       System.err.println(ex);
     }
@@ -276,7 +227,7 @@ public class DatabaseUtils
    * @param columnName	the column to retrieve the original case for
    * @return		the original case
    */
-  public String attributeCaseFix(String columnName){
+  protected String attributeCaseFix(String columnName){
     if (m_checkForUpperCaseNames) {
       String ucname = columnName.toUpperCase();
       if (ucname.equals(EXP_TYPE_COL.toUpperCase())) {
@@ -1439,43 +1390,5 @@ public class DatabaseUtils
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
-  }
-  
-  /**
-   * Loads a properties file from an external file.
-   * 
-   * @param propsFile	the properties file to load, ignored if null or 
-   * 			pointing to a directory
-   * @return		the properties, null if ignored or an error occurred
-   */
-  private static Properties loadProperties(File propsFile) {
-    Properties	result;
-        
-    Properties defaultProps = null;
-    try {
-      defaultProps = Utils.readProperties(PROPERTY_FILE);
-    } catch (Exception ex) {
-      System.err.println("Warning, unable to read default properties file(s).");
-      ex.printStackTrace();
-    }
-
-    
-    if (propsFile == null)
-      return defaultProps;
-    if (!propsFile.exists() || propsFile.isDirectory())
-      return defaultProps;
-    
-    try {
-      result = new Properties(defaultProps);
-      result.load(new FileInputStream(propsFile));
-    }
-    catch (Exception e) {
-      result = null;
-      System.err.println("Failed to load properties file (DatabaseUtils.java) '" 
-          + propsFile + "':");
-      e.printStackTrace();
-    }
-    
-    return result;
   }
 }

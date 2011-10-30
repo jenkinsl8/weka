@@ -24,7 +24,6 @@
 package weka.experiment;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -130,16 +129,13 @@ public class ClassifierSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 30;
+  private static final int RESULT_SIZE = 28;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 14;
   
   /** The number of averaged IR statistics */
   private static final int NUM_WEIGHTED_IR_STATISTICS = 8;
-  
-  /** The number of unweighted averaged IR statistics */
-  private static final int NUM_UNWEIGHTED_IR_STATISTICS = 2;
   
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
@@ -265,7 +261,7 @@ public class ClassifierSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClassifier(AbstractClassifier.forName(cName, null));
+    setClassifier(Classifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier())
 	.setOptions(Utils.partitionOptions(options));
@@ -466,7 +462,6 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
-    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     Object [] resultTypes = new Object[overall_length];
@@ -513,10 +508,6 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     
-    // Unweighted IR stats
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    
     // Weighted IR stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -535,10 +526,6 @@ public class ClassifierSplitEvaluator
     
     // sizes
     resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-
-    // Prediction interval statistics
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
@@ -576,7 +563,6 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
-    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
 
@@ -637,10 +623,6 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "Weighted_avg_F_measure";
     resultNames[current++] = "Weighted_avg_area_under_ROC";
     
-    // Unweighted IR stats
-    resultNames[current++] = "Unweighted_macro_avg_F_measure";
-    resultNames[current++] = "Unweighted_micro_avg_F_measure";
-    
     // Timing stats
     resultNames[current++] = "Elapsed_Time_training";
     resultNames[current++] = "Elapsed_Time_testing";
@@ -651,10 +633,6 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "Serialized_Model_Size";
     resultNames[current++] = "Serialized_Train_Set_Size";
     resultNames[current++] = "Serialized_Test_Set_Size";
-
-    // Prediction interval statistics
-    resultNames[current++] = "Coverage_of_Test_Cases_By_Regions";
-    resultNames[current++] = "Size_of_Predicted_Regions";
     
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultNames[current++] = "Instance_ID";
@@ -699,7 +677,6 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
-    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     
@@ -710,7 +687,7 @@ public class ClassifierSplitEvaluator
     
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
-    m_Classifier = AbstractClassifier.makeCopy(m_Template);
+    m_Classifier = Classifier.makeCopy(m_Template);
     double [] predictions;
     long thID = Thread.currentThread().getId();
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
@@ -790,10 +767,6 @@ public class ClassifierSplitEvaluator
     result[current++] = new Double(eval.weightedFMeasure());
     result[current++] = new Double(eval.weightedAreaUnderROC());
     
-    // Unweighted IR stats
-    result[current++] = new Double(eval.unweightedMacroFmeasure());
-    result[current++] = new Double(eval.unweightedMicroFmeasure());
-    
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
@@ -802,8 +775,8 @@ public class ClassifierSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Utils.missingValue());
-      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
     }
 
     // sizes
@@ -820,10 +793,6 @@ public class ClassifierSplitEvaluator
     oostream.writeObject(test);
     result[current++] = new Double(bastream.size());
     
-    // Prediction interval statistics
-    result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
-    result[current++] = new Double(eval.sizeOfPredictedRegions());
-
     // IDs
     if (getAttributeID() >= 0){
       String idsString = "";
@@ -898,7 +867,7 @@ public class ClassifierSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Utils.isMissingValue(dv)) {
+          if (!Instance.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {
@@ -1056,7 +1025,7 @@ public class ClassifierSplitEvaluator
 	    try {
 	      double dv = ((AdditionalMeasureProducer)m_Classifier).
 		getMeasure(m_AdditionalMeasures[i]);
-	      if (!Utils.isMissingValue(dv)) {
+	      if (!Instance.isMissingValue(dv)) {
 		Double value = new Double(dv);
 		result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
 	      } else {

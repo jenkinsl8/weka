@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.GZIPInputStream;
 
@@ -149,24 +148,12 @@ public abstract class AbstractFileLoader
       }
       file = new File(fName);
       // set the source only if the file exists
-      if (file.exists() && file.isFile()) {
+      if (file.exists()) {
         if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
           setSource(new GZIPInputStream(new FileInputStream(file)));
         } else {
           setSource(new FileInputStream(file));
         }
-      } else {
-        //System.out.println("Looking in classpath....");
-        // look for it as a resource in the classpath
-        
-        // forward slashes are platform independent for loading from the classpath...
-        String fnameWithCorrectSeparators = fName.replace(File.separatorChar, '/');
-        if (this.getClass().getClassLoader().
-            getResource(fnameWithCorrectSeparators) != null) {
-          //System.out.println("Found resource in classpath...");
-          setSource(this.getClass().getClassLoader().
-              getResourceAsStream(fnameWithCorrectSeparators));
-        }        
       }
    // }
   /*  catch (FileNotFoundException ex) {

@@ -740,7 +740,7 @@ public class EM
     // reestimate priors
     /*if (change_weights) {
       estimate_priors(inst);
-    }*/
+    } */
     return  loglk / sOW;
   }
   

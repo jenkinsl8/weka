@@ -29,7 +29,7 @@ import java.util.Vector;
  * Abstract general class for testing in Weka.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public abstract class Check
   implements OptionHandler, RevisionHandler {
@@ -46,7 +46,7 @@ public abstract class Check
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     result.addElement(new Option(
         "\tTurn on debugging output.",
@@ -77,9 +77,9 @@ public abstract class Check
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>        result;
+    Vector        result;
     
-    result = new Vector<String>();
+    result = new Vector();
     
     if (getDebug())
       result.add("-D");

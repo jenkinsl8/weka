@@ -23,7 +23,6 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 
 import java.util.EventObject;
 

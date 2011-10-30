@@ -41,7 +41,7 @@ import java.util.StringTokenizer;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class WordTokenizer
   extends CharacterDelimitedTokenizer {
@@ -99,7 +99,7 @@ public class WordTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

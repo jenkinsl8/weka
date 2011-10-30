@@ -140,7 +140,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator
@@ -155,7 +155,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
   protected Capabilities m_NotCapabilities = new Capabilities(this);
 
   /** the packages to search in. */
-  protected Vector<String> m_Packages = new Vector<String>();
+  protected Vector m_Packages = new Vector();
 
   /** a capabilities handler to retrieve the capabilities from. */
   protected CapabilitiesHandler m_Handler = null;
@@ -173,10 +173,10 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
   protected boolean m_GenericPropertiesCreator = false;
 
   /** the classes that matched. */
-  protected Vector<String> m_Matches = new Vector<String>();
+  protected Vector m_Matches = new Vector();
 
   /** the class that didn't match. */
-  protected Vector<String> m_Misses = new Vector<String>();
+  protected Vector m_Misses = new Vector();
 
   /**
    * Returns an enumeration describing the available options.
@@ -184,7 +184,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
 
     result.addElement(new Option(
 	"", "", 0, 
@@ -467,7 +467,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
     tmpStr = Utils.getOption("packages", options);
     if (tmpStr.length() != 0) {
       tok        = new StringTokenizer(tmpStr, ",");
-      m_Packages = new Vector<String>();
+      m_Packages = new Vector();
       while (tok.hasMoreTokens())
 	m_Packages.add(tok.nextToken());
     }
@@ -477,7 +477,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
       creator.execute(false);
       props	 = creator.getInputProperties();
       tok        = new StringTokenizer(props.getProperty(m_Superclass), ",");
-      m_Packages = new Vector<String>();
+      m_Packages = new Vector();
       while (tok.hasMoreTokens())
 	m_Packages.add(tok.nextToken());
     }
@@ -489,11 +489,11 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
     String[]	options;
     int		i;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     result.add("-num-instances");
     result.add("" + m_Capabilities.getMinimumNumberInstances());
@@ -793,7 +793,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		the matching classname from the last find run
    */
-  public Vector<String> getMatches() {
+  public Vector getMatches() {
     return m_Matches;
   }
 
@@ -802,7 +802,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		the classnames that didn't match from the last find run
    */
-  public Vector<String> getMisses() {
+  public Vector getMisses() {
     return m_Misses;
   }
 
@@ -811,8 +811,8 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		contains all classnames that fit the criteria
    */
-  public Vector<String> find() {
-    Vector<String>		list;
+  public Vector find() {
+    Vector		list;
     int			i;
     Class		cls;
     Object		obj;
@@ -820,8 +820,8 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
     boolean		fits;
     Capabilities	caps;
 
-    m_Matches = new Vector<String>();
-    m_Misses  = new Vector<String>();
+    m_Matches = new Vector();
+    m_Misses  = new Vector();
 
     list = ClassDiscovery.find(m_Superclass, (String[]) m_Packages.toArray(new String[m_Packages.size()]));
     for (i = 0; i < list.size(); i++) {
@@ -891,7 +891,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**
@@ -901,7 +901,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    */
   public static void main(String[] args) {
     FindWithCapabilities 	find;
-    Vector<String> 			list;
+    Vector 			list;
     String			result;
     int				i;
     boolean			printMisses;

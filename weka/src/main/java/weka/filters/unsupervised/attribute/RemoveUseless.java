@@ -24,8 +24,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -76,6 +75,7 @@ public class RemoveUseless
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -158,8 +158,8 @@ public class RemoveUseless
 	if (i==toFilter.classIndex()) continue; // skip class
 	AttributeStats stats = toFilter.attributeStats(i);
 	if (stats.missingCount == toFilter.numInstances()) {
-	  attsToDelete[numToDelete++] = i;
-	} else if (stats.distinctCount < 2) {
+          attsToDelete[numToDelete++] = i;
+        } else if (stats.distinctCount < 2) {
 	  // remove constant attributes
 	  attsToDelete[numToDelete++] = i;
 	} else if (toFilter.attribute(i).isNominal()) {

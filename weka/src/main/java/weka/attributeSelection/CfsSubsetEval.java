@@ -108,7 +108,7 @@ public class CfsSubsetEval
   private int m_numInstances;
   /** Treat missing values as separate values */
   private boolean m_missingSeparate;
-  /** Include locally predictive attributes */
+  /** Include locally predicitive attributes */
   private boolean m_locallyPredictive;
   /** Holds the matrix of attribute correlations */
   //  private Matrix m_corr_matrix;

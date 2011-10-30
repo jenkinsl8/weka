@@ -22,17 +22,13 @@
 
 package weka.gui.explorer;
 
-import weka.associations.AssociationRule;
-import weka.associations.AssociationRules;
 import weka.associations.Associator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
-import weka.core.Drawable;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Version;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
 import weka.gui.PropertyPanel;
@@ -44,10 +40,6 @@ import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -64,13 +56,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -117,17 +105,10 @@ public class AssociationsPanel
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
   /** Click to start running the associator */
-  protected JButton m_StartBut = new JButton("Start");
+  protected JButton m_StartBut = new JButton(Messages.getInstance().getString("AssociationsPanel_StartBut_JButton_Text"));
 
   /** Click to stop a running associator */
-  protected JButton m_StopBut = new JButton("Stop");
-  
-  /** 
-   * Whether to store any graph or xml rules output in
-   * the history list
-   */
-  protected JCheckBox m_storeOutput = 
-    new JCheckBox("Store output for visualization");
+  protected JButton m_StopBut = new JButton(Messages.getInstance().getString("AssociationsPanel_StopBut_JButton_Text"));
   
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
@@ -160,7 +141,7 @@ public class AssociationsPanel
 	}
       }
     });
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
+    m_History.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AssociationsPanel_MouseClicked_History_BorderFactoryCreateTitledBorder_Text")));
     m_History.setHandleRightClicks(false);
     // see if we can popup a menu for the selected result
     m_History.getList().addMouseListener(new MouseAdapter() {
@@ -200,8 +181,8 @@ public class AssociationsPanel
       }
     });
 
-    m_StartBut.setToolTipText("Starts the associator");
-    m_StopBut.setToolTipText("Stops the associator");
+    m_StartBut.setToolTipText(Messages.getInstance().getString("AssociationsPanel_StartBut_SetToolTipText_Text"));
+    m_StopBut.setToolTipText(Messages.getInstance().getString("AssociationsPanel_StopBut_SetToolTipText_Text"));
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
     m_StartBut.addActionListener(new ActionListener() {
@@ -214,42 +195,27 @@ public class AssociationsPanel
 	stopAssociator();
       }
     });
-    
-    // check for any visualization plugins so that we
-    // can add a checkbox for storing graphs or rules
-    boolean showStoreOutput = 
-      (GenericObjectEditor.
-        getClassnames(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
-       GenericObjectEditor.
-        getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createCompoundBorder(
-		 BorderFactory.createTitledBorder("Associator"),
+		 BorderFactory.createTitledBorder(Messages.getInstance().getString("AssociationsPanel_P1_JPanel_BorderFactoryCreateTitledBorder_Text")),
 		 BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		 ));
     p1.setLayout(new BorderLayout());
     p1.add(m_CEPanel, BorderLayout.NORTH);
 
     JPanel buttons = new JPanel();
-    buttons.setLayout(new BorderLayout());
-    JPanel buttonsP = new JPanel();
-    buttonsP.setLayout(new GridLayout(1,2));
-    
+    buttons.setLayout(new GridLayout(1,2));
     JPanel ssButs = new JPanel();
     ssButs.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     ssButs.setLayout(new GridLayout(1, 2, 5, 5));
     ssButs.add(m_StartBut);
     ssButs.add(m_StopBut);
-    buttonsP.add(ssButs);
-    buttons.add(buttonsP, BorderLayout.SOUTH);
-    if (showStoreOutput) {
-      buttons.add(m_storeOutput, BorderLayout.NORTH);
-    }
+    buttons.add(ssButs);
 
     JPanel p3 = new JPanel();
-    p3.setBorder(BorderFactory.createTitledBorder("Associator output"));
+    p3.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AssociationsPanel_P3_JPanel_BorderFactoryCreateTitledBorder_Text")));
     p3.setLayout(new BorderLayout());
     final JScrollPane js = new JScrollPane(m_OutText);
     p3.add(js, BorderLayout.CENTER);
@@ -315,7 +281,26 @@ public class AssociationsPanel
     m_Instances = inst;
     String [] attribNames = new String [m_Instances.numAttributes()];
     for (int i = 0; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
+      String type = "";
+      switch (m_Instances.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeNOMINAL_Text");
+	break;
+      case Attribute.NUMERIC:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeNUMERIC_Text");
+	break;
+      case Attribute.STRING:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeSTRING_Text");
+	break;
+      case Attribute.DATE:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeDATE_Text");
+	break;
+      case Attribute.RELATIONAL:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeRELATIONAL_Text");
+	break;
+      default:
+	type = Messages.getInstance().getString("AssociationsPanel_SetInstances_AttributeDEFAULT_Text");
+      }
       attribNames[i] = type + m_Instances.attribute(i).name();
     }
     m_StartBut.setEnabled(m_RunThread == null);
@@ -336,11 +321,9 @@ public class AssociationsPanel
       m_RunThread = new Thread() {
 	public void run() {
 	  // Copy the current state of things
-	  m_Log.statusMessage("Setting up...");
+	  m_Log.statusMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_StatusMessage_Text_First"));
 	  Instances inst = new Instances(m_Instances);
-	  String grph = null;
-	  //String xmlRules = null;
-	  AssociationRules rulesList = null;
+
 	  Associator associator = (Associator) m_AssociatorEditor.getValue();
 	  StringBuffer outBuff = new StringBuffer();
 	  String name = (new SimpleDateFormat("HH:mm:ss - "))
@@ -357,78 +340,47 @@ public class AssociationsPanel
 	  try {
 
 	    // Output some header information
-	    m_Log.logMessage("Started " + cname);
-	    m_Log.logMessage("Command: " + cmd);
+	    m_Log.logMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_LogMessage_Text_First") + cname);
+	    m_Log.logMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_LogMessage_Text_Second") + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
-	    outBuff.append("=== Run information ===\n\n");
-	    outBuff.append("Scheme:       " + cname);
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_First"));
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Second") + cname);
 	    if (associator instanceof OptionHandler) {
 	      String [] o = ((OptionHandler) associator).getOptions();
 	      outBuff.append(" " + Utils.joinOptions(o));
 	    }
-	    outBuff.append("\n");
-	    outBuff.append("Relation:     " + inst.relationName() + '\n');
-	    outBuff.append("Instances:    " + inst.numInstances() + '\n');
-	    outBuff.append("Attributes:   " + inst.numAttributes() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Third"));
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Fourth") + inst.relationName() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Sixth") + inst.numInstances() + '\n');
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Seventh") + inst.numAttributes() + '\n');
 	    if (inst.numAttributes() < 100) {
 	      for (int i = 0; i < inst.numAttributes(); i++) {
 		outBuff.append("              " + inst.attribute(i).name()
 			       + '\n');
 	      }
 	    } else {
-	      outBuff.append("              [list of attributes omitted]\n");
+	      outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Eighth"));
 	    }
 	    m_History.addResult(name, outBuff);
 	    m_History.setSingle(name);
 	    
 	    // Build the model and output it.
-	    m_Log.statusMessage("Building model on training data...");
+	    m_Log.statusMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_StatusMessage_Text_Second"));
 	    associator.buildAssociations(inst);
-	    outBuff.append("=== Associator model (full training set) ===\n\n");
+	    outBuff.append(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_OutBuffer_Text_Nineth"));
 	    outBuff.append(associator.toString() + '\n');
 	    m_History.updateResult(name);
-	    if (m_storeOutput.isSelected()) {
-	      if (associator instanceof Drawable) {
-	        grph = null;
-	        try {
-	          grph = ((Drawable)associator).graph();
-	        } catch (Exception ex) {	        
-	        }
-	      }
-
-	      if (associator instanceof weka.associations.AssociationRulesProducer) {
-	        // xmlRules = null;
-	        rulesList = null;
-	        try {
-	          // xmlRules = ((weka.associations.XMLRulesProducer)associator).xmlRules();
-	          rulesList = 
-	            ((weka.associations.AssociationRulesProducer)associator).getAssociationRules();
-	        } catch (Exception ex) {}
-	      }
-	    }
-	    m_Log.logMessage("Finished " + cname);
-	    m_Log.statusMessage("OK");
+	    m_Log.logMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_LogMessage_Text_Third") + cname);
+	    m_Log.statusMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_StatusMessage_Text_Third"));
 	  } catch (Exception ex) {
 	    m_Log.logMessage(ex.getMessage());
-	    m_Log.statusMessage("See error log");
+	    m_Log.statusMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_StatusMessage_Text_Fourth"));
 	  } finally {
-	    if (grph != null || rulesList != null) {
-	      Vector<Object> visVect = new Vector<Object>();
-
-	      if (grph != null) {
-	        visVect.add(grph);
-	      }
-
-	      if (rulesList != null) {
-	        visVect.add(rulesList);
-	      }
-	      m_History.addObject(name, visVect);
-	    }
 	    if (isInterrupted()) {
-	      m_Log.logMessage("Interrupted " + cname);
-	      m_Log.statusMessage("See error log");
+	      m_Log.logMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_LogMessage_Text_Fourth") + cname);
+	      m_Log.statusMessage(Messages.getInstance().getString("AssociationsPanel_StartAssociator_Run_Log_StatusMessage_Text_Fifth"));
 	    }
 	    m_RunThread = null;
 	    m_StartBut.setEnabled(true);
@@ -466,34 +418,9 @@ public class AssociationsPanel
     StringBuffer sb = m_History.getNamedBuffer(name);
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
-	m_Log.logMessage("Save successful.");
+	m_Log.logMessage(Messages.getInstance().getString("AssociationsPanel_SaveBuffer_Log_LogMessage_Text"));
       }
     }
-  }
-  
-  /**
-   * Pops up a TreeVisualizer for the associator from the currently
-   * selected item in the results list
-   * @param dottyString the description of the tree in dotty format
-   * @param treeName the title to assign to the display
-   */
-  protected void visualizeTree(String dottyString, String treeName) {
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+treeName);
-    jf.setSize(500,400);
-    jf.getContentPane().setLayout(new BorderLayout());
-    TreeVisualizer tv = new TreeVisualizer(null,
-                                           dottyString,
-                                           new PlaceNode2());
-    jf.getContentPane().add(tv, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-        public void windowClosing(java.awt.event.WindowEvent e) {
-          jf.dispose();
-        }
-      });
-    
-    jf.setVisible(true);
-    tv.fitToScreen();
   }
     
   /**
@@ -507,7 +434,7 @@ public class AssociationsPanel
     final String selectedName = name;
     JPopupMenu resultListMenu = new JPopupMenu();
     
-    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    JMenuItem visMainBuffer = new JMenuItem(Messages.getInstance().getString("AssociationsPanel_HistoryRightClickPopup_VisMainBuffer_JPopupMenu_Text"));
     if (selectedName != null) {
       visMainBuffer.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -519,7 +446,7 @@ public class AssociationsPanel
     }
     resultListMenu.add(visMainBuffer);
     
-    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    JMenuItem visSepBuffer = new JMenuItem(Messages.getInstance().getString("AssociationsPanel_HistoryRightClickPopup_VisSepBuffer_JMenuItem_Text"));
     if (selectedName != null) {
       visSepBuffer.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -531,7 +458,7 @@ public class AssociationsPanel
     }
     resultListMenu.add(visSepBuffer);
     
-    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    JMenuItem saveOutput = new JMenuItem(Messages.getInstance().getString("AssociationsPanel_HistoryRightClickPopup_SaveOutput_JMenuItem_Text"));
     if (selectedName != null) {
       saveOutput.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -543,7 +470,7 @@ public class AssociationsPanel
     }
     resultListMenu.add(saveOutput);
 
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    JMenuItem deleteOutput = new JMenuItem(Messages.getInstance().getString("AssociationsPanel_HistoryRightClickPopup_DeleteOutput_JMenuItem_Text"));
     if (selectedName != null) {
       deleteOutput.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -554,84 +481,6 @@ public class AssociationsPanel
       deleteOutput.setEnabled(false);
     }
     resultListMenu.add(deleteOutput);
-    
-//    String grph = null;
-    Vector<Object> visVect = null;
-    if (selectedName != null) {
-      //grph = (String)m_History.getNamedObject(selectedName);
-      visVect = (Vector)m_History.getNamedObject(selectedName);      
-    }
-    
-/*    final String fgrph = grph;
-    JMenuItem visTree = new JMenuItem("Visualize tree");
-    if (grph != null) {
-      visTree.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          String title = selectedName;
-          visualizeTree(fgrph, title);
-        }
-      });
-      resultListMenu.add(visTree);
-    } */
-    
-    // plugins
-    JMenu visPlugins = new JMenu("Plugins");
-    boolean availablePlugins = false;
-    
-    // tree plugins
-    if (visVect != null) {
-      for (Object o : visVect) {
-        if (o instanceof AssociationRules) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(AssociationRuleVisualizePlugin.class.getName());
-          for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
-            try {
-              AssociationRuleVisualizePlugin plugin = 
-                (AssociationRuleVisualizePlugin)Class.forName(className).newInstance();
-              if (plugin == null) {
-                continue;
-              }
-              availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((AssociationRules)o, selectedName);
-              if (pluginMenuItem != null) {
-                visPlugins.add(pluginMenuItem);
-              }
-            } catch (Exception ex) {
-              //ex.printStackTrace();
-            }
-          }
-        } else if (o instanceof String) {
-          Vector pluginsVector = 
-            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
-          for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (String) (pluginsVector.elementAt(i));
-            try {
-              TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
-              if (plugin == null)
-                continue;
-              availablePlugins = true;
-              JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem((String)o, selectedName);
-              // Version version = new Version();
-              if (pluginMenuItem != null) {
-                /*  if (version.compareTo(plugin.getMinVersion()) < 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
-            if (version.compareTo(plugin.getMaxVersion()) >= 0)
-              pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");*/
-                visPlugins.add(pluginMenuItem);
-              }
-            }
-            catch (Exception e) {
-              //e.printStackTrace();
-            }
-          }
-        }
-      }
-    }
-    
-    if (availablePlugins) {
-      resultListMenu.add(visPlugins);
-    }
 
     resultListMenu.show(m_History.getList(), x, y);
   }
@@ -718,7 +567,7 @@ public class AssociationsPanel
    * @return 		the title of this tab
    */
   public String getTabTitle() {
-    return "Associate";
+    return Messages.getInstance().getString("AssociationsPanel_GetTabTitle_Text");
   }
   
   /**
@@ -727,7 +576,7 @@ public class AssociationsPanel
    * @return 		the tooltip of this tab
    */
   public String getTabTitleToolTip() {
-    return "Discover association rules";
+    return Messages.getInstance().getString("AssociationsPanel_GetTabTitleToolTip_Text");
   }
 
   /**
@@ -739,7 +588,7 @@ public class AssociationsPanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Associator");
+	new javax.swing.JFrame(Messages.getInstance().getString("AssociationsPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final AssociationsPanel sp = new AssociationsPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -755,7 +604,7 @@ public class AssociationsPanel
       jf.pack();
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println("Loading instances from " + args[0]);
+	System.err.println(Messages.getInstance().getString("AssociationsPanel_Main_Error_Text") + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

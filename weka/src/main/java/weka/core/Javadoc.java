@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public abstract class Javadoc 
   implements OptionHandler, RevisionHandler {
@@ -62,7 +62,7 @@ public abstract class Javadoc
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
 
     result.addElement(new Option(
         "\tThe class to load.",
@@ -111,9 +111,9 @@ public abstract class Javadoc
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
 
-    result = new Vector<String>();
+    result = new Vector();
     
     result.add("-W");
     result.add(getClassname());

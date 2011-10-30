@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the classifier performance evaluator
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.5 $
  */
 public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
   
@@ -52,32 +52,5 @@ public class ClassifierPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
       ex.printStackTrace();
     }
     return null;
-  }
-  
-  /**
-   * Get the property descriptors for this bean
-   *
-   * @return a <code>PropertyDescriptor[]</code> value
-   */
-  public PropertyDescriptor[] getPropertyDescriptors() {
-    try {
-      PropertyDescriptor p1;
-      p1 = new PropertyDescriptor("executionSlots", ClassifierPerformanceEvaluator.class);
-      PropertyDescriptor [] pds = { p1 };
-      return pds;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    return null;
-  }
-  
-  /**
-   * Get the bean descriptor for this bean
-   *
-   * @return a <code>BeanDescriptor</code> value
-   */
-  public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(weka.gui.beans.ClassifierPerformanceEvaluator.class,
-                              ClassifierPerformanceEvaluatorCustomizer.class);
   }
 }

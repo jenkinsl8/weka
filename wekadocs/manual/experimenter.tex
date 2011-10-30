@@ -596,45 +596,6 @@ In this experiment, the \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48} schemes 
 \end{center}
 
 
-\subsubsection*{Explicit Test-Set Result Producer}
-
-One of the Experimenter's biggest drawbacks in the past was the inability to supply test sets. Even though repeated runs with explicit test sets don't make that much sense (apart from randomizing the training data, to test the robustness of the classifier), it offers the possibility to compare different classifiers and classifier setups side-by-side; a feature that the Explorer lacks.
-
-This result producer can be used by clicking the \textit{Result generator} panel and then choosing the \textit{ExplicitTestSetResultProducer} from the \textit{GenericObjectEditor}.
-\begin{center}
-	\epsfig{file=images/experimenter/advanced_explicittestsetresultproducer1.eps,width=6cm}
-\end{center}
-
-The associated help file is shown below.
-\begin{center}
-	\epsfig{file=images/experimenter/advanced_explicittestsetresultproducer2.eps,width=10cm}
-\end{center}
-
-The experiment setup using explicit test sets requires a bit more care than the others. The reason for this is, that the result producer has no information about the file the data originates from. In order to identify the correct test set, this result producer utilizes the relation name of the training file. Here is how the file name gets constructed under a Unix-based operating system (Linux, Mac OSX), based on the result producer's setup and the current training set's relation name:
-\begin{verbatim}
-   testsetDir "/" testsetPrefix + relation-name + testsetSuffix
-\end{verbatim}
-
-\noindent With the \texttt{testsetDir} property set to \texttt{/home/johndoe/datasets/test}, an empty \texttt{testsetPrefix}, \texttt{anneal} as \texttt{relation-name} and the default \texttt{testsetSuffix}, i.e., \texttt{\_test.arff}, the following file name for the test set gets created:
-\begin{verbatim}
-   /home/johndoe/datasets/test/anneal_test.arff
-\end{verbatim}
-
-\noindent \textbf{NB:} The result producer is platform-aware and uses backslashes instead of forward slashes on MS Windows-based operating systems.
-
-Of course, the relation name might not always be as simple as in the above example. Especially not, when the dataset has been pre-processed with various filters before being used in the Experimenter. The \textit{ExplicitTestSetResultProducer} allows one to remove unwanted strings from relation name using regular expressions. In case of removing the WEKA filter setups that got appended to the relation name during pre-processing, one can simply use \texttt{-weka.*} as the value for \texttt{relationFind} and leave \texttt{relationReplace} empty.
-
-Using this setup, the following relation name:
-\begin{verbatim}
-   anneal-weka.filters.unsupervised.instance.RemovePercentage-P66.0
-\end{verbatim}
-\noindent will be turned into this:
-\begin{verbatim}
-   anneal
-\end{verbatim}
-
-As long as one takes care and uses sensible relation names, the \textit{ExplicitTestSetResultProducer} can be used to compare different classifiers and setups on train/test set pairs, using the full functionality of the Experimenter.
-
 %%%%%%%%%%%%%%%%%%%%%%%
 % Cluster experiments %
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -643,7 +604,7 @@ As long as one takes care and uses sensible relation names, the \textit{Explicit
 \section{Cluster Experiments}
 Using the advanced mode of the Experimenter you can now run experiments on
 clustering algorithms as well as classifiers (Note: this is a new feature
-available with Weka 3.5.8). The main evaluation metric for this type of
+available with Weka 3.6.0). The main evaluation metric for this type of
 experiment is the log likelihood of the clusters found by each clusterer. Here
 is an example of setting up a cross-validation experiment using clusterers. \\
 
@@ -661,7 +622,7 @@ to use.
 \end{center}
 
 \noindent If you click on \textit{DensityBasedClustererSplitEvaluator} you will see its
-options. \\
+options.
 
 \noindent \textbf{Note} that there is an option for removing the class column
 from the data. In the Experimenter, the class column is set to be the last
@@ -694,6 +655,7 @@ down and select "Log\_likelihood".
 \begin{center}
 	\epsfig{file=images/experimenter/advanced-clusterexperiments-analyseclusteringexp.eps, width=10cm, angle=-90}
 \end{center}
+
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Remote Experiments %
@@ -777,7 +739,7 @@ We won't go into the details of setting up a MySQL server, but this is rather st
       	\item HSQLDB
 				\begin{verbatim}
 java -Xmx256m \
-  -classpath /home/johndoe/jars/hsqldb.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
+  -classpath /home/johndoe/jars/hsqldb.jar:remoteEngine.jar \
   -Djava.security.policy=remote.policy \
   weka.experiment.RemoteEngine &
 				\end{verbatim}
@@ -785,7 +747,7 @@ java -Xmx256m \
 			\item MySQL
 				\begin{verbatim}
 java -Xmx256m \
-  -classpath /home/johndoe/jars/mysql.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
+  -classpath /home/johndoe/jars/mysql.jar:remoteEngine.jar \
   -Djava.security.policy=remote.policy \
   weka.experiment.RemoteEngine &
 				\end{verbatim}
@@ -859,7 +821,7 @@ Now we will configure the experiment:
 
 
 \subsection{Multi-core support}
-If you want to utilize all the cores on a multi-core machine, then you can do so with Weka version later than 3.5.7. All you have to do, is define the port alongside the hostname in the Experimenter (format: \texttt{hostname:port}) and then start the RemoteEngine with the \texttt{-p} option, specifying the port to listen on.
+If you want to utilize all the cores on a multi-core machine, then you can do so with Weka. All you have to do, is define the port alongside the hostname in the Experimenter (format: \texttt{hostname:port}) and then start the RemoteEngine with the \texttt{-p} option, specifying the port to listen on.
 
 
 \subsection{Troubleshooting}
@@ -940,10 +902,6 @@ The following formats are supported:
 	\epsfig{file=images/experimenter/analyser_outputformat.eps,width=4cm}
 \end{center}
 
-To give one more control, the ``Advanced setup'' allows one to bring up all the
-options that a result matrix offers. This includes the options described above,
-plus options like the width of the row names, or whether to enumerate the
-columns and rows.
 
 \subsection{Saving the Results}
 

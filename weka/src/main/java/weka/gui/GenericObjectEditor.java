@@ -16,7 +16,7 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002-2010 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,6 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
-import weka.core.WekaPackageManager;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -78,16 +77,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.CustomDisplayStringProvider;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.gui.CheckBoxList.CheckBoxListModel;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -167,81 +156,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
   
-  public static void determineClasses() {
-    try {
-      // make sure we load all packages first!!!
-      WekaPackageManager.loadPackages(false);
-
-      // Don't do anything else until all initial packages are loaded...
-      if (WekaPackageManager.m_initialPackageLoadingInProcess) {
-        return;
-      }
-
-      EDITOR_PROPERTIES = GenericPropertiesCreator.getGlobalOutputProperties();
-      if (EDITOR_PROPERTIES == null) {
-        // try creating a new one from scratch
-        GenericPropertiesCreator creator = new GenericPropertiesCreator();
-
-        // dynamic approach?
-        if (creator.useDynamic()) {
-          try {
-            creator.execute(false);
-            EDITOR_PROPERTIES = creator.getOutputProperties();
-          }
-          catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Could not determine the properties for the generic object\n"
-                + "editor. This exception was produced:\n"
-                + e.toString(),
-                "GenericObjectEditor",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        }
-        else {
-          // Allow a properties file in the current directory to override
-          try {
-            EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-            java.util.Enumeration keys = 
-              (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-            if (!keys.hasMoreElements()) {
-              throw new Exception("Failed to read a property file for the "
-                  +"generic object editor");
-            }
-          }
-          catch (Exception ex) {
-            JOptionPane.showMessageDialog(
-                null,
-                "Could not read a configuration file for the generic object\n"
-                +"editor. An example file is included with the Weka distribution.\n"
-                +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-                +"should be placed either in your user home (which is set\n"
-                + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-                + "or the directory that java was started from\n",
-                "GenericObjectEditor",
-                JOptionPane.ERROR_MESSAGE);
-          }
-        }
-      }
-      
-      if (EDITOR_PROPERTIES == null) {
-        JOptionPane.showMessageDialog(
-            null,
-            "Could not initialize the GenericPropertiesCreator. ",
-            "GenericObjectEditor",
-            JOptionPane.ERROR_MESSAGE);
-      }
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(
-          null,
-          "Could not initialize the GenericPropertiesCreator. "
-          + "This exception was produced:\n"
-          + e.toString(),
-          "GenericObjectEditor",
-          JOptionPane.ERROR_MESSAGE);
-    }
-  }
-  
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
    * the classes dynamically (USE_DYNAMIC is TRUE)
@@ -249,7 +163,55 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @see GenericPropertiesCreator
    */
   static {
-    determineClasses();
+
+    try {
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+
+      // dynamic approach?
+      if (creator.useDynamic()) {
+	try {
+	  creator.execute(false);
+	  EDITOR_PROPERTIES = creator.getOutputProperties();
+	}
+	catch (Exception e) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      Messages.getInstance().getString("GenericObjectEditor_JOptionPaneShowMessageDialog_Text_First")
+	      + e.toString(),
+	      Messages.getInstance().getString("GenericObjectEditor_JOptionPaneShowMessageDialog_Text_Second"),
+	      JOptionPane.ERROR_MESSAGE);
+	}
+      }
+      else {
+	// Allow a properties file in the current directory to override
+	try {
+	  EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+	  java.util.Enumeration keys = 
+	    (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+	  if (!keys.hasMoreElements()) {
+	    throw new Exception(Messages.getInstance().getString("GenericObjectEditor_Exception_Text"));
+	  }
+	}
+	catch (Exception ex) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_First") 
+	      + PROPERTY_FILE + Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_Second") 
+	      + System.getProperties().getProperty("user.home") 
+	      + Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+	      Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
+	      JOptionPane.ERROR_MESSAGE);
+	}
+      }
+    }
+    catch (Exception e) {
+      JOptionPane.showMessageDialog(
+	  null,
+	  Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_Fifth")
+	  + e.toString(),
+	  Messages.getInstance().getString("GenericObjectEditor_Exception_JOptionPaneShowMessageDialog_Text_Sixth"),
+	  JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   /**
@@ -343,9 +305,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	initCapabilities();
 	if (m_Capabilities != null) {
 	  if (m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && !m_Capabilities.supports(m_CapabilitiesFilter))
-	    result = "<html><font color=\"" + MAYBE_SUPPORT + "\">" + result + "</font></i><html>";
+	    result = Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_First") + MAYBE_SUPPORT + Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_Second") + result + Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_Third");
 	  else if (!m_Capabilities.supports(m_CapabilitiesFilter))
-	    result = "<html><font color=\"" + NO_SUPPORT + "\">" + result + "</font></i><html>";
+	    result = Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_Fourth") + NO_SUPPORT + Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_Fifth") + result + Messages.getInstance().getString("GenericObjectEditor_GOETreeNode_ToString_Result_Text_Sixth");
 	}
       }
       
@@ -378,10 +340,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     protected CheckBoxList m_List = new CheckBoxList();
     
     /** the OK button. */
-    protected JButton m_OkButton = new JButton("OK");
+    protected JButton m_OkButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_CapabilitiesFilterDialog_OkButton_JButton_Text"));
     
     /** the Cancel button. */
-    protected JButton m_CancelButton = new JButton("Cancel");
+    protected JButton m_CancelButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_CapabilitiesFilterDialog_CancelButton_JButton_Text"));
     
     /**
      * creates a dialog to choose Capabilities from.
@@ -401,19 +363,24 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       JPanel			panel;
       CheckBoxListModel		model;
 
-      setTitle("Filtering Capabilities...");
+      setTitle(Messages.getInstance().getString("GenericObjectEditor_InitGUI_SetTitle_Text"));
       setLayout(new BorderLayout());
       
       panel = new JPanel(new BorderLayout());
       panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
       getContentPane().add(panel, BorderLayout.NORTH);
       m_InfoLabel.setText(
-	    "<html>"
-	  + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
-	  + " have to support <i>at least</i> the following capabilities <br>"
-	  + "(the ones highlighted <font color=\"" + GOETreeNode.NO_SUPPORT + "\">" + GOETreeNode.NO_SUPPORT + "</font> don't meet these requirements <br>"
-	  + "the ones highlighted  <font color=\"" + GOETreeNode.MAYBE_SUPPORT + "\">" + GOETreeNode.MAYBE_SUPPORT + "</font> possibly meet them):"
-	  + "</html>");
+    		  Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_First")
+	  + m_ClassType.getName().replaceAll(".*\\.", "") 
+	  + Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_Second") 
+	  + GOETreeNode.NO_SUPPORT 
+	  + Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_Third")
+	  + GOETreeNode.NO_SUPPORT 
+	  + Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_Fourth") 
+	  + GOETreeNode.MAYBE_SUPPORT 
+	  + Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_Fifth")
+	  + GOETreeNode.MAYBE_SUPPORT 
+	  + Messages.getInstance().getString("GenericObjectEditor_InitGUI_InfoLabel_SetTitle_Text_Sixth"));
       panel.add(m_InfoLabel, BorderLayout.CENTER);
       
       // list
@@ -556,13 +523,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     private JScrollPane m_scroller;
 
     /** The filter button in case of CapabilitiesHandlers. */
-    private JButton m_FilterButton = new JButton("Filter...");
+    private JButton m_FilterButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_JTreePopupMenu_FilterButton_JButton_Text"));
 
     /** The remove filter button in case of CapabilitiesHandlers. */
-    private JButton m_RemoveFilterButton = new JButton("Remove filter");
+    private JButton m_RemoveFilterButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_JTreePopupMenu_RemoveFilterButton_JButton_Text"));
     
     /** The button for closing the popup again. */
-    private JButton m_CloseButton = new JButton("Close");
+    private JButton m_CloseButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_JTreePopupMenu_CloseButton_JButton_Text"));
     
     /**
      * Constructs a new popup menu.
@@ -702,7 +669,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
       m_Backup = copyObject(m_Object);
       
-      m_ClassNameLabel = new JLabel("None");
+      m_ClassNameLabel = new JLabel(Messages.getInstance().getString("GenericObjectEditor_GOEPanel_ClassNameLabel_JLabel_Text"));
       m_ClassNameLabel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
       m_ChildPropertySheet = new PropertySheetPanel();
@@ -713,8 +680,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    }
 	  });
       
-      m_OpenBut = new JButton("Open...");
-      m_OpenBut.setToolTipText("Load a configured object");
+      m_OpenBut = new JButton(Messages.getInstance().getString("GenericObjectEditor_OpenBut_JButton_Text"));
+      m_OpenBut.setToolTipText(Messages.getInstance().getString("GenericObjectEditor_OpenBut_SetToolTipText_Text"));
       m_OpenBut.setEnabled(true);
       m_OpenBut.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -730,8 +697,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  }
 	});
       
-      m_SaveBut = new JButton("Save...");
-      m_SaveBut.setToolTipText("Save the current configured object");
+      m_SaveBut = new JButton(Messages.getInstance().getString("GenericObjectEditor_SaveBut_JButton_Text"));
+      m_SaveBut.setToolTipText(Messages.getInstance().getString("GenericObjectEditor_SaveBut_SetToolTipText_Text"));
       m_SaveBut.setEnabled(true);
       m_SaveBut.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -739,7 +706,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  }
 	});
       
-      m_okBut = new JButton("OK");
+      m_okBut = new JButton(Messages.getInstance().getString("GenericObjectEditor_OkBut_JButton_Text"));
       m_okBut.setEnabled(true);
       m_okBut.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -753,7 +720,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  }
 	});
       
-      m_cancelBut = new JButton("Cancel");
+      m_cancelBut = new JButton(Messages.getInstance().getString("GenericObjectEditor_CancelBut_JButton_Text"));
       m_cancelBut.setEnabled(true);
       m_cancelBut.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {		 
@@ -842,15 +809,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  Object obj = oi.readObject();
 	  oi.close();
 	  if (!m_ClassType.isAssignableFrom(obj.getClass())) {
-	    throw new Exception("Object not of type: " + m_ClassType.getName());
+	    throw new Exception(Messages.getInstance().getString("GenericObjectEditor_OpenObject_Exception_Text") + m_ClassType.getName());
 	  }
 	  return obj;
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this,
-					"Couldn't read object: "
+			  Messages.getInstance().getString("GenericObjectEditor_OpenObject_Exception_JOptionPaneShowMessageDialog_Text")
 					+ selected.getName() 
-					+ "\n" + ex.getMessage(),
-					"Open object file",
+					+ Messages.getInstance().getString("GenericObjectEditor_OpenObject_Exception_JOptionPaneShowMessageDialog_Text") + ex.getMessage(),
+					Messages.getInstance().getString("GenericObjectEditor_OpenObject_Exception_JOptionPaneShowMessageDialog_Text"),
 					JOptionPane.ERROR_MESSAGE);
 	}
       }
@@ -876,10 +843,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  oo.close();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this,
-					"Couldn't write to file: "
+			  Messages.getInstance().getString("GenericObjectEditor_SaveObject_Exception_JOptionPaneShowMessageDialog_Text")
 					+ sFile.getName() 
-					+ "\n" + ex.getMessage(),
-					"Save object",
+					+ Messages.getInstance().getString("GenericObjectEditor_SaveObject_Exception_JOptionPaneShowMessageDialog_Text") + ex.getMessage(),
+					Messages.getInstance().getString("GenericObjectEditor_SaveObject_Exception_JOptionPaneShowMessageDialog_Text"),
 					JOptionPane.ERROR_MESSAGE);
 	}
       }
@@ -909,7 +876,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	
       } catch (Exception ex) {
 	setCancelButton(false);
-	System.err.println("GenericObjectEditor: Problem making backup object");
+	System.err.println(Messages.getInstance().getString("GenericObjectEditor_CopyObject_Error_Text"));
 	System.err.println(ex);
       }
       return result;
@@ -971,7 +938,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     public void updateChildPropertySheet() {
       
       // Update the object name displayed
-      String className = "None";
+      String className = Messages.getInstance().getString("GenericObjectEditor_UpdateChildPropertySheet_ClassName_Text");
       if (m_Object != null) {
 	className = m_Object.getClass().getName();
       }
@@ -1021,7 +988,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     if (m_EditorsRegistered)
       return;
     
-    System.err.println("---Registering Weka Editors---");
+    System.err.println(Messages.getInstance().getString("GenericObjectEditor_RegisterEditors_Error_Text"));
     m_EditorsRegistered = true;
 
     // load properties
@@ -1037,29 +1004,21 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (enm.hasMoreElements()) {
       name  = enm.nextElement().toString();
       value = props.getProperty(name, "");
-      
-      registerEditor(name, value);
-    }
-  }
-  
-  public static void registerEditor(String name, String value) {
-    Class              baseCls;
-    Class               cls;
-    
-    try {
-      // array class?
-      if (name.endsWith("[]")) {
-        baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
-        cls = Array.newInstance(baseCls, 1).getClass();
+      try {
+	// array class?
+	if (name.endsWith("[]")) {
+	  baseCls = Class.forName(name.substring(0, name.indexOf("[]")));
+	  cls = Array.newInstance(baseCls, 1).getClass();
+	}
+	else {
+	  cls = Class.forName(name);
+	}
+	// register
+	PropertyEditorManager.registerEditor(cls, Class.forName(value));
       }
-      else {
-        cls = Class.forName(name);
+      catch (Exception e) {
+	System.err.println(Messages.getInstance().getString("GenericObjectEditor_RegisterEditors_Exception_Error_Text_First") + name + Messages.getInstance().getString("GenericObjectEditor_RegisterEditors_Exception_Error_Text_Second") + value + Messages.getInstance().getString("GenericObjectEditor_RegisterEditors_Exception_Error_Text_Third") + e);
       }
-      // register
-      PropertyEditorManager.registerEditor(cls, Class.forName(value));
-    }
-    catch (Exception e) {
-      System.err.println("Problem registering " + name + "/" + value + ": " + e);
     }
   }
 
@@ -1204,7 +1163,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  hpps.put(root, hpp);
         }
       } catch (Exception ex) {
-	System.err.println("Invalid property: " + typeOptions);
+	System.err.println(Messages.getInstance().getString("GenericObjectEditor_GetClassesFromProperties_Exception_Error_Text") + typeOptions);
       }	    
     }
     return hpps;
@@ -1262,7 +1221,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public void setDefaultValue() {
     
     if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
+      System.err.println(Messages.getInstance().getString("GenericObjectEditor_SetDefaultValue_Error_Text"));
       return;
     }	
     
@@ -1283,7 +1242,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         }
       }
     }catch(Exception ex){
-      System.err.println("Problem loading the first class: "+
+      System.err.println(Messages.getInstance().getString("GenericObjectEditor_SetDefaultValue_Exception_Error_Text") +
 			 hpp.fullValue());
       ex.printStackTrace();
     }
@@ -1299,11 +1258,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public void setValue(Object o) {
     
     if (m_ClassType == null) {
-      System.err.println("No ClassType set up for GenericObjectEditor!!");
+      System.err.println(Messages.getInstance().getString("GenericObjectEditor_SetValue_Error_Text_First"));
       return;
     }
     if (!m_ClassType.isAssignableFrom(o.getClass())) {
-      System.err.println("setValue object not of correct type!");
+      System.err.println(Messages.getInstance().getString("GenericObjectEditor_SetValue_Error_Text_Second"));
       return;
     }
     
@@ -1392,19 +1351,20 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     if (m_Enabled) {
       String rep;
       if (m_Object != null) {
-	if (m_Object instanceof CustomDisplayStringProvider) {
-	  rep = ((CustomDisplayStringProvider) m_Object).toDisplay();
-	}
-	else {
-	  rep = m_Object.getClass().getName();
-	  int dotPos = rep.lastIndexOf('.');
-	  if (dotPos != -1) {
-	    rep = rep.substring(dotPos + 1);
-	  }
-	}
+	rep = m_Object.getClass().getName();
       } else {
-	rep = "None";
+	rep = Messages.getInstance().getString("GenericObjectEditor_PaintValue_Rep_Text");
       }
+      int dotPos = rep.lastIndexOf('.');
+      if (dotPos != -1) {
+	rep = rep.substring(dotPos + 1);
+      }
+      /*
+      if (m_Object instanceof OptionHandler) {
+	rep += " " + Utils.joinOptions(((OptionHandler)m_Object)
+				       .getOptions());
+      }
+      */
       java.awt.Font originalFont = gfx.getFont();
       gfx.setFont(originalFont.deriveFont(java.awt.Font.BOLD));
 
@@ -1414,7 +1374,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       int repwidth = fm.stringWidth(rep);
 
       gfx.setFont(originalFont);
-      if ((m_Object instanceof OptionHandler) && !(m_Object instanceof CustomDisplayStringProvider)) {
+      if (m_Object instanceof OptionHandler) {
 	gfx.drawString(" " + Utils.joinOptions(((OptionHandler)m_Object).getOptions()),
 					       repwidth + 2, fm.getAscent() + vpad);
       }
@@ -1525,7 +1485,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   protected JButton createChooseClassButton() {
 
-    JButton setButton = new JButton("Choose");
+    JButton setButton = new JButton(Messages.getInstance().getString("GenericObjectEditor_CreateChooseClassButton_SetButton_JButton_Text"));
 
     // anonymous action listener shows a JTree popup and allows the user
     // to choose the class they want
@@ -1601,6 +1561,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
+	    /*if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
+	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
+	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
+	        return;
+	      }
+	    } */
 	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
@@ -1622,7 +1588,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     HierarchyPropertyParser hpp;
     
     if (hpps.size() > 1)
-      superRoot = new GOETreeNode("root");
+      superRoot = new GOETreeNode(Messages.getInstance().getString("GenericObjectEditor_CreateTree_GOETreeNode_Text"));
     else
       superRoot = null;
 
@@ -1691,10 +1657,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
-				    "Could not create an example of\n"
-				    + className + "\n"
-				    + "from the current classpath",
-				    "Class load failed",
+    		  Messages.getInstance().getString("GenericObjectEditor_ClassSelected_Exception_JOptionPaneShowMessageDialog_Text_First")
+				    + className + Messages.getInstance().getString("GenericObjectEditor_ClassSelected_Exception_JOptionPaneShowMessageDialog_Text_Second"),
+				    Messages.getInstance().getString("GenericObjectEditor_ClassSelected_Exception_JOptionPaneShowMessageDialog_Text_Third"),
 				    JOptionPane.ERROR_MESSAGE);
       ex.printStackTrace();
       try {

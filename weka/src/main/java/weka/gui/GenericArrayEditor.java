@@ -22,6 +22,8 @@
 
 package weka.gui;
 
+import weka.core.SerializedObject;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -59,9 +61,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import weka.core.SerializedObject;
-
-/** 
+/**
  * A PropertyEditor for arrays of objects that themselves have
  * property editors.
  *
@@ -79,8 +79,8 @@ public class GenericArrayEditor
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
   /** The label for when we can't edit that type. */
-  private JLabel m_Label = new JLabel("Can't edit", SwingConstants.CENTER);
-  
+  private JLabel m_Label = new JLabel(Messages.getInstance().getString("GenericArrayEditor_Label_JLabel_Text"), SwingConstants.CENTER);
+
   /** The list component displaying current values. */
   private JList m_ElementList = new JList();
 
@@ -94,19 +94,19 @@ public class GenericArrayEditor
   private PropertyEditor m_ElementEditor;
 
   /** Click this to delete the selected array values. */
-  private JButton m_DeleteBut = new JButton("Delete");
+  private JButton m_DeleteBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_DeleteBut_JButton_Text"));
 
   /** Click this to edit the selected array value. */
-  private JButton m_EditBut = new JButton("Edit");
+  private JButton m_EditBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_EditBut_JButton_Text"));
 
   /** Click this to move the selected array value(s) one up. */
-  private JButton m_UpBut = new JButton("Up");
+  private JButton m_UpBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_UpBut_JButton_Text"));
 
   /** Click this to move the selected array value(s) one down. */
-  private JButton m_DownBut = new JButton("Down");
+  private JButton m_DownBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_DownBut_JButton_Text"));
 
   /** Click to add the current object configuration to the array. */
-  private JButton m_AddBut = new JButton("Add");
+  private JButton m_AddBut = new JButton(Messages.getInstance().getString("GenericArrayEditor_AddBut_JButton_Text"));
 
   /** The property editor for editing existing elements. */
   private PropertyEditor m_Editor = new GenericObjectEditor();
@@ -133,26 +133,18 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	}
       } else if (e.getSource() == m_EditBut) {
-        if (m_Editor instanceof GenericObjectEditor) {
-          ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
-        }
-        try {
-          m_Editor.setValue(GenericObjectEditor.makeCopy(m_ElementList.getSelectedValue()));
-        }
-        catch (Exception ex) {
-          // not possible to serialize?
-          m_Editor.setValue(m_ElementList.getSelectedValue());
-        }
+        ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
+        m_Editor.setValue(m_ElementList.getSelectedValue());
         if (m_Editor.getValue() != null) {
           int x = getLocationOnScreen().x;
           int y = getLocationOnScreen().y;
           if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
             m_PD = new PropertyDialog(
-        	PropertyDialog.getParentDialog(GenericArrayEditor.this), 
+        	PropertyDialog.getParentDialog(GenericArrayEditor.this),
         	m_Editor, x, y);
           else
             m_PD = new PropertyDialog(
-        	PropertyDialog.getParentFrame(GenericArrayEditor.this), 
+        	PropertyDialog.getParentFrame(GenericArrayEditor.this),
         	m_Editor, x, y);
           m_PD.setVisible(true);
           m_Support.firePropertyChange("", null, null);
@@ -166,7 +158,7 @@ public class GenericArrayEditor
       } else if (e.getSource() == m_AddBut) {
 	int selected = m_ElementList.getSelectedIndex();
 	Object addObj = m_ElementEditor.getValue();
-	
+
 	// Make a full copy of the object using serialization
 	try {
           SerializedObject so = new SerializedObject(addObj);
@@ -179,11 +171,11 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(GenericArrayEditor.this,
-					"Could not create an object copy",
+			  Messages.getInstance().getString("GenericArrayEditor_InnerActionListener_JOptionPaneShowMessageDialog_Text"),
 					null,
 					JOptionPane.ERROR_MESSAGE);
 	}
-      } 
+      }
     }
   };
 
@@ -231,7 +223,7 @@ public class GenericArrayEditor
         }
       }
   };
-    
+
 
   /**
    * Sets up the array editor.
@@ -247,14 +239,14 @@ public class GenericArrayEditor
     m_AddBut.addActionListener(m_InnerActionListener);
     m_ElementList.addListSelectionListener(m_InnerSelectionListener);
     m_ElementList.addMouseListener(m_InnerMouseListener);
-    m_AddBut.setToolTipText("Add the current item to the list");
-    m_DeleteBut.setToolTipText("Delete the selected list item");
-    m_EditBut.setToolTipText("Edit the selected list item");
-    m_UpBut.setToolTipText("Move the selected item(s) one up");
-    m_DownBut.setToolTipText("Move the selected item(s) one down");
+    m_AddBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_AddBut_SetToolTipText_Text"));
+    m_DeleteBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_DeleteBut_SetToolTipText_Text"));
+    m_EditBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_EditBut_SetToolTipText_Text"));
+    m_UpBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_UpBut_SetToolTipText_Text"));
+    m_DownBut.setToolTipText(Messages.getInstance().getString("GenericArrayEditor_DownBut_SetToolTipText_Text"));
   }
 
-  /** This class handles the creation of list cell renderers from the 
+  /** This class handles the creation of list cell renderers from the
    * property editors.
    */
   private class EditorListCellRenderer implements ListCellRenderer {
@@ -299,7 +291,7 @@ public class GenericArrayEditor
 	}
 	e.setValue(value);
 	return new JPanel() {
-	  
+
 	  private static final long serialVersionUID = -3124434678426673334L;
 
 	  public void paintComponent(Graphics g) {
@@ -317,7 +309,7 @@ public class GenericArrayEditor
 		       : list.getForeground());
 	    e.paintValue(g, box);
 	  }
-	  
+
 	  public Dimension getPreferredSize() {
 
 	    Font f = this.getFont();
@@ -343,7 +335,7 @@ public class GenericArrayEditor
     m_ElementEditor = null; m_ListModel = null;
     removeAll();
     if ((o != null) && (o.getClass().isArray())) {
-      Class elementClass = o.getClass().getComponentType();    
+      Class elementClass = o.getClass().getComponentType();
       PropertyEditor editor = PropertyEditorManager.findEditor(elementClass);
       Component view = null;
       ListCellRenderer lcr = new DefaultListCellRenderer();
@@ -361,13 +353,9 @@ public class GenericArrayEditor
 	} else {
 	  if (editor instanceof GenericObjectEditor) {
 	    ((GenericObjectEditor)editor).setDefaultValue();
-	  } else {   
+	  } else {
             try {
-              if (editor instanceof FileEditor) {
-                editor.setValue(new java.io.File("-NONE-"));
-              } else {
-                editor.setValue(elementClass.newInstance());
-              }
+	    editor.setValue(elementClass.newInstance());
             } catch(Exception ex) {
               m_ElementEditor=null;
               System.err.println(ex.getMessage());
@@ -378,7 +366,7 @@ public class GenericArrayEditor
             }
 	  }
 	}
-        
+
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
 	  lcr = new EditorListCellRenderer(editor.getClass(), elementClass);
@@ -389,19 +377,10 @@ public class GenericArrayEditor
 	}
       }
       if (view == null) {
-	System.err.println("No property editor for class: "
+	System.err.println(Messages.getInstance().getString("GenericArrayEditor_UpdateEditorType_Error_Text")
 			   + elementClass.getName());
       } else {
-        m_ElementEditor = editor;
-        try {
-          m_Editor = editor.getClass().newInstance();
-        } catch (InstantiationException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        } catch (IllegalAccessException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
+	m_ElementEditor = editor;
 
 	// Create the ListModel and populate it
 	m_ListModel = new DefaultListModel();
@@ -431,7 +410,7 @@ public class GenericArrayEditor
 	  //    m_ElementEditor.setValue(m_ElementClass.newInstance());
 	  //  }
 	  //}
-	  
+
 	  JPanel panel = new JPanel();
 	  panel.setLayout(new BorderLayout());
 	  panel.add(view, BorderLayout.CENTER);
@@ -493,7 +472,7 @@ public class GenericArrayEditor
     }
     return result;
   }
-  
+
   /**
    * Supposedly returns an initialization string to create a classifier
    * identical to the current one, including it's state, but this doesn't
@@ -541,7 +520,7 @@ public class GenericArrayEditor
   }
 
   /**
-   * Returns null as we don't support getting/setting values as text. 
+   * Returns null as we don't support getting/setting values as text.
    *
    * @param text the text value
    * @exception IllegalArgumentException as we don't support
@@ -568,7 +547,7 @@ public class GenericArrayEditor
   public boolean supportsCustomEditor() {
     return true;
   }
-  
+
   /**
    * Returns the array editing component.
    *
@@ -598,20 +577,20 @@ public class GenericArrayEditor
 
   /**
    * Makes a copy of an object using serialization.
-   * 
+   *
    * @param source the object to copy
    * @return a copy of the source object, null if copying fails
    */
   public static Object makeCopy(Object source) {
     Object	result;
-    
+
     try {
       result = GenericObjectEditor.makeCopy(source);
     }
     catch (Exception e) {
       result = null;
     }
-    
+
     return result;
   }
 

@@ -52,7 +52,7 @@ public interface Loader
    *
    * @param mode the retrieval mode
    */
-  void setRetrieval(int mode);  
+  void setRetrieval(int mode);
 
   /**
    * Resets the Loader object ready to begin loading.

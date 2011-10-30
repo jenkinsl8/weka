@@ -25,7 +25,6 @@ package weka.filters.unsupervised.instance;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
@@ -121,7 +120,7 @@ public class SparseToNonSparse
     }
     Instance inst = null;
     if (instance instanceof SparseInstance) {
-      inst = new DenseInstance(instance.weight(), instance.toDoubleArray());
+      inst = new Instance(instance.weight(), instance.toDoubleArray());
       inst.setDataset(instance.dataset());
     } else {
       inst = instance;

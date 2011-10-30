@@ -39,6 +39,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -49,7 +50,7 @@ import javax.swing.JPanel;
  */
 public class ClassAssignerCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, 
+  implements Customizer, CustomizerClosingListener, 
   CustomizerCloseRequester, DataFormatListener {
 
   /** for serialization */
@@ -57,20 +58,18 @@ public class ClassAssignerCustomizer
 
   private boolean m_displayColNames = false;
 
-  private transient ClassAssigner m_classAssigner;
+  private ClassAssigner m_classAssigner;
 
-  private transient PropertyChangeSupport m_pcSupport = 
+  private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);
 
-  private transient PropertySheetPanel m_caEditor = 
+  private PropertySheetPanel m_caEditor = 
     new PropertySheetPanel();
 
-  private transient JComboBox m_ClassCombo = new JComboBox();
-  private transient JPanel m_holderP = new JPanel();
+  private JComboBox m_ClassCombo = new JComboBox();
+  private JPanel m_holderP = new JPanel();
   
-  private transient ModifyListener m_modifyListener;
-  
-  private transient Window m_parent;
+  private transient JFrame m_parent;
   
   private transient String m_backup;
 
@@ -78,10 +77,10 @@ public class ClassAssignerCustomizer
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
 
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassAssignerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("ClassAssignerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
-    m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class attribute"));
+    m_holderP.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassAssignerCustomizer_HolderP_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     m_holderP.add(m_ClassCombo, BorderLayout.CENTER);
     m_ClassCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -105,7 +104,6 @@ public class ClassAssignerCustomizer
     
     okBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_modifyListener.setModifiedStatus(ClassAssignerCustomizer.this, true);
         if (m_parent != null) {
           m_parent.dispose();
         }
@@ -136,7 +134,7 @@ public class ClassAssignerCustomizer
     if (m_displayColNames == false) {
       remove(m_caEditor);
     }
-
+    
     int existingClassCol = 0;
     
     String classColString = m_classAssigner.getClassColumn();
@@ -164,15 +162,33 @@ public class ClassAssignerCustomizer
       }
     }
     
-    //int existingClassCol = format.classIndex();
-
-/*    if (existingClassCol < 0) {
+    /*int existingClassCol = format.classIndex();
+    if (existingClassCol < 0) {
       existingClassCol = 0;
     } */
     String [] attribNames = new String [format.numAttributes()+1];
-    attribNames[0] = "NO CLASS";
+    attribNames[0] = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttribNames0_Text");
     for (int i = 1; i < attribNames.length; i++) {
-      String type = "(" + Attribute.typeToStringShort(format.attribute(i-1)) + ") ";
+      String type = "";
+      switch (format.attribute(i-1).type()) {
+      case Attribute.NOMINAL:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNOMINAL_Text");
+	break;
+      case Attribute.NUMERIC:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeNUMERIC_Text");
+	break;
+      case Attribute.STRING:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeSTRING_Text");
+	break;
+      case Attribute.DATE:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDATE_Text");
+	break;
+      case Attribute.RELATIONAL:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeRELATIONAL_Text");
+	break;
+      default:
+	type = Messages.getInstance().getString("ClassAssignerCustomizer_SetUpColumnSelection_AttributeDEFAULT_Text");
+      }
       attribNames[i] = type + format.attribute(i-1).name();
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
@@ -193,14 +209,13 @@ public class ClassAssignerCustomizer
    */
   public void setObject(Object object) {
     if (m_classAssigner != (ClassAssigner)object) {
-      m_classAssigner = (ClassAssigner)object;
       // remove ourselves as a listener from the old ClassAssigner (if necessary)
 /*      if (m_classAssigner != null) {
 	m_classAssigner.removeDataFormatListener(this);
-      }
-
+      } */
+      m_classAssigner = (ClassAssigner)object;
       // add ourselves as a data format listener
-      m_classAssigner.addDataFormatListener(this); */
+//      m_classAssigner.addDataFormatListener(this);
       m_caEditor.setTarget(m_classAssigner);
       if (m_classAssigner.getConnectedFormat() != null) {
 	setUpColumnSelection(m_classAssigner.getConnectedFormat());
@@ -212,7 +227,7 @@ public class ClassAssignerCustomizer
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassAssigner (if necessary)
     if (m_classAssigner != null) {
-      //System.out.println("Customizer deregistering with class assigner");
+      System.err.println(Messages.getInstance().getString("ClassAssignerCustomizer_CustomizerClosing_Error_Text"));
       m_classAssigner.removeDataFormatListener(this);
     }
     
@@ -247,14 +262,8 @@ public class ClassAssignerCustomizer
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
   }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
-
-  @Override
-  public void setParentWindow(Window parent) {
+  
+  public void setParentFrame(JFrame parent) {
     m_parent = parent;
   }
 }

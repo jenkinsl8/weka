@@ -26,7 +26,6 @@ import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.Customizer;
@@ -37,6 +36,7 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -48,8 +48,8 @@ import javax.swing.SwingConstants;
  */
 public class ClassValuePickerCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, 
-  CustomizerCloseRequester /*, DataFormatListener*/ {
+  implements Customizer, CustomizerClosingListener, 
+  CustomizerCloseRequester /*DataFormatListener*/ {
 
   /** for serialization */
   private static final long serialVersionUID = 8213423053861600469L;
@@ -64,12 +64,9 @@ public class ClassValuePickerCustomizer
   private JComboBox m_ClassValueCombo = new JComboBox();
   private JPanel m_holderP = new JPanel();
 
-  private JLabel m_messageLabel = new JLabel("No customization possible at present.");
+  private JLabel m_messageLabel = new JLabel(Messages.getInstance().getString("ClassValuePickerCustomizer_MessageLabel_JLabel_Text"));
   
-  private ModifyListener m_modifyListener;
-  private boolean m_modified = false;
-  
-  private Window m_parent;
+  private JFrame m_parent;
   private String m_backup;
   
   private boolean m_textBoxEntryMode = false;
@@ -80,17 +77,16 @@ public class ClassValuePickerCustomizer
     setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
     
     setLayout(new BorderLayout());
-    add(new javax.swing.JLabel("ClassValuePickerCustomizer"), 
+    add(new javax.swing.JLabel(Messages.getInstance().getString("ClassValuePickerCustomizer_JLabel_Text")), 
 	BorderLayout.NORTH);
     m_holderP.setLayout(new BorderLayout());
-    m_holderP.setBorder(BorderFactory.createTitledBorder("Choose class value"));
+    m_holderP.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassValuePickerCustomizer_HolderP_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_holderP.add(m_ClassValueCombo, BorderLayout.CENTER);
     m_ClassValueCombo.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_classValuePicker != null) {
 	    m_classValuePicker.
 	      setClassValue(m_ClassValueCombo.getSelectedItem().toString());
-	    m_modified = true;
 	  }
 	}
       });
@@ -110,9 +106,6 @@ public class ClassValuePickerCustomizer
     
     okBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClassValuePickerCustomizer.this, m_modified);
-        }
         
         if (m_textBoxEntryMode) {
           m_classValuePicker.setClassValue(m_valueTextBox.getText().trim());
@@ -135,6 +128,15 @@ public class ClassValuePickerCustomizer
       }
     });
   }
+
+  private void setUpNoCustPossible() {
+    if (m_displayValNames == true) {
+      remove(m_holderP);
+      add(m_messageLabel, BorderLayout.CENTER);
+      m_displayValNames = false;
+    }
+    validate(); repaint();
+  }
   
   private void setupTextBoxSelection() {
     m_textBoxEntryMode = true;
@@ -146,18 +148,14 @@ public class ClassValuePickerCustomizer
     holderPanel.add(label, BorderLayout.WEST);
     m_valueTextBox = new JTextField(15);
     m_valueTextBox.setToolTipText("Class label. /first, /last and /<num> " +
-    		"can be used to specify the first, last or specific index " +
-    		"of the label to use respectively.");
+                "can be used to specify the first, last or specific index " +
+                "of the label to use respectively.");
 
     holderPanel.add(m_valueTextBox, BorderLayout.CENTER);
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(holderPanel, BorderLayout.NORTH);
     add(holder2, BorderLayout.CENTER);
-    String existingClassVal = m_classValuePicker.getClassValue();
-    if (existingClassVal != null) {
-      m_valueTextBox.setText(existingClassVal);
-    }
   }
 
   private void setUpValueSelection(Instances format) {
@@ -234,13 +232,13 @@ public class ClassValuePickerCustomizer
     if (m_classValuePicker != (ClassValuePicker)object) {
       // remove ourselves as a listener from the old ClassvaluePicker (if necessary)
 /*      if (m_classValuePicker != null) {
-	m_classValuePicker.removeDataFormatListener(this);
+        m_classValuePicker.removeDataFormatListener(this);
       } */
       m_classValuePicker = (ClassValuePicker)object;
       // add ourselves as a data format listener
 //      m_classValuePicker.addDataFormatListener(this);
       if (m_classValuePicker.getConnectedFormat() != null) {
-	setUpValueSelection(m_classValuePicker.getConnectedFormat());	
+        setUpValueSelection(m_classValuePicker.getConnectedFormat());   
       } 
       m_backup = m_classValuePicker.getClassValue();
     }
@@ -248,20 +246,20 @@ public class ClassValuePickerCustomizer
   
   public void customizerClosing() {
     // remove ourselves as a listener from the ClassValuePicker (if necessary)
-  //  if (m_classValuePicker != null) {
-//      System.out.println("Customizer deregistering with class value picker");
+//    if (m_classValuePicker != null) {
+      //System.err.println(Messages.getInstance().getString("ClassValuePickerCustomizer_CustomizerClosing_Text"));
 //      m_classValuePicker.removeDataFormatListener(this);
-    //}    
+  //  }
     m_classValuePicker.setClassValue(m_backup);
   }
 
-/*  public void newDataFormat(DataSetEvent dse) {
+  /*public void newDataFormat(DataSetEvent dse) {
     if (dse.getDataSet() != null) {
       setUpValueSelection(m_classValuePicker.getConnectedFormat());
     } else {
       setUpNoCustPossible();
     }
-  } */
+  }*/
   
   /**
    * Add a property change listener
@@ -280,14 +278,8 @@ public class ClassValuePickerCustomizer
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
   }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
   
-  @Override
-  public void setParentWindow(Window parent) {
+  public void setParentFrame(JFrame parent) {
     m_parent = parent;
   }
 }

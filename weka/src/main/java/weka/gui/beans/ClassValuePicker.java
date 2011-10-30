@@ -70,8 +70,7 @@ public class ClassValuePicker
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate which class value is to be considered the \"positive\" "
-      +"class value (useful for ROC style curves).";
+    return Messages.getInstance().getString("ClassValuePicker_GlobalInfo_Text");
   }
 
   public ClassValuePicker() {
@@ -126,25 +125,15 @@ public class ClassValuePicker
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
-    // loaders will push instances format to us
-    // when the user makes configuration changes
-    // to the loader in the gui. However, if a fully
-    // configured flow is loaded then we won't get
-    // this information pushed to us until the
-    // flow is run. In this case we want to pull
-    // it (if possible) from upstream steps so
-    // that our customizer can provide the nice
-    // UI with the drop down box of class names.
-//    if (m_connectedFormat == null) {
-      // try and pull the incoming structure
-      // from the upstream step (if possible)
-  //    m_connectedFormat = getStructure();
-   // }
+    /*if (m_connectedFormat ==null) {
+      System.err.println(Messages.getInstance().getString("ClassValuePicker_GetConnectedFormat_Error_Text"));
+    }
+    return m_connectedFormat;*/
     return getStructure();
   }
 
   /**
-   * Set the class value considered to be the "positive"
+   * Set the class value index considered to be the "positive"
    * class value.
    *
    * @param index the class value index to use
@@ -188,11 +177,11 @@ public class ClassValuePicker
     if (dataSet.classIndex() < 0) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] " 
+	  logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_First") 
 	      + statusMessagePrefix() 
-	      + " No class attribute defined in data set.");
+	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Second"));
 	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: No class attribute defined in data set.");
+	    + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_First"));
       }
       return dataSet;
     }
@@ -200,16 +189,17 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("[ClassValuePicker] "
+	  logMessage(Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Third")
 	      + statusMessagePrefix()
-	      + " Class attribute must be nominal (ClassValuePicker)");
+	      + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_LogMessage_Text_Fourth"));
 	m_logger.statusMessage(statusMessagePrefix()
-	    + "WARNING: Class attribute must be nominal.");
+	    + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Second"));
       }
+      
       return dataSet;
     } else {
       if (m_logger != null) {
-        m_logger.statusMessage(statusMessagePrefix() + "remove");
+        m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("ClassValuePicker_AssignClassValue_StatusMessage_Text_Third"));
       }
     }
     
@@ -221,7 +211,7 @@ public class ClassValuePicker
           logMessage("[ClassValuePicker] "
               + statusMessagePrefix()
               + " Class value to consider as positive has not been set" +
-              		" (ClassValuePicker)");
+                        " (ClassValuePicker)");
         m_logger.statusMessage(statusMessagePrefix()
             + "WARNING: Class value to consider as positive has not been set.");
       }
@@ -234,7 +224,7 @@ public class ClassValuePicker
       // exsting structure so that it can get pushed downstream
       return dataSet;
     }
-    
+
     Attribute classAtt = dataSet.classAttribute();
     int classValueIndex = -1;
     
@@ -274,7 +264,7 @@ public class ClassValuePicker
                             " (ClassValuePicker)");
             m_logger.statusMessage(statusMessagePrefix()
                 + "WARNING: Unable to parse supplied class value index " +
-                		"as an integer.");
+                                "as an integer.");
             return dataSet;
           }
         }
@@ -291,24 +281,24 @@ public class ClassValuePicker
     if (classValueIndex != 0) { // nothing to do if == 0
       // swap selected index with index 0
       try {
-	SwapValues sv = new SwapValues();
-	sv.setAttributeIndex(""+(dataSet.classIndex()+1));
-	sv.setFirstValueIndex("first");
-	sv.setSecondValueIndex(""+(classValueIndex+1));
-	sv.setInputFormat(dataSet);
-	Instances newDataSet = Filter.useFilter(dataSet, sv);
-	newDataSet.setRelationName(dataSet.relationName());
-	return newDataSet;
+        SwapValues sv = new SwapValues();
+        sv.setAttributeIndex(""+(dataSet.classIndex()+1));
+        sv.setFirstValueIndex("first");
+        sv.setSecondValueIndex(""+(classValueIndex+1));
+        sv.setInputFormat(dataSet);
+        Instances newDataSet = Filter.useFilter(dataSet, sv);
+        newDataSet.setRelationName(dataSet.relationName());
+        return newDataSet;
       } catch (Exception ex) {
-	if (m_logger != null) {
-	  m_logger.
-	    logMessage("[ClassValuePicker] "
-	        +statusMessagePrefix()
-	        + " Unable to swap class attibute values.");
-	  m_logger.statusMessage(statusMessagePrefix()
-	      + "ERROR: (See log for details)");
-	  return null;
-	}
+        if (m_logger != null) {
+          m_logger.
+            logMessage("[ClassValuePicker] "
+                +statusMessagePrefix()
+                + " Unable to swap class attibute values.");
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR: (See log for details)");
+          return null;
+        }
       }
     }
     return dataSet;
@@ -321,8 +311,7 @@ public class ClassValuePicker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying data listeners "
-			   +"(ClassValuePicker)");
+	System.err.println(Messages.getInstance().getString("ClassValuePicker_NotifyDataListeners_Text"));
 	((DataSourceListener)l.elementAt(i)).acceptDataSet(tse);
       }
     }

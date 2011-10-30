@@ -413,7 +413,7 @@ public class DatabaseResultProducer
       result += "-W " + m_ResultProducer.getClass().getName();
       result  += " -- " + m_ResultProducer.getCompatibilityState();
     }
-    
+
     return result.trim();
   }
 

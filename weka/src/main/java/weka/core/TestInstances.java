@@ -28,7 +28,6 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.ArrayList;
 
 /**
  * Generates artificial datasets for testing. In case of Multi-Instance data
@@ -301,99 +300,99 @@ public class TestInstances
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe name of the data set.",
         "relation", 1, "-relation <name>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe seed value.",
         "seed", 1, "-seed <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",
         "num-instances", 1, "-num-instances <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe class type, see constants in weka.core.Attribute\n"
 	+ "\t(default 1=nominal).",
         "class-type", 1, "-class-type <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of classes to generate (for nominal classes only)\n"
 	+ "\t(default 2).",
         "class-values", 1, "-class-values <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe class index, with -1=last, (default -1).",
         "class-index", 1, "-class-index <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tDoesn't include a class attribute in the output.",
         "no-class", 0, "-no-class"));
 
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of nominal attributes (default 1).",
         "nominal", 1, "-nominal <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of values for nominal attributes (default 2).",
         "nominal-values", 1, "-nominal-values <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of numeric attributes (default 0).",
         "numeric", 1, "-numeric <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of string attributes (default 0).",
         "string", 1, "-string <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe words to use in string attributes.",
         "words", 1, "-words <comma-separated-list>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe word separators to use in string attributes.",
         "word-separators", 1, "-word-separators <chars>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of date attributes (default 0).",
         "date", 1, "-date <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of relational attributes (default 0).",
         "relational", 1, "-relational <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of nominal attributes in a rel. attribute (default 1).",
         "relational-nominal", 1, "-relational-nominal <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of values for nominal attributes in a rel. attribute (default 2).",
         "relational-nominal-values", 1, "-relational-nominal-values <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of numeric attributes in a rel. attribute (default 0).",
         "relational-numeric", 1, "-relational-numeric <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of string attributes in a rel. attribute (default 0).",
         "relational-string", 1, "-relational-string <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of date attributes in a rel. attribute (default 0).",
         "relational-date", 1, "-relational-date <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe number of instances in relational/bag attributes (default 10).",
         "num-instances-relational", 1, "-num-instances-relational <num>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tGenerates multi-instance data.",
         "multi-instance", 0, "-multi-instance"));
 
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe Capabilities handler to base the dataset on.\n"
 	+ "\tThe other parameters can be used to override the ones\n"
 	+ "\tdetermined from the handler. Additional parameters for\n"
@@ -643,11 +642,11 @@ public class TestInstances
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
     String[]	options;
     int		i;
 
-    result = new Vector<String>();
+    result = new Vector();
     
     result.add("-relation");
     result.add(getRelation());
@@ -949,9 +948,9 @@ public class TestInstances
    */
   protected static String[] listToArray(String value) {
     StringTokenizer	tok;
-    Vector<String>		list;
+    Vector		list;
     
-    list = new Vector<String>();
+    list = new Vector();
     tok = new StringTokenizer(value, ",");
     while (tok.hasMoreTokens())
       list.add(tok.nextToken());
@@ -1287,7 +1286,7 @@ public class TestInstances
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
-  protected Attribute generateAttribute(int index, int attType, 
+  protected Attribute generateAttribute(int index, int attType,
       String namePrefix) throws Exception {
     Attribute     result;
     String        name;
@@ -1337,9 +1336,9 @@ public class TestInstances
     
     switch (attType) {
       case Attribute.NOMINAL:
-        ArrayList<String> nomStrings = new ArrayList<String>(valIndex + 1);
+        FastVector nomStrings = new FastVector(valIndex + 1);
         for (int j = 0; j < nomCount; j++)
-          nomStrings.add(prefix + (j + 1));
+          nomStrings.addElement(prefix + (j + 1));
         result = new Attribute(namePrefix + name, nomStrings);
         break;
         
@@ -1348,7 +1347,7 @@ public class TestInstances
         break;
         
       case Attribute.STRING:
-        result = new Attribute(namePrefix + name, (ArrayList<String>) null);
+        result = new Attribute(namePrefix + name, (FastVector) null);
         break;
         
       case Attribute.DATE:
@@ -1496,7 +1495,7 @@ public class TestInstances
       case Attribute.RELATIONAL:
         Instances rel = new Instances(data.attribute(index).relation(), 0);
         for (int n = 0; n < getNumInstancesRelational(); n++) {
-          Instance inst = new DenseInstance(rel.numAttributes());
+          Instance inst = new Instance(rel.numAttributes());
           inst.setDataset(data);
           for (int i = 0; i < rel.numAttributes(); i++) {
             inst.setValue(i, generateAttributeValue(rel, i, 0));
@@ -1522,7 +1521,7 @@ public class TestInstances
   
   /**
    * generates a new dataset.
-   *
+   * 
    * @param namePrefix the prefix to add to the name of an attribute
    * @return 		the generated data
    * @throws Exception	if something goes wrong
@@ -1567,37 +1566,37 @@ public class TestInstances
         clsIndex = getNumAttributes() - 1;
 
       // generate attributes
-      ArrayList<Attribute> attributes = new ArrayList<Attribute>(getNumAttributes());
+      FastVector attributes = new FastVector(getNumAttributes());
       // Add Nominal attributes
       for (int i = 0; i < getNumNominal(); i++)
-        attributes.add(generateAttribute(i, Attribute.NOMINAL, namePrefix));
+        attributes.addElement(generateAttribute(i, Attribute.NOMINAL, namePrefix));
       
       // Add m_Numeric attributes
       for (int i = 0; i < getNumNumeric(); i++)
-        attributes.add(generateAttribute(i, Attribute.NUMERIC, namePrefix));
+        attributes.addElement(generateAttribute(i, Attribute.NUMERIC, namePrefix));
       
       // Add some String attributes...
       for (int i = 0; i < getNumString(); i++)
-        attributes.add(generateAttribute(i, Attribute.STRING, namePrefix));
+        attributes.addElement(generateAttribute(i, Attribute.STRING, namePrefix));
       
       // Add some Date attributes...
       for (int i = 0; i < getNumDate(); i++)
-        attributes.add(generateAttribute(i, Attribute.DATE, namePrefix));
+        attributes.addElement(generateAttribute(i, Attribute.DATE, namePrefix));
       
       // Add some Relational attributes...
       for (int i = 0; i < getNumRelational(); i++)
-        attributes.add(generateAttribute(i, Attribute.RELATIONAL, namePrefix));
+        attributes.addElement(generateAttribute(i, Attribute.RELATIONAL, namePrefix));
       
       // Add class attribute
       if (clsIndex != NO_CLASS)
-	attributes.add(clsIndex, generateAttribute(CLASS_IS_LAST, getClassType(), namePrefix));
+	attributes.insertElementAt(generateAttribute(CLASS_IS_LAST, getClassType(), namePrefix), clsIndex);
       
       m_Data = new Instances(getRelation(), attributes, getNumInstances());
       m_Data.setClassIndex(clsIndex);
 
       // generate instances
       for (int i = 0; i < getNumInstances(); i++) {
-        Instance current = new DenseInstance(getNumAttributes());
+        Instance current = new Instance(getNumAttributes());
         current.setDataset(m_Data);
 
         // class

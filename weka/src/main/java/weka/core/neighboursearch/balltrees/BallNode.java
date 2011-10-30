@@ -23,7 +23,6 @@ package weka.core.neighboursearch.balltrees;
 
 import weka.core.DistanceFunction;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -34,7 +33,7 @@ import java.io.Serializable;
  * Class representing a node of a BallTree.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class BallNode
   implements Serializable, RevisionHandler {
@@ -219,7 +218,7 @@ public class BallNode
     for(int j=0, numInsts=instList.length; j<attrVals.length; j++) {
       attrVals[j] /= numInsts;
     }
-    temp = new DenseInstance(1.0, attrVals);
+    temp = new Instance(1.0, attrVals);
     return temp;
   }
   
@@ -251,7 +250,7 @@ public class BallNode
       attrVals[j] /= numInsts;
     }
     
-    temp = new DenseInstance(1.0, attrVals);    
+    temp = new Instance(1.0, attrVals);    
     return temp;
   }
   
@@ -332,7 +331,7 @@ public class BallNode
       attrVals[j] /= 2D;
     }
     
-    p1 = new DenseInstance(1.0, attrVals);
+    p1 = new Instance(1.0, attrVals);
     return p1;
   }
 
@@ -366,6 +365,6 @@ public class BallNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

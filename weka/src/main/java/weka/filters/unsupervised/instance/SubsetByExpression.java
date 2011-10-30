@@ -217,21 +217,7 @@ public class SubsetByExpression
       + "  from the 'labor' UCI dataset:\n"
       + "  not ismissing(ATT3)\n"
       ;
-  }
-  
-  /**
-   * SubsetByExpression may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed if the user has opted to
-   * apply the filter to instances after the first batch (rather than
-   * just passing them through).
-   * 
-   * @return true this filter may remove (consume) input instances after
-   * the first batch has been completed.
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    return true;
-  }
+  }  
   
   /**
    * Input an instance for filtering. Filter requires all

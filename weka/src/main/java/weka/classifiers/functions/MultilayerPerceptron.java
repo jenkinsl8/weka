@@ -22,7 +22,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
@@ -147,7 +146,7 @@ import javax.swing.JTextField;
  * @version $Revision$
  */
 public class MultilayerPerceptron 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
   
   /** for serialization */
@@ -893,7 +892,6 @@ public class MultilayerPerceptron
     }
   }
   
-
   /** a ZeroR model in case no model can be built from the data 
    * or the network predicts all zeros for the classes */
   private Classifier m_ZeroR;
@@ -1774,10 +1772,11 @@ public class MultilayerPerceptron
 	  + "using ZeroR model instead!");
       m_useDefaultModel = true;
       return;
-    } else {
+    }
+    else {
       m_useDefaultModel = false;
     }
-       
+    
     m_epoch = 0;
     m_error = 0;
     m_instances = null;
@@ -2002,6 +2001,7 @@ public class MultilayerPerceptron
 	}
 	
 	if (right < lastRight) {
+	  
 	  if (right < bestError) {
 	    bestError = right;
 	    // save the network weights at this point

@@ -29,7 +29,6 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
 import java.awt.Color;
-import java.io.Serializable;
 
 /**
  * This class is a container for plottable data. Instances form the
@@ -39,18 +38,13 @@ import java.io.Serializable;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class PlotData2D implements Serializable {
-
-  /**
-   * For serialization
-   */
-  private static final long serialVersionUID = -3979972167982697979L;
+public class PlotData2D {
 
   /** The instances */
   protected Instances m_plotInstances = null;
 
   /** The name of this plot */
-  protected String m_plotName = "new plot";
+  protected String m_plotName = Messages.getInstance().getString("PlotData2D_PlotName_Text");
   
   /**
    * The name of this plot (possibly in html) suitable for using in a 
@@ -137,8 +131,8 @@ public class PlotData2D implements Serializable {
     int originalClassIndex = m_plotInstances.classIndex();
     try {
       Add addF = new Add();
-      addF.setAttributeName("Instance_number");
-      addF.setAttributeIndex("first");
+      addF.setAttributeName(Messages.getInstance().getString("PlotData2D_AddInstanceNumberAttribute_AddF_SetAttributeName_Text"));
+      addF.setAttributeIndex(Messages.getInstance().getString("PlotData2D_AddInstanceNumberAttribute_AddF_SetAttributeIndex_Text"));
       addF.setInputFormat(m_plotInstances);
       m_plotInstances = Filter.useFilter(m_plotInstances, addF);
       m_plotInstances.setClassIndex(originalClassIndex + 1);
@@ -208,23 +202,13 @@ public class PlotData2D implements Serializable {
   public void setShapeType(int [] st) throws Exception {
     m_shapeType = st;
     if (m_shapeType.length != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: Shape type array must have the same "
-			  +"number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_First"));
     }
     for (int i = 0; i < st.length; i++) {
       if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
       }
     }
-  }
-  
-  /**
-   * Get the shape types for the plot data
-   * 
-   * @return the shape types for the plot data
-   */
-  public int[] getShapeType() {
-    return m_shapeType;
   }
 
   /**
@@ -234,8 +218,7 @@ public class PlotData2D implements Serializable {
    */
   public void setShapeType(FastVector st) throws Exception {
     if (st.size() != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: Shape type vector must have the same "
-			  +"number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Second"));
     }
     m_shapeType = new int [st.size()];
     for (int i = 0; i < st.size(); i++) {
@@ -253,18 +236,8 @@ public class PlotData2D implements Serializable {
   public void setShapeSize(int [] ss) throws Exception {
     m_shapeSize = ss;
     if (m_shapeType.length != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: Shape size array must have the same "
-			  +"number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Third"));
     }
-  }
-  
-  /**
-   * Get the shape sizes for the plot data
-   * 
-   * @return the shape sizes for the plot data
-   */
-  public int[] getShapeSize() {
-    return m_shapeSize;
   }
   
   /**
@@ -273,8 +246,7 @@ public class PlotData2D implements Serializable {
    */
   public void setShapeSize(FastVector ss) throws Exception {
     if (ss.size() != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: Shape size vector must have the same "
-			  +"number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Fourth"));
     }
     //System.err.println("Setting connect points ");
     m_shapeSize = new int [ss.size()];
@@ -291,8 +263,8 @@ public class PlotData2D implements Serializable {
   public void setConnectPoints(boolean [] cp) throws Exception {
     m_connectPoints = cp;
     if (m_connectPoints.length != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: connect points array must have the "
-			  +"same number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetConnectPoints_Exception_Text_First"));
+    		  
     }
     m_connectPoints[0] = false;
   }
@@ -304,8 +276,7 @@ public class PlotData2D implements Serializable {
    */
   public void setConnectPoints(FastVector cp) throws Exception {
     if (cp.size() != m_plotInstances.numInstances()) {
-      throw new Exception("PlotData2D: connect points array must have the "
-			  +"same number of entries as number of data points!");
+      throw new Exception(Messages.getInstance().getString("PlotData2D_SetConnectPoints_Exception_Text_Second"));
     }
     //System.err.println("Setting connect points ");
     m_shapeSize = new int [cp.size()];

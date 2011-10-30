@@ -61,10 +61,10 @@ class TransformationDictionary implements Serializable {
                                   Instances dataDictionary) throws Exception {
     
     // set up incoming field definitions
-/*    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
+    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
     for (int i = 0; i < dataDictionary.numAttributes(); i++) {
       incomingFieldDefs.add(dataDictionary.attribute(i));
-    } */
+    }
     
     // get any derived fields and DefineFunctions
     NodeList derivedL = dictionary.getChildNodes();
@@ -73,7 +73,7 @@ class TransformationDictionary implements Serializable {
       if (child.getNodeType() == Node.ELEMENT_NODE) {
         String tagName = ((Element)child).getTagName();
         if (tagName.equals("DerivedField")) {
-          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, null /*incomingFieldDefs*/, null);
+          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, incomingFieldDefs, null);
           m_derivedFields.add(df);
         } else if (tagName.equals("DefineFunction")) {
           DefineFunction defF = new DefineFunction((Element)child, null);
@@ -85,20 +85,13 @@ class TransformationDictionary implements Serializable {
   
   /**
    * Set the field definitions for the derived fields. Usually called once the
-   * structure of the mining schema + derived fields has been determined. 
-   * Calling this method with an array list of field definitions in the order of 
-   * attributes in the mining schema + derived fields will allow the expressions 
-   * used in the derived fields to access the correct attribute values from the 
-   * incoming instance (also allows for derived fields to reference other
-   * derived fields). This is necessary because construction of the TransformationDictionary uses the
+   * structure of the mining schema has been determined. Calling this method
+   * with an array list of field definitions in the order of attributes in the
+   * mining schema will allow the expressions used in the derived fields to
+   * access the correct attribute values from the incoming instances. This is
+   * necessary because construction of the TransformationDictionary uses the
    * data dictionary to reference fields (the order of fields in the data dictionary
    * is not guaranteed to be the same as the order in the mining schema).
-   * 
-   * IMPORTANT: for derived field x to be able to reference derived field y, y must
-   * have been declared before x in the PMML file. This is because the process
-   * of constructing an input vector of values to the model proceeds in a linear
-   * left-to-right fashion - so any referenced derived field (e.g. field y),
-   * must have already computed its value when x is evaluated.
    * 
    * @param fieldDefs the definition of the incoming fields as an array list of attributes
    * @throws Exception if a problem occurs
@@ -106,18 +99,6 @@ class TransformationDictionary implements Serializable {
   protected void setFieldDefsForDerivedFields(ArrayList<Attribute> fieldDefs) throws Exception {
     for (int i = 0; i < m_derivedFields.size(); i++) {
       m_derivedFields.get(i).setFieldDefs(fieldDefs);
-    }
-    
-    // refresh the define functions - force them to pass on their parameter
-    // definitions as field defs to their encapsulated expression. Parameter
-    // defs were not passed on by expressions encapsulated in DefineFunctions
-    // at construction time because the encapsulated expression does not know
-    // whether it is contained in a DefineFunction or a DerivedField. Since
-    // we delay passing on field definitions until all derived fields are 
-    // loaded (in order to allow derived fields to reference other derived fields),
-    // we must tell DefineFunctions to pass on their parameter definitions
-    for (int i = 0; i < m_defineFunctions.size(); i++) {
-      m_defineFunctions.get(i).pushParameterDefs();
     }
   }
   

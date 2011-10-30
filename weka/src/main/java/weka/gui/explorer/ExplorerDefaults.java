@@ -53,7 +53,7 @@ public class ExplorerDefaults
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     }
     catch (Exception e) {
-      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(Messages.getInstance().getString("ExplorerDefaults_Error_Text"));
       e.printStackTrace();
       PROPERTIES = new Properties();
     }
@@ -70,11 +70,7 @@ public class ExplorerDefaults
   public static String get(String property, String defaultValue) {
     return PROPERTIES.getProperty(property, defaultValue);
   }
-  
-  public static void set(String property, String value) {
-    PROPERTIES.setProperty(property, value);
-  }
-  
+
   /**
    * returns the associated properties file.
    * 
@@ -202,7 +198,7 @@ public class ExplorerDefaults
     Object	result;
     
     result = getObject(
-		"Classifier", 
+    	"Classifier", 
 		weka.classifiers.rules.ZeroR.class.getName(), 
 		weka.classifiers.Classifier.class);
     if (result == null)
@@ -353,51 +349,6 @@ public class ExplorerDefaults
   }
   
   /**
-   * Returns an instance of the class used for generating plot instances
-   * for displaying the classifier errors.
-   * 
-   * @return		an instance of the class
-   */
-  public static ClassifierErrorsPlotInstances getClassifierErrorsPlotInstances() {
-    ClassifierErrorsPlotInstances	result;
-    String			classname;
-    String[]			options;
-    
-    try {
-      options = Utils.splitOptions(get("ClassifierErrorsPlotInstances", "weka.gui.explorer.ClassifierErrorsPlotInstances"));
-      classname  = options[0];
-      options[0] = "";
-      result     = (ClassifierErrorsPlotInstances) Utils.forName(ClassifierErrorsPlotInstances.class, classname, options);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      result = new ClassifierErrorsPlotInstances();
-    }
-    
-    return result;
-  }
-  
-  /**
-   * Returns the minimum size in pixels for plots of plotting classifier errors 
-   * of numeric attributes.
-   * 
-   * @return		the size
-   */
-  public static int getClassifierErrorsMinimumPlotSizeNumeric() {
-    return Integer.parseInt(get("ClassifierErrorsMinimumPlotSizeNumeric", "1"));
-  }
-  
-  /**
-   * Returns the maximum size in pixels for plots of plotting classifier errors 
-   * of numeric attributes.
-   * 
-   * @return		the size
-   */
-  public static int getClassifierErrorsMaximumPlotSizeNumeric() {
-    return Integer.parseInt(get("ClassifierErrorsMaximumPlotSizeNumeric", "20"));
-  }
-  
-  /**
    * returns the default clusterer (fully configured) for the clusterer panel.
    * 
    * @return		the default clusterer, EM by default
@@ -432,31 +383,6 @@ public class ExplorerDefaults
    */
   public static boolean getClustererStoreClustersForVis() {
     return Boolean.parseBoolean(get("ClustererStoreClustersForVis", "true"));
-  }
-  
-  /**
-   * Returns an instance of the class used for generating plot instances
-   * for displaying the cluster assignments.
-   * 
-   * @return		an instance of the class
-   */
-  public static ClustererAssignmentsPlotInstances getClustererAssignmentsPlotInstances() {
-    ClustererAssignmentsPlotInstances	result;
-    String			classname;
-    String[]			options;
-    
-    try {
-      options = Utils.splitOptions(get("ClustererAssignmentsPlotInstances", "weka.gui.explorer.ClustererAssignmentsPlotInstances"));
-      classname  = options[0];
-      options[0] = "";
-      result     = (ClustererAssignmentsPlotInstances) Utils.forName(ClustererAssignmentsPlotInstances.class, classname, options);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      result = new ClustererAssignmentsPlotInstances();
-    }
-    
-    return result;
   }
   
   /**
@@ -554,7 +480,7 @@ public class ExplorerDefaults
     String		name;
     Vector		sorted;
     
-    System.out.println("\nExplorer defaults:");
+    System.out.println(Messages.getInstance().getString("ExplorerDefaults_Main_Message_Text"));
     names = PROPERTIES.propertyNames();
 
     // sort names

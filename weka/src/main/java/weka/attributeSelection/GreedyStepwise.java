@@ -551,15 +551,15 @@ public class GreedyStepwise
     } else {
       if (m_backward) {
         FString.append("\n\tRanking is the order that attributes were removed, " +
-        		"starting \n\twith all attributes. The merit scores in the left" +
-        		"\n\tcolumn are the goodness of the remaining attributes in the" +
-        		"\n\tsubset after removing the corresponding in the right column" +
-        		"\n\tattribute from the subset.\n");
+                        "starting \n\twith all attributes. The merit scores in the left" +
+                        "\n\tcolumn are the goodness of the remaining attributes in the" +
+                        "\n\tsubset after removing the corresponding in the right column" +
+                        "\n\tattribute from the subset.\n");
       } else {
         FString.append("\n\tRanking is the order that attributes were added, starting " +
-        		"\n\twith no attributes. The merit scores in the left column" +
-        		"\n\tare the goodness of the subset after the adding the" +
-        		"\n\tcorresponding attribute in the right column to the subset.\n");
+                        "\n\twith no attributes. The merit scores in the left column" +
+                        "\n\tare the goodness of the subset after the adding the" +
+                        "\n\tcorresponding attribute in the right column to the subset.\n");
       }
     }
     

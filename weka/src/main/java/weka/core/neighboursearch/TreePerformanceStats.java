@@ -31,7 +31,7 @@ import java.util.Vector;
  * nearest neighbour search algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class TreePerformanceStats
   extends PerformanceStats {
@@ -237,11 +237,11 @@ public class TreePerformanceStats
    * @return An enumeration of the measure names.
    */
   public Enumeration enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+    Vector newVector = new Vector();
     
     Enumeration en = super.enumerateMeasures();
     while(en.hasMoreElements())
-      newVector.addElement((String)en.nextElement());
+      newVector.addElement(en.nextElement());
     
     newVector.addElement("measureTotal_nodes_visited");
     newVector.addElement("measureMean_nodes_visited");
@@ -317,6 +317,6 @@ public class TreePerformanceStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

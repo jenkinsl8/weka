@@ -17,18 +17,19 @@
 % Version: $Revision$
 
 \subsection{Choosing the base class}
-Common to all classifiers in WEKA is the \texttt{weka.classifiers.Classifier}
-interface. Your new classifier must implement this interface in order to be
-visible through the GenericObjectEditor. But in order to make implementations of
-new classifiers even easier, WEKA comes already with a range of other abstract
-classes that implement \texttt{weka.classifiers.Classifier}. In the following
-you will find an overview that will help you decide what base class to use for
-your classifier. For better readability, the \texttt{weka.classifiers} prefix
-was dropped from the class names:
+The ancestor of all classifiers in WEKA is \texttt{weka.classifiers.Classifier},
+an abstract class. Your new classifier must be derived from this class at
+least to be visible through the GenericObjectEditor. But in order to
+make implementations of new classifiers even easier, WEKA comes already with a
+range of other abstract classes derived from
+\texttt{weka.classifiers.Classifier}. In the following you will find an overview
+that will help you decide what base class to use for your classifier. For better
+readability, the \texttt{weka.classifiers} prefix was dropped from the class
+names:
 \begin{tight_itemize}
   \item simple classifier
 	\begin{tight_itemize}
-	  \item \texttt{AbstractClassifier} -- not randomizable
+	  \item \texttt{Classifier} -- not randomizable
 	  \item \texttt{RandomizableClassifier} -- randomizable
 	\end{tight_itemize}
   \item meta classifier
@@ -51,22 +52,11 @@ randomizable, iterated
 		\end{tight_itemize}
 	\end{tight_itemize}
 \end{tight_itemize}
-In order to make the most of multi-core machines, WEKA offers also
-meta-classifiers that can build the base-classifiers in parallel:
-\begin{tight_itemize}
-  \item \texttt{ParallelIteratedSingleClassifierEnhancer}
-  \item \texttt{ParallelMultipleClassifiersCombiner}
-  \item \texttt{RandomizableParallelIteratedSingleClassifierEnhancer} -- e.g.,
-\texttt{Bagging}
-  \item \texttt{RandomizableParallelMultipleClassifiersCombiner} -- e.g.,
-\texttt{Stacking}
-\end{tight_itemize}
 If you are still unsure about what superclass to choose, then check out the
 Javadoc of those superclasses. In the Javadoc you will find all the classifiers
 that are derived from it, which should give you a better idea whether this
 particular superclass is suited for your needs.
 
-\newpage
 \subsection{Additional interfaces}
 The abstract classes listed above basically just implement various combinations
 of the following two interfaces:
@@ -94,6 +84,7 @@ can be trained incrementally, i.e., row by row like
 \texttt{NaiveBayesUpdateable}.
 \end{tight_itemize}
 
+\pagebreak
 \subsection{Packages}
 A few comments about the different sub-packages in the \texttt{weka.classifiers}
 package:
@@ -132,9 +123,7 @@ base-classifiers).
 
 \heading{General}
 Here is an overview of methods that your new classifier needs to implement in
-order to integrate nicely into the WEKA framework. Since
-\texttt{AbstractClassifier} implements
-\texttt{weka.core.OptionHandler}, these methods are listed as well.
+order to integrate nicely into the WEKA framework:
 
 \heading{globalInfo()}
 returns a short description that is displayed in the GUI, like the Explorer or
@@ -160,12 +149,8 @@ present. But note that these calls \textbf{remove} the option and, if
 applicable, the argument from the string array (``destructive''). The last call
 in the \texttt{setOptions} methods should always be the
 \texttt{super.setOptions(String[])} one, in order to pass on any other arguments
-still present in the array to the superclass.
-
-\clearpage
-
-The following code snippet just parses the only option ``alpha'' that an
-imaginary classifier defines:
+still present in the array to the superclass. The following code snippet just
+parses the only option ``alpha'' that an imaginary classifier defines:
 {\small \begin{verbatim}
   import weka.core.Utils;
   ...
@@ -180,6 +165,8 @@ imaginary classifier defines:
     super.setOptions(options);
   }
 \end{verbatim}}
+
+\clearpage
 
 \heading{getOptions()}
 returns a string array of command-line options that resemble the current
@@ -211,8 +198,6 @@ the \texttt{setOptions} method.
 returns meta-information on what type of data the classifier can handle, in
 regards to attributes and class attributes. See section ``Capabilities'' on page
 \pageref{classifier_capabilities} for more information.
-
-\clearpage
 
 \heading{buildClassifier(Instances)}
 builds the model from scratch with the provided dataset. Each subsequent call of
@@ -267,9 +252,12 @@ method:
    * @param args the options, use "-h" to display options
    */
   public static void main(String[] args) {
-    AbstractClassifier.runClassifier(new FunkyClassifier(), args);
+    runClassifier(new FunkyClassifier(), args);
   }
 \end{verbatim}
+Note: the static method \texttt{runClassifier} (defined in the abstract
+superclass \texttt{weka.classifiers.Classifier}) handles all the appropriate
+calls and catches and processes any exceptions as well.
 
 \newpage
 \subsubsection*{Meta-classifiers}
@@ -371,8 +359,8 @@ abstract classifiers already implement.
 \newpage
 \heading{Capabilities}
 \label{classifier_capabilities}
-By default, the \texttt{weka.classifiers.AbstractClassifier} superclass returns
-an object that denotes that the classifier can handle \textbf{any} type of data.
+By default, the \texttt{weka.classifiers.Classifier} superclass returns an
+object that denotes that the classifier can handle \textbf{any} type of data.
 This is useful for rapid prototyping of new algorithms, but also very
 dangerous. If you do not specifically define what type of data can be handled by
 your classifier, you can end up with meaningless models or errors. This can

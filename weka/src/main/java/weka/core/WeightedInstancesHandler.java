@@ -27,7 +27,7 @@ package weka.core;
  * by instance weights.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.5 $ 
 */
 public interface WeightedInstancesHandler {
 

@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Capabilities;
@@ -100,7 +99,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision$
+ * @version $Revision: 1.29 $
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer
@@ -654,7 +653,7 @@ public class CostSensitiveClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.29 $");
   }
 
   /**

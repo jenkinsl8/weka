@@ -56,13 +56,13 @@ public class Tee
   implements RevisionHandler {
   
   /** the different PrintStreams. */
-  protected Vector<PrintStream> m_Streams = new Vector<PrintStream>();
+  protected Vector m_Streams = new Vector();
   
   /** whether to add timestamps or not. */
-  protected Vector<Boolean> m_Timestamps = new Vector<Boolean>();
+  protected Vector m_Timestamps = new Vector();
   
   /** whether to add a prefix or not. */
-  protected Vector<String> m_Prefixes = new Vector<String>();
+  protected Vector m_Prefixes = new Vector();
   
   /** the default printstream. */
   protected PrintStream m_Default = null;

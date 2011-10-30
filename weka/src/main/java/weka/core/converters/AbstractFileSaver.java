@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.zip.GZIPOutputStream;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -67,7 +66,7 @@ public abstract class AbstractFileSaver
 
   /** The file extension of the destination file. */
   private String FILE_EXTENSION;
-
+  
   /** the extension for compressed files */
   private String FILE_EXTENSION_COMPRESSED = ".gz";
 
@@ -135,7 +134,7 @@ public abstract class AbstractFileSaver
    * @return the file extensions
    */
   public String[] getFileExtensions() {
-    return new String[]{getFileExtension(), FILE_EXTENSION_COMPRESSED};
+    return new String[]{getFileExtension()};
   }
 
 

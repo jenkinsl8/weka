@@ -22,28 +22,29 @@
 
 package weka.gui.beans;
 
+import weka.classifiers.Classifier;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import weka.classifiers.Classifier;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
 /**
  * GUI customizer for the classifier wrapper bean
@@ -53,8 +54,8 @@ import weka.gui.PropertySheetPanel;
  */
 public class ClassifierCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerClosingListener, 
-  CustomizerCloseRequester, EnvironmentHandler {
+  implements Customizer, CustomizerClosingListener,
+             CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -6688000820160821429L;
@@ -74,35 +75,24 @@ public class ClassifierCustomizer
 
   private JPanel m_incrementalPanel = new JPanel();
   private JCheckBox m_updateIncrementalClassifier 
-    = new JCheckBox("Update classifier on incoming instance stream");
+    = new JCheckBox(Messages.getInstance().getString("ClassifierCustomizer_UpdateIncrementalClassifier_JCheckBox_Text"));
   private boolean m_panelVisible = false;
   
   private JPanel m_holderPanel = new JPanel();
   private JTextField m_executionSlotsText = new JTextField();
-  
-  private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
-  
-  private Window m_parentWindow;
-  
+
+  private JFrame m_parentFrame;
+
   /** Copy of the current classifier in case cancel is selected */
   protected weka.classifiers.Classifier m_backup;
-  
-  private Environment m_env = Environment.getSystemWide();
-  
-  /**
-   *  Listener that wants to know the the modified status of the object that
-   * we're customizing
-   */
-  private ModifyListener m_modifyListener;
 
   public ClassifierCustomizer() {
     
     m_ClassifierEditor.
-      setBorder(BorderFactory.createTitledBorder("Classifier options"));
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassifierCustomizer_ClassifierEditor_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     
     m_updateIncrementalClassifier.
-      setToolTipText("Train the classifier on "
-		     +"each individual incoming streamed instance.");
+      setToolTipText(Messages.getInstance().getString("ClassifierCustomizer_UpdateIncrementalClassifier_SetToolTipText_Text"));
     m_updateIncrementalClassifier.
       addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
@@ -137,62 +127,39 @@ public class ClassifierCustomizer
       }
     });
     
-    m_blockOnLastFold.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_dsClassifier != null) {
-          m_dsClassifier.setBlockOnLastFold(m_blockOnLastFold.isSelected());
-        }
-      }
-    });
-    
     JPanel executionSlotsPanel = new JPanel();
     executionSlotsPanel.
       setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-    JLabel executionSlotsLabel = new JLabel("Execution slots");
+    JLabel executionSlotsLabel = new JLabel(Messages.getInstance().getString("ClassifierCustomizer_ExecutionSlotsLabel_JLabel_Text"));
     executionSlotsPanel.setLayout(new BorderLayout());
     executionSlotsPanel.add(executionSlotsLabel, BorderLayout.WEST);
     executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
     m_holderPanel.
-      setBorder(BorderFactory.createTitledBorder("More options"));
+      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ClassifierCustomizer_HolderPanel_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_holderPanel.setLayout(new BorderLayout());
     m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
-//    m_blockOnLastFold.setHorizontalTextPosition(SwingConstants.RIGHT);
-    m_holderPanel.add(m_blockOnLastFold, BorderLayout.SOUTH);
-    
+
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(m_holderPanel, BorderLayout.NORTH);
-    JButton OKBut = new JButton("OK");
-    JButton CancelBut = new JButton("Cancel");
+    JButton OKBut = new JButton(Messages.getInstance().getString("ClassifierCustomizer_OKBut_JButton_Text"));
+    JButton CancelBut = new JButton(Messages.getInstance().getString("ClassifierCustomizer_CancelBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // forces the template to be deep copied to the actual classifier.
-        // necessary for InputMappedClassifier that is loading from a file
-        m_dsClassifier.setClassifierTemplate(m_dsClassifier.getClassifierTemplate());
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, true);
+        public void actionPerformed(ActionEvent e) {
+          m_parentFrame.dispose();
         }
-        
-        m_parentWindow.dispose();
-      }
-    });
+      });
     
     CancelBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        // cancel requested, so revert to backup and then
-        // close the dialog
-        if (m_backup != null) {
-          m_dsClassifier.setClassifierTemplate(m_backup);
+        public void actionPerformed(ActionEvent e) {
+          // cancel requested, so revert to backup and then
+          // close the dialog
+          if (m_backup != null) {
+            m_dsClassifier.setClassifierTemplate(m_backup);
+          }
+          m_parentFrame.dispose();
         }
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(ClassifierCustomizer.this, false);
-        }
-        
-        m_parentWindow.dispose();
-      }
-    });
+      });
     
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
@@ -237,12 +204,11 @@ public class ClassifierCustomizer
     } catch (Exception ex) {
       // ignore
     }
-    m_ClassifierEditor.setEnvironment(m_env);
+
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
-    m_blockOnLastFold.setSelected(m_dsClassifier.getBlockOnLastFold());
     checkOnClassifierType();
   }
   
@@ -274,22 +240,7 @@ public class ClassifierCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;    
-  }
-  
-  /**
-   * Set any environment variables to pass to the PropertySheetPanel
-   * 
-   * @param env environment variables to pass to the property sheet
-   * panel
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;    
   }
 }

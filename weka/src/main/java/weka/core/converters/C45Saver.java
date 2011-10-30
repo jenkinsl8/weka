@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -36,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7 $
  * @see Saver
  */
 public class C45Saver 
@@ -378,11 +378,11 @@ public class C45Saver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    FastVector result = new FastVector();
 
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
 
     result.addElement(new Option(
 	"The class index", 
@@ -508,7 +508,7 @@ public class C45Saver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
   
   /**

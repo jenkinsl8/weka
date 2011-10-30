@@ -65,7 +65,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -109,13 +109,13 @@ public class XRFFSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option>      result;
+    Vector      result;
     
-    result = new Vector<Option>();
+    result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(
         new Option(
@@ -142,10 +142,10 @@ public class XRFFSaver
    */
   public String[] getOptions(){
     int       	i;
-    Vector<String>    	result;
+    Vector    	result;
     String[]  	options;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     if (getClassIndex().length() != 0) {
       result.add("-C");
@@ -396,7 +396,7 @@ public class XRFFSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
   
   /**

@@ -23,9 +23,7 @@
 package weka.gui.boundaryvisualizer;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
-import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.experiment.Task;
@@ -242,18 +240,17 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       m_numOfSamplesPerGenerator = 
 	(int)Math.pow(m_samplesBase, m_trainingData.numAttributes()-3);
       if (m_trainingData == null) {
-	throw new Exception("No training data set (BoundaryPanel)");
+	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_TrainingData_Error_Text_First"));
       }
       if (m_classifier == null) {
-	throw new Exception("No classifier set (BoundaryPanel)");
+	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_Classifier_Error_Text"));
       }
       if (m_dataGenerator == null) {
-	throw new Exception("No data generator set (BoundaryPanel)");
+	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_DataGenerator_Error_Text"));
       }
       if (m_trainingData.attribute(m_xAttribute).isNominal() || 
 	m_trainingData.attribute(m_yAttribute).isNominal()) {
-	throw new Exception("Visualization dimensions must be numeric "
-			    +"(RemoteBoundaryVisualizerSubTask)");
+	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_TrainingData_Error_Text_Second"));
       }
       
       m_attsToWeightOn = new boolean[m_trainingData.numAttributes()];
@@ -263,10 +260,10 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       // generate samples
       m_weightingAttsValues = new double [m_attsToWeightOn.length];
       m_vals = new double[m_trainingData.numAttributes()];
-      m_predInst = new DenseInstance(1.0, m_vals);
+      m_predInst = new Instance(1.0, m_vals);
       m_predInst.setDataset(m_trainingData);
 
-      System.err.println("Executing row number "+m_rowNumber);
+      System.err.println(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_Error_Text") + m_rowNumber);
       for (int j = 0; j < m_panelWidth; j++) {
 	double [] preds = calculateRegionProbs(j, m_rowNumber);
 	m_result.setLocationProbs(j, preds);
@@ -275,14 +272,14 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       }
     } catch (Exception ex) {
       m_status.setExecutionStatus(TaskStatusInfo.FAILED);
-      m_status.setStatusMessage("Row "+m_rowNumber+" failed.");
+      m_status.setStatusMessage(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_Front_First") + m_rowNumber + Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_End_First"));
       System.err.print(ex);
       return;
     }
 
     // finished
     m_status.setExecutionStatus(TaskStatusInfo.FINISHED);
-    m_status.setStatusMessage("Row "+m_rowNumber+" completed successfully.");
+    m_status.setStatusMessage(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_Front") + m_rowNumber + Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_End"));
   }
 
 

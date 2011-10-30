@@ -23,8 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Instance; 
-import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -183,14 +182,14 @@ public class NumericTransform
     Double newVal;
     for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-	vals[i] = Utils.missingValue();
+	vals[i] = Instance.missingValue();
       } else {
 	if (m_Cols.isInRange(i) &&
 	    instance.attribute(i).isNumeric()) {
 	  params[0] = new Double(instance.value(i));
 	  newVal = (Double) m.invoke(null, (Object[])params);
 	  if (newVal.isNaN() || newVal.isInfinite()) {
-	    vals[i] = Utils.missingValue();
+	    vals[i] = Instance.missingValue();
 	  } else {
 	    vals[i] = newVal.doubleValue(); 
 	  }
@@ -203,7 +202,7 @@ public class NumericTransform
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);

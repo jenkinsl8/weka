@@ -23,7 +23,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.lazy.kstar.KStarCache;
 import weka.classifiers.lazy.kstar.KStarConstants;
@@ -95,7 +94,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class KStar 
-  extends AbstractClassifier
+  extends Classifier
   implements KStarConstants, UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */
@@ -243,7 +242,7 @@ public class KStar
     String debug = "(KStar.updateClassifier) ";
 
     if (m_Train.equalHeaders(instance.dataset()) == false)
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     if ( instance.classIsMissing() )
       return;
     m_Train.add(instance);

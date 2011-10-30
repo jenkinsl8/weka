@@ -31,7 +31,6 @@ import java.awt.Rectangle;
 import java.beans.Beans;
 import java.io.Serializable;
 import java.util.Vector;
-import java.util.ArrayList;
 
 import javax.swing.JComponent;
 
@@ -48,28 +47,10 @@ public class BeanInstance
   /** for serialization */
   private static final long serialVersionUID = -7575653109025406342L;
 
-  private static ArrayList<Vector> TABBED_COMPONENTS = 
-    new ArrayList<Vector>();
-  
-/*  static {
-    Vector initial = new Vector();
-    TABBED_COMPONENTS.add(initial);
-  } */
-  
-  /**
-   * Sets up just a single collection of bean instances in the first
-   * element of the list. This is useful for clients that are using
-   * XMLBeans to load beans.
-   */
-  public static void init() {
-    TABBED_COMPONENTS.clear();
-    TABBED_COMPONENTS.add(new Vector());
-  }
-  
   /**
    * class variable holding all the beans
    */
-//  private static Vector COMPONENTS = new Vector();
+  private static Vector COMPONENTS = new Vector();
 
   public static final int IDLE = 0;
   public static final int BEAN_EXECUTING = 1;
@@ -81,28 +62,26 @@ public class BeanInstance
   private int m_x;
   private int m_y;
 
+
+  /**
+   * Reset the list of beans
+   */
+  public static void reset(JComponent container) {
+    // remove beans from container if necessary
+    removeAllBeansFromContainer(container);
+    COMPONENTS = new Vector();
+  }
+
   /**
    * Removes all beans from containing component
    *
    * @param container a <code>JComponent</code> value
    */
-  public static void removeAllBeansFromContainer(JComponent container, 
-      Integer... tab) {
-    
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
+  public static void removeAllBeansFromContainer(JComponent container) {
     if (container != null) {
-      if (components != null) {
-	for (int i = 0; i < components.size(); i++) {
-	  BeanInstance tempInstance = (BeanInstance)components.elementAt(i);
+      if (COMPONENTS != null) {
+	for (int i = 0; i < COMPONENTS.size(); i++) {
+	  BeanInstance tempInstance = (BeanInstance)COMPONENTS.elementAt(i);
 	  Object tempBean = tempInstance.getBean();
 	  if (Beans.isInstanceOf(tempBean, JComponent.class)) {
 	    container.remove((JComponent)tempBean);
@@ -110,7 +89,7 @@ public class BeanInstance
 	}
       }
       container.revalidate();
-    }    
+    }
   }
 
   /**
@@ -118,21 +97,11 @@ public class BeanInstance
    *
    * @param container a <code>JComponent</code> value
    */
-  public static void addAllBeansToContainer(JComponent container, Integer... tab) {
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
+  public static void addAllBeansToContainer(JComponent container) {
     if (container != null) {
-      if (components != null) {
-	for (int i = 0; i < components.size(); i++) {
-	  BeanInstance tempInstance = (BeanInstance)components.elementAt(i);
+      if (COMPONENTS != null) {
+	for (int i = 0; i < COMPONENTS.size(); i++) {
+	  BeanInstance tempInstance = (BeanInstance)COMPONENTS.elementAt(i);
 	  Object tempBean = tempInstance.getBean();
 	  if (Beans.isInstanceOf(tempBean, JComponent.class)) {
 	    container.add((JComponent)tempBean);
@@ -145,39 +114,22 @@ public class BeanInstance
 
   /**
    * Return the list of displayed beans
-   * 
-   * @param tab varargs parameter specifying the index of
-   * the collection of beans to return - if omitted then
-   * the first (i.e. primary) collection of beans is returned 
    *
    * @return a vector of beans
    */
-  public static Vector getBeanInstances(Integer... tab) {
-    Vector returnV = null;
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    if (TABBED_COMPONENTS.size() > 0) {
-      returnV = TABBED_COMPONENTS.get(index);
-    }
-    
-    return returnV;
+  public static Vector getBeanInstances() {
+    return COMPONENTS;
   }
 
   /**
-   * Adds the supplied collection of beans at the supplied index in
-   * the list of collections. If the index is not supplied then
-   * the primary collection is set (i.e. index 0). Also adds
-   * the beans to the supplied JComponent container (if not null)
+   * Describe <code>setBeanInstances</code> method here.
    *
    * @param beanInstances a <code>Vector</code> value
    * @param container a <code>JComponent</code> value
    */
   public static void setBeanInstances(Vector beanInstances, 
-				      JComponent container, 
-				      Integer... tab) {
-    removeAllBeansFromContainer(container, tab);
+				      JComponent container) {
+    reset(container);
     
     if (container != null) {
       for (int i = 0; i < beanInstances.size(); i++) {
@@ -189,56 +141,7 @@ public class BeanInstance
       container.revalidate();
       container.repaint();
     }
-    
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    if (index < TABBED_COMPONENTS.size()) {
-      TABBED_COMPONENTS.set(index, beanInstances);
-    }
-    
-    // COMPONENTS = beanInstances;
-  }
-  
-  /**
-   * Adds the supplied collection of beans to the end of the list
-   * of collections and to the JComponent container (if not null)
-   * 
-   * @param beanInstances the vector of bean instances to add
-   * @param container
-   */
-  public static void addBeanInstances(Vector beanInstances, JComponent container) {
-    // reset(container);
-    
-    if (container != null) {
-      for (int i = 0; i < beanInstances.size(); i++) {
-        Object bean = ((BeanInstance)beanInstances.elementAt(i)).getBean();
-        if (Beans.isInstanceOf(bean, JComponent.class)) {
-          container.add((JComponent)bean);
-        }
-      }
-      container.revalidate();
-      container.repaint();
-    }
-    
-    TABBED_COMPONENTS.add(beanInstances);    
-  }
-  
-  /**
-   * Remove the vector of bean instances from the supplied index in
-   * the list of collections.
-   * 
-   * @param tab the index of the vector of beans to remove.
-   */
-  public static void removeBeanInstances(JComponent container, Integer tab) {
-    
-    if (tab >= 0 && tab < TABBED_COMPONENTS.size()) {
-      System.out.println("Removing vector of beans at index: " + tab);
-      removeAllBeansFromContainer(container, tab);
-      TABBED_COMPONENTS.remove(tab.intValue());
-    }        
+    COMPONENTS = beanInstances;
   }
 
   /**
@@ -247,66 +150,54 @@ public class BeanInstance
    * @param gx a <code>Graphics</code> object on which to render
    * the labels
    */
-  public static void paintLabels(Graphics gx, Integer... tab) {
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
-    if (components != null) {
-      gx.setFont(new Font(null, Font.PLAIN, 9));
-      FontMetrics fm = gx.getFontMetrics();
-      int hf = fm.getAscent();
-      for (int i = 0; i < components.size(); i++) {
-        BeanInstance bi = (BeanInstance)components.elementAt(i);
-        if (!(bi.getBean() instanceof Visible)) {
-          continue;
-        }
-        int cx = bi.getX(); int cy = bi.getY();
-        int width = ((JComponent)bi.getBean()).getWidth();
-        int height = ((JComponent)bi.getBean()).getHeight();
-        String label = ((Visible)bi.getBean()).getVisual().getText();
-        int labelwidth = fm.stringWidth(label);
-        if (labelwidth < width) {
-          gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), cy+height+hf+2);
-        } else {
-          // split label
+  public static void paintLabels(Graphics gx) {
+    gx.setFont(new Font(null, Font.PLAIN, 9));
+    FontMetrics fm = gx.getFontMetrics();
+    int hf = fm.getAscent();
+    for (int i = 0; i < COMPONENTS.size(); i++) {
+      BeanInstance bi = (BeanInstance)COMPONENTS.elementAt(i);
+      if (!(bi.getBean() instanceof Visible)) {
+	continue;
+      }
+      int cx = bi.getX(); int cy = bi.getY();
+      int width = ((JComponent)bi.getBean()).getWidth();
+      int height = ((JComponent)bi.getBean()).getHeight();
+      String label = ((Visible)bi.getBean()).getVisual().getText();
+      int labelwidth = fm.stringWidth(label);
+      if (labelwidth < width) {
+	gx.drawString(label, (cx+(width/2)) - (labelwidth / 2), cy+height+hf+2);
+      } else {
+	// split label
 
-          // find mid point
-          int mid = label.length() / 2;
-          // look for split point closest to the mid
-          int closest = label.length();
-          int closestI = -1;
-          for (int z = 0; z < label.length(); z++) {
-            if (label.charAt(z) < 'a') {
-              if (Math.abs(mid - z) < closest) {
-                closest = Math.abs(mid - z);
-                closestI = z;
-              }
-            }
-          }
-          if (closestI != -1) {
-            String left = label.substring(0, closestI);
-            String right = label.substring(closestI, label.length());
-            if (left.length() > 1 && right.length() > 1) {
-              gx.drawString(left, (cx+(width/2)) - (fm.stringWidth(left) / 2), 
-                  cy+height+(hf * 1)+2);
-              gx.drawString(right, (cx+(width/2)) - (fm.stringWidth(right) / 2), 
-                  cy+height+(hf * 2)+2);
-            } else {
-              gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
-                  cy+height+(hf * 1)+2);
-            }
-          } else {
-            gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
-                cy+height+(hf * 1)+2);
-          }
-        }
+	// find mid point
+	int mid = label.length() / 2;
+	// look for split point closest to the mid
+	int closest = label.length();
+	int closestI = -1;
+	for (int z = 0; z < label.length(); z++) {
+	  if (label.charAt(z) < 'a') {
+	    if (Math.abs(mid - z) < closest) {
+	      closest = Math.abs(mid - z);
+	      closestI = z;
+	    }
+	  }
+	}
+	if (closestI != -1) {
+	  String left = label.substring(0, closestI);
+	  String right = label.substring(closestI, label.length());
+	  if (left.length() > 1 && right.length() > 1) {
+	    gx.drawString(left, (cx+(width/2)) - (fm.stringWidth(left) / 2), 
+			  cy+height+(hf * 1)+2);
+	    gx.drawString(right, (cx+(width/2)) - (fm.stringWidth(right) / 2), 
+			  cy+height+(hf * 2)+2);
+	  } else {
+	    gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
+			  cy+height+(hf * 1)+2);
+	  }
+	} else {
+	  gx.drawString(label, (cx+(width/2)) - (fm.stringWidth(label) / 2), 
+			cy+height+(hf * 1)+2);
+	}
       }
     }
   }
@@ -318,21 +209,11 @@ public class BeanInstance
    * @return a bean that contains the supplied point or null if no bean
    * contains the point
    */
-  public static BeanInstance findInstance(Point p, Integer... tab) {
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
+  public static BeanInstance findInstance(Point p) {
     Rectangle tempBounds = new Rectangle();
-    for (int i=0; i < components.size(); i++) {
+    for (int i=0; i < COMPONENTS.size(); i++) {
       
-      BeanInstance t = (BeanInstance)components.elementAt(i);
+      BeanInstance t = (BeanInstance)COMPONENTS.elementAt(i);
       JComponent temp = (JComponent)t.getBean();
 				      
       tempBounds = temp.getBounds(tempBounds);
@@ -352,17 +233,7 @@ public class BeanInstance
    * @param boundingBox the bounding rectangle
    * @return a Vector of BeanInstances
    */
-  public static Vector findInstances(Rectangle boundingBox, Integer... tab) {
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
+  public static Vector findInstances(Rectangle boundingBox) {
     Graphics gx = null;
     FontMetrics fm = null;
     
@@ -377,8 +248,8 @@ public class BeanInstance
     int maxX = Integer.MIN_VALUE;
     int maxY = Integer.MIN_VALUE;
     Vector result = new Vector();
-    for (int i = 0; i < components.size(); i++) {
-      BeanInstance t = (BeanInstance)components.elementAt(i);
+    for (int i = 0; i < COMPONENTS.size(); i++) {
+      BeanInstance t = (BeanInstance)COMPONENTS.elementAt(i);
       centerX = t.getX() + (t.getWidth()/2);
       centerY = t.getY() + (t.getHeight()/2);
       if (boundingBox.contains(centerX, centerY)) {
@@ -431,7 +302,7 @@ public class BeanInstance
     boundingBox.setBounds(minX, minY, maxX - minX, maxY - minY);
     
     return result;
-  }  
+  }
 
   /**
    * Creates a new <code>BeanInstance</code> instance.
@@ -441,11 +312,11 @@ public class BeanInstance
    * @param x the x coordinate of the bean
    * @param y the y coordinate of the bean
    */
-  public BeanInstance(JComponent container, Object bean, int x, int y, Integer... tab) {
+  public BeanInstance(JComponent container, Object bean, int x, int y) {
     m_bean = bean;
     m_x = x;
     m_y = y;
-    addBean(container, tab);
+    addBean(container);
   }
 
   /**
@@ -457,7 +328,7 @@ public class BeanInstance
    * @param x the x coordinate of the bean
    * @param y th y coordinate of the bean
    */
-  public BeanInstance(JComponent container, String beanName, int x, int y, Integer... tab) {
+  public BeanInstance(JComponent container, String beanName, int x, int y) {
     m_x = x;
     m_y = y;
     
@@ -469,7 +340,7 @@ public class BeanInstance
       return;
     }
 
-    addBean(container, tab);
+    addBean(container);
   }
 
   /**
@@ -477,49 +348,17 @@ public class BeanInstance
    *
    * @param container the <code>JComponent</code> that holds the bean
    */
-  public void removeBean(JComponent container, Integer... tab) {
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
-    
-    for (int i = 0; i < components.size(); i++) {
-      if ((BeanInstance)components.elementAt(i) == this) {
-	System.out.println("Removing bean");
-	components.removeElementAt(i);
+  public void removeBean(JComponent container) {
+    for (int i = 0; i < COMPONENTS.size(); i++) {
+      if ((BeanInstance)COMPONENTS.elementAt(i) == this) {
+	System.err.println(Messages.getInstance().getString("BeanInstance_RemoveBean_Error_Text"));
+	COMPONENTS.removeElementAt(i);
       }
     }
     if (container != null) {
       container.remove((JComponent)m_bean);
       container.revalidate();
       container.repaint();
-    }
-  }
-  
-  public static void appendBeans(JComponent container, Vector beans, int tab) {
-    if (TABBED_COMPONENTS.size() > 0 && tab < TABBED_COMPONENTS.size()) {
-      Vector components = TABBED_COMPONENTS.get(tab);
-      //
-      
-      for (int i = 0; i < beans.size(); i++) {
-        components.add(beans.get(i));
-        if (container != null) {
-          Object bean = ((BeanInstance)beans.elementAt(i)).getBean();
-          if (Beans.isInstanceOf(bean, JComponent.class)) {
-            container.add((JComponent)bean);
-          }
-        }        
-      }
-      
-      if (container != null) {
-        container.revalidate();
-        container.repaint();
-      }      
     }
   }
 
@@ -533,30 +372,20 @@ public class BeanInstance
    * @param container the Component on which this
    * BeanInstance will be displayed
    */
-  public void addBean(JComponent container, Integer... tab) {
-    
-    int index = 0;
-    if (tab.length > 0) {
-      index = tab[0].intValue();
-    }
-    
-    Vector components = null;
-    if (TABBED_COMPONENTS.size() > 0 && index < TABBED_COMPONENTS.size()) {
-      components = TABBED_COMPONENTS.get(index);
-    }
+  public void addBean(JComponent container) {
 
     // do nothing if we are already in the list
-    if (components.contains(this)) {
+    if (COMPONENTS.contains(this)) {
       return;
     }
 
     // Ignore invisible components
     if (!Beans.isInstanceOf(m_bean, JComponent.class)) {
-      System.out.println("Component is invisible!");
+      System.err.println(Messages.getInstance().getString("BeanInstance_AddBean_Error_Text"));
       return;
     }
     
-    components.addElement(this);
+    COMPONENTS.addElement(this);
     
     // Position and layout the component
     JComponent c = (JComponent)m_bean;

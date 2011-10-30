@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the attribute summarizer bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class AttributeSummarizerBeanInfo extends SimpleBeanInfo {
   
@@ -39,28 +39,7 @@ public class AttributeSummarizerBeanInfo extends SimpleBeanInfo {
    */
   public EventSetDescriptor [] getEventSetDescriptors() {
     // hide all gui events
-    try {
-      EventSetDescriptor [] esds = { 
-          new EventSetDescriptor(DataVisualizer.class, 
-              "image", 
-              ImageListener.class, 
-          "acceptImage")
-      };
-      return esds;
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-
-    return null;
+    EventSetDescriptor [] esds = { };
+    return esds;
   }
-  
-  /**
-   * Get the bean descriptor for this bean
-   *
-   * @return a <code>BeanDescriptor</code> value
-   */
-  public BeanDescriptor getBeanDescriptor() {
-    return new BeanDescriptor(weka.gui.beans.AttributeSummarizer.class,
-                              AttributeSummarizerCustomizer.class);
-  }  
 }

@@ -22,7 +22,6 @@
 
 package weka.gui.beans;
 
-import weka.core.Attribute;
 import weka.core.Instances;
 
 import java.awt.BorderLayout;
@@ -71,15 +70,14 @@ public class ClassAssigner
     new BeanVisual("ClassAssigner", 
 		   BeanVisual.ICON_PATH+"ClassAssigner.gif",
 		   BeanVisual.ICON_PATH+"ClassAssigner_animated.gif");
-  
+
   /**
    * Global info for this bean
    *
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Designate which column is to be considered the class column "
-      +"in incoming data.";
+    return Messages.getInstance().getString("ClassAssigner_GlobalInfo_Text");
   }
 
   public ClassAssigner() {
@@ -111,7 +109,7 @@ public class ClassAssigner
    * @return a <code>String</code> value
    */
   public String classColumnTipText() {
-    return "Specify the number of the column that contains the class attribute";
+    return Messages.getInstance().getString("ClassAssigner_ClassColumnTipText_Text");
   }
   
   private Instances getUpstreamStructure() {
@@ -183,10 +181,7 @@ public class ClassAssigner
       m_connectedFormat = getUpstreamStructure();
     }
     
-    if (m_connectedFormat != null) {
-      assignClass(m_connectedFormat);
-    }
-    
+    assignClass(m_connectedFormat);
     return m_connectedFormat;
   }
 
@@ -196,7 +191,7 @@ public class ClassAssigner
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
-    // loaders will push instances format to us
+ // loaders will push instances format to us
     // when the user makes configuration changes
     // to the loader in the gui. However, if a fully
     // configured flow is loaded then we won't get
@@ -252,6 +247,7 @@ public class ClassAssigner
     Instances testSet = e.getTestSet();
     assignClass(testSet);
     notifyTestListeners(e);
+    
     if (e.isStructureOnly()) {
       m_connectedFormat = e.getTestSet();
       // tell any listening customizers (or other
@@ -269,7 +265,7 @@ public class ClassAssigner
       notifyInstanceListeners(e);
 
       // tell any listening customizers (or other interested parties)
-      System.err.println("Notifying customizer...");
+      System.err.println(Messages.getInstance().getString("ClassAssigner_AcceptInstance_Error_Text"));
       notifyDataFormatListeners();
     } else {
       //      Instances dataSet = e.getInstance().dataset();
@@ -280,29 +276,18 @@ public class ClassAssigner
 
   private void assignClass(Instances dataSet) {
     int classCol = -1;
-
-    if (m_classColumn.trim().toLowerCase().compareTo("last") == 0 ||
-        m_classColumn.equalsIgnoreCase("/last")) {
+    if (m_classColumn.toLowerCase().compareTo("last") == 0) {
       dataSet.setClassIndex(dataSet.numAttributes()-1);
-    } else if (m_classColumn.trim().toLowerCase().compareTo("first") == 0 ||
-        m_classColumn.equalsIgnoreCase("/first")) {
+    } else if (m_classColumn.toLowerCase().compareTo("first") == 0) {
       dataSet.setClassIndex(0);
     } else {
-      // try to look up the class attribute as a string
-      Attribute classAtt = dataSet.attribute(m_classColumn.trim());
-      if (classAtt != null) {
-        dataSet.setClass(classAtt);
+      classCol = Integer.parseInt(m_classColumn) - 1;
+      if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
+	if (m_logger != null) {
+	  m_logger.logMessage(Messages.getInstance().getString("ClassAssigner_AssignClass_LogMessage_Text"));
+	}
       } else {
-        // parse it as a number
-        classCol = Integer.parseInt(m_classColumn.trim()) - 1;
-        if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
-          if (m_logger != null) {
-            m_logger.logMessage("Class column outside range of data "
-                +"(ClassAssigner)");
-          }
-        } else {
-          dataSet.setClassIndex(classCol);
-        }
+	dataSet.setClassIndex(classCol);
       }
     }
   }
@@ -314,8 +299,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying test listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTestListeners_Error_Text"));
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -328,8 +312,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying training listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTrainingListeners_Error_Text"));
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }
@@ -342,8 +325,7 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying data listeners "
-			   +"(ClassAssigner)");
+	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyDataListeners_Error_Text"));
 	((DataSourceListener)l.elementAt(i)).acceptDataSet(tse);
       }
     }

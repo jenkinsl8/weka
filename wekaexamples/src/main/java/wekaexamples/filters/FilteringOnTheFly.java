@@ -53,7 +53,7 @@ public class FilteringOnTheFly {
     test.setClassIndex(test.numAttributes() - 1);
     if (!train.equalHeaders(test))
       throw new IllegalArgumentException(
-	  "Datasets are not compatible:\n" + train.equalHeadersMsg(test));
+	  "Datasets are not compatible!");
     
     // filter
     Remove rm = new Remove();
