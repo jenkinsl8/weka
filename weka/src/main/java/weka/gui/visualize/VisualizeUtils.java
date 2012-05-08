@@ -1,32 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    VisualizeUtils.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
 
-import java.awt.Color;
-import java.util.Properties;
-
-import javax.swing.JOptionPane;
-
 import weka.core.Utils;
+import java.util.Properties;
+import java.io.FileInputStream;
+
+import java.awt.Color;
+import javax.swing.JOptionPane;
 
 
 /**
@@ -66,13 +67,11 @@ public class VisualizeUtils {
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
-       "VisualizeUtils: Could not read a visualization configuration file.\n"
-       +"An example file is included in the Weka distribution.\n"
-       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
-       +"should be placed either in your user home (which is set\n"
-       +"to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-       +"or the directory that java was started from\n",
-       "Plot2D",
+    	Messages.getInstance().getString("VisualizeUtils_JOptionPaneShowMessageDialog_Text_First") + PROPERTY_FILE + 
+       Messages.getInstance().getString("VisualizeUtils_JOptionPaneShowMessageDialog_Text_Second") + System.getProperties().getProperty("user.home") + 
+       Messages.getInstance().getString("VisualizeUtils_JOptionPaneShowMessageDialog_Text_Third")
+       ,
+       Messages.getInstance().getString("VisualizeUtils_JOptionPaneShowMessageDialog_Text_Fourth"),
        JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -99,8 +98,8 @@ public class VisualizeUtils {
 	//System.err.println(R+" "+G+" "+B);
 	retC = new Color(R,G,B);
       } catch (Exception ex) {
-	System.err.println("VisualizeUtils: Problem parsing colour property "
-			   +"value ("+colourDefBack+").");
+	System.err.println(Messages.getInstance().getString("VisualizeUtils_ProcessColour_Error_Text_First")
+			   + colourDefBack+Messages.getInstance().getString("VisualizeUtils_ProcessColour_Error_Text_Second"));
       }
     } else {
       // assume that the string is the name of a default Color.color
@@ -131,8 +130,7 @@ public class VisualizeUtils {
       } else if (colourDef.compareTo("yellow") == 0) {
 	retC = Color.yellow;
       } else {
-	System.err.println("VisualizeUtils: colour property name not recognized "
-			   +"("+colourDefBack+").");
+	System.err.println(Messages.getInstance().getString("VisualizeUtils_ProcessColour_Error_Text_Third")+colourDefBack+Messages.getInstance().getString("VisualizeUtils_ProcessColour_Error_Text_Fourth"));
       }
     }
     return retC;

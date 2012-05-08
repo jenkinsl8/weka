@@ -47,7 +47,7 @@ public class OutputClusterDistribution {
     Instances test = DataSource.read(args[1]);
     if (!train.equalHeaders(test))
       throw new IllegalArgumentException(
-	  "Train and test set are not compatible: " + train.equalHeadersMsg(test));
+	  "Train and test set are not compatible!");
     
     // build clusterer
     EM clusterer = new EM();

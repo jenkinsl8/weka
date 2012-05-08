@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ClassDiscovery.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,7 +25,6 @@ package weka.core;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
@@ -47,22 +48,19 @@ public class ClassDiscovery
 
   /** whether to output some debug information. */
   public final static boolean VERBOSE = false;
-
+  
   /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames). */
-  protected static Hashtable<String,Vector<String>> m_Cache;
-
-  /** the overall class cache. */
-  protected static ClassCache m_ClassCache;
-
+  protected static Hashtable<String,Vector> m_Cache;
+  
   /** notify if VERBOSE is still on */
   static {
     if (VERBOSE)
       System.err.println(ClassDiscovery.class.getName() + ": VERBOSE ON");
   }
-
+  
   /**
    * Checks whether the "otherclass" is a subclass of the given "superclass".
-   *
+   * 
    * @param superclass      the superclass to check against
    * @param otherclass      this class is checked whether it is a subclass
    *                        of the the superclass
@@ -76,10 +74,10 @@ public class ClassDiscovery
       return false;
     }
   }
-
+  
   /**
    * Checks whether the "otherclass" is a subclass of the given "superclass".
-   *
+   * 
    * @param superclass      the superclass to check against
    * @param otherclass      this class is checked whether it is a subclass
    *                        of the the superclass
@@ -88,30 +86,30 @@ public class ClassDiscovery
   public static boolean isSubclass(Class superclass, Class otherclass) {
     Class       currentclass;
     boolean     result;
-
+    
     result       = false;
     currentclass = otherclass;
     do {
       result = currentclass.equals(superclass);
-
+      
       // topmost class reached?
       if (currentclass.equals(Object.class))
         break;
-
+      
       if (!result)
-        currentclass = currentclass.getSuperclass();
-    }
+        currentclass = currentclass.getSuperclass(); 
+    } 
     while (!result);
-
+    
     return result;
   }
-
+  
   /**
    * Checks whether the given class implements the given interface.
-   *
+   * 
    * @param intf      the interface to look for in the given class
    * @param cls       the class to check for the interface
-   * @return          TRUE if the class contains the interface
+   * @return          TRUE if the class contains the interface 
    */
   public static boolean hasInterface(String intf, String cls) {
     try {
@@ -121,20 +119,20 @@ public class ClassDiscovery
       return false;
     }
   }
-
+  
   /**
    * Checks whether the given class implements the given interface.
-   *
+   * 
    * @param intf      the interface to look for in the given class
    * @param cls       the class to check for the interface
-   * @return          TRUE if the class contains the interface
+   * @return          TRUE if the class contains the interface 
    */
   public static boolean hasInterface(Class intf, Class cls) {
     Class[]       intfs;
     int           i;
     boolean       result;
     Class         currentclass;
-
+    
     result       = false;
     currentclass = cls;
     do {
@@ -150,21 +148,21 @@ public class ClassDiscovery
       // get parent class
       if (!result) {
         currentclass = currentclass.getSuperclass();
-
+        
         // topmost class reached or no superclass?
         if ( (currentclass == null) || (currentclass.equals(Object.class)) )
           break;
       }
-    }
+    } 
     while (!result);
-
+      
     return result;
   }
-
+  
   /**
-   * If the given package can be found in this part of the classpath then
+   * If the given package can be found in this part of the classpath then 
    * an URL object is returned, otherwise <code>null</code>.
-   *
+   * 
    * @param classpathPart     the part of the classpath to look for the package
    * @param pkgname           the package to look for
    * @return                  if found, the url as string, otherwise null
@@ -177,13 +175,13 @@ public class ClassDiscovery
     JarFile             jarfile;
     Enumeration         enm;
     String              pkgnameTmp;
-
+    
     result = null;
     urlStr = null;
 
     try {
       classpathFile = new File(classpathPart);
-
+      
       // directory or jar?
       if (classpathFile.isDirectory()) {
         // does the package exist in this directory?
@@ -207,7 +205,7 @@ public class ClassDiscovery
     catch (Exception e) {
       // ignore
     }
-
+    
     // try to generate URL from url string
     if (urlStr != null) {
       try {
@@ -215,7 +213,7 @@ public class ClassDiscovery
       }
       catch (Exception e) {
         System.err.println(
-            "Trying to create URL from '" + urlStr
+            "Trying to create URL from '" + urlStr 
             + "' generates this exception:\n" + e);
         result = null;
       }
@@ -232,11 +230,11 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(String classname, String[] pkgnames) {
-    Vector<String>      result;
+  public static Vector find(String classname, String[] pkgnames) {
+    Vector      result;
     Class       cls;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     try {
       cls    = Class.forName(classname);
@@ -257,11 +255,11 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(String classname, String pkgname) {
-    Vector<String>      result;
+  public static Vector find(String classname, String pkgname) {
+    Vector      result;
     Class       cls;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     try {
       cls    = Class.forName(classname);
@@ -282,14 +280,14 @@ public class ClassDiscovery
    * @param pkgnames        the packages to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(Class cls, String[] pkgnames) {
-    Vector<String>	result;
+  public static Vector find(Class cls, String[] pkgnames) {
+    Vector	result;
     int		i;
-    HashSet<String>	names;
+    HashSet	names;
 
-    result = new Vector<String>();
+    result = new Vector();
 
-    names = new HashSet<String>();
+    names = new HashSet();
     for (i = 0; i < pkgnames.length; i++)
       names.addAll(find(cls, pkgnames[i]));
 
@@ -301,17 +299,6 @@ public class ClassDiscovery
   }
 
   /**
-   * Find all classes that have the supplied matchText String in
-   * their suffix.
-   *
-   * @param matchText the text to match
-   * @return an array list of matching fully qualified class names.
-   */
-  public static ArrayList<String> find(String matchText) {
-    return m_ClassCache.find(matchText);
-  }
-
-  /**
    * Checks the given package for classes that inherited from the given class,
    * in case it's a class, or implement this class, in case it's an interface.
    *
@@ -319,22 +306,108 @@ public class ClassDiscovery
    * @param pkgname         the package to search in
    * @return                a list with all the found classnames
    */
-  public static Vector<String> find(Class cls, String pkgname) {
-    Vector<String>	result;
-    int			i;
-    Class		clsNew;
+  public static Vector find(Class cls, String pkgname) {
+    Vector                result;
+    StringTokenizer       tok;
+    String                part;
+    String                pkgpath;
+    File                  dir;
+    File[]                files;
+    URL                   url;
+    int                   i;
+    Class                 clsNew;
+    String                classname;
+    JarFile               jar;
+    JarEntry              entry;
+    Enumeration           enm;
+
 
     // already cached?
     result = getCache(cls, pkgname);
-
+    
     if (result == null) {
+      result = new Vector();
+
       if (VERBOSE)
 	System.out.println(
 	    "Searching for '" + cls.getName() + "' in '" + pkgname + "':");
 
-      result = new Vector<String>();
-      if (m_ClassCache.getClassnames(pkgname) != null)
-	result.addAll(m_ClassCache.getClassnames(pkgname));
+      // turn package into path
+      pkgpath = pkgname.replaceAll("\\.", "/");
+
+      // check all parts of the classpath, to include additional classes from
+      // "parallel" directories/jars, not just the first occurence
+      tok = new StringTokenizer(
+	  System.getProperty("java.class.path"), 
+	  System.getProperty("path.separator"));
+
+      while (tok.hasMoreTokens()) {
+	part = tok.nextToken();
+	if (VERBOSE)
+	  System.out.println("Classpath-part: " + part);
+
+	// does package exist in this part of the classpath?
+	url = getURL(part, "/" + pkgpath);
+	if (VERBOSE) {
+	  if (url == null)
+	    System.out.println("   " + pkgpath + " NOT FOUND");
+	  else
+	    System.out.println("   " + pkgpath + " FOUND");
+	}
+	if (url == null)
+	  continue;
+
+	// find classes
+	dir = new File(part + "/" + pkgpath);
+	if (dir.exists()) {
+	  files = dir.listFiles();
+	  for (i = 0; i < files.length; i++) {
+	    // only class files
+	    if (    (!files[i].isFile()) 
+		|| (!files[i].getName().endsWith(".class")) )
+	      continue;
+
+	    try {
+	      classname =   pkgname + "." 
+	      + files[i].getName().replaceAll(".*/", "")
+	      .replaceAll("\\.class", "");
+	      result.add(classname);
+	    }
+	    catch (Exception e) {
+	      e.printStackTrace();
+	    }
+	  }
+	}
+	else {
+	  try {
+	    jar = new JarFile(part);
+	    enm = jar.entries();
+	    while (enm.hasMoreElements()) {
+	      entry = (JarEntry) enm.nextElement();
+
+	      // only class files
+	      if (    (entry.isDirectory())
+		  || (!entry.getName().endsWith(".class")) )
+		continue;
+
+	      classname = entry.getName().replaceAll("\\.class", "");
+
+	      // only classes in the particular package
+	      if (!classname.startsWith(pkgpath))
+		continue;
+
+	      // no sub-package
+	      if (classname.substring(pkgpath.length() + 1).indexOf("/") > -1)
+		continue;
+
+	      result.add(classname.replaceAll("/", "."));
+	    }
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
+	}
+      }
 
       // check classes
       i = 0;
@@ -343,25 +416,21 @@ public class ClassDiscovery
 	  clsNew = Class.forName((String) result.get(i));
 
 	  // no abstract classes
-	  if (Modifier.isAbstract(clsNew.getModifiers())) {
-	    m_ClassCache.remove(result.get(i));
+	  if (Modifier.isAbstract(clsNew.getModifiers()))
 	    result.remove(i);
-	  }
 	  // must implement interface
-	  else if ( (cls.isInterface()) && (!hasInterface(cls, clsNew)) ) {
+	  else if ( (cls.isInterface()) && (!hasInterface(cls, clsNew)) )
 	    result.remove(i);
-	  }
 	  // must be derived from class
-	  else if ( (!cls.isInterface()) && (!isSubclass(cls, clsNew)) ) {
+	  else if ( (!cls.isInterface()) && (!isSubclass(cls, clsNew)) )
 	    result.remove(i);
-	  }
-	  else {
+	  else
 	    i++;
-	  }
 	}
-	catch (Exception e) {
-	  System.out.println("Accessing class '" + result.get(i) + "' resulted in error:");
+	catch (Throwable e) {
+	  System.err.println("Checking class: " + result.get(i));
 	  e.printStackTrace();
+	  result.remove(i);
 	}
       }
 
@@ -377,17 +446,17 @@ public class ClassDiscovery
 
   /**
    * adds all the sub-directories recursively to the list.
-   *
+   * 
    * @param prefix	the path prefix
    * @param dir		the directory to look in for sub-dirs
    * @param list	the current list of sub-dirs
    * @return		the new list of sub-dirs
    */
-  protected static HashSet<String> getSubDirectories(String prefix, File dir, HashSet<String> list) {
+  protected static HashSet getSubDirectories(String prefix, File dir, HashSet list) {
     File[]	files;
     int		i;
     String 	newPrefix;
-
+    
     // add directory to the list
     if (prefix == null)
       newPrefix = "";
@@ -398,7 +467,7 @@ public class ClassDiscovery
 
     if (newPrefix.length() != 0)
       list.add(newPrefix);
-
+    
     // search for sub-directories
     files = dir.listFiles();
     if (files != null) {
@@ -407,25 +476,65 @@ public class ClassDiscovery
 	  list = getSubDirectories(newPrefix, files[i], list);
       }
     }
-
+      
     return list;
   }
-
+  
   /**
    * Lists all packages it can find in the classpath.
    *
    * @return                a list with all the found packages
    */
-  public static Vector<String> findPackages() {
-    Vector<String>	result;
-    Enumeration<String>	packages;
+  public static Vector findPackages() {
+    Vector		result;
+    StringTokenizer	tok;
+    String		part;
+    File		file;
+    JarFile		jar;
+    JarEntry		entry;
+    Enumeration		enm;
+    HashSet		set;
 
-    initCache();
+    result = new Vector();
+    set    = new HashSet();
+    
+    // check all parts of the classpath, to include additional classes from
+    // "parallel" directories/jars, not just the first occurence
+    tok = new StringTokenizer(
+        System.getProperty("java.class.path"), 
+        System.getProperty("path.separator"));
 
-    result   = new Vector<String>();
-    packages = m_ClassCache.packages();
-    while (packages.hasMoreElements())
-      result.add(packages.nextElement());
+    while (tok.hasMoreTokens()) {
+      part = tok.nextToken();
+      if (VERBOSE)
+        System.out.println("Classpath-part: " + part);
+      
+      // find classes
+      file = new File(part);
+      if (file.isDirectory()) {
+	set = getSubDirectories(null, file, set);
+      }
+      else if (file.exists()) {
+        try {
+          jar = new JarFile(part);
+          enm = jar.entries();
+          while (enm.hasMoreElements()) {
+            entry = (JarEntry) enm.nextElement();
+            
+            // only directories
+            if (entry.isDirectory())
+              set.add(entry.getName().replaceAll("/", ".").replaceAll("\\.$", ""));
+          }
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+
+    // sort result
+    set.remove("META-INF");
+    result.addAll(set);
     Collections.sort(result, new StringCompare());
 
     return result;
@@ -436,38 +545,36 @@ public class ClassDiscovery
    */
   protected static void initCache() {
     if (m_Cache == null)
-      m_Cache = new Hashtable<String,Vector<String>>();
-    if (m_ClassCache == null)
-      m_ClassCache = new ClassCache();
+      m_Cache = new Hashtable<String,Vector>();
   }
-
+  
   /**
    * adds the list of classnames to the cache.
-   *
+   * 
    * @param cls		the class to cache the classnames for
    * @param pkgname	the package name the classes were found in
    * @param classnames	the list of classnames to cache
    */
-  protected static void addCache(Class cls, String pkgname, Vector<String> classnames) {
+  protected static void addCache(Class cls, String pkgname, Vector classnames) {
     initCache();
     m_Cache.put(cls.getName() + "-" + pkgname, classnames);
   }
-
+  
   /**
    * returns the list of classnames associated with this class and package, if
    * available, otherwise null.
-   *
+   * 
    * @param cls		the class to get the classnames for
-   * @param pkgname	the package name for the classes
+   * @param pkgname	the package name for the classes 
    * @return		the classnames if found, otherwise null
    */
-  protected static Vector<String> getCache(Class cls, String pkgname) {
+  protected static Vector getCache(Class cls, String pkgname) {
     initCache();
     return m_Cache.get(cls.getName() + "-" + pkgname);
   }
-
+  
   /**
-   * clears the cache for class/classnames queries.
+   * clears the cache for class/classnames relation.
    */
   public static void clearCache() {
     initCache();
@@ -475,18 +582,8 @@ public class ClassDiscovery
   }
   
   /**
-   * Calls clearCache() and resets the cache of classes on the classpath
-   * (i.e. forces a rescan of the classpath).
-   */
-  public static void clearClassCache() {
-    clearCache();
-    // make sure that any new classes are picked up
-    m_ClassCache = new ClassCache();
-  }
-
-  /**
    * Returns the revision string.
-   *
+   * 
    * @return		the revision
    */
   public String getRevision() {
@@ -505,15 +602,15 @@ public class ClassDiscovery
    *      Prints the classes it found.
    *    </li>
    * </ul>
-   *
+   * 
    * @param args	the commandline arguments
    */
   public static void main(String[] args) {
-    Vector<String>      	list;
-    Vector<String> 		packages;
+    Vector      	list;
+    Vector 		packages;
     int         	i;
     StringTokenizer	tok;
-
+    
     if ((args.length == 1) && (args[0].equals("packages"))) {
       list = findPackages();
       for (i = 0; i < list.size(); i++)
@@ -521,19 +618,19 @@ public class ClassDiscovery
     }
     else if (args.length == 2) {
       // packages
-      packages = new Vector<String>();
+      packages = new Vector();
       tok = new StringTokenizer(args[1], ",");
       while (tok.hasMoreTokens())
         packages.add(tok.nextToken());
-
+      
       // search
       list = ClassDiscovery.find(
-  		args[0],
+  		args[0], 
   		(String[]) packages.toArray(new String[packages.size()]));
 
       // print result, if any
       System.out.println(
-          "Searching for '" + args[0] + "' in '" + args[1] + "':\n"
+          "Searching for '" + args[0] + "' in '" + args[1] + "':\n" 
           + "  " + list.size() + " found.");
       for (i = 0; i < list.size(); i++)
         System.out.println("  " + (i+1) + ". " + list.get(i));
@@ -551,7 +648,7 @@ public class ClassDiscovery
       System.exit(1);
     }
   }
-
+  
   /**
    * compares two strings. The following order is used:<br/>
    * <ul>
@@ -561,12 +658,12 @@ public class ClassDiscovery
    *    <li>special chars &lt; numbers &lt; letters</li>
    * </ul>
    */
-  public static class StringCompare
+  public static class StringCompare 
     implements Comparator, RevisionHandler {
 
     /**
      * appends blanks to the string if its shorter than <code>len</code>.
-     *
+     * 
      * @param s		the string to pad
      * @param len	the minimum length for the string to have
      * @return		the padded string
@@ -576,33 +673,33 @@ public class ClassDiscovery
         s += " ";
       return s;
     }
-
+    
     /**
      * returns the group of the character: 0=special char, 1=number, 2=letter.
-     *
+     * 
      * @param c		the character to check
      * @return		the group
      */
     private int charGroup(char c) {
       int         result;
-
+      
       result = 0;
-
+      
       if ( (c >= 'a') && (c <= 'z') )
         result = 2;
       else if ( (c >= '0') && (c <= '9') )
         result = 1;
-
+      
       return result;
     }
-
+    
     /**
      * Compares its two arguments for order.
-     *
+     * 
      * @param o1	the first object
      * @param o2	the second object
      * @return		-1 if o1&lt;o2, 0 if o1=o2 and 1 if o1&;gt;o2
-     */
+     */    
     public int compare(Object o1, Object o2) {
       String        s1;
       String        s2;
@@ -610,17 +707,17 @@ public class ClassDiscovery
       int           result;
       int           v1;
       int           v2;
-
+      
       result = 0;   // they're equal
-
+      
       // get lower case string
       s1 = o1.toString().toLowerCase();
       s2 = o2.toString().toLowerCase();
-
+      
       // same length
       s1 = fillUp(s1, s2.length());
       s2 = fillUp(s2, s1.length());
-
+      
       for (i = 0; i < s1.length(); i++) {
         // same char?
         if (s1.charAt(i) == s2.charAt(i)) {
@@ -629,7 +726,7 @@ public class ClassDiscovery
         else {
           v1 = charGroup(s1.charAt(i));
           v2 = charGroup(s2.charAt(i));
-
+          
           // different type (special, number, letter)?
           if (v1 != v2) {
             if (v1 < v2)
@@ -643,27 +740,27 @@ public class ClassDiscovery
             else
               result = 1;
           }
-
+          
           break;
         }
       }
-
+      
       return result;
     }
-
+    
     /**
-     * Indicates whether some other object is "equal to" this Comparator.
-     *
+     * Indicates whether some other object is "equal to" this Comparator. 
+     * 
      * @param obj	the object to compare with this Comparator
      * @return		true if the object is a StringCompare object as well
      */
     public boolean equals(Object obj) {
       return (obj instanceof StringCompare);
     }
-
+    
     /**
      * Returns the revision string.
-     *
+     * 
      * @return		the revision
      */
     public String getRevision() {

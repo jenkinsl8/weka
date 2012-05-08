@@ -1,61 +1,35 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PostscriptGraphics.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.Polygon;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.Toolkit;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ColorModel;
-import java.awt.image.ImageObserver;
-import java.awt.image.PixelGrabber;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.RenderableImage;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.text.AttributedCharacterIterator;
-import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.Map;
+import java.awt.image.renderable.*;
+import java.awt.*;
+import java.awt.geom.*;
+import java.awt.font.*;
+import java.io.*;
+import java.util.*;
+import java.awt.image.*;
+import java.text.*;
 
 
 /** 
@@ -213,7 +187,7 @@ public class PostscriptGraphics extends Graphics2D {
   /** output if we're in debug mode */
   static {
     if (DEBUG)
-      System.err.println(PostscriptGraphics.class.getName() + ": DEBUG ON");
+      System.err.println(PostscriptGraphics.class.getName() + Messages.getInstance().getString("PostscriptGraphics_Error_Text"));
     
     // get font replacements
     m_PSFontReplacement = new Hashtable();
@@ -807,7 +781,7 @@ public class PostscriptGraphics extends Graphics2D {
     if (m_PSFontReplacement.containsKey(font)) {
       result = m_PSFontReplacement.get(font).toString();
       if (DEBUG)
-        System.out.println("switched font from '" + font + "' to '" + result +  "'");
+        System.out.println(Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_First") + font + Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_Second") + result +  Messages.getInstance().getString("PostscriptGraphics_ReplacePSFont_Text_Third"));
     }
     
     return result;
@@ -859,7 +833,7 @@ public class PostscriptGraphics extends Graphics2D {
    */
   public void translate(int x, int y){
     if (DEBUG)
-      System.out.println("translate with x = " + x + " and y = " + y);
+      System.out.println(Messages.getInstance().getString("PostscriptGraphics_Translate_Text_First") + x + Messages.getInstance().getString("PostscriptGraphics_Translate_Text_Second") + y);
     m_localGraphicsState.setXOffset(m_localGraphicsState.getXOffset() + xScale(x));
     m_localGraphicsState.setYOffset(m_localGraphicsState.getYOffset() + yScale(y));
     m_psGraphicsState.setXOffset(m_psGraphicsState.getXOffset() + xScale(x));
@@ -897,7 +871,7 @@ public class PostscriptGraphics extends Graphics2D {
     m_localGraphicsState.setXScale(d1);
     m_localGraphicsState.setYScale(d2);
     if (DEBUG)
-      System.err.println("d1 = " + d1 + ", d2 = " + d2);
+      System.err.println(Messages.getInstance().getString("PostscriptGraphics_Scale_Error_Text_First") + d1 + Messages.getInstance().getString("PostscriptGraphics_Scale_Error_Text_Second") + d2);
   }
   public void rotate(double d1, double d2, double d3){}
   public void rotate(double d1){}

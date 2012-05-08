@@ -1,41 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLInstances.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.zip.GZIPInputStream;
-
-import org.w3c.dom.Element;
-
 import weka.core.Attribute;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.ProtectedProperties;
@@ -44,11 +31,24 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Version;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.zip.GZIPInputStream;
+
+import org.w3c.dom.Element;
+
 /**
  * XML representation of the Instances class.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class XMLInstances
   extends XMLDocument
@@ -511,20 +511,20 @@ public class XMLInstances
 
   /**
    * returns the labels listed underneath this (nominal) attribute in a 
-   * ArrayList
+   * FastVector
    * 
    * @param parent	the (nominal) attribute node
    * @return		the label vector
    * @throws Exception	if generation fails
    */
-  protected ArrayList<String> createLabels(Element parent) throws Exception {
-    ArrayList<String>		result;
+  protected FastVector createLabels(Element parent) throws Exception {
+    FastVector		result;
     Vector		list;
     Element		node;
     Element		labelsnode;
     int			i;
     
-    result = new ArrayList<String>();
+    result = new FastVector();
     
     // find labels node directly underneath this attribute, but not in
     // deeper nested attributes (e.g., within relational attributes)
@@ -538,7 +538,7 @@ public class XMLInstances
       list  = getChildTags(labelsnode, TAG_LABEL);
       for (i = 0; i < list.size(); i++) {
 	node = (Element) list.get(i);
-	result.add(getContent(node));
+	result.addElement(getContent(node));
       }
     }
     
@@ -557,10 +557,10 @@ public class XMLInstances
     String		name;
     int			type;
     Attribute		result;
-    ArrayList<String>		values;
+    FastVector		values;
     ProtectedProperties	metadata;
     Vector		list;
-    ArrayList<Attribute>		atts;
+    FastVector		atts;
     
     result = null;
     
@@ -611,9 +611,9 @@ public class XMLInstances
 	
       case Attribute.STRING:
 	if (metadata == null)
-	  result = new Attribute(name, (ArrayList<String>) null);
+	  result = new Attribute(name, (FastVector) null);
 	else
-	  result = new Attribute(name, (ArrayList<String>) null, metadata);
+	  result = new Attribute(name, (FastVector) null, metadata);
 	break;
 	
       case Attribute.RELATIONAL:
@@ -638,14 +638,14 @@ public class XMLInstances
    * @return		the vector with the generated attributes
    * @throws Exception	if generation fails, e.g., due to unknown attribute type
    */
-  protected ArrayList<Attribute> createAttributes(Element parent, int[] classIndex) throws Exception {
+  protected FastVector createAttributes(Element parent, int[] classIndex) throws Exception {
     Vector	list;
-    ArrayList<Attribute>	result;
+    FastVector	result;
     int		i;
     Element	node;
     Attribute	att;
 
-    result        = new ArrayList<Attribute>();
+    result        = new FastVector();
     classIndex[0] = -1;
     
     list = getChildTags(parent, TAG_ATTRIBUTE);
@@ -654,7 +654,7 @@ public class XMLInstances
       att = createAttribute(node);
       if (node.getAttribute(ATT_CLASS).equals(VAL_YES))
 	classIndex[0] = i;
-      result.add(att);
+      result.addElement(att);
     }
     
     return result;
@@ -706,7 +706,7 @@ public class XMLInstances
 
       // set value
       if (node.getAttribute(ATT_MISSING).equals(VAL_YES)) {
-	values[index] = Utils.missingValue();
+	values[index] = Instance.missingValue();
       }
       else {
 	content = getContent(node);
@@ -746,7 +746,7 @@ public class XMLInstances
     if (sparse)
       result = new SparseInstance(weight, values);
     else
-      result = new DenseInstance(weight, values);
+      result = new Instance(weight, values);
     
     return result;
   }
@@ -784,7 +784,7 @@ public class XMLInstances
     Element	root;
     Element	node;
     Vector	list;
-    ArrayList<Attribute>	atts;
+    FastVector	atts;
     Version	version;
     int[]	classIndex;
 
@@ -852,7 +852,7 @@ public class XMLInstances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

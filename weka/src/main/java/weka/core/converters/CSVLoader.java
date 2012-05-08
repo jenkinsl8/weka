@@ -1,25 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CSVLoader.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,32 +41,18 @@ import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-
 /**
  <!-- globalinfo-start -->
- * Reads a source that is in comma separated format (the default). One can also change the column separator from comma to tab or another character. Assumes that the first row in the file determines the number of and names of the attributes.
+ * Reads a source that is in comma separated or tab separated format. Assumes that the first row in the file determines the number of and names of the attributes.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
- * <pre> -H
- *  No header row present in the data.</pre>
  * 
  * <pre> -N &lt;range&gt;
  *  The range of attributes to force type to be NOMINAL.
@@ -83,11 +80,6 @@ import weka.core.Utils;
  *  The string representing a missing value.
  *  (default: ?)</pre>
  * 
- * <pre> -F &lt;separator&gt;
- *  The field separator to be used.
- *  '\t' can be used as well.
- *  (default: ',')</pre>
- * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
@@ -107,12 +99,12 @@ public class CSVLoader
   /**
    * A list of hash tables for accumulating nominal values during parsing.
    */
-  protected ArrayList<Hashtable<Object,Integer>> m_cumulativeStructure;
+  protected FastVector m_cumulativeStructure;
 
   /**
    * Holds instances accumulated so far.
    */
-  protected ArrayList<ArrayList<Object>> m_cumulativeInstances;
+  protected FastVector m_cumulativeInstances;
   
   /** The reader for the data. */         
   protected transient BufferedReader m_sourceReader;
@@ -138,22 +130,8 @@ public class CSVLoader
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
   
-  /** the field separator. */
-  protected String m_FieldSeparator = ",";
-  
   /** whether the first row has been read. */
   protected boolean m_FirstCheck;
-  
-  /** whether the csv file contains a header row with att names */
-  protected boolean m_noHeaderRow = false;
-  
-  /** 
-   * holds the first row that we read when the data does not
-   * have a header row. This row gets used to determine how
-   * many attributes the data has in getStructure(), but we 
-   * still need to process its values as the first instance 
-   */
-  protected ArrayList<Object> m_firstRow;
   
   /**
    * default constructor.
@@ -197,12 +175,9 @@ public class CSVLoader
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-        "Reads a source that is in comma separated format (the default). "
-      + "One can also change the column separator from comma to tab or " 
-      + "another character. "
-      + "Assumes that the first row in the file determines the number of "
-      + "and names of the attributes.";
+    return "Reads a source that is in comma separated or tab separated format. "
+      +"Assumes that the first row in the file determines the number of "
+      +"and names of the attributes.";
   }
 
   /**
@@ -211,18 +186,16 @@ public class CSVLoader
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
-    result.add(new Option(
-        "\tNo header row present in the data.", "H", 0, "-H"));
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe range of attributes to force type to be NOMINAL.\n"
         + "\t'first' and 'last' are accepted as well.\n"
         + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
         + "\t(default: -none-)",
         "N", 1, "-N <range>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe range of attribute to force type to be STRING.\n"
         + "\t'first' and 'last' are accepted as well.\n"
         + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
@@ -241,16 +214,10 @@ public class CSVLoader
         + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")",
         "format", 1, "-format <date format>"));
     
-    result.add(new Option(
+    result.addElement(new Option(
         "\tThe string representing a missing value.\n"
         + "\t(default: ?)",
         "M", 1, "-M <str>"));
-    
-    result.addElement(new Option(
-        "\tThe field separator to be used.\n"
-        + "\t'\\t' can be used as well.\n"
-        + "\t(default: ',')",
-        "F", 1, "-F <separator>"));
       
     return result.elements();
   }
@@ -260,9 +227,6 @@ public class CSVLoader
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
-   * <pre> -H
-   *  No header row present in the data.</pre>
    * 
    * <pre> -N &lt;range&gt;
    *  The range of attributes to force type to be NOMINAL.
@@ -290,11 +254,6 @@ public class CSVLoader
    *  The string representing a missing value.
    *  (default: ?)</pre>
    * 
-   * <pre> -F &lt;separator&gt;
-   *  The field separator to be used.
-   *  '\t' can be used as well.
-   *  (default: ',')</pre>
-   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -303,8 +262,6 @@ public class CSVLoader
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
 
-    setNoHeaderRowPresent(Utils.getFlag('H', options));
-    
     tmpStr = Utils.getOption('N', options);
     if (tmpStr.length() != 0)
       setNominalAttributes(tmpStr);
@@ -323,12 +280,6 @@ public class CSVLoader
     else
       setMissingValue("?");
     
-    tmpStr = Utils.getOption('F', options);
-    if (tmpStr.length() != 0)
-      setFieldSeparator(tmpStr);
-    else
-      setFieldSeparator(",");
-    
     tmpStr = Utils.getOption('D', options);
     if (tmpStr.length() > 0) {
       setDateAttributes(tmpStr);
@@ -340,7 +291,7 @@ public class CSVLoader
   }
 
   /**
-   * Gets the current settings of the Loader.
+   * Gets the current settings of the Classifier.
    *
    * @return an array of strings suitable for passing to setOptions
    */
@@ -348,10 +299,6 @@ public class CSVLoader
     Vector<String>	result;
     
     result  = new Vector<String>();
-    
-    if (getNoHeaderRowPresent()) {
-      result.add("-H");
-    }
 
     if (getNominalAttributes().length() > 0) {
       result.add("-N");
@@ -373,38 +320,7 @@ public class CSVLoader
     result.add("-M");
     result.add(getMissingValue());
     
-    result.add("-F");
-    result.add(getFieldSeparator());
-    
     return result.toArray(new String[result.size()]);
-  }
-  
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return            tip text for this property suitable for
-   *                    displaying in the explorer/experimenter gui
-   */
-  public String noHeaderRowPresentTipText() {
-    return "First row of data does not contain attribute names";
-  }
-  
-  /**
-   * Set whether there is no header row in the data.
-   * 
-   * @param b true if there is no header row in the data
-   */
-  public void setNoHeaderRowPresent(boolean b) {
-    m_noHeaderRow = b;
-  }
-  
-  /**
-   * Get whether there is no header row in the data.
-   * 
-   * @return true if there is no header row in the data
-   */
-  public boolean getNoHeaderRowPresent() {
-    return m_noHeaderRow;
   }
   
   /**
@@ -524,7 +440,7 @@ public class CSVLoader
    */
   public String dateFormatTipText() {
     return "The format to use for parsing date values.";
-  }  
+  }
   
   /**
    * Sets the placeholder for missing values.
@@ -552,40 +468,6 @@ public class CSVLoader
    */
   public String missingValueTipText() {
     return "The placeholder for missing values, default is '?'.";
-  }
-  
-  /**
-   * Sets the character used as column separator.
-   * 
-   * @param value	the character to use
-   */
-  public void setFieldSeparator(String value) {
-    m_FieldSeparator = Utils.unbackQuoteChars(value);
-    if (m_FieldSeparator.length() != 1) {
-      m_FieldSeparator = ",";
-      System.err.println(
-	  "Field separator can only be a single character (exception being '\t'), "
-	  + "defaulting back to '" + m_FieldSeparator + "'!");
-    }
-  }
-  
-  /**
-   * Returns the character used as column separator.
-   * 
-   * @return		the character to use
-   */
-  public String getFieldSeparator() {
-    return Utils.backQuoteChars(m_FieldSeparator);
-  }
-
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return 		tip text for this property suitable for
-   *         		displaying in the explorer/experimenter gui
-   */
-  public String fieldSeparatorTipText() {
-    return "The character to use as separator for the columns/fields (use '\\t' for TAB).";
   }
   
   /**
@@ -675,43 +557,39 @@ public class CSVLoader
       initTokenizer(m_st);      
     }
         
-    m_st.ordinaryChar(m_FieldSeparator.charAt(0));
+    m_st.ordinaryChar(',');
+    m_st.ordinaryChar('\t');
     
-    m_cumulativeStructure = new ArrayList<Hashtable<Object,Integer>>(m_structure.numAttributes());
+    m_cumulativeStructure = new FastVector(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
-      m_cumulativeStructure.add(new Hashtable<Object,Integer>());
+      m_cumulativeStructure.addElement(new Hashtable());
     }
     
-    m_cumulativeInstances = new ArrayList<ArrayList<Object>>();
-    if (m_noHeaderRow && m_firstRow != null) {
-      // add the first row that was read in readHeader() in order
-      // to determine how many attributes the data has
-      m_cumulativeInstances.add(m_firstRow);
-    }
-    ArrayList<Object> current;
+    m_cumulativeInstances = new FastVector();
+    FastVector current;
     while ((current = getInstance(m_st)) != null) {
-      m_cumulativeInstances.add(current);
+      m_cumulativeInstances.addElement(current);
     }
 
-    ArrayList<Attribute> atts = new ArrayList<Attribute>(m_structure.numAttributes());
+    FastVector atts = new FastVector(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
       String attname = m_structure.attribute(i).name();
-      Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
+      Hashtable tempHash = ((Hashtable)m_cumulativeStructure.elementAt(i));
       if (tempHash.size() == 0) {
         if (m_dateAttributes.isInRange(i)) {
-          atts.add(new Attribute(attname, m_dateFormat));
+          atts.addElement(new Attribute(attname, m_dateFormat));
         } else {
-          atts.add(new Attribute(attname));
+          atts.addElement(new Attribute(attname));
         }
       } else {
 	if (m_StringAttributes.isInRange(i)) {
-	  atts.add(new Attribute(attname, (ArrayList<String>) null));
+	  atts.addElement(new Attribute(attname, (FastVector) null));
 	}
 	else {
-	  ArrayList<String> values = new ArrayList<String>(tempHash.size());
-	  // add dummy objects in order to make the ArrayList's size == capacity
+	  FastVector values = new FastVector(tempHash.size());
+	  // add dummy objects in order to make the FastVector's size == capacity
 	  for (int z = 0; z < tempHash.size(); z++) {
-	    values.add("dummy");
+	    values.addElement("dummy");
 	  }
 	  Enumeration e = tempHash.keys();
 	  while (e.hasMoreElements()) {
@@ -721,10 +599,10 @@ public class CSVLoader
 	    String s = ob.toString();
 	    if (s.startsWith("'") || s.startsWith("\""))
 	      s = s.substring(1, s.length() - 1);
-	    values.set(index, new String(s));
+	    values.setElementAt(new String(s), index);
 	    //	  }
 	  }
-	  atts.add(new Attribute(attname, values));
+	  atts.addElement(new Attribute(attname, values));
 	}
       }
     }
@@ -740,20 +618,20 @@ public class CSVLoader
 				      m_cumulativeInstances.size());
 
     for (int i = 0; i < m_cumulativeInstances.size(); i++) {
-      current = m_cumulativeInstances.get(i);
+      current = ((FastVector)m_cumulativeInstances.elementAt(i));
       double [] vals = new double[dataSet.numAttributes()];
       for (int j = 0; j < current.size(); j++) {
-	Object cval = current.get(j);
+	Object cval = current.elementAt(j);
 	if (cval instanceof String) {
 	  if (((String)cval).compareTo(m_MissingValue) == 0) {
-	    vals[j] = Utils.missingValue();
+	    vals[j] = Instance.missingValue();
 	  } else {
 	    if (dataSet.attribute(j).isString()) {
 	      vals[j] = dataSet.attribute(j).addStringValue((String) cval);
 	    }
 	    else if (dataSet.attribute(j).isNominal()) {
 	      // find correct index
-	      Hashtable<Object,Integer> lookup = m_cumulativeStructure.get(j);
+	      Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
 	      int index = ((Integer)lookup.get(cval)).intValue();
 	      vals[j] = index;
 	    }
@@ -763,7 +641,7 @@ public class CSVLoader
 	  }
 	} else if (dataSet.attribute(j).isNominal()) {
 	  // find correct index
-	  Hashtable<Object,Integer> lookup = m_cumulativeStructure.get(j);
+	  Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
 	  int index = ((Integer)lookup.get(cval)).intValue();
 	  vals[j] = index;
 	} else if (dataSet.attribute(j).isString()) {
@@ -772,7 +650,7 @@ public class CSVLoader
 	  vals[j] = ((Double)cval).doubleValue();
 	}
       }
-      dataSet.add(new DenseInstance(1.0, vals));
+      dataSet.add(new Instance(1.0, vals));
     }
     m_structure = new Instances(dataSet, 0);
     setRetrieval(BATCH);
@@ -796,17 +674,12 @@ public class CSVLoader
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("CSVLoader can't read data sets incrementally.");
   }
-  
-  private ArrayList<Object> getInstance(StreamTokenizer tokenizer)
-    throws IOException {
-    return getInstance(tokenizer, false);
-  }
 
   /**
    * Attempts to parse a line of the data set.
    *
    * @param tokenizer the tokenizer
-   * @return a ArrayList containg String and Double objects representing
+   * @return a FastVector containg String and Double objects representing
    * the values of the instance.
    * @exception IOException if an error occurs
    *
@@ -821,11 +694,10 @@ public class CSVLoader
    *      signals: (IOException);
    * </jml></pre>
    */
-  private ArrayList<Object> getInstance(StreamTokenizer tokenizer,
-      boolean readingFirstRow)
+  private FastVector getInstance(StreamTokenizer tokenizer) 
     throws IOException {
 
-    ArrayList<Object> current = new ArrayList<Object>();
+    FastVector current = new FastVector();
 
     // Check if end of file reached.
     ConverterUtils.getFirstToken(tokenizer);
@@ -843,23 +715,23 @@ public class CSVLoader
 	ConverterUtils.getToken(tokenizer);
       }
 
-      if (tokenizer.ttype == m_FieldSeparator.charAt(0) || 
+      if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
-	current.add(m_MissingValue);
+	current.addElement(m_MissingValue);
 	wasSep = true;
       } else {
 	wasSep = false;
 	if (tokenizer.sval.equals(m_MissingValue)) {
-	  current.add(new String(m_MissingValue));
+	  current.addElement(new String(m_MissingValue));
 	}
 	else {
 	  // try to parse as a number
 	  try {
 	    double val = Double.valueOf(tokenizer.sval).doubleValue();
-	    current.add(new Double(val));
+	    current.addElement(new Double(val));
 	  } catch (NumberFormatException e) {
 	    // otherwise assume its an enumerated value
-	    current.add(new String(tokenizer.sval));
+	    current.addElement(new String(tokenizer.sval));
 	  }
 	}
       }
@@ -870,20 +742,18 @@ public class CSVLoader
       first = false;
     }
     
-    if (!readingFirstRow) {
-      // check number of values read
-      if (current.size() != m_structure.numAttributes()) {
-        ConverterUtils.errms(tokenizer, 
-            "wrong number of values. Read "+current.size()
-            +", expected "+m_structure.numAttributes());
-      }
+    // check number of values read
+    if (current.size() != m_structure.numAttributes()) {
+      ConverterUtils.errms(tokenizer, 
+			   "wrong number of values. Read "+current.size()
+			   +", expected "+m_structure.numAttributes());
+    }
 
-      // check for structure update
-      try {
-        checkStructure(current);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
+    // check for structure update
+    try {
+      checkStructure(current);
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
 
     return current;
@@ -892,10 +762,10 @@ public class CSVLoader
   /**
    * Checks the current instance against what is known about the structure
    * of the data set so far. If there is a nominal value for an attribute
-   * that was believed to be numeric then all previously seen values for this
+   * that was beleived to be numeric then all previously seen values for this
    * attribute are stored in a Hashtable.
    *
-   * @param current a <code>ArrayList</code> value
+   * @param current a <code>FastVector</code> value
    * @exception Exception if an error occurs
    *
    * <pre><jml>
@@ -908,7 +778,7 @@ public class CSVLoader
    *      signals: (Exception);
    * </jml></pre>
    */
-  private void checkStructure(ArrayList<Object> current) throws Exception {
+  private void checkStructure(FastVector current) throws Exception {
     if (current == null) {
       throw new Exception("current shouldn't be null in checkStructure");
     }
@@ -922,40 +792,40 @@ public class CSVLoader
     }
     
     for (int i = 0; i < current.size(); i++) {
-      Object ob = current.get(i);
+      Object ob = current.elementAt(i);
       if ((ob instanceof String) || (m_NominalAttributes.isInRange(i)) || 
           (m_StringAttributes.isInRange(i)) || m_dateAttributes.isInRange(i)) {
 	if (ob.toString().compareTo(m_MissingValue) == 0) {
 	  // do nothing
 	} else {
-	  
+
 	  boolean notDate = true;
 	  if (m_dateAttributes.isInRange(i)) {
 	    // try to parse date string
 	    if (m_formatter == null) {
 	      m_formatter = new SimpleDateFormat(m_dateFormat);
 	    }
-	    
+
 	    try {
 	      long time = m_formatter.parse(ob.toString()).getTime();
 	      Double timeL = new Double(time);
-	      current.set(i, timeL);
+	      current.setElementAt(timeL, i);
 	      notDate = false;
 	    } catch (ParseException e) {
 	      notDate = true;
-	    }	    
+	    }       
 	  }
-	  
+
 	  if (notDate) {
-	    Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
+	    Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
 	    if (!tempHash.containsKey(ob)) {
 	      // may have found a nominal value in what was previously thought to
 	      // be a numeric variable.
 	      if (tempHash.size() == 0) {
 	        for (int j = 0; j < m_cumulativeInstances.size(); j++) {
-	          ArrayList tempUpdate = 
-	            ((ArrayList)m_cumulativeInstances.get(j));
-	          Object tempO = tempUpdate.get(i);
+	          FastVector tempUpdate = 
+	            ((FastVector)m_cumulativeInstances.elementAt(j));
+	          Object tempO = tempUpdate.elementAt(i);
 	          if (tempO instanceof String) {
 	            // must have been a missing value
 	          } else {
@@ -972,7 +842,7 @@ public class CSVLoader
 	  }
 	}
       } else if (ob instanceof Double) {
-	Hashtable<Object,Integer> tempHash = m_cumulativeStructure.get(i);
+	Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
 	if (tempHash.size() != 0) {
 	  if (!tempHash.containsKey(ob)) {
 	    int newIndex = tempHash.size();
@@ -988,7 +858,7 @@ public class CSVLoader
 
   /**
    * Assumes the first line of the file contains the attribute names.
-   * Assumes all attributes are Strung (Reading the full data set with
+   * Assumes all attributes are String attributes (Reading the full data set with
    * getDataSet will establish the true structure).
    *
    * @param tokenizer a <code>StreamTokenizer</code> value
@@ -1008,27 +878,16 @@ public class CSVLoader
    */
   private void readHeader(StreamTokenizer tokenizer) throws IOException {
    
-    ArrayList<Attribute> attribNames = new ArrayList<Attribute>();
-    m_firstRow = null;
-    if (m_noHeaderRow) {
-      tokenizer.ordinaryChar(m_FieldSeparator.charAt(0));
-      ArrayList<Object> firstRow = getInstance(tokenizer, true);
-      for (int i = 0; i < firstRow.size(); i++) {
-        attribNames.add(new Attribute("att" + (i + 1),
-            (java.util.List<String>)null));
-      }
-      m_firstRow = firstRow;
-    } else {
-      ConverterUtils.getFirstToken(tokenizer);
-      if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-        ConverterUtils.errms(tokenizer,"premature end of file");
-      }
+    FastVector attribNames = new FastVector();
+    ConverterUtils.getFirstToken(tokenizer);
+    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
+      ConverterUtils.errms(tokenizer,"premature end of file");
+    }
 
-      while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
-        attribNames.add(new Attribute(tokenizer.sval, 
-            (java.util.List<String>)null));
-        ConverterUtils.getToken(tokenizer);
-      }
+    while (tokenizer.ttype != StreamTokenizer.TT_EOL) {
+      attribNames.addElement(new Attribute(tokenizer.sval,
+          (FastVector)null));
+      ConverterUtils.getToken(tokenizer);
     }
     String relationName;
     if (m_sourceFile != null)
@@ -1047,7 +906,8 @@ public class CSVLoader
     tokenizer.resetSyntax();         
     tokenizer.whitespaceChars(0, (' '-1));    
     tokenizer.wordChars(' ','\u00FF');
-    tokenizer.whitespaceChars(m_FieldSeparator.charAt(0),m_FieldSeparator.charAt(0));
+    tokenizer.whitespaceChars(',',',');
+    tokenizer.whitespaceChars('\t','\t');
     tokenizer.commentChar('%');
     tokenizer.quoteChar('"');
     tokenizer.quoteChar('\'');

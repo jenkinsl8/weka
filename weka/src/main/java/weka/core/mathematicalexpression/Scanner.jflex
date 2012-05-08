@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Scanner.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.mathematicalexpression;
@@ -83,7 +84,7 @@ import java.io.*;
 // numbers and variables
 [0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
 -[0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
-[A-Z]+[0-9]* { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext())); }
+[A-Z]+ { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext())); }
 
 // whitespaces
 [ \r\n\t\f] { /* ignore white space. */ }

@@ -1,25 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GeneratorPropertyIteratorPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.FastVector;
+import weka.experiment.Experiment;
+import weka.experiment.PropertyNode;
+import weka.gui.GenericArrayEditor;
+import weka.gui.PropertySelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -43,12 +50,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import weka.core.FastVector;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
-import weka.gui.GenericArrayEditor;
-import weka.gui.PropertySelectorDialog;
-
 /** 
  * This panel controls setting a list of values for an arbitrary
  * resultgenerator property for an experiment to iterate over.
@@ -64,7 +65,7 @@ public class GeneratorPropertyIteratorPanel
   private static final long serialVersionUID = -6026938995241632139L;
 
   /** Click to select the property to iterate over */
-  protected JButton m_ConfigureBut = new JButton("Select property...");
+  protected JButton m_ConfigureBut = new JButton(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_ConfigureBut_JButton_Text"));
 
   /** Controls whether the custom iterator is used or not */
   protected JComboBox m_StatusBox = new JComboBox();
@@ -83,8 +84,7 @@ public class GeneratorPropertyIteratorPanel
    * Creates the property iterator panel initially disabled.
    */
   public GeneratorPropertyIteratorPanel() {
-
-    String [] options = {"Disabled", "Enabled"};
+    String [] options = {Messages.getInstance().getString("GeneratorPropertyIteratorPanel_Options_Disabled_Text"), Messages.getInstance().getString("GeneratorPropertyIteratorPanel_Options_Enabled_Text")};
     ComboBoxModel cbm = new DefaultComboBoxModel(options);
     m_StatusBox.setModel(cbm);
     m_StatusBox.setSelectedIndex(0);
@@ -115,7 +115,7 @@ public class GeneratorPropertyIteratorPanel
     m_ArrayEditor.setBorder(BorderFactory.createEtchedBorder());
     m_ArrayEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-	System.err.println("Updating experiment property iterator array");
+	System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_PropertyChange_Error_Text"));
 	m_Exp.setPropertyArray(m_ArrayEditor.getValue());
       }
     });
@@ -179,7 +179,7 @@ public class GeneratorPropertyIteratorPanel
     jd.setLocationRelativeTo(this);
     int result = jd.showDialog();
     if (result == PropertySelectorDialog.APPROVE_OPTION) {
-      System.err.println("Property Selected");
+      System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_SelectProperty_Error_Text_First"));
       PropertyNode [] path = jd.getPath();
       Object value = path[path.length - 1].value;
       PropertyDescriptor property = path[path.length - 1].property;
@@ -191,9 +191,9 @@ public class GeneratorPropertyIteratorPanel
       // Pass it to the arrayeditor
       m_ArrayEditor.setValue(m_Exp.getPropertyArray());
       m_ArrayEditor.repaint();
-      System.err.println("Set new array to array editor");
+      System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_SelectProperty_Error_Text_Second"));
     } else {
-      System.err.println("Cancelled");
+      System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_SelectProperty_Error_Text_Third"));
     }
     return result;
   }
@@ -213,7 +213,7 @@ public class GeneratorPropertyIteratorPanel
 	ActionListener temp = ((ActionListener)m_Listeners.elementAt(i));
 	temp.actionPerformed(new ActionEvent(this, 
 					     ActionEvent.ACTION_PERFORMED, 
-					     "Editor status change"));
+					     Messages.getInstance().getString("GeneratorPropertyIteratorPanel_ActionPerformed_Text")));
       }
 
       // Toggles whether the custom property is used
@@ -255,7 +255,7 @@ public class GeneratorPropertyIteratorPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Generator Property Iterator");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       GeneratorPropertyIteratorPanel gp = new GeneratorPropertyIteratorPanel();
       jf.getContentPane().add(gp, BorderLayout.CENTER);
@@ -267,9 +267,9 @@ public class GeneratorPropertyIteratorPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println("Short nap");
+      System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_Main_Error_Text_First"));
       Thread.currentThread().sleep(3000);
-      System.err.println("Done");
+      System.err.println(Messages.getInstance().getString("GeneratorPropertyIteratorPanel_Main_Error_Text_Second"));
       gp.setExperiment(new Experiment());
     } catch (Exception ex) {
       ex.printStackTrace();

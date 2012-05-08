@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeListPanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -30,8 +33,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-
-import weka.core.Instances;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -128,9 +129,9 @@ public class AttributeListPanel
       
       switch (column) {
       case 0:
-	return new String("No.");
+	return new String(Messages.getInstance().getString("AttributeListPanel_getColumnName_Number_Text"));
       case 1:
-	return new String("Name");
+	return new String(Messages.getInstance().getString("AttributeListPanel_getColumnName_Name_Text"));
       default:
 	return null;
       }
@@ -218,13 +219,13 @@ public class AttributeListPanel
 
     try {
       if (args.length == 0) {
-	throw new Exception("supply the name of an arff file");
+	throw new Exception(Messages.getInstance().getString("AttributeListPanel_Main_Error_Text"));
       }
       Instances i = new Instances(new java.io.BufferedReader(
 				  new java.io.FileReader(args[0])));
       AttributeListPanel asp = new AttributeListPanel();
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Attribute List Panel");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeListPanel_Main_AttributeListPanel_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(asp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

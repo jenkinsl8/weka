@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    TransformationDictionary.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -60,10 +61,10 @@ class TransformationDictionary implements Serializable {
                                   Instances dataDictionary) throws Exception {
     
     // set up incoming field definitions
-/*    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
+    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
     for (int i = 0; i < dataDictionary.numAttributes(); i++) {
       incomingFieldDefs.add(dataDictionary.attribute(i));
-    } */
+    }
     
     // get any derived fields and DefineFunctions
     NodeList derivedL = dictionary.getChildNodes();
@@ -72,7 +73,7 @@ class TransformationDictionary implements Serializable {
       if (child.getNodeType() == Node.ELEMENT_NODE) {
         String tagName = ((Element)child).getTagName();
         if (tagName.equals("DerivedField")) {
-          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, null /*incomingFieldDefs*/, null);
+          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, incomingFieldDefs, null);
           m_derivedFields.add(df);
         } else if (tagName.equals("DefineFunction")) {
           DefineFunction defF = new DefineFunction((Element)child, null);
@@ -84,20 +85,13 @@ class TransformationDictionary implements Serializable {
   
   /**
    * Set the field definitions for the derived fields. Usually called once the
-   * structure of the mining schema + derived fields has been determined. 
-   * Calling this method with an array list of field definitions in the order of 
-   * attributes in the mining schema + derived fields will allow the expressions 
-   * used in the derived fields to access the correct attribute values from the 
-   * incoming instance (also allows for derived fields to reference other
-   * derived fields). This is necessary because construction of the TransformationDictionary uses the
+   * structure of the mining schema has been determined. Calling this method
+   * with an array list of field definitions in the order of attributes in the
+   * mining schema will allow the expressions used in the derived fields to
+   * access the correct attribute values from the incoming instances. This is
+   * necessary because construction of the TransformationDictionary uses the
    * data dictionary to reference fields (the order of fields in the data dictionary
    * is not guaranteed to be the same as the order in the mining schema).
-   * 
-   * IMPORTANT: for derived field x to be able to reference derived field y, y must
-   * have been declared before x in the PMML file. This is because the process
-   * of constructing an input vector of values to the model proceeds in a linear
-   * left-to-right fashion - so any referenced derived field (e.g. field y),
-   * must have already computed its value when x is evaluated.
    * 
    * @param fieldDefs the definition of the incoming fields as an array list of attributes
    * @throws Exception if a problem occurs
@@ -105,18 +99,6 @@ class TransformationDictionary implements Serializable {
   protected void setFieldDefsForDerivedFields(ArrayList<Attribute> fieldDefs) throws Exception {
     for (int i = 0; i < m_derivedFields.size(); i++) {
       m_derivedFields.get(i).setFieldDefs(fieldDefs);
-    }
-    
-    // refresh the define functions - force them to pass on their parameter
-    // definitions as field defs to their encapsulated expression. Parameter
-    // defs were not passed on by expressions encapsulated in DefineFunctions
-    // at construction time because the encapsulated expression does not know
-    // whether it is contained in a DefineFunction or a DerivedField. Since
-    // we delay passing on field definitions until all derived fields are 
-    // loaded (in order to allow derived fields to reference other derived fields),
-    // we must tell DefineFunctions to pass on their parameter definitions
-    for (int i = 0; i < m_defineFunctions.size(); i++) {
-      m_defineFunctions.get(i).pushParameterDefs();
     }
   }
   

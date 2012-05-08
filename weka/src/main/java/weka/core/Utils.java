@@ -1,39 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Utils.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.lang.Math;
+import java.lang.reflect.Array;
+import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.lang.reflect.Array;
-import java.net.URL;
-import java.text.BreakIterator;
-import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Random;
-import java.util.Vector;
 
 /**
  * Class implementing some simple utility methods.
@@ -52,45 +46,14 @@ public final class Utils
 
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
-  
-  /**
-   * Tests if the given value codes "missing".
-   *
-   * @param val the value to be tested
-   * @return true if val codes "missing"
-   */
-  public static boolean isMissingValue(double val) {
 
-    return Double.isNaN(val);
-  }
-
-  /**
-   * Returns the value used to code a missing value.  Note that
-   * equality tests on this value will always return false, so use
-   * isMissingValue(double val) for testing..
-   *
-   * @return the value used as missing value.
-   */
-  public static double missingValue() {
-    
-    return Double.NaN;
-  }
-
-  /**
-   * Casting an object without "unchecked" compile-time warnings.
-   * Use only when absolutely necessary (e.g. when using clone()).
-   */
-  @SuppressWarnings("unchecked")
-    public static <T> T cast(Object x) {
-    return (T) x;
-  }
   
   /**
    * Reads properties that inherit from three locations. Properties
    * are first defined in the system resource location (i.e. in the
-   * CLASSPATH).  These default properties must exist. Properties optionally
-   * defined in the user properties location (WekaPackageManager.PROPERTIES_DIR) 
-   * override default settings. Properties defined in the current directory (optional)
+   * CLASSPATH).  These default properties must exist. Properties
+   * defined in the users home directory (optional) override default
+   * settings. Properties defined in the current directory (optional)
    * override all these settings.
    *
    * @param resourceName the location of the resource that should be
@@ -110,24 +73,13 @@ public final class Utils
     try {
       // Apparently hardcoded slashes are OK here
       // jdk1.1/docs/guide/misc/resources.html
-      Utils utils = new Utils();
-      Enumeration<URL> urls = utils.getClass().getClassLoader().getResources(resourceName);
-      boolean first = true;
-      while (urls.hasMoreElements()) {
-	URL url = urls.nextElement();
-	if (first) {
-	  defaultProps.load(url.openStream());
-	  first = false;
-	}
-	else {
-	  Properties props = new Properties(defaultProps);
-	  props.load(url.openStream());
-	  defaultProps = props;
-	}
-      }
+      //      defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
+      defaultProps.load((new Utils()).getClass().getClassLoader().getResourceAsStream(resourceName));
     } catch (Exception ex) {
-      System.err.println("Warning, unable to load properties file(s) from "
-			 +"system resource (Utils.java): " + resourceName);
+/*      throw new Exception("Problem reading default properties: "
+	+ ex.getMessage()); */
+      System.err.println("Warning, unable to load properties file from "
+			 +"system resource (Utils.java)");
     }
 
     // Hardcoded slash is OK here
@@ -137,15 +89,11 @@ public final class Utils
       resourceName = resourceName.substring(slInd + 1);
     }
 
-    // Allow a properties file in the WekaPackageManager.PROPERTIES_DIR to override
-    Properties userProps = new Properties(defaultProps);
-    if (!WekaPackageManager.PROPERTIES_DIR.exists()) {
-      WekaPackageManager.PROPERTIES_DIR.mkdir();
-    }
-    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString()
-                             + File.separator
+    // Allow a properties file in the home directory to override
+    Properties userProps = new Properties(defaultProps);    
+    File propFile = new File(System.getProperties().getProperty("user.home")
+                             + File.separatorChar
                              + resourceName);
-
     if (propFile.exists()) {
       try {
         userProps.load(new FileInputStream(propFile));
@@ -749,7 +697,7 @@ public final class Utils
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%', 
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%',
         '\u001E'};
     String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
         "\\u001E"};
@@ -950,7 +898,7 @@ public final class Utils
    */
   public static String[] splitOptions(String quotedOptionString) throws Exception{
 
-    Vector<String> optionsVec = new Vector<String>();
+    FastVector optionsVec = new FastVector();
     String str = new String(quotedOptionString);
     int i;
     
@@ -1061,11 +1009,11 @@ public final class Utils
    * class is not assignable to the desired class type, or the options
    * supplied are not acceptable to the object
    */
-  public static Object forName(Class<?> classType,
+  public static Object forName(Class classType,
 			       String className,
 			       String[] options) throws Exception {
 
-    Class<?> c = null;
+    Class c = null;
     try {
       c = Class.forName(className);
     } catch (Exception ex) {
@@ -1084,28 +1032,6 @@ public final class Utils
     return o;
   }
 
-  /**
-   * Generates a commandline of the given object. If the object is not 
-   * implementing OptionHandler, then it will only return the classname,
-   * otherwise also the options.
-   * 
-   * @param obj		the object to turn into a commandline
-   * @return		the commandline
-   */
-  public static String toCommandLine(Object obj) {
-    StringBuffer	result;
-    
-    result = new StringBuffer();
-    
-    if (obj != null) {
-      result.append(obj.getClass().getName());
-      if (obj instanceof OptionHandler)
-	result.append(" " + joinOptions(((OptionHandler) obj).getOptions()));
-    }
-    
-    return result.toString().trim();
-  }
-  
   /**
    * Computes entropy for an array of integers.
    *
@@ -1949,172 +1875,6 @@ public final class Utils
     }
   }
   
-  /**
-   * For a named dialog, returns true if the user has opted not to view
-   * it again in the future.
-   * 
-   * @param dialogName the name of the dialog to check (e.g.
-   * weka.gui.GUICHooser.HowToFindPackageManager).
-   * @return true if the user has opted not to view the named dialog
-   * in the future.
-   */
-  public static boolean getDontShowDialog(String dialogName) {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return false;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      return false;
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    
-    return dialogFile.exists();
-  }
-  
-  /**
-   * Specify that the named dialog is not to be displayed in the future.
-   * 
-   * @param dialogName the name of the dialog not to show again (e.g.
-   * weka.gui.GUIChooser.HowToFindPackageManager).
-   * @throws Exception if the marker file that is used to indicate that
-   * a named dialog is not to be shown can't be created. This file lives
-   * in $WEKA_HOME/systemDialogs
-   */
-  public static void setDontShowDialog(String dialogName) throws Exception {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      if (!dialogSubDir.mkdir()) {
-        return;
-      }
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    dialogFile.createNewFile();
-  }
-  
-  /**
-   * For a named dialog, if the user has opted not to view it again, 
-   * returns the answer the answer the user supplied when they
-   * closed the dialog. Returns null if the user did opt to view
-   * the dialog again.
-   * 
-   * @param dialogName the name of the dialog to check (e.g.
-   * weka.gui.GUICHooser.HowToFindPackageManager).
-   * @return the answer the user supplied the last time they
-   * viewed the named dialog (if they opted not to view it again
-   * in the future) or null if the user opted to view the dialog
-   * again in the future.
-   */
-  public static String getDontShowDialogResponse(String dialogName) throws Exception {
-    if (!getDontShowDialog(dialogName)) {
-      return null; // This must be the first time - no file recorded yet.
-    }
-    
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    File dialogSubDir = new File(wekaHome.toString() + File.separator 
-        + "systemDialogs" + File.separator + dialogName);
-
-    
-    BufferedReader br = new BufferedReader(new FileReader(dialogSubDir));
-    String response = br.readLine();
-    
-    br.close();
-    return response;
-  }
-  
-  /**
-   * Specify that the named dialog is not to be shown again in the future. 
-   * Also records the answer that the user chose when closing the dialog.
-   * 
-   * @param dialogName the name of the dialog to no longer display
-   * @param response the user selected response when they closed the dialog
-   * @throws Exception if there is a problem saving the information
-   */
-  public static void setDontShowDialogResponse(String dialogName, String response) 
-    throws Exception {
-    
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      if (!dialogSubDir.mkdir()) {
-        return;
-      }
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    BufferedWriter br = new BufferedWriter(new FileWriter(dialogFile));
-    br.write(response + "\n");
-    br.flush();
-    br.close();
-  }
-
-  /**
-   * Breaks up the string, if wider than "columns" characters.
-   *
-   * @param s		the string to process
-   * @param columns	the width in columns
-   * @return		the processed string
-   */
-  public static String[] breakUp(String s, int columns) {
-    Vector<String>	result;
-    String		line;
-    BreakIterator	boundary;
-    int			boundaryStart;
-    int			boundaryEnd;
-    String		word;
-    String		punctuation;
-    int			i;
-    String[]		lines;
-
-    result      = new Vector<String>();
-    punctuation = " .,;:!?'\"";
-    lines       = s.split("\n");
-
-    for (i = 0; i < lines.length; i++) {
-      boundary      = BreakIterator.getWordInstance();
-      boundary.setText(lines[i]);
-      boundaryStart = boundary.first();
-      boundaryEnd   = boundary.next();
-      line          = "";
-
-      while (boundaryEnd != BreakIterator.DONE) {
-	word = lines[i].substring(boundaryStart, boundaryEnd);
-	if (line.length() >= columns) {
-	  if (word.length() == 1) {
-	    if (punctuation.indexOf(word.charAt(0)) > -1) {
-	      line += word;
-	      word = "";
-	    }
-	  }
-	  result.add(line);
-	  line = "";
-	}
-	line          += word;
-	boundaryStart  = boundaryEnd;
-	boundaryEnd    = boundary.next();
-      }
-      if (line.length() > 0)
-	result.add(line);
-    }
-
-    return result.toArray(new String[result.size()]);
-  }
-
   /**
    * Returns the revision string.
    * 

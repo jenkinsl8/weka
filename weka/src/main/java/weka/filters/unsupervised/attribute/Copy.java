@@ -1,34 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Copy.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,35 +33,39 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-/** 
+import java.util.Enumeration;
+import java.util.Vector;
+
+/**
  <!-- globalinfo-start -->
  * An instance filter that copies a range of attributes in the dataset. This is used in conjunction with other filters that overwrite attribute values during the course of their operation -- this filter allows the original attributes to be kept as well as the new attributes.
  * <p/>
  <!-- globalinfo-end -->
- * 
+ *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
  * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of columns to copy. First and last are valid
  *  indexes. (default none)</pre>
- * 
+ *
  * <pre> -V
  *  Invert matching sense (i.e. copy all non-specified columns)</pre>
- * 
+ *
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Copy 
-  extends Filter 
+public class Copy
+  extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
-  
+
   /** for serialization */
   static final long serialVersionUID = -8543707493627441566L;
 
@@ -100,17 +100,17 @@ public class Copy
 
   /**
    * Parses a given list of options. <p/>
-   * 
+   *
    <!-- options-start -->
    * Valid options are: <p/>
-   * 
+   *
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of columns to copy. First and last are valid
    *  indexes. (default none)</pre>
-   * 
+   *
    * <pre> -V
    *  Invert matching sense (i.e. copy all non-specified columns)</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -123,7 +123,7 @@ public class Copy
       setAttributeIndices(copyList);
     }
     setInvertSelection(Utils.getFlag('V', options));
-    
+
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
@@ -152,7 +152,7 @@ public class Copy
     return options;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -165,12 +165,12 @@ public class Copy
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
@@ -186,11 +186,11 @@ public class Copy
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    
+
     m_CopyCols.setUpper(instanceInfo.numAttributes() - 1);
 
     // Create the output buffer
-    Instances outputFormat = new Instances(instanceInfo, 0); 
+    Instances outputFormat = new Instances(instanceInfo, 0);
     m_SelectedAttributes = m_CopyCols.getSelection();
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
@@ -198,7 +198,6 @@ public class Copy
       Attribute origAttribute = instanceInfo.attribute(current);
       outputFormat.insertAttributeAt((Attribute)origAttribute.copy("Copy of " + origAttribute.name()),
 				     outputFormat.numAttributes());
-
     }
 
     // adapt locators
@@ -210,10 +209,10 @@ public class Copy
     initInputLocators(instanceInfo, newIndices);
 
     setOutputFormat(outputFormat);
-    
+
     return true;
   }
-  
+
 
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
@@ -248,9 +247,9 @@ public class Copy
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
-    
+
     inst.setDataset(getOutputFormat());
     copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
@@ -296,10 +295,10 @@ public class Copy
   }
 
   /**
-   * Set whether selected columns should be removed or kept. If true the 
+   * Set whether selected columns should be removed or kept. If true the
    * selected columns are kept and unselected columns are copied. If false
    * selected columns are copied and unselected columns are kept. <br>
-   * Note: use this method before you call 
+   * Note: use this method before you call
    * <code>setInputFormat(Instances)</code>, since the output format is
    * determined in that method.
    *
@@ -340,7 +339,7 @@ public class Copy
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last<br>
-   * Note: use this method before you call 
+   * Note: use this method before you call
    * <code>setInputFormat(Instances)</code>, since the output format is
    * determined in that method.
    * @throws Exception if an invalid range list is supplied
@@ -356,7 +355,7 @@ public class Copy
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.<br>
-   * Note: use this method before you call 
+   * Note: use this method before you call
    * <code>setInputFormat(Instances)</code>, since the output format is
    * determined in that method.
    * @throws Exception if an invalid set of ranges is supplied
@@ -365,10 +364,10 @@ public class Copy
 
     setAttributeIndices(Range.indicesToRangeList(attributes));
   }
-  
+
   /**
    * Returns the revision string.
-   * 
+   *
    * @return		the revision
    */
   public String getRevision() {

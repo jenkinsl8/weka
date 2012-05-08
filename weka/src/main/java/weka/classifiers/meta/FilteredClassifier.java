@@ -1,32 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FilteredClassifier.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -34,7 +31,11 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -99,7 +100,7 @@ import weka.filters.Filter;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.28 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -422,24 +423,8 @@ public class FilteredClassifier
     t.start();
     */
     if (!m_Filter.input(instance)) {
-      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
-        throw new Exception("Filter didn't make the test instance"
-            + " immediately available!");
-      } else {
-        // filter has consumed the instance (e.g. RemoveWithValues
-        // may do this). We will indicate no prediction for this
-        // instance
-        double[] unclassified = null;
-        if (instance.classAttribute().isNumeric()) {
-          unclassified = new double[1];
-          unclassified[0] = Utils.missingValue();
-        } else {
-          // all zeros
-          unclassified = new double[instance.classAttribute().numValues()];
-        }
-        m_Filter.batchFinished();
-        return unclassified;
-      }
+      throw new Exception("Filter didn't make the test instance"
+			  + " immediately available!");
     }
     m_Filter.batchFinished();
     Instance newInstance = m_Filter.output();
@@ -480,7 +465,7 @@ public class FilteredClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 
   /**
@@ -489,7 +474,7 @@ public class FilteredClassifier
    * @param argv should contain the following arguments:
    * -t training file [-T test file] [-c class index]
    */
-  public static void main(String [] argv)  {
+  public static void main(String [] argv) {
     runClassifier(new FilteredClassifier(), argv);
   }
 }

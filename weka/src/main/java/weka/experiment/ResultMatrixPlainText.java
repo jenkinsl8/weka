@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ResultMatrixPlainText.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,157 +26,61 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start -->
- * Generates the output as plain text (for fixed width fonts).
- * <p/>
- <!-- globalinfo-end -->
+ * This matrix is a container for the datasets and classifier setups and 
+ * their statistics. It outputs the matrix in plain text (columns).
  *
- <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -mean-prec &lt;int&gt;
- *  The number of decimals after the decimal point for the mean.
- *  (default: 2)</pre>
- * 
- * <pre> -stddev-prec &lt;int&gt;
- *  The number of decimals after the decimal point for the mean.
- *  (default: 2)</pre>
- * 
- * <pre> -col-name-width &lt;int&gt;
- *  The maximum width for the column names (0 = optimal).
- *  (default: 0)</pre>
- * 
- * <pre> -row-name-width &lt;int&gt;
- *  The maximum width for the row names (0 = optimal).
- *  (default: 25)</pre>
- * 
- * <pre> -mean-width &lt;int&gt;
- *  The width of the mean (0 = optimal).
- *  (default: 0)</pre>
- * 
- * <pre> -stddev-width &lt;int&gt;
- *  The width of the standard deviation (0 = optimal).
- *  (default: 0)</pre>
- * 
- * <pre> -sig-width &lt;int&gt;
- *  The width of the significance indicator (0 = optimal).
- *  (default: 0)</pre>
- * 
- * <pre> -count-width &lt;int&gt;
- *  The width of the counts (0 = optimal).
- *  (default: 5)</pre>
- * 
- * <pre> -show-stddev
- *  Whether to display the standard deviation column.
- *  (default: no)</pre>
- * 
- * <pre> -show-avg
- *  Whether to show the row with averages.
- *  (default: no)</pre>
- * 
- * <pre> -remove-filter
- *  Whether to remove the classname package prefixes from the
- *  filter names in datasets.
- *  (default: no)</pre>
- * 
- * <pre> -print-col-names
- *  Whether to output column names or just numbers representing them.
- *  (default: no)</pre>
- * 
- * <pre> -print-row-names
- *  Whether to output row names or just numbers representing them.
- *  (default: no)</pre>
- * 
- * <pre> -enum-col-names
- *  Whether to enumerate the column names (prefixing them with 
- *  '(x)', with 'x' being the index).
- *  (default: no)</pre>
- * 
- * <pre> -enum-row-names
- *  Whether to enumerate the row names (prefixing them with 
- *  '(x)', with 'x' being the index).
- *  (default: no)</pre>
- * 
- <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class ResultMatrixPlainText
   extends ResultMatrix {
 
-  /** for serialization. */
+  /** for serialization */
   private static final long serialVersionUID = 1502934525382357937L;
 
   /**
-   * initializes the matrix as 1x1 matrix.
+   * initializes the matrix as 1x1 matrix
    */
   public ResultMatrixPlainText() {
     this(1, 1);
   }
 
   /**
-   * initializes the matrix with the given dimensions.
-   * 
-   * @param cols	the number of columns
-   * @param rows	the number of rows
+   * initializes the matrix with the given dimensions
    */
   public ResultMatrixPlainText(int cols, int rows) {
     super(cols, rows);
   }
 
   /**
-   * initializes the matrix with the values from the given matrix.
-   * 
+   * initializes the matrix with the values from the given matrix
    * @param matrix      the matrix to get the values from
    */
   public ResultMatrixPlainText(ResultMatrix matrix) {
     super(matrix);
   }
-  
-  /**
-   * Returns a string describing the matrix.
-   * 
-   * @return 		a description suitable for
-   * 			displaying in the experimenter gui
-   */
-  public String globalInfo() {
-    return "Generates the output as plain text (for fixed width fonts).";
-  }
 
   /**
-   * returns the name of the output format.
-   * 
-   * @return		the display name
+   * returns the name of the output format
    */
   public String getDisplayName() {
     return "Plain Text";
   }
 
   /**
-   * returns the default width for the row names.
-   * 
-   * @return		the width
+   * removes the stored data but retains the dimensions of the matrix
    */
-  public int getDefaultRowNameWidth() {
-    return 25;
-  }
-
-  /**
-   * returns the default width for the counts.
-   * 
-   * @return		the width
-   */
-  public int getDefaultCountWidth() {
-    return 5;
+  public void clear() {
+    super.clear();
+    setRowNameWidth(25);
+    setCountWidth(5);
   }
   
   /**
-   * returns the header of the matrix as a string.
-   * 
-   * @return		the header
-   * @see 		#m_HeaderKeys
-   * @see 		#m_HeaderValues
+   * returns the header of the matrix as a string
+   * @see #m_HeaderKeys
+   * @see #m_HeaderValues
    */
   public String toStringHeader() {
     int         i;
@@ -205,9 +110,7 @@ public class ResultMatrixPlainText
   }
 
   /**
-   * returns the matrix as plain text.
-   * 
-   * @return		the matrix
+   * returns the matrix as plain text
    */
   public String toStringMatrix() {
     StringBuffer    result;
@@ -371,9 +274,7 @@ public class ResultMatrixPlainText
 
   /**
    * returns returns a key for all the col names, for better readability if
-   * the names got cut off.
-   * 
-   * @return		the key
+   * the names got cut off
    */
   public String toStringKey() {
     String          result;
@@ -392,9 +293,7 @@ public class ResultMatrixPlainText
   }
 
   /**
-   * returns the summary as string.
-   * 
-   * @return		the summary
+   * returns the summary as string
    */
   public String toStringSummary() {
     String      result;
@@ -443,9 +342,7 @@ public class ResultMatrixPlainText
   }
 
   /**
-   * returns the ranking in a string representation.
-   * 
-   * @return		the ranking
+   * returns the ranking in a string representation
    */
   public String toStringRanking() {
     int           biggest;
@@ -489,13 +386,11 @@ public class ResultMatrixPlainText
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**
-   * for testing only.
-   * 
-   * @param args	ignored
+   * for testing only
    */
   public static void main(String[] args) {
     ResultMatrix        matrix;

@@ -1,25 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ExperimenterDefaults.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.Utils;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.Tester;
 
 import java.io.File;
 import java.io.Serializable;
@@ -27,12 +34,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
-
-import weka.core.Utils;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
 
 /**
  * This class offers get methods for the default Experimenter settings in 
@@ -45,20 +46,20 @@ import weka.experiment.Tester;
 public class ExperimenterDefaults
   implements Serializable {
   
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = -2835933184632147981L;
   
-  /** The name of the properties file. */
+  /** The name of the properties file */
   public final static String PROPERTY_FILE = "weka/gui/experiment/Experimenter.props";
 
-  /** Properties associated with the experimenter options. */
+  /** Properties associated with the experimenter options */
   protected static Properties PROPERTIES;
   static {
     try {
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
     }
     catch (Exception e) {
-      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(Messages.getInstance().getString("ExperimenterDefaults_STATIC_Error_Text"));
       e.printStackTrace();
       PROPERTIES = new Properties();
     }
@@ -77,7 +78,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the associated properties file.
+   * returns the associated properties file
    * 
    * @return              the props file
    */
@@ -86,7 +87,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default experiment extension.
+   * returns the default experiment extension
    * 
    * @return              the extension (incl. dot)
    */
@@ -95,25 +96,25 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default destination.
+   * returns the default destination
    * 
    * @return              the destination
    */
   public final static String getDestination() {
-    return get("Destination", "ARFF file");
+    return get("Destination", Messages.getInstance().getString("ExperimenterDefaults_GetDestination_Text"));
   }
 
   /**
-   * returns the default experiment type.
+   * returns the default experiment type
    * 
    * @return              the type
    */
   public final static String getExperimentType() {
-    return get("ExperimentType", "Cross-validation");
+    return get("ExperimentType", Messages.getInstance().getString("ExperimenterDefaults_GetExperimentType_Text"));
   }
 
   /**
-   * whether classification or regression is used.
+   * whether classification or regression is used
    * 
    * @return              true if classification
    */
@@ -122,7 +123,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the number of folds used for cross-validation.
+   * returns the number of folds used for cross-validation
    * 
    * @return              the number of folds
    */
@@ -131,7 +132,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the training percentage in case of splits.
+   * returns the training percentage in case of splits
    * 
    * @return              the percentage (0-100)
    */
@@ -140,7 +141,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the number of repetitions to use.
+   * returns the number of repetitions to use
    * 
    * @return              the repetitions/runs
    */
@@ -149,7 +150,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * whether datasets or algorithms are iterated first.
+   * whether datasets or algorithms are iterated first
    * 
    * @return              true if datasets are iterated first
    */
@@ -159,7 +160,7 @@ public class ExperimenterDefaults
 
   /**
    * returns the initial directory for the datasets (if empty, it returns
-   * the user's home directory).
+   * the user's home directory)
    * 
    * @return              the directory
    */
@@ -174,7 +175,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * whether relative paths are used by default.
+   * whether relative paths are used by default
    * 
    * @return              true if relative paths are used
    */
@@ -183,7 +184,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the display name of the preferred Tester algorithm.
+   * returns the display name of the preferred Tester algorithm
    * 
    * @return              the display name
    * @see Tester
@@ -194,7 +195,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * the comma-separated list of attribute names that identify a row.
+   * the comma-separated list of attribute names that identify a row
    * 
    * @return              the attribute list
    */
@@ -203,7 +204,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * the comma-separated list of attribute names that identify a column.
+   * the comma-separated list of attribute names that identify a column
    * 
    * @return              the attribute list
    */
@@ -212,7 +213,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the name of the field used for comparison.
+   * returns the name of the field used for comparison
    * 
    * @return              the comparison field
    */
@@ -221,7 +222,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default significance.
+   * returns the default significance
    * 
    * @return              the significance (0.0-1.0)
    */
@@ -230,7 +231,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default sorting (empty string means none).
+   * returns the default sorting (empty string means none)
    * 
    * @return              the sorting field
    */
@@ -239,7 +240,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns whether StdDevs are shown by default.
+   * returns whether StdDevs are shown by default
    * 
    * @return              true if stddevs are shown
    */
@@ -248,7 +249,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns whether the Average is shown by default.
+   * returns whether the Average is shown by default
    * 
    * @return              true if the average is shown
    */
@@ -257,7 +258,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default precision for the mean.
+   * returns the default precision for the mean
    * 
    * @return              the decimals of the mean
    */
@@ -266,7 +267,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default precision for the stddevs.
+   * returns the default precision for the stddevs
    * 
    * @return              the decimals of the stddevs
    */
@@ -275,39 +276,19 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the classname (and optional options) of the ResultMatrix class, 
-   * responsible for the output format.
+   * returns the classname of the ResultMatrix class, responsible for the
+   * output format
    * 
-   * @return              the classname and options
+   * @return              the classname
    * @see ResultMatrix
    * @see ResultMatrixPlainText
    */
-  public final static ResultMatrix getOutputFormat() {
-    ResultMatrix	result;
-    
-    try {
-      String[] options = Utils.splitOptions(get("OutputFormat", ResultMatrix.class.getName() + " -col-name-width 0 -row-name-width 25 -mean-width 0 -stddev-width 0 -sig-width 0 -count-width 5 -print-col-names -print-row-names -enum-col-names"));
-      String classname = options[0];
-      options[0]       = "";
-      result           = (ResultMatrix) Utils.forName(ResultMatrix.class, classname, options);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      result = new ResultMatrixPlainText();
-    }
-    
-    // override with other default properties
-    result.setMeanPrec(getMeanPrecision());
-    result.setStdDevPrec(getStdDevPrecision());
-    result.setShowAverage(getShowAverage());
-    result.setShowStdDev(getShowStdDevs());
-    result.setRemoveFilterName(getRemoveFilterClassnames());
-
-    return result;
+  public final static String getOutputFormat() {
+    return get("OutputFormat", ResultMatrixPlainText.class.getName());
   }
 
   /**
-   * whether the filter classnames in the dataset names are removed by default.
+   * whether the filter classnames in the dataset names are removed by default
    * 
    * @return              true if filter names are removed
    */
@@ -316,7 +297,7 @@ public class ExperimenterDefaults
   }
   
   /**
-   * only for testing - prints the content of the props file.
+   * only for testing - prints the content of the props file
    * 
    * @param args	commandline parameters - ignored
    */
@@ -325,7 +306,7 @@ public class ExperimenterDefaults
     String		name;
     Vector		sorted;
     
-    System.out.println("\nExperimenter defaults:");
+    System.out.println(Messages.getInstance().getString("ExperimenterDefaults_Main_Text"));
     names = PROPERTIES.propertyNames();
 
     // sort names

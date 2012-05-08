@@ -1,51 +1,52 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    IBk.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.lazy;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.rules.ZeroR;
-import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.neighboursearch.LinearNNSearch;
+import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.neighboursearch.LinearNNSearch;
-import weka.core.neighboursearch.NearestNeighbourSearch;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.core.AdditionalMeasureProducer;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -112,7 +113,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  * @version $Revision$
  */
 public class IBk 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler,
              TechnicalInformationHandler, AdditionalMeasureProducer {
 
@@ -162,9 +163,6 @@ public class IBk
    * error when cross-validating on numeric prediction tasks.
    */
   protected boolean m_MeanSquared;
-  
-  /** Default ZeroR model to use when there are no training instances */
-  protected ZeroR m_defaultModel;
 
   /** no weighting. */
   public static final int WEIGHT_NONE = 1;
@@ -184,6 +182,9 @@ public class IBk
 
   /** The number of attributes the contribute to a prediction. */
   protected double m_NumAttributesUsed;
+  
+  /** Default ZeroR model to use when there are no training instances */
+  protected ZeroR m_defaultModel;
   
   /**
    * IBk classifier. Simple instance-based learner that uses the class
@@ -528,7 +529,7 @@ public class IBk
   public void updateClassifier(Instance instance) throws Exception {
 
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (instance.classIsMissing()) {
       return;
@@ -799,12 +800,14 @@ public class IBk
     
     if (m_Train.numInstances() == 0) {
       return "Warning: no training instances - ZeroR model used.";
-    }
+    }    
 
     if (!m_kNNValid && m_CrossValidate) {
       crossValidate();
     }
     
+    
+
     String result = "IB1 instance-based classifier\n" +
       "using " + m_kNN;
 

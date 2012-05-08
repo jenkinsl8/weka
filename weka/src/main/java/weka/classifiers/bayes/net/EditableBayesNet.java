@@ -1,25 +1,24 @@
+package weka.classifiers.bayes.net;
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * EditableBayesNet.java
- * Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
- * 
+ *
  */
-
-package weka.classifiers.bayes.net;
 
 import java.io.Serializable;
 import java.io.StringReader;
@@ -1135,7 +1134,7 @@ public class EditableBayesNet extends BayesNet {
 
 	/** Set position of node. Move set of nodes with the same displacement
 	 * as a specified node.
-	 * @param nNode index of node to set position for
+	 * @param iNode index of node to set position for
 	 * @param nX x position of new position
 	 * @param nY y position of new position
 	 * @param nodes array of indexes of nodes to move
@@ -1402,13 +1401,13 @@ public class EditableBayesNet extends BayesNet {
 			m_Instances.setClassIndex(nTargetNode); */
 			
 			m_Instances.deleteAttributeAt(nTargetNode);
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
-			m_Instances.setClassIndex(nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
+                        m_Instances.setClassIndex(nTargetNode);
 		} else {
 			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.deleteAttributeAt(nTargetNode + 1); */
 		        m_Instances.deleteAttributeAt(nTargetNode);
-		        m_Instances.insertAttributeAt(newAtt, nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 		}
 	} // replaceAtt
 
@@ -1445,7 +1444,7 @@ public class EditableBayesNet extends BayesNet {
 	}
 
 	/** return list of children of a node
-	 * @param nTargetNode index of node of interest
+	 * @param iNode index of node of interest
 	 */
 	public FastVector getChildren(int nTargetNode) {
 		FastVector children = new FastVector();

@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Saver.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -117,33 +118,33 @@ public class Saver
                 
         m_Saver.setInstances(m_dataSet);
         if (m_logger != null) {
-          m_logger.statusMessage(statusMessagePrefix() + "Saving "
-              + m_dataSet.relationName() + "...");
+          m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Saver_SaveBatchThread_Run_StatusMessage_Text_First")
+              + m_dataSet.relationName() + Messages.getInstance().getString("Saver_SaveBatchThread_Run_StatusMessage_Text_Second"));
         }
         m_Saver.writeBatch();
         if (m_logger != null) {
-          m_logger.logMessage("[Saver] " + statusMessagePrefix() 
-              + "Save successful.");
+          m_logger.logMessage(Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_First") + statusMessagePrefix() 
+              + Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_Second"));
         }
 	
       } catch (Exception ex) {
         if (m_logger != null) {
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
-          m_logger.logMessage("[Saver] " + statusMessagePrefix()
-              + " problem saving. " 
+              + Messages.getInstance().getString("Saver_SaveBatchThread_Run_StatusMessage_Text_Third"));
+          m_logger.logMessage(Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_Third") + statusMessagePrefix()
+              + Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_Fourth") 
               + ex.getMessage());
         }
 	ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
           if (m_logger != null) {
-            m_logger.logMessage("[Saver] " + statusMessagePrefix()
-                + " Saving interrupted!!");
+            m_logger.logMessage(Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_Fifth") + statusMessagePrefix()
+                + Messages.getInstance().getString("Saver_SaveBatchThread_Run_LogMessage_Text_Sixth"));
           }
         }
         if (m_logger != null) {
-          m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+          m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Saver_SaveBatchThread_Run_StatusMessage_Text_Fourth"));
         }
         block(false);
 	m_visual.setStatic();
@@ -317,9 +318,9 @@ public class Saver
       } catch (Exception ex) {
         if (m_logger != null) {
           m_logger.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details)");
-          m_logger.logMessage("[Saver] " + statusMessagePrefix()
-              + " unable to copy saver. " 
+              + Messages.getInstance().getString("Saver_AcceptDataSet_StatusMessage_Text_First"));
+          m_logger.logMessage(Messages.getInstance().getString("Saver_AcceptDataSet_LogMessage_Text_First") + statusMessagePrefix()
+              + Messages.getInstance().getString("Saver_AcceptDataSet_LogMessage_Text_Second")
               + ex.getMessage());
         }
       }
@@ -338,7 +339,7 @@ public class Saver
             }
           }
           saveBatch();
-          System.out.println("...relation "+ m_fileName +" saved.");
+          System.out.println(Messages.getInstance().getString("Saver_AcceptDataSet_Text_First")+ m_fileName + Messages.getInstance().getString("Saver_AcceptDataSet_Text_Second"));
       }
   }
   
@@ -354,9 +355,9 @@ public class Saver
     } catch (Exception ex) {
       if (m_logger != null) {
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
-        m_logger.logMessage("[Saver] " + statusMessagePrefix()
-            + " unable to copy saver. " 
+            + Messages.getInstance().getString("Saver_AcceptDataSet_StatusMessage_Text_Second"));
+        m_logger.logMessage(Messages.getInstance().getString("Saver_AcceptDataSet_LogMessage_Text_Third") + statusMessagePrefix()
+            + Messages.getInstance().getString("Saver_AcceptDataSet_LogMessage_Text_Fourth")
             + ex.getMessage());
       }
     }
@@ -378,7 +379,7 @@ public class Saver
       }
     }
     saveBatch();
-    System.out.println("...relation "+ m_fileName +" saved.");
+    System.out.println(Messages.getInstance().getString("Saver_AcceptDataSet_Text_Third") + m_fileName + Messages.getInstance().getString("Saver_AcceptDataSet_Text_Fourth"));
   }
   
   /** Method reacts to a test set event and starts the writing process in batch mode
@@ -391,9 +392,9 @@ public class Saver
     } catch (Exception ex) {
       if (m_logger != null) {
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
-        m_logger.logMessage("[Saver] " + statusMessagePrefix()
-            + " unable to copy saver. " 
+            + Messages.getInstance().getString("Saver_AcceptTestSet_StatusMessage_Text_First"));
+        m_logger.logMessage(Messages.getInstance().getString("Saver_AcceptTestSet_LogMessage_Text_First") + statusMessagePrefix()
+            + Messages.getInstance().getString("Saver_AcceptTestSet_LogMessage_Text_Second")
             + ex.getMessage());
       }
     }
@@ -419,7 +420,9 @@ public class Saver
         ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
       saveBatch();
-      System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+      System.out.println(Messages.getInstance().getString("Saver_AcceptTestSet_Text_First") + e.getSetNumber() + 
+          Messages.getInstance().getString("Saver_AcceptTestSet_Text_Second") + e.getMaxSetNumber() + 
+          Messages.getInstance().getString("Saver_AcceptTestSet_Text_Third") + m_fileName + Messages.getInstance().getString("Saver_AcceptTestSet_Text_Fourth"));
     }
   }
   
@@ -428,14 +431,15 @@ public class Saver
    * @param e a training set event
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
+
     try {
       m_Saver = makeCopy();
     } catch (Exception ex) {
       if (m_logger != null) {
         m_logger.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
-        m_logger.logMessage("[Saver] " + statusMessagePrefix()
-            + " unable to copy saver. " 
+            + Messages.getInstance().getString("Saver_AcceptTrainingSet_StatusMessage_Text_First"));
+        m_logger.logMessage(Messages.getInstance().getString("Saver_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix()
+            + Messages.getInstance().getString("Saver_AcceptTrainingSet_LogMessage_Text_Second")
             + ex.getMessage());
       }
     }
@@ -462,7 +466,7 @@ public class Saver
         ((DatabaseSaver)m_Saver).setTableName(setName+"_training_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
       saveBatch();
-      System.out.println("... training set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+      System.out.println(Messages.getInstance().getString("Saver_AcceptTrainingSet_Text_First") + e.getSetNumber() + Messages.getInstance().getString("Saver_AcceptTrainingSet_Text_Second") + e.getMaxSetNumber()+ Messages.getInstance().getString("Saver_AcceptTrainingSet_Text_Third") + m_fileName + Messages.getInstance().getString("Saver_AcceptTrainingSet_Text_Fourth"));
     }
   }
   
@@ -497,9 +501,9 @@ public class Saver
         } catch (Exception ex) {
           if (m_logger != null) {
             m_logger.statusMessage(statusMessagePrefix()
-                + "ERROR (See log for details)");
-            m_logger.logMessage("[Saver] " + statusMessagePrefix()
-                + " unable to copy saver. " 
+                + Messages.getInstance().getString("Saver_AcceptInstance_StatusMessage_Text_First"));
+            m_logger.logMessage(Messages.getInstance().getString("Saver_AcceptInstance_LogMessage_Text_First") + statusMessagePrefix()
+                + Messages.getInstance().getString("Saver_AcceptInstance_LogMessage_Text_Second")
                 + ex.getMessage());
           }
         }
@@ -534,26 +538,25 @@ public class Saver
             m_Saver.writeIncremental(e.getInstance());
         } catch (Exception ex) {
             m_visual.setStatic();
-            System.err.println("Instance "+e.getInstance() +" could not been saved");
+            System.err.println(Messages.getInstance().getString("Saver_AcceptInstance_Error_Text_First") + e.getInstance() + 
+            		Messages.getInstance().getString("Saver_AcceptInstance_Error_Text_Second"));
             ex.printStackTrace();
         }
       }
       if(e.getStatus() == e.BATCH_FINISHED){
         try{  
             m_Saver.writeIncremental(e.getInstance());
-            if (e.getInstance() != null) {
-              m_Saver.writeIncremental(null);
-            }
+            m_Saver.writeIncremental(null);
             //m_firstNotice = true;
             m_visual.setStatic();
-            System.out.println("...relation "+ m_fileName +" saved.");
+            System.out.println(Messages.getInstance().getString("Saver_AcceptInstance_Text_First") + m_fileName + Messages.getInstance().getString("Saver_AcceptInstance_Text_Second"));
 /*            String visText = this.getName();
             visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
             m_visual.setText(visText); */     
             m_count = 0;
         } catch (Exception ex) {
             m_visual.setStatic();
-            System.err.println("File could not have been closed.");
+            System.err.println(Messages.getInstance().getString("Saver_AcceptInstance_Text_Third"));
             ex.printStackTrace();
         }
       }
@@ -578,8 +581,7 @@ public class Saver
   public void setWrappedAlgorithm(Object algorithm) 
     {
     if (!(algorithm instanceof weka.core.converters.Saver)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Loader)");
+      throw new IllegalArgumentException(algorithm.getClass()+  Messages.getInstance().getString("Saver_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setSaverTemplate((weka.core.converters.Saver)algorithm);
   }
