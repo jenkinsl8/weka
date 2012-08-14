@@ -1,25 +1,31 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLSerialization.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.Version;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -44,11 +50,6 @@ import java.util.Vector;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Version;
 
 /**
  * With this class objects can be serialized to XML instead into a binary 
@@ -89,7 +90,7 @@ import weka.core.Version;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.16 $ 
  */
 public class XMLSerialization
    implements RevisionHandler {
@@ -172,7 +173,7 @@ public class XMLSerialization
 
    /** for overriding class names (Class &lt;-&gt; Classname (String)) 
     * @see #overrideClassname(Object) */
-   protected Hashtable<Class,String> m_ClassnameOverride = null;
+   protected Hashtable m_ClassnameOverride = null;
    
    /**
     * initializes the serialization
@@ -211,7 +212,7 @@ public class XMLSerialization
       m_Properties        = new PropertyHandler();
       m_CustomMethods     = new XMLSerializationMethodHandler(this);
 
-      m_ClassnameOverride = new Hashtable<Class,String>();
+      m_ClassnameOverride = new Hashtable();
       // java.io.File is sometimes represented as another class:
       // - Win32: sun.awt.shell.Win32ShellFolder2 
       // - Linux: sun.awt.shell.DefaultShellFolder
@@ -282,9 +283,9 @@ public class XMLSerialization
       BeanInfo                   info;
       PropertyDescriptor[]       desc;
       int                        i;
-      Hashtable<String,PropertyDescriptor>                  result;
+      Hashtable                  result;
       
-      result = new Hashtable<String,PropertyDescriptor>();
+      result = new Hashtable();
 
       info = Introspector.getBeanInfo(o.getClass());
       desc = info.getPropertyDescriptors();
@@ -1324,8 +1325,8 @@ public class XMLSerialization
     * @return the dimensions of the array
     */
    protected int[] getArrayDimensions(Element node) {
-     Vector<Element>         children;
-     Vector<Integer>         tmpVector;      
+     Vector         children;
+     Vector         tmpVector;      
      int[]          tmp;
      int[]          result;
      int            i;
@@ -1337,7 +1338,7 @@ public class XMLSerialization
        children = null;
      
      if (children != null) {
-       tmpVector = new Vector<Integer>();
+       tmpVector = new Vector();
 
        if (children.size() > 0) {
          // are children also arrays?
@@ -1382,8 +1383,8 @@ public class XMLSerialization
       boolean              primitive;
       boolean              array;
       boolean              isnull;
-      Class<?>                cls;
-      Vector<Element>               children;
+      Class                cls;
+      Vector               children;
       Object               result;
       int                  i;
       Constructor          constructor;
@@ -1698,6 +1699,6 @@ public class XMLSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
+     return RevisionUtils.extract("$Revision: 1.16 $");
    }
 }

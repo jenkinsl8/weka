@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * InfoPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.ComponentHelper;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,8 +41,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.gui.ComponentHelper;
 
 /**
  * A simple panel for displaying information, e.g. progress information etc.
@@ -103,7 +104,7 @@ public class InfoPanel
     // clear button
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.EAST);
-    m_ButtonClear = new JButton("Clear");
+    m_ButtonClear = new JButton(Messages.getInstance().getString("InfoPanel_CreatePanel_ButtonClear_JButton_Text"));
     m_ButtonClear.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  clear();
@@ -114,7 +115,7 @@ public class InfoPanel
     // clear button
     panel2 = new JPanel(new BorderLayout());
     panel.add(panel2, BorderLayout.CENTER);
-    m_ButtonCopy = new JButton("Copy");
+    m_ButtonCopy = new JButton(Messages.getInstance().getString("InfoPanel_CreatePanel_ButtonCopy_JButton_Text"));
     m_ButtonCopy.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  copyToClipboard();

@@ -1,38 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    REPTree.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.ContingencyTables;
 import weka.core.Drawable;
 import weka.core.Instance;
@@ -43,6 +38,12 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -78,7 +79,7 @@ import weka.core.WeightedInstancesHandler;
  * @version $Revision$ 
  */
 public class REPTree 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
 
@@ -196,7 +197,7 @@ public class REPTree
         if (m_ClassProbs == null) {
           return m_ClassProbs;
         }
-	return (double[])m_ClassProbs.clone();
+        return (double[])m_ClassProbs.clone();
       } else {
 	return returnedDist;
       }
@@ -578,7 +579,6 @@ public class REPTree
 	  for (int i = 0; i < m_ClassProbs.length; i++) {
 	    m_Distribution[i] = m_ClassProbs[i];
 	  }
-          doSmoothing();
 	  Utils.normalize(m_ClassProbs);
 	} else {
 
@@ -639,7 +639,7 @@ public class REPTree
       }
 
       // Any useful split found?
-      if (Utils.gr(vals[m_Attribute], 0) && (count > 1)) {
+      if (Utils.gr(vals[m_Attribute], 0) && (count > 1)) {      
 
         // Set split point, proportions, and temp arrays
 	m_SplitPoint = splits[m_Attribute];
@@ -693,26 +693,11 @@ public class REPTree
 	for (int i = 0; i < m_ClassProbs.length; i++) {
 	    m_Distribution[i] = m_ClassProbs[i];
 	}
-        doSmoothing();
 	Utils.normalize(m_ClassProbs);
       } else {
 	m_Distribution = new double[2];
 	m_Distribution[0] = priorVar;
 	m_Distribution[1] = totalWeight;
-      }
-    }
-
-    /**
-     * Smoothes class probabilities stored at node.
-     */
-    protected void doSmoothing() {
-
-      double val = m_InitialCount;
-      if (m_SpreadInitialCount) {
-        val /= (double)m_ClassProbs.length;
-      } 
-      for (int i = 0; i < m_ClassProbs.length; i++) {
-        m_ClassProbs[i] += val;
       }
     }
 
@@ -1309,7 +1294,6 @@ public class REPTree
           m_ClassProbs[i] += m_HoldOutDist[i];
         }
         if (Utils.sum(m_ClassProbs) > 0) {
-          doSmoothing();
           Utils.normalize(m_ClassProbs);
         } else {
           m_ClassProbs = null;
@@ -1370,12 +1354,6 @@ public class REPTree
   /** Upper bound on the tree depth */
   protected int m_MaxDepth = -1;
   
-  /** The initial class count */
-  protected double m_InitialCount = 0;
-  
-  /** Whether to spread initial count across all values */
-  protected boolean m_SpreadInitialCount = false;
-
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -1554,71 +1532,13 @@ public class REPTree
   }
   
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String initialCountTipText() {
-    return "Initial class value count.";
-  }
-
-  /**
-   * Get the value of InitialCount.
-   *
-   * @return Value of InitialCount.
-   */
-  public double getInitialCount() {
-    
-    return m_InitialCount;
-  }
-  
-  /**
-   * Set the value of InitialCount.
-   *
-   * @param newInitialCount Value to assign to InitialCount.
-   */
-  public void setInitialCount(double newInitialCount) {
-    
-    m_InitialCount = newInitialCount;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String spreadInitialCountTipText() {
-    return "Spread initial count across all values instead of using the count per value.";
-  }
-  
-  /**
-   * Get the value of SpreadInitialCount.
-   *
-   * @return Value of SpreadInitialCount.
-   */
-  public boolean getSpreadInitialCount() {
-    
-    return m_SpreadInitialCount;
-  }
-  
-  /**
-   * Set the value of SpreadInitialCount.
-   *
-   * @param newSpreadInitialCount Value to assign to SpreadInitialCount.
-   */
-  public void setSpreadInitialCount(boolean newSpreadInitialCount) {
-    
-    m_SpreadInitialCount = newSpreadInitialCount;
-  }
-  
-  /**
    * Lists the command-line options for this classifier.
    * 
    * @return an enumeration over all commandline options
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(8);
+    Vector newVector = new Vector(5);
 
     newVector.
       addElement(new Option("\tSet minimum number of instances per leaf " +
@@ -1641,13 +1561,6 @@ public class REPTree
     newVector.
       addElement(new Option("\tMaximum tree depth (default -1, no maximum)",
 			    "L", 1, "-L"));
-    newVector.
-      addElement(new Option("\tInitial class value count (default 0)",
-			    "I", 1, "-I"));
-    newVector.
-      addElement(new Option("\tSpread initial count over all class values (i.e." +
-                            " don't use 1 per value)",
-			    "R", 0, "-R"));
 
     return newVector.elements();
   } 
@@ -1659,7 +1572,7 @@ public class REPTree
    */
   public String[] getOptions() {
     
-    String [] options = new String [15];
+    String [] options = new String [12];
     int current = 0;
     options[current++] = "-M"; 
     options[current++] = "" + (int)getMinNum();
@@ -1673,11 +1586,6 @@ public class REPTree
     options[current++] = "" + getMaxDepth();
     if (getNoPruning()) {
       options[current++] = "-P";
-    }
-    options[current++] = "-I"; 
-    options[current++] = "" + getInitialCount();
-    if (getSpreadInitialCount()) {
-      options[current++] = "-R";
     }
     while (current < options.length) {
       options[current++] = "";
@@ -1748,14 +1656,6 @@ public class REPTree
     } else {
       m_MaxDepth = -1;
     }
-    String initialCountString = Utils.getOption('I', options);
-    if (initialCountString.length() != 0) {
-      m_InitialCount = Double.parseDouble(initialCountString);
-    } else {
-      m_InitialCount = 0;
-    }
-    m_SpreadInitialCount = Utils.getFlag('R', options);
-    
     Utils.checkForRemainingOptions(options);
   }
   

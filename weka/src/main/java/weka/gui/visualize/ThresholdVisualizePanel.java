@@ -1,25 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ThresholdVisualizePanel.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.evaluation.EvaluationUtils;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -32,15 +41,6 @@ import java.io.FileReader;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.border.TitledBorder;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.EvaluationUtils;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.SingleIndex;
-import weka.core.Utils;
 
 /** 
  * This panel is a VisualizePanel, with the added ablility to display the
@@ -123,7 +123,7 @@ public class ThresholdVisualizePanel
     String xs = m_XCombo.getSelectedItem().toString();
     String ys = m_YCombo.getSelectedItem().toString();
 
-    if (xs.equals("X: False Positive Rate (Num)") && ys.equals("Y: True Positive Rate (Num)"))   {
+    if (xs.equals(Messages.getInstance().getString("ThresholdVisualizePanel_SetBorderText_Text_First")) && ys.equals(Messages.getInstance().getString("ThresholdVisualizePanel_SetBorderText_Text_Second")))   {
         m_plotSurround.setBorder((BorderFactory.createTitledBorder(m_savePanelBorderText+" "+m_ROCString)));
     } else
         m_plotSurround.setBorder((BorderFactory.createTitledBorder(m_savePanelBorderText))); 
@@ -139,8 +139,8 @@ public class ThresholdVisualizePanel
     super.openVisibleInstances(insts);
 
     setROCString(
-	"(Area under ROC = " 
-	+ Utils.doubleToString(ThresholdCurve.getROCArea(insts), 4) + ")");
+    		Messages.getInstance().getString("ThresholdVisualizePanel_OpenVisibleInstances_Text_First") 
+	+ Utils.doubleToString(ThresholdCurve.getROCArea(insts), 4) + Messages.getInstance().getString("ThresholdVisualizePanel_OpenVisibleInstances_Text_Second"));
     
     setBorderText();
   }
@@ -197,16 +197,16 @@ public class ThresholdVisualizePanel
     try {
       // help?
       if (Utils.getFlag('h', args)) {
-	System.out.println("\nOptions for " + ThresholdVisualizePanel.class.getName() + ":\n");
-	System.out.println("-h\n\tThis help.");
-	System.out.println("-t <file>\n\tDataset to process with given classifier.");
-	System.out.println("-c <num>\n\tThe class index. first and last are valid, too (default: last).");
-	System.out.println("-C <num>\n\tThe index of the class value to get the the curve for (default: first).");
-	System.out.println("-W <classname>\n\tFull classname of classifier to run.\n\tOptions after '--' are passed to the classifier.\n\t(default: weka.classifiers.functions.Logistic)");
-	System.out.println("-r <number>\n\tThe number of runs to perform (default: 1).");
-	System.out.println("-x <number>\n\tThe number of Cross-validation folds (default: 10).");
-	System.out.println("-S <number>\n\tThe seed value for randomizing the data (default: 1).");
-	System.out.println("-l <file>\n\tPreviously saved threshold curve ARFF file.");
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_First") + ThresholdVisualizePanel.class.getName() + Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Second"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Third"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Fourth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Fifth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Sixth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Seventh"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Eighth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Nineth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Tenth"));
+	System.out.println(Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Eleventh"));
 	return;
       }
       
@@ -250,7 +250,7 @@ public class ThresholdVisualizePanel
 	  tmpStr = weka.classifiers.functions.Logistic.class.getName();
 	  options = new String[0];
 	}
-	classifier = AbstractClassifier.forName(tmpStr, options);
+	classifier = Classifier.forName(tmpStr, options);
 	
 	tmpStr = Utils.getOption('c', args);
 	if (tmpStr.length() != 0)
@@ -295,23 +295,23 @@ public class ThresholdVisualizePanel
       
       // setup GUI
       ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-      vmc.setROCString("(Area under ROC = " + 
-	  Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
+      vmc.setROCString(Messages.getInstance().getString("ThresholdVisualizePanel_OpenVisibleInstances_Text_Third") + 
+	  Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + Messages.getInstance().getString("ThresholdVisualizePanel_OpenVisibleInstances_Text_Fourth"));
       if (compute)     
 	vmc.setName(
 	    result.relationName() 
-	    + ". (Class value " + inst.classAttribute().value(valueIndex.getIndex()) + ")");
+	    + Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Twelveth") + inst.classAttribute().value(valueIndex.getIndex()) + Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Thirteenth"));
       else
 	vmc.setName(
 	    result.relationName()
-	    + " (display only)");
+	    + Messages.getInstance().getString("ThresholdVisualizePanel_Main_Text_Fourteenth"));
       PlotData2D tempd = new PlotData2D(result);
       tempd.setPlotName(result.relationName());
       tempd.addInstanceNumberAttribute();
       vmc.addPlot(tempd);
       
       String plotName = vmc.getName(); 
-      final JFrame jf = new JFrame("Weka Classifier Visualize: "+plotName);
+      final JFrame jf = new JFrame(Messages.getInstance().getString("ThresholdVisualizePanel_Main_JFrame_Text") + plotName);
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       
@@ -329,11 +329,3 @@ public class ThresholdVisualizePanel
     }
   }
 }
-
- 
-
-
-
-
-
-

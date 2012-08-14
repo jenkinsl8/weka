@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    InstanceStreamToBatchMaker.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,8 +25,6 @@ package weka.gui.beans;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -40,7 +39,6 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-@KFStep(category = "Tools", toolTipText = "Converts an incoming instance stream into a data set batch")
 public class InstanceStreamToBatchMaker extends JPanel 
   implements BeanCommon, Visible, InstanceListener, 
   EventConstraints, DataSource {
@@ -71,7 +69,7 @@ public class InstanceStreamToBatchMaker extends JPanel
   /**
    * Collects up the instances. 
    */
-  private List<Instance> m_batch;
+  private ArrayList<Instance> m_batch;
   
   private Instances m_structure;
   
@@ -87,12 +85,12 @@ public class InstanceStreamToBatchMaker extends JPanel
    */
   public void acceptInstance(InstanceEvent e) {
     if (e.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
-      m_batch = new LinkedList<Instance>();
+      m_batch = new ArrayList<Instance>();
       m_structure = e.getStructure();
       
       // notify dataset listeners of structure available
       if (m_log != null) {
-        m_log.logMessage("[InstanceStreamToBatch] passing on structure.");
+        m_log.logMessage(Messages.getInstance().getString("InstanceStreamToBatchMaker_AcceptInstance_LogMessage_Text_First"));
       }
       DataSetEvent dse = new DataSetEvent(this, m_structure);
       notifyDataListeners(dse);
@@ -101,10 +99,8 @@ public class InstanceStreamToBatchMaker extends JPanel
     } else {
       // batch finished
       
-      if (e.getInstance() != null) {
-        // add the last instance
-        m_batch.add(e.getInstance());
-      }
+      // add the last instance
+      m_batch.add(e.getInstance());
       
       // create the new Instances
       Instances dataSet = new Instances(m_structure, m_batch.size());
@@ -117,7 +113,7 @@ public class InstanceStreamToBatchMaker extends JPanel
       m_batch = null;
       
       if (m_log != null) {
-        m_log.logMessage("[InstanceStreamToBatch] sending batch to listeners.");
+        m_log.logMessage(Messages.getInstance().getString("InstanceStreamToBatchMaker_AcceptInstance_LogMessage_Text_Second"));
       }
       
       // notify dataset listeners

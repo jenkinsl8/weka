@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Javadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -32,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public abstract class Javadoc 
   implements OptionHandler, RevisionHandler {
@@ -61,7 +62,7 @@ public abstract class Javadoc
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
 
     result.addElement(new Option(
         "\tThe class to load.",
@@ -110,9 +111,9 @@ public abstract class Javadoc
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
 
-    result = new Vector<String>();
+    result = new Vector();
     
     result.add("-W");
     result.add(getClassname());

@@ -1,29 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    NBTreeNoSplit.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
 
-import java.util.Random;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -33,12 +31,14 @@ import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
+import java.util.Random;
+
 /**
  * Class implementing a "no-split"-split (leaf node) for naive bayes
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public final class NBTreeNoSplit
   extends ClassifierSplitModel {
@@ -188,7 +188,7 @@ public final class NBTreeNoSplit
 			       Instances trainingSet,
 			       Random r) throws Exception {
     // make some copies for fast evaluation of 5-fold xval
-    Classifier [] copies = AbstractClassifier.makeCopies(fullModel, 5);
+    Classifier [] copies = Classifier.makeCopies(fullModel, 5);
     Evaluation eval = new Evaluation(trainingSet);
     // make some splits
     for (int j = 0; j < 5; j++) {
@@ -211,6 +211,6 @@ public final class NBTreeNoSplit
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

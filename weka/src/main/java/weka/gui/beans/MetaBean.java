@@ -1,31 +1,35 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    MetaBean.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -39,8 +43,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JWindow;
-
-import weka.gui.Logger;
 
 /**
  * A meta bean that encapsulates several other regular beans, useful for 
@@ -76,19 +78,12 @@ public class MetaBean
   
   // Holds a preview image of the encapsulated sub-flow
   protected ImageIcon m_subFlowPreview = null;
-  
-  // offset from where originally grouped if the meta bean 
-  // dropped onto the canvas from the user toolbar
-  protected int m_xCreate = 0;
-  protected int m_yCreate = 0;
-  protected int m_xDrop = 0;
-  protected int m_yDrop = 0;
 
   public MetaBean() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
-  
+
   /**
    * Set a custom (descriptive) name for this bean
    * 
@@ -300,15 +295,14 @@ public class MetaBean
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (save) {
-        // save offsets from this point
-        Point p = new Point(temp.getX() - targetX, temp.getY() - targetY);
+        Point p = new Point(temp.getX(), temp.getY());
         m_originalCoords.add(p);
       }
       temp.setX(targetX); temp.setY(targetY);
     }
   }
 
-  public void restoreBeans(int x, int y) {
+  public void restoreBeans() {
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       Point p = (Point)m_originalCoords.elementAt(i);
@@ -316,8 +310,8 @@ public class MetaBean
       Dimension d = c.getPreferredSize();
       int dx = (int)(d.getWidth() / 2);
       int dy = (int)(d.getHeight() / 2);
-      temp.setX(x + (int)p.getX());// + (m_xDrop - m_xCreate));
-      temp.setY(y + (int)p.getY());// + (m_yDrop - m_yCreate));
+      temp.setX((int)p.getX()+dx);
+      temp.setY((int)p.getY()+dy);
     }
   }
 

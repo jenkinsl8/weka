@@ -1,26 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CostSensitiveClassifierSplitEvaluator.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Summarizable;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -31,17 +44,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Summarizable;
-import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -424,7 +426,7 @@ public class CostSensitiveClassifierSplitEvaluator
     new FileReader(costFile)));
     
     Evaluation eval = new Evaluation(train, costMatrix);    
-    m_Classifier = AbstractClassifier.makeCopy(m_Template);
+    m_Classifier = Classifier.makeCopy(m_Template);
     
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)
@@ -483,8 +485,8 @@ public class CostSensitiveClassifierSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Utils.missingValue());
-      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
     }
     
     // sizes
@@ -512,7 +514,7 @@ public class CostSensitiveClassifierSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Utils.isMissingValue(dv)) {
+          if (!Instance.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {

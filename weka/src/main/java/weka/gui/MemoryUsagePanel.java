@@ -1,24 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * MemoryUsagePanel.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
+
+import weka.core.Memory;
+import weka.core.Utils;
+import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,10 +42,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import weka.core.Memory;
-import weka.core.Utils;
-import weka.gui.visualize.VisualizeUtils;
 
 /**
  * A panel for displaying the memory usage.
@@ -150,7 +151,7 @@ public class MemoryUsagePanel
       perc = Math.round(perc * 1000) / 10;
       
       // tool tip
-      setToolTipText("" + perc + "% used");
+      setToolTipText("" + perc + Messages.getInstance().getString("MemoryUsagePanel_MemoryMonitor_Update_SetToolTipText_Text"));
       
       // update history
       m_History.insertElementAt(perc, 0);
@@ -208,19 +209,15 @@ public class MemoryUsagePanel
       PROPERTIES = Utils.readProperties(PROPERTY_FILE);
       Enumeration keys = PROPERTIES.propertyNames();
       if (!keys.hasMoreElements())
-	throw new Exception("Failed to read a property file for the "
-	    +"memory usage panel");
+	throw new Exception(Messages.getInstance().getString("MemoryUsagePanel_Exception_Text"));
     }
     catch (Exception ex) {
       JOptionPane.showMessageDialog(
 	  null,
-	  "Could not read a configuration file for the memory usage\n"
-	  +"panel. An example file is included with the Weka distribution.\n"
-	  +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-	  +"should be placed either in your user home (which is set\n"
-	  + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-	  + "or the directory that java was started from\n",
-	  "MemoryUsagePanel",
+	  Messages.getInstance().getString("MemoryUsagePanel_Exception_JOptionPaneShowMessageDialog_Text_First") 
+	  + System.getProperties().getProperty("user.home") 
+	  + Messages.getInstance().getString("MemoryUsagePanel_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+	  Messages.getInstance().getString("MemoryUsagePanel_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
 	  JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -253,8 +250,8 @@ public class MemoryUsagePanel
 	}
 	catch (Exception e) {
 	  System.err.println(
-	      "MemoryUsagePanel: cannot parse percentage '" 
-	      + percs[i] + "' - ignored!");
+			  Messages.getInstance().getString("MemoryUsagePanel_Error_First") 
+	      + percs[i] + Messages.getInstance().getString("MemoryUsagePanel_Error_Second"));
 	  continue;
 	}
 
@@ -269,8 +266,8 @@ public class MemoryUsagePanel
       }
       else {
 	System.err.println(
-	    "MemoryUsagePanel: cannot find color for percentage '" 
-	    + percs[i] + "' - ignored!");
+			Messages.getInstance().getString("MemoryUsagePanel_Error_Third") 
+	    + percs[i] + Messages.getInstance().getString("MemoryUsagePanel_Error_Fourth"));
       }
     }
     Collections.sort(m_Percentages);
@@ -281,8 +278,8 @@ public class MemoryUsagePanel
     JPanel panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.EAST);
     
-    m_ButtonGC = new JButton("GC");
-    m_ButtonGC.setToolTipText("Runs the garbage collector.");
+    m_ButtonGC = new JButton(Messages.getInstance().getString("MemoryUsagePanel_ButtonGC_JButton_Text"));
+    m_ButtonGC.setToolTipText(Messages.getInstance().getString("MemoryUsagePanel_ButtonGC_SetToolTipText_Text"));
     m_ButtonGC.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
 	System.gc();
@@ -298,7 +295,7 @@ public class MemoryUsagePanel
       width  = Integer.parseInt(PROPERTIES.getProperty("Width", "400"));
     }
     catch (Exception e) {
-      System.err.println("MemoryUsagePanel: Problem parsing the dimensions - " + e);
+      System.err.println(Messages.getInstance().getString("MemoryUsagePanel_Error_Fifth") + e);
       height = (int) m_ButtonGC.getPreferredSize().getHeight();
       width = 400;
     }
@@ -312,7 +309,7 @@ public class MemoryUsagePanel
       left = Integer.parseInt(PROPERTIES.getProperty("Left", "0"));
     }
     catch (Exception e) {
-      System.err.println("MemoryUsagePanel: Problem parsing the position - " + e);
+      System.err.println(Messages.getInstance().getString("MemoryUsagePanel_Error_Sixth") + e);
       top  = 0;
       left = 0;
     }
@@ -324,7 +321,7 @@ public class MemoryUsagePanel
       interval = Integer.parseInt(PROPERTIES.getProperty("Interval", "1000"));
     }
     catch (Exception e) {
-      System.err.println("MemoryUsagePanel: Problem parsing the refresh interval - " + e);
+      System.err.println(Messages.getInstance().getString("MemoryUsagePanel_Error_Seventh") + e);
       interval = 1000;
     }
     m_Monitor = new MemoryMonitor();
@@ -356,8 +353,8 @@ public class MemoryUsagePanel
     }
     catch (Exception e) {
       System.err.println(
-	  "MemoryUsagePanel: cannot parse color '" 
-	  + e.getMessage() + "' - ignored!");
+    		  Messages.getInstance().getString("MemoryUsagePanel_Error_Eighth") 
+	  + e.getMessage() + Messages.getInstance().getString("MemoryUsagePanel_Error_Nineth"));
     }
     
     return result;

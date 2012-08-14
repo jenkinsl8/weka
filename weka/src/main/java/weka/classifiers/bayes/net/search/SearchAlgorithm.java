@@ -1,36 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * SearchAlgorithm.java
- * Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This is the base class for all search algorithms for learning Bayes networks.
@@ -41,7 +41,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class SearchAlgorithm 
     implements OptionHandler, Serializable, RevisionHandler {
@@ -64,12 +64,6 @@ public class SearchAlgorithm
      * If this is true, m_bInitAsNaiveBayes is overridden and interpreted as false.
      */
     protected boolean m_bMarkovBlanketClassifier = false;
-
-    /**
-     * File name containing initial network structure. This can be used as starting point for structure search
-     * It will be ignored if not speficied. When specified, it overrides the InitAsNaivBayes flag.
-     */
-    protected String m_sInitalBIFFile;
 
     /** c'tor **/
     public SearchAlgorithm() {
@@ -270,7 +264,6 @@ public class SearchAlgorithm
         return "SearchAlgorithm\n";
     } // toString
 
-    
     /**
      * buildStructure determines the network structure/graph of the network.
      * The default behavior is creating a network where all nodes have the first
@@ -283,24 +276,7 @@ public class SearchAlgorithm
      * @throws Exception if something goes wrong
      */
     public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
-    	if (m_sInitalBIFFile != null && !m_sInitalBIFFile.equals("")) {
-    		BIFReader initialNet = new BIFReader().processFile(m_sInitalBIFFile);
-            for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            	int iNode = initialNet.getNode(bayesNet.getNodeName(iAttribute));
-            	for (int iParent = 0; iParent < initialNet.getNrOfParents(iAttribute);iParent++) {
-            		String sParent = initialNet.getNodeName(initialNet.getParent(iNode, iParent));
-            		int nParent = 0;
-            		while (nParent < bayesNet.getNrOfNodes() && !bayesNet.getNodeName(nParent).equals(sParent)) {
-            			nParent++;
-            		}
-            		if (nParent< bayesNet.getNrOfNodes()) {
-            			bayesNet.getParentSet(iAttribute).addParent(nParent, instances);
-            		} else {
-            			System.err.println("Warning: Node " + sParent + " is ignored. It is found in initial network but not in data set.");
-            		}
-            	}
-            }
-    	} else if (m_bInitAsNaiveBayes) {
+        if (m_bInitAsNaiveBayes) {
             int iClass = instances.classIndex();
             // initialize parent sets to have arrow from classifier node to
             // each of the other nodes
@@ -431,6 +407,6 @@ public class SearchAlgorithm
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.9 $");
     }
 } // class SearchAlgorithm

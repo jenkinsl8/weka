@@ -1,25 +1,37 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Loader.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.converters.ArffLoader;
+import weka.core.converters.DatabaseLoader;
+import weka.core.converters.FileSourcedConverter;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -30,21 +42,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
+import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JButton;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.converters.ArffLoader;
-import weka.core.converters.DatabaseLoader;
-import weka.core.converters.FileSourcedConverter;
-import weka.gui.Logger;
 
 /**
  * Loads data sets using weka.core.converter classes
@@ -152,9 +153,9 @@ public class Loader
 	
 	String msg = statusMessagePrefix();
 	if (m_Loader instanceof FileSourcedConverter) {
-	  msg += "Loading " + ((FileSourcedConverter)m_Loader).retrieveFile().getName();
+	  msg += Messages.getInstance().getString("Loader_LoadThread_Msg_Text_First") + ((FileSourcedConverter)m_Loader).retrieveFile().getName();
 	} else {
-	  msg += "Loading...";
+	  msg += Messages.getInstance().getString("Loader_LoadThread_Msg_Text_Second");
 	}
 	if (m_log != null) {
 	  m_log.statusMessage(msg);
@@ -166,25 +167,17 @@ public class Loader
 	  Instance nextInstance = null;
 	  // load and pass on the structure first
 	  Instances structure = null;
-	  Instances structureCopy = null;
-	  Instances currentStructure = null;
-	  boolean stringAttsPresent = false;
 	  try {
             m_Loader.reset();
             m_Loader.setRetrieval(weka.core.converters.Loader.INCREMENTAL);
             //	    System.err.println("NOTIFYING STRUCTURE AVAIL");
 	    structure = m_Loader.getStructure();
-	    if (structure.checkForStringAttributes()) {
-	      structureCopy = (Instances)(new SerializedObject(structure).getObject());
-	      stringAttsPresent = true;
-	    }
-	    currentStructure = structure;
 	    notifyStructureAvailable(structure);
 	  } catch (IOException e) {
 	    if (m_log != null) {
 	      m_log.statusMessage(statusMessagePrefix()
-	          +"ERROR (See log for details");
-	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_First"));
+	      m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Second") + statusMessagePrefix()
 	          + " " + e.getMessage());
 	    }
 	    e.printStackTrace();
@@ -194,8 +187,8 @@ public class Loader
 	  } catch (IOException e) {
 	    if (m_log != null) {
 	      m_log.statusMessage(statusMessagePrefix()
-	          +"ERROR (See log for details");
-	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Third"));
+	      m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Fourth") + statusMessagePrefix()
 	          + " " + e.getMessage());
 	    }
 	    e.printStackTrace();
@@ -205,7 +198,7 @@ public class Loader
 	    if (m_stopped) {
 	      break;
 	    }
-	    //nextInstance.setDataset(structure);
+	    nextInstance.setDataset(structure);
 	    //	    format.add(nextInstance);
 	    /*	    InstanceEvent ie = (start)
 	      ? new InstanceEvent(m_DP, nextInstance, 
@@ -220,23 +213,7 @@ public class Loader
 	    m_ie.setInstance(nextInstance);
 	    //	    start = false;
 	    //	    System.err.println(z);
-	    
-	    // a little jiggery pokery to ensure that our
-	    // one instance lookahead to determine whether
-	    // this instance is the end of the batch doesn't
-	    // clobber any string values in the current
-	    // instance, if the loader is loading them
-	    // incrementally (i.e. only retaining one
-	    // value in the header at any one time).
-	    if (stringAttsPresent) {
-	      if (currentStructure == structure) {
-	        currentStructure = structureCopy;
-	      } else {
-	        currentStructure = structure;
-	      }
-	    }
-	    nextInstance = m_Loader.getNextInstance(currentStructure);
-
+	    nextInstance = m_Loader.getNextInstance(structure);
 	    if (nextInstance == null) {
 	      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
 	    }
@@ -246,7 +223,7 @@ public class Loader
 //              m_visual.setText("" + z + " instances...");
               if (m_log != null) {
                 m_log.statusMessage(statusMessagePrefix() 
-                    + "Loaded " + z + " instances");
+                    + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Fifth") + z + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Sixth"));
               }
             }
 	  }
@@ -258,8 +235,8 @@ public class Loader
 	  m_dataSet = m_Loader.getDataSet();
 	  m_visual.setStatic();
 	  if (m_log != null) {
-	    m_log.logMessage("[Loader] " + statusMessagePrefix() 
-	        + " loaded " + m_dataSet.relationName());
+	    m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_First") + statusMessagePrefix() 
+	        + Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Second") + m_dataSet.relationName());
 	  }
 //	  m_visual.setText(m_dataSet.relationName());
 	  notifyDataSetLoaded(new DataSetEvent(m_DP, m_dataSet));
@@ -267,16 +244,16 @@ public class Loader
       } catch (Exception ex) {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              +"ERROR (See log for details");
-          m_log.logMessage("[Loader] " + statusMessagePrefix()
+              + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Seventh"));
+          m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Eighth") + statusMessagePrefix()
               + " " + ex.getMessage());
         }
 	ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
           if (m_log != null) {
-            m_log.logMessage("[Loader] " + statusMessagePrefix() 
-                + " loading interrupted!");
+            m_log.logMessage(Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Third") + statusMessagePrefix() 
+                + Messages.getInstance().getString("Loader_LoadThread_LogMessage_Text_Fourth"));
           }
         }
 	m_ioThread = null;
@@ -286,7 +263,7 @@ public class Loader
         m_state = IDLE;
         m_stopped = false;
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Loader_LoadThread_StatusMessage_Text_Nineth"));
         }
         block(false);
       }
@@ -311,19 +288,12 @@ public class Loader
   public void setDB(boolean flag){
   
       m_dbSet = flag;
-      if (m_dbSet) {
-        try {
-          newStructure();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
   }
 
   protected void appearanceFinal() {
     removeAll();
     setLayout(new BorderLayout());
-    JButton goButton = new JButton("Start...");
+    JButton goButton = new JButton(Messages.getInstance().getString("Loader_AppearanceFinal_GoButton_JButton_Text"));
     add(goButton, BorderLayout.CENTER);
     goButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -388,37 +358,19 @@ public class Loader
   protected void newFileSelected() throws Exception {
     if(! (m_Loader instanceof DatabaseLoader)) {
       newStructure();
-/*      // try to load structure (if possible) and notify any listeners
-
-      // Set environment variables
-      if (m_Loader instanceof EnvironmentHandler && m_env != null) {
-        try {
-          ((EnvironmentHandler)m_Loader).setEnvironment(m_env);
-        }catch (Exception ex) {
-        }
-      }
-      m_dataFormat = m_Loader.getStructure();
-      //      System.err.println(m_dataFormat);
-      System.out.println("[Loader] Notifying listeners of instance structure avail.");
-      notifyStructureAvailable(m_dataFormat); */
     }
   }
   
   protected void newStructure() throws Exception {
-    
-    m_Loader.reset();
-    
-    // Set environment variables
     if (m_Loader instanceof EnvironmentHandler && m_env != null) {
       try {
         ((EnvironmentHandler)m_Loader).setEnvironment(m_env);
-      }catch (Exception ex) {
-      }
+      } catch (Exception ex) {}
     }
     m_dataFormat = m_Loader.getStructure();
-    System.out.println("[Loader] Notifying listeners of instance structure avail.");
-    notifyStructureAvailable(m_dataFormat);
-  }  
+//    System.out.println(Messages.getInstance().getString("Loader_NewFileSelected_Text"));
+//    notifyStructureAvailable(m_dataFormat);
+  }
   
   /**
    * Get the structure of the output encapsulated in the named
@@ -475,8 +427,7 @@ public class Loader
     {
 
     if (!(algorithm instanceof weka.core.converters.Loader)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Loader)");
+      throw new IllegalArgumentException(algorithm.getClass() + Messages.getInstance().getString("Loader_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setLoader((weka.core.converters.Loader)algorithm);
   }
@@ -626,7 +577,7 @@ public class Loader
    */
   public String getStartMessage() {
     boolean ok = true;
-    String entry = "Start loading";
+    String entry = Messages.getInstance().getString("Loader_GetStartMessage_Entry_Text");
     if (m_ioThread == null) {
       if (m_Loader instanceof FileSourcedConverter) {
         String temp = ((FileSourcedConverter) m_Loader).retrieveFile().getPath();
@@ -635,12 +586,7 @@ public class Loader
           temp = env.substitute(temp);
         } catch (Exception ex) {}
         File tempF = new File(temp);
-        
-        // forward slashes are platform independent for resources read from the
-        // classpath
-        String tempFixedPathSepForResource = temp.replace(File.separatorChar, '/');
-        if (!tempF.isFile() && 
-            this.getClass().getClassLoader().getResource(tempFixedPathSepForResource) == null) {
+        if (!tempF.isFile()) {
           ok = false;
         }
       }
@@ -648,6 +594,7 @@ public class Loader
         entry = "$"+entry;
       }
     }
+    
     return entry;
   }
   
@@ -921,4 +868,3 @@ public class Loader
     m_env = Environment.getSystemWide();
   }
 }
-

@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Stopwords.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -55,13 +56,13 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public class Stopwords
   implements RevisionHandler {
   
   /** The hash set containing the list of stopwords */
-  protected HashSet<String> m_Words = null;
+  protected HashSet m_Words = null;
 
   /** The default stopwords object (stoplist based on Rainbow) */
   protected static Stopwords m_Stopwords;
@@ -76,7 +77,7 @@ public class Stopwords
    * initializes the stopwords (based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>).
    */
   public Stopwords() {
-    m_Words = new HashSet<String>();
+    m_Words = new HashSet();
 
     //Stopwords list from Rainbow
     add("a");
@@ -651,11 +652,11 @@ public class Stopwords
    * @return the enumeration over all stopwords
    */
   public Enumeration elements() {
-    Iterator<String>    iter;
-    Vector<String>      list;
+    Iterator    iter;
+    Vector      list;
 
     iter = m_Words.iterator();
-    list = new Vector<String>();
+    list = new Vector();
 
     while (iter.hasNext())
       list.add(iter.next());
@@ -790,7 +791,7 @@ public class Stopwords
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
   
   /**
@@ -816,7 +817,7 @@ public class Stopwords
     boolean print = Utils.getFlag('p', args);
 
     // words to process?
-    Vector<String> words = new Vector<String>();
+    Vector words = new Vector();
     for (int i = 0; i < args.length; i++) {
       if (args[i].trim().length() > 0)
         words.add(args[i].trim());

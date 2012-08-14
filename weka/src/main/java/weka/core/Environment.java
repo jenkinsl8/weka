@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Environment.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,10 +31,8 @@ import java.util.TreeMap;
 
 /**
  * This class encapsulates a map of all environment and java system properties.
- * There are methods for adding and removing variables to this
- * Environment object as well as to the system wide global environment. There
- * is also a method for replacing key names (enclosed by ${}) with their associated 
- * value in Strings.
+ * There are methods for adding and removing variables as well as a method for
+ * replacing key names (enclosed by ${}) with their associated value in Strings.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
@@ -124,30 +123,13 @@ public class Environment implements RevisionHandler {
   }
 
   /**
-   * Add a variable to the internal map of this properties object.
+   * Add a variable to the internal map.
    *
    * @param key the name of the variable
    * @param value its value
    */
   public void addVariable(String key, String value) {
     m_envVars.put(key, value);
-  }
-  
-  /**
-   * Add a a variable to the internal map of this properties
-   * object and to the global system-wide environment;
-   * 
-   * @param key the name of the variable
-   * @param value its value
-   */
-  public void addVariableSystemWide(String key, String value) {
-    addVariable(key, value); // local
-    
-    // system wide
-    if (this != getSystemWide()) {
-      getSystemWide().addVariableSystemWide(key, value);
-    }
-    System.setProperty(key, value);
   }
 
   /**

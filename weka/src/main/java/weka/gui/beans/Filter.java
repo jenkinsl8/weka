@@ -1,25 +1,35 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Filter.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.AllFilter;
+import weka.filters.StreamableFilter;
+import weka.filters.SupervisedFilter;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
@@ -30,15 +40,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.JPanel;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.AllFilter;
-import weka.filters.StreamableFilter;
-import weka.filters.SupervisedFilter;
-import weka.gui.Logger;
 
 /**
  * A wrapper bean for Weka filters
@@ -53,8 +54,7 @@ public class Filter
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
-	     InstanceListener, EventConstraints,
-	     ConfigurationProducer {
+	     InstanceListener, EventConstraints {
 
   /** for serialization */
   private static final long serialVersionUID = 8249759470189439321L;
@@ -219,8 +219,7 @@ public class Filter
   public void setWrappedAlgorithm(Object algorithm) {
     
     if (!(algorithm instanceof weka.filters.Filter)) { 
-      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
-					 +"type of algorithm (Filter)");
+      throw new IllegalArgumentException(algorithm.getClass()+ Messages.getInstance().getString("Filter_SetWrappedAlgorithm_IllegalArgumentException_Text"));
     }
     setFilter((weka.filters.Filter)algorithm);
   }
@@ -252,12 +251,12 @@ public class Filter
   public void acceptInstance(InstanceEvent e) {
     // to do!
     if (m_filterThread != null) {
-      String messg = "[Filter] " + statusMessagePrefix() 
-        + " is currently batch processing!";
+      String messg = Messages.getInstance().getString("Filter_AcceptInstance_Mess_Text_First") + statusMessagePrefix() 
+        + Messages.getInstance().getString("Filter_AcceptInstance_Mess_Text_Second");
       if (m_log != null) {
 	m_log.logMessage(messg);
 	m_log.statusMessage(statusMessagePrefix()
-	    + "WARNING: Filter is currently batch processing.");
+	    + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_First"));
       } else {
 	System.err.println(messg);
       }
@@ -266,11 +265,11 @@ public class Filter
     if (!(m_Filter instanceof StreamableFilter)) {
       stop(); // stop all processing
       if (m_log != null) {
-	m_log.logMessage("[Filter] " + statusMessagePrefix() 
-	    + " ERROR : "+m_Filter.getClass().getName()
-	    +"can't process streamed instances; can't continue");
+	m_log.logMessage(Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_First") + statusMessagePrefix() 
+	    + Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Second") + m_Filter.getClass().getName()
+	    + Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Third"));
 	m_log.statusMessage(statusMessagePrefix()
-	    + "ERROR: Can't process streamed instances; can't continue.");
+	    + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Second"));
       }
       return;
     }
@@ -303,14 +302,14 @@ public class Filter
 	} catch (Exception ex) {
 	  stop(); // stop all processing
 	  if (m_log != null) {
-	    m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                + " Error in obtaining post-filter structure. " 
+	    m_log.logMessage(Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Fourth") + statusMessagePrefix() 
+                + Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Fifth") 
                 + ex.getMessage());
 	    m_log.statusMessage(statusMessagePrefix()
-	        +"ERROR (See log for details).");
+	        +Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Third"));
 	  } else {
-	    System.err.println("[Filter] " + statusMessagePrefix() 
-	        + " Error in obtaining post-filter structure");
+	    System.err.println(Messages.getInstance().getString("Filter_AcceptInstance_Error_Text_First") + statusMessagePrefix() 
+	        + Messages.getInstance().getString("Filter_AcceptInstance_Error_Text_Second"));
 	  }
 	}
       } catch (Exception ex) {
@@ -319,49 +318,46 @@ public class Filter
       return;
     }
    
-    if (e.getStatus() == InstanceEvent.BATCH_FINISHED ||
-        e.getInstance() == null) {
+    if (e.getStatus() == InstanceEvent.BATCH_FINISHED) {
       // get the last instance (if available)
       try {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix() 
-              + "Stream finished.");
+              + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Fourth"));
         }
-        if (e.getInstance() != null) {
-          if (m_Filter.input(e.getInstance())) {
-            Instance filteredInstance = m_Filter.output();
-            if (filteredInstance != null) {
-              if (!m_structurePassedOn) {
-                // pass on the new structure first
-                m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-                notifyInstanceListeners(m_ie);
-                m_structurePassedOn = true;
-              }
-
-              m_ie.setInstance(filteredInstance);
-
-              // if there are instances pending for output don't want to send
-              // a batch finisehd at this point...
-              //System.err.println("Filter - in batch finisehd...");
-              if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
-                m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
-              } else {
-                m_ie.setStatus(e.getStatus());
-              }
+        if (m_Filter.input(e.getInstance())) {
+          Instance filteredInstance = m_Filter.output();
+          if (filteredInstance != null) {
+            if (!m_structurePassedOn) {
+              // pass on the new structure first
+              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
               notifyInstanceListeners(m_ie);
+              m_structurePassedOn = true;
             }
+
+            m_ie.setInstance(filteredInstance);
+            
+            // if there are instances pending for output don't want to send
+            // a batch finisehd at this point...
+            //System.err.println("Filter - in batch finisehd...");
+            if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
+              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+            } else {
+              m_ie.setStatus(e.getStatus());
+            }
+            notifyInstanceListeners(m_ie);
           }
         }
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Done.");
+          m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Fourth_Alpha"));
         }
       } catch (Exception ex) {
         stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " 
+          m_log.logMessage(Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Sixth")
               + statusMessagePrefix() + ex.getMessage());
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details).");
+              + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Fifth"));
         }
         ex.printStackTrace();
       }
@@ -371,7 +367,7 @@ public class Filter
         if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
           if (m_log != null) {
             m_log.statusMessage(statusMessagePrefix() 
-                + "Passing on pending instances...");
+                + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Sixth"));
           }
           Instance filteredInstance = m_Filter.output();
           if (filteredInstance != null) {
@@ -400,17 +396,17 @@ public class Filter
             notifyInstanceListeners(m_ie);
           }
           if (m_log != null) {
-            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+            m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Seventh"));
           }
         }
       } catch (Exception ex) {
         stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " 
+          m_log.logMessage(Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Seventh") 
               + statusMessagePrefix() 
               + ex.toString());
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details.");
+              + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Eighth"));
         }
         ex.printStackTrace();
       }
@@ -447,16 +443,16 @@ public class Filter
         
         if (m_log != null && (m_instanceCount % 10000 == 0)) {
           m_log.statusMessage(statusMessagePrefix()
-              + "Received " + m_instanceCount + " instances.");
+              + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Nineth") + m_instanceCount + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Tenth"));
         }
         notifyInstanceListeners(m_ie);
       } catch (Exception ex) {
         stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " + statusMessagePrefix() 
+          m_log.logMessage(Messages.getInstance().getString("Filter_AcceptInstance_LogMessage_Text_Eighth") + statusMessagePrefix() 
               + ex.toString());
           m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details).");
+              + Messages.getInstance().getString("Filter_AcceptInstance_StatusMessage_Text_Eleventh"));
         }
         ex.printStackTrace();
       }
@@ -500,8 +496,8 @@ public class Filter
 //		    m_visual.setText("Filtering training data...");
 		    if (m_log != null) {
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + "Filtering training data ("
-		          + m_trainingSet.relationName() + ")");
+		          + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_StatusMessage_Text_First")
+		          + m_trainingSet.relationName() + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_StatusMessage_Text_Second"));
 		    }
 		    m_Filter.setInputFormat(m_trainingSet);
 		    Instances filteredData = 
@@ -526,10 +522,10 @@ public class Filter
 		} catch (Exception ex) {
 		  ex.printStackTrace();
                   if (m_log != null) {
-                    m_log.logMessage("[Filter] " + statusMessagePrefix() 
+                    m_log.logMessage(Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_LogMessage_Text_First") + statusMessagePrefix() 
                         + ex.getMessage());
                     m_log.statusMessage(statusMessagePrefix()
-                        + "ERROR (See log for details).");
+                        + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_StatusMessage_Text_Third"));
 //                    m_log.statusMessage("Problem filtering: see log for details.");
                   }
                   Filter.this.stop(); // stop all processing
@@ -540,14 +536,14 @@ public class Filter
 		  if (isInterrupted()) {
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("[Filter] " + statusMessagePrefix()
-                                       + " training set interrupted!");
+		      m_log.logMessage(Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_LogMessage_Text_Second") + statusMessagePrefix()
+                                       + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_LogMessage_Text_Third"));
 		      m_log.statusMessage(statusMessagePrefix()
-		          + "INTERRUPTED");
+		          + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_StatusMessage_Text_Fifth"));
 		    }		    
 		  } else {
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		      m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Filter_ProcessTrainingOrDataSourceEvents_StatusMessage_Text_Sixth"));
 		    }
 		  }
 		  block(false);
@@ -591,8 +587,8 @@ public class Filter
                   //		  m_visual.setText("Filtering test data...");
 		  if (m_log != null) {
 		    m_log.statusMessage(statusMessagePrefix() 
-		        + "Filtering test data ("
-			+ m_testingSet.relationName() + ")");
+		        + Messages.getInstance().getString("Filter_AcceptTestSet_StatusMessage_Text_First")
+			+ m_testingSet.relationName() + Messages.getInstance().getString("Filter_AcceptTestSet_StatusMessage_Text_Second"));
 		  }
 		  Instances filteredTest = 
 		    weka.filters.Filter.useFilter(m_testingSet, m_Filter);
@@ -608,10 +604,10 @@ public class Filter
 	      } catch (Exception ex) {
 		ex.printStackTrace();
                 if (m_log != null) {
-                  m_log.logMessage("[Filter] " + statusMessagePrefix() 
+                  m_log.logMessage(Messages.getInstance().getString("Filter_AcceptTestSet_LogMessage_Text_First") + statusMessagePrefix() 
                       + ex.getMessage());
                   m_log.statusMessage(statusMessagePrefix() 
-                      + "ERROR (See log for details).");
+                      + Messages.getInstance().getString("Filter_AcceptTestSet_StatusMessage_Text_Third"));
                 }
                 Filter.this.stop();
 	      } finally {
@@ -621,15 +617,15 @@ public class Filter
 		if (isInterrupted()) {
 		  m_trainingSet = null;
 		  if (m_log != null) {
-		      m_log.logMessage("[Filter] " + statusMessagePrefix()
-                                       + " test set interrupted!");
+		      m_log.logMessage(Messages.getInstance().getString("Filter_AcceptTestSet_LogMessage_Text_Second") + statusMessagePrefix()
+                                       + Messages.getInstance().getString("Filter_AcceptTestSet_LogMessage_Text_Third"));
 		      m_log.statusMessage(statusMessagePrefix()
-		          + "INTERRUPTED");
+		          + Messages.getInstance().getString("Filter_AcceptTestSet_StatusMessage_Text_Fourth"));
 //		    m_log.statusMessage("OK");
 		  }
 		} else {
 		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Filter_AcceptTestSet_StatusMessage_Text_Fifth"));
 		  }
 		}
 		block(false);
@@ -752,26 +748,6 @@ public class Filter
    */
   public synchronized void removeInstanceListener(InstanceListener tsl) {
     m_instanceListeners.removeElement(tsl);
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void addConfigurationListener(ConfigurationListener cl) {
-    
-  }
-  
-  /**
-   * We don't have to keep track of configuration listeners (see the
-   * documentation for ConfigurationListener/ConfigurationEvent).
-   * 
-   * @param cl a ConfigurationListener.
-   */
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
-    
   }
 
   private void notifyDataOrTrainingListeners(EventObject ce) {
@@ -1012,7 +988,7 @@ public class Filter
       stop();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Filter)");
+					 + Messages.getInstance().getString("Filter_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 
@@ -1026,11 +1002,6 @@ public class Filter
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    
-    if (eventName.equals("configuration") && m_Filter != null) {
-      return true;
-    }
-    
     // can't generate the named even if we are not receiving it as an
     // input!
     if (!m_listenees.containsKey(eventName)) {

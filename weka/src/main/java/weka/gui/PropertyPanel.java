@@ -1,26 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PropertyPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.core.OptionHandler;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -44,11 +48,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.gui.GenericObjectEditorHistory.HistorySelectionEvent;
-import weka.gui.GenericObjectEditorHistory.HistorySelectionListener;
 
 /** 
  * Support for drawing a property value in a component.
@@ -94,7 +93,7 @@ public class PropertyPanel
    */
   public PropertyPanel(PropertyEditor pe, boolean ignoreCustomPanel) {
 
-    m_Editor  = pe;
+    m_Editor = pe;
     
     if (!ignoreCustomPanel && m_Editor instanceof CustomPanelSupplier) {
       setLayout(new BorderLayout());
@@ -113,7 +112,7 @@ public class PropertyPanel
   protected void createDefaultPanel() {
 
     setBorder(BorderFactory.createEtchedBorder());
-    setToolTipText("Left-click to edit properties for this object, right-click/Alt+Shift+left-click for menu");
+    setToolTipText(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_SetToolTipText_Text"));
     setOpaque(true);
     final Component comp = this;
     addMouseListener(new MouseAdapter() {
@@ -128,7 +127,7 @@ public class PropertyPanel
             JMenuItem item;
 
             if (m_Editor.getValue() != null) {
-              item = new JMenuItem("Show properties...");
+              item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_First"));
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   showPropertyDialog();
@@ -136,7 +135,7 @@ public class PropertyPanel
               });
               menu.add(item);
 
-              item = new JMenuItem("Copy configuration to clipboard");
+              item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_Second"));
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   String str = m_Editor.getValue().getClass().getName();
@@ -150,12 +149,12 @@ public class PropertyPanel
               menu.add(item);
             }
             
-            item = new JMenuItem("Enter configuration...");
+            item = new JMenuItem(Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Item_JMenuItem_Text_Third"));
             item.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent e) {
         	String str = JOptionPane.showInputDialog(
         	                 comp, 
-        	                 "Configuration (<classname> [<options>])");
+        	                 Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Str_JOptionPaneShowInputDialog_Text"));
         	if (str != null) {
         	  try {
         	    String[] options = Utils.splitOptions(str);
@@ -169,25 +168,14 @@ public class PropertyPanel
         	    ex.printStackTrace();
         	    JOptionPane.showMessageDialog(
         		comp, 
-        		"Error parsing commandline:\n" + ex, 
-        		"Error...",
+        		Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Exception_Text_First") + ex, 
+        		Messages.getInstance().getString("PropertyPanel_CreateDefaultPanel_Exception_Text_Second"),
         		JOptionPane.ERROR_MESSAGE);
         	  }
         	}
               }
             });
             menu.add(item);
-
-            if (m_Editor instanceof GenericObjectEditor) {
-              ((GenericObjectEditor) m_Editor).getHistory().customizePopupMenu(
-        	  menu,
-        	  m_Editor.getValue(),
-        	  new HistorySelectionListener() {
-        	    public void historySelected(HistorySelectionEvent e) {
-        	      m_Editor.setValue(e.getHistoryItem());
-        	    }
-        	  });
-            }
             
             menu.show(comp, evt.getX(), evt.getY());
           }
@@ -274,27 +262,4 @@ public class PropertyPanel
     }
   }
 
-  /**
-   * Adds the current editor value to the history.
-   * 
-   * @return		true if successfully added (i.e., if editor is a GOE)
-   */
-  public boolean addToHistory() {
-    return addToHistory(m_Editor.getValue());
-  }
-
-  /**
-   * Adds the specified value to the history.
-   * 
-   * @param obj		the object to add to the history
-   * @return		true if successfully added (i.e., if editor is a GOE)
-   */
-  public boolean addToHistory(Object obj) {
-    if ((m_Editor instanceof GenericObjectEditor) && (obj != null)) {
-      ((GenericObjectEditor) m_Editor).getHistory().add(obj);
-      return true;
-    }
-    
-    return false;
-  }
 }

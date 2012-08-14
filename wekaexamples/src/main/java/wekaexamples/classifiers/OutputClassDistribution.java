@@ -50,7 +50,7 @@ public class OutputClassDistribution {
     test.setClassIndex(test.numAttributes() - 1);
     if (!train.equalHeaders(test))
       throw new IllegalArgumentException(
-	  "Train and test set are not compatible: " + train.equalHeadersMsg(test));
+	  "Train and test set are not compatible!");
     
     // train classifier
     J48 cls = new J48();

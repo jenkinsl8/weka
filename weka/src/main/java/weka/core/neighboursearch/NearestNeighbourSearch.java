@@ -1,28 +1,25 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    NearestNeighbourSearch.java
- *    Copyright (C) 1999-2012 University of Waikato
+ *    Copyright (C) 1999-2007 University of Waikato
  */
 
 package weka.core.neighboursearch;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.AdditionalMeasureProducer;
 import weka.core.DistanceFunction;
@@ -35,12 +32,16 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * Abstract class for nearest neighbour search. All algorithms (classes) that
  * do nearest neighbour search should extend this class.
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public abstract class NearestNeighbourSearch
   implements Serializable, OptionHandler, AdditionalMeasureProducer,
@@ -53,7 +54,7 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum size of the heap is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.2 $
    */
   protected class MyHeap
     implements RevisionHandler {
@@ -267,7 +268,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
   
@@ -275,7 +276,7 @@ public abstract class NearestNeighbourSearch
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.2 $
    */
   protected class MyHeapElement
     implements RevisionHandler {
@@ -303,7 +304,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
   
@@ -311,7 +312,7 @@ public abstract class NearestNeighbourSearch
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.2 $
    */ //better to change this into a heap element
   protected class NeighborNode
     implements RevisionHandler {
@@ -355,7 +356,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   } 
 
@@ -366,7 +367,7 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum length of the list is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.2 $
    */ //better to change this into a heap
   protected class NeighborList
     implements RevisionHandler {
@@ -525,7 +526,7 @@ public abstract class NearestNeighbourSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.2 $");
     }
   }
   
@@ -580,7 +581,7 @@ public abstract class NearestNeighbourSearch
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+    Vector newVector = new Vector();
 
     newVector.add(new Option(
 	"\tDistance function to use.\n"
@@ -794,15 +795,15 @@ public abstract class NearestNeighbourSearch
    * @return 		an enumeration of the measure names
    */
   public Enumeration enumerateMeasures() {
-    Vector<String> newVector; 
+    Vector newVector; 
     if(m_Stats == null) {
-      newVector = new Vector<String>(0);
+      newVector = new Vector(0);
     }
     else {
-      newVector = new Vector<String>();
+      newVector = new Vector();
       Enumeration en = m_Stats.enumerateMeasures();
       while(en.hasMoreElements())
-        newVector.add((String)en.nextElement());
+        newVector.add(en.nextElement());
     }
     return newVector.elements();
   }

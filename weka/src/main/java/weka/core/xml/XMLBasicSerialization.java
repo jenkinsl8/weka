@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLBasicSerialization.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionUtils;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -39,9 +42,6 @@ import java.util.Vector;
 import javax.swing.DefaultListModel;
 
 import org.w3c.dom.Element;
-
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * This serializer contains some read/write methods for common classes that
@@ -66,7 +66,7 @@ import weka.core.Utils;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.6 $ 
  */
 public class XMLBasicSerialization
    extends XMLSerialization {
@@ -243,9 +243,9 @@ public class XMLBasicSerialization
     * @see java.util.Collection
     */
    public Object readCollection(Element node) throws Exception {
-      Collection<Object>           coll;
-      Vector<Object>               v;
-      Vector<Element>               children;
+      Collection           coll;
+      Vector               v;
+      Vector               children;
       Element              child;
       int                  i;
       int                  index;
@@ -258,7 +258,7 @@ public class XMLBasicSerialization
       m_CurrentNode = node;
       
       children = XMLDocument.getChildTags(node); 
-      v        = new Vector<Object>();
+      v        = new Vector();
 
       // determine highest index for size
       index    = children.size() - 1;
@@ -280,8 +280,8 @@ public class XMLBasicSerialization
       }
       
       // populate collection
-      coll = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                        newInstance());
+      coll = (Collection) Class.forName(
+                  node.getAttribute(ATT_CLASS)).newInstance();
       coll.addAll(v);
       
       return coll;
@@ -337,7 +337,7 @@ public class XMLBasicSerialization
     * @see java.util.Map
     */
    public Object readMap(Element node) throws Exception {
-     Map<Object,Object>                  map;
+      Map                  map;
       Object               key;
       Object               value;
       Vector               children;
@@ -354,8 +354,8 @@ public class XMLBasicSerialization
 
       m_CurrentNode = node;
       
-      map      = Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).
-                            newInstance());
+      map      = (Map) Class.forName(
+                     node.getAttribute(ATT_CLASS)).newInstance();
       children = XMLDocument.getChildTags(node); 
 
       for (i = 0; i < children.size(); i++) {
@@ -567,6 +567,6 @@ public class XMLBasicSerialization
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
+     return RevisionUtils.extract("$Revision: 1.6 $");
    }
 }

@@ -1,26 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ResultHistoryPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.gui.visualize.PrintableComponent;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -49,8 +52,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
-
-import weka.gui.visualize.PrintableComponent;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -438,13 +439,13 @@ public class ResultHistoryPanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Weka Explorer: Classifier");
+	new javax.swing.JFrame(Messages.getInstance().getString("ResultHistoryPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultHistoryPanel jd = new ResultHistoryPanel(null);
-      jd.addResult("blah", new StringBuffer("Nothing to see here"));
-      jd.addResult("blah1", new StringBuffer("Nothing to see here1"));
-      jd.addResult("blah2", new StringBuffer("Nothing to see here2"));
-      jd.addResult("blah3", new StringBuffer("Nothing to see here3"));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_First"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Second")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Third"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Fourth")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Fifth"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Sixth")));
+      jd.addResult(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Seventh"), new StringBuffer(Messages.getInstance().getString("ResultHistoryPanel_Main_Jd_JFrame_AddResult_Text_Eighth")));
       jf.getContentPane().add(jd, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	public void windowClosing(java.awt.event.WindowEvent e) {

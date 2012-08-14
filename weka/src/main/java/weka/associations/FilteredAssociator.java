@@ -1,38 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FilteredAssociator.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -107,7 +108,7 @@ import weka.filters.MultiFilter;
  * @version $Revision$
  */
 public class FilteredAssociator 
-  extends SingleAssociatorEnhancer implements AssociationRulesProducer {
+  extends SingleAssociatorEnhancer {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -390,7 +391,6 @@ public class FilteredAssociator
     
     if (getFilter() == null) {
       result = super.getCapabilities();
-      result.disableAll();
     } else {
       result = getFilter().getCapabilities();
     }
@@ -435,64 +435,6 @@ public class FilteredAssociator
 
     m_FilteredInstances = data.stringFreeStructure();
     m_Associator.buildAssociations(data);
-  }
-  
-  /**
-   * Gets the list of mined association rules.
-   * 
-   * @return the list of association rules discovered during mining.
-   * Returns null if mining hasn't been performed yet.
-   */
-  public AssociationRules getAssociationRules() {
-    if (m_Associator instanceof AssociationRulesProducer) {
-      AssociationRules rules = 
-        ((AssociationRulesProducer)m_Associator).getAssociationRules();
-
-      // construct a new FilteredAssociationRules
-      FilteredAssociationRules fRules = 
-        new FilteredAssociationRules(FilteredAssociator.this, m_Filter, rules);
-      
-      return fRules;
-    }
-    
-    // return null if we don't wrap an association rules producer
-    return null;
-  }
-  
-  /**
-   * Gets a list of the names of the metrics output for
-   * each rule. This list should be the same (in terms of
-   * the names and order thereof) as that produced by
-   * AssociationRule.getMetricNamesForRule().
-   * 
-   * @return an array of the names of the metrics available
-   * for each rule learned by this producer.
-   */
-  public String[] getRuleMetricNames() {
-    if (m_Associator instanceof AssociationRulesProducer) {
-      return ((AssociationRulesProducer)m_Associator).getRuleMetricNames();
-    }
-    
-    return new String[0];
-  }
-  
-  /**
-   * Returns true if this AssociationRulesProducer can actually
-   * produce rules. Most implementing classes will always return
-   * true from this method (obviously :-)). However, an implementing
-   * class that actually acts as a wrapper around things that may
-   * or may not implement AssociationRulesProducer will want to
-   * return false if the thing they wrap can't produce rules.
-   * 
-   * @return true if this producer can produce rules in its current
-   * configuration
-   */
-  public boolean canProduceRules() {
-    if (m_Associator instanceof AssociationRulesProducer) {
-      return ((AssociationRulesProducer)m_Associator).canProduceRules();
-    }
-    
-    return false;
   }
 
   /**

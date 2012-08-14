@@ -1,40 +1,44 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FilterCustomizer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.filters.Filter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the filter bean
@@ -44,7 +48,7 @@ import weka.gui.PropertySheetPanel;
  */
 public class FilterCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 2049895469240109738L;
@@ -66,13 +70,11 @@ public class FilterCustomizer
   private PropertySheetPanel m_filterEditor = 
     new PropertySheetPanel();
   
-  private Window m_parentWindow;
-  
-  private ModifyListener m_modifyListener;
+  private JFrame m_parentFrame;
  
   public FilterCustomizer() {
     m_filterEditor.
-    setBorder(BorderFactory.createTitledBorder("Filter options"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("FilterCustomizer_FilterEditor_SetBorder_BorderFactory_CreateTitledBorder_Text")));
 
 
 
@@ -81,18 +83,14 @@ public class FilterCustomizer
 
     JPanel butHolder = new JPanel();
     butHolder.setLayout(new GridLayout(1,2));
-    JButton OKBut = new JButton("OK");
+    JButton OKBut = new JButton(Messages.getInstance().getString("FilterCustomizer_OKBut_JButton_Text"));
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(FilterCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
 
-    JButton CancelBut = new JButton("Cancel");
+    JButton CancelBut = new JButton(Messages.getInstance().getString("FilterCustomizer_CancelBut_JButton_Text"));
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // cancel requested, so revert to backup and then
@@ -100,11 +98,7 @@ public class FilterCustomizer
         if (m_backup != null) {
           m_filter.setFilter(m_backup);
         }
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(FilterCustomizer.this, false);
-        }
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
     
@@ -147,13 +141,8 @@ public class FilterCustomizer
     m_pcSupport.removePropertyChangeListener(pcl);
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 }
 
