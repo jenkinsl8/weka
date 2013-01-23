@@ -21,7 +21,6 @@
 
 package wekaexamples.filters;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSink;
@@ -59,7 +58,7 @@ public class RemoveMisclassifiedTest {
     input.setClassIndex(input.numAttributes() - 1);
 
     // get classifier
-    Classifier c = AbstractClassifier.forName(args[1], new String[0]);
+    Classifier c = Classifier.forName(args[1], new String[0]);
 
     // setup and run filter
     RemoveMisclassified filter = new RemoveMisclassified();

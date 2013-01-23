@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Discretize.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.Utils;
+import weka.core.FastVector;
+import weka.core.Instance;
 
 /**
  * Class encapsulating a Discretize Expression.
@@ -56,14 +58,7 @@ public class Discretize extends Expression {
     /** The bin value for this DiscretizeBin */
     private String m_binValue;
     
-    /** 
-     * If the optype is continuous or ordinal, we will attempt to parse
-     * the bin value as a number and store it here.
-     */
-    private double m_numericBinValue = Utils.missingValue();
-    
-    protected DiscretizeBin(Element bin, 
-        FieldMetaInfo.Optype opType) throws Exception {
+    protected DiscretizeBin(Element bin) throws Exception {
       NodeList iL = bin.getElementsByTagName("Interval");
       for (int i = 0; i < iL.getLength(); i++) {
         Node iN = iL.item(i);
@@ -74,15 +69,6 @@ public class Discretize extends Expression {
       }
       
       m_binValue = bin.getAttribute("binValue");
-      
-      if (opType == FieldMetaInfo.Optype.CONTINUOUS ||
-          opType == FieldMetaInfo.Optype.ORDINAL) {
-        try {
-          m_numericBinValue = Double.parseDouble(m_binValue);
-        } catch (NumberFormatException ex) {
-          // quietly ignore...
-        }
-      }
     }
     
     /**
@@ -92,16 +78,6 @@ public class Discretize extends Expression {
      */
     protected String getBinValue() {
       return m_binValue;
-    }
-    
-    /**
-     * Get the value of this bin as a number (parsed from the string value).
-     * 
-     * @return the value of this bin as a number or Double.NaN if the string
-     * value of the bin could not be interpreted as a number.
-     */
-    protected double getBinValueNumeric() {
-      return m_numericBinValue;
     }
     
     /**
@@ -180,9 +156,9 @@ public class Discretize extends Expression {
     throws Exception {
     super(opType, fieldDefs);
   
-/*    if (m_opType == FieldMetaInfo.Optype.CONTINUOUS) {
+    if (opType == FieldMetaInfo.Optype.CONTINUOUS) {
       throw new Exception("[Discretize] must have a categorical or ordinal optype");
-    } */
+    }
     
     m_fieldName = discretize.getAttribute("field");
     
@@ -202,14 +178,12 @@ public class Discretize extends Expression {
       Node dbN = dbL.item(i);
       if (dbN.getNodeType() == Node.ELEMENT_NODE) {
         Element dbE = (Element)dbN;
-        DiscretizeBin db = new DiscretizeBin(dbE, m_opType);
+        DiscretizeBin db = new DiscretizeBin(dbE);
         m_bins.add(db);
       }
     }
    
-    if (fieldDefs != null) {
-      setUpField();
-    }
+    setUpField();
   }
   
   /**
@@ -241,51 +215,30 @@ public class Discretize extends Expression {
     }
     
     // set up the output structure
-    Attribute tempAtt = null;
-    boolean categorical = false;
-    if (m_opType == FieldMetaInfo.Optype.CONTINUOUS ||
-        m_opType == FieldMetaInfo.Optype.ORDINAL) {
-      // check to see if all bin values could be parsed as numbers
-      for (DiscretizeBin d : m_bins) {
-        if (Utils.isMissingValue(d.getBinValueNumeric())) {
-          categorical = true;
-          break;
-        }
-      }
-    } else {
-      categorical = true;
+    Attribute tempAtt = new Attribute("temp", (FastVector)null);
+    for (DiscretizeBin d : m_bins) {
+      tempAtt.addStringValue(d.getBinValue());
     }
-    tempAtt = (categorical) 
-    ? new Attribute("temp", (ArrayList<String>)null) 
-    : new Attribute(m_fieldName + "_discretized(optype=continuous)");
-      
-    if (categorical) {
-      for (DiscretizeBin d : m_bins) {
-        tempAtt.addStringValue(d.getBinValue());
-      }
-
-      // add the default value (just in case it is some other value than one
-      // of the bins
-      if (m_defaultValueDefined) {
-        tempAtt.addStringValue(m_defaultValue);
-      }
-
-      // add the map missing to value (just in case it is some other value than one
-      // of the bins
-      if (m_mapMissingDefined) {
-        tempAtt.addStringValue(m_mapMissingTo);
-      }
-
-      // now make this into a nominal attribute
-      ArrayList<String> values = new ArrayList<String>();
-      for (int i = 0; i < tempAtt.numValues(); i++) {
-        values.add(tempAtt.value(i)); 
-      }
-
-      m_outputDef = new Attribute(m_fieldName + "_discretized", values);
-    } else {
-      m_outputDef = tempAtt;
+    
+    // add the default value (just in case it is some other value than one
+    // of the bins
+    if (m_defaultValueDefined) {
+      tempAtt.addStringValue(m_defaultValue);
     }
+    
+    // add the map missing to value (just in case it is some other value than one
+    // of the bins
+    if (m_mapMissingDefined) {
+      tempAtt.addStringValue(m_mapMissingTo);
+    }
+    
+    // now make this into a nominal attribute
+    FastVector values = new FastVector();
+    for (int i = 0; i < tempAtt.numValues(); i++) {
+     values.addElement(tempAtt.value(i)); 
+    }
+    
+    m_outputDef = new Attribute(m_fieldName + "_discretized", values);
   }
 
   /**
@@ -296,15 +249,6 @@ public class Discretize extends Expression {
    * Attribute.
    */
   protected Attribute getOutputDef() {
-    if (m_outputDef == null) {
-      // return a "default" output def. This will get replaced
-      // by a final one when the final field defs are are set
-      // for all expressions after all derived fields are collected
-      return (m_opType == FieldMetaInfo.Optype.CATEGORICAL || 
-          m_opType == FieldMetaInfo.Optype.ORDINAL)
-      ? new Attribute(m_fieldName + "_discretized", new ArrayList<String>())
-      : new Attribute(m_fieldName + "_discretized(optype=continuous)");
-    }
     return m_outputDef;
   }
 
@@ -322,22 +266,13 @@ public class Discretize extends Expression {
     
     // default of a missing value for the result if none of the following
     // logic applies
-    double result = Utils.missingValue();
+    double result = Instance.missingValue();
     
     double value = incoming[m_fieldIndex];
     
-    if (Utils.isMissingValue(value)) {
+    if (Instance.isMissingValue(value)) {
       if (m_mapMissingDefined) {
-        if (m_outputDef.isNominal()) {
-          result = m_outputDef.indexOfValue(m_mapMissingTo);
-        } else {
-          try {
-            result = Double.parseDouble(m_mapMissingTo);
-          } catch (NumberFormatException ex) {
-            throw new Exception("[Discretize] Optype is continuous but value of mapMissingTo "
-                +"can not be parsed as a number!");
-          }
-        }
+        result = m_outputDef.indexOfValue(m_mapMissingTo);
       }
     } else {
       // look for a bin that has an interval that contains this value
@@ -345,27 +280,14 @@ public class Discretize extends Expression {
       for (DiscretizeBin b : m_bins) {
         if (b.containsValue(value)) {
           found = true;
-          if (m_outputDef.isNominal()) {
-            result = m_outputDef.indexOfValue(b.getBinValue());
-          } else {
-            result = b.getBinValueNumeric();
-          }
+          result = m_outputDef.indexOfValue(b.getBinValue());
           break;
         }
       }
       
       if (!found) {
         if (m_defaultValueDefined) {
-          if (m_outputDef.isNominal()) {
-            result = m_outputDef.indexOfValue(m_defaultValue);
-          } else {
-            try {
-              result = Double.parseDouble(m_defaultValue);
-            } catch (NumberFormatException ex) {
-              throw new Exception("[Discretize] Optype is continuous but value of " +
-              		"default value can not be parsed as a number!");   
-            }
-          }
+          result = m_outputDef.indexOfValue(m_defaultValue);
         }
       }
     }
@@ -384,16 +306,13 @@ public class Discretize extends Expression {
    */
   public String getResultCategorical(double[] incoming) throws Exception {
     double index = getResult(incoming);
-    if (Utils.isMissingValue(index)) {
+    if (Instance.isMissingValue(index)) {
       return "**Missing Value**";
     }
     
     return m_outputDef.value((int)index);
   }
   
-  /* (non-Javadoc)
-   * @see weka.core.pmml.Expression#toString(java.lang.String)
-   */
   public String toString(String pad) {
     StringBuffer buff = new StringBuffer();
     
@@ -402,16 +321,12 @@ public class Discretize extends Expression {
       buff.append("\n" + pad + d.toString());
     }
     
-    if (m_outputDef.isNumeric()) {
-      buff.append("\n" + pad + "(bin values interpreted as numbers)");
-    }
-    
     if (m_mapMissingDefined) {
       buff.append("\n" + pad + "map missing values to: " + m_mapMissingTo);
     }
     
     if (m_defaultValueDefined) {
-      buff.append("\n" + pad + "default value: " + m_defaultValue);
+      buff.append("\n" + pad + "defautl value: " + m_defaultValue);
     }
     
     return buff.toString();

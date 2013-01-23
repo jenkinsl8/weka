@@ -1,24 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLDocument.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -44,9 +48,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-
 /**
  * This class offers some methods for generating, reading and writing 
  * XML documents.<br>
@@ -54,7 +55,7 @@ import weka.core.RevisionUtils;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class XMLDocument
   implements RevisionHandler {
@@ -426,7 +427,7 @@ public class XMLDocument
    * @param parent 	the node to get the children from
    * @return 		a vector containing all the non-text children
    */
-  public static Vector<Element> getChildTags(Node parent) {
+  public static Vector getChildTags(Node parent) {
     return getChildTags(parent, "");
   }
   
@@ -437,12 +438,12 @@ public class XMLDocument
    * @param name 	the name of the tags to return, "" for all
    * @return 		a vector containing all the non-text children
    */
-  public static Vector<Element> getChildTags(Node parent, String name) {
-    Vector<Element>         result;
+  public static Vector getChildTags(Node parent, String name) {
+    Vector         result;
     int            i;
     NodeList       list;
     
-    result = new Vector<Element>();
+    result = new Vector();
     
     list = parent.getChildNodes();
     for (i = 0; i < list.getLength(); i++) {
@@ -453,7 +454,7 @@ public class XMLDocument
 	if (!((Element) list.item(i)).getTagName().equals(name))
 	  continue;
       }
-      result.add((Element)list.item(i));
+      result.add(list.item(i));
     }
     
     return result;
@@ -652,7 +653,7 @@ public class XMLDocument
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
   
   /**

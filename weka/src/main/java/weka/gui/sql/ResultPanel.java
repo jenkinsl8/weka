@@ -1,25 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ResultPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.JTableHelper;
+import weka.gui.sql.event.QueryExecuteEvent;
+import weka.gui.sql.event.QueryExecuteListener;
+import weka.gui.sql.event.ResultChangedEvent;
+import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -37,12 +44,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import weka.gui.JTableHelper;
-import weka.gui.sql.event.QueryExecuteEvent;
-import weka.gui.sql.event.QueryExecuteListener;
-import weka.gui.sql.event.ResultChangedEvent;
-import weka.gui.sql.event.ResultChangedListener;
 
 /**
  * Represents a panel for displaying the results of a query in table format.
@@ -70,16 +71,16 @@ public class ResultPanel
   protected JTabbedPane m_TabbedPane;
 
   /** the close button */
-  protected JButton m_ButtonClose = new JButton("Close");
+  protected JButton m_ButtonClose = new JButton(Messages.getInstance().getString("ResultPanel_ButtonClose_JButton_Text"));
 
   /** the close all button */
-  protected JButton m_ButtonCloseAll = new JButton("Close all");
+  protected JButton m_ButtonCloseAll = new JButton(Messages.getInstance().getString("ResultPanel_ButtonCloseAll_JButton_Text"));
 
   /** the button that copies the query into the QueryPanel */
-  protected JButton m_ButtonCopyQuery = new JButton("Re-use query");
+  protected JButton m_ButtonCopyQuery = new JButton(Messages.getInstance().getString("ResultPanel_ButtonCopyQuery_JButton_Text"));
 
   /** the button for the optimal column width of the current table */
-  protected JButton m_ButtonOptWidth = new JButton("Optimal width");
+  protected JButton m_ButtonOptWidth = new JButton(Messages.getInstance().getString("ResultPanel_ButtonOptWidth_JButton_Text"));
 
   /** the counter for the tab names */
   protected int m_NameCounter;
@@ -143,7 +144,7 @@ public class ResultPanel
     panel2.add(m_ButtonCloseAll, BorderLayout.NORTH);
     
     m_ButtonCopyQuery.setMnemonic('Q');
-    m_ButtonCopyQuery.setToolTipText("Copies the query of the currently selected tab into the query field.");
+    m_ButtonCopyQuery.setToolTipText(Messages.getInstance().getString("ResultPanel_CreatePanel_ButtonCopyQuery_SetToolTipText_Text"));
     m_ButtonCopyQuery.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  copyQuery();
@@ -152,7 +153,7 @@ public class ResultPanel
     panel3.add(m_ButtonCopyQuery, BorderLayout.NORTH);
     
     m_ButtonOptWidth.setMnemonic('p');
-    m_ButtonOptWidth.setToolTipText("Calculates the optimal column width for the current table.");
+    m_ButtonOptWidth.setToolTipText(Messages.getInstance().getString("ResultPanel_CreatePanel_ButtonOptWidth_SetToolTipText_Text"));
     m_ButtonOptWidth.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  calcOptimalWidth();
@@ -202,7 +203,7 @@ public class ResultPanel
    */
   protected String getNextTabName() {
     m_NameCounter++;
-    return "Query" + m_NameCounter;
+    return Messages.getInstance().getString("ResultPanel_GetNextTabName_Text") + m_NameCounter;
   }
   
   /**

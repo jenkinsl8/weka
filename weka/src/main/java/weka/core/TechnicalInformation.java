@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * TechnicalInformation.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -34,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation
@@ -261,10 +262,10 @@ public class TechnicalInformation
   protected String m_ID = "";
   
   /** stores all the values associated with the fields (FIELD - String) */
-  protected Hashtable<Field,String> m_Values = new Hashtable<Field,String>();
+  protected Hashtable m_Values = new Hashtable();
 
   /** additional technical informations */
-  protected Vector<TechnicalInformation> m_Additional = new Vector<TechnicalInformation>();
+  protected Vector m_Additional = new Vector();
   
   /**
    * Initializes the information with the given type
@@ -398,7 +399,7 @@ public class TechnicalInformation
    * 
    * @return		all currently stored fields
    */
-  public Enumeration<Field> fields() {
+  public Enumeration fields() {
     return m_Values.keys();
   }
   
@@ -417,7 +418,7 @@ public class TechnicalInformation
    * 
    * @return an enumeration over all additional technical informations
    */
-  public Enumeration<TechnicalInformation> additional() {
+  public Enumeration additional() {
     return m_Additional.elements();
   }
   
@@ -459,7 +460,7 @@ public class TechnicalInformation
     String	result;
     String[]	authors;
     int		i;
-    Enumeration<TechnicalInformation>	enm;
+    Enumeration	enm;
     
     result  = "";
     authors = getAuthors();
@@ -593,16 +594,17 @@ public class TechnicalInformation
    */
   public String toBibTex() {
     String		result;
+    Enumeration		enm;
     Field		field;
-    Vector<Field>		list;
+    Vector		list;
     int			i;
     String		value;
     
     result = "@" + getType() + "{" + getID() + "";
     
     // sort the fields
-    list = new Vector<Field>();
-    Enumeration<Field> enm  = fields();
+    list = new Vector();
+    enm  = fields();
     while (enm.hasMoreElements())
       list.add(enm.nextElement());
     Collections.sort(list);
@@ -620,9 +622,9 @@ public class TechnicalInformation
     result += "\n}";
     
     // additional informations?
-    Enumeration<TechnicalInformation> enm2 = additional();
-    while (enm2.hasMoreElements()) {
-      result += "\n\n" + ((TechnicalInformation) enm2.nextElement()).toBibTex();
+    enm = additional();
+    while (enm.hasMoreElements()) {
+      result += "\n\n" + ((TechnicalInformation) enm.nextElement()).toBibTex();
     }
     
     return result;
@@ -634,7 +636,7 @@ public class TechnicalInformation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
   
   /**

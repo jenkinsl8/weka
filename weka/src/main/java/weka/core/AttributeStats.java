@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeStats.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +29,7 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision$
+ * @version $Revision: 1.10 $
  */
 public class AttributeStats
   implements Serializable, RevisionHandler {
@@ -60,18 +61,14 @@ public class AttributeStats
   
   /** Counts of each nominal value */
   public int [] nominalCounts;
-  
-  /** Weight mass for each nominal value */
-  public double[] nominalWeights;
     
   /**
    * Updates the counters for one more observed distinct value.
    *
    * @param value the value that has just been seen
    * @param count the number of times the value appeared
-   * @param weight the weight mass of the value
    */
-  protected void addDistinct(double value, int count, double weight) {
+  protected void addDistinct(double value, int count) {
     
     if (count > 0) {
       if (count == 1) {
@@ -84,11 +81,9 @@ public class AttributeStats
       }
       if (nominalCounts != null) {
 	nominalCounts[(int)value] = count;
-	nominalWeights[(int)value] = weight;
       }
       if (numericStats != null) {
-	  //numericStats.add(value, count);
-          numericStats.add(value, weight);
+	  numericStats.add(value, count);
 	  numericStats.calculateDerived();
       }
     }
@@ -151,6 +146,6 @@ public class AttributeStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 }

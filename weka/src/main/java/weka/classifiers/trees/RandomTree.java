@@ -28,7 +28,6 @@ import java.util.Vector;
 import java.util.Queue;
 import java.util.LinkedList;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -43,7 +42,6 @@ import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.PartitionGenerator;
 
 /**
  * <!-- globalinfo-start -->
@@ -86,9 +84,9 @@ import weka.core.PartitionGenerator;
  * @version $Revision$
  */
 public class RandomTree 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable, 
-             Drawable, PartitionGenerator {
+             Drawable {
 
   /** for serialization */
   static final long serialVersionUID = 8934314652175299374L;

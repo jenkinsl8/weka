@@ -1,25 +1,46 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ResultsPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Range;
+import weka.core.converters.CSVLoader;
+import weka.experiment.CSVResultListener;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstanceQuery;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.Tester;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.ListSelectorDialog;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -61,28 +82,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-import weka.core.Attribute;
-import weka.core.ClassDiscovery;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Range;
-import weka.core.converters.CSVLoader;
-import weka.experiment.CSVResultListener;
-import weka.experiment.DatabaseResultListener;
-import weka.experiment.Experiment;
-import weka.experiment.InstanceQuery;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.ListSelectorDialog;
-import weka.gui.PropertyDialog;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-
 /** 
  * This panel controls simple analysis of experimental results.
  *
@@ -96,16 +95,16 @@ public class ResultsPanel
   private static final long serialVersionUID = -4913007978534178569L;
 
   /** Message shown when no experimental results have been loaded. */
-  protected static final String NO_SOURCE = "No source";
+  protected static final String NO_SOURCE = Messages.getInstance().getString("ResultsPanel_FromFileBut_JButton_Text");
 
   /** Click to load results from a file. */
-  protected JButton m_FromFileBut = new JButton("File...");
+  protected JButton m_FromFileBut = new JButton(Messages.getInstance().getString("ResultsPanel_FromFileBut_JButton_Text"));
 
   /** Click to load results from a database. */
-  protected JButton m_FromDBaseBut = new JButton("Database...");
+  protected JButton m_FromDBaseBut = new JButton(Messages.getInstance().getString("ResultsPanel_FromDBaseBut_JButton_Text"));
 
   /** Click to get results from the destination given in the experiment. */
-  protected JButton m_FromExpBut = new JButton("Experiment");
+  protected JButton m_FromExpBut = new JButton(Messages.getInstance().getString("ResultsPanel_FromExpBut_JButton_Text"));
 
   /** Displays a message about the current result set. */
   protected JLabel m_FromLab = new JLabel(NO_SOURCE);
@@ -136,7 +135,7 @@ public class ResultsPanel
   protected DefaultListModel m_DisplayedModel = new DefaultListModel();
 
   /** Displays the currently selected Tester-Class. */
-  protected JLabel m_TesterClassesLabel = new JLabel("Testing with",
+  protected JLabel m_TesterClassesLabel = new JLabel(Messages.getInstance().getString("ResultsPanel_TesterClassesLabel_JButton_Text"),
 						 SwingConstants.RIGHT);
   
   /** Contains all the available classes implementing the Tester-Interface 
@@ -178,15 +177,12 @@ public class ResultsPanel
   protected JComboBox m_TesterClasses = 
     new JComboBox(m_TesterClassesModel);
 
-  /** Label for the dataset and result key buttons. */
-  protected JLabel m_DatasetAndResultKeysLabel = new JLabel("Select rows and cols",
+  /** Displays the currently selected column names for the scheme & options. */
+  protected JLabel m_DatasetKeyLabel = new JLabel(Messages.getInstance().getString("ResultsPanel_DatasetKeyLabel_JButton_Text"),
 						 SwingConstants.RIGHT);
 
-  /** the panel encapsulating the Rows/Columns/Swap buttons. */
-  protected JPanel m_PanelDatasetResultKeys = new JPanel(new GridLayout(1, 3));
-  
   /** Click to edit the columns used to determine the scheme. */
-  protected JButton m_DatasetKeyBut = new JButton("Rows");
+  protected JButton m_DatasetKeyBut = new JButton(Messages.getInstance().getString("ResultsPanel_DatasetKeyBut_JButton_Text"));
 
   /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_DatasetKeyModel = new DefaultListModel();
@@ -194,11 +190,12 @@ public class ResultsPanel
   /** Displays the list of selected columns determining the scheme. */
   protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
 
-  /** Click to edit the columns used to determine the scheme. */
-  protected JButton m_ResultKeyBut = new JButton("Cols");
+  /** Displays the currently selected column names for the scheme & options. */
+  protected JLabel m_ResultKeyLabel = new JLabel(Messages.getInstance().getString("ResultsPanel_ResultKeyLabel_JButton_Text"),
+						 SwingConstants.RIGHT);
 
-  /** For swapping rows and columns. */
-  protected JButton m_SwapDatasetKeyAndResultKeyBut = new JButton("Swap");
+  /** Click to edit the columns used to determine the scheme. */
+  protected JButton m_ResultKeyBut = new JButton(Messages.getInstance().getString("ResultsPanel_ResultKeyBut_JButton_Text"));
 
   /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
@@ -207,10 +204,10 @@ public class ResultsPanel
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
 
   /** Lets the user select which scheme to base comparisons against. */
-  protected JButton m_TestsButton = new JButton("Select");
+  protected JButton m_TestsButton = new JButton(Messages.getInstance().getString("ResultsPanel_TestsButton_JButton_Text"));
 
   /** Lets the user select which schemes are compared to base. */
-  protected JButton m_DisplayedButton = new JButton("Select");
+  protected JButton m_DisplayedButton = new JButton(Messages.getInstance().getString("ResultsPanel_DisplayedButton_JButton_Text"));
 
   /** Holds the list of schemes to base the test against. */
   protected JList m_TestsList = new JList(m_TestsModel);
@@ -234,13 +231,13 @@ public class ResultsPanel
     new JCheckBox("");
   
   /** lets the user choose the format for the output. */
-  protected JButton m_OutputFormatButton = new JButton("Select");
+  protected JButton m_OutputFormatButton = new JButton(Messages.getInstance().getString("ResultsPanel_OutputFormatButton_JButton_Text"));
 
   /** Click to start the test. */
-  protected JButton m_PerformBut = new JButton("Perform test");
+  protected JButton m_PerformBut = new JButton(Messages.getInstance().getString("ResultsPanel_PerformBut_JButton_Text"));
   
   /** Click to save test output to a file. */
-  protected JButton m_SaveOutBut = new JButton("Save output");
+  protected JButton m_SaveOutBut = new JButton(Messages.getInstance().getString("ResultsPanel_SaveOutBut_JButton_Text"));
 
   /** The buffer saving object for saving output. */
   SaveBuffer m_SaveOut = new SaveBuffer(null, this);
@@ -257,11 +254,11 @@ public class ResultsPanel
   // File filters for various file types.
   /** CSV file filter. */
   protected ExtensionFileFilter m_csvFileFilter = 
-    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION, "CSV data files");
+    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION, Messages.getInstance().getString("ResultsPanel_CsvFileFilter_ExtensionFileFilter_Text"));
 
   /** ARFF file filter. */
   protected ExtensionFileFilter m_arffFileFilter = 
-    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, Messages.getInstance().getString("ResultsPanel_ArffFileFilter_ExtensionFileFilter_Text"));
 
   /** The PairedTTester object. */
   protected Tester m_TTester = new PairedCorrectedTTester();
@@ -279,7 +276,7 @@ public class ResultsPanel
   protected Experiment m_Exp;
 
   /** the size for a combobox. */
-  private Dimension COMBO_SIZE = new Dimension(210, m_ResultKeyBut.getPreferredSize().height);
+  private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut.getPreferredSize().height);
 
   /** the initial result matrix. */
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
@@ -292,7 +289,13 @@ public class ResultsPanel
     // defaults
     m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
     m_TTester.setShowStdDevs(ExperimenterDefaults.getShowStdDevs());
-    m_ResultMatrix = ExperimenterDefaults.getOutputFormat();
+    try {
+      m_ResultMatrix = (ResultMatrix) Class.forName(
+          ExperimenterDefaults.getOutputFormat()).newInstance();
+    }
+    catch (Exception e) {
+      m_ResultMatrix = new ResultMatrixPlainText();
+    }
     m_ResultMatrix.setShowStdDev(ExperimenterDefaults.getShowStdDevs());
     m_ResultMatrix.setMeanPrec(ExperimenterDefaults.getMeanPrecision());
     m_ResultMatrix.setStdDevPrec(ExperimenterDefaults.getStdDevPrecision());
@@ -357,7 +360,6 @@ public class ResultsPanel
     setComboSizes();
     m_TesterClasses.setEnabled(false);
     m_DatasetKeyBut.setEnabled(false);
-    m_DatasetKeyBut.setToolTipText("For selecting the keys that are shown as rows.");
     m_DatasetKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setDatasetKeyFromDialog();
@@ -366,7 +368,6 @@ public class ResultsPanel
     m_DatasetKeyList.setSelectionMode(ListSelectionModel
 				      .MULTIPLE_INTERVAL_SELECTION);
     m_ResultKeyBut.setEnabled(false);
-    m_ResultKeyBut.setToolTipText("For selecting the keys that are shown as columns.");
     m_ResultKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setResultKeyFromDialog();
@@ -374,13 +375,6 @@ public class ResultsPanel
     });
     m_ResultKeyList.setSelectionMode(ListSelectionModel
 				     .MULTIPLE_INTERVAL_SELECTION);
-    m_SwapDatasetKeyAndResultKeyBut.setEnabled(false);
-    m_SwapDatasetKeyAndResultKeyBut.setToolTipText("Swaps the keys for selecting rows and columns.");
-    m_SwapDatasetKeyAndResultKeyBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	swapDatasetKeyAndResultKey();
-      }
-    });
     m_CompareCombo.setEnabled(false);
     m_SortCombo.setEnabled(false);
 
@@ -427,12 +421,12 @@ public class ResultsPanel
     m_OutText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_OutText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_OutText.setEditable(false);
-    m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
+    m_History.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ResultsPanel_OutText_SetBorder_BorderFactoryCreateTitledBorder_Text")));
 
 
     // Set up the GUI layout
     JPanel p1 = new JPanel();
-    p1.setBorder(BorderFactory.createTitledBorder("Source"));
+    p1.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ResultsPanel_OutText_SetBorder_BorderFactoryCreateTitledBorder_Text_First")));
     JPanel p2 = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -455,7 +449,7 @@ public class ResultsPanel
     p1.add(p2, BorderLayout.EAST);
 
     JPanel p3 = new JPanel();
-    p3.setBorder(BorderFactory.createTitledBorder("Configure test"));
+    p3.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ResultsPanel_P3_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     GridBagLayout gbL = new GridBagLayout();
     p3.setLayout(gbL);
 
@@ -486,23 +480,35 @@ public class ResultsPanel
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = y;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(m_DatasetAndResultKeysLabel,gbC);
-    m_DatasetAndResultKeysLabel.setDisplayedMnemonic('R');
-    m_DatasetAndResultKeysLabel.setLabelFor(m_DatasetKeyBut);
-    p3.add(m_DatasetAndResultKeysLabel);
-    
-    m_PanelDatasetResultKeys.add(m_DatasetKeyBut);
-    m_PanelDatasetResultKeys.add(m_ResultKeyBut);
-    m_PanelDatasetResultKeys.add(m_SwapDatasetKeyAndResultKeyBut);
+    gbL.setConstraints(m_DatasetKeyLabel,gbC);
+    m_DatasetKeyLabel.setDisplayedMnemonic('R');
+    m_DatasetKeyLabel.setLabelFor(m_DatasetKeyBut);
+    p3.add(m_DatasetKeyLabel);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_PanelDatasetResultKeys, gbC);
-    p3.add(m_PanelDatasetResultKeys);
+    gbL.setConstraints(m_DatasetKeyBut, gbC);
+    p3.add(m_DatasetKeyBut);
     
     y++;
-    JLabel lab = new JLabel("Comparison field", SwingConstants.RIGHT);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(m_ResultKeyLabel, gbC);
+    m_ResultKeyLabel.setDisplayedMnemonic('C');
+    m_ResultKeyLabel.setLabelFor(m_ResultKeyBut);
+    p3.add(m_ResultKeyLabel);
+    gbC = new GridBagConstraints();
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_ResultKeyBut, gbC);
+    p3.add(m_ResultKeyBut);
+    
+    y++;
+    JLabel lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_First"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('m');
     lab.setLabelFor(m_CompareCombo);
     gbC = new GridBagConstraints();
@@ -519,7 +525,7 @@ public class ResultsPanel
     p3.add(m_CompareCombo);
     
     y++;
-    lab = new JLabel("Significance", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Second"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('g');
     lab.setLabelFor(m_SigTex);
     gbC = new GridBagConstraints();
@@ -535,7 +541,7 @@ public class ResultsPanel
     p3.add(m_SigTex);
     
     y++;
-    lab = new JLabel("Sorting (asc.) by", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Third"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('S');
     lab.setLabelFor(m_SortCombo);
     gbC = new GridBagConstraints();
@@ -553,7 +559,7 @@ public class ResultsPanel
     p3.add(m_SortCombo);
     
     y++;
-    lab = new JLabel("Test base", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Fourth"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('b');
     lab.setLabelFor(m_TestsButton);
     gbC = new GridBagConstraints();
@@ -570,7 +576,7 @@ public class ResultsPanel
     p3.add(m_TestsButton);
 
     y++;
-    lab = new JLabel("Displayed Columns", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Fifth"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('i');
     lab.setLabelFor(m_DisplayedButton);
     gbC = new GridBagConstraints();
@@ -587,7 +593,7 @@ public class ResultsPanel
     p3.add(m_DisplayedButton);
 
     y++;
-    lab = new JLabel("Show std. deviations", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Sixth"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('a');
     lab.setLabelFor(m_ShowStdDevs);
     gbC = new GridBagConstraints();
@@ -604,7 +610,7 @@ public class ResultsPanel
     p3.add(m_ShowStdDevs);
 
     y++;
-    lab = new JLabel("Output Format", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("ResultsPanel_Lab_JLabel_Text_Seventh"), SwingConstants.RIGHT);
     lab.setDisplayedMnemonic('O');
     lab.setLabelFor(m_OutputFormatButton);
     gbC = new GridBagConstraints();
@@ -623,7 +629,7 @@ public class ResultsPanel
     
     JPanel output = new JPanel();
     output.setLayout(new BorderLayout());
-    output.setBorder(BorderFactory.createTitledBorder("Test output"));
+    output.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("ResultsPanel_Output_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     output.add(new JScrollPane(m_OutText), BorderLayout.CENTER);
 
     JPanel mondo = new JPanel();
@@ -682,19 +688,22 @@ public class ResultsPanel
   protected void setComboSizes() {
     
     m_TesterClasses.setPreferredSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setPreferredSize(COMBO_SIZE);
+    m_DatasetKeyBut.setPreferredSize(COMBO_SIZE);
+    m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
     m_SortCombo.setPreferredSize(COMBO_SIZE);
 
     m_TesterClasses.setMaximumSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setMaximumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
     m_SortCombo.setMaximumSize(COMBO_SIZE);
 
     m_TesterClasses.setMinimumSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setMinimumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
     m_SigTex.setMinimumSize(COMBO_SIZE);
     m_SortCombo.setMinimumSize(COMBO_SIZE);
@@ -739,7 +748,7 @@ public class ResultsPanel
       
       //if (dbaseURL == null) {
       if (dbd.getReturnValue()==JOptionPane.CLOSED_OPTION) {
-	m_FromLab.setText("Cancelled");
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_First"));
 	return;
       }
       dbaseURL=dbd.getURL();
@@ -752,21 +761,21 @@ public class ResultsPanel
       
       m_InstanceQuery.connectToDatabase();
       if (!m_InstanceQuery.experimentIndexExists()) {
-	System.err.println("not found");
-	m_FromLab.setText("No experiment index");
+	System.err.println(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_Error_Text_First"));
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Second"));
         m_InstanceQuery.disconnectFromDatabase();
 	return;
       }
-      System.err.println("found");
-      m_FromLab.setText("Getting experiment index");
+      System.err.println(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_Error_Text_Second"));
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Fourth"));
       Instances index = m_InstanceQuery.retrieveInstances("SELECT * FROM "
 				       + InstanceQuery.EXP_INDEX_TABLE);
       if (index.numInstances() == 0) {
-	m_FromLab.setText("No experiments available");
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Fifth"));
         m_InstanceQuery.disconnectFromDatabase();
 	return;	
       }
-      m_FromLab.setText("Got experiment index");
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Sixth"));
 
       DefaultListModel lm = new DefaultListModel();
       for (int i = 0; i < index.numInstances(); i++) {
@@ -784,7 +793,7 @@ public class ResultsPanel
         result = ListSelectorDialog.APPROVE_OPTION;
       }
       if (result != ListSelectorDialog.APPROVE_OPTION) {
-	m_FromLab.setText("Cancelled");
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Sixth"));
         m_InstanceQuery.disconnectFromDatabase();
 	return;
       }
@@ -798,7 +807,7 @@ public class ResultsPanel
        // 1. print complete stacktrace
        ex.printStackTrace();
        // 2. print message in panel
-       m_FromLab.setText("Problem reading database: '" + ex.getMessage() + "'");
+       m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Seventh_First") + ex.getMessage() + Messages.getInstance().getString("ResultsPanel_SetInstancesFromDBaseQuery_FromLab_Text_Seventh_Second"));
     }
   }
   
@@ -814,7 +823,7 @@ public class ResultsPanel
       File resultFile = ((CSVResultListener) exp.getResultListener())
 	.getOutputFile();
       if ((resultFile == null)) {
-	m_FromLab.setText("No result file");
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromExp_FromLab_Text_First"));
       } else {
 	setInstancesFromFile(resultFile);
       }
@@ -831,10 +840,10 @@ public class ResultsPanel
 	  .getResultsTableName(exp.getResultProducer());
 	setInstancesFromDatabaseTable(tableName);
       } catch (Exception ex) {
-	m_FromLab.setText("Problem reading database");
+	m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromExp_FromLab_Text_Second"));
       }
     } else {
-      m_FromLab.setText("Can't get results from experiment");
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromExp_FromLab_Text_Third"));
     }
   }
 
@@ -848,7 +857,7 @@ public class ResultsPanel
   protected void setInstancesFromDatabaseTable(String tableName) {
 
     try {
-      m_FromLab.setText("Reading from database, please wait...");
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromDatabaseTable_FromLab_Text"));
       final Instances i = m_InstanceQuery.retrieveInstances("SELECT * FROM "
 						      + tableName);
       SwingUtilities.invokeAndWait(new Runnable() {
@@ -872,7 +881,7 @@ public class ResultsPanel
 
     String fileType = f.getName();
     try {
-      m_FromLab.setText("Reading from file...");
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_FromLab_Text"));
       if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {	    
 	fileType = "arff";
 	Reader r = new BufferedReader(new FileReader(f));
@@ -885,21 +894,21 @@ public class ResultsPanel
 	Instances inst = cnv.getDataSet();
 	setInstances(inst);
       } else {
-	throw new Exception("Unrecognized file type");
+	throw new Exception(Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_Text"));
       }
     } catch (Exception ex) {
-      m_FromLab.setText("File '" + f.getName() + "' not recognised as an "
-			  +fileType+" file.");
+      m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_FromLab_Text_First") + f.getName() + Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_FromLab_Text_Second")
+			  +fileType + Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_FromLab_Text_Third"));
       if (JOptionPane.showOptionDialog(ResultsPanel.this,
-				       "File '" + f.getName()
-				       + "' not recognised as an "
-				       +fileType+" file.\n"
-				       + "Reason:\n" + ex.getMessage(),
-				       "Load Instances",
+    		  Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_First") + f.getName()
+				       + Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_Second")
+				       +fileType + Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_Third")
+				       + Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_Fourth") + ex.getMessage(),
+				       Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_Fifth"),
 				       0,
 				       JOptionPane.ERROR_MESSAGE,
 				       null,
-				       new String[] {"OK"},
+				       new String[] {Messages.getInstance().getString("ResultsPanel_SetInstancesFromFile_Error_JOptionPaneShowOptionDialog_Text_Sixth")},
 				       null) == 1) {
 	
       }
@@ -962,7 +971,7 @@ public class ResultsPanel
 
     m_Instances = newInstances;
     m_TTester.setInstances(m_Instances);
-    m_FromLab.setText("Got " + m_Instances.numInstances() + " results");
+    m_FromLab.setText(Messages.getInstance().getString("ResultsPanel_SetInstances_FromLab_Text_First") + m_Instances.numInstances() + Messages.getInstance().getString("ResultsPanel_SetInstances_FromLab_Text_Second"));
     
     // setup row and column names
     Vector rows = determineColumnNames(
@@ -1017,7 +1026,6 @@ public class ResultsPanel
     m_TesterClasses.setEnabled(true);
     m_DatasetKeyBut.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
-    m_SwapDatasetKeyAndResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
     m_SortCombo.setEnabled(true);
     if (ExperimenterDefaults.getSorting().length() != 0)
@@ -1078,9 +1086,9 @@ public class ResultsPanel
 
     String name = (new SimpleDateFormat("HH:mm:ss - "))
       .format(new Date())
-      + "Available resultsets";
+      + Messages.getInstance().getString("ResultsPanel_SetTTester_Name_Text");
     StringBuffer outBuff = new StringBuffer();
-    outBuff.append("Available resultsets\n"
+    outBuff.append(Messages.getInstance().getString("ResultsPanel_SetTTester_OutBuff_Text_First")
 		   + m_TTester.resultsetKey() + "\n\n");
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
@@ -1098,8 +1106,8 @@ public class ResultsPanel
     for (int i = 0; i < m_TestsModel.size(); i++)
       m_DisplayedModel.addElement(m_TestsModel.elementAt(i));
     
-    m_TestsModel.addElement("Summary");
-    m_TestsModel.addElement("Ranking");
+    m_TestsModel.addElement(Messages.getInstance().getString("ResultsPanel_SetTTester_TestsModel_Element_Text_First"));
+    m_TestsModel.addElement(Messages.getInstance().getString("ResultsPanel_SetTTester_TestsModel_Element_Text_Second"));
 
     m_TestsList.setSelectedIndex(0);
     m_DisplayedList.setSelectionInterval(0, m_DisplayedModel.size() - 1);
@@ -1219,25 +1227,6 @@ public class ResultsPanel
     }
   }
 
-  /**
-   * Swaps the keys for dataset and result.
-   */
-  protected void swapDatasetKeyAndResultKey() {
-    int[] 	tmpSelected;
-    Range	tmpRange;
-    
-    // lists
-    tmpSelected = m_DatasetKeyList.getSelectedIndices();
-    m_DatasetKeyList.setSelectedIndices(m_ResultKeyList.getSelectedIndices());
-    m_ResultKeyList.setSelectedIndices(tmpSelected);
-    
-    // tester
-    tmpRange = m_TTester.getDatasetKeyColumns();
-    m_TTester.setDatasetKeyColumns(m_TTester.getResultsetKeyColumns());
-    m_TTester.setResultsetKeyColumns(tmpRange);
-    setTTester();
-  }
-  
   public void setTestBaseFromDialog() {
     ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
 
@@ -1257,15 +1246,26 @@ public class ResultsPanel
    * if the user approves.
    */
   public void setOutputFormatFromDialog() {
-    OutputFormatDialog dialog = new OutputFormatDialog(PropertyDialog.getParentFrame(this));
-
-    m_ResultMatrix.setShowStdDev(m_ShowStdDevs.isSelected());
-    dialog.setResultMatrix(m_ResultMatrix);
-    dialog.setLocationRelativeTo(this);
+    OutputFormatDialog dialog = new OutputFormatDialog(null);
+    
+    dialog.setResultMatrix(m_ResultMatrix.getClass());
+    dialog.setMeanPrec(m_ResultMatrix.getMeanPrec());
+    dialog.setStdDevPrec(m_ResultMatrix.getStdDevPrec());
+    dialog.setRemoveFilterName(m_ResultMatrix.getRemoveFilterName());
+    dialog.setShowAverage(m_ResultMatrix.getShowAverage());
     
     if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
-      m_ResultMatrix = dialog.getResultMatrix();
-      m_ShowStdDevs.setSelected(m_ResultMatrix.getShowStdDev());
+      try {
+        m_ResultMatrix = (ResultMatrix) dialog.getResultMatrix().newInstance();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        m_ResultMatrix = new ResultMatrixPlainText();
+      }
+      m_ResultMatrix.setMeanPrec(dialog.getMeanPrec());
+      m_ResultMatrix.setStdDevPrec(dialog.getStdDevPrec());
+      m_ResultMatrix.setRemoveFilterName(dialog.getRemoveFilterName());
+      m_ResultMatrix.setShowAverage(dialog.getShowAverage());
     }
   }
 
@@ -1277,8 +1277,8 @@ public class ResultsPanel
     if (sb != null) {
       if (m_SaveOut.save(sb)) {
 	JOptionPane.showMessageDialog(this,
-				      "File saved",
-				      "Results",
+			Messages.getInstance().getString("ResultsPanel_SetTTester_SaveBuffer_JOptionPaneShowMessageDialog_Text_First"),
+			Messages.getInstance().getString("ResultsPanel_SetTTester_SaveBuffer_JOptionPaneShowMessageDialog_Text_Second"),
 				      JOptionPane.INFORMATION_MESSAGE);
       }
     } else {
@@ -1321,7 +1321,7 @@ public class ResultsPanel
     tester.assign(m_TTester);
     m_TTester = tester;
     m_PerformBut.setToolTipText(m_TTester.getToolTipText());
-    System.out.println("Tester set to: " + m_TTester.getClass().getName());
+    System.out.println(Messages.getInstance().getString("ResultsPanel_SetTTester_SetTester_Text") + m_TTester.getClass().getName());
   }
   
   /**
@@ -1332,7 +1332,7 @@ public class ResultsPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Weka Experiment: Results Analysis");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("ResultsPanel_SetTTester_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultsPanel sp = new ResultsPanel();
       //sp.setBorder(BorderFactory.createTitledBorder("Setup"));

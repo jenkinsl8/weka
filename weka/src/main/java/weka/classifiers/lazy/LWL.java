@@ -1,46 +1,47 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LWL.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999, 2002, 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.lazy;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.neighboursearch.LinearNNSearch;
+import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.neighboursearch.LinearNNSearch;
-import weka.core.neighboursearch.NearestNeighbourSearch;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -142,12 +143,12 @@ public class LWL
   protected NearestNeighbourSearch m_NNSearch =  new LinearNNSearch();
   
   /** The available kernel weighting methods. */
-  public static final int LINEAR       = 0;
-  public static final int EPANECHNIKOV = 1;
-  public static final int TRICUBE      = 2;  
-  public static final int INVERSE      = 3;
-  public static final int GAUSS        = 4;
-  public static final int CONSTANT     = 5;
+  protected static final int LINEAR       = 0;
+  protected static final int EPANECHNIKOV = 1;
+  protected static final int TRICUBE      = 2;  
+  protected static final int INVERSE      = 3;
+  protected static final int GAUSS        = 4;
+  protected static final int CONSTANT     = 5;
 
   /** a ZeroR model in case no model can be built from the data. */
   protected Classifier m_ZeroR;
@@ -486,11 +487,10 @@ public class LWL
   public Capabilities getCapabilities() {
     Capabilities      result;
     
-    if (m_Classifier != null) {
+    if (m_Classifier != null)
       result = m_Classifier.getCapabilities();
-    } else {
+    else
       result = super.getCapabilities();
-    }
     
     result.setMinimumNumberInstances(0);
     
@@ -552,7 +552,7 @@ public class LWL
       throw new Exception("No training instance structure set!");
     }
     else if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (!instance.classIsMissing()) {
       m_NNSearch.update(instance);
@@ -581,9 +581,9 @@ public class LWL
     m_NNSearch.addInstanceInfo(instance);
     
     int k = m_Train.numInstances();
-    if( (!m_UseAllK && (m_kNN < k)) /*&&
+    if( (!m_UseAllK && (m_kNN < k)) &&
        !(m_WeightKernel==INVERSE ||
-         m_WeightKernel==GAUSS)*/ ) {
+         m_WeightKernel==GAUSS) ) {
       k = m_kNN;
     }
     

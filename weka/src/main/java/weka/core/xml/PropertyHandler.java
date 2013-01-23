@@ -1,38 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * PropertyHandler.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class stores information about properties to ignore or properties
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.4 $ 
  */
 public class PropertyHandler
    implements RevisionHandler {
@@ -46,7 +47,7 @@ public class PropertyHandler
     * @see #removeIgnored(String)
     * @see #isIgnored(String)
     */
-  protected Hashtable<Object,HashSet<String>> m_Ignored = null;
+   protected Hashtable m_Ignored = null;
    
    /**
     * lists for a class the properties allowed to use for setting and getting.
@@ -58,7 +59,7 @@ public class PropertyHandler
     * @see #removeAllowed(Class,String)
     * @see #isAllowed(Class,String)
     */
-  protected Hashtable<Object,HashSet<String>> m_Allowed = null;
+   protected Hashtable m_Allowed = null;
 
    /**
     * initializes the handling 
@@ -66,8 +67,8 @@ public class PropertyHandler
    public PropertyHandler() {
       super();
 
-      m_Ignored = new Hashtable<Object,HashSet<String>>();
-      m_Allowed = new Hashtable<Object,HashSet<String>>();
+      m_Ignored = new Hashtable();
+      m_Allowed = new Hashtable();
    }
    
    /**
@@ -93,9 +94,9 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
-      list = new HashSet<String>();
+      list = new HashSet();
       list.add(displayName);
       
       m_Ignored.put(displayName, list);
@@ -110,14 +111,14 @@ public class PropertyHandler
     * @see #m_Ignored 
     */
    public void addIgnored(Class c, String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
       // retrieve list
       if (m_Ignored.contains(c)) {
-         list = (HashSet<String>) m_Ignored.get(c);
+         list = (HashSet) m_Ignored.get(c);
       }
       else {
-         list = new HashSet<String>();
+         list = new HashSet();
          m_Ignored.put(c, list);
       }
       
@@ -253,12 +254,12 @@ public class PropertyHandler
     * @see #m_Allowed
     */
    public void addAllowed(Class c, String displayName) {
-      HashSet<String>        list;
+      HashSet        list;
       
       // retrieve list
-      list = (HashSet<String>) m_Allowed.get(c);
+      list = (HashSet) m_Allowed.get(c);
       if (list == null) {
-         list = new HashSet<String>();
+         list = new HashSet();
          m_Allowed.put(c, list);
       }
       
@@ -358,6 +359,6 @@ public class PropertyHandler
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision$");
+     return RevisionUtils.extract("$Revision: 1.4 $");
    }
 }

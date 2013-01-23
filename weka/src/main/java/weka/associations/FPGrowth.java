@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FPGrowth.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +38,6 @@ import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -45,11 +45,13 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
+import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -125,11 +127,165 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class FPGrowth extends AbstractAssociator 
-  implements AssociationRulesProducer, OptionHandler, 
-    TechnicalInformationHandler {
+  implements OptionHandler, TechnicalInformationHandler {
   
   /** For serialization */
   private static final long serialVersionUID = 3620717108603442911L;
+
+  /**
+   * Inner class that handles a single binary item
+   */
+  public static class BinaryItem implements Serializable, Comparable<BinaryItem> {
+    
+    /** For serialization */
+    private static final long serialVersionUID = -3372941834914147669L;
+    
+    /** The frequency of the item */
+    protected int m_frequency;
+    
+    /** The attribute that the item corresponds to */
+    protected Attribute m_attribute;
+    
+    /** The index of the value considered to be positive */
+    protected int m_valueIndex;
+    
+    public BinaryItem(Attribute att, int valueIndex) throws Exception {
+      if (att.isNumeric() || (att.isNominal() && att.numValues() > 2)) {
+        throw new Exception("BinaryItem must be constructed using a nominal attribute" +
+        		" with at most 2 values!");
+      }
+      m_attribute = att;
+      if (m_attribute.numValues() == 1) {
+        m_valueIndex = 0; // unary attribute (? used to indicate absence from a basket)
+      } else {
+        m_valueIndex = valueIndex;
+      }
+    }
+    
+    /**
+     * Increase the frequency of this item.
+     * 
+     * @param f the amount to increase the frequency by.
+     */
+    public void increaseFrequency(int f) {
+      m_frequency += f;
+    }
+    
+    /**
+     * Decrease the frequency of this item.
+     * 
+     * @param f the amount by which to decrease the frequency.
+     */
+    public void decreaseFrequency(int f) {
+      m_frequency -= f;
+    }
+    
+    /**
+     * Increment the frequency of this item.
+     */
+    public void increaseFrequency() {
+      m_frequency++;
+    }
+    
+    /**
+     * Decrement the frequency of this item.
+     */
+    public void decreaseFrequency() {
+      m_frequency--;
+    }
+    
+    /**
+     * Get the frequency of this item.
+     * 
+     * @return the frequency.
+     */
+    public int getFrequency() {
+      return m_frequency;
+    }
+    
+    /**
+     * Get the attribute that this item corresponds to.
+     * 
+     * @return the corresponding attribute.
+     */
+    public Attribute getAttribute() {
+      return m_attribute;
+    }
+    
+    /**
+     * Get the value index for this item.
+     * 
+     * @return the value index.
+     */
+    public int getValueIndex() {
+      return m_valueIndex;
+    }
+    
+    /**
+     * A string representation of this item.
+     * 
+     * @return a string representation of this item.
+     */
+    public String toString() {
+      return toString(false);
+    }
+    
+    /**
+     * A string representation of this item.
+     * 
+     * @param freq true if the frequency should be included.
+     * @return a string representation of this item. 
+     */
+    public String toString(boolean freq) {
+      String result = m_attribute.name() + "=" + m_attribute.value(m_valueIndex);
+      if (freq) {
+        result += ":" + m_frequency;
+      }
+      return result;
+    }
+    
+    public String toXML() {
+      String result = "<ITEM name=\"" +  m_attribute.name() + "\" value=\"=" 
+      + m_attribute.value(m_valueIndex) + "\"/>";
+      
+      return result;
+    }
+    
+    /**
+     * Ensures that items will be sorted in descending order of frequency.
+     * Ties are ordered by attribute name.
+     * 
+     * @param comp the BinaryItem to compare against.
+     */
+    public int compareTo(BinaryItem comp) {
+      if (m_frequency == comp.getFrequency()) {
+        // sort by name
+        return -1 * m_attribute.name().compareTo(comp.getAttribute().name());
+      }
+      if (comp.getFrequency() < m_frequency) {
+        return -1;
+      }
+      return 1;
+    }
+    
+    public boolean equals(Object compareTo) {
+      if (!(compareTo instanceof BinaryItem)) {
+        return false;
+      }
+      
+      BinaryItem b = (BinaryItem)compareTo;
+      if (m_attribute.equals(b.getAttribute()) && m_frequency == b.getFrequency()) {
+        return true;
+      }
+      
+      return false;
+    }
+    
+    public int hashCode() {
+      return (m_attribute.name().hashCode() ^ 
+          m_attribute.numValues()) * m_frequency;
+    }
+  }
   
   /**
    * Class for maintaining a frequent item set.
@@ -801,131 +957,459 @@ public class FPGrowth extends AbstractAssociator
     }
   }
   
-  private static void nextSubset(boolean[] subset) {
-    for (int i = 0; i < subset.length; i++) {
-      if (!subset[i]) {
-        subset[i] = true;
-        break;
-      } else {
-        subset[i] = false;
-      }
-    }
-  }
-  
-  private static Collection<Item> getPremise(FrequentBinaryItemSet fis, 
-      boolean[] subset) {
-    boolean ok = false;
-    for (int i = 0; i < subset.length; i++){
-      if (!subset[i]) {
-        ok = true;
-        break;
-      }
-    }      
-    
-    if (!ok) {
-      return null;
-    }
-    
-    List<Item> premise = new ArrayList<Item>();
-    ArrayList<Item> items = new ArrayList<Item>(fis.getItems());
-
-    
-    for (int i = 0; i < subset.length; i++) {
-      if (subset[i]) {
-        premise.add(items.get(i));
-      }
-    }
-    return premise;
-  }
-  
-  private static Collection<Item> getConsequence(FrequentBinaryItemSet fis,
-      boolean[] subset) {
-    List<Item> consequence = new ArrayList<Item>();
-    ArrayList<Item> items = new ArrayList<Item>(fis.getItems());
-    
-    for (int i = 0; i < subset.length; i++) {
-      if (!subset[i]) {
-        consequence.add(items.get(i));
-      }
-    }
-    return consequence;
-  }
-  
-  
   /**
-   * Generate all association rules, from the supplied frequet item sets,
-   * that meet a given minimum metric threshold. Uses a brute force approach.
+   * Class for storing and manipulating an association rule. Also has a utility
+   * routine for generating (by brute force) all the association rules that meet
+   * a given metric threshold from a list of large item sets.
    * 
-   * @param largeItemSets the set of frequent item sets
-   * @param metricToUse the metric to use
-   * @param metricThreshold the threshold value that a rule must meet
-   * @param upperBoundMinSuppAsInstances the upper bound on the support
-   * in order to accept the rule
-   * @param lowerBoundMinSuppAsInstances the lower bound on the support
-   * in order to accept the rule
-   * @param totalTransactions the total number of transactions in the data
-   * @return a list of association rules
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com).
    */
-  public static List<AssociationRule> 
-    generateRulesBruteForce(FrequentItemSets largeItemSets, 
-        DefaultAssociationRule.METRIC_TYPE metricToUse, 
-        double metricThreshold, int upperBoundMinSuppAsInstances,
-        int lowerBoundMinSuppAsInstances, int totalTransactions) {
+  /**
+   * @author mhall
+   *
+   */
+  public static class AssociationRule implements Serializable, Comparable<AssociationRule> {
     
-    List<AssociationRule> rules = new ArrayList<AssociationRule>();
-    largeItemSets.sort();
-    Map<Collection<BinaryItem>, Integer> frequencyLookup =
-      new HashMap<Collection<BinaryItem>, Integer>();
+    /** For serialization */
+    private static final long serialVersionUID = -661269018702294489L;
+
+    /** Enum for holding different metric types */
+    public static enum METRIC_TYPE {
+      CONFIDENCE("conf") {
+        double compute(int premiseSupport, int consequenceSupport, 
+            int totalSupport, int totalTransactions) {
+          
+          return (double)totalSupport / (double)premiseSupport;
+        }
+      },
+      LIFT("lift") {
+        double compute(int premiseSupport, int consequenceSupport, 
+            int totalSupport, int totalTransactions) {
+          
+          double confidence = 
+            METRIC_TYPE.CONFIDENCE.compute(premiseSupport, consequenceSupport, 
+                totalSupport, totalTransactions);
+          return confidence / ((double)consequenceSupport /
+              (double)totalTransactions);
+        }
+      },
+      LEVERAGE("lev") {
+        double compute(int premiseSupport, int consequenceSupport, 
+            int totalSupport, int totalTransactions) {
+          
+          double coverageForItemSet = (double)totalSupport /
+            (double)totalTransactions;
+          double expectedCoverageIfIndependent = 
+            ((double)premiseSupport / (double)totalTransactions) *
+            ((double)consequenceSupport / (double)totalTransactions);
+          return coverageForItemSet - expectedCoverageIfIndependent;
+        }
+      },
+      CONVICTION("conv") {
+        double compute(int premiseSupport, int consequenceSupport, 
+            int totalSupport, int totalTransactions) {
+          
+          double num = 
+            (double)premiseSupport * (double)(totalTransactions - consequenceSupport) /
+            (double)totalTransactions;
+          double denom = premiseSupport - totalSupport + 1;
+          return num / denom;
+        }
+      };
+      
+      private final String m_stringVal;
+      METRIC_TYPE(String name) {
+        m_stringVal = name;
+      }
+      
+      abstract double compute(int premiseSupport, int consequenceSupport, 
+          int totalSupport, int totalTransactions);
+      
+      public String toString() {
+        return m_stringVal;
+      }
+      
+      public String toStringMetric(int premiseSupport, int consequenceSupport,
+          int totalSupport, int totalTransactions) {
+        return m_stringVal + ":(" + Utils.doubleToString(compute(premiseSupport, consequenceSupport,
+            totalSupport, totalTransactions), 2) + ")";
+      }
+      
+      public String toXML(int premiseSupport, int consequenceSupport,
+          int totalSupport, int totalTransactions) {
+        String result = "<CRITERE name=\"" + m_stringVal + "\" value=\" " +
+          Utils.doubleToString(compute(premiseSupport, consequenceSupport,
+            totalSupport, totalTransactions), 2) + "\"/>";
+        
+        return result;
+      }
+    }
     
-    Iterator<FrequentBinaryItemSet> setI = largeItemSets.iterator();
-    // process each large item set
-    while (setI.hasNext()) {
-      FrequentBinaryItemSet fis = setI.next();
-      frequencyLookup.put(fis.getItems(), fis.getSupport());
-      if (fis.getItems().size() > 1) {
-        // generate all the possible subsets for the premise
-        boolean[] subset = new boolean[fis.getItems().size()];
-        Collection<Item> premise = null;
-        Collection<Item> consequence = null;
-        while ((premise = getPremise(fis, subset)) != null) {
-          if (premise.size() > 0 && premise.size() < fis.getItems().size()) {
-            consequence = getConsequence(fis, subset);
-            int totalSupport = fis.getSupport();
-            int supportPremise = frequencyLookup.get(premise).intValue();
-            int supportConsequence = frequencyLookup.get(consequence).intValue();
-            
-            // a candidate rule
-            DefaultAssociationRule candidate = 
-              new DefaultAssociationRule(premise, consequence, metricToUse, supportPremise,
-                  supportConsequence, totalSupport, totalTransactions);
-            if (candidate.getPrimaryMetricValue() > metricThreshold &&
-                candidate.getTotalSupport() >= lowerBoundMinSuppAsInstances &&
-                candidate.getTotalSupport() <= upperBoundMinSuppAsInstances) {
-              // accept this rule
-              rules.add(candidate);
-            }              
+    /** Tags for display in the GUI */
+    public static final Tag[] TAGS_SELECTION = {
+      new Tag(METRIC_TYPE.CONFIDENCE.ordinal(), "Confidence"),
+      new Tag(METRIC_TYPE.LIFT.ordinal(), "Lift"),
+      new Tag(METRIC_TYPE.LEVERAGE.ordinal(), "Leverage"),
+      new Tag(METRIC_TYPE.CONVICTION.ordinal(), "Conviction")
+    };
+    
+    /** The metric type for this rule */
+    protected METRIC_TYPE m_metricType = METRIC_TYPE.CONFIDENCE;
+    
+    /** The premise of the rule */
+    protected Collection<BinaryItem> m_premise;
+    
+    /** The consequence of the rule */
+    protected Collection<BinaryItem> m_consequence;
+    
+    /** The support for the premise */
+    protected int m_premiseSupport;
+    
+    /** The support for the consequence */
+    protected int m_consequenceSupport;
+    
+    /** The total support for the item set (premise + consequence) */
+    protected int m_totalSupport;
+    
+    /** The total number of transactions in the data */
+    protected int m_totalTransactions;
+    
+    /**
+     * Construct a new association rule.
+     * 
+     * @param premise the premise of the rule
+     * @param consequence the consequence of the rule
+     * @param metric the metric for the rule
+     * @param premiseSupport the support of the premise
+     * @param consequenceSupport the support of the consequence
+     * @param totalSupport the total support of the rule
+     * @param totalTransactions the number of transactions in the data
+     */
+    public AssociationRule(Collection<BinaryItem> premise, 
+        Collection<BinaryItem> consequence, METRIC_TYPE metric,
+        int premiseSupport, int consequenceSupport,
+        int totalSupport, int totalTransactions) {
+      m_premise = premise;
+      m_consequence = consequence;
+      m_metricType = metric;
+      m_premiseSupport = premiseSupport;
+      m_consequenceSupport = consequenceSupport;
+      m_totalSupport = totalSupport;
+      m_totalTransactions = totalTransactions;
+    }
+    
+    /**
+     * Get the premise of this rule.
+     * 
+     * @return the premise of this rule.
+     */
+    public Collection<BinaryItem> getPremise() {
+      return m_premise;
+    }
+    
+    /**
+     * Get the consequence of this rule.
+     * 
+     * @return the consequence of this rule.
+     */
+    public Collection<BinaryItem> getConsequence() {
+      return m_consequence;
+    }
+    
+    /**
+     * Get the metric type of this rule (e.g. confidence).
+     * 
+     * @return the metric type of this rule.
+     */
+    public METRIC_TYPE getMetricType() {
+      return m_metricType;
+    }
+    
+    /**
+     * Get the value of the metric for this rule. 
+     * 
+     * @return the value of the metric for this rule.
+     */
+    public double getMetricValue() {
+      return m_metricType.compute(m_premiseSupport, m_consequenceSupport, 
+          m_totalSupport, m_totalTransactions);
+    }
+    
+    /**
+     * Get the support for the premise.
+     * 
+     * @return the support for the premise.
+     */
+    public int getPremiseSupport() {
+      return m_premiseSupport;
+    }
+    
+    /**
+     * Get the support for the consequence.
+     * 
+     * @return the support for the consequence.
+     */
+    public int getConsequenceSupport() {
+      return m_consequenceSupport;
+    }
+    
+    /**
+     * Get the total support for this rule (premise + consequence).
+     * 
+     * @return the total support for this rule.
+     */
+    public int getTotalSupport() {
+      return m_totalSupport;
+    }
+    
+    /**
+     * Get the total number of transactions in the data.
+     * 
+     * @return the total number of transactions in the data.
+     */
+    public int getTotalTransactions() {
+      return m_totalTransactions;
+    }
+    
+    /**
+     * Compare this rule to the supplied rule.
+     * 
+     * @param other the rule to compare to.
+     * @return the result of the comparison.
+     */
+    public int compareTo(AssociationRule other) {
+      return -Double.compare(getMetricValue(), other.getMetricValue());
+    }
+    
+    /**
+     * Return true if this rule is equal to the supplied one.
+     * 
+     * @return true if this rule is the same as the supplied rule.
+     */
+    public boolean equals(Object other) {
+      if (!(other instanceof AssociationRule)) {
+        return false;
+      }
+      
+      AssociationRule otherRule = (AssociationRule)other;
+      boolean result = m_premise.equals(otherRule.getPremise()) &&
+        m_consequence.equals(otherRule.getConsequence()) && 
+        (getMetricValue() == otherRule.getMetricValue());
+      
+      return result;
+    }
+    
+    public boolean containsItems(ArrayList<Attribute> items, boolean useOr) {
+      int numItems = items.size();
+      int count = 0;
+      
+      for (BinaryItem i : m_premise) {
+        if (items.contains(i.getAttribute())) {
+          if (useOr) {
+            return true; // can stop here
+          } else {
+            count++;
           }
-          nextSubset(subset);
+        }
+      }
+      
+      for (BinaryItem i : m_consequence) {
+        if (items.contains(i.getAttribute())) {
+          if (useOr) {
+            return true; // can stop here
+          } else {
+            count++;
+          }
+        }
+      }
+      
+      if (!useOr) {
+        if (count == numItems) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+    
+    /**
+     * Get a textual description of this rule.
+     * 
+     * @return a textual description of this rule.
+     */
+    public String toString() {
+      StringBuffer result = new StringBuffer();
+      
+      result.append(m_premise.toString() + ": " + m_premiseSupport 
+          + " ==> " + m_consequence.toString() + ": " + m_totalSupport 
+          + "   ");
+      for (METRIC_TYPE m : METRIC_TYPE.values()) {
+        if (m.equals(m_metricType)) {
+          result.append("<" + 
+              m.toStringMetric(m_premiseSupport, m_consequenceSupport, 
+                  m_totalSupport, m_totalTransactions) + "> ");
+        } else {
+          result.append("" + 
+              m.toStringMetric(m_premiseSupport, m_consequenceSupport, 
+                  m_totalSupport, m_totalTransactions) + " ");
+        }
+      }
+      return result.toString();
+    }
+    
+    public String toXML() {
+      StringBuffer result = new StringBuffer();
+      result.append("  <RULE>\n    <LHS>");
+      
+      for (BinaryItem b : m_premise) {
+        result.append("\n      ");
+        result.append(b.toXML());
+      }
+      result.append("\n    </LHS>\n    <RHS>");
+      
+      for (BinaryItem b : m_consequence) {
+        result.append("\n      ");
+        result.append(b.toXML());
+      }
+      result.append("\n    </RHS>");
+      
+      // metrics
+      // do support first
+      result.append("\n    <CRITERE name=\"support\" value=\"" 
+          + m_totalSupport + "\"/>");
+      for (METRIC_TYPE m : METRIC_TYPE.values()) {
+        result.append("\n    ");
+        result.append(m.toXML(m_premiseSupport, m_consequenceSupport,
+            m_totalSupport, m_totalTransactions));
+      }
+      result.append("\n  </RULE>\n");
+      
+      return result.toString();
+    }
+    
+    private static void nextSubset(boolean[] subset) {
+      for (int i = 0; i < subset.length; i++) {
+        if (!subset[i]) {
+          subset[i] = true;
+          break;
+        } else {
+          subset[i] = false;
         }
       }
     }
-    return rules;
-  }
-  
-  public static List<AssociationRule> pruneRules(List<AssociationRule> rulesToPrune,
-      ArrayList<Item> itemsToConsider, boolean useOr) {
-    ArrayList<AssociationRule> result = new ArrayList<AssociationRule>();
     
-    for (AssociationRule r : rulesToPrune) {
-      if (r.containsItems(itemsToConsider, useOr)) {
-        result.add(r);
+    private static Collection<BinaryItem> getPremise(FrequentBinaryItemSet fis, 
+        boolean[] subset) {
+      boolean ok = false;
+      for (int i = 0; i < subset.length; i++){
+        if (!subset[i]) {
+          ok = true;
+          break;
+        }
+      }      
+      
+      if (!ok) {
+        return null;
       }
+      
+      List<BinaryItem> premise = new ArrayList<BinaryItem>();
+      ArrayList<BinaryItem> items = new ArrayList<BinaryItem>(fis.getItems());
+
+      
+      for (int i = 0; i < subset.length; i++) {
+        if (subset[i]) {
+          premise.add(items.get(i));
+        }
+      }
+      return premise;
     }
     
-    return result;
+    private static Collection<BinaryItem> getConsequence(FrequentBinaryItemSet fis,
+        boolean[] subset) {
+      List<BinaryItem> consequence = new ArrayList<BinaryItem>();
+      ArrayList<BinaryItem> items = new ArrayList<BinaryItem>(fis.getItems());
+      
+      for (int i = 0; i < subset.length; i++) {
+        if (!subset[i]) {
+          consequence.add(items.get(i));
+        }
+      }
+      return consequence;
+    }
+        
+    /**
+     * Generate all association rules, from the supplied frequet item sets,
+     * that meet a given minimum metric threshold. Uses a brute force approach.
+     * 
+     * @param largeItemSets the set of frequent item sets
+     * @param metricToUse the metric to use
+     * @param metricThreshold the threshold value that a rule must meet
+     * @param upperBoundMinSuppAsInstances the upper bound on the support
+     * in order to accept the rule
+     * @param lowerBoundMinSuppAsInstances the lower bound on the support
+     * in order to accept the rule
+     * @param totalTransactions the total number of transactions in the data
+     * @return a list of association rules
+     */
+    public static List<AssociationRule> 
+      generateRulesBruteForce(FrequentItemSets largeItemSets, METRIC_TYPE metricToUse, 
+          double metricThreshold, int upperBoundMinSuppAsInstances,
+          int lowerBoundMinSuppAsInstances, int totalTransactions) {
+      
+      List<AssociationRule> rules = new ArrayList<AssociationRule>();
+      largeItemSets.sort();
+      Map<Collection<BinaryItem>, Integer> frequencyLookup =
+        new HashMap<Collection<BinaryItem>, Integer>();
+      
+      Iterator<FrequentBinaryItemSet> setI = largeItemSets.iterator();
+      // process each large item set
+      while (setI.hasNext()) {
+        FrequentBinaryItemSet fis = setI.next();
+        frequencyLookup.put(fis.getItems(), fis.getSupport());
+        if (fis.getItems().size() > 1) {
+          // generate all the possible subsets for the premise
+          boolean[] subset = new boolean[fis.getItems().size()];
+          Collection<BinaryItem> premise = null;
+          Collection<BinaryItem> consequence = null;
+          while ((premise = getPremise(fis, subset)) != null) {
+            if (premise.size() > 0 && premise.size() < fis.getItems().size()) {
+              consequence = getConsequence(fis, subset);
+              int totalSupport = fis.getSupport();
+              int supportPremise = frequencyLookup.get(premise).intValue();
+              int supportConsequence = frequencyLookup.get(consequence).intValue();
+              
+              // a candidate rule
+              AssociationRule candidate = 
+                new AssociationRule(premise, consequence, metricToUse, supportPremise,
+                    supportConsequence, totalSupport, totalTransactions);
+              if (candidate.getMetricValue() > metricThreshold &&
+                  candidate.getTotalSupport() >= lowerBoundMinSuppAsInstances &&
+                  candidate.getTotalSupport() <= upperBoundMinSuppAsInstances) {
+                // accept this rule
+                rules.add(candidate);
+              }              
+            }
+            nextSubset(subset);
+          }
+        }
+      }
+      return rules;
+    }
+    
+    public static List<AssociationRule> pruneRules(List<AssociationRule> rulesToPrune,
+        ArrayList<Attribute> itemsToConsider, boolean useOr) {
+      ArrayList<AssociationRule> result = new ArrayList<AssociationRule>();
+      
+      for (AssociationRule r : rulesToPrune) {
+        if (r.containsItems(itemsToConsider, useOr)) {
+          result.add(r);
+        }
+      }
+      
+      return result;
+    }
   }
   
-
   /** The number of rules to find */
   protected int m_numRulesToFind = 10;
   //protected double m_upperBoundMinSupport = 0.36;
@@ -938,15 +1422,6 @@ public class FPGrowth extends AbstractAssociator
   
   /** The amount by which to decrease the support in each iteration */
   protected double m_delta = 0.05;
-  
-  /** The number of instances in the data */
-  protected int m_numInstances;
-  
-  /** 
-   * When processing data off of disk report progress
-   * this frequently (number of instances).
-   */
-  protected int m_offDiskReportingFrequency = 10000;
   
   /** 
    * If true, just all rules meeting the lower bound on the minimum
@@ -961,8 +1436,8 @@ public class FPGrowth extends AbstractAssociator
   /** The index (1 based) of binary attributes to treat as the positive value */
   protected int m_positiveIndex = 2;
   
-  protected DefaultAssociationRule.METRIC_TYPE m_metric = 
-    DefaultAssociationRule.METRIC_TYPE.CONFIDENCE;
+  protected AssociationRule.METRIC_TYPE m_metric = 
+    AssociationRule.METRIC_TYPE.CONFIDENCE;
   
   protected double m_metricThreshold = 0.9;
   
@@ -1100,77 +1575,6 @@ public class FPGrowth extends AbstractAssociator
     return result;
   }
   
-  private void processSingleton(Instance current, 
-      ArrayList<BinaryItem> singletons) throws Exception {
-    
-    if (current instanceof SparseInstance) {
-      for (int j = 0; j < current.numValues(); j++) {
-        int attIndex = current.index(j);
-        singletons.get(attIndex).increaseFrequency();
-      }
-    } else {
-      for (int j = 0; j < current.numAttributes(); j++) {
-        if (!current.isMissing(j)) {
-          if (current.attribute(j).numValues() == 1 
-              || current.value(j) == m_positiveIndex - 1) {
-            singletons.get(j).increaseFrequency();
-          }
-        }
-      }
-    }
-  }
-  
-  /**
-   * Get the singleton items in the data
-   * 
-   * @param source the source of the data (either Instances or
-   * an ArffLoader).
-   * @return a list of singleton item sets
-   * @throws Exception if the singletons can't be found for some reason
-   */
-  protected ArrayList<BinaryItem> getSingletons(Object source) 
-    throws Exception {
-    ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
-    Instances data = null;
-    
-    if (source instanceof Instances) {
-      data = (Instances)source;
-    } else if (source instanceof weka.core.converters.ArffLoader) {
-      data = ((weka.core.converters.ArffLoader)source).getStructure();
-    }
-    
-    for (int i = 0; i < data.numAttributes(); i++) {
-      singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex - 1));
-    }
-    
-    if (source instanceof Instances) {
-      // set the number of instances
-      m_numInstances = data.numInstances();
-      
-      for (int i = 0; i < data.numInstances(); i++) {
-        Instance current = data.instance(i);
-        processSingleton(current, singletons);
-      }
-    } else if (source instanceof weka.core.converters.ArffLoader) {
-      weka.core.converters.ArffLoader loader = (weka.core.converters.ArffLoader)source;
-      Instance current = null;
-      int count = 0;
-      while ((current = loader.getNextInstance(data)) != null) {
-        processSingleton(current, singletons);
-        count++;
-        if (count % m_offDiskReportingFrequency == 0) {
-          System.err.println("Singletons: done " + count);
-        }
-      }
-      
-      // set the number of instances
-      m_numInstances = count;
-      
-      loader.reset();
-    }
-    
-    return singletons;
-  }
   
   /**
    * Get the singleton items in the data
@@ -1180,8 +1584,7 @@ public class FPGrowth extends AbstractAssociator
    * @throws Exception if the singletons can't be found for some reason
    */
   protected ArrayList<BinaryItem> getSingletons(Instances data) throws Exception {
-    return getSingletons((Object)data);
-    /*ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
+    ArrayList<BinaryItem> singletons = new ArrayList<BinaryItem>();
     
     for (int i = 0; i < data.numAttributes(); i++) {
       singletons.add(new BinaryItem(data.attribute(i), m_positiveIndex - 1));
@@ -1206,7 +1609,7 @@ public class FPGrowth extends AbstractAssociator
       }
     }
     
-    return singletons;*/
+    return singletons;
   }
   
   /*protected ArrayList<BinaryItem> getFrequent(ArrayList<BinaryItem> items, int minSupport) {
@@ -1221,42 +1624,6 @@ public class FPGrowth extends AbstractAssociator
     Collections.sort(frequent);
     return frequent;
   } */
-
-  /**
-   * Inserts a single instance into the FPTree.
-   * 
-   * @param current the instance to insert
-   * @param singletons the singleton item sets
-   * @param tree the tree to insert into
-   * @param minSupport the minimum support threshold
-   */
-  private void insertInstance(Instance current, ArrayList<BinaryItem> singletons, 
-      FPTreeRoot tree, int minSupport) {
-    ArrayList<BinaryItem> transaction = new ArrayList<BinaryItem>();
-    if (current instanceof SparseInstance) {
-      for (int j = 0; j < current.numValues(); j++) {
-        int attIndex = current.index(j);
-        if (singletons.get(attIndex).getFrequency() >= minSupport) {
-          transaction.add(singletons.get(attIndex));
-        }
-      }
-      Collections.sort(transaction);
-      tree.addItemSet(transaction, 1);
-    } else {
-      for (int j = 0; j < current.numAttributes(); j++) {
-        if (!current.isMissing(j)) {
-          if (current.attribute(j).numValues() == 1 
-              || current.value(j) == m_positiveIndex - 1) {
-            if (singletons.get(j).getFrequency() >= minSupport) {
-              transaction.add(singletons.get(j));
-            }
-          }
-        }
-      }
-      Collections.sort(transaction);
-      tree.addItemSet(transaction, 1);
-    }
-  }
   
   /**
    * Construct the frequent pattern tree by inserting each transaction
@@ -1268,49 +1635,7 @@ public class FPGrowth extends AbstractAssociator
    * @param minSupport the minimum support
    * @return the root of the tree
    */
-  protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons,
-      Object dataSource, int minSupport) throws Exception {
-    
-    FPTreeRoot tree = new FPTreeRoot();    
-    Instances data = null;
-    if (dataSource instanceof Instances) {
-      data = (Instances)dataSource;
-    } else if (dataSource instanceof weka.core.converters.ArffLoader) {
-      data = ((weka.core.converters.ArffLoader)dataSource).getStructure();
-    }
-    
-    if (dataSource instanceof Instances) {
-      for (int i = 0; i < data.numInstances(); i++) {
-        insertInstance(data.instance(i), singletons, tree, minSupport);
-      }
-    } else if (dataSource instanceof weka.core.converters.ArffLoader) {
-      weka.core.converters.ArffLoader loader = 
-        (weka.core.converters.ArffLoader)dataSource;
-      Instance current = null;
-      int count = 0;
-      while ((current = loader.getNextInstance(data)) != null) {
-        insertInstance(current, singletons, tree, minSupport);
-        count++;
-        if (count % m_offDiskReportingFrequency == 0) {
-          System.err.println("build tree done: " + count);
-        }
-      }
-    }
-    
-    return tree;
-  }
-  
-  /**
-   * Construct the frequent pattern tree by inserting each transaction
-   * in the data into the tree. Only those items from each transaction that
-   * meet the minimum support threshold are inserted.
-   * 
-   * @param singletons the singleton item sets
-   * @param data the Instances containing the transactions
-   * @param minSupport the minimum support
-   * @return the root of the tree
-   */
-  /*protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons, 
+  protected FPTreeRoot buildFPTree(ArrayList<BinaryItem> singletons, 
       Instances data, int minSupport) {
     
     FPTreeRoot tree = new FPTreeRoot();
@@ -1344,7 +1669,7 @@ public class FPGrowth extends AbstractAssociator
     }
     
     return tree;
-  }*/
+  }
   
   /**
    * Find large item sets in the FP-tree.
@@ -1525,7 +1850,7 @@ public class FPGrowth extends AbstractAssociator
    */
   public void setMetricType(SelectedTag d) {
     int ordinal =  d.getSelectedTag().getID();
-    for (DefaultAssociationRule.METRIC_TYPE m : DefaultAssociationRule.METRIC_TYPE.values()) {
+    for (AssociationRule.METRIC_TYPE m : AssociationRule.METRIC_TYPE.values()) {
       if (m.ordinal() == ordinal) {
         m_metric = m;
         break;
@@ -1568,7 +1893,7 @@ public class FPGrowth extends AbstractAssociator
    * @return the metric type to use.
    */
   public SelectedTag getMetricType() {
-    return new SelectedTag(m_metric.ordinal(), DefaultAssociationRule.TAGS_SELECTION);
+    return new SelectedTag(m_metric.ordinal(), AssociationRule.TAGS_SELECTION);
   }
   
   /**
@@ -1788,9 +2113,9 @@ public class FPGrowth extends AbstractAssociator
    * displaying in the explorer/experimenter gui
    */
   public String upperBoundMinSupportTipText() {
-    return "Upper bound for minimum support as a fraction or number of instances. " +
-      "Start iteratively decreasing " +
-      "minimum support from this value.";
+    return "Upper bound for minimum support as a fraction or" +
+    		"number of instances. Start iteratively decreasing "
+      +"minimum support from this value.";
   }
 
   /**
@@ -1850,17 +2175,6 @@ public class FPGrowth extends AbstractAssociator
     return m_findAllRulesForSupportLevel;
   }
   
-  /**
-   * Set how often to report some progress when the data is
-   * being read incrementally off of the disk rather than
-   * loaded into memory.
-   * 
-   * @param freq the frequency to print progress.
-   */
-  public void setOffDiskReportingFrequency(int freq) {
-    m_offDiskReportingFrequency = freq;
-  }
-  
   /* public void setMinimumSupport(double minSupp) {
     m_minSupport = minSupp;
   }
@@ -1875,53 +2189,8 @@ public class FPGrowth extends AbstractAssociator
    * @return the list of association rules discovered during mining.
    * Returns null if mining hasn't been performed yet.
    */
-  public AssociationRules getAssociationRules() {
-    List<AssociationRule> rulesToReturn = new ArrayList<AssociationRule>();
-    
-    int count = 0;
-    for (AssociationRule r : m_rules) {
-      rulesToReturn.add(r);
-      count++;
-      if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
-        break;
-      }
-    }
-    
-    return new AssociationRules(rulesToReturn, this);
-  }
-  
-  /**
-   * Gets a list of the names of the metrics output for
-   * each rule. This list should be the same (in terms of
-   * the names and order thereof) as that produced by
-   * AssociationRule.getMetricNamesForRule().
-   * 
-   * @return an array of the names of the metrics available
-   * for each rule learned by this producer.
-   */
-  public String[] getRuleMetricNames() {
-    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length];
-    
-    for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
-      metricNames[i] = DefaultAssociationRule.TAGS_SELECTION[i].getReadable();
-    }
-    
-    return metricNames;
-  }
-  
-  /**
-   * Returns true if this AssociationRulesProducer can actually
-   * produce rules. Most implementing classes will always return
-   * true from this method (obviously :-)). However, an implementing
-   * class that actually acts as a wrapper around things that may
-   * or may not implement AssociationRulesProducer will want to
-   * return false if the thing they wrap can't produce rules.
-   * 
-   * @return true if this producer can produce rules in its current
-   * configuration
-   */
-  public boolean canProduceRules() {
-    return true;
+  public List<AssociationRule> getAssociationRules() {
+    return m_rules;
   }
   
   /**
@@ -1945,8 +2214,8 @@ public class FPGrowth extends AbstractAssociator
     		" = " + m_metricThreshold + ")";
     String string3 = "\tThe metric by which to rank rules. (default"
       + " = confidence)";
-    String string4 = "\tThe lower bound for the minimum support as a fraction" +
-    		" or number of instances. (default = "
+    String string4 = "\tThe lower bound for the minimum support as a " +
+    		"fraction or number of instances. (default = "
       + m_lowerBoundMinSupport + ")";
     String string5 = "\tUpper bound for minimum support as a fraction or number of instances. "
       + "(default = 1.0)";
@@ -2058,7 +2327,7 @@ public class FPGrowth extends AbstractAssociator
     
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
-          DefaultAssociationRule.TAGS_SELECTION));
+          AssociationRule.TAGS_SELECTION));
     }
     
     if (numRulesString.length() != 0) {
@@ -2161,8 +2430,8 @@ public class FPGrowth extends AbstractAssociator
     }
   }
   
-  private ArrayList<Item> parseRulesMustContain(Instances data) {
-    ArrayList<Item> result = new ArrayList<Item>();
+  private ArrayList<Attribute> parseRulesMustContain(Instances data) {
+    ArrayList<Attribute> result = new ArrayList<Attribute>();
     
     String[] split = m_rulesMustContain.trim().split(",");
     
@@ -2173,109 +2442,92 @@ public class FPGrowth extends AbstractAssociator
         System.err.println("[FPGrowth] : WARNING - can't find attribute " 
             + attName + " in the data.");
       } else {
-        BinaryItem tempI = null;
-        try {
-          tempI = new BinaryItem(att, m_positiveIndex - 1);
-        } catch (Exception e) {
-          // this should never happen
-          e.printStackTrace();
-        }
-        result.add(tempI);
+        result.add(att);
       }
     }
     
     return result;
   }
-  
+
   /**
    * Method that generates all large item sets with a minimum support, and from
    * these all association rules with a minimum metric (i.e. confidence, 
    * lift etc.).
    *
-   * @param source the source of the data. May be an Instances object or
-   * an ArffLoader. In the case of the latter, the two passes over the 
-   * data that FPGrowth requires will be done off of disk (i.e. only one
-   * instance will be in memory at any one time).
+   * @param data the instances to be used for generating the associations
    * @throws Exception if rules can't be built successfully
    */
-  private void buildAssociations(Object source) throws Exception {
-    Instances data = null;
-    Capabilities capabilities = getCapabilities();
-    boolean arffLoader = false;
+  public void buildAssociations(Instances data) throws Exception {
+    
+    // can we handle the data?
+    getCapabilities().testWithFail(data);
     boolean breakOnNext = false;
     
-    if (source instanceof weka.core.converters.ArffLoader) {
-      data = ((weka.core.converters.ArffLoader)source).getStructure();
-      capabilities.setMinimumNumberInstances(0);
-      arffLoader = true;
-    } else {
-      data = (Instances)source;
-    }
-
-    // can we handle the data?
-    capabilities.testWithFail(data);
-    
     // prune any instances that don't contain the requested items (if any)
-    // can only do this if we are not reading the data incrementally
-    if (m_transactionsMustContain.length() > 0 && (source instanceof Instances)) {
+    if (m_transactionsMustContain.length() > 0) {
       data = parseTransactionsMustContain(data);
       getCapabilities().testWithFail(data);
     }
     
-    ArrayList<Item> rulesMustContain = null;
+    ArrayList<Attribute> rulesMustContain = null;
     if (m_rulesMustContain.length() > 0) {
       rulesMustContain = parseRulesMustContain(data);
     }
-    
-    ArrayList<BinaryItem> singletons = getSingletons(source);
+        
     
     int upperBoundMinSuppAsInstances = (m_upperBoundMinSupport > 1) 
-      ? (int) m_upperBoundMinSupport
-      : (int)Math.ceil(m_upperBoundMinSupport * m_numInstances);
-      
+    ? (int) m_upperBoundMinSupport
+    : (int)Math.ceil(m_upperBoundMinSupport * data.numInstances());
+    
     int lowerBoundMinSuppAsInstances = (m_lowerBoundMinSupport > 1)
-      ? (int)m_lowerBoundMinSupport
-      : (int)Math.ceil(m_lowerBoundMinSupport * m_numInstances);
-      
+    ? (int)m_lowerBoundMinSupport
+        : (int)Math.ceil(m_lowerBoundMinSupport * data.numInstances());
+
+
     double upperBoundMinSuppAsFraction = (m_upperBoundMinSupport > 1)
-      ? m_upperBoundMinSupport / m_numInstances
-      : m_upperBoundMinSupport;
-      
+    ? m_upperBoundMinSupport / data.numInstances()
+        : m_upperBoundMinSupport;
+
     double lowerBoundMinSuppAsFraction = (m_lowerBoundMinSupport > 1)
-      ? m_lowerBoundMinSupport / m_numInstances
-      : m_lowerBoundMinSupport;
-      
+    ? m_lowerBoundMinSupport / data.numInstances()
+        : m_lowerBoundMinSupport;
+
     double deltaAsFraction = (m_delta > 1)
-      ? m_delta / m_numInstances
-      : m_delta;
-      
-    //double currentSupport = upperBoundMinSuppAsFraction;
+    ? m_delta / data.numInstances()
+        : m_delta;
+
+    //double currentSupport = upperBoundMinSuppAsFraction;      
     double currentSupport = 1.0;
-             
+
     if (m_findAllRulesForSupportLevel) {
       currentSupport = lowerBoundMinSuppAsFraction;
     }
-        
+    // first compute singletons
+    ArrayList<BinaryItem> singletons = getSingletons(data);
+    //ArrayList<BinaryItem> singletonsCopy = new ArrayList<BinaryItem>(singletons);
+/*    Collections.sort(singletonsCopy);
+    for (int i = 0; i < singletonsCopy.size(); i++) {
+      System.out.println(singletonsCopy.get(i).toString(true));
+    }
+    System.out.println("---------"); */
+//    System.out.println("Finished finding singletons...");
+    
+    // while not enough rules
     do {
-      if (arffLoader) {
-        ((weka.core.converters.ArffLoader)source).reset();
-      }
-      
       int currentSupportAsInstances = (currentSupport > 1)
       ? (int)currentSupport
-      : (int)Math.ceil(currentSupport * m_numInstances);
+      : (int)Math.ceil(currentSupport * data.numInstances());
       
+      //System.err.println("Current support " + currentSupportAsInstances);
+      //ArrayList<BinaryItem> prunedSingletons = removeNonFrequent(singletons);
+
       // build the FPTree
-      if (arffLoader) {
-        System.err.println("Building FP-tree...");
-      }
-      FPTreeRoot tree = buildFPTree(singletons, source, currentSupportAsInstances);
-      
-      FrequentItemSets largeItemSets = new FrequentItemSets(m_numInstances);
-      
-      if (arffLoader) {
-        System.err.println("Mining tree for min supp " + currentSupport);
-      }
+      FPTreeRoot tree = buildFPTree(singletons, data, currentSupportAsInstances);
+//      System.out.println("Finished building tree...");
+//      System.out.println(tree.toString(0));
+    /*System.out.println(tree.printHeaderTable(0)); */
+
+      FrequentItemSets largeItemSets = new FrequentItemSets(data.numInstances());
 
       // mine the tree
       FrequentBinaryItemSet conditionalItems = 
@@ -2283,34 +2535,31 @@ public class FPGrowth extends AbstractAssociator
       mineTree(tree, largeItemSets, 0, conditionalItems, currentSupportAsInstances);      
 
       m_largeItemSets = largeItemSets;
-      
-      if (arffLoader) {
-        System.err.println("Number of large item sets: " + m_largeItemSets.size());
-      }
+//      System.err.println("Number of large item sets: " + m_largeItemSets.size());
+  //    System.err.println(m_largeItemSets.toString(100));
+
+      //    m_largeItemSets.sort(compF);
+//      System.err.println("Finished mining tree...");
       
       // save memory
       tree = null;
 
       m_rules = 
-        generateRulesBruteForce(m_largeItemSets, m_metric, 
+        AssociationRule.generateRulesBruteForce(m_largeItemSets, m_metric, 
             m_metricThreshold, upperBoundMinSuppAsInstances, 
-            lowerBoundMinSuppAsInstances, m_numInstances);
-      
-      if (arffLoader) {
-        System.err.println("Number of rules found " + m_rules.size());
-      }
+            lowerBoundMinSuppAsInstances, data.numInstances());
       
       if (rulesMustContain != null && rulesMustContain.size() > 0) {
-        m_rules = pruneRules(m_rules, rulesMustContain, 
+        m_rules = AssociationRule.pruneRules(m_rules, rulesMustContain, 
             m_mustContainOR);
       }
+      
       
       if (!m_findAllRulesForSupportLevel) {
         if (breakOnNext) {
           break;
         }
         currentSupport -= deltaAsFraction;
-//        System.err.println("currentSupport " + currentSupport + " lowBoundAsFrac " + lowerBoundMinSuppAsFraction);
         if (currentSupport < lowerBoundMinSuppAsFraction) {
           if (currentSupport + deltaAsFraction > lowerBoundMinSuppAsFraction) {
             // ensure that the lower bound does get evaluated
@@ -2324,26 +2573,15 @@ public class FPGrowth extends AbstractAssociator
         // just break out of the loop as we are just finding all rules
         // with a minimum support + metric
         break;
-      }      
+      }
     } while (m_rules.size() < m_numRulesToFind);
     
     Collections.sort(m_rules);
-  }
-
-  /**
-   * Method that generates all large item sets with a minimum support, and from
-   * these all association rules with a minimum metric (i.e. confidence, 
-   * lift etc.).
-   *
-   * @param data the instances to be used for generating the associations
-   * @throws Exception if rules can't be built successfully
-   */
-  public void buildAssociations(Instances data) throws Exception {
+//    for (AssociationRule)
     
-    buildAssociations((Object)data);
-    return;
+//    System.out.println(graph(tree));
   }
-      
+    
   /**
    * Output the association rules.
    * 
@@ -2417,7 +2655,25 @@ public class FPGrowth extends AbstractAssociator
     
     return text.toString();
   }
+  
+  public String xmlRules() {
+    StringBuffer rulesBuff = new StringBuffer();
     
+    rulesBuff.append("<?xml version=\"1.0\" encoding=\"iso-8859-15\"?>\n");
+    rulesBuff.append("<RULES>\n");
+    int count = 0;
+    for (AssociationRule r : m_rules) {
+      rulesBuff.append(r.toXML());
+      count++;
+      if (!m_findAllRulesForSupportLevel && count == m_numRulesToFind) {
+        break;
+      } 
+    }
+    rulesBuff.append("</RULES>\n");
+    
+    return rulesBuff.toString();
+  }
+  
   /**
    * Returns the revision string.
    * 
@@ -2433,36 +2689,7 @@ public class FPGrowth extends AbstractAssociator
    * @param args the commandline options
    */
   public static void main(String[] args) {
-    try {
-      String[] argsCopy = args.clone();
-      if (Utils.getFlag('h', argsCopy) || Utils.getFlag("help", argsCopy)) {
-        runAssociator(new FPGrowth(), args);
-        System.out.println("-disk\n\tProcess data off of disk instead of loading\n\t" +
-        		"into main memory. This is a command line only option.");
-        return;
-      }
-        
-      if (!Utils.getFlag("disk", args)) {
-        runAssociator(new FPGrowth(), args);
-      } else {
-        String filename;
-        filename = Utils.getOption('t', args);
-        weka.core.converters.ArffLoader loader = null;
-        if (filename.length() != 0) {
-          loader = new weka.core.converters.ArffLoader();
-          loader.setFile(new java.io.File(filename));
-        } else {
-          throw new Exception("No training file specified!");
-        }
-        FPGrowth fpGrowth = new FPGrowth();
-        fpGrowth.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-        fpGrowth.buildAssociations(loader);
-        System.out.print(fpGrowth.toString());
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
+    runAssociator(new FPGrowth(), args);
   }
 }
 

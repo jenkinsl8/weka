@@ -1,33 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RemoveWithValues.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -38,9 +35,13 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -339,7 +340,7 @@ public class RemoveWithValues
       Attribute newAtt = new Attribute(oldAtt.name(), newVals);
       newAtt.setWeight(oldAtt.weight());
       instanceInfo.insertAttributeAt(newAtt,
-				      m_AttIndex.getIndex());
+                                      m_AttIndex.getIndex());
       m_NominalMapping = new int [oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
 	boolean found = false;
@@ -417,19 +418,6 @@ public class RemoveWithValues
       }
     }
     return false;
-  }
-  
-  /**
-   * RemoveWithValues may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed due to matching a value
-   * that the user wants to remove. Therefore this method returns
-   * true.
-   * 
-   * @return true
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    return true;
   }
 
   /** 

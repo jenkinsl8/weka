@@ -1,37 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    InstanceQuery.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.io.File;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Time;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,6 +31,14 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Time;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Convert the results of a database query into instances. The jdbc
@@ -80,19 +79,16 @@ import weka.core.Utils;
  */
 public class InstanceQuery 
   extends DatabaseUtils 
-  implements OptionHandler, InstanceQueryAdapter {
+  implements OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 718158370917782584L;
 
   /** Determines whether sparse data is created */
-  protected boolean m_CreateSparseData = false;
+  boolean m_CreateSparseData = false;
   
   /** Query to execute */
-  protected String m_Query = "SELECT * from ?";
-  
-  /** the custom props file to use instead of default one. */
-  protected File m_CustomPropsFile = null;
+  String m_Query = "SELECT * from ?";
 
   /**
    * Sets up the database drivers
@@ -127,13 +123,6 @@ public class InstanceQuery
      result.addElement(
          new Option("\tThe password to use for connecting.", 
                     "P", 1, "-P <password>"));
-     
-     result.add(
-	 new Option(
-             "\tThe custom properties file to use instead of default ones,\n"
-           + "\tcontaining the database parameters.\n"
-           + "\t(default: none)",
-           "custom-props", 1, "-custom-props <file>"));
      
      result.addElement(
          new Option("\tEnables debug output.", 
@@ -186,12 +175,6 @@ public class InstanceQuery
     tmpStr = Utils.getOption('P',options);
     if (tmpStr.length() != 0)
       setPassword(tmpStr);
-    
-    tmpStr = Utils.getOption("custom-props", options);
-    if (tmpStr.length() == 0)
-      setCustomPropsFile(null);
-    else
-      setCustomPropsFile(new File(tmpStr));
 
     setDebug(Utils.getFlag('D',options));
   }
@@ -245,36 +228,6 @@ public class InstanceQuery
   public boolean getSparseData() {
     return m_CreateSparseData;
   }
-  
-  /**
-   * Sets the custom properties file to use.
-   * 
-   * @param value 	the custom props file to load database parameters from,
-   * 			use null or directory to disable custom properties.
-   * @see		#initialize(File)
-   */
-  public void setCustomPropsFile(File value) {
-    m_CustomPropsFile = value;
-    initialize(m_CustomPropsFile);
-  }
-  
-   /**
-   * Returns the custom properties file in use, if any.
-   * 
-   * @return 		the custom props file, null if none used
-   */
-  public File getCustomPropsFile() {
-    return m_CustomPropsFile;
-  }
-  
-  /**
-   * The tip text for this property.
-   * 
-   * @return 		the tip text
-   */
-  public String customPropsFileTipText(){
-    return "The custom properties that the user can use to override the default ones.";
-  }
 
   /**
    * Gets the current settings of InstanceQuery
@@ -300,11 +253,6 @@ public class InstanceQuery
       options.add("-P");
       options.add(getPassword());
     }
-    
-    if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
-      options.add("-custom-props");
-      options.add(m_CustomPropsFile.toString());
-    }
 
     if (getDebug())
       options.add("-D");
@@ -321,280 +269,6 @@ public class InstanceQuery
    */
   public Instances retrieveInstances() throws Exception {
     return retrieveInstances(m_Query);
-  }
-  
-  public static Instances retrieveInstances(InstanceQueryAdapter adapter, ResultSet rs) throws Exception {
-    if (adapter.getDebug()) 
-      System.err.println("Getting metadata...");
-    ResultSetMetaData md = rs.getMetaData();
-    if (adapter.getDebug()) 
-      System.err.println("Completed getting metadata...");
-    
-    // Determine structure of the instances
-    int numAttributes = md.getColumnCount();
-    int [] attributeTypes = new int [numAttributes];
-    Hashtable [] nominalIndexes = new Hashtable [numAttributes];
-    FastVector [] nominalStrings = new FastVector [numAttributes];
-    for (int i = 1; i <= numAttributes; i++) {
-      /* switch (md.getColumnType(i)) {
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY:*/
-      
-      switch (adapter.translateDBColumnType(md.getColumnTypeName(i))) {
-        
-      case STRING :
-        //System.err.println("String --> nominal");
-        attributeTypes[i - 1] = Attribute.NOMINAL;
-        nominalIndexes[i - 1] = new Hashtable();
-        nominalStrings[i - 1] = new FastVector();
-        break;
-      case TEXT:
-        //System.err.println("Text --> string");
-        attributeTypes[i - 1] = Attribute.STRING;
-        nominalIndexes[i - 1] = new Hashtable();
-        nominalStrings[i - 1] = new FastVector();
-        break;
-      case BOOL:
-        //System.err.println("boolean --> nominal");
-        attributeTypes[i - 1] = Attribute.NOMINAL;
-        nominalIndexes[i - 1] = new Hashtable();
-        nominalIndexes[i - 1].put("false", new Double(0));
-        nominalIndexes[i - 1].put("true", new Double(1));
-        nominalStrings[i - 1] = new FastVector();
-        nominalStrings[i - 1].addElement("false");
-        nominalStrings[i - 1].addElement("true");
-        break;
-      case DOUBLE:
-        //System.err.println("BigDecimal --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case BYTE:
-        //System.err.println("byte --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case SHORT:
-        //System.err.println("short --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case INTEGER:
-        //System.err.println("int --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case LONG:
-        //System.err.println("long --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case FLOAT:
-        //System.err.println("float --> numeric");
-        attributeTypes[i - 1] = Attribute.NUMERIC;
-        break;
-      case DATE:
-        attributeTypes[i - 1] = Attribute.DATE;
-        break;
-      case TIME:
-        attributeTypes[i - 1] = Attribute.DATE;
-        break;
-      default:
-        //System.err.println("Unknown column type");
-        attributeTypes[i - 1] = Attribute.STRING;
-      }
-    }
-
-    // For sqlite
-    // cache column names because the last while(rs.next()) { iteration for
-    // the tuples below will close the md object:  
-    Vector<String> columnNames = new Vector<String>(); 
-    for (int i = 0; i < numAttributes; i++) {
-      columnNames.add(md.getColumnLabel(i + 1));
-    }
-
-    // Step through the tuples
-    if (adapter.getDebug()) 
-      System.err.println("Creating instances...");
-    FastVector instances = new FastVector();
-    int rowCount = 0;
-    while(rs.next()) {
-      if (rowCount % 100 == 0) {
-        if (adapter.getDebug())  {
-          System.err.print("read " + rowCount + " instances \r");
-          System.err.flush();
-        }
-      }
-      double[] vals = new double[numAttributes];
-      for(int i = 1; i <= numAttributes; i++) {
-        /*switch (md.getColumnType(i)) {
-        case Types.CHAR:
-        case Types.VARCHAR:
-        case Types.LONGVARCHAR:
-        case Types.BINARY:
-        case Types.VARBINARY:
-        case Types.LONGVARBINARY:*/
-        switch (adapter.translateDBColumnType(md.getColumnTypeName(i))) {
-        case STRING :
-          String str = rs.getString(i);
-          
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            Double index = (Double)nominalIndexes[i - 1].get(str);
-            if (index == null) {
-              index = new Double(nominalStrings[i - 1].size());
-              nominalIndexes[i - 1].put(str, index);
-              nominalStrings[i - 1].addElement(str);
-            }
-            vals[i - 1] = index.doubleValue();
-          }
-          break;
-        case TEXT:
-          String txt = rs.getString(i);
-          
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            Double index = (Double)nominalIndexes[i - 1].get(txt);
-            if (index == null) {
-
-              // Need to add one because first value in
-              // string attribute is dummy value.
-              index = new Double(nominalStrings[i - 1].size()) + 1;
-              nominalIndexes[i - 1].put(txt, index);
-              nominalStrings[i - 1].addElement(txt);
-            }
-            vals[i - 1] = index.doubleValue();
-          }
-          break;
-        case BOOL:
-          boolean boo = rs.getBoolean(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (boo ? 1.0 : 0.0);
-          }
-          break;
-        case DOUBLE:
-          //      BigDecimal bd = rs.getBigDecimal(i, 4); 
-          double dd = rs.getDouble(i);
-          // Use the column precision instead of 4?
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            //      newInst.setValue(i - 1, bd.doubleValue());
-            vals[i - 1] =  dd;
-          }
-          break;
-        case BYTE:
-          byte by = rs.getByte(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (double)by;
-          }
-          break;
-        case SHORT:
-          short sh = rs.getShort(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (double)sh;
-          }
-          break;
-        case INTEGER:
-          int in = rs.getInt(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (double)in;
-          }
-          break;
-        case LONG:
-          long lo = rs.getLong(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (double)lo;
-          }
-          break;
-        case FLOAT:
-          float fl = rs.getFloat(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            vals[i - 1] = (double)fl;
-          }
-          break;
-        case DATE:
-          Date date = rs.getDate(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            // TODO: Do a value check here.
-            vals[i - 1] = (double)date.getTime();
-          }
-          break;
-        case TIME:
-          Time time = rs.getTime(i);
-          if (rs.wasNull()) {
-            vals[i - 1] = Utils.missingValue();
-          } else {
-            // TODO: Do a value check here.
-            vals[i - 1] = (double) time.getTime();
-          }
-          break;
-        default:
-          vals[i - 1] = Utils.missingValue();
-        }
-      }
-      Instance newInst;
-      if (adapter.getSparseData()) {
-        newInst = new SparseInstance(1.0, vals);
-      } else {
-        newInst = new DenseInstance(1.0, vals);
-      }
-      instances.addElement(newInst);
-      rowCount++;
-    }
-    //disconnectFromDatabase();  (perhaps other queries might be made)
-    
-    // Create the header and add the instances to the dataset
-    if (adapter.getDebug()) 
-      System.err.println("Creating header...");
-    FastVector attribInfo = new FastVector();
-    for (int i = 0; i < numAttributes; i++) {
-      /* Fix for databases that uppercase column names */
-      // String attribName = attributeCaseFix(md.getColumnName(i + 1));
-      String attribName = adapter.attributeCaseFix(columnNames.get(i));
-      switch (attributeTypes[i]) {
-      case Attribute.NOMINAL:
-        attribInfo.addElement(new Attribute(attribName, nominalStrings[i]));
-        break;
-      case Attribute.NUMERIC:
-        attribInfo.addElement(new Attribute(attribName));
-        break;
-      case Attribute.STRING:
-        Attribute att = new Attribute(attribName, (FastVector) null);
-        attribInfo.addElement(att);
-        for (int n = 0; n < nominalStrings[i].size(); n++) {
-          att.addStringValue((String) nominalStrings[i].elementAt(n));
-        }
-        break;
-      case Attribute.DATE:
-        attribInfo.addElement(new Attribute(attribName, (String)null));
-        break;
-      default:
-        throw new Exception("Unknown attribute type");
-      }
-    }
-    Instances result = new Instances("QueryResult", attribInfo, 
-                                     instances.size());
-    for (int i = 0; i < instances.size(); i++) {
-      result.add((Instance)instances.elementAt(i));
-    }
-   
-    return result;    
   }
 
   /**
@@ -625,8 +299,274 @@ public class InstanceQuery
     ResultSet rs = getResultSet();
     if (m_Debug) 
       System.err.println("Getting metadata...");
+    ResultSetMetaData md = rs.getMetaData();
+    if (m_Debug) 
+      System.err.println("Completed getting metadata...");
+    
+    
+    // Determine structure of the instances
+    int numAttributes = md.getColumnCount();
+    int [] attributeTypes = new int [numAttributes];
+    Hashtable [] nominalIndexes = new Hashtable [numAttributes];
+    FastVector [] nominalStrings = new FastVector [numAttributes];
+    for (int i = 1; i <= numAttributes; i++) {
+      /* switch (md.getColumnType(i)) {
+      case Types.CHAR:
+      case Types.VARCHAR:
+      case Types.LONGVARCHAR:
+      case Types.BINARY:
+      case Types.VARBINARY:
+      case Types.LONGVARBINARY:*/
+      
+      switch (translateDBColumnType(md.getColumnTypeName(i))) {
+	
+      case STRING :
+	//System.err.println("String --> nominal");
+	attributeTypes[i - 1] = Attribute.NOMINAL;
+	nominalIndexes[i - 1] = new Hashtable();
+	nominalStrings[i - 1] = new FastVector();
+	break;
+      case TEXT:
+	//System.err.println("Text --> string");
+	attributeTypes[i - 1] = Attribute.STRING;
+	nominalIndexes[i - 1] = new Hashtable();
+	nominalStrings[i - 1] = new FastVector();
+	break;
+      case BOOL:
+	//System.err.println("boolean --> nominal");
+	attributeTypes[i - 1] = Attribute.NOMINAL;
+	nominalIndexes[i - 1] = new Hashtable();
+	nominalIndexes[i - 1].put("false", new Double(0));
+	nominalIndexes[i - 1].put("true", new Double(1));
+	nominalStrings[i - 1] = new FastVector();
+	nominalStrings[i - 1].addElement("false");
+	nominalStrings[i - 1].addElement("true");
+	break;
+      case DOUBLE:
+	//System.err.println("BigDecimal --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case BYTE:
+	//System.err.println("byte --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case SHORT:
+	//System.err.println("short --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case INTEGER:
+	//System.err.println("int --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case LONG:
+	//System.err.println("long --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case FLOAT:
+	//System.err.println("float --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DATE:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
+      case TIME:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
+      default:
+	//System.err.println("Unknown column type");
+	attributeTypes[i - 1] = Attribute.STRING;
+      }
+    }
 
-    Instances result = retrieveInstances(this, rs);
+    // For sqlite
+    // cache column names because the last while(rs.next()) { iteration for
+    // the tuples below will close the md object:  
+    Vector<String> columnNames = new Vector<String>(); 
+    for (int i = 0; i < numAttributes; i++) {
+      columnNames.add(md.getColumnLabel(i + 1));
+    }
+
+    // Step through the tuples
+    if (m_Debug) 
+      System.err.println("Creating instances...");
+    FastVector instances = new FastVector();
+    int rowCount = 0;
+    while(rs.next()) {
+      if (rowCount % 100 == 0) {
+        if (m_Debug)  {
+	  System.err.print("read " + rowCount + " instances \r");
+	  System.err.flush();
+        }
+      }
+      double[] vals = new double[numAttributes];
+      for(int i = 1; i <= numAttributes; i++) {
+	/*switch (md.getColumnType(i)) {
+	case Types.CHAR:
+	case Types.VARCHAR:
+	case Types.LONGVARCHAR:
+	case Types.BINARY:
+	case Types.VARBINARY:
+	case Types.LONGVARBINARY:*/
+	switch (translateDBColumnType(md.getColumnTypeName(i))) {
+	case STRING :
+	  String str = rs.getString(i);
+	  
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    Double index = (Double)nominalIndexes[i - 1].get(str);
+	    if (index == null) {
+	      index = new Double(nominalStrings[i - 1].size());
+	      nominalIndexes[i - 1].put(str, index);
+	      nominalStrings[i - 1].addElement(str);
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
+	  break;
+	case TEXT:
+	  String txt = rs.getString(i);
+	  
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    Double index = (Double)nominalIndexes[i - 1].get(txt);
+	    if (index == null) {
+	      
+              // Need to add one because first value in
+              // string attribute is dummy value.
+	      index = new Double(nominalStrings[i - 1].size()) + 1;
+	      nominalIndexes[i - 1].put(txt, index);
+	      nominalStrings[i - 1].addElement(txt);
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
+	  break;
+	case BOOL:
+	  boolean boo = rs.getBoolean(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (boo ? 1.0 : 0.0);
+	  }
+	  break;
+	case DOUBLE:
+	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
+	  double dd = rs.getDouble(i);
+	  // Use the column precision instead of 4?
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    //	    newInst.setValue(i - 1, bd.doubleValue());
+	    vals[i - 1] =  dd;
+	  }
+	  break;
+	case BYTE:
+	  byte by = rs.getByte(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (double)by;
+	  }
+	  break;
+	case SHORT:
+	  short sh = rs.getShort(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (double)sh;
+	  }
+	  break;
+	case INTEGER:
+	  int in = rs.getInt(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (double)in;
+	  }
+	  break;
+	case LONG:
+	  long lo = rs.getLong(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (double)lo;
+	  }
+	  break;
+	case FLOAT:
+	  float fl = rs.getFloat(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    vals[i - 1] = (double)fl;
+	  }
+	  break;
+	case DATE:
+          Date date = rs.getDate(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double)date.getTime();
+          }
+          break;
+	case TIME:
+          Time time = rs.getTime(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double) time.getTime();
+          }
+          break;
+	default:
+	  vals[i - 1] = Instance.missingValue();
+	}
+      }
+      Instance newInst;
+      if (m_CreateSparseData) {
+	newInst = new SparseInstance(1.0, vals);
+      } else {
+	newInst = new Instance(1.0, vals);
+      }
+      instances.addElement(newInst);
+      rowCount++;
+    }
+    //disconnectFromDatabase();  (perhaps other queries might be made)
+    
+    // Create the header and add the instances to the dataset
+    if (m_Debug) 
+      System.err.println("Creating header...");
+    FastVector attribInfo = new FastVector();
+    for (int i = 0; i < numAttributes; i++) {
+      /* Fix for databases that uppercase column names */
+      // String attribName = attributeCaseFix(md.getColumnName(i + 1));
+      String attribName = attributeCaseFix(columnNames.get(i));
+      switch (attributeTypes[i]) {
+      case Attribute.NOMINAL:
+	attribInfo.addElement(new Attribute(attribName, nominalStrings[i]));
+	break;
+      case Attribute.NUMERIC:
+	attribInfo.addElement(new Attribute(attribName));
+	break;
+      case Attribute.STRING:
+	Attribute att = new Attribute(attribName, (FastVector) null);
+	attribInfo.addElement(att);
+	for (int n = 0; n < nominalStrings[i].size(); n++) {
+	  att.addStringValue((String) nominalStrings[i].elementAt(n));
+	}
+	break;
+      case Attribute.DATE:
+	attribInfo.addElement(new Attribute(attribName, (String)null));
+	break;
+      default:
+	throw new Exception("Unknown attribute type");
+      }
+    }
+    Instances result = new Instances("QueryResult", attribInfo, 
+				     instances.size());
+    for (int i = 0; i < instances.size(); i++) {
+      result.add((Instance)instances.elementAt(i));
+    }
     close(rs);
    
     return result;

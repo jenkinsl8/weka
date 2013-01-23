@@ -1,16 +1,17 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
@@ -85,7 +86,7 @@ import java.util.Vector;
  * @author Sham Kakade (original C++ code)
  * @author John Langford (original C++ code)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class CoverTree
   extends NearestNeighbourSearch
@@ -98,7 +99,7 @@ public class CoverTree
    * class representing a node of the cover tree.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.4 $
    */
   public class CoverTreeNode
     implements Serializable, RevisionHandler {
@@ -172,7 +173,7 @@ public class CoverTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
 
@@ -181,7 +182,7 @@ public class CoverTree
    * point p.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.4 $
    */
   private class DistanceNode
     implements RevisionHandler {
@@ -211,7 +212,7 @@ public class CoverTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
 
@@ -308,7 +309,7 @@ public class CoverTree
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+    Vector newVector = new Vector();
 
     newVector.addElement(new Option(
 	"\tSet base of the expansion constant\n"
@@ -454,7 +455,7 @@ public class CoverTree
       } else
         far_set.push(point_set.element(i)); // point_set[i]);
     }
-    List<DistanceNode> l = new java.util.LinkedList<DistanceNode>();
+    List l = new java.util.LinkedList();
     for (int i = 0; i < new_index; i++)
       l.add(point_set.element(i));
     //removing all and adding only the near points
@@ -488,7 +489,7 @@ public class CoverTree
       } else
         point_set.set(new_index++, point_set.element(i));
     }
-    List<DistanceNode> l = new java.util.LinkedList<DistanceNode>();
+    List l = new java.util.LinkedList();
     for (int i = 0; i < new_index; i++)
       l.add(point_set.element(i));
     point_set.clear();
@@ -682,7 +683,7 @@ public class CoverTree
    * i.e. the minimum size of the heap is k.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.4 $
    */
   protected class MyHeap
     implements RevisionHandler {
@@ -888,7 +889,7 @@ public class CoverTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
   
@@ -896,7 +897,7 @@ public class CoverTree
    * A class for storing data about a neighboring instance.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.4 $
    */
   protected class MyHeapElement
     implements RevisionHandler {
@@ -925,7 +926,7 @@ public class CoverTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
   
@@ -933,7 +934,7 @@ public class CoverTree
    * stores a CoverTreeNode and its distance to the current query node.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision$
+   * @version $Revision: 1.4 $
    */
   private class d_node
     implements RevisionHandler {
@@ -960,7 +961,7 @@ public class CoverTree
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   };
 
@@ -1831,13 +1832,13 @@ public class CoverTree
    * @return 		an enumeration of the measure names
    */
   public Enumeration enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+    Vector newVector = new Vector();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if(m_Stats!=null) {
       for(Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
-        newVector.addElement((String)e.nextElement());
+        newVector.addElement(e.nextElement());
       }
     }
     return newVector.elements();
@@ -1941,7 +1942,7 @@ public class CoverTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /** 

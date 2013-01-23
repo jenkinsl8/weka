@@ -1,38 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    BinC45Split.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
-
-import java.util.Enumeration;
 
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
+import java.util.Enumeration;
+
 /**
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.14 $
  */
 public class BinC45Split
   extends ClassifierSplitModel {
@@ -45,9 +46,6 @@ public class BinC45Split
 
   /** Minimum number of objects in a split.   */ 
   private int m_minNoObj;         
-
-  /** Use MDL correction? */
-  private boolean m_useMDLcorrection;         
 
   /** Value of split point. */
   private double m_splitPoint;  
@@ -70,8 +68,7 @@ public class BinC45Split
   /**
    * Initializes the split model.
    */
-  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights,
-                     boolean useMDLcorrection) {
+  public BinC45Split(int attIndex,int minNoObj,double sumOfWeights){
 
     // Get index of attribute to split on.
     m_attIndex = attIndex;
@@ -81,9 +78,6 @@ public class BinC45Split
 
     // Set sum of weights;
     m_sumOfWeights = sumOfWeights;
-
-    // Whether to use the MDL correction for numeric attributes
-    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -116,15 +110,6 @@ public class BinC45Split
   public final int attIndex(){
 
     return m_attIndex;
-  }
-  
-  /**
-   * Returns the split point (numeric attribute only).
-   * 
-   * @return the split point used for a test on a numeric attribute
-   */
-  public double splitPoint() {
-    return m_splitPoint;
   }
   
   /**
@@ -298,9 +283,7 @@ public class BinC45Split
       return;
     
     // Compute modified information gain for best split.
-    if (m_useMDLcorrection) {
-      m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
-    }
+    m_infoGain = m_infoGain-(Utils.log2(index)/m_sumOfWeights);
     if (Utils.smOrEq(m_infoGain,0))
       return;
     
@@ -501,6 +484,6 @@ public class BinC45Split
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.14 $");
   }
 }

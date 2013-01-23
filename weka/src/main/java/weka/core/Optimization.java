@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Optimization.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,8 +24,6 @@ package weka.core;
 
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-
-import weka.core.matrix.Matrix;
 
 /**
  * Implementation of Active-sets method with BFGS update to solve optimization
@@ -142,7 +141,7 @@ import weka.core.matrix.Matrix;
  * No.126, pp 505-535. <p/>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.9 $ 
  * @see #getTechnicalInformation()
  */
 public abstract class Optimization
@@ -167,10 +166,10 @@ public abstract class Optimization
     private double m_Slope;
     
     /** Test if zero step in lnsrch */
-    protected boolean m_IsZeroStep = false;
+    private boolean m_IsZeroStep = false;
     
     /** Used when iteration overflow occurs */
-    protected double[] m_X;
+    private double[] m_X;
     
     /** Compute machine precision */
     protected static double m_Epsilon, m_Zero; 
@@ -552,9 +551,6 @@ public abstract class Optimization
 		    if(!isFixed[i])
 			newSlope += newGrad[i]*direct[i];
 
-                if (m_Debug)
-                  System.err.println("newSlope: " + newSlope);
-
 		if(newSlope >= m_BETA*m_Slope){ // Beta condition: ensure pos. defnty.	
 		    if(m_Debug)		
 			System.err.println("Increasing derivatives (beta condition): "); 	
@@ -847,8 +843,8 @@ public abstract class Optimization
 	Matrix L = new Matrix(l, l);  // Lower triangle of Cholesky factor 
 	double[] D = new double[l];   // Diagonal of Cholesky factor
 	for(int i=0; i<l; i++){
-          //	    L.setRow(i, new double[l]);  Not necessary
-	    L.set(i,i,1.0);
+	    L.setRow(i, new double[l]);
+	    L.setElement(i,i,1.0);
 	    D[i] = 1.0;
 	    direct[i] = -grad[i];
 	    sum += grad[i]*grad[i];
@@ -879,15 +875,10 @@ public abstract class Optimization
 	    
 	    if(m_IsZeroStep){ // Zero step, simply delete rows/cols of D and L
 		for(int f=0; f<wsBdsIndx.size(); f++){
-                    int[] idx = new int[1];
-                    //		    int idx=wsBdsIndx.elementAt(f);
-                    idx[0] = wsBdsIndx.elementAt(f);
-                    L.setMatrix(idx, 0, l - 1, new Matrix(1, l));
-                    //		    L.setRow(idx, new double[l]);
-                    L.setMatrix(0, l - 1, idx, new Matrix(l, 1));
-                    //		    L.setColumn(idx, new double[l]);
-                    D[idx[0]] = 0.0;
-                    //		    D[idx] = 0.0;
+		    int idx=wsBdsIndx.elementAt(f);
+		    L.setRow(idx, new double[l]);
+		    L.setColumn(idx, new double[l]);
+		    D[idx] = 0.0;
 		}		
 		grad = evaluateGradient(x);
 		step--;
@@ -1028,7 +1019,7 @@ public abstract class Optimization
 						   " from bound "+ 
 						   nwsBounds[1][freeIndx]);
 			}			
-			L.set(freeIndx, freeIndx, 1.0);
+			L.setElement(freeIndx, freeIndx, 1.0);
 			D[freeIndx] = 1.0;
 			isUpdate = false;			
 		    }			
@@ -1062,7 +1053,7 @@ public abstract class Optimization
 		
 		for(int j=k; j<l; j++){ // Lower triangle	
 		    if(!isFixed[j] && !isFixed[k])
-			LD.set(j, k, L.get(j,k)*D[k]);
+			LD.setElement(j, k, L.getElement(j,k)*D[k]);
 		}		
 	    }	    	
 	    
@@ -1117,14 +1108,14 @@ public abstract class Optimization
 	    while((j<n)&&isZero[j]){result[j]=0.0; j++;} // go to the first row
 	    
 	    if(j<n){
-		result[j] = b[j]/t.get(j,j);
+		result[j] = b[j]/t.getElement(j,j);
 		
 		for(; j<n; j++){
 		    if(!isZero[j]){
 			double numerator=b[j];
 			for(int k=0; k<j; k++)
-			    numerator -= t.get(j,k)*result[k];
-			result[j] = numerator/t.get(j,j);
+			    numerator -= t.getElement(j,k)*result[k];
+			result[j] = numerator/t.getElement(j,j);
 		    }
 		    else 
 			result[j] = 0.0;
@@ -1136,14 +1127,14 @@ public abstract class Optimization
 	    while((j>=0)&&isZero[j]){result[j]=0.0; j--;} // go to the last row
 	    
 	    if(j>=0){
-		result[j] = b[j]/t.get(j,j);
+		result[j] = b[j]/t.getElement(j,j);
 		
 		for(; j>=0; j--){
 		    if(!isZero[j]){
 			double numerator=b[j];
 			for(int k=j+1; k<n; k++)
-			    numerator -= t.get(k,j)*result[k];
-			result[j] = numerator/t.get(j,j);
+			    numerator -= t.getElement(k,j)*result[k];
+			result[j] = numerator/t.getElement(j,j);
 		    }
 		    else 
 			result[j] = 0.0;
@@ -1193,12 +1184,12 @@ public abstract class Optimization
 		t *= d/dbarj;
 		for(int r=j+1; r<n; r++){
 		    if(!isFixed[r]){
-			double l=L.get(r, j);
+			double l=L.getElement(r, j);
 			vp[r] -= p*l;
-			L.set(r, j, l+b*vp[r]);
+			L.setElement(r, j, l+b*vp[r]);
 		    }
 		    else
-		    	L.set(r, j, 0.0);
+		    	L.setElement(r, j, 0.0);
 		}
 	    }
 	}
@@ -1249,12 +1240,12 @@ public abstract class Optimization
 		
 		for(int r=j+1; r<n; r++){
 		    if(!isFixed[r]){
-			double l=L.get(r, j);
+			double l=L.getElement(r, j);
 			vp[r] -= P[j]*l;
-			L.set(r, j, l+b*vp[r]);
+			L.setElement(r, j, l+b*vp[r]);
 		    }
 		    else
-		    	L.set(r, j, 0.0);
+		    	L.setElement(r, j, 0.0);
 		}
 	    }
 	}	
@@ -1263,7 +1254,7 @@ public abstract class Optimization
   /**
    * Implements a simple dynamic array for ints.
    */
-  protected class DynamicIntArray
+  private class DynamicIntArray
     implements RevisionHandler {
 
     /** The int array. */
@@ -1397,7 +1388,7 @@ public abstract class Optimization
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.9 $");
     }
   }
 }

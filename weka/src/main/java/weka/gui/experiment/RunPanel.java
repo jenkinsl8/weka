@@ -1,25 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RunPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.experiment.RemoteExperiment;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
+import weka.gui.LogPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -40,14 +49,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.experiment.RemoteExperiment;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.gui.LogPanel;
-
 /** 
  * This panel controls the running of an experiment.
  *
@@ -62,13 +63,13 @@ public class RunPanel
   private static final long serialVersionUID = 1691868018596872051L;
 
   /** The message displayed when no experiment is running */
-  protected static final String NOT_RUNNING = "Not running";
+  protected static final String NOT_RUNNING = Messages.getInstance().getString("RunPanel_NOT_RUNNING_Text");
 
   /** Click to start running the experiment */
-  protected JButton m_StartBut = new JButton("Start");
+  protected JButton m_StartBut = new JButton(Messages.getInstance().getString("RunPanel_StartBut_JButton_Text"));
 
   /** Click to signal the running experiment to halt */
-  protected JButton m_StopBut = new JButton("Stop");
+  protected JButton m_StopBut = new JButton(Messages.getInstance().getString("RunPanel_StopBut_JButton_Text"));
 
   protected LogPanel m_Log = new LogPanel();
 
@@ -98,15 +99,15 @@ public class RunPanel
 
       // Create a full copy using serialization
       if (exp == null) {
-	System.err.println("Null experiment!!!");
+	System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Error_Text_First"));
       } else {
-	System.err.println("Running experiment: " + exp.toString());
+	System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Error_Text_Second") + exp.toString());
       }
-      System.err.println("Writing experiment copy");
+      System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Error_Text_Third"));
       SerializedObject so = new SerializedObject(exp);
-      System.err.println("Reading experiment copy");
+      System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Error_Text_Fourth"));
       m_ExpCopy = (Experiment) so.getObject();
-      System.err.println("Made experiment copy");
+      System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Error_Text_Fifth"));
     }
 
     public void abortExperiment() {
@@ -131,7 +132,7 @@ public class RunPanel
       try {
 	if (m_ExpCopy instanceof RemoteExperiment) {
 	  // add a listener
-	  System.err.println("Adding a listener");
+	  System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_Error_Text"));
 	  ((RemoteExperiment)m_ExpCopy).
 	    addRemoteExperimentListener(new RemoteExperimentListener() {
 		public void remoteExperimentStatus(RemoteExperimentEvent e) {
@@ -150,15 +151,15 @@ public class RunPanel
 		}
 	      });
 	}
-	logMessage("Started");
-	statusMessage("Initializing...");
+	logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_First"));
+	statusMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_StatusMessage_Text_First"));
 	m_ExpCopy.initialize();
 	int errors = 0;
 	if (!(m_ExpCopy instanceof RemoteExperiment)) {
-	  statusMessage("Iterating...");
+	  statusMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_StatusMessage_Text_Second"));
 	  while (m_RunThread != null && m_ExpCopy.hasMoreIterations()) {
 	    try {
-	      String current = "Iteration:";
+	      String current = Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_Current_Text_First");
 	      if (m_ExpCopy.getUsePropertyIterator()) {
 		int cnum = m_ExpCopy.getCurrentPropertyNumber();
 		String ctype = m_ExpCopy.getPropertyArray().getClass().getComponentType().getName();
@@ -174,8 +175,8 @@ public class RunPanel
 	      String dname = ((File) m_ExpCopy.getDatasets()
 			      .elementAt(m_ExpCopy.getCurrentDatasetNumber()))
 		.getName();
-	      current += " Dataset=" + dname
-		+ " Run=" + (m_ExpCopy.getCurrentRunNumber());
+	      current += Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_Current_Text_Second") + dname
+		+ Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_Current_Text_Third")  + (m_ExpCopy.getCurrentRunNumber());
 	      statusMessage(current);
 	      m_ExpCopy.nextIteration();
 	    } catch (Exception ex) {
@@ -190,21 +191,21 @@ public class RunPanel
 	      }
 	    }
 	  }
-	  statusMessage("Postprocessing...");
+	  statusMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_StatusMessage_Text_Third"));
 	  m_ExpCopy.postProcess();
 	  if (m_RunThread == null) {
-	    logMessage("Interrupted");
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Third"));
 	  } else {
-	    logMessage("Finished");
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fourth"));
 	  }
 	  if (errors == 1) {
-	    logMessage("There was " + errors + " error");
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_Front") + errors + " " + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Fifth_End"));
 	  } else {
-	    logMessage("There were " + errors + " errors");
+	    logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_Front") + errors + " " + Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_LogMessage_Text_Sixth_End"));
 	  }
 	  statusMessage(NOT_RUNNING);
 	} else {
-	  statusMessage("Remote experiment running...");
+	  statusMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_StatusMessage_Text_Fourth"));
 	  ((RemoteExperiment)m_ExpCopy).runExperiment();
 	}
       } catch (Exception ex) {
@@ -219,7 +220,7 @@ public class RunPanel
 	  m_RunThread = null;
 	  m_StartBut.setEnabled(true);
 	  m_StopBut.setEnabled(false);
-	  System.err.println("Done...");
+	  System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Run_Error_Text"));
 	}
       }
     }
@@ -309,17 +310,16 @@ public class RunPanel
             m_RunThread.start();
           } catch (Exception ex) {
             ex.printStackTrace();
-            logMessage("Problem creating experiment copy to run: "
+            logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_ActionPerformed_LogMessage_Text_First")
                 + ex.getMessage());
           }
         }
       }
     } else if (e.getSource() == m_StopBut) {
       m_StopBut.setEnabled(false);
-      logMessage("User aborting experiment. ");
+      logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_ActionPerformed_LogMessage_Text_Second"));
       if (m_Exp instanceof RemoteExperiment) {
-	logMessage("Waiting for remote tasks to "
-		   +"complete...");
+	logMessage(Messages.getInstance().getString("RunPanel_ExperimentRunner_ActionPerformed_LogMessage_Text_Third"));
       }
       ((ExperimentRunner)m_RunThread).abortExperiment();
       // m_RunThread.stop() ??
@@ -358,7 +358,7 @@ public class RunPanel
       boolean readExp = Utils.getFlag('l', args);
       final String expFile = Utils.getOption('f', args);
       if (readExp && (expFile.length() == 0)) {
-	throw new Exception("A filename must be given with the -f option");
+	throw new Exception(Messages.getInstance().getString("RunPanel_ExperimentRunner_Main_Exception_Text"));
       }
       Experiment exp = null;
       if (readExp) {
@@ -375,15 +375,15 @@ public class RunPanel
       } else {
 	exp = new Experiment();
       }
-      System.err.println("Initial Experiment:\n" + exp.toString());
-      final JFrame jf = new JFrame("Run Weka Experiment");
+      System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Main_Error_Text_First") + exp.toString());
+      final JFrame jf = new JFrame(Messages.getInstance().getString("RunPanel_ExperimentRunner_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final RunPanel sp = new RunPanel(exp);
       //sp.setBorder(BorderFactory.createTitledBorder("Setup"));
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
-	  System.err.println("\nExperiment Configuration\n"
+	  System.err.println(Messages.getInstance().getString("RunPanel_ExperimentRunner_Main_Error_Text_Second")
 			     + sp.m_Exp.toString());
 	  jf.dispose();
 	  System.exit(0);

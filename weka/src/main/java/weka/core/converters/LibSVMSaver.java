@@ -1,39 +1,40 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * LibSVMSaver.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, NZ
+ * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
 
 package weka.core.converters;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -103,13 +104,13 @@ public class LibSVMSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option>      result;
+    Vector      result;
     
-    result = new Vector<Option>();
+    result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(
         new Option(
@@ -127,10 +128,10 @@ public class LibSVMSaver
    */
   public String[] getOptions(){
     int       	i;
-    Vector<String>    	result;
+    Vector    	result;
     String[]  	options;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     result.add("-c");
     result.add(getClassIndex());
@@ -165,7 +166,6 @@ public class LibSVMSaver
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-    
 
     tmpStr = Utils.getOption('c', options);
     if (tmpStr.length() != 0)

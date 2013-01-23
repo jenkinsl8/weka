@@ -1,24 +1,3 @@
-/*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/*
- *    MarginCalculator.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
- *
- */
-
 package weka.classifiers.bayes.net;
 
 import weka.classifiers.bayes.BayesNet;
@@ -58,6 +37,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 *	 Note that a connected network is assumed. 
 	 *	 Unconnected networks may give unexpected results.
 	 * @param bayesNet
+	 * @return root of junction tree
 	 */
 	public void calcMargins(BayesNet bayesNet) throws Exception {
 		//System.out.println(bayesNet.toString());
@@ -256,7 +236,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 		
 		/** marginalize junciontTreeNode node over all nodes outside the separator set
 		 * 
-		 * @param node one of the neighboring junciont tree nodes of this separator
+		 * @param node: one of the neighboring junciont tree nodes of this separator
 		 */
 		public double [] update(JunctionTreeNode node) {
 			if (node.m_P == null) {
@@ -294,7 +274,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 		 * @return		the revision
 		 */
 		public String getRevision() {
-		  return RevisionUtils.extract("$Revision$");
+		  return RevisionUtils.extract("$Revision: 1.2 $");
 		}
 
 	} // class JunctionTreeSeparator
@@ -654,7 +634,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 		 * @return		the revision
 		 */
 		public String getRevision() {
-		  return RevisionUtils.extract("$Revision$");
+		  return RevisionUtils.extract("$Revision: 1.2 $");
 		}
 		
 	} // class JunctionTreeNode
@@ -789,7 +769,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 * adjacency matrix representation for a Bayes Network, effecively
 	 * converting the directed acyclic graph to an undirected graph.
 	 * 
-	 * @param bayesNet
+	 * @param bayesNet:
 	 *            Bayes Network to process
 	 * @return adjacencies in boolean matrix format
 	 */
@@ -827,9 +807,9 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 * 
 	 * Side effect: input matrix is used as output
 	 * 
-	 * @param order
+	 * @param order:
 	 *            node ordering
-	 * @param bAdjacencyMatrix
+	 * @param bAdjacencyMatrix:
 	 *            boolean matrix representing the graph
 	 * @return boolean matrix representing the graph with fill ins
 	 */
@@ -936,7 +916,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision$");
+	  return RevisionUtils.extract("$Revision: 1.2 $");
 	}
 	
 	public static void main(String[] args) {

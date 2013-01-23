@@ -1,26 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RunNumberPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui.experiment;
+
+import weka.experiment.Experiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -40,8 +43,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import weka.experiment.Experiment;
-
 
 
 /** 
@@ -58,10 +59,10 @@ public class RunNumberPanel
   private static final long serialVersionUID = -1644336658426067852L;
 
   /** Configures the lower run number */
-  protected JTextField m_LowerText = new JTextField("1");
+  protected JTextField m_LowerText = new JTextField(Messages.getInstance().getString("RunNumberPanel_LowerText_JTextField_Text"));
 
   /** Configures the upper run number */
-  protected JTextField m_UpperText = new JTextField("10");
+  protected JTextField m_UpperText = new JTextField(Messages.getInstance().getString("RunNumberPanel_UpperText_JTextField_Text"));
 
   /** The experiment being configured */
   protected Experiment m_Exp;
@@ -98,16 +99,16 @@ public class RunNumberPanel
 
     // Set the GUI layout
     setLayout(new GridLayout(1,2));
-    setBorder(BorderFactory.createTitledBorder("Runs"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("RunNumberPanel_SetBorder_BorderFactoryCreateTitledBorder_Text")));
     Box b1 = new Box(BoxLayout.X_AXIS);
     b1.add(Box.createHorizontalStrut(10));
-    b1.add(new JLabel("From:", SwingConstants.RIGHT));
+    b1.add(new JLabel(Messages.getInstance().getString("RunNumberPanel_B1_JLabel_Text"), SwingConstants.RIGHT));
     b1.add(Box.createHorizontalStrut(5));
     b1.add(m_LowerText);
     add(b1);
     Box b2 = new Box(BoxLayout.X_AXIS);
     b2.add(Box.createHorizontalStrut(10));
-    b2.add(new JLabel("To:", SwingConstants.RIGHT));
+    b2.add(new JLabel(Messages.getInstance().getString("RunNumberPanel_B2_JLabel_Text"), SwingConstants.RIGHT));
     b2.add(Box.createHorizontalStrut(5));
     b2.add(m_UpperText);
     add(b2);
@@ -176,7 +177,7 @@ public class RunNumberPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Dataset List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("RunNumberPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(new RunNumberPanel(new Experiment()),
 			      BorderLayout.CENTER);

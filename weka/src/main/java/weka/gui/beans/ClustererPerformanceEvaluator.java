@@ -1,32 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ClustererPerformanceEvaluator.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.Clusterer;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
 
 /**
  * A bean that evaluates the performance of batch trained clusterers
@@ -88,7 +89,7 @@ public class ClustererPerformanceEvaluator
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Evaluate the performance of batch trained clusterers.";
+    return Messages.getInstance().getString("ClustererPerformanceEvaluator_GlobalInfo_Text");
   }
 
   /**
@@ -119,8 +120,8 @@ public class ClustererPerformanceEvaluator
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
 		    m_logger.statusMessage(statusMessagePrefix()
-					   +"Evaluating ("+ce.getSetNumber()
-					   +")...");
+					   + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_StatusMessage_Text_First") + ce.getSetNumber()
+					   + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_StatusMessage_Text_Second"));
 		  }
 		  m_visual.setAnimated();
                   if(ce.getTestSet().getDataSet().classIndex() != -1 && ce.getTestSet().getDataSet().classAttribute().isNumeric()){
@@ -137,22 +138,23 @@ public class ClustererPerformanceEvaluator
 					textTitle.length());
                   String test;
                   if(ce.getTestOrTrain() == 0)
-                      test = "test";
+                      test = Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_Test_Text_First");
                   else
-                      test = "training";
-		  String resultT = "=== Evaluation result for "+test+" instances ===\n\n"
-		    + "Scheme: " + textTitle + "\n"
-		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
+                      test = Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_Test_Text_Second");
+		  String resultT = Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_ResultT_Text_First") + test 
+		  	+ Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_ResultT_Text_Second") 
+		    + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_ResultT_Text_Third") + textTitle 
+		    + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_ResultT_Text_Fourth") + ce.getTestSet().getDataSet().relationName()
 		    + "\n\n" + m_eval.clusterResultsToString();
                   if(numericClass)
-                      resultT = resultT + "\n\nNo class based evaluation possible. Class attribute has to be nominal.";
+                      resultT = resultT + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_ResultT_Text_Fifth");
 		  TextEvent te = 
 		    new TextEvent(ClustererPerformanceEvaluator.this, 
 				  resultT,
 				  textTitle);
 		  notifyTextListeners(te);
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
+		    m_logger.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_StatusMessage_Text_Third"));
 		  }
 		}
 	      } catch (Exception ex) {
@@ -160,10 +162,10 @@ public class ClustererPerformanceEvaluator
 	        ClustererPerformanceEvaluator.this.stop();
 	        if (m_logger != null) {
 	          m_logger.statusMessage(statusMessagePrefix()
-	              + "ERROR (see log for details");
-	          m_logger.logMessage("[ClustererPerformanceEvaluator] " 
+	              + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_StatusMessage_Text_Fourth"));
+	          m_logger.logMessage(Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_LogMessage_Text_First")
 	              + statusMessagePrefix()
-	              + " problem while evaluating clusterer. " + ex.getMessage());
+	              + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_LogMessage_Text_Second") + ex.getMessage());
 	        }
 		ex.printStackTrace();
 	      } finally {
@@ -172,10 +174,10 @@ public class ClustererPerformanceEvaluator
 		m_evaluateThread = null;
 		if (isInterrupted()) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("[" + getCustomName() 
-		        + "] Evaluation interrupted!");
+		    m_logger.logMessage(Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_LogMessage_Text_Third") + getCustomName() 
+		        + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_LogMessage_Text_Fourth"));
 		    m_logger.statusMessage(statusMessagePrefix() 
-		        + "INTERRUPTED");
+		        + Messages.getInstance().getString("ClustererPerformanceEvaluator_AcceptClusterer_LogMessage_Text_Fifth"));
 		  }
 		}
 		block(false);
@@ -272,7 +274,7 @@ public class ClustererPerformanceEvaluator
       throw new 
 	IllegalArgumentException(request
 
-		    + " not supported (ClustererPerformanceEvaluator)");
+		    + Messages.getInstance().getString("ClustererPerformanceEvaluator_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 

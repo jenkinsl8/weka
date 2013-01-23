@@ -1,38 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    BinC45ModelSelection.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
-
-import java.util.Enumeration;
 
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 
+import java.util.Enumeration;
+
 /**
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public class BinC45ModelSelection
   extends ModelSelection {
@@ -42,9 +43,6 @@ public class BinC45ModelSelection
 
   /** Minimum number of instances in interval. */
   private int m_minNoObj;               
-
-  /** Use MDL correction? */
-  private boolean m_useMDLcorrection;         
 
   /** The FULL training dataset. */
   private Instances m_allData; 
@@ -56,14 +54,10 @@ public class BinC45ModelSelection
    * at least two subsets induced by split
    * @param allData FULL training dataset (necessary for selection of
    * split points).  
-   * @param useMDLcorrection whether to use MDL adjustement when
-   * finding splits on numeric attributes
    */
-  public BinC45ModelSelection(int minNoObj,Instances allData,
-                             boolean useMDLcorrection){
+  public BinC45ModelSelection(int minNoObj,Instances allData){
     m_minNoObj = minNoObj;
     m_allData = allData;
-    m_useMDLcorrection = useMDLcorrection;
   }
 
   /**
@@ -124,7 +118,7 @@ public class BinC45ModelSelection
 	if (i != (data).classIndex()){
 	  
 	  // Get models for current attribute.
-	  currentModel[i] = new BinC45Split(i,m_minNoObj,sumOfWeights,m_useMDLcorrection);
+	  currentModel[i] = new BinC45Split(i,m_minNoObj,sumOfWeights);
 	  currentModel[i].buildClassifier(data);
 	  
 	  // Check if useful split for current attribute
@@ -194,6 +188,6 @@ public class BinC45ModelSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }

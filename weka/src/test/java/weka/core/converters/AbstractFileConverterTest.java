@@ -1,16 +1,17 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
@@ -33,31 +34,19 @@ import java.io.FileWriter;
  * Abstract Test class for file converters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractFileConverterTest 
   extends AbstractConverterTest {
   
-  /** the filename used for the data in ARFF format. */
+  /** the filename used for the data in ARFF format */
   protected String m_SourceFilename;
   
-  /** the filename used for loading/saving in the export file format. */
+  /** the filename used for loading/saving in the export file format */
   protected String m_ExportFilename;
 
-  /** the command line options. */
+  /** the command line options */
   protected String[] m_CommandlineOptions;
-  
-  /** the maximum different for attribute values. */
-  protected double m_MaxDiffValues;
-  
-  /** the maximum different for attribute weights. */
-  protected double m_MaxDiffWeights;
-  
-  /** whether to check the header when comparing datasets. */
-  protected boolean m_CheckHeader;
-  
-  /** whether to compare the attribute values as string. */
-  protected boolean m_CompareValuesAsString;
   
   /**
    * Constructs the <code>AbstractFileConverterTest</code>. Called by
@@ -70,9 +59,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * returns a filename in ARFF format which can be used for loading and saving.
-   * 
-   * @return		the filename
+   * returns a filename in ARFF format which can be used for loading and saving
    */
   protected String getSourceFilename() {
     String	result;
@@ -94,7 +81,7 @@ public abstract class AbstractFileConverterTest
   
   /**
    * returns a filename in the export format which can be used for 
-   * loading and saving.
+   * loading and saving
    * 
    * @return the filename
    */
@@ -119,7 +106,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * returns the command line options, either for the loader or the saver.
+   * returns the command line options, either for the loader or the saver
    * 
    * @param loader	if true the options for the loader will be returned,
    * 			otherwise the ones for the saver
@@ -142,10 +129,8 @@ public abstract class AbstractFileConverterTest
   protected void compareDatasets(Instances data1, Instances data2)
     throws Exception {
     
-    if (m_CheckHeader) {
-      if (!data2.equalHeaders(data1)) {
-	throw new Exception("header has been modified\n" + data2.equalHeadersMsg(data1));
-      }
+    if (!data2.equalHeaders(data1)) {
+      throw new Exception("header has been modified");
     }
     if (!(data2.numInstances() == data1.numInstances())) {
       throw new Exception("number of instances has changed");
@@ -158,18 +143,10 @@ public abstract class AbstractFileConverterTest
           if (!copy.isMissing(j)) {
             throw new Exception("instances have changed");
           }
-        } else {
-          if (m_CompareValuesAsString) {
-            if (!orig.toString(j).equals(copy.toString(j))) {
-              throw new Exception("instances have changed");
-            }
-          } else {
-            if (Math.abs(orig.value(j) - copy.value(j)) > m_MaxDiffValues) {
-              throw new Exception("instances have changed");
-            }
-          }
+        } else if (orig.value(j) != copy.value(j)) {
+          throw new Exception("instances have changed");
         }
-        if (Math.abs(orig.weight() - copy.weight()) > m_MaxDiffWeights) {
+        if (orig.weight() != copy.weight()) {
           throw new Exception("instance weights have changed");
         }	  
       }
@@ -187,13 +164,6 @@ public abstract class AbstractFileConverterTest
     
     super.setUp();
     
-    // how to compare datasets
-    // see compareDatasets(Instances,Instances)
-    m_MaxDiffValues         = 0.0;
-    m_MaxDiffWeights        = 0.0;
-    m_CheckHeader           = true;
-    m_CompareValuesAsString = false;
-    
     m_SourceFilename = getSourceFilename();
     m_ExportFilename = getExportFilename();
     
@@ -206,9 +176,7 @@ public abstract class AbstractFileConverterTest
   }
 
   /** 
-   * Called by JUnit after each test method.
-   * 
-   * @throws Exception	if fails
+   * Called by JUnit after each test method
    */
   protected void tearDown() throws Exception {
     File 	file;
@@ -228,7 +196,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * test the batch saving/loading (via setFile(File)).
+   * test the batch saving/loading (via setFile(File))
    */
   public void testBatch() {
     Instances		data;
@@ -260,7 +228,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * test the incremental loading (via setFile(File)).
+   * test the incremental loading (via setFile(File))
    */
   public void testIncrementalLoader() {
     Instance	temp;
@@ -302,7 +270,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * test the incremental save (via setFile(File)).
+   * test the incremental save (via setFile(File))
    */
   public void testIncrementalSaver() {
     int 	i;
@@ -340,7 +308,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * tests the commandline operation of the saver.
+   * tests the commandline operation of the saver
    */
   public void testSaverCommandlineArgs() {
     String[]	options;
@@ -357,7 +325,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * tests whether a URL can be loaded (via setURL(URL)).
+   * tests whether a URL can be loaded (via setURL(URL))
    */
   public void testURLSourcedLoader() {
     Instances	data;
@@ -392,7 +360,7 @@ public abstract class AbstractFileConverterTest
   }
   
   /**
-   * tests whether data can be loaded via setSource() with a file stream.
+   * tests whether data can be loaded via setSource() with a file stream
    */
   public void testLoaderWithStream() {
     Instances	data;

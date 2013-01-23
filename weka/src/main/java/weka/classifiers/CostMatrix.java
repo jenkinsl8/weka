@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CostMatrix.java
- *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -168,7 +169,8 @@ public class CostMatrix implements Serializable, RevisionHandler {
     }
 
     if (size() != data.numClasses()) {
-      throw new Exception("Misclassification cost matrix has wrong format!");
+      throw new Exception("Misclassification cost matrix has "
+          + "wrong format!");
     }
 
     // are there any non-fixed, per-instance costs defined in the matrix?
@@ -630,56 +632,6 @@ public class CostMatrix implements Serializable, RevisionHandler {
   }
 
   /**
-   * creates a matrix from the given Matlab string.
-   * 
-   * @param matlab the matrix in matlab format
-   * @return the matrix represented by the given string
-   * @see #toMatlab()
-   */
-  public static CostMatrix parseMatlab(String matlab) throws Exception {
-    StringTokenizer tokRow;
-    StringTokenizer tokCol;
-    int rows;
-    int cols;
-    CostMatrix result;
-    String cells;
-
-    // get content
-    cells = matlab.substring(matlab.indexOf("[") + 1, matlab.indexOf("]"))
-        .trim();
-
-    // determine dimenions
-    tokRow = new StringTokenizer(cells, ";");
-    rows = tokRow.countTokens();
-    tokCol = new StringTokenizer(tokRow.nextToken(), " ");
-    cols = tokCol.countTokens();
-
-    // fill matrix
-    result = new CostMatrix(rows);
-    tokRow = new StringTokenizer(cells, ";");
-    rows = 0;
-    while (tokRow.hasMoreTokens()) {
-      tokCol = new StringTokenizer(tokRow.nextToken(), " ");
-      cols = 0;
-      while (tokCol.hasMoreTokens()) {
-        // is it a number
-        String current = tokCol.nextToken();
-        try {
-          double val = Double.parseDouble(current);
-          result.setCell(rows, cols, new Double(val));
-        } catch (NumberFormatException e) {
-          // must be an expression
-          result.setCell(rows, cols, current);
-        }
-        cols++;
-      }
-      rows++;
-    }
-
-    return result;
-  }
-
-  /**
    * Set the value of a particular cell in the matrix
    * 
    * @param rowIndex the row
@@ -749,6 +701,56 @@ public class CostMatrix implements Serializable, RevisionHandler {
    */
   public final void setElement(int rowIndex, int columnIndex, double value) {
     m_matrix[rowIndex][columnIndex] = new Double(value);
+  }
+
+  /**
+   * creates a matrix from the given Matlab string.
+   * 
+   * @param matlab the matrix in matlab format
+   * @return the matrix represented by the given string
+   * @see #toMatlab()
+   */
+  public static CostMatrix parseMatlab(String matlab) throws Exception {
+    StringTokenizer tokRow;
+    StringTokenizer tokCol;
+    int rows;
+    int cols;
+    CostMatrix result;
+    String cells;
+
+    // get content
+    cells = matlab.substring(matlab.indexOf("[") + 1, matlab.indexOf("]"))
+        .trim();
+
+    // determine dimenions
+    tokRow = new StringTokenizer(cells, ";");
+    rows = tokRow.countTokens();
+    tokCol = new StringTokenizer(tokRow.nextToken(), " ");
+    cols = tokCol.countTokens();
+
+    // fill matrix
+    result = new CostMatrix(rows);
+    tokRow = new StringTokenizer(cells, ";");
+    rows = 0;
+    while (tokRow.hasMoreTokens()) {
+      tokCol = new StringTokenizer(tokRow.nextToken(), " ");
+      cols = 0;
+      while (tokCol.hasMoreTokens()) {
+        // is it a number
+        String current = tokCol.nextToken();
+        try {
+          double val = Double.parseDouble(current);
+          result.setCell(rows, cols, new Double(val));
+        } catch (NumberFormatException e) {
+          // must be an expression
+          result.setCell(rows, cols, current);
+        }
+        cols++;
+      }
+      rows++;
+    }
+
+    return result;
   }
 
   /**
@@ -827,7 +829,6 @@ public class CostMatrix implements Serializable, RevisionHandler {
    * 
    * @return the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }

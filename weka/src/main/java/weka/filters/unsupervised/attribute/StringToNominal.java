@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    StringToNominal.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,19 +41,22 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- <!-- globalinfo-start -->
- * Converts a range of string attributes (unspecified number of values) to nominal (set number of values). You should ensure that all string values that will appear are represented in the first batch of the data.
+ <!-- globalinfo-start --> 
+ * Converts a string attribute (i.e. unspecified
+ * number of values) to nominal (i.e. set number of values). You should ensure
+ * that all string values that will appear are represented in the first batch of
+ * the data.
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -R &lt;col&gt;
- *  Sets the range of attribute indices (default last).</pre>
- * 
- * <pre> -V &lt;col&gt;
- *  Invert the range specified by -R.</pre>
+ * <pre>
+ * -R &lt;col&gt;
+ *  Sets the range of attribute indices (default last).
+ * </pre>
  * 
  <!-- options-end -->
  * 
@@ -212,7 +216,6 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    * 
    * @return an enumeration of all the available options.
    */
-  @Override
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>(1);
@@ -231,21 +234,24 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -R &lt;col&gt;
-   *  Sets the range of attribute indices (default last).</pre>
+   * <pre>
+   * -R &lt;col&gt;
+   *  Sets the range of attribute indices (default last).
+   * </pre>
    * 
-   * <pre> -V &lt;col&gt;
-   *  Invert the range specified by -R.</pre>
+   * <pre>
+   * -V &lt;col&gt;
+   *  Inverts the selection specified by -R.
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
 
     String attIndices = Utils.getOption('R', options);
@@ -272,7 +278,6 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    * 
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
   public String[] getOptions() {
 
     String[] options = new String[this.m_AttIndices.getInvert() ? 7 : 6];
@@ -316,7 +321,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
   /**
    * Sets range of indices of the attributes used.
    * 
-   * @param rangeList the list of attribute indices
+   * @param attIndex the index of the attribute
    */
   public void setAttributeRange(String rangeList) {
 
@@ -344,7 +349,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
         newAtts.addElement(att);
       } else {
 
-        // Compute list of attribute values - skipping the dummy string value
+        // Compute list of attribute values
         newVals = new FastVector(att.numValues());
         for (int i = 1; i < att.numValues(); i++) {
           newVals.addElement(att.value(i));
@@ -380,4 +385,3 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
     runFilter(new StringToNominal(), argv);
   }
 }
-

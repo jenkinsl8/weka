@@ -1,31 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    NormalizableDistance.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
+import weka.core.neighboursearch.PerformanceStats;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.neighboursearch.PerformanceStats;
 
 /**
  * Represents the abstract ancestor for normalizable distance functions, like
@@ -34,7 +35,7 @@ import weka.core.neighboursearch.PerformanceStats;
  * @author Fracpete (fracpete at waikato dot ac dot nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) -- original code from weka.core.EuclideanDistance
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public abstract class NormalizableDistance
   implements DistanceFunction, OptionHandler, Serializable, RevisionHandler {
@@ -98,7 +99,7 @@ public abstract class NormalizableDistance
    * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     result.add(new Option(
 	"\tTurns off the normalization of attribute \n"
@@ -500,8 +501,8 @@ public abstract class NormalizableDistance
   protected double difference(int index, double val1, double val2) {
     switch (m_Data.attribute(index).type()) {
       case Attribute.NOMINAL:
-        if (Utils.isMissingValue(val1) ||
-           Utils.isMissingValue(val2) ||
+        if (Instance.isMissingValue(val1) ||
+           Instance.isMissingValue(val2) ||
            ((int) val1 != (int) val2)) {
           return 1;
         }
@@ -510,10 +511,10 @@ public abstract class NormalizableDistance
         }
         
       case Attribute.NUMERIC:
-        if (Utils.isMissingValue(val1) ||
-           Utils.isMissingValue(val2)) {
-          if (Utils.isMissingValue(val1) &&
-             Utils.isMissingValue(val2)) {
+        if (Instance.isMissingValue(val1) ||
+           Instance.isMissingValue(val2)) {
+          if (Instance.isMissingValue(val1) &&
+             Instance.isMissingValue(val2)) {
             if (!m_DontNormalize)  //We are doing normalization
               return 1;
             else
@@ -521,7 +522,7 @@ public abstract class NormalizableDistance
           }
           else {
             double diff;
-            if (Utils.isMissingValue(val2)) {
+            if (Instance.isMissingValue(val2)) {
               diff = (!m_DontNormalize) ? norm(val1, index) : val1;
             }
             else {

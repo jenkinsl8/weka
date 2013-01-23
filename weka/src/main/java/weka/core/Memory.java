@@ -25,7 +25,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 
-import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 
 /**
@@ -33,7 +32,7 @@ import javax.swing.JOptionPane;
  * disabled by using the setEnabled(boolean) method.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 9487 $
  * @see #setEnabled(boolean)
  */
 public class Memory implements RevisionHandler {
@@ -248,25 +247,10 @@ public class Memory implements RevisionHandler {
     System.err.println(msg);
 
     if (getUseGUI()) {
-      if (!Utils.getDontShowDialog("weka.core.Memory.LowMemoryWarning")) {
-        JCheckBox dontShow = new JCheckBox("Do not show this message again");
-        Object[] stuff = new Object[2];
-        stuff[0] = msg;
-        stuff[1] = dontShow;
+      int result = JOptionPane.showConfirmDialog(null, msg, "Low Memory",
+          JOptionPane.YES_NO_OPTION);
 
-        int result = JOptionPane.showConfirmDialog(null, stuff, "Memory",
-            JOptionPane.YES_NO_OPTION);
-
-        if (dontShow.isSelected()) {
-          try {
-            Utils.setDontShowDialog("weka.core.Memory.LowMemoryWarning");
-          } catch (Exception ex) {
-            // quietly ignore
-          }
-        }
-
-        return (result == JOptionPane.YES_OPTION);
-      }
+      return (result == JOptionPane.YES_OPTION);
     }
 
     return true;
@@ -305,9 +289,8 @@ public class Memory implements RevisionHandler {
    * 
    * @return the revision
    */
-  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 9487 $");
   }
 
   /**

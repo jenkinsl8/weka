@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ThresholdCurve.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,7 +24,6 @@ package weka.classifiers.evaluation;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -155,7 +155,6 @@ public class ThresholdCurve
     double threshold = 0;
     double cumulativePos = 0;
     double cumulativeNeg = 0;
-    
     for (int i = 0; i < sorted.length; i++) {
 
       if ((i == 0) || (probs[sorted[i]] > threshold)) {
@@ -207,7 +206,7 @@ public class ThresholdCurve
       threshold = probs[sorted[sorted.length - 1]] + 10e-6;
       insts.add(makeInstance(tc, threshold));
     }
-    
+        
     return insts;
   }
 
@@ -263,42 +262,6 @@ public class ThresholdCurve
       psum += precis;
     }
     return psum / n;
-  }  
-  
-  /**
-   * Calculates the area under the precision-recall curve (AUPRC).
-   *
-   * @param tcurve a previously extracted threshold curve Instances.
-   * @return the PRC area, or Double.NaN if you don't pass in 
-   * a ThresholdCurve generated Instances. 
-   */
-  public static double getPRCArea(Instances tcurve) {
-    final int n = tcurve.numInstances();
-    if (!RELATION_NAME.equals(tcurve.relationName()) 
-        || (n == 0)) {
-      return Double.NaN;
-    }
-    
-    final int pInd = tcurve.attribute(PRECISION_NAME).index();
-    final int rInd = tcurve.attribute(RECALL_NAME).index();
-    final double [] pVals = tcurve.attributeToDoubleArray(pInd);
-    final double [] rVals = tcurve.attributeToDoubleArray(rInd);
-    
-    double area = 0;
-    double xlast = rVals[n - 1];
-    
-    // start from the first real p/r pair (not the artificial zero point)
-    for (int i = n - 2; i >= 0; i--) {
-      double recallDelta = rVals[i] - xlast;
-      area += (pVals[i] * recallDelta);
-      
-      xlast = rVals[i];
-    }
-    
-    if (area == 0) {
-      return Utils.missingValue();
-    }
-    return area;
   }
 
   /**
@@ -461,13 +424,13 @@ public class ThresholdCurve
     vals[count++] = ss;
     double expectedByChance = (ss * (tc.getTruePositive() + tc.getFalseNegative()));
     if (expectedByChance < 1) {
-      vals[count++] = Utils.missingValue();
+      vals[count++] = Instance.missingValue();
     } else {
     vals[count++] = tc.getTruePositive() / expectedByChance; 
      
     }
     vals[count++] = prob;
-    return new DenseInstance(1.0, vals);
+    return new Instance(1.0, vals);
   }
   
   /**

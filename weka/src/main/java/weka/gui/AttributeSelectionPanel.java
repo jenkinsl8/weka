@@ -1,45 +1,45 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeSelectionPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
-import java.awt.BorderLayout;
+import weka.core.Instances;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.regex.Pattern;
-
-import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-
-import weka.core.Instances;
+import javax.swing.BorderFactory;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -153,11 +153,11 @@ public class AttributeSelectionPanel
       
       switch (column) {
       case 0:
-	return new String("No.");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_First"));
       case 1:
-	return new String("");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_Second"));
       case 2:
-	return new String("Name");
+	return new String(Messages.getInstance().getString("AttributeSelectionPanel_GetColumnName_Text_Third"));
       default:
 	return null;
       }
@@ -281,16 +281,16 @@ public class AttributeSelectionPanel
   }
 
   /** Press to select all attributes */  
-  protected JButton m_IncludeAll = new JButton("All");
+  protected JButton m_IncludeAll = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_IncludeAll_JButton_Text"));
 
   /** Press to deselect all attributes */
-  protected JButton m_RemoveAll = new JButton("None");
+  protected JButton m_RemoveAll = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_RemoveAll_JButton_Text"));
 
   /** Press to invert the current selection */
-  protected JButton m_Invert = new JButton("Invert");
+  protected JButton m_Invert = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_Invert_JButton_Text"));
 
   /** Press to enter a perl regular expression for selection */
-  protected JButton m_Pattern = new JButton("Pattern");
+  protected JButton m_Pattern = new JButton(Messages.getInstance().getString("AttributeSelectionPanel_Pattern_JButton_Text"));
 
   /** The table displaying attribute names and selection status */
   protected JTable m_Table = new JTable();
@@ -318,34 +318,34 @@ public class AttributeSelectionPanel
   public AttributeSelectionPanel(boolean include, boolean remove, boolean invert,
       boolean pattern) {
 
-    m_IncludeAll.setToolTipText("Selects all attributes");
+    m_IncludeAll.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_IncludeAll_SetToolTipText_Text"));
     m_IncludeAll.setEnabled(false);
     m_IncludeAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.includeAll();
       }
     });
-    m_RemoveAll.setToolTipText("Unselects all attributes");
+    m_RemoveAll.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_RemoveAll_SetToolTipText_Text"));
     m_RemoveAll.setEnabled(false);
     m_RemoveAll.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.removeAll();
       }
     });
-    m_Invert.setToolTipText("Inverts the current attribute selection");
+    m_Invert.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_Invert_SetToolTipText_Text"));
     m_Invert.setEnabled(false);
     m_Invert.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Model.invert();
       }
     });
-    m_Pattern.setToolTipText("Selects all attributes that match a reg. expression");
+    m_Pattern.setToolTipText(Messages.getInstance().getString("AttributeSelectionPanel_Pattern_SetToolTipText_Text"));
     m_Pattern.setEnabled(false);
     m_Pattern.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         String pattern = JOptionPane.showInputDialog(
                             m_Pattern.getParent(),
-                            "Enter a Perl regular expression",
+                            Messages.getInstance().getString("AttributeSelectionPanel_Pattern_JOptionPaneShowInputDialog_Text"),
                             m_PatternRegEx);
         if (pattern != null) {
           try {
@@ -356,9 +356,8 @@ public class AttributeSelectionPanel
           catch (Exception ex) {
             JOptionPane.showMessageDialog(
               m_Pattern.getParent(),
-              "'" + pattern + "' is not a valid Perl regular expression!\n" 
-              + "Error: " + ex, 
-              "Error in Pattern...", 
+              Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_First") + pattern + Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_Second") + ex, 
+              Messages.getInstance().getString("AttributeSelectionPanel_Exception_JOptionPaneShowMessageDialog_Text_Third"), 
               JOptionPane.ERROR_MESSAGE);
           }
         }
@@ -482,13 +481,13 @@ public class AttributeSelectionPanel
 
     try {
       if (args.length == 0) {
-	throw new Exception("supply the name of an arff file");
+	throw new Exception(Messages.getInstance().getString("AttributeSelectionPanel_Main_Exception_Text"));
       }
       Instances i = new Instances(new java.io.BufferedReader(
 				  new java.io.FileReader(args[0])));
       AttributeSelectionPanel asp = new AttributeSelectionPanel();
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame("Attribute Selection Panel");
+	new javax.swing.JFrame(Messages.getInstance().getString("AttributeSelectionPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(asp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {

@@ -1,28 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Apply.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.pmml;
 
 import java.util.ArrayList;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -100,13 +100,12 @@ class Apply extends Expression {
       }
     }
     
-    if (fieldDefs != null) {
-      updateDefsForArgumentsAndFunction();
-    }
+    updateDefsForArgumentsAndFunction();
   }
   
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
     super.setFieldDefs(fieldDefs);
+    
     updateDefsForArgumentsAndFunction();
   }
   
@@ -181,15 +180,6 @@ class Apply extends Expression {
    * Attribute.
    */
   public Attribute getOutputDef() {
-    if (m_outputStructure == null) {
-      // return a "default" output def. This will get replaced
-      // by a final one when the final field defs are are set
-      // for all expressions after all derived fields are collected
-      return (m_opType == FieldMetaInfo.Optype.CATEGORICAL ||
-          m_opType == FieldMetaInfo.Optype.ORDINAL)
-      ? new Attribute("Placeholder", new ArrayList<String>())
-      : new Attribute("Placeholder");
-    }
     return m_outputStructure;//.copy(attName);
   }
   
