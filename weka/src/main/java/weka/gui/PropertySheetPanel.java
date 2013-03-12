@@ -1,26 +1,31 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PropertySheet.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.MultiInstanceCapabilitiesHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -63,23 +68,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.MultiInstanceCapabilitiesHandler;
-import weka.gui.beans.GOECustomizer;
-
 
 /** 
  * Displays a property sheet where (supported) properties of the target
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.17.2.1 $
  */
 public class PropertySheetPanel extends JPanel
-  implements PropertyChangeListener, EnvironmentHandler {
+  implements PropertyChangeListener {
 
   /** for serialization. */
   private static final long serialVersionUID = -8939835593429918345L;
@@ -247,9 +245,6 @@ public class PropertySheetPanel extends JPanel
   
   /** The target object being edited. */
   private Object m_Target;
-  
-  /** Holds the customizer (if one exists) for the object being edited */
-  private GOECustomizer m_Customizer;
 
   /** Holds properties of the target. */
   private PropertyDescriptor m_Properties[];
@@ -296,9 +291,6 @@ public class PropertySheetPanel extends JPanel
   /** The panel holding global info and help, if provided by
       the object being editied. */
   private JPanel m_aboutPanel;
-  
-  /** Environment variables to pass on to any editors that can handle them */
-  private transient Environment m_env;
 
   /**
    * Creates the property sheet panel.
@@ -307,7 +299,6 @@ public class PropertySheetPanel extends JPanel
 
     //    setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-    m_env = Environment.getSystemWide();
   }
 
   /**
@@ -359,10 +350,6 @@ public class PropertySheetPanel extends JPanel
    * @param targ a value of type 'Object'
    */
   public synchronized void setTarget(Object targ) {
-    
-    if (m_env == null) {
-      m_env = Environment.getSystemWide();
-    }
 
     // used to offset the components for the properties of targ
     // if there happens to be globalInfo available in targ
@@ -370,26 +357,17 @@ public class PropertySheetPanel extends JPanel
 
     // Close any child windows at this point
     removeAll();
-
-    setLayout(new BorderLayout());
-    JPanel scrollablePanel = new JPanel();
-    JScrollPane scrollPane = new JScrollPane(scrollablePanel);
-    scrollPane.setBorder(BorderFactory.createEmptyBorder());
-    add(scrollPane, BorderLayout.CENTER);
     
     GridBagLayout gbLayout = new GridBagLayout();
 
-    scrollablePanel.setLayout(gbLayout);
+    setLayout(gbLayout);
     setVisible(false);
     m_NumEditable = 0;
     m_Target = targ;
-    Class custClass = null;
     try {
       BeanInfo bi = Introspector.getBeanInfo(m_Target.getClass());
       m_Properties = bi.getPropertyDescriptors();
       m_Methods = bi.getMethodDescriptors();
-      custClass = Introspector.
-        getBeanInfo(m_Target.getClass()).getBeanDescriptor().getCustomizerClass();            
     } catch (IntrospectionException ex) {
       System.err.println("PropertySheet: Couldn't introspect");
       return;
@@ -399,40 +377,13 @@ public class PropertySheetPanel extends JPanel
     m_HelpText = null;
     // Look for a globalInfo method that returns a string
     // describing the target
-    Object args[] = { };
-    boolean firstTip = true;
-    StringBuffer optionsBuff = new StringBuffer();
     for (int i = 0;i < m_Methods.length; i++) {
       String name = m_Methods[i].getDisplayName();
       Method meth = m_Methods[i].getMethod();
-      
-      if (name.endsWith("TipText")) {
-        if (meth.getReturnType().equals(String.class)) {
-          try {
-            String tempTip = (String)(meth.invoke(m_Target, args));
-//            int ci = tempTip.indexOf('.');
-
-              if (firstTip) {
-                optionsBuff.append("OPTIONS\n");
-                firstTip = false;
-              }
-              tempTip = tempTip.replace("<html>", "").
-                replace("</html>", "").replace("<br>", "\n").replace("<p>", "\n\n");
-              optionsBuff.append(name.replace("TipText", "")).append(" -- ");
-              optionsBuff.append(tempTip).append("\n\n");
-              //jt.setText(m_HelpText.toString());
-
-          } catch (Exception ex) {
-
-          }
-       //   break;
-        }
-      }      
-      
       if (name.equals("globalInfo")) {
 	if (meth.getReturnType().equals(String.class)) {
 	  try {
-//	    Object args[] = { };
+	    Object args[] = { };
 	    String globalInfo = (String)(meth.invoke(m_Target, args));
             String summary = globalInfo;
             int ci = globalInfo.indexOf('.');
@@ -502,70 +453,22 @@ public class PropertySheetPanel extends JPanel
 	    gbConstraints.insets = new Insets(0,5,0,5);
 	    gbLayout.setConstraints(jp, gbConstraints);
 	    m_aboutPanel = jp;
-	    scrollablePanel.add(m_aboutPanel);
+	    add(m_aboutPanel);
 	    componentOffset = 1;
-	    
-	    //break;
+	    break;
 	  } catch (Exception ex) {
 	    
 	  }
 	}
       }
     }
-    
-    if (m_HelpText != null) {
-      m_HelpText.append(optionsBuff.toString());
-    }
-    
-    if (custClass != null) {
-      // System.out.println("**** We've found a customizer for this object!");
-      try {
-        Object customizer = custClass.newInstance();
 
-        if (customizer instanceof JComponent && 
-            customizer instanceof GOECustomizer) {
-          m_Customizer = (GOECustomizer)customizer;
-
-          m_Customizer.dontShowOKCancelButtons();
-          m_Customizer.setObject(m_Target);
-
-          GridBagConstraints gbc = new GridBagConstraints();
-          gbc.fill = GridBagConstraints.BOTH;
-          gbc.gridwidth = 2;
-          gbc.gridy = componentOffset;     gbc.gridx = 0;
-          gbc.insets = new Insets(0,5,0,5);
-          gbLayout.setConstraints((JComponent)m_Customizer, gbc);
-          scrollablePanel.add((JComponent)m_Customizer);
-
-          validate();
-
-          // sometimes, the calculated dimensions seem to be too small and the
-          // scrollbars show up, though there is still plenty of space on the
-          // screen. hence we increase the dimensions a bit to fix this.
-          Dimension dim = scrollablePanel.getPreferredSize();
-          dim.height += 20;
-          dim.width  += 20;
-          scrollPane.setPreferredSize(dim);
-          validate();
-
-          setVisible(true);
-          return;
-        }
-      } catch (InstantiationException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      } catch (IllegalAccessException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }   
-    }
-    
     m_Editors = new PropertyEditor[m_Properties.length];
     m_Values = new Object[m_Properties.length];
     m_Views = new JComponent[m_Properties.length];
     m_Labels = new JLabel[m_Properties.length];
     m_TipTexts = new String[m_Properties.length];
-//    boolean firstTip = true;
+    boolean firstTip = true;
     for (int i = 0; i < m_Properties.length; i++) {
 
       // Don't display hidden or expert properties.
@@ -586,7 +489,7 @@ public class PropertySheetPanel extends JPanel
       JComponent view = null;
 
       try {
-//	Object args[] = { };
+	Object args[] = { };
 	Object value = getter.invoke(m_Target, args);
 	m_Values[i] = value;
 
@@ -621,10 +524,6 @@ public class PropertySheetPanel extends JPanel
 	if (editor instanceof GenericObjectEditor) {
 	  ((GenericObjectEditor) editor).setClassType(type);
 	}
-	
-	if (editor instanceof EnvironmentHandler) {
-	  ((EnvironmentHandler)editor).setEnvironment(m_env);
-	}
 
 	// Don't try to set null values:
 	if (value == null) {
@@ -657,15 +556,15 @@ public class PropertySheetPanel extends JPanel
 		} else {
 		  m_TipTexts[i] = tempTip.substring(0, ci);
 		}
-/*                if (m_HelpText != null) {
+                if (m_HelpText != null) {
                   if (firstTip) {
                     m_HelpText.append("OPTIONS\n");
                     firstTip = false;
                   }
                   m_HelpText.append(name).append(" -- ");
-                  m_HelpText.append(tempTip).append("\n\n"); 
+                  m_HelpText.append(tempTip).append("\n\n");
                   //jt.setText(m_HelpText.toString());
-                } */
+                }
 	      } catch (Exception ex) {
 
 	      }
@@ -674,14 +573,14 @@ public class PropertySheetPanel extends JPanel
 	  }
 	}	  
 
+	
 	// Now figure out how to display it...
 	if (editor.isPaintable() && editor.supportsCustomEditor()) {
 	  view = new PropertyPanel(editor);
-	} else if (editor.supportsCustomEditor() && (editor.getCustomEditor() instanceof JComponent)) {
-	  view = (JComponent) editor.getCustomEditor();
 	} else if (editor.getTags() != null) {
 	  view = new PropertyValueSelector(editor);
 	} else if (editor.getAsText() != null) {
+	  //String init = editor.getAsText();
 	  view = new PropertyText(editor);
 	} else {
 	  System.err.println("Warning: Property \"" + name 
@@ -712,7 +611,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(m_Labels[i], gbConstraints);
-      scrollablePanel.add(m_Labels[i]);
+      add(m_Labels[i]);
       JPanel newPanel = new JPanel();
       if (m_TipTexts[i] != null) {
 	m_Views[i].setToolTipText(m_TipTexts[i]);
@@ -726,7 +625,7 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.gridy = i+componentOffset;     gbConstraints.gridx = 1;
       gbConstraints.weightx = 100;
       gbLayout.setConstraints(newPanel, gbConstraints);
-      scrollablePanel.add(newPanel);
+      add(newPanel);
       m_NumEditable ++;
     }
 
@@ -741,20 +640,10 @@ public class PropertySheetPanel extends JPanel
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = componentOffset;     gbConstraints.gridx = 0;
       gbLayout.setConstraints(empty, gbConstraints);
-      scrollablePanel.add(empty);
+      add(empty);
     }
 
     validate();
-
-    // sometimes, the calculated dimensions seem to be too small and the
-    // scrollbars show up, though there is still plenty of space on the
-    // screen. hence we increase the dimensions a bit to fix this.
-    Dimension dim = scrollablePanel.getPreferredSize();
-    dim.height += 20;
-    dim.width  += 20;
-    scrollPane.setPreferredSize(dim);
-    validate();
-
     setVisible(true);	
   }
 
@@ -772,13 +661,10 @@ public class PropertySheetPanel extends JPanel
     ta.setText(m_HelpText.toString());
     ta.setCaretPosition(0);
     JDialog jdtmp;
-    if (PropertyDialog.getParentDialog(this) != null) {
+    if (PropertyDialog.getParentDialog(this) != null)
       jdtmp = new JDialog(PropertyDialog.getParentDialog(this), "Information");
-    } else if (PropertyDialog.getParentFrame(this) != null) {
+    else
       jdtmp = new JDialog(PropertyDialog.getParentFrame(this), "Information");
-    } else {
-      jdtmp = new JDialog(PropertyDialog.getParentDialog(m_aboutPanel), "Information");
-    }
     final JDialog jd = jdtmp;
     jd.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
@@ -938,43 +824,6 @@ public class PropertySheetPanel extends JPanel
     // Make sure the target bean gets repainted.
     if (Beans.isInstanceOf(m_Target, Component.class)) {
       ((Component)(Beans.getInstanceOf(m_Target, Component.class))).repaint();
-    }
-  }
-
-  /**
-   * Set environment variables to pass on to any editor that
-   * can use them
-   * 
-   * @param env the variables to pass on to individual property
-   * editors
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
-  }
-  
-  /**
-   * Pass on an OK closing notification to the customizer (if 
-   * one is in use)
-   */
-  public void closingOK() {
-    if (m_Customizer != null) {
-      // pass on the notification to the customizer so that
-      // it can copy values out of its GUI widgets into the object
-      // being customized, if necessary
-      m_Customizer.closingOK();
-    }
-  }
-  
-  /**
-   * Pass on a CANCEL closing notificiation to the customizer (if 
-   * one is in use).
-   */
-  public void closingCancel() {
-    // pass on the notification to the customizer so that
-    // it can revert to previous settings for the object being
-    // edited, if neccessary
-    if (m_Customizer != null) {
-      m_Customizer.closingCancel();
     }
   }
 }

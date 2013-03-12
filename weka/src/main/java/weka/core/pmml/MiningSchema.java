@@ -1,34 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    MiningSchema.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.pmml;
 
+import java.lang.String;
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
@@ -122,7 +124,7 @@ public class MiningSchema implements Serializable {
           + "are not supported yet.");
     }*/
 
-    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
+    FastVector attInfo = new FastVector();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
     int addedCount = 0;
@@ -140,7 +142,7 @@ public class MiningSchema implements Serializable {
           Attribute miningAtt = dataDictionary.attribute(mfi.getName());
           if (miningAtt != null) {
             mfi.setIndex(addedCount);
-            attInfo.add(miningAtt);
+            attInfo.addElement(miningAtt);
             addedCount++;
 
             if (mfi.getUsageType() == MiningFieldMetaInfo.Usage.PREDICTED) {
@@ -178,13 +180,13 @@ public class MiningSchema implements Serializable {
     
     // Set up the full instances structure: combo of mining schema fields and
     // all derived fields
-    ArrayList<Attribute> newStructure = new ArrayList<Attribute>();
+    FastVector newStructure = new FastVector();
     for (MiningFieldMetaInfo m : m_miningMeta) {
-      newStructure.add(m.getFieldAsAttribute());
+      newStructure.addElement(m.getFieldAsAttribute());
     }
     
     for (DerivedFieldMetaInfo d : m_derivedMeta) {
-      newStructure.add(d.getFieldAsAttribute());
+      newStructure.addElement(d.getFieldAsAttribute());
     }
     m_fieldInstancesStructure = new Instances("FieldStructure", newStructure, 0);
     
@@ -338,18 +340,18 @@ public class MiningSchema implements Serializable {
   public void convertStringAttsToNominal() {
     Instances miningSchemaI = getFieldsAsInstances();
     if (miningSchemaI.checkForStringAttributes()) {
-      ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
+      FastVector attInfo = new FastVector();
       for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
         Attribute tempA = miningSchemaI.attribute(i);
         if (tempA.isString()) {
-          ArrayList<String> valueVector = new ArrayList<String>();
+          FastVector valueVector = new FastVector();
           for (int j = 0; j < tempA.numValues(); j++) {
-            valueVector.add(tempA.value(j));
+            valueVector.addElement(tempA.value(j));
           }
           Attribute newAtt = new Attribute(tempA.name(), valueVector);
-          attInfo.add(newAtt);
+          attInfo.addElement(newAtt);
         } else {
-          attInfo.add(tempA);
+          attInfo.addElement(tempA);
         }
       }
       Instances newI = new Instances("miningSchema", attInfo, 0);
@@ -379,19 +381,19 @@ public class MiningSchema implements Serializable {
                                          + "already nominal!");
     }
 
-    ArrayList<String> newValues = new ArrayList<String>();
+    FastVector newValues = new FastVector();
     for (int i = 0; i < newVals.size(); i++) {
-      newValues.add(newVals.get(i));
+      newValues.addElement(newVals.get(i));
     }
 
-    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
+    FastVector attInfo = new FastVector();
     for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
       Attribute tempA = miningSchemaI.attribute(i);
       if (i == index) {
         Attribute newAtt = new Attribute(tempA.name(), newValues);
-        attInfo.add(newAtt);
+        attInfo.addElement(newAtt);
       } else {
-        attInfo.add(tempA);
+        attInfo.addElement(tempA);
       }
     }
 

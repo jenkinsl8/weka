@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * PlainText.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
@@ -141,93 +142,6 @@ public class PlainText
     }
     return text.toString();
   }
-  
-  /**
-   * Store the prediction made by the classifier as a string.
-   * 
-   * @param dist        the distribution to use
-   * @param inst        the instance to generate text from
-   * @param index       the index in the dataset
-   * @throws Exception  if something goes wrong
-   */
-  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {
-    int width = 7 + m_NumDecimals;
-    int prec = m_NumDecimals;
-    
-    Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    
-    double predValue = 0;
-    if (Utils.sum(dist) == 0) {
-      predValue = Utils.missingValue();
-    } else {
-      if (inst.classAttribute().isNominal()) {
-        predValue = Utils.maxIndex(dist);
-      } else {
-        predValue = dist[0];                         
-      }
-    }
-    
-    // index
-    append(Utils.padLeft("" + (index+1), 6));
-
-    if (inst.dataset().classAttribute().isNumeric()) {
-      // actual
-      if (inst.classIsMissing())
-        append(" " + Utils.padLeft("?", width));
-      else
-        append(" " + Utils.doubleToString(inst.classValue(), width, prec));
-      // predicted
-      if (Utils.isMissingValue(predValue))
-        append(" " + Utils.padLeft("?", width));
-      else
-        append(" " + Utils.doubleToString(predValue, width, prec));
-      // error
-      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
-        append(" " + Utils.padLeft("?", width));
-      else
-        append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
-    } else {
-      // actual
-      append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
-      // predicted
-      if (Utils.isMissingValue(predValue))
-        append(" " + Utils.padLeft("?", width));
-      else
-        append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
-      // error?
-      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
-        append(" " + "  +  ");
-      else
-        append(" " + "     ");
-      // prediction/distribution
-      if (m_OutputDistribution) {
-        if (Utils.isMissingValue(predValue)) {
-          append(" " + "?");
-        }
-        else {
-          append(" ");
-          for (int n = 0; n < dist.length; n++) {
-            if (n > 0)
-              append(",");
-            if (n == (int) predValue)
-              append("*");
-            append(Utils.doubleToString(dist[n], prec));
-          }
-        }
-      }
-      else {
-        if (Utils.isMissingValue(predValue))
-          append(" " + "?");
-        else
-          append(" " + Utils.doubleToString(dist[(int)predValue], prec));
-      }
-    }
-
-    // attributes
-    append(" " + attributeValuesString(withMissing) + "\n");
-    
-  }
 
   /**
    * Store the prediction made by the classifier as a string.
@@ -238,9 +152,73 @@ public class PlainText
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    
-    double[] d = classifier.distributionForInstance(inst);
-    doPrintClassification(d, inst, index);    
+    int width = 7 + m_NumDecimals;
+    int prec = m_NumDecimals;
+
+    Instance withMissing = (Instance)inst.copy();
+    withMissing.setDataset(inst.dataset());
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
+
+    // index
+    append(Utils.padLeft("" + (index+1), 6));
+
+    if (inst.dataset().classAttribute().isNumeric()) {
+      // actual
+      if (inst.classIsMissing())
+	append(" " + Utils.padLeft("?", width));
+      else
+	append(" " + Utils.doubleToString(inst.classValue(), width, prec));
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	append(" " + Utils.padLeft("?", width));
+      else
+	append(" " + Utils.doubleToString(predValue, width, prec));
+      // error
+      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+	append(" " + Utils.padLeft("?", width));
+      else
+	append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
+    } else {
+      // actual
+      append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	append(" " + Utils.padLeft("?", width));
+      else
+	append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
+      // error?
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+	append(" " + "  +  ");
+      else
+	append(" " + "     ");
+      // prediction/distribution
+      if (m_OutputDistribution) {
+	if (Instance.isMissingValue(predValue)) {
+	  append(" " + "?");
+	}
+	else {
+	  append(" ");
+	  double[] dist = classifier.distributionForInstance(withMissing);
+	  for (int n = 0; n < dist.length; n++) {
+	    if (n > 0)
+	      append(",");
+	    if (n == (int) predValue)
+	      append("*");
+            append(Utils.doubleToString(dist[n], prec));
+	  }
+	}
+      }
+      else {
+	if (Instance.isMissingValue(predValue))
+	  append(" " + "?");
+	else
+	  append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
+      }
+    }
+
+    // attributes
+    append(" " + attributeValuesString(withMissing) + "\n");
   }
   
   /**

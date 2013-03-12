@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * HTML.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
@@ -173,85 +174,6 @@ public class HTML
     }
     return text.toString();
   }
-  
-  protected void doPrintClassification(double[] dist, Instance inst, int index) throws Exception {
-    int prec = m_NumDecimals;
-    
-    Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    
-    double predValue = 0;
-    if (Utils.sum(dist) == 0) {
-      predValue = Utils.missingValue();
-    } else {
-      if (inst.classAttribute().isNominal()) {
-        predValue = Utils.maxIndex(dist);
-      } else {
-        predValue = dist[0];                         
-      }
-    }
-    
-    // index
-    append("<tr>");
-    append("<td>" + (index+1) + "</td>");
-
-    if (inst.dataset().classAttribute().isNumeric()) {
-      // actual
-      if (inst.classIsMissing())
-        append("<td align=\"right\">" + "?" + "</td>");
-      else
-        append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
-      // predicted
-      if (Utils.isMissingValue(predValue))
-        append("<td align=\"right\">" + "?" + "</td>");
-      else
-        append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
-      // error
-      if (Utils.isMissingValue(predValue) || inst.classIsMissing())
-        append("<td align=\"right\">" + "?" + "</td>");
-      else
-        append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
-    } else {
-      // actual
-      append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
-      // predicted
-      if (Utils.isMissingValue(predValue))
-        append("<td>" + "?" + "</td>");
-      else
-        append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
-      // error?
-      if (!Utils.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
-        append("<td>" + "+" + "</td>");
-      else
-        append("<td>" + "&nbsp;" + "</td>");
-      // prediction/distribution
-      if (m_OutputDistribution) {
-        if (Utils.isMissingValue(predValue)) {
-          append("<td>" + "?" + "</td>");
-        }
-        else {
-          append("<td align=\"right\">");
-          for (int n = 0; n < dist.length; n++) {
-            if (n > 0)
-              append("</td><td align=\"right\">");
-            if (n == (int) predValue)
-              append("*");
-            append(Utils.doubleToString(dist[n], prec));
-          }
-          append("</td>");
-        }
-      }
-      else {
-        if (Utils.isMissingValue(predValue))
-          append("<td align=\"right\">" + "?" + "</td>");
-        else
-          append("<td align=\"right\">" + Utils.doubleToString(dist[(int)predValue], prec) + "</td>");
-      }
-    }
-
-    // attributes
-    append(attributeValuesString(withMissing) + "</tr>\n");    
-  }
 
   /**
    * Store the prediction made by the classifier as a string.
@@ -262,9 +184,74 @@ public class HTML
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    
-    double[] d = classifier.distributionForInstance(inst);
-    doPrintClassification(d, inst, index);    
+    int prec = m_NumDecimals;
+
+    Instance withMissing = (Instance)inst.copy();
+    withMissing.setDataset(inst.dataset());
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
+
+    // index
+    append("<tr>");
+    append("<td>" + (index+1) + "</td>");
+
+    if (inst.dataset().classAttribute().isNumeric()) {
+      // actual
+      if (inst.classIsMissing())
+	append("<td align=\"right\">" + "?" + "</td>");
+      else
+	append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	append("<td align=\"right\">" + "?" + "</td>");
+      else
+	append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
+      // error
+      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+	append("<td align=\"right\">" + "?" + "</td>");
+      else
+	append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
+    } else {
+      // actual
+      append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	append("<td>" + "?" + "</td>");
+      else
+	append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
+      // error?
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
+	append("<td>" + "+" + "</td>");
+      else
+	append("<td>" + "&nbsp;" + "</td>");
+      // prediction/distribution
+      if (m_OutputDistribution) {
+	if (Instance.isMissingValue(predValue)) {
+	  append("<td>" + "?" + "</td>");
+	}
+	else {
+	  append("<td align=\"right\">");
+	  double[] dist = classifier.distributionForInstance(withMissing);
+	  for (int n = 0; n < dist.length; n++) {
+	    if (n > 0)
+	      append("</td><td align=\"right\">");
+	    if (n == (int) predValue)
+	      append("*");
+            append(Utils.doubleToString(dist[n], prec));
+	  }
+	  append("</td>");
+	}
+      }
+      else {
+	if (Instance.isMissingValue(predValue))
+	  append("<td align=\"right\">" + "?" + "</td>");
+	else
+	  append("<td align=\"right\">" + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec) + "</td>");
+      }
+    }
+
+    // attributes
+    append(attributeValuesString(withMissing) + "</tr>\n");
   }
   
   /**

@@ -1,40 +1,41 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * LocalScoreSearchAlgorithm.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
 package weka.classifiers.bayes.net.search.local;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.SearchAlgorithm;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
+import weka.core.Instance;
 import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
+import weka.core.Utils;
 import weka.core.Statistics;
 import weka.core.Tag;
-import weka.core.Utils;
+import weka.core.Option;
+import weka.core.SelectedTag;
+
+import java.util.Vector;
+import java.util.Enumeration;
 
 /** 
  <!-- globalinfo-start -->
@@ -57,7 +58,7 @@ import weka.core.Utils;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision$
+ * @version $Revision: 1.7.2.1 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -407,9 +408,9 @@ public class LocalScoreSearchAlgorithm
 					double nSumOfCounts = 0;
 
 					for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
-						if (m_fAlpha + nCounts[iParent][iSymbol] != 0) {
-							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol]);
-							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol];
+						if (m_fAlpha + nCounts[iParent * numValues][iSymbol] != 0) {
+							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol]);
+							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol];
 						}
 					}
 					fLogScore -= Statistics.lnGamma(nSumOfCounts);
@@ -714,6 +715,6 @@ public class LocalScoreSearchAlgorithm
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision$");
+	  return RevisionUtils.extract("$Revision: 1.7.2.1 $");
 	}
 }

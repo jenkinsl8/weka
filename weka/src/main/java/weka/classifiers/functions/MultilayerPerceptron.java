@@ -1,24 +1,46 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    MultilayerPerceptron.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.functions.neural.LinearUnit;
+import weka.classifiers.functions.neural.NeuralConnection;
+import weka.classifiers.functions.neural.NeuralNode;
+import weka.classifiers.functions.neural.SigmoidUnit;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Randomizable;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,27 +69,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.functions.neural.LinearUnit;
-import weka.classifiers.functions.neural.NeuralConnection;
-import weka.classifiers.functions.neural.NeuralNode;
-import weka.classifiers.functions.neural.SigmoidUnit;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
 
 /** 
  <!-- globalinfo-start -->
@@ -150,8 +151,8 @@ public class MultilayerPerceptron
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
   
   /** for serialization */
-  private static final long serialVersionUID = -5990607817048210779L;
-
+  static final long serialVersionUID = 572250905027665169L;
+  
   /**
    * Main method for testing this class.
    *
@@ -893,12 +894,8 @@ public class MultilayerPerceptron
   }
   
 
-  /** a ZeroR model in case no model can be built from the data 
-   * or the network predicts all zeros for the classes */
+  /** a ZeroR model in case no model can be built from the data */
   private Classifier m_ZeroR;
-
-  /** Whether to use the default ZeroR model */
-  private boolean m_useDefaultModel = false;
     
   /** The training instances. */
   private Instances m_instances;
@@ -1764,19 +1761,19 @@ public class MultilayerPerceptron
     i = new Instances(i);
     i.deleteWithMissingClass();
 
-    m_ZeroR = new weka.classifiers.rules.ZeroR();
-    m_ZeroR.buildClassifier(i);
-    // only class? -> use ZeroR model
+    // only class? -> build ZeroR model
     if (i.numAttributes() == 1) {
       System.err.println(
 	  "Cannot build model (only class attribute present in data!), "
 	  + "using ZeroR model instead!");
-      m_useDefaultModel = true;
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(i);
       return;
-    } else {
-      m_useDefaultModel = false;
     }
-       
+    else {
+      m_ZeroR = null;
+    }
+    
     m_epoch = 0;
     m_error = 0;
     m_instances = null;
@@ -1903,10 +1900,8 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
       m_instances = new Instances(m_instances, 0);
-      m_currentInstance = null;
       return;
     }
-    
 
     //connections done.
     double right = 0;
@@ -1979,8 +1974,7 @@ public class MultilayerPerceptron
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
-	  m_instances = new Instances(m_instances, 0);
-	  m_currentInstance = null;
+	  m_instances = new Instances(m_instances, 0);	  
 	  return;
 	}
       }
@@ -2065,13 +2059,11 @@ public class MultilayerPerceptron
 	  m_controlPanel = null;
 	  m_nodePanel = null;
 	  m_instances = new Instances(m_instances, 0);
-	  m_currentInstance = null;
 	  return;
 	}
       }
       if (m_accepted) {
 	m_instances = new Instances(m_instances, 0);
-	m_currentInstance = null;
 	return;
       }
     }
@@ -2080,8 +2072,7 @@ public class MultilayerPerceptron
       m_controlPanel = null;
       m_nodePanel = null;
     }
-    m_instances = new Instances(m_instances, 0);
-    m_currentInstance = null;
+    m_instances = new Instances(m_instances, 0);  
   }
 
   /**
@@ -2094,7 +2085,7 @@ public class MultilayerPerceptron
   public double[] distributionForInstance(Instance i) throws Exception {
 
     // default model?
-    if (m_useDefaultModel) {
+    if (m_ZeroR != null) {
       return m_ZeroR.distributionForInstance(i);
     }
     
@@ -2139,7 +2130,7 @@ public class MultilayerPerceptron
       count += theArray[noa];
     }
     if (count <= 0) {
-      return m_ZeroR.distributionForInstance(i);
+      return null;
     }
     for (int noa = 0; noa < m_numClasses; noa++) {
       theArray[noa] /= count;
@@ -2431,7 +2422,7 @@ public class MultilayerPerceptron
    */
   public String toString() {
     // only ZeroR model?
-    if (m_useDefaultModel) {
+    if (m_ZeroR != null) {
       StringBuffer buf = new StringBuffer();
       buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
       buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");

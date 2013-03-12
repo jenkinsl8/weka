@@ -1,35 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Capabilities.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
-import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * A class that describes the capabilites (e.g., handling certain types of
@@ -214,10 +213,10 @@ public class Capabilities
   protected CapabilitiesHandler m_Owner;
   
   /** the hashset for storing the active capabilities */
-  protected HashSet<Capability> m_Capabilities;
+  protected HashSet m_Capabilities;
   
   /** the hashset for storing dependent capabilities, eg for meta-classifiers */
-  protected HashSet<Capability> m_Dependencies;
+  protected HashSet m_Dependencies;
   
   /** the reason why the test failed, used to throw an exception */
   protected Exception m_FailReason = null;
@@ -252,8 +251,8 @@ public class Capabilities
     super();
 
     setOwner(owner);
-    m_Capabilities = new HashSet<Capability>();
-    m_Dependencies = new HashSet<Capability>();
+    m_Capabilities = new HashSet();
+    m_Dependencies = new HashSet();
 
     // load properties
     if (PROPERTIES == null) {
@@ -272,11 +271,6 @@ public class Capabilities
     m_MissingValuesTest          = Boolean.parseBoolean(PROPERTIES.getProperty("MissingValuesTest", "true")) && m_Test;
     m_MissingClassValuesTest     = Boolean.parseBoolean(PROPERTIES.getProperty("MissingClassValuesTest", "true")) && m_Test;
     m_MinimumNumberInstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty("MinimumNumberInstancesTest", "true")) && m_Test;
-    
-    if (owner instanceof weka.classifiers.UpdateableClassifier ||
-        owner instanceof weka.clusterers.UpdateableClusterer) {
-      setMinimumNumberInstances(0);
-    }
   }
   
   /**
@@ -587,8 +581,6 @@ public class Capabilities
     enableAllAttributeDependencies();
     enableAllClasses();
     enableAllClassDependencies();
-    enable(Capability.MISSING_VALUES);
-    enable(Capability.MISSING_CLASS_VALUES);
   }
 
   /**
@@ -723,9 +715,6 @@ public class Capabilities
     disableAllAttributeDependencies();
     disableAllClasses();
     disableAllClassDependencies();
-    disable(Capability.MISSING_VALUES);
-    disable(Capability.MISSING_CLASS_VALUES);
-    disable(Capability.NO_CLASS);
   }
   
   /**
@@ -1231,7 +1220,7 @@ public class Capabilities
 	MultiInstanceCapabilitiesHandler handler = (MultiInstanceCapabilitiesHandler) getOwner();
 	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
-	if (data.numInstances() > 0 && data.attribute(1).numValues() > 0)
+	if (data.numInstances() > 0)
 	  result = cap.test(data.attribute(1).relation(0));
 	else
 	  result = cap.test(data.attribute(1).relation());
@@ -1308,18 +1297,18 @@ public class Capabilities
    * @return 	a string representation of this object
    */
   public String toString() {
-    Vector<Capability>		sorted;
+    Vector		sorted;
     StringBuffer	result;
     
     result = new StringBuffer();
 
     // capabilities
-    sorted = new Vector<Capability>(m_Capabilities);
+    sorted = new Vector(m_Capabilities);
     Collections.sort(sorted);
     result.append("Capabilities: " + sorted.toString() + "\n");
 
     // dependencies
-    sorted = new Vector<Capability>(m_Dependencies);
+    sorted = new Vector(m_Dependencies);
     Collections.sort(sorted);
     result.append("Dependencies: " + sorted.toString() + "\n");
     
@@ -1369,53 +1358,18 @@ public class Capabilities
     // object name
     result.append(indentStr + capsName + " " + objectname + " = new " + capsName + "(this);\n");
     
-    List<Capability> capsList = new ArrayList<Capability>();
-    boolean hasNominalAtt = false;
-    boolean hasBinaryAtt = false;
-    boolean hasUnaryAtt = false;
-    boolean hasEmptyNomAtt = false;
-    boolean hasNominalClass = false;
     // capabilities
     result.append("\n");
     for (Capability cap: Capability.values()) {
       // capability
-      if (handles(cap)) {
-        if (cap == Capability.NOMINAL_ATTRIBUTES) {
-          hasNominalAtt = true;
-        }
-        if (cap == Capability.NOMINAL_CLASS) {
-          hasNominalClass = true;
-        }
-        if (cap == Capability.BINARY_ATTRIBUTES) {
-          hasBinaryAtt = true;
-        }
-        if (cap == Capability.UNARY_ATTRIBUTES) {
-          hasUnaryAtt = true;
-        }
-        if (cap == Capability.EMPTY_NOMINAL_ATTRIBUTES) {
-          hasEmptyNomAtt = true;
-        }
-        capsList.add(cap);              
-      }
-    }
-    
-    for (Capability cap : capsList) {
-      if ((cap == Capability.BINARY_ATTRIBUTES && hasNominalAtt) ||
-          (cap == Capability.UNARY_ATTRIBUTES && hasBinaryAtt) ||
-          (cap == Capability.EMPTY_NOMINAL_ATTRIBUTES && hasUnaryAtt) ||
-          (cap == Capability.BINARY_CLASS && hasNominalClass)) {
-        continue;
-      }
-      result.append(
-          indentStr + objectname + ".enable(" + capName + "." + cap.name() + ");\n");
+      if (handles(cap))
+        result.append(
+            indentStr + objectname + ".enable(" + capName + "." + cap.name() + ");\n");
       // dependency
       if (hasDependency(cap))
         result.append(
             indentStr + objectname + ".enableDependency(" + capName + "." + cap.name() + ");\n");
     }
-    
-    // capabilities
-    result.append("\n");
 
     // other
     result.append("\n");

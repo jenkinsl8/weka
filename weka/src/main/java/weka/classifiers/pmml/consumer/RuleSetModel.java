@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RuleSetModel.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -101,19 +102,19 @@ public class RuleSetModel extends PMMLClassifier {
      * The predicted value as a number (regression) or index (classification)
      * when the rule fires (required)
      */
-    protected double m_score = Utils.missingValue();
+    protected double m_score = Instance.missingValue();
     
     /** The number of training/test instances on which the rule fired (optional) */
-    protected double m_recordCount = Utils.missingValue();
+    protected double m_recordCount = Instance.missingValue();
     
     /** 
      * The number of training/test instances on which the rule fired and the
      * prediction was correct (optional)
      */
-    protected double m_nbCorrect = Utils.missingValue();
+    protected double m_nbCorrect = Instance.missingValue();
     
     /** The confidence of the rule (optional) */
-    protected double m_confidence = Utils.missingValue();
+    protected double m_confidence = Instance.missingValue();
     
     /** The score distributions for this rule (if any) */
     protected ArrayList<TreeModel.ScoreDistribution> m_scoreDistributions = 
@@ -123,7 +124,7 @@ public class RuleSetModel extends PMMLClassifier {
      *  The relative importance of the rule. May or may not be equal to the
      * confidence (optional).
      */
-    protected double m_weight = Utils.missingValue();
+    protected double m_weight = Instance.missingValue();
     
     public String toString(String prefix, int indent) {
       StringBuffer temp = new StringBuffer();
@@ -134,16 +135,16 @@ public class RuleSetModel extends PMMLClassifier {
       
       temp.append(prefix + "Simple rule: " + m_predicate + "\n");
       temp.append(prefix + " => " + m_scoreString + "\n");
-      if (!Utils.isMissingValue(m_recordCount)) {
+      if (!Instance.isMissingValue(m_recordCount)) {
         temp.append(prefix + " recordCount: " + m_recordCount + "\n");
       }
-      if (!Utils.isMissingValue(m_nbCorrect)) {
+      if (!Instance.isMissingValue(m_nbCorrect)) {
         temp.append(prefix + "   nbCorrect: " + m_nbCorrect + "\n");
       }
-      if (!Utils.isMissingValue(m_confidence)) {
+      if (!Instance.isMissingValue(m_confidence)) {
         temp.append(prefix + "  confidence: " + m_confidence + "\n");
       }
-      if (!Utils.isMissingValue(m_weight)) {
+      if (!Instance.isMissingValue(m_weight)) {
         temp.append(prefix + "      weight: " + m_weight + "\n");
       }
       
@@ -229,7 +230,7 @@ public class RuleSetModel extends PMMLClassifier {
         }
         
         //backfit the confidence values (if necessary)
-        if (Utils.isMissingValue(m_recordCount)) {
+        if (Instance.isMissingValue(m_recordCount)) {
           double baseCount = 0;
           for (TreeModel.ScoreDistribution s : m_scoreDistributions) {
             baseCount += s.getRecordCount();
@@ -278,7 +279,7 @@ public class RuleSetModel extends PMMLClassifier {
           for (TreeModel.ScoreDistribution s : m_scoreDistributions) {
             preds[s.getClassLabelIndex()] = s.getConfidence();
           }
-        } else if (!Utils.isMissingValue(m_confidence)) {
+        } else if (!Instance.isMissingValue(m_confidence)) {
           preds[classAtt.indexOfValue(m_scoreString)] = m_confidence;
         } else {
           preds[classAtt.indexOfValue(m_scoreString)] = 1.0;
@@ -425,13 +426,13 @@ public class RuleSetModel extends PMMLClassifier {
      * applied to generate support and confidence measures for individual
      * rules (optional)
      */
-    private double m_recordCount = Utils.missingValue();
+    private double m_recordCount = Instance.missingValue();
     
     /** 
      * The number of training/test cases for which the default
      * score is correct (optional)
      */
-    private double m_nbCorrect = Utils.missingValue();
+    private double m_nbCorrect = Instance.missingValue();
     
     /** 
      * The default value to predict when no rule in the
@@ -443,7 +444,7 @@ public class RuleSetModel extends PMMLClassifier {
      * The default value to predict (either a real value or an
      * index) 
      * */
-    private double m_defaultPrediction = Utils.missingValue();
+    private double m_defaultPrediction = Instance.missingValue();
     
     /** 
      * The default distribution to predict when no rule in the
@@ -456,7 +457,7 @@ public class RuleSetModel extends PMMLClassifier {
      * The default confidence value to return along with a score
      * when no rules in the set fire (optional)
      */
-    private double m_defaultConfidence = Utils.missingValue();
+    private double m_defaultConfidence = Instance.missingValue();
     
     /** The active rule selection method */
     private RuleSelectionMethod m_currentMethod;
@@ -478,13 +479,13 @@ public class RuleSetModel extends PMMLClassifier {
       if (m_defaultScore != null) {
         temp.append("Default prediction: " + m_defaultScore + "\n");
         
-        if (!Utils.isMissingValue(m_recordCount)) {
+        if (!Instance.isMissingValue(m_recordCount)) {
           temp.append("       recordCount: " + m_recordCount + "\n");
         }
-        if (!Utils.isMissingValue(m_nbCorrect)) {
+        if (!Instance.isMissingValue(m_nbCorrect)) {
           temp.append("         nbCorrect: " + m_nbCorrect + "\n");
         }
-        if (!Utils.isMissingValue(m_defaultConfidence)) {
+        if (!Instance.isMissingValue(m_defaultConfidence)) {
           temp.append(" defaultConfidence: " + m_defaultConfidence + "\n");
         }
         
@@ -579,7 +580,7 @@ public class RuleSetModel extends PMMLClassifier {
         }
         
         //backfit the confidence values (if necessary)
-        if (Utils.isMissingValue(m_recordCount)) {
+        if (Instance.isMissingValue(m_recordCount)) {
           double baseCount = 0;
           for (TreeModel.ScoreDistribution s : m_scoreDistributions) {
             baseCount += s.getRecordCount();
@@ -640,7 +641,7 @@ public class RuleSetModel extends PMMLClassifier {
           double wMax = Double.NEGATIVE_INFINITY;
           SimpleRule best = null;
           for (SimpleRule s : firingRules) {
-            if (Utils.isMissingValue(s.getWeight())) {
+            if (Instance.isMissingValue(s.getWeight())) {
               throw new Exception("[RuleSet] Scoring criterion is WEIGHTEDMAX, but " +
               		"rule " + s.getID() + " does not have a weight defined!");
             }
@@ -657,7 +658,7 @@ public class RuleSetModel extends PMMLClassifier {
         } else if (m_currentMethod == RuleSelectionMethod.WEIGHTEDSUM) {
           double sumOfWeights = 0;
           for (SimpleRule s : firingRules) {
-            if (Utils.isMissingValue(s.getWeight())) {
+            if (Instance.isMissingValue(s.getWeight())) {
               throw new Exception("[RuleSet] Scoring criterion is WEIGHTEDSUM, but " +
                         "rule " + s.getID() + " does not have a weight defined!");
             }            
@@ -686,7 +687,7 @@ public class RuleSetModel extends PMMLClassifier {
             for (TreeModel.ScoreDistribution s : m_scoreDistributions) {
               preds[s.getClassLabelIndex()] = s.getConfidence();
             }
-          } else if (!Utils.isMissingValue(m_defaultConfidence)) {
+          } else if (!Instance.isMissingValue(m_defaultConfidence)) {
             preds[(int)m_defaultPrediction] = m_defaultConfidence;
           } else {
             preds[(int)m_defaultPrediction] = 1.0;
@@ -759,7 +760,7 @@ public class RuleSetModel extends PMMLClassifier {
    *                                                                                                              
    * @param inst the instance to be classified                                                                
    * @return the predicted most likely class for the instance or                                                  
-   * Utils.missingValue() if no prediction is made                                                             
+   * Instance.missingValue() if no prediction is made                                                             
    * @exception Exception if an error occurred during the prediction                                              
    */
   public double[] distributionForInstance(Instance inst) throws Exception {

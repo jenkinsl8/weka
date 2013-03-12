@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Discretize.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.Utils;
+import weka.core.FastVector;
+import weka.core.Instance;
 
 /**
  * Class encapsulating a Discretize Expression.
@@ -60,7 +62,7 @@ public class Discretize extends Expression {
      * If the optype is continuous or ordinal, we will attempt to parse
      * the bin value as a number and store it here.
      */
-    private double m_numericBinValue = Utils.missingValue();
+    private double m_numericBinValue = Instance.missingValue();
     
     protected DiscretizeBin(Element bin, 
         FieldMetaInfo.Optype opType) throws Exception {
@@ -247,7 +249,7 @@ public class Discretize extends Expression {
         m_opType == FieldMetaInfo.Optype.ORDINAL) {
       // check to see if all bin values could be parsed as numbers
       for (DiscretizeBin d : m_bins) {
-        if (Utils.isMissingValue(d.getBinValueNumeric())) {
+        if (Instance.isMissingValue(d.getBinValueNumeric())) {
           categorical = true;
           break;
         }
@@ -256,7 +258,7 @@ public class Discretize extends Expression {
       categorical = true;
     }
     tempAtt = (categorical) 
-    ? new Attribute("temp", (ArrayList<String>)null) 
+    ? new Attribute("temp", (FastVector)null) 
     : new Attribute(m_fieldName + "_discretized(optype=continuous)");
       
     if (categorical) {
@@ -277,9 +279,9 @@ public class Discretize extends Expression {
       }
 
       // now make this into a nominal attribute
-      ArrayList<String> values = new ArrayList<String>();
+      FastVector values = new FastVector();
       for (int i = 0; i < tempAtt.numValues(); i++) {
-        values.add(tempAtt.value(i)); 
+        values.addElement(tempAtt.value(i)); 
       }
 
       m_outputDef = new Attribute(m_fieldName + "_discretized", values);
@@ -302,7 +304,7 @@ public class Discretize extends Expression {
       // for all expressions after all derived fields are collected
       return (m_opType == FieldMetaInfo.Optype.CATEGORICAL || 
           m_opType == FieldMetaInfo.Optype.ORDINAL)
-      ? new Attribute(m_fieldName + "_discretized", new ArrayList<String>())
+      ? new Attribute(m_fieldName + "_discretized", new FastVector())
       : new Attribute(m_fieldName + "_discretized(optype=continuous)");
     }
     return m_outputDef;
@@ -322,11 +324,11 @@ public class Discretize extends Expression {
     
     // default of a missing value for the result if none of the following
     // logic applies
-    double result = Utils.missingValue();
+    double result = Instance.missingValue();
     
     double value = incoming[m_fieldIndex];
     
-    if (Utils.isMissingValue(value)) {
+    if (Instance.isMissingValue(value)) {
       if (m_mapMissingDefined) {
         if (m_outputDef.isNominal()) {
           result = m_outputDef.indexOfValue(m_mapMissingTo);
@@ -384,7 +386,7 @@ public class Discretize extends Expression {
    */
   public String getResultCategorical(double[] incoming) throws Exception {
     double index = getResult(incoming);
-    if (Utils.isMissingValue(index)) {
+    if (Instance.isMissingValue(index)) {
       return "**Missing Value**";
     }
     

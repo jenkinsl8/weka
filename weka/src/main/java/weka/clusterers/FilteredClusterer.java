@@ -1,39 +1,40 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * FilteredClusterer.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -59,19 +60,10 @@ import weka.filters.SupervisedFilter;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).</pre>
- * 
- * <pre> -V
- *  Display std. deviations for centroids.
- * </pre>
- * 
- * <pre> -M
- *  Replace missing values with mean/mode.
- * </pre>
+ *  number of clusters. (default = 2).</pre>
  * 
  * <pre> -S &lt;num&gt;
- *  Random number seed.
+ *  random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -80,7 +72,7 @@ import weka.filters.SupervisedFilter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2.2.1 $
  * @see weka.classifiers.meta.FilteredClassifier
  */
 public class FilteredClusterer
@@ -169,19 +161,10 @@ public class FilteredClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).</pre>
-   * 
-   * <pre> -V
-   *  Display std. deviations for centroids.
-   * </pre>
-   * 
-   * <pre> -M
-   *  Replace missing values with mean/mode.
-   * </pre>
+   *  number of clusters. (default = 2).</pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  Random number seed.
+   *  random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -291,13 +274,10 @@ public class FilteredClusterer
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getFilter() == null) {
+    if (getFilter() == null)
       result = super.getCapabilities();
-      result.disableAll();
-      result.enable(Capability.NO_CLASS);
-    } else {
+    else
       result = getFilter().getCapabilities();
-    }
     
     // set dependencies
     for (Capability cap: Capability.values())
@@ -385,7 +365,7 @@ public class FilteredClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 
   /**
@@ -397,4 +377,3 @@ public class FilteredClusterer
     runClusterer(new FilteredClusterer(), args);
   }
 }
-

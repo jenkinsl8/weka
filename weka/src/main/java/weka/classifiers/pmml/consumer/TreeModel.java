@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    TreeModel.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,8 +35,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.pmml.Array;
-import weka.core.pmml.MiningSchema;
+import weka.core.pmml.*;
 
 /**
  * Class implementing import of PMML TreeModel. Can be used as a Weka
@@ -71,7 +71,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     private double m_recordCount;
     
     /** The optional confidence value */
-    private double m_confidence = Utils.missingValue();
+    private double m_confidence = Instance.missingValue();
     
     /**
      * Construct a ScoreDistribution entry
@@ -102,7 +102,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       String confidence = scoreE.getAttribute("confidence");
       if (confidence != null && confidence.length() > 0) {
         m_confidence = Double.parseDouble(confidence);        
-      } else if (!Utils.isMissingValue(baseCount) && baseCount > 0) {
+      } else if (!Instance.isMissingValue(baseCount) && baseCount > 0) {
         m_confidence = m_recordCount / baseCount;
       }
     }
@@ -118,8 +118,8 @@ public class TreeModel extends PMMLClassifier implements Drawable {
      * entry).
      */
     void deriveConfidenceValue(double baseCount) {
-      if (Utils.isMissingValue(m_confidence) && 
-          !Utils.isMissingValue(baseCount) && 
+      if (Instance.isMissingValue(m_confidence) && 
+          !Instance.isMissingValue(baseCount) && 
           baseCount > 0) {
         m_confidence = m_recordCount / baseCount;
       }
@@ -291,7 +291,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     enum Operator {
       EQUAL("equal") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]), 
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]), 
               weka.core.Utils.eq(input[fieldIndex], value));
         }
         
@@ -302,7 +302,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       NOTEQUAL("notEqual")
        {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]), 
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]), 
               (input[fieldIndex] != value));
         }
         
@@ -312,7 +312,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       LESSTHAN("lessThan")  {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]),
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]),
               (input[fieldIndex] < value));
         }
         
@@ -322,7 +322,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       LESSOREQUAL("lessOrEqual") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]),
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]),
               (input[fieldIndex] <= value));
         }
         
@@ -332,7 +332,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       GREATERTHAN("greaterThan") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]),
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]),
               (input[fieldIndex] > value));
         }
         
@@ -342,7 +342,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       GREATEROREQUAL("greaterOrEqual") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]),
+          return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]),
               (input[fieldIndex] >= value));
         }
         
@@ -353,7 +353,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       ISMISSING("isMissing") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
           return Predicate.booleanToEval(false,
-              Utils.isMissingValue(input[fieldIndex]));
+              Instance.isMissingValue(input[fieldIndex]));
         }
         
         String shortName() {
@@ -362,7 +362,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       },
       ISNOTMISSING("isNotMissing") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
-          return Predicate.booleanToEval(false, !Utils.isMissingValue(input[fieldIndex]));
+          return Predicate.booleanToEval(false, !Instance.isMissingValue(input[fieldIndex]));
         }
         
         String shortName() {
@@ -650,17 +650,17 @@ public class TreeModel extends PMMLClassifier implements Drawable {
               Array set, Attribute nominalLookup) {            
             if (set.getType() == Array.ArrayType.STRING) {
               String value = "";
-              if (!Utils.isMissingValue(input[fieldIndex])) {
+              if (!Instance.isMissingValue(input[fieldIndex])) {
                 value = nominalLookup.value((int)input[fieldIndex]);
               }
-              return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]), 
+              return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]), 
                   set.contains(value));
             } else if (set.getType() == Array.ArrayType.NUM ||
                 set.getType() == Array.ArrayType.REAL) {
-              return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]), 
+              return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]), 
                 set.contains(input[fieldIndex]));
             }
-            return Predicate.booleanToEval(Utils.isMissingValue(input[fieldIndex]), 
+            return Predicate.booleanToEval(Instance.isMissingValue(input[fieldIndex]), 
                 set.contains((int)input[fieldIndex]));
           }
         },
@@ -804,10 +804,10 @@ public class TreeModel extends PMMLClassifier implements Drawable {
     private int m_scoreIndex = -1;
     
     /** The score as a number (if target is numeric) */
-    private double m_scoreNumeric = Utils.missingValue();
+    private double m_scoreNumeric = Instance.missingValue();
     
     /** The record count at this node (if defined) */
-    private double m_recordCount = Utils.missingValue();
+    private double m_recordCount = Instance.missingValue();
     
     /** The ID of the default child (if applicable) */
     private String m_defaultChildID;
@@ -929,7 +929,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       }
       
       // backfit the confidence values
-      if (Utils.isMissingValue(m_recordCount)) {
+      if (Instance.isMissingValue(m_recordCount)) {
         double baseCount = 0;
         for (ScoreDistribution s : m_scoreDistributions) {
           baseCount += s.getRecordCount();
@@ -1045,7 +1045,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       } else {
         // leaf
         text.append(": ");
-        if (!Utils.isMissingValue(m_scoreNumeric)) {
+        if (!Instance.isMissingValue(m_scoreNumeric)) {
           text.append(m_scoreNumeric);
         } else {
           text.append(m_scoreString + " ");
@@ -1136,7 +1136,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       if (TreeModel.this.m_noTrueChildStrategy == 
         NoTrueChildStrategy.RETURNNULLPREDICTION) {
         for (int i = 0; i < classAtt.numValues(); i++) {
-          preds[i] = Utils.missingValue();
+          preds[i] = Instance.missingValue();
         }
       } else {
         // return the predictions at this node
@@ -1192,7 +1192,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
               c.getPredicate().evaluate(instance) == Predicate.Eval.UNKNOWN) {
             
             weights[count] = c.getRecordCount();
-            if (Utils.isMissingValue(weights[count])) {
+            if (Instance.isMissingValue(weights[count])) {
               throw new Exception("[TreeNode] weighted confidence missing value " +
               		"strategy invoked, but no record count defined for node " +
               		c.getID());
@@ -1423,7 +1423,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
         } else {
           // do the strategy
           for (int i = 0; i < classAtt.numValues(); i++) {
-            preds[i] = Utils.missingValue();
+            preds[i] = Instance.missingValue();
           }
         }
       }
@@ -1532,7 +1532,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    * We don't actually make use of this since we always return 
    * full probability distributions.
    */
-  protected double m_missingValuePenalty = Utils.missingValue();
+  protected double m_missingValuePenalty = Instance.missingValue();
   
   /** The no true child strategy to use */
   protected NoTrueChildStrategy m_noTrueChildStrategy = NoTrueChildStrategy.RETURNNULLPREDICTION;
@@ -1611,7 +1611,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    *                                                                                                              
    * @param inst the instance to be classified                                                                
    * @return the predicted most likely class for the instance or                                                  
-   * Utils.missingValue() if no prediction is made                                                             
+   * Instance.missingValue() if no prediction is made                                                             
    * @exception Exception if an error occurred during the prediction                                              
    */
   public double[] distributionForInstance(Instance inst) throws Exception {

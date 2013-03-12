@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Debug.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -39,7 +40,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.7.2.1 $
  */
 public class Debug
   implements Serializable, RevisionHandler {
@@ -83,7 +84,7 @@ public class Debug
    * disable the use of CPU time as well.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision$ 
+   * @version $Revision: 1.7.2.1 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -247,7 +248,7 @@ public class Debug
     protected ThreadMXBean getThreadMonitor() {
       if (m_ThreadMonitor == null) {
 	m_ThreadMonitor = ManagementFactory.getThreadMXBean();
-	if (m_CanMeasureCpuTime && !m_ThreadMonitor.isThreadCpuTimeEnabled())
+	if (!m_ThreadMonitor.isThreadCpuTimeEnabled())
 	  m_ThreadMonitor.setThreadCpuTimeEnabled(true);
 	m_ThreadID = Thread.currentThread().getId();
       }
@@ -421,7 +422,7 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
   
@@ -431,7 +432,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision$ 
+   * @version $Revision: 1.7.2.1 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -544,7 +545,7 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
   
@@ -652,7 +653,7 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
   
@@ -663,7 +664,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision$ 
+   * @version $Revision: 1.7.2.1 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -878,7 +879,7 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
 
@@ -889,7 +890,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision$
+   * @version $Revision: 1.7.2.1 $
    */
   public static class Random
     extends java.util.Random
@@ -1166,14 +1167,14 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
   /**
    * contains debug methods
    *
    * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
-   * @version $Revision$
+   * @version $Revision: 1.7.2.1 $
    */
   public static class DBO 
     implements Serializable, RevisionHandler {
@@ -1323,7 +1324,7 @@ public class Debug
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   }
   
@@ -1652,6 +1653,6 @@ public class Debug
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 }

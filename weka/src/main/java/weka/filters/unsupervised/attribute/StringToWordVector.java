@@ -1,37 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    StringToWordVector.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -45,12 +37,21 @@ import weka.core.SparseInstance;
 import weka.core.Stopwords;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -80,11 +81,6 @@ import weka.filters.UnsupervisedFilter;
  *  Specify approximate number of word fields to create.
  *  Surplus words will be discarded..
  *  (default: 1000)</pre>
- * 
- * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
- *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
- *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
- *  (default: no periodic pruning)</pre>
  * 
  * <pre> -T
  *  Transform the word frequencies into log(1+fij)
@@ -135,7 +131,7 @@ import weka.filters.UnsupervisedFilter;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision: 1.19.2.4 $ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -338,76 +334,76 @@ public class StringToWordVector
    * Parses a given list of options. <p/>
    * 
          <!-- options-start -->
-         * Valid options are: <p/>
-         * 
-         * <pre> -C
-         *  Output word counts rather than boolean word presence.
-         * </pre>
-         * 
-         * <pre> -R &lt;index1,index2-index4,...&gt;
-         *  Specify list of string attributes to convert to words (as weka Range).
-         *  (default: select all string attributes)</pre>
-         * 
-         * <pre> -V
-         *  Invert matching sense of column indexes.</pre>
-         * 
-         * <pre> -P &lt;attribute name prefix&gt;
-         *  Specify a prefix for the created attribute names.
-         *  (default: "")</pre>
-         * 
-         * <pre> -W &lt;number of words to keep&gt;
-         *  Specify approximate number of word fields to create.
-         *  Surplus words will be discarded..
-         *  (default: 1000)</pre>
-         * 
-         * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
-         *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
-         *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
-         *  (default: no periodic pruning)</pre>
-         * 
-         * <pre> -T
-         *  Transform the word frequencies into log(1+fij)
-         *  where fij is the frequency of word i in jth document(instance).
-         * </pre>
-         * 
-         * <pre> -I
-         *  Transform each word frequency into:
-         *  fij*log(num of Documents/num of documents containing word i)
-         *    where fij if frequency of word i in jth document(instance)</pre>
-         * 
-         * <pre> -N
-         *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
-         *  to average length of training documents (default 0=don't normalize).</pre>
-         * 
-         * <pre> -L
-         *  Convert all tokens to lowercase before adding to the dictionary.</pre>
-         * 
-         * <pre> -S
-         *  Ignore words that are in the stoplist.</pre>
-         * 
-         * <pre> -stemmer &lt;spec&gt;
-         *  The stemmering algorihtm (classname plus parameters) to use.</pre>
-         * 
-         * <pre> -M &lt;int&gt;
-         *  The minimum term frequency (default = 1).</pre>
-         * 
-         * <pre> -O
-         *  If this is set, the maximum number of words and the 
-         *  minimum term frequency is not enforced on a per-class 
-         *  basis but based on the documents in all the classes 
-         *  (even if a class attribute is set).</pre>
-         * 
-         * <pre> -stopwords &lt;file&gt;
-         *  A file containing stopwords to override the default ones.
-         *  Using this option automatically sets the flag ('-S') to use the
-         *  stoplist if the file exists.
-         *  Format: one stopword per line, lines starting with '#'
-         *  are interpreted as comments and ignored.</pre>
-         * 
-         * <pre> -tokenizer &lt;spec&gt;
-         *  The tokenizing algorihtm (classname plus parameters) to use.
-         *  (default: weka.core.tokenizers.WordTokenizer)</pre>
-         * 
+   * Valid options are: <p/>
+   * 
+   * <pre> -C
+   *  Output word counts rather than boolean word presence.
+   * </pre>
+   * 
+   * <pre> -R &lt;index1,index2-index4,...&gt;
+   *  Specify list of string attributes to convert to words (as weka Range).
+   *  (default: select all string attributes)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   * <pre> -P &lt;attribute name prefix&gt;
+   *  Specify a prefix for the created attribute names.
+   *  (default: "")</pre>
+   * 
+   * <pre> -W &lt;number of words to keep&gt;
+   *  Specify approximate number of word fields to create.
+   *  Surplus words will be discarded..
+   *  (default: 1000)</pre>
+   *
+   * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
+   *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
+   *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
+   *  (default: no periodic pruning)"</pre>
+   * 
+   * <pre> -T
+   *  Transform the word frequencies into log(1+fij)
+   *  where fij is the frequency of word i in jth document(instance).
+   * </pre>
+   * 
+   * <pre> -I
+   *  Transform each word frequency into:
+   *  fij*log(num of Documents/num of documents containing word i)
+   *    where fij if frequency of word i in jth document(instance)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
+   *  to average length of training documents (default 0=don't normalize).</pre>
+   * 
+   * <pre> -L
+   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+   * 
+   * <pre> -S
+   *  Ignore words that are in the stoplist.</pre>
+   * 
+   * <pre> -stemmer &lt;spec&gt;
+   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+   * 
+   * <pre> -M &lt;int&gt;
+   *  The minimum term frequency (default = 1).</pre>
+   * 
+   * <pre> -O
+   *  If this is set, the maximum number of words and the 
+   *  minimum term frequency is not enforced on a per-class 
+   *  basis but based on the documents in all the classes 
+   *  (even if a class attribute is set).</pre>
+   * 
+   * <pre> -stopwords &lt;file&gt;
+   *  A file containing stopwords to override the default ones.
+   *  Using this option automatically sets the flag ('-S') to use the
+   *  stoplist if the file exists.
+   *  Format: one stopword per line, lines starting with '#'
+   *  are interpreted as comments and ignored.</pre>
+   * 
+   * <pre> -tokenizer &lt;spec&gt;
+   *  The tokenizing algorihtm (classname plus parameters) to use.
+   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+   * 
          <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -619,7 +615,7 @@ public class StringToWordVector
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
+      return RevisionUtils.extract("$Revision: 1.19.2.4 $");
     }
   }
 
@@ -631,7 +627,6 @@ public class StringToWordVector
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -716,14 +711,6 @@ public class StringToWordVector
     // if the first batch hasn't been processed. Otherwise
     // input() has already done all the work.
     if (!isFirstBatchDone()) {
-      
-      // turn of per-class mode if the class is not nominal (or is all missing)!
-      if (getInputFormat().classIndex() >= 0) {
-        if (!getInputFormat().classAttribute().isNominal() || 
-            getInputFormat().attributeStats(getInputFormat().classIndex()).missingCount == getInputFormat().numInstances()) {
-          m_doNotOperateOnPerClassBasis = true;
-        }
-      }
 
       // Determine the dictionary from the first batch (training data)
       determineDictionary();
@@ -761,7 +748,7 @@ public class StringToWordVector
       // Push all instances into the output queue
       for(int i=0; i<fv.size(); i++) {
 	push((Instance) fv.elementAt(i));
-      }      
+      }
     }
 
     // Flush the input
@@ -1436,7 +1423,7 @@ public class StringToWordVector
 	      if(stopwords.is(word))
 		continue;
 
-	    if(!(h.containsKey(word)))
+	    if(!(h.contains(word)))
 	      h.put(word, new Integer(0));
 
 	    Count count = (Count)dictionaryArr[vInd].get(word);
@@ -1589,8 +1576,7 @@ public class StringToWordVector
     int firstCopy = 0;
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (!m_SelectedRange.isInRange(i)) { 
-	if (getInputFormat().attribute(i).type() != Attribute.STRING && 
-	    getInputFormat().attribute(i).type() != Attribute.RELATIONAL) {
+	if (getInputFormat().attribute(i).type() != Attribute.STRING) {
 	  // Add simple nominal and numeric attributes directly
 	  if (instance.value(i) != 0.0) {
 	    contained.put(new Integer(firstCopy), 
@@ -1599,8 +1585,8 @@ public class StringToWordVector
 	} else {
 	  if (instance.isMissing(i)) {
 	    contained.put(new Integer(firstCopy),
-		new Double(Utils.missingValue()));
-	  } else if (getInputFormat().attribute(i).type() == Attribute.STRING) {
+		new Double(Instance.missingValue()));
+	  } else {
 
 	    // If this is a string attribute, we have to first add
 	    // this value to the range of possible values, then add
@@ -1615,17 +1601,6 @@ public class StringToWordVector
 	    .addStringValue(instance.stringValue(i));
 	    contained.put(new Integer(firstCopy), 
 		new Double(newIndex));
-	  } else {
-	    // relational
-	    if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
-	      Instances relationalHeader = outputFormatPeek().attribute(firstCopy).relation();
-	      
-	      // hack to defeat sparse instances bug
-	      outputFormatPeek().attribute(firstCopy).addRelation(relationalHeader);
-	    }
-	    int newIndex = outputFormatPeek().attribute(firstCopy)
-	      .addRelation(instance.relationalValue(i));
-	    contained.put(new Integer(firstCopy), new Double(newIndex));
 	  }
 	}
 	firstCopy++;
@@ -1752,7 +1727,7 @@ public class StringToWordVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.19.2.4 $");
   }
 
   /**
@@ -1765,4 +1740,3 @@ public class StringToWordVector
     runFilter(new StringToWordVector(), argv);
   }
 }
-

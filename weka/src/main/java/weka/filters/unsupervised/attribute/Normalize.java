@@ -1,32 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Normalize.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -34,8 +30,12 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -63,7 +63,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.10.2.3 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
@@ -196,7 +196,6 @@ public class Normalize
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -284,7 +283,7 @@ public class Normalize
 	for (int i = 0; i < input.numAttributes(); i++) {
 	  if (input.attribute(i).isNumeric() &&
 	      (input.classIndex() != i)) {
-	    if (!Utils.isMissingValue(value[i])) {
+	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
 	      }
@@ -327,7 +326,7 @@ public class Normalize
       for (int j = 0; j < instance.numAttributes(); j++) {
 	double value;
 	if (instance.attribute(j).isNumeric() &&
-	    (!Utils.isMissingValue(vals[j])) &&
+	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
@@ -368,7 +367,7 @@ public class Normalize
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
-	    (!Utils.isMissingValue(vals[j])) &&
+	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
@@ -385,7 +384,7 @@ public class Normalize
 	  }
 	}
       }	
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);
@@ -566,7 +565,7 @@ public class Normalize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.10.2.3 $");
   }
   
   /**

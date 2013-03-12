@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CostBenefitAnalysis.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,9 +26,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -39,10 +39,7 @@ import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.EventObject;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -60,14 +57,14 @@ import javax.swing.event.ChangeListener;
 
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.gui.Logger;
-import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.Plot2D;
+import weka.gui.visualize.PlotData2D;
 
 
 /**
@@ -76,18 +73,14 @@ import weka.gui.visualize.VisualizePanel;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-@KFStep(category = "Visualize", toolTipText = "Interactive cost/benefit analysis")
 public class CostBenefitAnalysis extends JPanel 
   implements BeanCommon, ThresholdDataListener, Visible, UserRequestAcceptor,
-  Serializable, BeanContextChild, HeadlessEventCollector {
+  Serializable, BeanContextChild {
   
   /** For serialization */
   private static final long serialVersionUID = 8647471654613320469L;
 
-  protected BeanVisual m_visual = new BeanVisual("CostBenefitAnalysis", 
-      BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
-      BeanVisual.ICON_PATH
-      +"ModelPerformanceChart_animated.gif");
+  protected BeanVisual m_visual;
   
   protected transient JFrame m_popupFrame;
 
@@ -115,8 +108,6 @@ public class CostBenefitAnalysis extends JPanel
    * The object sending us data (we allow only one connection at any one time)
    */
   protected Object m_listenee;
-  
-  protected List<EventObject> m_headlessEvents;
   
   /**
    * Inner class for displaying the plots and all control widgets.
@@ -178,10 +169,10 @@ public class CostBenefitAnalysis extends JPanel
     protected JLabel m_cost_predictedB = new JLabel("Predicted (b)", SwingConstants.RIGHT);
     protected JLabel m_cost_actualA = new JLabel(" Actual (a)");
     protected JLabel m_cost_actualB = new JLabel(" Actual (b)");
-    protected JTextField m_cost_aa = new JTextField("0.0", 5);
+    protected JTextField m_cost_aa = new JTextField(5);
     protected JTextField m_cost_ab = new JTextField("1.0", 5);
     protected JTextField m_cost_ba = new JTextField("1.0", 5);
-    protected JTextField m_cost_bb = new JTextField("0.0" ,5);
+    protected JTextField m_cost_bb = new JTextField(5);
     protected JButton m_maximizeCB = new JButton("Maximize Cost/Benefit");
     protected JButton m_minimizeCB = new JButton("Minimize Cost/Benefit");
     protected JRadioButton m_costR = new JRadioButton("Cost");
@@ -265,7 +256,7 @@ public class CostBenefitAnalysis extends JPanel
        * @param precision precision for the percentage value
        */
       public void setCellValue(double cellValue, double max, double scaleFactor, int precision) {
-        if (!Utils.isMissingValue(cellValue)) {
+        if (!Instance.isMissingValue(cellValue)) {
           m_percentage = cellValue / max;
         } else {
           m_percentage = 0;
@@ -621,7 +612,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tpCost = Double.parseDouble(m_cost_aa.getText());
       } catch (NumberFormatException n) {}
-      double fpCost = 0.0;
+      double fpCost = 1.0;
       try {
         fpCost = Double.parseDouble(m_cost_ba.getText());
       } catch (NumberFormatException n) {}
@@ -629,11 +620,11 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tnCost = Double.parseDouble(m_cost_bb.getText());
       } catch (NumberFormatException n) {}
-      double fnCost = 0.0;
+      double fnCost = 1.0;
       try {
         fnCost = Double.parseDouble(m_cost_ab.getText());
       } catch (NumberFormatException n) {}
-            
+      
       totalRandomCB += posInSample * tpCost;
       totalRandomCB += negInSample * fpCost;
       totalRandomCB += posOutSample * fnCost;
@@ -880,7 +871,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tpCost = Double.parseDouble(m_cost_aa.getText());
       } catch (NumberFormatException n) {}
-      double fpCost = 0.0;
+      double fpCost = 1.0;
       try {
         fpCost = Double.parseDouble(m_cost_ba.getText());
       } catch (NumberFormatException n) {}
@@ -888,7 +879,7 @@ public class CostBenefitAnalysis extends JPanel
       try {
         tnCost = Double.parseDouble(m_cost_bb.getText());
       } catch (NumberFormatException n) {}
-      double fnCost = 0.0;
+      double fnCost = 1.0;
       try {
         fnCost = Double.parseDouble(m_cost_ab.getText());
       } catch (NumberFormatException n) {}
@@ -913,7 +904,6 @@ public class CostBenefitAnalysis extends JPanel
       FastVector fv = new FastVector();
       fv.addElement(new Attribute("Sample Size"));
       fv.addElement(new Attribute("Cost/Benefit"));
-      fv.addElement(new Attribute("Threshold"));
       Instances costBenefitI = new Instances("Cost/Benefit Curve", fv, 100);
       
       // process the performance data to make this curve
@@ -922,14 +912,13 @@ public class CostBenefitAnalysis extends JPanel
       for (int i = 0; i < performanceI.numInstances(); i++) {
         Instance current = performanceI.instance(i);
         
-        double[] vals = new double[3];
+        double[] vals = new double[2];
         vals[0] = current.value(10); // sample size
         vals[1] = (current.value(0) * tpCost
             + current.value(1) * fnCost
             + current.value(2) * fpCost
             + current.value(3) * tnCost) * scaleFactor;
-        vals[2] = current.value(current.numAttributes() - 1);
-        Instance newInst = new DenseInstance(1.0, vals);
+        Instance newInst = new Instance(1.0, vals);
         costBenefitI.add(newInst);
       }
       
@@ -968,8 +957,6 @@ public class CostBenefitAnalysis extends JPanel
       java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
     if (!ge.isHeadless()) {
       appearanceFinal();
-    } else {
-      m_headlessEvents = new ArrayList<EventObject>();
     }
   }
   
@@ -987,16 +974,11 @@ public class CostBenefitAnalysis extends JPanel
    * @param e a threshold data event
    */
   public void acceptDataSet(ThresholdDataEvent e) {
-    if (!GraphicsEnvironment.isHeadless()) {  
-      try {
-        setCurveData(e.getDataSet(), e.getClassAttribute());
-      } catch (Exception ex) {
-        System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
-        ex.printStackTrace();
-      }
-    } else {
-      m_headlessEvents = new ArrayList<EventObject>();
-      m_headlessEvents.add(e);
+    try {
+      setCurveData(e.getDataSet(), e.getClassAttribute());
+    } catch (Exception ex) {
+      System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
+      ex.printStackTrace();
     }
   }
   
@@ -1010,7 +992,6 @@ public class CostBenefitAnalysis extends JPanel
    */
   public void setCurveData(PlotData2D curveData, Attribute origClassAtt) 
     throws Exception {
-
     if (m_analysisPanel == null) {
       m_analysisPanel = new AnalysisPanel();
     }
@@ -1101,7 +1082,10 @@ public class CostBenefitAnalysis extends JPanel
   
   protected void appearanceDesign() {
     removeAll();
-    useDefaultVisual();
+    m_visual = new BeanVisual("CostBenefitAnalysis", 
+                              BeanVisual.ICON_PATH+"ModelPerformanceChart.gif",
+                              BeanVisual.ICON_PATH
+                              +"ModelPerformanceChart_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
   }
@@ -1264,33 +1248,5 @@ public class CostBenefitAnalysis extends JPanel
       ex.printStackTrace();
     }
  
-  }
-
-  /**
-   * Get the list of events processed in headless mode. May return
-   * null or an empty list if not running in headless mode or no
-   * events were processed
-   * 
-   * @return a list of EventObjects or null.
-   */
-  public List<EventObject> retrieveHeadlessEvents() {
-    return m_headlessEvents;
-  }
-
-  /**
-   * Process a list of events that have been collected earlier. Has
-   * no affect if the component is running in headless mode.
-   * 
-   * @param headless a list of EventObjects to process.
-   */
-  public void processHeadlessEvents(List<EventObject> headless) {
-    // only process if we're not headless
-    if (!GraphicsEnvironment.isHeadless()) {
-      for (EventObject e : headless) {
-        if (e instanceof ThresholdDataEvent) {
-          acceptDataSet((ThresholdDataEvent)e);
-        }
-      }
-    }    
   }
 }

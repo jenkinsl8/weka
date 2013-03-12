@@ -132,8 +132,8 @@ weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.mi.supportVector
 
 # List of SVMreg learning algorithms
-weka.classifiers.functions.supportVector.RegOptimizer=\
- weka.classifiers.functions.supportVector
+#weka.classifiers.functions.supportVector.RegOptimizer=\
+# weka.classifiers.functions.supportVector
 
 # List of tokenizers
 weka.core.tokenizers.Tokenizer=\
@@ -157,14 +157,6 @@ weka.gui.visualize.plugins.GraphVisualizePlugin=\
 # List of Explorer error visualization plugins (classification panel)
 weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  weka.gui.visualize.plugins
- 
-#List of Explorer association rule visualization plugins (associations panel)
-weka.gui.visualize.plugins.AssociationRuleVisualizePlugin=\
- weka.gui.visualize.plugins
-
-#List of Explorer classifier panel launch handler plugins
-weka.gui.explorer.ClassifierPanelLaunchHandlerPlugin=\
- weka.gui.explorer
 
 # List of writers for outputting graphics
 weka.gui.visualize.JComponentWriter=\
@@ -186,11 +178,6 @@ weka.core.converters.AbstractFileLoader=\
 weka.core.converters.AbstractFileSaver=\
  weka.core.converters
 
-# List of partition generators
-weka.core.PartitionGenerator=\
- weka.classifiers.trees,\
- weka.classifiers.meta
-
 # List of snowball stemmers.
 #
 # Note: the snowball jar needs to be in the CLASSPATH to make these stemmers
@@ -202,11 +189,11 @@ weka.core.PartitionGenerator=\
 # org.tartarus.snowball.ext
 
 # List of generators
-#weka.classifiers.meta.generators.Generator=\
-# weka.classifiers.meta.generators
+weka.classifiers.meta.generators.Generator=\
+ weka.classifiers.meta.generators
 
-#weka.classifiers.meta.generators.NumericAttributeGenerator=\
-# weka.classifiers.meta.generators
+weka.classifiers.meta.generators.NumericAttributeGenerator=\
+ weka.classifiers.meta.generators
 
-#weka.classifiers.meta.generators.NominalAttributeGenerator=\
-# weka.classifiers.meta.generators
+weka.classifiers.meta.generators.NominalAttributeGenerator=\
+ weka.classifiers.meta.generators

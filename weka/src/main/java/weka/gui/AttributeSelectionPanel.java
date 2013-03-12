@@ -1,45 +1,44 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeSelectionPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
-import java.awt.BorderLayout;
+import weka.core.Instances;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.regex.Pattern;
-
-import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.table.TableModel;
-
-import weka.core.Instances;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.BorderFactory;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -56,7 +55,7 @@ import weka.core.Instances;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class AttributeSelectionPanel
   extends JPanel {
@@ -173,8 +172,7 @@ public class AttributeSelectionPanel
     public void setValueAt(Object value, int row, int col) {
       
       if (col == 1) {
-	m_Selected[row] = ((Boolean) value).booleanValue();
-	fireTableRowsUpdated(0, m_Selected.length);
+	m_Selected[row] = ((Boolean) value).booleanValue(); 
       }
     }
     
@@ -266,18 +264,6 @@ public class AttributeSelectionPanel
                           pattern, m_Instances.attribute(i).name());
       fireTableRowsUpdated(0, m_Selected.length);
     }
-    
-    public void setSelectedAttributes(boolean [] selected) throws Exception {
-      if (selected.length != m_Selected.length) {
-        throw new Exception("Supplied array does not have the same number " +
-        		"of elements as there are attributes!");
-      }
-      
-      for (int i = 0; i < selected.length; i++) {
-        m_Selected[i] = selected[i];
-      }
-      fireTableRowsUpdated(0, m_Selected.length);
-    }
   }
 
   /** Press to select all attributes */  
@@ -295,7 +281,7 @@ public class AttributeSelectionPanel
   /** The table displaying attribute names and selection status */
   protected JTable m_Table = new JTable();
 
-  /** The table model containing attribute names and selection status */
+  /** The table model containingn attribute names and selection status */
   protected AttributeTableModel m_Model;
 
   /** The current regular expression. */
@@ -305,18 +291,6 @@ public class AttributeSelectionPanel
    * Creates the attribute selection panel with no initial instances.
    */
   public AttributeSelectionPanel() {
-    this(true, true, true, true);
-  }
-  
-  /**
-   * Creates the attribute selection panel with no initial instances.
-   * @param include true if the include button is to be shown
-   * @param remove true if the remove button is to be shown
-   * @param invert true if the invert button is to be shown
-   * @param patter true if the pattern button is to be shown
-   */
-  public AttributeSelectionPanel(boolean include, boolean remove, boolean invert,
-      boolean pattern) {
 
     m_IncludeAll.setToolTipText("Selects all attributes");
     m_IncludeAll.setEnabled(false);
@@ -372,32 +346,14 @@ public class AttributeSelectionPanel
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
     p1.setLayout(new GridLayout(1, 4, 5, 5));
-    if (include) {
-      p1.add(m_IncludeAll);
-    }
-    if (remove) {
-      p1.add(m_RemoveAll);
-    }
-    if (invert) {
-      p1.add(m_Invert);
-    }
-    if (pattern) {
-      p1.add(m_Pattern);
-    }
+    p1.add(m_IncludeAll);
+    p1.add(m_RemoveAll);
+    p1.add(m_Invert);
+    p1.add(m_Pattern);
 
     setLayout(new BorderLayout());
-    if (include || remove || invert || pattern) {
-      add(p1, BorderLayout.NORTH);
-    }
+    add(p1, BorderLayout.NORTH);
     add(new JScrollPane(m_Table), BorderLayout.CENTER);
-  }
-  
-  public Dimension getPreferredScrollableViewportSize() {
-    return m_Table.getPreferredScrollableViewportSize();
-  }
-  
-  public void setPreferredScrollableViewportSize(Dimension d) {
-    m_Table.setPreferredScrollableViewportSize(d);
   }
 
   /**
@@ -434,33 +390,7 @@ public class AttributeSelectionPanel
    */
   public int [] getSelectedAttributes() {
     
-    return (m_Model == null) ? null : m_Model.getSelectedAttributes();
-  }
-  
-  /**
-   * Set the selected attributes in the widget. Note that
-   * setInstances() must have been called first.
-   * 
-   * @param selected an array of boolean indicating which attributes
-   * are to have their check boxes selected.
-   * @throws Exception if the supplied array of booleans does not have
-   * the same number of elements as there are attributes.
-   */
-  public void setSelectedAttributes(boolean[] selected) throws Exception {
-    if (m_Model != null) {
-      m_Model.setSelectedAttributes(selected);
-    }
-  }
-  
-  /**
-   * Get the table model in use (or null if no instances
-   * have been set yet).
-   * 
-   * @return the table model in use or null if no instances
-   * have been seen yet.
-   */
-  public TableModel getTableModel() {
-    return m_Model;
+    return m_Model.getSelectedAttributes();
   }
   
   /**

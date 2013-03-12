@@ -1,25 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *   BoundaryPanel.java
- *   Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.gui.visualize.JPEGWriter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,14 +59,6 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /**
  * BoundaryPanel. A class to handle the plotting operations
@@ -320,7 +321,7 @@ public class BoundaryPanel
 		Instance inst = m_trainingData.instance(i);
 		double x = inst.value(m_xAttribute);
 		double y = inst.value(m_yAttribute);
-		if (!Utils.isMissingValue(x) && !Utils.isMissingValue(y)) {
+		if (!Instance.isMissingValue(x) && !Instance.isMissingValue(y)) {
 			if (x < m_minX) {
 			m_minX = x;
 			}
@@ -353,7 +354,7 @@ public class BoundaryPanel
     if (m_maxY == Double.MIN_VALUE)
     	m_maxY = 1;
     if (allPointsLessThanOne) {
-//    	m_minX = m_minY = 0.0;
+    	m_minX = m_minY = 0.0;
     	m_maxX = m_maxY = 1.0;
     }
     
@@ -459,7 +460,7 @@ public class BoundaryPanel
         // generate samples
         m_weightingAttsValues = new double [m_attsToWeightOn.length];
         m_vals = new double[m_trainingData.numAttributes()];
-        m_predInst = new DenseInstance(1.0, m_vals);
+        m_predInst = new Instance(1.0, m_vals);
         m_predInst.setDataset(m_trainingData);
 
 	
@@ -1048,7 +1049,7 @@ public class BoundaryPanel
 	double y = convertFromPanelY(mouseY);
 	
 	//build the training instance
-	Instance newInstance = new DenseInstance(m_trainingData.numAttributes());
+	Instance newInstance = new Instance(m_trainingData.numAttributes());
 	for (int i = 0; i < newInstance.numAttributes(); i++) {
 		if (i == classAttIndex) {
 			newInstance.setValue(i,classValue);

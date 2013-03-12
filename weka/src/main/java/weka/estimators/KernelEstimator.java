@@ -1,38 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    KernelEstimator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
 
-import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.Capabilities;
 import weka.core.RevisionUtils;
-import weka.core.Statistics;
 import weka.core.Utils;
+import weka.core.Statistics;
 
 /** 
  * Simple kernel density estimator. Uses one gaussian kernel per observed
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7.2.2 $
  */
 public class KernelEstimator extends Estimator implements IncrementalEstimator {
 
@@ -308,14 +309,6 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
-    // class
-    if (!m_noClass) {
-      result.enable(Capability.NOMINAL_CLASS);
-      result.enable(Capability.MISSING_CLASS_VALUES);
-    } else {
-      result.enable(Capability.NO_CLASS);
-    }
     
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -328,7 +321,7 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
   }
 
   /**

@@ -1,48 +1,49 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Stacking.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -470,23 +471,24 @@ public class Stacking
    * @throws Exception if the format generation fails
    */
   protected Instances metaFormat(Instances instances) throws Exception {
-    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+
+    FastVector attributes = new FastVector();
     Instances metaFormat;
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
-      String name = classifier.getClass().getName() + "-" + (k+1);
+      String name = classifier.getClass().getName();
       if (m_BaseFormat.classAttribute().isNumeric()) {
-	attributes.add(new Attribute(name));
+	attributes.addElement(new Attribute(name));
       } else {
 	for (int j = 0; j < m_BaseFormat.classAttribute().numValues(); j++) {
-	  attributes.add(
-	      new Attribute(
-		  name + ":" + m_BaseFormat.classAttribute().value(j)));
+	  attributes.addElement(new Attribute(name + ":" + 
+					      m_BaseFormat
+					      .classAttribute().value(j)));
 	}
       }
     }
-    attributes.add((Attribute) m_BaseFormat.classAttribute().copy());
+    attributes.addElement(m_BaseFormat.classAttribute().copy());
     metaFormat = new Instances("Meta format", attributes, 0);
     metaFormat.setClassIndex(metaFormat.numAttributes() - 1);
     return metaFormat;
@@ -516,7 +518,7 @@ public class Stacking
       }
     }
     values[i] = instance.classValue();
-    metaInstance = new DenseInstance(1, values);
+    metaInstance = new Instance(1, values);
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }

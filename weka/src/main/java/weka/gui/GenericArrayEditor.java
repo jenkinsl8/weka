@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GenericArrayEditor.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.core.SerializedObject;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -57,8 +60,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.core.SerializedObject;
 
 /** 
  * A PropertyEditor for arrays of objects that themselves have
@@ -132,29 +133,25 @@ public class GenericArrayEditor
 	  m_Support.firePropertyChange("", null, null);
 	}
       } else if (e.getSource() == m_EditBut) {
-        if (m_Editor instanceof GenericObjectEditor) {
-          ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
-        }
-        try {
-          m_Editor.setValue(GenericObjectEditor.makeCopy(m_ElementList.getSelectedValue()));
-        }
-        catch (Exception ex) {
-          // not possible to serialize?
-          m_Editor.setValue(m_ElementList.getSelectedValue());
-        }
+        ((GenericObjectEditor) m_Editor).setClassType(m_ElementClass);
+        m_Editor.setValue(m_ElementList.getSelectedValue());
         if (m_Editor.getValue() != null) {
-          int x = getLocationOnScreen().x;
-          int y = getLocationOnScreen().y;
-          if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
-            m_PD = new PropertyDialog(
-        	PropertyDialog.getParentDialog(GenericArrayEditor.this), 
-        	m_Editor, x, y);
-          else
-            m_PD = new PropertyDialog(
-        	PropertyDialog.getParentFrame(GenericArrayEditor.this), 
-        	m_Editor, x, y);
-          m_PD.setVisible(true);
-          m_ListModel.set(m_ElementList.getSelectedIndex(), m_Editor.getValue());
+          if (m_PD == null) {
+            int x = getLocationOnScreen().x;
+            int y = getLocationOnScreen().y;
+            if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentDialog(GenericArrayEditor.this), 
+        	  m_Editor, x, y);
+            else
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentFrame(GenericArrayEditor.this), 
+        	  m_Editor, x, y);
+            m_PD.setVisible(true);
+          } 
+          else {
+            m_PD.setVisible(true);
+          }
           m_Support.firePropertyChange("", null, null);
         }
       } else if (e.getSource() == m_UpBut) {
@@ -357,17 +354,13 @@ public class GenericArrayEditor
         //when we do getAsText() in the constructor of
         //PropertyValueSelector()
 	if(Array.getLength(o) > 0) {
-	  editor.setValue(makeCopy(Array.get(o,0)));
+	  editor.setValue(Array.get(o,0));
 	} else {
 	  if (editor instanceof GenericObjectEditor) {
 	    ((GenericObjectEditor)editor).setDefaultValue();
 	  } else {   
             try {
-              if (editor instanceof FileEditor) {
-                editor.setValue(new java.io.File("-NONE-"));
-              } else {
-                editor.setValue(elementClass.newInstance());
-              }
+	    editor.setValue(elementClass.newInstance());
             } catch(Exception ex) {
               m_ElementEditor=null;
               System.err.println(ex.getMessage());
@@ -392,16 +385,7 @@ public class GenericArrayEditor
 	System.err.println("No property editor for class: "
 			   + elementClass.getName());
       } else {
-        m_ElementEditor = editor;
-        try {
-          m_Editor = editor.getClass().newInstance();
-        } catch (InstantiationException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        } catch (IllegalAccessException e1) {
-          // TODO Auto-generated catch block
-          e1.printStackTrace();
-        }
+	m_ElementEditor = editor;
 
 	// Create the ListModel and populate it
 	m_ListModel = new DefaultListModel();
@@ -594,25 +578,6 @@ public class GenericArrayEditor
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
     m_Support.removePropertyChangeListener(l);
-  }
-
-  /**
-   * Makes a copy of an object using serialization.
-   * 
-   * @param source the object to copy
-   * @return a copy of the source object, null if copying fails
-   */
-  public static Object makeCopy(Object source) {
-    Object	result;
-    
-    try {
-      result = GenericObjectEditor.makeCopy(source);
-    }
-    catch (Exception e) {
-      result = null;
-    }
-    
-    return result;
   }
 
   /**

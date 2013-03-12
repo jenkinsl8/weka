@@ -1,34 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Add.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,9 +36,14 @@ import weka.core.SelectedTag;
 import weka.core.SingleIndex;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -80,7 +81,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.6.2.2 $
  */
 public class Add 
   extends Filter 
@@ -223,7 +224,7 @@ public class Add
       tmpStr = "last";
     setAttributeIndex(tmpStr);
     
-    setAttributeName(Utils.unbackQuoteChars(Utils.getOption('N', options)));
+    setAttributeName(Utils.getOption('N', options));
     
     if (m_AttributeType == Attribute.NOMINAL) {
       tmpStr = Utils.getOption('L', options);
@@ -257,7 +258,7 @@ public class Add
     }
     
     result.add("-N");
-    result.add(Utils.backQuoteChars(getAttributeName()));
+    result.add(getAttributeName());
     
     if (m_AttributeType == Attribute.NOMINAL) {
       result.add("-L");
@@ -282,7 +283,6 @@ public class Add
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -406,10 +406,19 @@ public class Add
    * @param name the new name
    */
   public void setAttributeName(String name) {
-    if (name.trim().equals(""))
-      m_Name = "unnamed";
-    else
-      m_Name = name;
+
+    String newName = name.trim();
+    if (newName.indexOf(' ') >= 0) {
+      if (newName.indexOf('\'') != 0) {
+	newName = newName.replace('\'',' ');
+      }
+      newName = '\'' + newName + '\'';
+    }
+    if (newName.equals("")) {
+      newName = "unnamed";
+    }
+    m_Name = newName;
+    
   }
 
   /**
@@ -580,7 +589,7 @@ public class Add
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.6.2.2 $");
   }
 
   /**

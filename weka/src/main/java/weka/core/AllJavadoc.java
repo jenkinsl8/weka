@@ -1,26 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * AllJavadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
-import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -44,27 +44,26 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4.2.1 $
  */
 public class AllJavadoc
   extends Javadoc {
 
   /** contains all the  */
-  protected static Vector<Javadoc> m_Javadocs;
+  protected static Vector m_Javadocs;
   
   /** determine all classes derived from Javadoc and instantiate them */
   static {
     // get all classnames, besides this one
-    HashSet<String> set = new HashSet<String>(ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName()));
-    if (set.contains(AllJavadoc.class.getName()))
-      set.remove(AllJavadoc.class.getName());
+    Vector list = ClassDiscovery.find(Javadoc.class, Javadoc.class.getPackage().getName());
+    list.remove(AllJavadoc.class.getName());
     
     // instantiate them
-    m_Javadocs = new Vector<Javadoc>();
-    for (String classname: set) {
+    m_Javadocs = new Vector();
+    for (int i = 0; i < list.size(); i++) {
       try {
-	Class cls = Class.forName(classname);
-	m_Javadocs.add((Javadoc)cls.newInstance());
+	Class cls = Class.forName((String) list.get(i));
+	m_Javadocs.add(cls.newInstance());
       }
       catch (Exception e) {
 	e.printStackTrace();
@@ -143,7 +142,7 @@ public class AllJavadoc
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
   }
 
   /**

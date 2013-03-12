@@ -1,32 +1,35 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    UnivariateEqualFrequencyEstimator.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
 
+import java.util.Random;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Map;
+import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
 
 import weka.core.Statistics;
 import weka.core.Utils;
@@ -39,8 +42,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDensityEstimator,
-                                                                   UnivariateIntervalEstimator,
-                                                                   UnivariateQuantileEstimator {
+                                                     UnivariateIntervalEstimator {
 
   /** The collection used to store the weighted values. */
   protected TreeMap<Double, Double> m_TM = new TreeMap<Double, Double>();
@@ -382,39 +384,6 @@ public class UnivariateEqualFrequencyHistogramEstimator implements UnivariateDen
     }
 
     return intervals.toArray(new double[0][0]);
-  }
-
-
-  /**
-   * Returns the quantile for the given percentage.
-   * 
-   * @param percentage the percentage
-   * @return the quantile
-   */
-  public double predictQuantile(double percentage) {
-
-    // Update the bandwidth
-    updateBoundariesAndOrWeights();
-
-    // Compute minimum and maximum value, and delta
-    double val = Statistics.normalInverse(1.0 - (1.0 - 0.95) / 2);
-    double min = m_TM.firstKey() - val * m_Width;
-    double max = m_TM.lastKey() + val * m_Width;
-    double delta = (max - min) / m_NumIntervals;
-
-    // Compute approximate quantile
-    double[] probabilities = new double[m_NumIntervals];
-    double sum = 0;
-    double leftVal = Math.exp(logDensity(min));
-    for (int i = 0; i < m_NumIntervals; i++) {
-      if (sum >= percentage) {
-        return min + i * delta;
-      }
-      double rightVal = Math.exp(logDensity(min + (i + 1) * delta));
-      sum += 0.5 * (leftVal + rightVal) * delta;
-      leftVal = rightVal;
-    }
-    return max;
   }
 
   /**

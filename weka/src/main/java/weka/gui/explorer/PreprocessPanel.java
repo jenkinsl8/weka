@@ -1,25 +1,60 @@
-/*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ /*
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.Loader;
+import weka.core.converters.SerializedInstancesLoader;
+import weka.core.converters.URLSourcedLoader;
+import weka.datagenerators.DataGenerator;
+import weka.experiment.InstanceQuery;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AttributeSelectionPanel;
+import weka.gui.AttributeSummaryPanel;
+import weka.gui.AttributeVisualizationPanel;
+import weka.gui.ConverterFileChooser;
+import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.ViewerDialog;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.sql.SqlViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -59,44 +94,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.TableModel;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.Loader;
-import weka.core.converters.SerializedInstancesLoader;
-import weka.core.converters.URLSourcedLoader;
-import weka.datagenerators.DataGenerator;
-import weka.experiment.InstanceQuery;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.AttributeSelectionPanel;
-import weka.gui.AttributeSummaryPanel;
-import weka.gui.AttributeVisualizationPanel;
-import weka.gui.ConverterFileChooser;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.ViewerDialog;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.sql.SqlViewerDialog;
 
 /** 
  * This panel controls simple preprocessing of instances. Summary
@@ -202,7 +200,6 @@ public class PreprocessPanel
   protected Explorer m_Explorer = null;
   
   static {
-     weka.core.WekaPackageManager.loadPackages(false);
      GenericObjectEditor.registerEditors();
   }
   
@@ -218,7 +215,7 @@ public class PreprocessPanel
     
     m_FilterEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-        m_ApplyFilterBut.setEnabled(getInstances() != null);
+        m_ApplyFilterBut.setEnabled(true);
         Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
         Filter filter = (Filter) m_FilterEditor.getValue();
         Capabilities currentFilterCapabilities = null;
@@ -228,11 +225,7 @@ public class PreprocessPanel
           
           if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
               !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
-            try {
-              filter.setInputFormat(getInstances());              
-            } catch (Exception ex) {
-              m_ApplyFilterBut.setEnabled(false);
-            }
+            m_ApplyFilterBut.setEnabled(false);
           }
         }
       }
@@ -242,16 +235,11 @@ public class PreprocessPanel
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
     m_GenerateBut.setToolTipText("Generates artificial data");
     m_UndoBut.setToolTipText("Undo the last change to the dataset");
-    m_UndoBut.setEnabled(ExplorerDefaults.get("enableUndo", "true").equalsIgnoreCase("true"));
-    if (!m_UndoBut.isEnabled()) {
-      m_UndoBut.setToolTipText("Undo is disabled - " +
-      		"see weka.gui.explorer.Explorer.props to enable");
-    }
     m_EditBut.setToolTipText("Open the current dataset in a Viewer for editing");
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
-    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setInstancesFromURLQ();
@@ -343,7 +331,6 @@ public class PreprocessPanel
 	    }
 	    r.setAttributeIndicesArray(selected);
 	    applyFilter(r);
-	    m_RemoveButton.setEnabled(false);
 	  } catch (Exception ex) {
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
@@ -493,26 +480,9 @@ public class PreprocessPanel
     try {
       Runnable r = new Runnable() {
 	public void run() {
-	  boolean first = 
-	    (m_AttPanel.getTableModel() == null);
-	  
 	  m_InstSummaryPanel.setInstances(m_Instances);
 	  m_AttPanel.setInstances(m_Instances);
-	  
-	  if (first) {
-	    TableModel model = m_AttPanel.getTableModel(); 
-	    model.addTableModelListener(new TableModelListener() {
-	      public void tableChanged(TableModelEvent e) {
-	        if (m_AttPanel.getSelectedAttributes() != null &&
-	            m_AttPanel.getSelectedAttributes().length > 0) {
-	          m_RemoveButton.setEnabled(true);
-	        } else {
-	          m_RemoveButton.setEnabled(false);
-	        }
-	      }
-	    });
-	  }
-//	  m_RemoveButton.setEnabled(true);
+	  m_RemoveButton.setEnabled(true);
 	  m_AttSummaryPanel.setInstances(m_Instances);
 	  m_AttVisualizePanel.setInstances(m_Instances);
 
@@ -615,7 +585,6 @@ public class PreprocessPanel
 	  try {
 
 	    if (filter != null) {
-	      m_FilterPanel.addToHistory();
 	    
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskStarted();
@@ -1240,34 +1209,11 @@ public class PreprocessPanel
    * @throws Exception 	if an error occurs
    */
   public void addUndoPoint() throws Exception {
-    if (!ExplorerDefaults.get("enableUndo", "true").equalsIgnoreCase("true")) {
-      return;
-    }
     
     if (m_Instances != null) {
       // create temporary file
       File tempFile = File.createTempFile("weka", SerializedInstancesLoader.FILE_EXTENSION);
       tempFile.deleteOnExit();
-      if (!ExplorerDefaults.get("undoDirectory", "%t").equalsIgnoreCase("%t")) {
-        String dir = ExplorerDefaults.get("undoDirectory", "%t");
-        File undoDir = new File(dir);
-        if (undoDir.exists()) {
-          String fileName = tempFile.getName();
-          File newFile = new File(dir + File.separator + fileName);
-          if (undoDir.canWrite()) {
-            newFile.deleteOnExit();
-            tempFile = newFile;
-          } else {
-            System.err.println("Explorer: it doesn't look like we have permission" +
-            		" to write to the user-specified undo directory " +
-            		"'" + dir + "'");
-          }
-        } else {
-          System.err.println("Explorer: user-specified undo directory '" +
-              dir + "' does not exist!");
-        }
-      }
-    
 
       ObjectOutputStream oos = 
 	new ObjectOutputStream(
@@ -1408,25 +1354,6 @@ public class PreprocessPanel
     
     // set new filter
     m_FilterEditor.setCapabilitiesFilter(filterClass);
-    
-    // check capabilities
-    m_ApplyFilterBut.setEnabled(true);
-    Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
-    Filter currentFilter = (Filter) m_FilterEditor.getValue();
-    Capabilities currentFilterCapabilities = null;
-    if (currentFilter != null && currentCapabilitiesFilter != null &&
-        (currentFilter instanceof CapabilitiesHandler)) {
-      currentFilterCapabilities = ((CapabilitiesHandler)currentFilter).getCapabilities();
-      
-      if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
-          !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
-        try {
-          currentFilter.setInputFormat(getInstances());
-        } catch (Exception ex) {
-          m_ApplyFilterBut.setEnabled(false);
-        }
-      }
-    }
   }
   
   /**

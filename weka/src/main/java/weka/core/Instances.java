@@ -1,39 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Instances.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
+import weka.core.converters.ArffLoader.ArffReader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
-
-import weka.core.converters.ArffLoader.ArffReader;
-import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -67,7 +64,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$ 
  */
-public class Instances extends AbstractList<Instance>
+public class Instances 
   implements Serializable, RevisionHandler {
   
   /** for serialization */
@@ -89,13 +86,13 @@ public class Instances extends AbstractList<Instance>
   protected /*@spec_public non_null@*/ String m_RelationName;         
 
   /** The attribute information. */
-  protected /*@spec_public non_null@*/ ArrayList<Attribute> m_Attributes;
+  protected /*@spec_public non_null@*/ FastVector m_Attributes;
   /*  public invariant (\forall int i; 0 <= i && i < m_Attributes.size(); 
-                    m_Attributes.get(i) != null);
+                    m_Attributes.elementAt(i) != null);
   */
 
   /** The instances. */
-  protected /*@spec_public non_null@*/ ArrayList<Instance> m_Instances;
+  protected /*@spec_public non_null@*/ FastVector m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
@@ -193,7 +190,7 @@ public class Instances extends AbstractList<Instance>
     m_ClassIndex   = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
     m_Attributes   = dataset.m_Attributes;
-    m_Instances    = new ArrayList<Instance>(capacity);
+    m_Instances    = new FastVector(capacity);
   }
   
   /**
@@ -229,33 +226,19 @@ public class Instances extends AbstractList<Instance>
    * @param name the name of the relation
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
-   * @throws IllegalArgumentException if attribute names are not unique
    */
   public Instances(/*@non_null@*/String name, 
-		   /*@non_null@*/ArrayList<Attribute> attInfo, int capacity) {
+		   /*@non_null@*/FastVector attInfo, int capacity) {
 
-    // check whether the attribute names are unique
-    HashSet<String> names = new HashSet<String>();
-    StringBuffer nonUniqueNames = new StringBuffer();
-    for (Attribute att: attInfo) {
-      if (names.contains(att.name())) {
-        nonUniqueNames.append("'" + att.name() +"' ");
-      }
-      names.add(att.name());
-    }
-    if (names.size() != attInfo.size())
-      throw new IllegalArgumentException("Attribute names are not unique!" +
-      		" Causes: " + nonUniqueNames.toString());
-    names.clear();
-    
     m_RelationName = name;
     m_ClassIndex = -1;
     m_Attributes = attInfo;
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
     }
-    m_Instances = new ArrayList<Instance>(capacity);
+    m_Instances = new FastVector(capacity);
   }
+ 
 
   /**
    * Create a copy of the structure if the data has string or
@@ -267,21 +250,21 @@ public class Instances extends AbstractList<Instance>
    */
   public Instances stringFreeStructure() {
 
-    ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
+    FastVector newAtts = new FastVector();
     for (int i = 0 ; i < m_Attributes.size(); i++) {
-      Attribute att = (Attribute)m_Attributes.get(i);
+      Attribute att = (Attribute)m_Attributes.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        newAtts.add(new Attribute(att.name(), (List<String>)null, i));
+        newAtts.addElement(new Attribute(att.name(), (FastVector)null, i));
       } else if (att.type() == Attribute.RELATIONAL) {
-        newAtts.add(new Attribute(att.name(), new Instances(att.relation(), 0), i));
+        newAtts.addElement(new Attribute(att.name(), new Instances(att.relation(), 0), i));
       }
     }
     if (newAtts.size() == 0) {
       return new Instances(this, 0);
     }
-    ArrayList<Attribute> atts = Utils.cast(m_Attributes.clone());
+    FastVector atts = (FastVector)m_Attributes.copy();
     for (int i = 0; i < newAtts.size(); i++) {
-      atts.set(((Attribute)newAtts.get(i)).index(), newAtts.get(i));
+      atts.setElementAt(newAtts.elementAt(i), ((Attribute)newAtts.elementAt(i)).index());
     }
     Instances result = new Instances(this, 0);
     result.m_Attributes = atts;
@@ -297,34 +280,12 @@ public class Instances extends AbstractList<Instance>
    *
    * @param instance the instance to be added
    */
-  public boolean add(/*@non_null@*/ Instance instance) {
+  public void add(/*@non_null@*/ Instance instance) {
 
     Instance newInstance = (Instance)instance.copy();
 
     newInstance.setDataset(this);
-    m_Instances.add(newInstance);
-
-    return true;
-  }
-
-  /**
-   * Adds one instance to the end of the set. 
-   * Shallow copies instance before it is added. Increases the
-   * size of the dataset if it is not large enough. Does not
-   * check if the instance is compatible with the dataset.
-   * Note: String or relational values are not transferred.
-   *
-   * @param index position where instance is to be inserted
-   * @param instance the instance to be added
-   */
-  //@ requires 0 <= index;
-  //@ requires index < m_Instances.size();
-  public void add(int index, /*@non_null@*/ Instance instance) {
-
-    Instance newInstance = (Instance)instance.copy();
-
-    newInstance.setDataset(this);
-    m_Instances.add(index, newInstance);
+    m_Instances.addElement(newInstance);
   }
 
   /**
@@ -338,7 +299,7 @@ public class Instances extends AbstractList<Instance>
   //@ ensures \result != null;
   public /*@pure@*/ Attribute attribute(int index) {
     
-    return (Attribute) m_Attributes.get(index);
+    return (Attribute) m_Attributes.elementAt(index);
   }
 
   /**
@@ -460,7 +421,7 @@ public class Instances extends AbstractList<Instance>
    */
   public void delete() {
     
-    m_Instances = new ArrayList<Instance>();
+    m_Instances = new FastVector();
   }
 
   /**
@@ -471,7 +432,7 @@ public class Instances extends AbstractList<Instance>
   //@ requires 0 <= index && index < numInstances();
   public void delete(int index) {
     
-    m_Instances.remove(index);
+    m_Instances.removeElementAt(index);
   }
 
   /**
@@ -497,15 +458,13 @@ public class Instances extends AbstractList<Instance>
     if (m_ClassIndex > position) {
       m_ClassIndex--;
     }
-    m_Attributes.remove(position);
+    m_Attributes.removeElementAt(position);
     for (int i = position; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.get(i);
+      Attribute current = (Attribute)m_Attributes.elementAt(i);
       current.setIndex(current.index() - 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).setDataset(null);
-      instance(i).deleteAttributeAt(position); 
-      instance(i).setDataset(this);
+      instance(i).forceDeleteAttributeAt(position); 
     }
   }
 
@@ -549,11 +508,11 @@ public class Instances extends AbstractList<Instance>
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
-    ArrayList<Instance> newInstances = new ArrayList<Instance>(numInstances());
+    FastVector newInstances = new FastVector(numInstances());
 
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-	newInstances.add(instance(i));
+	newInstances.addElement(instance(i));
       }
     }
     m_Instances = newInstances;
@@ -591,7 +550,7 @@ public class Instances extends AbstractList<Instance>
    */
   public /*@non_null pure@*/ Enumeration enumerateAttributes() {
 
-    return new WekaEnumeration(m_Attributes, m_ClassIndex);
+    return m_Attributes.elements(m_ClassIndex);
   }
 
   /**
@@ -601,7 +560,7 @@ public class Instances extends AbstractList<Instance>
    */
   public /*@non_null pure@*/ Enumeration enumerateInstances() {
 
-    return new WekaEnumeration(m_Instances);
+    return m_Instances.elements();
   }
 
   /**
@@ -649,7 +608,7 @@ public class Instances extends AbstractList<Instance>
   //@ requires numInstances() > 0;
   public /*@non_null pure@*/ Instance firstInstance() {
     
-    return (Instance)m_Instances.get(0);
+    return (Instance)m_Instances.firstElement();
   }
 
   /**
@@ -686,22 +645,16 @@ public class Instances extends AbstractList<Instance>
 	(position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
-    if (attribute(att.name()) != null) {
-      throw new IllegalArgumentException(
-	  "Attribute name '" + att.name() + "' already in use at position #" + attribute(att.name()).index());
-    }
     att = (Attribute)att.copy();
     freshAttributeInfo();
     att.setIndex(position);
-    m_Attributes.add(position, att);
+    m_Attributes.insertElementAt(att, position);
     for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute current = (Attribute)m_Attributes.get(i);
+      Attribute current = (Attribute)m_Attributes.elementAt(i);
       current.setIndex(current.index() + 1);
     }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).setDataset(null);
-      instance(i).insertAttributeAt(position);
-      instance(i).setDataset(this);
+      instance(i).forceInsertAttributeAt(position);
     }
     if (m_ClassIndex >= position) {
       m_ClassIndex++;
@@ -718,24 +671,12 @@ public class Instances extends AbstractList<Instance>
   //@ requires index < numInstances();
   public /*@non_null pure@*/ Instance instance(int index) {
 
-    return m_Instances.get(index);
-  }
-
-  /**
-   * Returns the instance at the given position.
-   *
-   * @param index the instance's index (index starts with 0)
-   * @return the instance at the given position
-   */
-  //@ requires 0 <= index;
-  //@ requires index < numInstances();
-  public /*@non_null pure@*/ Instance get(int index) {
-
-    return m_Instances.get(index);
+    return (Instance)m_Instances.elementAt(index);
   }
 
   /**
    * Returns the kth-smallest attribute value of a numeric attribute.
+   * Note that calling this method will change the order of the data!
    *
    * @param att the Attribute object
    * @param k the value of k
@@ -748,8 +689,9 @@ public class Instances extends AbstractList<Instance>
 
   /**
    * Returns the kth-smallest attribute value of a numeric attribute.
-   * NOTE CHANGE: Missing values (NaN values) are now treated as Double.MAX_VALUE.
-   * Also, the order of the instances in the data is no longer affected.
+   * Note that calling this method will change the order of the data!
+   * The number of non-missing values in the data must be as least
+   * as last as k for this to work.
    *
    * @param attIndex the attribute's index
    * @param k the value of k
@@ -760,22 +702,29 @@ public class Instances extends AbstractList<Instance>
     if (!attribute(attIndex).isNumeric()) {
       throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
     }
- 
-    if ((k < 1) || (k > numInstances())) {
-      throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
-    }
-    
 
-    double[] vals = new double[numInstances()];
-    for (int i = 0; i < vals.length; i++) {
-      double val = instance(i).value(attIndex);
-      if (Utils.isMissingValue(val)) {
-        vals[i] = Double.MAX_VALUE;
+    int i,j;
+
+    // move all instances with missing values to end
+    j = numInstances() - 1;
+    i = 0;
+    while (i <= j) {
+      if (instance(j).isMissing(attIndex)) {
+	j--;
       } else {
-        vals[i] = val;
+	if (instance(i).isMissing(attIndex)) {
+	  swap(i,j);
+	  j--;
+	}
+	i++;
       }
     }
-    return Utils.kthSmallestValue(vals, k);
+
+    if ((k < 1) || (k > j+1)) {
+      throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
+    }
+
+    return instance(select(attIndex, 0, j, k)).value(attIndex);
   }
 
   /**
@@ -786,7 +735,7 @@ public class Instances extends AbstractList<Instance>
   //@ requires numInstances() > 0;
   public /*@non_null pure@*/ Instance lastInstance() {
     
-    return (Instance)m_Instances.get(m_Instances.size() - 1);
+    return (Instance)m_Instances.lastElement();
   }
 
   /**
@@ -929,17 +878,6 @@ public class Instances extends AbstractList<Instance>
 
     return m_Instances.size();
   }
-  
-  /**
-   * Returns the number of instances in the dataset.
-   *
-   * @return the number of instances in the dataset as an integer
-   */
-  //@ ensures \result == m_Instances.size();
-  public /*@pure@*/ int size() {
-
-    return m_Instances.size();
-  }
 
   /**
    * Shuffles the instances in the set so that they are ordered 
@@ -995,19 +933,6 @@ public class Instances extends AbstractList<Instance>
   }
 
   /**
-   * Removes the instance at the given position.
-   *
-   * @param index the instance's index (index starts with 0)
-   * @return the instance at the given position
-   */
-  //@ requires 0 <= index;
-  //@ requires index < numInstances();
-  public Instance remove(int index) {
-
-    return m_Instances.remove(index);
-  }
-
-  /**
    * Renames an attribute. This change only affects this
    * dataset.
    *
@@ -1015,23 +940,15 @@ public class Instances extends AbstractList<Instance>
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
-    // name already present?
-    for (int i = 0; i < numAttributes(); i++) {
-      if (i == att)
-	continue;
-      if (attribute(i).name().equals(name)) {
-	throw new IllegalArgumentException(
-	    "Attribute name '" + name + "' already present at position #" + i);
-      }
-    }
-    
+
     Attribute newAtt = attribute(att).copy(name);
-    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
+    FastVector newVec = new FastVector(numAttributes());
+
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.add(newAtt);
+	newVec.addElement(newAtt);
       } else {
-	newVec.add(attribute(i));
+	newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
@@ -1060,14 +977,14 @@ public class Instances extends AbstractList<Instance>
   public void renameAttributeValue(int att, int val, String name) {
 
     Attribute newAtt = (Attribute)attribute(att).copy();
-    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
+    FastVector newVec = new FastVector(numAttributes());
 
     newAtt.setValue(val, name);
     for (int i = 0; i < numAttributes(); i++) {
       if (i == att) {
-	newVec.add(newAtt);
+	newVec.addElement(newAtt);
       } else {
-	newVec.add(attribute(i));
+	newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
@@ -1109,7 +1026,6 @@ public class Instances extends AbstractList<Instance>
    * Creates a new dataset of the same size using random sampling
    * with replacement according to the current instance weights. The
    * weights of the instances in the new dataset are set to one.
-   * See also resampleWithWeights(Random, double[], boolean[]).
    *
    * @param random a random number generator
    * @return the new dataset
@@ -1120,43 +1036,9 @@ public class Instances extends AbstractList<Instance>
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights, null);
+    return resampleWithWeights(random, weights);
   }
 
-  /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement according to the current instance weights. The
-   * weights of the instances in the new dataset are set to one.
-   * See also resampleWithWeights(Random, double[], boolean[]).
-   *
-   * @param random a random number generator
-   * @param sampled an array indicating what has been sampled
-   * @return the new dataset
-   */
-  public Instances resampleWithWeights(Random random, boolean[] sampled) {
-
-    double [] weights = new double[numInstances()];
-    for (int i = 0; i < weights.length; i++) {
-      weights[i] = instance(i).weight();
-    }
-    return resampleWithWeights(random, weights, sampled);
-  }
-
-  /**
-   * Creates a new dataset of the same size using random sampling
-   * with replacement according to the given weight vector.
-   * See also resampleWithWeights(Random, double[], boolean[]).
-   *
-   * @param random a random number generator
-   * @param weights the weight vector
-   * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
-   * length or contains negative weights.
-   */
-  public Instances resampleWithWeights(Random random, double[] weights) {
-
-    return resampleWithWeights(random, weights, null);
-  }
 
   /**
    * Creates a new dataset of the same size using random sampling
@@ -1164,109 +1046,50 @@ public class Instances extends AbstractList<Instance>
    * weights of the instances in the new dataset are set to one.
    * The length of the weight vector has to be the same as the
    * number of instances in the dataset, and all weights have to
-   * be positive. Uses Walker's method, see 
-   * pp. 232 of "Stochastic Simulation" by B.D. Ripley (1987).
+   * be positive.
    *
    * @param random a random number generator
    * @param weights the weight vector
-   * @param sampled an array indicating what has been sampled, can be null
    * @return the new dataset
    * @throws IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
-  public Instances resampleWithWeights(Random random, double[] weights,
-                                       boolean[] sampled) {
+  public Instances resampleWithWeights(Random random, 
+					     double[] weights) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
     }
-
     Instances newData = new Instances(this, numInstances());
     if (numInstances() == 0) {
       return newData;
     }
+    double[] probabilities = new double[numInstances()];
+    double sumProbs = 0, sumOfWeights = Utils.sum(weights);
+    for (int i = 0; i < numInstances(); i++) {
+      sumProbs += random.nextDouble();
+      probabilities[i] = sumProbs;
+    }
+    Utils.normalize(probabilities, sumProbs / sumOfWeights);
 
-    // Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley
-    double[] P = new double[weights.length];
-    System.arraycopy(weights, 0, P, 0, weights.length);
-    Utils.normalize(P);
-    double[] Q = new double[weights.length];
-    int[] A = new int[weights.length];
-    int[] W = new int[weights.length];
-    int M = weights.length;
-    int NN = -1;
-    int NP = M;
-    for (int I = 0; I < M; I++) { 
-      if (P[I] < 0) {
+    // Make sure that rounding errors don't mess things up
+    probabilities[numInstances() - 1] = sumOfWeights;
+    int k = 0; int l = 0;
+    sumProbs = 0;
+    while ((k < numInstances() && (l < numInstances()))) {
+      if (weights[l] < 0) {
 	throw new IllegalArgumentException("Weights have to be positive.");
       }
-      Q[I] = M * P[I]; 
-      if (Q[I] < 1.0) {
-        W[++NN] = I;
-      } else {
-        W[--NP] = I;
+      sumProbs += weights[l];
+      while ((k < numInstances()) &&
+	     (probabilities[k] <= sumProbs)) { 
+	newData.add(instance(l));
+	newData.instance(k).setWeight(1);
+	k++;
       }
+      l++;
     }
-    if (NN > -1 && NP < M) {
-      for (int S = 0; S < M - 1; S++) {
-        int I = W[S];
-        int J = W[NP];
-        A[I] = J;
-        Q[J] += Q[I] - 1.0;
-        if (Q[J] < 1.0) {
-          NP++;
-        }
-        if (NP >= M) {
-          break;
-        }
-      }
-      //      A[W[M]] = W[M];
-    }
-
-    for (int I = 0; I < M; I++) {
-      Q[I] += I;
-    }
-
-    for (int i = 0; i < numInstances(); i++) {
-      int ALRV;
-      double U = M * random.nextDouble();
-      int I = (int)U;
-      if (U < Q[I]) {
-        ALRV = I;
-      } else {
-        ALRV = A[I];
-      }
-      newData.add(instance(ALRV));
-      if (sampled != null) {
-        sampled[ALRV] = true;
-      }
-      newData.instance(newData.numInstances() - 1).setWeight(1);
-    }
-    
     return newData;
-  }
-
-  /**
-   * Replaces the instance at the given position.
-   * Shallow copies instance before it is added. Does not
-   * check if the instance is compatible with the dataset.
-   * Note: String or relational values are not transferred.
-   *
-   * @param index position where instance is to be inserted
-   * @param instance the instance to be inserted
-   * @return the instance previously at that position
-   */
-  //@ requires 0 <= index;
-  //@ requires index < m_Instances.size();
-  public Instance set(int index, /*@non_null@*/ Instance instance) {
-
-    Instance newInstance = (Instance)instance.copy();
-    Instance oldInstance = m_Instances.get(index);
-
-    newInstance.setDataset(this);
-    m_Instances.set(index, newInstance);
-
-    return oldInstance;
   }
 
   /** 
@@ -1316,24 +1139,23 @@ public class Instances extends AbstractList<Instance>
    */
   public void sort(int attIndex) {
 
-    double[] vals = new double[numInstances()];
-    for (int i = 0; i < vals.length; i++) {
-      double val = instance(i).value(attIndex);
-      if (Utils.isMissingValue(val)) {
-        vals[i] = Double.MAX_VALUE;
+    int i,j;
+
+    // move all instances with missing values to end
+    j = numInstances() - 1;
+    i = 0;
+    while (i <= j) {
+      if (instance(j).isMissing(attIndex)) {
+	j--;
       } else {
-        vals[i] = val;
+	if (instance(i).isMissing(attIndex)) {
+	  swap(i,j);
+	  j--;
+	}
+	i++;
       }
     }
-    
-    int[] sortOrder = Utils.sortWithNoMissingValues(vals);
-    Instance[] backup = new Instance[vals.length];
-    for (int i = 0; i < vals.length; i++) {
-      backup[i] = instance(i);
-    }
-    for (int i = 0; i < vals.length; i++) {
-      m_Instances.set(i, backup[sortOrder[i]]);
-    }
+    quickSort(attIndex, 0, j);
   }
 
   /**
@@ -1616,7 +1438,7 @@ public class Instances extends AbstractList<Instance>
     int [] sorted = Utils.sort(attVals);
     int currentCount = 0;
     double currentWeight = 0;
-    double prev = Double.NaN;
+    double prev = Instance.missingValue();
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
@@ -1769,11 +1591,7 @@ public class Instances extends AbstractList<Instance>
    */
   protected void freshAttributeInfo() {
 
-    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-    for (Attribute att : m_Attributes) {
-      newList.add((Attribute)att.copy());
-    }
-    m_Attributes = newList;
+    m_Attributes = (FastVector) m_Attributes.copyElements();
   }
  
   /**
@@ -1794,6 +1612,88 @@ public class Instances extends AbstractList<Instance>
     }
     return text.toString();
   }
+  
+  /**
+   * Partitions the instances around a pivot. Used by quicksort and
+   * kthSmallestValue.
+   *
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param l the first index of the subset (index starts with 0)
+   * @param r the last index of the subset (index starts with 0)
+   *
+   * @return the index of the middle element
+   */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= left && left <= right && right < numInstances();
+  protected int partition(int attIndex, int l, int r) {
+    
+    double pivot = instance((l + r) / 2).value(attIndex);
+
+    while (l < r) {
+      while ((instance(l).value(attIndex) < pivot) && (l < r)) {
+        l++;
+      }
+      while ((instance(r).value(attIndex) > pivot) && (l < r)) {
+        r--;
+      }
+      if (l < r) {
+        swap(l, r);
+        l++;
+        r--;
+      }
+    }
+    if ((l == r) && (instance(r).value(attIndex) > pivot)) {
+      r--;
+    } 
+
+    return r;
+  }
+  
+  /**
+   * Implements quicksort according to Manber's "Introduction to
+   * Algorithms".
+   *
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param left the first index of the subset to be sorted (index starts with 0)
+   * @param right the last index of the subset to be sorted (index starts with 0)
+   */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= first && first <= right && right < numInstances();
+  protected void quickSort(int attIndex, int left, int right) {
+
+    if (left < right) {
+      int middle = partition(attIndex, left, right);
+      quickSort(attIndex, left, middle);
+      quickSort(attIndex, middle + 1, right);
+    }
+  }
+  
+  /**
+   * Implements computation of the kth-smallest element according
+   * to Manber's "Introduction to Algorithms".
+   *
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param left the first index of the subset (index starts with 0)
+   * @param right the last index of the subset (index starts with 0)
+   * @param k the value of k
+   *
+   * @return the index of the kth-smallest element
+   */
+  //@ requires 0 <= attIndex && attIndex < numAttributes();
+  //@ requires 0 <= first && first <= right && right < numInstances();
+  protected int select(int attIndex, int left, int right, int k) {
+    
+    if (left == right) {
+      return left;
+    } else {
+      int middle = partition(attIndex, left, right);
+      if ((middle - left + 1) >= k) {
+        return select(attIndex, left, middle, k);
+      } else {
+        return select(attIndex, middle + 1, right, k - (middle - left + 1));
+      }
+    }
+  }
 
   /**
    * Help function needed for stratification of set.
@@ -1802,14 +1702,14 @@ public class Instances extends AbstractList<Instance>
    */
   protected void stratStep (int numFolds){
     
-    ArrayList<Instance> newVec = new ArrayList<Instance>(m_Instances.size());
+    FastVector newVec = new FastVector(m_Instances.capacity());
     int start = 0, j;
 
     // create stratified batch
     while (newVec.size() < numInstances()) {
       j = start;
       while (j < numInstances()) {
-	newVec.add(instance(j));
+	newVec.addElement(instance(j));
 	j = j + numFolds;
       }
       start++;
@@ -1827,9 +1727,7 @@ public class Instances extends AbstractList<Instance>
   //@ requires 0 <= j && j < numInstances();
   public void swap(int i, int j){
     
-    Instance in = m_Instances.get(i);
-    m_Instances.set(i, m_Instances.get(j));
-    m_Instances.set(j, in);
+    m_Instances.swap(i, j);
   }
 
   /**
@@ -1849,12 +1747,12 @@ public class Instances extends AbstractList<Instance>
     }
 
     // Create the vector of merged attributes
-    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
+    FastVector newAttributes = new FastVector();
     for (int i = 0; i < first.numAttributes(); i++) {
-      newAttributes.add(first.attribute(i));
+      newAttributes.addElement(first.attribute(i));
     }
     for (int i = 0; i < second.numAttributes(); i++) {
-      newAttributes.add(second.attribute(i));
+      newAttributes.addElement(second.attribute(i));
     }
     
     // Create the set of Instances
@@ -1883,8 +1781,7 @@ public class Instances extends AbstractList<Instance>
     Random random = new Random(2);
     Reader reader;
     int start, num;
-    ArrayList<Attribute> testAtts;
-    ArrayList<String> testVals;
+    FastVector testAtts, testVals;
     int i,j;
     
     try{
@@ -1893,16 +1790,16 @@ public class Instances extends AbstractList<Instance>
       }
       
       // Creating set of instances from scratch
-      testVals = new ArrayList<String>(2);
-      testVals.add("first_value");
-      testVals.add("second_value");
-      testAtts = new ArrayList<Attribute>(2);
-      testAtts.add(new Attribute("nominal_attribute", testVals));
-      testAtts.add(new Attribute("numeric_attribute"));
+      testVals = new FastVector(2);
+      testVals.addElement("first_value");
+      testVals.addElement("second_value");
+      testAtts = new FastVector(2);
+      testAtts.addElement(new Attribute("nominal_attribute", testVals));
+      testAtts.addElement(new Attribute("numeric_attribute"));
       instances = new Instances("test_set", testAtts, 10);
-      instances.add(new DenseInstance(instances.numAttributes()));
-      instances.add(new DenseInstance(instances.numAttributes()));
-      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
       instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);

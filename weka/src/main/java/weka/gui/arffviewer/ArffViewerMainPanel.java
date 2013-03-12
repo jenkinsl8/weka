@@ -1,25 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ArffViewerMainPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
+
+import weka.core.Capabilities;
+import weka.core.Instances;
+import weka.core.converters.AbstractSaver;
+import weka.gui.ComponentHelper;
+import weka.gui.ConverterFileChooser;
+import weka.gui.JTableHelper;
+import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -49,24 +58,13 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractSaver;
-import weka.core.converters.ConverterUtils;
-import weka.gui.ComponentHelper;
-import weka.gui.ConverterFileChooser;
-import weka.gui.JTableHelper;
-import weka.gui.ListSelectorDialog;
-
 /**
  * The main panel of the ArffViewer. It has a reference to the menu, that an
  * implementing JFrame only needs to add via the setJMenuBar(JMenuBar) method.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision: 1.7 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -598,12 +596,11 @@ public class ArffViewerMainPanel
    * loads the specified file
    * 
    * @param filename	the file to load
-   * @param loaders optional varargs loader to use
    */
-  public void loadFile(String filename, AbstractFileLoader... loaders) {
+  public void loadFile(String filename) {
     ArffPanel         panel;
 
-    panel    = new ArffPanel(filename, loaders);
+    panel    = new ArffPanel(filename);
     panel.addChangeListener(this);
     tabbedPane.addTab(panel.getTitle(), panel);
     tabbedPane.setSelectedIndex(tabbedPane.getTabCount() - 1);
@@ -625,7 +622,7 @@ public class ArffViewerMainPanel
     
     for (i = 0; i< fileChooser.getSelectedFiles().length; i++) {
       filename = fileChooser.getSelectedFiles()[i].getAbsolutePath();
-      loadFile(filename, fileChooser.getLoader());
+      loadFile(filename);
     }
     
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -649,10 +646,9 @@ public class ArffViewerMainPanel
       saveFileAs();
     }
     else {
-      saver = ConverterUtils.getSaverForFile(filename);
+      saver = fileChooser.getSaver();
       try {
 	saver.setInstances(panel.getInstances());
-	saver.setFile(new File(filename));
 	saver.writeBatch();
 	panel.setChanged(false);
 	setCurrentFilename(filename);

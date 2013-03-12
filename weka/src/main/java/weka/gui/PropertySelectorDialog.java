@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PropertySelectorDialog.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.experiment.PropertyNode;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -45,14 +48,12 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import weka.experiment.PropertyNode;
-
 /** 
  * Allows the user to select any (supported) property of an object, including
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 public class PropertySelectorDialog
   extends JDialog {
@@ -95,7 +96,7 @@ public class PropertySelectorDialog
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
     
-    super(parentFrame, "Select a property", ModalityType.DOCUMENT_MODAL);
+    super(parentFrame, "Select a property", true);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;

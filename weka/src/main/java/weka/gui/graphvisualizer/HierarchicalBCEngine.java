@@ -1,39 +1,42 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    HierarchicalBCEngine.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.graphvisualizer;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-
 import weka.core.FastVector;
+import weka.gui.graphvisualizer.GraphNode;
+import weka.gui.graphvisualizer.GraphEdge;
+
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JCheckBox;
+import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
+import javax.swing.JProgressBar;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 
 /**
  * This class lays out the vertices of a graph in a
@@ -54,7 +57,7 @@ import weka.core.FastVector;
  * vertices present in each level.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision$ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.5.2.1 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  *
  */
 public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {

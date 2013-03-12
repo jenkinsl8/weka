@@ -1,47 +1,51 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * NominalToString.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Range;
 import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Range;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /** 
  <!-- globalinfo-start -->
- * Converts a nominal attribute (i.e. set number of values) to string (i.e. unspecified number of values).
+ * Converts a range of nominal attributes (i.e. set number of values) to string 
+ * (i.e. unspecified number of values). Any non-nominal attributes in the supplied
+ * range are left untouched.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -54,7 +58,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2.2.3 $
  */
 public class NominalToString
   extends Filter 
@@ -74,8 +78,8 @@ public class NominalToString
    */
   public String globalInfo() {
     return 
-        "Converts a nominal attribute (that is, a set number of values) to string "
-      + "(that is, an unspecified number of values).";
+        "Converts a nominal attribute (i.e. set number of values) to string "
+      + "(i.e. unspecified number of values).";
   }
 
   /** 
@@ -86,7 +90,6 @@ public class NominalToString
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -286,13 +289,10 @@ public class NominalToString
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
 
-      if (!att.isNominal() || !m_AttIndex.isInRange(j)) {        
+      if (!att.isNominal() || !m_AttIndex.isInRange(j))
 	newAtts.addElement(att); 
-      } else {
-        Attribute newAtt = new Attribute(att.name(), (FastVector) null);
-        newAtt.setWeight(getInputFormat().attribute(j).weight());
-	newAtts.addElement(newAtt);
-      }
+      else
+	newAtts.addElement(new Attribute(att.name(), (FastVector) null));
     }
       
     // Construct new header
@@ -308,7 +308,7 @@ public class NominalToString
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2.2.3 $");
   }
   
   /**
@@ -320,4 +320,3 @@ public class NominalToString
     runFilter(new NominalToString(), args);
   }
 }
-

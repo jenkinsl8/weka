@@ -1,31 +1,25 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * AbstractOutput.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.evaluation.output.prediction;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -36,6 +30,13 @@ import weka.core.Range;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * A superclass for outputting the classifications of a classifier.
@@ -523,47 +524,6 @@ public abstract class AbstractOutput
   protected abstract void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception;
   
   /**
-   * Performs the actual printing of the classification.
-   * 
-   * @param dist        the distribution to use for printing the classification
-   * @param inst        the instance to print
-   * @param index       the index of the instance
-   * @throws Exception  if printing of classification fails
-   */
-  protected abstract void doPrintClassification(double[] dist, Instance inst, int index) throws Exception;
-  
-  /**
-   * Preprocesses an input instance and its copy (that will get its class
-   * value set to missing for prediction purposes). Basically this only does
-   * something special in the case when the classifier is an InputMappedClassifier.
-   * 
-   * @param inst the original instance to predict
-   * @param withMissing a copy of the instance to predict
-   * @param classifier the classifier that will be used to make the prediction
-   * @return the original instance unchanged or mapped (in the case of an InputMappedClassifier)
-   * and the withMissing copy with the class attribute set to missing value.
-   * @throws Exception if a problem occurs.
-   */
-  protected Instance preProcessInstance(Instance inst, Instance withMissing, 
-      Classifier classifier) throws Exception {
-    
-    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      inst = (Instance)inst.copy();
-      inst =
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          constructMappedInstance(inst);
-      int mappedClass =
-        ((weka.classifiers.misc.InputMappedClassifier)classifier).
-          getMappedClassIndex();
-      withMissing.setMissing(mappedClass);      
-    } else {
-      withMissing.setMissing(withMissing.classIndex());
-    }
-    
-    return inst;
-  }
-  
-  /**
    * Prints the classification to the buffer.
    * 
    * @param classifier	the classifier to use for printing the classification
@@ -578,23 +538,6 @@ public abstract class AbstractOutput
       throw new WekaException(error);
     
     doPrintClassification(classifier, inst, index);
-  }
-  
-  /**
-   * Prints the classification to the buffer.
-   * 
-   * @param dist        the distribution from classifier for the supplied instance
-   * @param inst        the instance to print
-   * @param index       the index of the instance
-   * @throws Exception  if check fails or error occurs during printing of classification
-   */
-  public void printClassification(double[] dist, Instance inst, int index) throws Exception {
-    String      error;
-    
-    if ((error = checkBasic()) != null)
-      throw new WekaException(error);
-    
-    doPrintClassification(dist, inst, index);
   }
   
   /**
@@ -617,7 +560,7 @@ public abstract class AbstractOutput
       doPrintClassification(classifier, inst, i);
       i++;
     }
-  }  
+  }
   
   /**
    * Prints the classifications to the buffer.

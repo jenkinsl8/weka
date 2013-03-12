@@ -1,29 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Experimenter.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
 
+import weka.core.Memory;
+import weka.experiment.Experiment;
+import weka.gui.LookAndFeel;
+
 import java.awt.BorderLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
@@ -32,10 +35,6 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-
-import weka.core.Memory;
-import weka.experiment.Experiment;
-import weka.gui.LookAndFeel;
 
 /** 
  * The main class for the experiment environment. Lets the user create,
@@ -105,7 +104,7 @@ public class Experimenter
   private static Experimenter m_experimenter;
 
   /** for monitoring the Memory consumption */
-  protected static Memory m_Memory = new Memory(true);
+  private static Memory m_Memory = new Memory(true);
 
   /**
    * Tests out the experiment environment.
@@ -113,12 +112,7 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-    
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    weka.gui.GenericObjectEditor.determineClasses();
-    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");    
     LookAndFeel.setLookAndFeel();
     
     try {
@@ -143,21 +137,22 @@ public class Experimenter
       jf.setSize(800, 600);
       jf.setVisible(true);
 
-      Image icon = Toolkit.getDefaultToolkit().
-        getImage(m_experimenter.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
-      jf.setIconImage(icon);
-
       Thread memMonitor = new Thread() {
         public void run() {
           while(true) {
             try {
-              this.sleep(10);
+              this.sleep(4000);
+              
+              System.gc();
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 jf.dispose();
                 m_experimenter = null;
                 System.gc();
+
+                // stop threads
+                m_Memory.stopThreads();
 
                 // display error
                 System.err.println("\ndisplayed message:");

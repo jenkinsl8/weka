@@ -1,35 +1,31 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    JRip.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.rules;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
+import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Copyable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -38,13 +34,19 @@ import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.ClassOrder;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -667,7 +669,7 @@ public class JRip
    * the corresponding value.  There are two inherited classes, namely NumericAntd
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */    
-  public abstract class Antd 
+  private abstract class Antd 
     implements WeightedInstancesHandler, Copyable, Serializable, RevisionHandler {
 
     /** for serialization */
@@ -739,7 +741,7 @@ public class JRip
   /** 
    * The antecedent with numeric attribute
    */
-  public class 
+  private class 
     NumericAntd extends Antd {
     
     /** for serialization */
@@ -942,7 +944,7 @@ public class JRip
   /** 
    * The antecedent with nominal attribute
    */
-  public class NominalAntd 
+  private class NominalAntd 
     extends Antd {
 	
     /** for serialization */
@@ -1072,7 +1074,7 @@ public class JRip
    * select an antecedent and Reduced Error Prunning (REP) with the metric
    * of accuracy rate p/(p+n) or (TP+TN)/(P+N) is used to prune the rule. 
    */    
-  public class RipperRule 
+  protected class RipperRule 
     extends Rule {
     
     /** for serialization */
@@ -1151,15 +1153,6 @@ public class JRip
       else
 	return (m_Antds.size() > 0);
     }      
-    
-    /**
-     * Return the antecedents
-     * 
-     * @return the vector of antecedents
-     */
-    public FastVector getAntds() {
-      return m_Antds;
-    }
 	
     /** 
      * the number of antecedents of the rule
@@ -1193,106 +1186,106 @@ public class JRip
      * @param data the growing data used to build the rule
      * @throws Exception if the consequent is not set yet
      */    
-    public void grow(Instances data) throws Exception {
+      public void grow(Instances data) throws Exception {
       if(m_Consequent == -1)
-        throw new Exception(" Consequent not set yet.");
-
+	throw new Exception(" Consequent not set yet.");
+	    
       Instances growData = data;	         
       double sumOfWeights = growData.sumOfWeights();
       if(!Utils.gr(sumOfWeights, 0.0))
-        return;
-
+	return;
+	    
       /* Compute the default accurate rate of the growing data */
       double defAccu = computeDefAccu(growData);
       double defAcRt = (defAccu+1.0)/(sumOfWeights+1.0); 
-
+	    
       /* Keep the record of which attributes have already been used*/    
       boolean[] used=new boolean [growData.numAttributes()];
       for (int k=0; k<used.length; k++)
-        used[k]=false;
+	used[k]=false;
       int numUnused=used.length;
-
+	    
       // If there are already antecedents existing
       for(int j=0; j < m_Antds.size(); j++){
-        Antd antdj = (Antd)m_Antds.elementAt(j);
-        if(!antdj.getAttr().isNumeric()){ 
-          used[antdj.getAttr().index()]=true;
-          numUnused--;
-        } 
+	Antd antdj = (Antd)m_Antds.elementAt(j);
+	if(!antdj.getAttr().isNumeric()){ 
+	  used[antdj.getAttr().index()]=true;
+	  numUnused--;
+	} 
       }	    
-
+	    
       double maxInfoGain;	    
       while (Utils.gr(growData.numInstances(), 0.0) && 
-          (numUnused > 0) 
-          && Utils.sm(defAcRt, 1.0)
-          ){   
-
-        // We require that infoGain be positive
-        /*if(numAntds == originalSize)
-          maxInfoGain = 0.0; // At least one condition allowed
-          else
-          maxInfoGain = Utils.eq(defAcRt, 1.0) ? 
-          defAccu/(double)numAntds : 0.0; */
-        maxInfoGain = 0.0; 
-
-        /* Build a list of antecedents */
-        Antd oneAntd=null;
-        Instances coverData = null;
-        Enumeration enumAttr=growData.enumerateAttributes();	      
-
-        /* Build one condition based on all attributes not used yet*/
-        while (enumAttr.hasMoreElements()){
-          Attribute att= (Attribute)(enumAttr.nextElement());
-
-          if(m_Debug)
-            System.err.println("\nOne condition: size = " 
-                + growData.sumOfWeights());
-
-          Antd antd =null;	
-          if(att.isNumeric())
-            antd = new NumericAntd(att);
-          else
-            antd = new NominalAntd(att);
-
-          if(!used[att.index()]){
-            /* Compute the best information gain for each attribute,
-               it's stored in the antecedent formed by this attribute.
-               This procedure returns the data covered by the antecedent*/
-            Instances coveredData = computeInfoGain(growData, defAcRt,
-                antd);
-            if(coveredData != null){
-              double infoGain = antd.getMaxInfoGain();      
-              if(m_Debug)
-                System.err.println("Test of \'"+antd.toString()+
-                    "\': infoGain = "+
-                    infoGain + " | Accuracy = " +
-                    antd.getAccuRate()+
-                    "="+antd.getAccu()
-                    +"/"+antd.getCover()+
-                    " def. accuracy: "+defAcRt);
-
-              if(infoGain > maxInfoGain){         
-                oneAntd=antd;
-                coverData = coveredData;  
-                maxInfoGain = infoGain;
-              }		    
-            }
-          }
-        }
-
-        if(oneAntd == null) break; // Cannot find antds		
-        if(Utils.sm(oneAntd.getAccu(), m_MinNo)) break;// Too low coverage
-
-        //Numeric attributes can be used more than once
-        if(!oneAntd.getAttr().isNumeric()){ 
-          used[oneAntd.getAttr().index()]=true;
-          numUnused--;
-        }
-
-        m_Antds.addElement(oneAntd);
-        growData = coverData;// Grow data size is shrinking 	
-        defAcRt = oneAntd.getAccuRate();
-          }
+	     (numUnused > 0) 
+	     && Utils.sm(defAcRt, 1.0)
+	     ){   
+		
+	// We require that infoGain be positive
+	/*if(numAntds == originalSize)
+	  maxInfoGain = 0.0; // At least one condition allowed
+	  else
+	  maxInfoGain = Utils.eq(defAcRt, 1.0) ? 
+	  defAccu/(double)numAntds : 0.0; */
+	maxInfoGain = 0.0; 
+		
+	/* Build a list of antecedents */
+	Antd oneAntd=null;
+	Instances coverData = null;
+	Enumeration enumAttr=growData.enumerateAttributes();	      
+		
+	/* Build one condition based on all attributes not used yet*/
+	while (enumAttr.hasMoreElements()){
+	  Attribute att= (Attribute)(enumAttr.nextElement());
+	  
+	  if(m_Debug)
+	    System.err.println("\nOne condition: size = " 
+			       + growData.sumOfWeights());
+		   
+	  Antd antd =null;	
+	  if(att.isNumeric())
+	    antd = new NumericAntd(att);
+	  else
+	    antd = new NominalAntd(att);
+		    
+	  if(!used[att.index()]){
+	    /* Compute the best information gain for each attribute,
+	       it's stored in the antecedent formed by this attribute.
+	       This procedure returns the data covered by the antecedent*/
+	    Instances coveredData = computeInfoGain(growData, defAcRt,
+						    antd);
+	    if(coveredData != null){
+	      double infoGain = antd.getMaxInfoGain();      
+	      if(m_Debug)
+		System.err.println("Test of \'"+antd.toString()+
+				   "\': infoGain = "+
+				   infoGain + " | Accuracy = " +
+				   antd.getAccuRate()+
+				   "="+antd.getAccu()
+				   +"/"+antd.getCover()+
+				   " def. accuracy: "+defAcRt);
+			    
+	      if(infoGain > maxInfoGain){         
+		oneAntd=antd;
+		coverData = coveredData;  
+		maxInfoGain = infoGain;
+	      }		    
+	    }
+	  }
+	}
+		
+	if(oneAntd == null) break; // Cannot find antds		
+	if(Utils.sm(oneAntd.getAccu(), m_MinNo)) break;// Too low coverage
+		
+	//Numeric attributes can be used more than once
+	if(!oneAntd.getAttr().isNumeric()){ 
+	  used[oneAntd.getAttr().index()]=true;
+	  numUnused--;
+	}
+		
+	m_Antds.addElement(oneAntd);
+	growData = coverData;// Grow data size is shrinking 	
+	defAcRt = oneAntd.getAccuRate();
+      }
     }
 	
 	
@@ -1441,7 +1434,6 @@ public class JRip
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);

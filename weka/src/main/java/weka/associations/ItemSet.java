@@ -1,35 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ItemSet.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -320,13 +321,6 @@ public class ItemSet
     FastVector newPremises = new FastVector(rules[0].size()),
       newConsequences = new FastVector(rules[1].size()),
       newConf = new FastVector(rules[2].size());
-    
-    FastVector newLift = null, newLev = null, newConv = null;
-    if (rules.length > 3) {
-      newLift = new FastVector(rules[3].size());
-      newLev = new FastVector(rules[4].size());
-      newConv = new FastVector(rules[5].size());
-    }
 
     for (int i = 0; i < rules[0].size(); i++) 
       if (!(((Double)rules[2].elementAt(i)).doubleValue() <
@@ -334,22 +328,10 @@ public class ItemSet
 	newPremises.addElement(rules[0].elementAt(i));
 	newConsequences.addElement(rules[1].elementAt(i));
 	newConf.addElement(rules[2].elementAt(i));
-	
-	if (rules.length > 3) {
-	  newLift.addElement(rules[3].elementAt(i));
-	  newLev.addElement(rules[4].elementAt(i));
-	  newConv.addElement(rules[5].elementAt(i));
-	}
       }
     rules[0] = newPremises;
     rules[1] = newConsequences;
     rules[2] = newConf;
-    
-    if (rules.length > 3) {
-      rules[3] = newLift;
-      rules[4] = newLev;
-      rules[5] = newConv;
-    }
   }
 
   /**
@@ -407,38 +389,6 @@ public class ItemSet
 	text.append(instances.attribute(i).name()+'=');
 	text.append(instances.attribute(i).value(m_items[i])+' ');
       }
-    text.append(m_counter);
-    return text.toString();
-  }
-
-   /**
-   * Returns the contents of an item set as a delimited string.
-   *
-   * @param instances contains the relevant header information
-   * @param outerDelim the outer delimiter
-   * @param innerDelim the inner delimiter
-   * @return string describing the item set
-   */
-  public String toString(Instances instances, char outerDelim, char innerDelim) {
-
-    StringBuffer text = new StringBuffer();
-
-    for (int i = 0; i < instances.numAttributes(); i++)
-      if (m_items[i] != -1) {
-        text.append(instances.attribute(i).name())
-          .append('=')
-          .append(instances.attribute(i).value(m_items[i]))
-          .append(innerDelim);
-      }
-
-    int n = text.length();
-    if (n > 0) {
-      text.setCharAt(n - 1, outerDelim);
-    } else {
-      if (outerDelim != ' ' || innerDelim != ' ') {
-        text.append(outerDelim);
-      }
-    }
     text.append(m_counter);
     return text.toString();
   }

@@ -1,34 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PlotData2D.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui.visualize;
 
-import java.awt.Color;
-import java.io.Serializable;
-
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
+
+import java.awt.Color;
 
 /**
  * This class is a container for plottable data. Instances form the
@@ -38,12 +38,7 @@ import weka.filters.unsupervised.attribute.Add;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class PlotData2D implements Serializable {
-
-  /**
-   * For serialization
-   */
-  private static final long serialVersionUID = -3979972167982697979L;
+public class PlotData2D {
 
   /** The instances */
   protected Instances m_plotInstances = null;
@@ -210,20 +205,11 @@ public class PlotData2D implements Serializable {
       throw new Exception("PlotData2D: Shape type array must have the same "
 			  +"number of entries as number of data points!");
     }
-/*    for (int i = 0; i < st.length; i++) {
+    for (int i = 0; i < st.length; i++) {
       if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
       }
-    } */
-  }
-  
-  /**
-   * Get the shape types for the plot data
-   * 
-   * @return the shape types for the plot data
-   */
-  public int[] getShapeType() {
-    return m_shapeType;
+    }
   }
 
   /**
@@ -239,9 +225,9 @@ public class PlotData2D implements Serializable {
     m_shapeType = new int [st.size()];
     for (int i = 0; i < st.size(); i++) {
       m_shapeType[i] = ((Integer)st.elementAt(i)).intValue();
-/*      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
-      } */
+      }
     }
   }
 
@@ -255,15 +241,6 @@ public class PlotData2D implements Serializable {
       throw new Exception("PlotData2D: Shape size array must have the same "
 			  +"number of entries as number of data points!");
     }
-  }
-  
-  /**
-   * Get the shape sizes for the plot data
-   * 
-   * @return the shape sizes for the plot data
-   */
-  public int[] getShapeSize() {
-    return m_shapeSize;
   }
   
   /**

@@ -1,25 +1,41 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *   BoundaryVisualizer.java
- *   Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
+import weka.gui.visualize.ClassPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -56,21 +72,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
-import weka.gui.visualize.ClassPanel;
 
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
@@ -883,7 +884,26 @@ public class BoundaryVisualizer
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
       classAttNames[i] = m_trainingInstances.attribute(i).name();
-      String type = " (" + Attribute.typeToStringShort(m_trainingInstances.attribute(i)) + ")";
+      String type = "";
+      switch (m_trainingInstances.attribute(i).type()) {
+	case Attribute.NOMINAL:
+	  type = " (Nom)";
+	  break;
+	case Attribute.NUMERIC:
+	  type = " (Num)";
+	  break;
+	case Attribute.STRING:
+	  type = " (Str)";
+	  break;
+	case Attribute.DATE:
+	  type = " (Dat)";
+	  break;
+	case Attribute.RELATIONAL:
+	  type = " (Rel)";
+	  break;
+	default:
+	  type = " (???)";
+      }
       classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement("X: "+classAttNames[i]);
@@ -1029,13 +1049,7 @@ public class BoundaryVisualizer
 	setInstances(i);
 	
 	//dataFileLabel.setText(selected.getName());
-	String relationName = i.relationName();
-	String truncatedN = relationName;
-	if (relationName.length() > 25) {
-	  truncatedN = relationName.substring(0, 25) + "...";
-	}
-	dataFileLabel.setText(truncatedN);
-	dataFileLabel.setToolTipText(relationName);
+	dataFileLabel.setText(i.relationName());
 	} catch (Exception e)
 	{
 		JOptionPane.showMessageDialog(this,"Can't load at this time,\n"

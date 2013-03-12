@@ -1,25 +1,35 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeVisualizationPanel.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.gui.visualize.PrintableComponent;
+import weka.gui.visualize.PrintablePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -36,15 +46,6 @@ import java.io.FileReader;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.PrintablePanel;
 
 /**
  * Creates a panel that shows a visualization of an
@@ -78,9 +79,6 @@ public class AttributeVisualizationPanel
    * attribute index.
    */
   protected AttributeStats m_as;
-  
-  /** Cache of attribute stats info for the current data set */
-  protected AttributeStats[] m_asCache;
   
   /** This holds the index of the current attribute on display and should be
    *  set through setAttribute(int idx).
@@ -251,7 +249,6 @@ public class AttributeVisualizationPanel
    * @param newins a set of Instances
    */
   public void setInstances(Instances newins) {
-    
     m_attribIndex = 0;
     m_as = null;
     m_data = new Instances(newins);
@@ -259,8 +256,28 @@ public class AttributeVisualizationPanel
       m_colorAttrib.removeAllItems();
       m_colorAttrib.addItem("No class");
       for(int i=0; i<m_data.numAttributes(); i++) {
-	String type = "(" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
-        m_colorAttrib.addItem(new String("Class: " + m_data.attribute(i).name() + " " + type));
+	String type = "";
+	switch (m_data.attribute(i).type()) {
+	  case Attribute.NOMINAL:
+	    type = "(Nom) ";
+	    break;
+	  case Attribute.NUMERIC:
+	    type = "(Num) ";
+	    break;
+	  case Attribute.STRING:
+	    type = "(Str) ";
+	    break;
+	  case Attribute.DATE:
+	    type = "(Dat) ";
+	    break;
+	  case Attribute.RELATIONAL:
+	    type = "(Rel) ";
+	    break;
+	  default:
+	    type = "(???) ";
+	}
+        m_colorAttrib.addItem(new String("Class: "+m_data.attribute(i).name()+
+        " " + type));
       }
       if (m_data.classIndex() >= 0) {
         m_colorAttrib.setSelectedIndex(m_data.classIndex() + 1);
@@ -277,7 +294,6 @@ public class AttributeVisualizationPanel
       m_classIndex = m_data.numAttributes()-1;
     }
     
-    m_asCache = new AttributeStats[m_data.numAttributes()];
   }
   
   /**
@@ -315,7 +331,7 @@ public class AttributeVisualizationPanel
    *
    * @param index The index of the attribute
    */
-  public void setAttribute(int index) {    
+  public void setAttribute(int index) {
     
     synchronized (m_locker) {
       //m_threadRun = true;
@@ -324,16 +340,9 @@ public class AttributeVisualizationPanel
       m_displayCurrentAttribute = true;
       //if(m_hc!=null && m_hc.isAlive()) m_hc.stop();
       m_attribIndex = index;
-      if (m_asCache[index] != null) {
-        m_as = m_asCache[index];
-      } else {
-        m_asCache[index] = m_data.attributeStats(index);
-        m_as = m_asCache[index];
-      }
-      // m_as = m_data.attributeStats(m_attribIndex);
+      m_as = m_data.attributeStats(m_attribIndex);
       //m_classIndex = m_colorAttrib.getSelectedIndex();
     }
-    
     this.repaint();
     // calcGraph();
   }
@@ -765,7 +774,7 @@ public class AttributeVisualizationPanel
             
             try {
               //1. see footnote at the end of this file
-              t =(int) Math.ceil((float)(
+              t =(int) Math.ceil((
               (m_data.instance(k).value(m_attribIndex)-m_as.numericStats.min)
               / barRange));
               if(t==0) {

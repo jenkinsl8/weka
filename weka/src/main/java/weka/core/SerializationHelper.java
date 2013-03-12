@@ -1,30 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * SerializationHelper.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -218,9 +216,6 @@ public class SerializationHelper
   public static void write(OutputStream stream, Object o) throws Exception {
     ObjectOutputStream	oos;
     
-    if (!(stream instanceof BufferedOutputStream))
-      stream = new BufferedOutputStream(stream);
-    
     oos = new ObjectOutputStream(stream);
     oos.writeObject(o);
     oos.flush();
@@ -248,9 +243,6 @@ public class SerializationHelper
   public static void writeAll(OutputStream stream, Object[] o) throws Exception {
     ObjectOutputStream	oos;
     int			i;
-    
-    if (!(stream instanceof BufferedOutputStream))
-      stream = new BufferedOutputStream(stream);
     
     oos = new ObjectOutputStream(stream);
     for (i = 0; i < o.length; i++)
@@ -281,10 +273,7 @@ public class SerializationHelper
     ObjectInputStream 	ois;
     Object		result;
     
-    if (!(stream instanceof BufferedInputStream))
-      stream = new BufferedInputStream(stream);
-    
-    ois    = new ObjectInputStream(stream);
+    ois = new ObjectInputStream(stream);
     result = ois.readObject();
     ois.close();
     
@@ -311,19 +300,16 @@ public class SerializationHelper
    */
   public static Object[] readAll(InputStream stream) throws Exception {
     ObjectInputStream 	ois;
-    Vector<Object>	result;
-    
-    if (!(stream instanceof BufferedInputStream))
-      stream = new BufferedInputStream(stream);
+    Vector		result;
     
     ois    = new ObjectInputStream(stream);
-    result = new Vector<Object>();
+    result = new Vector();
     try {
       while (true) {
 	result.add(ois.readObject());
       }
     }
-    catch (IOException e) {
+    catch (Exception e) {
       // ignored
     }
     ois.close();

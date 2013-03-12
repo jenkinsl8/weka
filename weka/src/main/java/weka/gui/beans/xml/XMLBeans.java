@@ -1,24 +1,37 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLBeans.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.beans.xml;
+
+import weka.core.converters.ConverterUtils;
+import weka.core.xml.XMLBasicSerialization;
+import weka.core.xml.XMLDocument;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.gui.beans.BeanConnection;
+import weka.gui.beans.BeanInstance;
+import weka.gui.beans.BeanVisual;
+import weka.gui.beans.MetaBean;
+import weka.gui.beans.Visible;
+import weka.gui.beans.BeanCommon;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,18 +55,6 @@ import javax.swing.plaf.FontUIResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.converters.ConverterUtils;
-import weka.core.xml.XMLBasicSerialization;
-import weka.core.xml.XMLDocument;
-import weka.gui.beans.BeanCommon;
-import weka.gui.beans.BeanConnection;
-import weka.gui.beans.BeanInstance;
-import weka.gui.beans.BeanVisual;
-import weka.gui.beans.MetaBean;
-import weka.gui.beans.Visible;
 
 /**
  * This class serializes and deserializes a KnowledgeFlow setup to and fro XML.
@@ -107,10 +108,10 @@ public class XMLBeans
   public final static String VAL_OPTIONS = "options";
   
   /** the value of the saver property */
-  public final static String VAL_SAVER = "wrappedAlgorithm";
+  public final static String VAL_SAVER = "saver";
   
   /** the value of the loader property */
-  public final static String VAL_LOADER = "wrappedAlgorithm";
+  public final static String VAL_LOADER = "loader";
   
   /** the value of the text property */
   public final static String VAL_TEXT = "text";
@@ -232,22 +233,15 @@ public class XMLBeans
    * null in the bean */
   protected BeanContextSupport m_BeanContextSupport = null;
   
-  /** The index of the vector of bean instances or connections to use.
-   * this corresponds to a tab in the main KnowledgeFlow UI
-   */
-  protected int m_vectorIndex = 0;
-  
   /**
    * initializes the serialization for layouts
    * 
    * @param layout      the component that manages the layout
    * @param context     the bean context support to use
-   * @param tab         the index of the vector of bean instances or connections
-   * to use (this corresponds to a visible tab in the main KnowledgeFlow UI)
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int tab) throws Exception {
-    this(layout, context, DATATYPE_LAYOUT, tab);
+  public XMLBeans(JComponent layout, BeanContextSupport context) throws Exception {
+    this(layout, context, DATATYPE_LAYOUT);
   }
   
   /**
@@ -258,11 +252,9 @@ public class XMLBeans
    * @param datatype    the type of data to read/write
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype, 
-      int tab) throws Exception {
+  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype) throws Exception {
     super();
     
-    m_vectorIndex = tab;
     m_BeanLayout = layout;
     m_BeanContextSupport = context;
     setDataType(datatype);
@@ -346,27 +338,21 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "x");
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "y");
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
-    m_Properties.addAllowed(weka.gui.beans.Saver.class, "wrappedAlgorithm");
-    m_Properties.addAllowed(weka.gui.beans.Loader.class, "wrappedAlgorithm");
+    m_Properties.addAllowed(weka.gui.beans.Saver.class, "saver");
+    m_Properties.addAllowed(weka.gui.beans.Loader.class, "loader");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "relationNameForFilename");
     if (getDataType() == DATATYPE_LAYOUT)
       m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
     else
       m_Properties.addIgnored(weka.gui.beans.Loader.class, "beanContext");   // TODO: more classes???
     m_Properties.addAllowed(weka.gui.beans.Filter.class, "filter");
-    m_Properties.addAllowed(weka.gui.beans.Associator.class, "associator");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "executionSlots");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "blockOnLastFold");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "resetIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "updateIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "loadClassifierFileName");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
-    m_Properties.addAllowed(weka.associations.Associator.class, "options");
-    m_Properties.addAllowed(weka.clusterers.Clusterer.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
@@ -452,7 +438,7 @@ public class XMLBeans
     
     switch (getDataType()) {
       case DATATYPE_LAYOUT:
-        addBeanInstances(BeanInstance.getBeanInstances(m_vectorIndex));
+        addBeanInstances(BeanInstance.getBeanInstances());
         break;
 
       case DATATYPE_USERCOMPONENTS:
@@ -613,7 +599,7 @@ public class XMLBeans
 
     for (i = 0; i < esds.length; i++) {
       if (esds[i].getName().equals(event)) {
-        result = new BeanConnection(instSource, instTarget, esds[i], m_vectorIndex);
+        result = new BeanConnection(instSource, instTarget, esds[i]);
         ((BeanConnection) result).setHidden(hidden);
         break;
       }
@@ -663,7 +649,7 @@ public class XMLBeans
       }
       // MetaBean? -> find BeanConnection 
       else {
-        beanconns = BeanConnection.getConnections(m_vectorIndex);
+        beanconns = BeanConnection.getConnections();
         
         for (i = 0; i < beanconns.size(); i++) {
           conn = (BeanConnection) beanconns.get(i);
@@ -1337,7 +1323,7 @@ public class XMLBeans
       }
     }
     
-    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);  
+    result   = new BeanInstance(m_BeanLayout, bean, x, y);
     beaninst = (BeanInstance) result;
     
     // set parent of BeanVisual
@@ -1552,7 +1538,7 @@ public class XMLBeans
     node   = addElement(parent, name, saver.getClass().getName(), false);
     invokeWriteToXML(node, saver.getRelationNameForFilename(), VAL_RELATIONNAMEFORFILENAME);
 
-    invokeWriteToXML(node, saver.getSaverTemplate(), VAL_SAVER);
+    invokeWriteToXML(node, saver.getSaver(), VAL_SAVER);
     
     return node;
   }
@@ -1604,13 +1590,10 @@ public class XMLBeans
     if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
-      String withResourceSeparators = file.getPath().replace(File.pathSeparatorChar, '/');
       boolean notAbsolute = 
         (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
         (loader instanceof EnvironmentHandler 
-            && Environment.containsEnvVariables(file.getPath())) ||
-            this.getClass().getClassLoader().getResource(withResourceSeparators) != null ||
-            !file.exists());
+            && Environment.containsEnvVariables(file.getPath())));
       
       String path = (notAbsolute)
         ? file.getPath()
@@ -1622,11 +1605,6 @@ public class XMLBeans
     }
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
-    }
-    
-    if (loader instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)loader).getOptions();
-      invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
     
     return node;
@@ -1692,10 +1670,8 @@ public class XMLBeans
       
       fl = new File(file);      
       // only test for existence if the path does not contain environment vars
-      // (trust that after they are resolved that everything is hunky dory). Also 
-      // don't test if the file can be found as a resource in the classath
-      if (containsEnv || fl.exists() || 
-          this.getClass().getClassLoader().getResource(file) != null) {
+      // (trust that after they are resolved that everything is hunky dory)
+      if (containsEnv || fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
         System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
@@ -1779,11 +1755,6 @@ public class XMLBeans
 
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
-    }
-    
-    if (saver instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)saver).getOptions();
-      invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
     
     return node;

@@ -1,34 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SaverCustomizer.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
@@ -37,12 +39,11 @@ import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
@@ -51,7 +52,6 @@ import weka.core.EnvironmentHandler;
 import weka.core.converters.DatabaseConverter;
 import weka.core.converters.DatabaseSaver;
 import weka.core.converters.FileSourcedConverter;
-import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
@@ -63,7 +63,7 @@ import weka.gui.PropertySheetPanel;
  */
 public class SaverCustomizer
 extends JPanel
-implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
+implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
@@ -84,9 +84,9 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   = new JFileChooser(new File(System.getProperty("user.dir")));
 
 
-  private Window m_parentWindow;
+  private JFrame m_parentFrame;
   
-  private JDialog m_fileChooserFrame;
+  private JFrame m_fileChooserFrame;
 
   private EnvironmentField m_dbaseURLText;
 
@@ -95,8 +95,6 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private JPasswordField m_passwordText;
 
   private EnvironmentField m_tableText;
-  
-  private JCheckBox m_truncateBox;
 
   private JCheckBox m_idBox;
 
@@ -111,15 +109,26 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private Environment m_env = Environment.getSystemWide();
   
   private EnvironmentField m_directoryText;
-  
-  private FileEnvironmentField m_dbProps;
-  
-  private ModifyListener m_modifyListener;
 
 
   /** Constructor */  
   public SaverCustomizer() {
 
+    try {
+      m_SaverEditor.addPropertyChangeListener(
+          new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+              repaint();
+              if (m_dsSaver != null) {
+                System.err.println("Property change!!");
+                m_dsSaver.setSaver(m_dsSaver.getSaver());
+              }
+            }
+          });
+      repaint();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
     setLayout(new BorderLayout());
     m_fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
     m_fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -148,8 +157,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     });   
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 
   /** Sets up dialog for saving instances in other data sinks then files
@@ -158,41 +167,6 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
   private void setUpOther() {
     removeAll();
     add(m_SaverEditor, BorderLayout.CENTER);
-    
-    JPanel buttonsP = new JPanel();
-    buttonsP.setLayout(new FlowLayout());
-    JButton ok,cancel;
-    buttonsP.add(ok = new JButton("OK"));
-    buttonsP.add(cancel=new JButton("Cancel"));
-    ok.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        
-        // Tell the editor that we are closing under an OK condition
-        // so that it can pass on the message to any customizer that
-        // might be in use
-        m_SaverEditor.closingOK();        
-        
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
-        }
-      }
-    });
-    cancel.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent evt){
-        
-        // Tell the editor that we are closing under a CANCEL condition
-        // so that it can pass on the message to any customizer that
-        // might be in use
-        m_SaverEditor.closingCancel();
-        
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
-        }
-      }
-    });
-    
-    add(buttonsP, BorderLayout.SOUTH);
-    
     validate();
     repaint();
   }
@@ -220,7 +194,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     int height = m_dbaseURLText.getPreferredSize().height;
     m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
     m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_dbaseURLText.setText(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUrl());
+    m_dbaseURLText.setText(((DatabaseConverter)m_dsSaver.getSaver()).getUrl());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -242,7 +216,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     m_userNameText.setEnvironment(m_env);
 /*    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
     m_userNameText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_userNameText.setText(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUser());
+    m_userNameText.setText(((DatabaseConverter)m_dsSaver.getSaver()).getUser());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -260,7 +234,6 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     db.add(passwordLab);
 
     m_passwordText = new JPasswordField();
-    m_passwordText.setText(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getPassword());
     JPanel passwordHolder = new JPanel();
     passwordHolder.setLayout(new BorderLayout());
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -287,8 +260,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     m_tableText.setEnvironment(m_env);
 /*    m_tableText.setMinimumSize(new Dimension(width * 2, height));
     m_tableText.setPreferredSize(new Dimension(width * 2, height)); */
-    m_tableText.setEnabled(!((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName());
-    m_tableText.setText(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getTableName());
+    m_tableText.setEnabled(!((DatabaseSaver)m_dsSaver.getSaver()).getRelationForTableName());
+    m_tableText.setText(((DatabaseSaver)m_dsSaver.getSaver()).getTableName());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -306,7 +279,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     db.add(tabLab);
     
     m_tabBox = new JCheckBox();
-    m_tabBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getRelationForTableName()); 
+    m_tabBox.setSelected(((DatabaseSaver)m_dsSaver.getSaver()).getRelationForTableName()); 
     m_tabBox.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent e){
         m_tableText.setEnabled(!m_tabBox.isSelected());
@@ -318,93 +291,24 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     gbConstraints.gridy = 4; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_tabBox, gbConstraints);
     db.add(m_tabBox);
-    
-    JLabel truncLab = new JLabel("Truncate table", SwingConstants.RIGHT);
-    truncLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(truncLab, gbConstraints);
-    db.add(truncLab);
-    
-    m_truncateBox = new JCheckBox();
-    m_truncateBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getTruncate());
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_truncateBox, gbConstraints);
-    db.add(m_truncateBox);
 
     JLabel idLab = new JLabel("Automatic primary key", SwingConstants.RIGHT);
     idLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 6; gbConstraints.gridx = 0;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 0;
     gbLayout.setConstraints(idLab, gbConstraints);
-    db.add(idLab);        
+    db.add(idLab);
     
     m_idBox = new JCheckBox();
-    m_idBox.setSelected(((DatabaseSaver)m_dsSaver.getSaverTemplate()).getAutoKeyGeneration());
+    m_idBox.setSelected(((DatabaseSaver)m_dsSaver.getSaver()).getAutoKeyGeneration());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 6; gbConstraints.gridx = 1;
+    gbConstraints.gridy = 5; gbConstraints.gridx = 1;
     gbLayout.setConstraints(m_idBox, gbConstraints);
     db.add(m_idBox);
-    
-    JLabel propsLab = new JLabel("DB config props", SwingConstants.RIGHT);
-    propsLab.setToolTipText("The custom properties that the user can use to override the default ones.");
-    propsLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 7; gbConstraints.gridx = 0;
-    gbLayout.setConstraints(propsLab, gbConstraints);
-    db.add(propsLab);
-    
-    m_dbProps = new FileEnvironmentField();
-    m_dbProps.setEnvironment(m_env);
-    m_dbProps.resetFileFilters();
-    m_dbProps.addFileFilter(new ExtensionFileFilter(".props" , 
-        "DatabaseUtils property file (*.props)"));
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 7; gbConstraints.gridx = 1;
-    gbLayout.setConstraints(m_dbProps, gbConstraints);
-    db.add(m_dbProps);
-    File toSet = ((DatabaseSaver)m_dsSaver.getSaverTemplate()).getCustomPropsFile();
-    if (toSet != null) {
-      m_dbProps.setText(toSet.getPath());
-    }
-    JButton loadPropsBut = new JButton("Load");
-    loadPropsBut.setToolTipText("Load config");
-    gbConstraints = new GridBagConstraints();
-    gbConstraints.anchor = GridBagConstraints.EAST;
-    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gbConstraints.gridy = 7; gbConstraints.gridx = 2;
-    gbLayout.setConstraints(loadPropsBut, gbConstraints);
-    db.add(loadPropsBut);
-    loadPropsBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        if (m_dbProps.getText() != null &&
-            m_dbProps.getText().length() > 0) {
-          String propsS = m_dbProps.getText();
-          try {
-            propsS = m_env.substitute(propsS);
-          } catch (Exception ex) { }
-          File propsFile = new File(propsS);
-          if (propsFile.exists()) {
-            ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setCustomPropsFile(propsFile);
-            ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();
-            m_dbaseURLText.setText(((DatabaseConverter)m_dsSaver.getSaverTemplate()).getUrl());
-          }
-        }
-      }
-    });
 
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
@@ -413,39 +317,24 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     buttonsP.add(cancel=new JButton("Cancel"));
     ok.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        if (m_dbProps.getText().length() > 0) {
-          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).
-            setCustomPropsFile(new File(m_dbProps.getText()));
-        }
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetStructure();
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).resetOptions();  
-        ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUrl(m_dbaseURLText.getText());
-        ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setUser(m_userNameText.getText());
-        ((DatabaseConverter)m_dsSaver.getSaverTemplate()).setPassword(new String(m_passwordText.getPassword()));
+        ((DatabaseSaver)m_dsSaver.getSaver()).resetStructure();  
+        ((DatabaseConverter)m_dsSaver.getSaver()).setUrl(m_dbaseURLText.getText());
+        ((DatabaseConverter)m_dsSaver.getSaver()).setUser(m_userNameText.getText());
+        ((DatabaseConverter)m_dsSaver.getSaver()).setPassword(new String(m_passwordText.getPassword()));
         if(!m_tabBox.isSelected()) {
-          ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTableName(m_tableText.getText());
+          ((DatabaseSaver)m_dsSaver.getSaver()).setTableName(m_tableText.getText());
         }
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setTruncate(m_truncateBox.isSelected());
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setAutoKeyGeneration(m_idBox.isSelected());
-        ((DatabaseSaver)m_dsSaver.getSaverTemplate()).setRelationForTableName(m_tabBox.isSelected());
-        
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
-        }
-        
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
+        ((DatabaseSaver)m_dsSaver.getSaver()).setAutoKeyGeneration(m_idBox.isSelected());
+        ((DatabaseSaver)m_dsSaver.getSaver()).setRelationForTableName(m_tabBox.isSelected());
+        if (m_parentFrame != null) {
+          m_parentFrame.dispose();
         }
       }
     });
     cancel.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
-        }
-        
-        if (m_parentWindow != null) {
-          m_parentWindow.dispose();
+        if (m_parentFrame != null) {
+          m_parentFrame.dispose();
         }
       }
     });
@@ -479,8 +368,8 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     m_fileChooser.setAcceptAllFileFilterUsed(false);
     
     try{
-      if(!(((m_dsSaver.getSaverTemplate()).retrieveDir()).equals(""))) {
-        String dirStr = m_dsSaver.getSaverTemplate().retrieveDir();
+      if(!(((m_dsSaver.getSaver()).retrieveDir()).equals(""))) {
+        String dirStr = m_dsSaver.getSaver().retrieveDir();
         if (Environment.containsEnvVariables(dirStr)) {
           try {
             dirStr = m_env.substitute(dirStr);
@@ -503,7 +392,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     GridBagLayout gbLayout = new GridBagLayout();
     alignedP.setLayout(gbLayout);
     
-    final JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
+    JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
     prefixLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
     GridBagConstraints gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -530,7 +419,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     try{
 //      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25);
 
-      m_prefixText.setText(m_dsSaver.getSaverTemplate().filePrefix());
+      m_prefixText.setText(m_dsSaver.getSaver().filePrefix());
       
 /*      final JLabel prefixLab = 
         new JLabel(" Prefix for file name:", SwingConstants.LEFT); */
@@ -546,19 +435,14 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
       
       m_relationNameForFilename = new JCheckBox();
       m_relationNameForFilename.setSelected(m_dsSaver.getRelationNameForFilename());
-      if (m_dsSaver.getRelationNameForFilename()) {
-        prefixLab.setText("Prefix for file name");
-      } else {
-        prefixLab.setText("File name");
-      }
       m_relationNameForFilename.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           if (m_relationNameForFilename.isSelected()) {
-            prefixLab.setText("Prefix for file name");
-//            m_fileChooser.setApproveButtonText("Select directory and prefix");
+            m_prefixText.setLabel("Prefix for file name");
+            m_fileChooser.setApproveButtonText("Select directory and prefix");
           } else {
-            prefixLab.setText("File name");
-  //          m_fileChooser.setApproveButtonText("Select directory and filename");
+            m_prefixText.setLabel("File name");
+            m_fileChooser.setApproveButtonText("Select directory and filename");
           }
         }
       });
@@ -598,7 +482,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     m_directoryText.setPreferredSize(new Dimension(width * 2, height)); */
     
     try {
-      m_directoryText.setText(m_dsSaver.getSaverTemplate().retrieveDir());
+      m_directoryText.setText(m_dsSaver.getSaver().retrieveDir());
     } catch (IOException ex) {
       // ignore
     }
@@ -607,14 +491,12 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
-          //final JFrame jf = new JFrame("Choose directory");
-          final JDialog jf = new JDialog((JDialog)SaverCustomizer.this.getTopLevelAncestor(), 
-              "Choose directory", ModalityType.DOCUMENT_MODAL);
-          jf.setLayout(new BorderLayout());
+          final JFrame jf = new JFrame("Choose directory");
+          jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
-          m_fileChooserFrame = jf;
           jf.pack();
           jf.setVisible(true);
+          m_fileChooserFrame = jf;
         } catch (Exception ex) {
           ex.printStackTrace();
         }
@@ -648,11 +530,11 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     
     m_relativeFilePath = new JCheckBox();
     m_relativeFilePath.
-    setSelected(((FileSourcedConverter)m_dsSaver.getSaverTemplate()).getUseRelativePath());
+    setSelected(((FileSourcedConverter)m_dsSaver.getSaver()).getUseRelativePath());
 
     m_relativeFilePath.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        ((FileSourcedConverter)m_dsSaver.getSaverTemplate()).
+        ((FileSourcedConverter)m_dsSaver.getSaver()).
         setUseRelativePath(m_relativeFilePath.isSelected());
       }
     });
@@ -667,30 +549,22 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {          
-          (m_dsSaver.getSaverTemplate()).setFilePrefix(m_prefixText.getText());
-          (m_dsSaver.getSaverTemplate()).setDir(m_directoryText.getText());
+          (m_dsSaver.getSaver()).setFilePrefix(m_prefixText.getText());
+          (m_dsSaver.getSaver()).setDir(m_directoryText.getText());
           m_dsSaver.
             setRelationNameForFilename(m_relationNameForFilename.isSelected());
         } catch (Exception ex) {
           ex.printStackTrace();
         }
         
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(SaverCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(SaverCustomizer.this, false);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
     
@@ -701,19 +575,9 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
     JPanel holder2 = new JPanel();
     holder2.setLayout(new BorderLayout());
     holder2.add(alignedP, BorderLayout.NORTH);
+    holder2.add(butHolder, BorderLayout.SOUTH);
     
-    JPanel optionsHolder = new JPanel();
-    optionsHolder.setLayout(new BorderLayout());
-    optionsHolder.setBorder(BorderFactory.createTitledBorder("Other options"));
-
-    optionsHolder.add(m_SaverEditor, BorderLayout.SOUTH);
-    JScrollPane scroller = new JScrollPane(optionsHolder);
-    //holder2.add(scroller, BorderLayout.CENTER);
-    
-    //holder2.add(butHolder, BorderLayout.SOUTH);
-    innerPanel.add(holder2, BorderLayout.SOUTH);
-    add(scroller, BorderLayout.CENTER);
-    add(butHolder, BorderLayout.SOUTH);
+    add(holder2, BorderLayout.SOUTH);
   }
 
   /**
@@ -723,12 +587,12 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
    */
   public void setObject(Object object) {
     m_dsSaver = (weka.gui.beans.Saver)object;
-    m_SaverEditor.setTarget(m_dsSaver.getSaverTemplate());
-    if(m_dsSaver.getSaverTemplate() instanceof DatabaseConverter){
+    m_SaverEditor.setTarget(m_dsSaver.getSaver());
+    if(m_dsSaver.getSaver() instanceof DatabaseConverter){
       setUpDatabase();
     }
     else{
-      if (m_dsSaver.getSaverTemplate() instanceof FileSourcedConverter) {
+      if (m_dsSaver.getSaver() instanceof FileSourcedConverter) {
         setUpFile();
       } else {
         setUpOther();
@@ -759,11 +623,5 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
    */
   public void setEnvironment(Environment env) {
     m_env = env;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    // TODO Auto-generated method stub
-    m_modifyListener = l;
   }
 }

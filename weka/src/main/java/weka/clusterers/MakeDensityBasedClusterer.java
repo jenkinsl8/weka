@@ -1,31 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    MakeDensityBasedClusterer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -35,6 +32,9 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.estimators.DiscreteEstimator;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -80,7 +80,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.13.2.4 $
  */
 public class MakeDensityBasedClusterer 
   extends AbstractDensityBasedClusterer
@@ -174,14 +174,10 @@ public class MakeDensityBasedClusterer
    * @return      the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
-    if (m_wrappedClusterer != null) {
+    if (m_wrappedClusterer != null)
       return m_wrappedClusterer.getCapabilities();
-    }
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+    else
+      return super.getCapabilities();
   }
   
   /**
@@ -585,7 +581,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13.2.4 $");
   }
 
   /**
