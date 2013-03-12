@@ -1,35 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Filter.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -38,13 +31,20 @@ import weka.core.OptionHandler;
 import weka.core.Queue;
 import weka.core.RelationalLocator;
 import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.Capabilities.Capability;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -133,19 +133,6 @@ public abstract class Filter
   public boolean isFirstBatchDone() {
     return m_FirstBatchDone;
   }
-  
-  /**
-   * Default implementation returns false. Some filters may not
-   * necessarily be able to produce an instance for output for
-   * every instance input after the first batch has been 
-   * completed - such filters should override this method
-   * and return true.
-   * 
-   * @return false by default
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    return false;
-  }
 
   /** 
    * Returns the Capabilities of this filter. Derived filters have to
@@ -158,20 +145,9 @@ public abstract class Filter
     Capabilities 	result;
 
     result = new Capabilities(this);
-    result.enableAll();
-    
     result.setMinimumNumberInstances(0);
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return            the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
 
   /** 
@@ -428,8 +404,6 @@ public abstract class Filter
     if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
 	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
-      m_InputStringAtts = new StringLocator(m_InputFormat, m_InputStringAtts.getAllowedIndices());
-      m_InputRelAtts = new RelationalLocator(m_InputFormat, m_InputRelAtts.getAllowedIndices());
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
@@ -543,16 +517,6 @@ public abstract class Filter
     flushInput();
     m_NewBatch = true;
     m_FirstBatchDone = true;
-    
-    if (m_OutputQueue.empty()) {
-      // Clear out references to old strings/relationals occasionally
-      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
-          || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
-        m_OutputFormat = m_OutputFormat.stringFreeStructure();
-        m_OutputStringAtts = new StringLocator(m_OutputFormat, m_OutputStringAtts.getAllowedIndices());
-      }
-    }
-    
     return (numPendingOutput() != 0);
   }
 
@@ -1332,7 +1296,7 @@ public abstract class Filter
    * @param filter	the filter to run
    * @param options	the commandline options
    */
-  public static void runFilter(Filter filter, String[] options) {
+  protected static void runFilter(Filter filter, String[] options) {
     try {
       if (Utils.getFlag('b', options)) {
 	Filter.batchFilterFile(filter, options);

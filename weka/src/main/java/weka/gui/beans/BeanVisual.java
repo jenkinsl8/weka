@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    BeanVisual.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,10 +26,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -46,7 +45,7 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision$
+ * @version $Revision: 1.9.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -158,23 +157,6 @@ public class BeanVisual
       setMaximumSize(d2);   
     }
   }
-  
-  public Image scale(double percent) {
-    if (m_icon != null) {
-      Image pic = m_icon.getImage();
-      double width = m_icon.getIconWidth();
-      double height = m_icon.getIconHeight();
-      
-      width *= percent;
-      height *= percent;
-      
-      pic = pic.getScaledInstance((int)width, (int)height, Image.SCALE_SMOOTH);
-      
-      return pic;
-    }
-    
-    return null;
-  }
 
   /**
    * Loads static and animated versions of a beans icons. These are
@@ -245,8 +227,7 @@ public class BeanVisual
    *
    */
   public void setStatic() {
-    setDisplayConnectors(false);
-    //m_visualLabel.setIcon(m_icon);
+    m_visualLabel.setIcon(m_icon);
   }
 
   /**
@@ -254,8 +235,7 @@ public class BeanVisual
    *
    */
   public void setAnimated() {
-    setDisplayConnectors(true);
-    //m_visualLabel.setIcon(m_animatedIcon);
+    m_visualLabel.setIcon(m_animatedIcon);
   }
 
   /**
@@ -390,9 +370,6 @@ public class BeanVisual
   }
 
   public void paintComponent(Graphics gx) {
-    ((Graphics2D)gx).setRenderingHint(RenderingHints.KEY_ANTIALIASING, 
-        RenderingHints.VALUE_ANTIALIAS_ON);
-    
     super.paintComponent(gx);
     if (m_displayConnectors) {
       gx.setColor(m_connectorColor);

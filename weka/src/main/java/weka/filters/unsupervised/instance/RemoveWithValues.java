@@ -1,33 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RemoveWithValues.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -38,9 +35,13 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -77,15 +78,10 @@ import weka.filters.UnsupervisedFilter;
  *  When selecting on nominal attributes, removes header
  *  references to excluded values.</pre>
  * 
- * <pre> -F
- *  Do not apply the filter to instances that arrive after the first
- *  (training) batch. The default is to apply the filter (i.e.
- *  the filter may not return an instance if it matches the remove criteria)</pre>
- * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.12.2.1 $
  */
 public class RemoveWithValues 
   extends Filter
@@ -111,9 +107,6 @@ public class RemoveWithValues
 
   /** If m_ModifyHeader, stores a mapping from old to new indexes */
   protected int [] m_NominalMapping;
-  
-  /** Whether to filter instances after the first batch has been processed */
-  protected boolean m_dontFilterAfterFirstBatch = false;
 
   /**
    * Returns a string describing this classifier
@@ -166,11 +159,6 @@ public class RemoveWithValues
 	      "\tWhen selecting on nominal attributes, removes header\n"
 	      + "\treferences to excluded values.",
               "H", 0, "-H"));
-    newVector.addElement(new Option(
-        "\tDo not apply the filter to instances that arrive after the first\n" +
-        "\t(training) batch. The default is to apply the filter (i.e.\n" +
-        "\tthe filter may not return an instance if it matches the remove criteria)",
-        "F", 0, "-F"));
 
     return newVector.elements();
   }
@@ -208,11 +196,6 @@ public class RemoveWithValues
    *  When selecting on nominal attributes, removes header
    *  references to excluded values.</pre>
    * 
-   * <pre> -F
-   *  Do not apply the filter to instances that arrive after the first
-   *  (training) batch. The default is to apply the filter (i.e.
-   *  the filter may not return an instance if it matches the remove criteria)</pre>
-   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -243,7 +226,6 @@ public class RemoveWithValues
     setInvertSelection(Utils.getFlag('V', options));
     setMatchMissingValues(Utils.getFlag('M', options));
     setModifyHeader(Utils.getFlag('H', options));
-    setDontFilterAfterFirstBatch(Utils.getFlag('F', options));
     // Re-initialize output format according to new options
     
     if (getInputFormat() != null) {
@@ -258,7 +240,7 @@ public class RemoveWithValues
    */
   public String [] getOptions() {
 
-    String [] options = new String [10];
+    String [] options = new String [9];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
@@ -276,9 +258,6 @@ public class RemoveWithValues
     if (getModifyHeader()) {
       options[current++] = "-H";
     }
-    if (getDontFilterAfterFirstBatch()) {
-      options[current++] = "-F";
-    }
     while (current < options.length) {
       options[current++] = "";
     }
@@ -293,7 +272,6 @@ public class RemoveWithValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -336,9 +314,7 @@ public class RemoveWithValues
 	newVals.addElement(oldAtt.value(selection[i]));
       }
       instanceInfo.deleteAttributeAt(m_AttIndex.getIndex());
-      Attribute newAtt = new Attribute(oldAtt.name(), newVals);
-      newAtt.setWeight(oldAtt.weight());
-      instanceInfo.insertAttributeAt(newAtt,
+      instanceInfo.insertAttributeAt(new Attribute(oldAtt.name(), newVals),
 				      m_AttIndex.getIndex());
       m_NominalMapping = new int [oldAtt.numValues()];
       for (int i = 0; i < m_NominalMapping.length; i++) {
@@ -378,12 +354,6 @@ public class RemoveWithValues
       resetQueue();
       m_NewBatch = false;
     }
-    
-    if (isFirstBatchDone() && m_dontFilterAfterFirstBatch) {
-      push((Instance)instance.copy());
-      return true;
-    }
-    
     if (instance.isMissing(m_AttIndex.getIndex())) {
       if (!getMatchMissingValues()) {
         push((Instance)instance.copy());
@@ -417,19 +387,6 @@ public class RemoveWithValues
       }
     }
     return false;
-  }
-  
-  /**
-   * RemoveWithValues may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed due to matching a value
-   * that the user wants to remove. Therefore this method returns
-   * true.
-   * 
-   * @return true
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    return true;
   }
 
   /** 
@@ -642,49 +599,6 @@ public class RemoveWithValues
     
     m_Values.setRanges(rangeList);
   }
-  
-  /**
-   * Set whether to apply the filter to instances that arrive once
-   * the first (training) batch has been seen. The default is to
-   * not apply the filter and just return each instance input. This
-   * is so that, when used in the FilteredClassifier, a test instance
-   * does not get "consumed" by the filter and a prediction is always
-   * generated.
-   * 
-   * @param b true if the filter should *not* be applied to instances that
-   * arrive after the first (training) batch has been processed.
-   */
-  public void setDontFilterAfterFirstBatch(boolean b) {
-    m_dontFilterAfterFirstBatch = b;
-  }
-  
-  /**
-   * Get whether to apply the filter to instances that arrive once
-   * the first (training) batch has been seen. The default is to
-   * not apply the filter and just return each instance input. This
-   * is so that, when used in the FilteredClassifier, a test instance
-   * does not get "consumed" by the filter and a prediction is always
-   * generated.
-   * 
-   * @return true if the filter should *not* be applied to instances that
-   * arrive after the first (training) batch has been processed.
-   */
-  public boolean getDontFilterAfterFirstBatch() {
-    return m_dontFilterAfterFirstBatch;
-  }
-  
-  /**
-   * Returns the tip text for this property.
-   * 
-   * @return            tip text for this property suitable for
-   *                    displaying in the explorer/experimenter gui
-   */
-  public String dontFilterAfterFirstBatchTipText() {
-    return "Whether to apply the filtering process to instances that " +
-                "are input after the first (training) batch. The default " +
-                "is false so instances in subsequent batches can potentially " +
-                "get 'consumed' by the filter.";
-  }
 
   /**
    * Set which values of a nominal attribute are to be used for
@@ -713,7 +627,7 @@ public class RemoveWithValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 
   /**
@@ -726,4 +640,3 @@ public class RemoveWithValues
     runFilter(new RemoveWithValues(), argv);
   }
 }
-

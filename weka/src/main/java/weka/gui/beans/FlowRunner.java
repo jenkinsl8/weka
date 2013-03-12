@@ -1,41 +1,49 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FlowRunner.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.gui.Logger;
-import weka.gui.beans.xml.XMLBeans;
+import weka.gui.beans.xml.*;
 
 /**
  * Small utility class for executing KnowledgeFlow
@@ -52,9 +60,6 @@ public class FlowRunner implements RevisionHandler {
   protected int m_runningCount = 0;
 
   protected transient Logger m_log = null;
-  
-  /** Whether to register the set log object with the beans */
-  protected boolean m_registerLog = true;
   
   protected transient Environment m_env;
   
@@ -78,15 +83,8 @@ public class FlowRunner implements RevisionHandler {
    * Constructor
    */
   public FlowRunner() {
-    this(true, true);
-  }
-  
-  public FlowRunner(boolean loadProps, boolean registerLog) {
-    if (loadProps) {
-      // make sure that properties and plugins are loaded
-      KnowledgeFlowApp.loadProperties();
-    }
-    m_registerLog = registerLog;
+    // make sure that properties and plugins are loaded
+    KnowledgeFlowApp.loadProperties();
   }
 
   public void setLog(Logger log) {
@@ -256,9 +254,8 @@ public class FlowRunner implements RevisionHandler {
     if (!fileName.endsWith(".kfml")) {
       throw new Exception("File must be an XML flow (*.kfml)");
     }
-    BeanConnection.init();
-    BeanInstance.init();
-    XMLBeans xml = new XMLBeans(null, null, 0);
+
+    XMLBeans xml = new XMLBeans(null, null);
     Vector v = (Vector) xml.read(new File(fileName));
     m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
 
@@ -346,7 +343,7 @@ public class FlowRunner implements RevisionHandler {
     // register the log (if set) with the beans
     for (int i = 0; i < m_beans.size(); i++) {
       BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
-      if (m_log != null && m_registerLog) {
+      if (m_log != null) {
         if (tempB.getBean() instanceof BeanCommon) {
           ((BeanCommon)tempB.getBean()).setLog(m_log);
         }
@@ -370,66 +367,49 @@ public class FlowRunner implements RevisionHandler {
     // look for a Startable bean...
     for (int i = 0; i < m_beans.size(); i++) {
       BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
-      boolean launch = true;
-      
-      if (tempB.getBean() instanceof Startable) {        
-        
+      if (tempB.getBean() instanceof Startable) {
         Startable s = (Startable)tempB.getBean();
-        String beanName = s.getClass().getName();
-        String customName = beanName;
-        if (s instanceof BeanCommon) {
-          customName = ((BeanCommon)s).getCustomName();
-          beanName = customName;
-          if (customName.indexOf(':') > 0) {
-            if (customName.substring(0, customName.indexOf(':')).startsWith("!")) {
-              launch = false;
-            }
-          }
-        }
-        
         // start that sucker (if it's happy to be started)...
         if (!m_startSequentially) {
           if (s.getStartMessage().charAt(0) != '$') {
-            if (launch) {
-              if (m_log != null) {
-                m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
-              } else {
-                System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
-              }
-              launchThread(s, numFlows);
-              numFlows++;
+            if (m_log != null) {
+              m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
+            } else {
+              System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
             }
-          } else {            
+            launchThread(s, numFlows);
+            numFlows++;
+          } else {
+            String beanName = s.getClass().getName();
+            if (s instanceof BeanCommon) {
+              String customName = ((BeanCommon)s).getCustomName();
+              beanName = customName;
+            }
             if (m_log != null) {
               m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
             } else {
               System.out.println("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
             }
           }
-        } else {          
+        } else {
           boolean ok = false;
           Integer position = null;
-          //String beanName = s.getClass().getName();
+          String beanName = s.getClass().getName();
           if (s instanceof BeanCommon) {
-            //String customName = ((BeanCommon)s).getCustomName();
-            //beanName = customName;
+            String customName = ((BeanCommon)s).getCustomName();
+            beanName = customName;
             // see if we have a parseable integer at the start of the name
             if (customName.indexOf(':') > 0) {
-              if (customName.substring(0, customName.indexOf(':')).startsWith("!")) {
-                launch = false;
-              } else {              
-                String startPos = customName.substring(0, customName.indexOf(':'));
-
-                try {
-                  position = new Integer(startPos);
-                  ok = true;
-                } catch (NumberFormatException n) {
-                }
+              String startPos = customName.substring(0, customName.indexOf(':'));
+              try {
+                position = new Integer(startPos);
+                ok = true;
+              } catch (NumberFormatException n) {
               }
             }            
           }
           
-          if (!ok && launch) {
+          if (!ok) {
             if (startables.size() == 0) {
               position = new Integer(0);
             } else {
@@ -440,16 +420,14 @@ public class FlowRunner implements RevisionHandler {
           }
           
           if (s.getStartMessage().charAt(0) != '$') {
-            if (launch) {
-              if (m_log != null) {
-                m_log.logMessage("[FlowRunner] adding start point " + beanName
-                    + " to the execution list (position " + position + ")");
-              } else {
-                System.out.println("[FlowRunner] adding start point " + beanName
-                    + " to the execution list (position " + position + ")");
-              }
-              startables.put(position, s);
+            if (m_log != null) {
+              m_log.logMessage("[FlowRunner] adding start point " + beanName
+                  + " to the execution list (position " + position + ")");
+            } else {
+              System.out.println("[FlowRunner] adding start point " + beanName
+                  + " to the execution list (position " + position + ")");
             }
+            startables.put(position, s);
           } else {
             if (m_log != null) {
               m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
@@ -458,16 +436,6 @@ public class FlowRunner implements RevisionHandler {
             }
           }
         }
-        
-        if (!launch) {
-          if (m_log != null) {
-            m_log.logMessage("[FlowRunner] start point " + beanName 
-                + " will not be launched.");
-          } else {
-            System.out.println("[FlowRunner] start point " + beanName 
-                + " will not be launched.");
-          }
-        }        
       }
     }
     

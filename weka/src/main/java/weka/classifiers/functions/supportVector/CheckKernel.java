@@ -1,29 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * CheckKernel.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions.supportVector;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.CheckScheme;
@@ -37,6 +34,10 @@ import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for examining the capabilities and finding problems with 
@@ -135,11 +136,11 @@ import weka.core.WeightedInstancesHandler;
  * 
  * <pre> -W
  *  Full name of the kernel analysed.
- *  eg: weka.classifiers.functions.supportVector.RBFKernel
- *  (default weka.classifiers.functions.supportVector.RBFKernel)</pre>
+ *  eg: weka.classifiers.functions.supportVector.PolyKernel
+ *  (default weka.classifiers.functions.supportVector.PolyKernel)</pre>
  * 
  * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+ * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
  * </pre>
  * 
  * <pre> -D
@@ -151,13 +152,16 @@ import weka.core.WeightedInstancesHandler;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
+ *  The size of the cache (a prime number).
  *  (default: 250007)</pre>
  * 
- * <pre> -G &lt;num&gt;
- *  The Gamma parameter.
- *  (default: 0.01)</pre>
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
  * 
  <!-- options-end -->
  *
@@ -165,7 +169,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.2.2.2 $
  * @see TestInstances
  */
 public class CheckKernel
@@ -181,7 +185,7 @@ public class CheckKernel
    */
   
   /*** The kernel to be examined */
-  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.RBFKernel();
+  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.PolyKernel();
   
   /**
    * Returns an enumeration describing the available options.
@@ -197,8 +201,8 @@ public class CheckKernel
     
     result.addElement(new Option(
         "\tFull name of the kernel analysed.\n"
-        +"\teg: weka.classifiers.functions.supportVector.RBFKernel\n"
-        + "\t(default weka.classifiers.functions.supportVector.RBFKernel)",
+        +"\teg: weka.classifiers.functions.supportVector.PolyKernel\n"
+        + "\t(default weka.classifiers.functions.supportVector.PolyKernel)",
         "W", 1, "-W"));
     
     if ((m_Kernel != null) 
@@ -259,11 +263,11 @@ public class CheckKernel
    * 
    * <pre> -W
    *  Full name of the kernel analysed.
-   *  eg: weka.classifiers.functions.supportVector.RBFKernel
-   *  (default weka.classifiers.functions.supportVector.RBFKernel)</pre>
+   *  eg: weka.classifiers.functions.supportVector.PolyKernel
+   *  (default weka.classifiers.functions.supportVector.PolyKernel)</pre>
    * 
    * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
    * </pre>
    * 
    * <pre> -D
@@ -275,13 +279,16 @@ public class CheckKernel
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number), 0 for full cache and 
-   *  -1 to turn it off.
+   *  The size of the cache (a prime number).
    *  (default: 250007)</pre>
    * 
-   * <pre> -G &lt;num&gt;
-   *  The Gamma parameter.
-   *  (default: 0.01)</pre>
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
    * 
    <!-- options-end -->
    *
@@ -295,7 +302,7 @@ public class CheckKernel
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      tmpStr = weka.classifiers.functions.supportVector.RBFKernel.class.getName();
+      tmpStr = weka.classifiers.functions.supportVector.PolyKernel.class.getName();
     setKernel(
 	(Kernel) forName(
 	    "weka.classifiers.functions.supportVector", 
@@ -1431,7 +1438,7 @@ public class CheckKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
   }
   
   /**

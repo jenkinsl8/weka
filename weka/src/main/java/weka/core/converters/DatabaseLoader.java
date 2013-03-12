@@ -1,52 +1,43 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    DatabaseLoader.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.DatabaseMetaData;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
-import weka.core.Option;
+import weka.core.Attribute;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.experiment.InstanceQuery;
+import weka.core.Option;
+import java.io.IOException;
+import java.sql.*;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
@@ -104,8 +95,7 @@ import weka.experiment.InstanceQuery;
  */
 public class DatabaseLoader 
   extends AbstractLoader 
-  implements BatchConverter, IncrementalConverter, DatabaseConverter, 
-  OptionHandler, EnvironmentHandler {
+  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -7936159015338318659L;
@@ -114,74 +104,83 @@ public class DatabaseLoader
   protected Instances m_structure;
   
   /** Used in pseudoincremental mode. The whole dataset from which instances will be read incrementally.*/
-  protected Instances m_datasetPseudoInc;
+  private Instances m_datasetPseudoInc;
   
   /** Set of instances that equals m_structure except that the auto_generated_id column is not included as an attribute*/
-  protected Instances m_oldStructure;
+  private Instances m_oldStructure;
   
   /** The database connection */
-  protected DatabaseConnection m_DataBaseConnection;
+  private DatabaseConnection m_DataBaseConnection;
   
   /** The user defined query to load instances. (form: SELECT *|&ltcolumn-list&gt; FROM &lttable&gt; [WHERE &lt;condition&gt;]) */
-  protected String m_query = "Select * from Results0";
+  private String m_query = "Select * from Results0";
   
   /** Flag indicating that pseudo incremental mode is used (all instances load at once into main memeory and then incrementally from main memory instead of the database) */
-  protected boolean m_pseudoIncremental;
+  private boolean m_pseudoIncremental;
   
   /** If true it checks whether or not the table exists in the database before loading depending on jdbc metadata information.
    *  Set flag to false if no check is required or if jdbc metadata is not complete. */
-  protected boolean m_checkForTable;
+  private boolean m_checkForTable;
   
   /** Limit when an attribute is treated as string attribute and not as a nominal one because it has to many values. */
-  protected int m_nominalToStringLimit;
+  private int m_nominalToStringLimit;
   
   /** The number of rows obtained by m_query, eg the size of the ResultSet to load*/
-  protected int m_rowCount;
+  private int m_rowCount;
   
   /** Indicates how many rows has already been loaded incrementally */
-  protected int m_counter;
+  private int m_counter;
   
   /** Decides which SQL statement to limit the number of rows should be used. DBMS dependent. Algorithm just tries several possibilities. */
-  protected int m_choice;
+  private int m_choice;
   
   /** Flag indicating that incremental process wants to read first instance*/
-  protected boolean m_firstTime;
+  private boolean m_firstTime;
   
   /** Flag indicating that incremental mode is chosen (for command line use only)*/
-  protected boolean m_inc;
+  private boolean m_inc;
   
   /** Contains the name of the columns that uniquely define a row in the ResultSet. Ensures a unique ordering of instances for indremental loading.*/
-  protected ArrayList<String> m_orderBy;
+  private ArrayList<String> m_orderBy;
   
   /** Stores the index of a nominal value */
-  protected Hashtable<String,Double> [] m_nominalIndexes;
+  private Hashtable<String,Double> [] m_nominalIndexes;
   
   /**  Stores the nominal value*/
-  protected ArrayList<String> [] m_nominalStrings;
+  private ArrayList<String> [] m_nominalStrings;
   
   /** Name of the primary key column that will allow unique ordering necessary for incremental loading. The name is specified in the DatabaseUtils file.*/
-  protected String m_idColumn;
+  private String m_idColumn;
+  
+  /** The property file for the database connection */
+  protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
+  
+  /** Properties associated with the database connection */
+  protected static Properties PROPERTIES;
 
   /** the JDBC URL to use */
   protected String m_URL = null;
 
   /** the database user to use */
-  protected String m_User = "";
+  protected String m_User = null;
 
   /** the database password to use */
-  protected String m_Password = "";
+  protected String m_Password = null;
   
   /** the keys for unique ordering */
-  protected String m_Keys = "";
+  protected String m_Keys = null;
   
-  /** the custom props file to use instead of default one. */
-  protected File m_CustomPropsFile = null;
+  /** reads the property file */
+  static {
 
-  /** Determines whether sparse data is created */
-  protected boolean m_CreateSparseData = false;
-  
-  /** Environment variables */
-  protected transient Environment m_env;
+    try {
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+   
+    } catch (Exception ex) {
+      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(ex);
+    }
+  }
   
   /**
    * Constructor
@@ -190,7 +189,14 @@ public class DatabaseLoader
    */
   public DatabaseLoader() throws Exception{
   
-      resetOptions();
+      reset();
+      m_pseudoIncremental=false;
+      m_checkForTable=true;
+      String props=PROPERTIES.getProperty("nominalToStringLimit");
+      m_nominalToStringLimit = Integer.parseInt(props);
+      m_idColumn=PROPERTIES.getProperty("idColumn");
+      if (PROPERTIES.getProperty("checkForTable", "").equalsIgnoreCase("FALSE"))
+	m_checkForTable=false;
   }
 
   /**
@@ -215,134 +221,34 @@ public class DatabaseLoader
       + "In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.\n"
       + "In batch mode no string attributes will be created.";
   }
-  
-  /**
-   * Set the environment variables to use.
-   * 
-   * @param env the environment variables to use
-   */
-  public void setEnvironment(Environment env) {
-    m_env = env;
-    try {
-      // force a new connection and setting of all parameters
-      // with environment variables resolved
-      m_DataBaseConnection = newDatabaseConnection();
-      setUrl(m_URL);
-      setUser(m_User);
-      setPassword(m_Password);
-    } catch (Exception ex) {
-      // we won't complain about it here...
-    }
-  }
-  
-  private void checkEnv() {
-    if (m_env == null) {
-      m_env = Environment.getSystemWide();
-    }
-  }
 
-  /**
-   * Initializes a new DatabaseConnection object, either default one or from
-   * custom props file.
-   * 
-   * @return		the DatabaseConnection object
-   * @see		#m_CustomPropsFile
-   */
-  protected DatabaseConnection newDatabaseConnection() throws Exception {
-    DatabaseConnection	result;
-    
-    checkEnv();
-    
-    if (m_CustomPropsFile != null) {
-      File pFile = new File(m_CustomPropsFile.getPath());
-      String pPath = m_CustomPropsFile.getPath();      
-      try {
-        pPath = m_env.substitute(pPath);
-        pFile = new File(pPath);
-      } catch (Exception ex) { }
-      result = new DatabaseConnection(pFile);
-    } else {
-      result = new DatabaseConnection();
-    }
-    
-    m_pseudoIncremental    = false;
-    m_checkForTable        = true;
-    String props           = result.getProperties().getProperty("nominalToStringLimit");
-    m_nominalToStringLimit = Integer.parseInt(props);
-    m_idColumn             = result.getProperties().getProperty("idColumn");
-    if (result.getProperties().getProperty("checkForTable", "").equalsIgnoreCase("FALSE"))
-      m_checkForTable = false;
-    
-    return result;
-  }
   
-  /**
-   * Resets the Loader to the settings in either the default DatabaseUtils.props
-   * or any property file that the user has specified via setCustomPropsFile().
-   */
-  public void resetOptions() {
-    resetStructure();
-    try {
-      if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
-        m_DataBaseConnection.disconnectFromDatabase();
-      m_DataBaseConnection = newDatabaseConnection();
-    } catch (Exception ex) {
-      printException(ex);
-    }
-    
-    m_URL       = m_DataBaseConnection.getDatabaseURL();
-    if (m_URL == null) {
-      m_URL = "none set!";
-    }
-    m_User  = m_DataBaseConnection.getUsername();
-    if (m_User == null) {
-      m_User = "";
-    }
-    m_Password  = m_DataBaseConnection.getPassword();
-    if (m_Password == null) {
-      m_Password = "";
-    }
-    m_orderBy = new ArrayList<String>();
-  }
 
-  /** Resets the Loader ready to read a new data set using set options
+  /** Resets the Loader ready to read a new data set
    * @throws Exception if an error occurs while disconnecting from the database
    */
-  public void reset() {
+  public void reset() throws Exception{
 
     resetStructure();
-    try {
     if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
         m_DataBaseConnection.disconnectFromDatabase();
-    m_DataBaseConnection = newDatabaseConnection();
-    } catch (Exception ex) {
-      printException(ex);
-    }
+    m_DataBaseConnection = new DatabaseConnection();
 
     // don't lose previously set connection data!
-    if (m_URL != null) {
-      setUrl(m_URL);
-    }
-    
-    if (m_User != null) {
-      setUser(m_User);
-    }
-    
-    if (m_Password != null) {
-      setPassword(m_Password);
-    }
+    if (m_URL != null)
+      m_DataBaseConnection.setDatabaseURL(m_URL);
+    if (m_User != null)
+      m_DataBaseConnection.setUsername(m_User);
+    if (m_Password != null)
+      m_DataBaseConnection.setPassword(m_Password);
 
     m_orderBy = new ArrayList<String>();
     // don't lose previously set key columns!
-    if (m_Keys != null) {
-      String k = m_Keys;
-      try {
-        k = m_env.substitute(k);
-      } catch (Exception ex) { }
-      setKeys(k);
-    }
+    if (m_Keys != null)
+      setKeys(m_Keys);
       
-    m_inc = false;        
+    m_inc = false;
+    
   }
   
   
@@ -440,48 +346,15 @@ public class DatabaseLoader
   }
   
   /**
-   * Sets the custom properties file to use.
-   * 
-   * @param value 	the custom props file to load database parameters from,
-   * 			use null or directory to disable custom properties.
-   */
-  public void setCustomPropsFile(File value) {
-    m_CustomPropsFile = value;
-  }
-  
-   /**
-   * Returns the custom properties file in use, if any.
-   * 
-   * @return 		the custom props file, null if none used
-   */
-  public File getCustomPropsFile() {
-    return m_CustomPropsFile;
-  }
-  
-  /**
-   * The tip text for this property.
-   * 
-   * @return 		the tip text
-   */
-  public String customPropsFileTipText(){
-    return "The custom properties that the user can use to override the default ones.";
-  }
-  
-  /**
    * Sets the database URL
    * 
    * @param url string with the database URL
    */
-  public void setUrl(String url) {
-      checkEnv();
+  public void setUrl(String url){
       
       m_URL = url;
-      String dbU = m_URL;
-      try {
-        dbU = m_env.substitute(dbU);
-      } catch (Exception ex) { }
-      
-      m_DataBaseConnection.setDatabaseURL(dbU);    
+      m_DataBaseConnection.setDatabaseURL(url);
+    
   }
   
   /**
@@ -491,8 +364,7 @@ public class DatabaseLoader
    */
   public String getUrl(){
   
-      //return m_DataBaseConnection.getDatabaseURL();
-    return m_URL;
+      return m_DataBaseConnection.getDatabaseURL();
   }
   
   /**
@@ -511,15 +383,9 @@ public class DatabaseLoader
    * @param user the database user name
    */
   public void setUser(String user){
-    checkEnv();
    
       m_User = user;
-      String userCopy = user;
-      try {
-        userCopy = m_env.substitute(userCopy);
-      } catch (Exception ex) {        
-      }
-      m_DataBaseConnection.setUsername(userCopy);
+      m_DataBaseConnection.setUsername(user);
   }
   
   /**
@@ -529,8 +395,7 @@ public class DatabaseLoader
    */
   public String getUser(){
    
-      //return m_DataBaseConnection.getUsername();
-    return m_User;
+      return m_DataBaseConnection.getUsername();
   }
   
   /**
@@ -548,15 +413,10 @@ public class DatabaseLoader
    * 
    * @param password the password
    */
-  public void setPassword(String password) {
-    checkEnv();
-    
-    m_Password = password;
-    String passCopy = password;
-    try {
-      passCopy = m_env.substitute(passCopy);
-    } catch (Exception ex) { }
-    m_DataBaseConnection.setPassword(password);   
+  public void setPassword(String password){
+   
+      m_Password = password;
+      m_DataBaseConnection.setPassword(password);
   }
 
   /**
@@ -565,8 +425,7 @@ public class DatabaseLoader
    * @return the database password
    */
   public String getPassword() {
-//    return m_DataBaseConnection.getPassword();
-    return m_Password;
+    return m_DataBaseConnection.getPassword();
   }
   
   /**
@@ -578,31 +437,7 @@ public class DatabaseLoader
   
       return "The database password";
   }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String sparseDataTipText() {
-    return "Encode data as sparse instances.";
-  }
-
-  /**
-   * Sets whether data should be encoded as sparse instances
-   * @param s true if data should be encoded as a set of sparse instances
-   */
-  public void setSparseData(boolean s) {
-    m_CreateSparseData = s;
-  }
-
-  /**
-   * Gets whether data is to be returned as a set of sparse instances
-   * @return true if data is to be encoded as sparse instances
-   */
-  public boolean getSparseData() {
-    return m_CreateSparseData;
-  }
+  
   
   /** 
    * Sets the database url, user and pw
@@ -614,7 +449,7 @@ public class DatabaseLoader
   public void setSource(String url, String userName, String password){
   
       try{
-        m_DataBaseConnection = newDatabaseConnection();
+        m_DataBaseConnection = new DatabaseConnection();
         setUrl(url);
         setUser(userName);
         setPassword(password);
@@ -631,7 +466,7 @@ public class DatabaseLoader
   public void setSource(String url){
   
       try{
-        m_DataBaseConnection = newDatabaseConnection();
+        m_DataBaseConnection = new DatabaseConnection();
         setUrl(url);
         m_User = m_DataBaseConnection.getUsername();
         m_Password = m_DataBaseConnection.getPassword();
@@ -647,7 +482,7 @@ public class DatabaseLoader
    */  
   public void setSource() throws Exception{
   
-        m_DataBaseConnection = newDatabaseConnection();
+        m_DataBaseConnection = new DatabaseConnection();
         m_URL = m_DataBaseConnection.getDatabaseURL();
         m_User = m_DataBaseConnection.getUsername();
         m_Password = m_DataBaseConnection.getPassword();
@@ -842,7 +677,6 @@ public class DatabaseLoader
     if (m_DataBaseConnection == null) {
       throw new IOException("No source database has been specified");
     }
-
     connectToDatabase();
   pseudo:
       try{
@@ -864,34 +698,30 @@ public class DatabaseLoader
               + "If you are convinced the table exists, set 'checkForTable' "
               + "to 'False' in your DatabaseUtils.props file and try again.");
       }
-
-      //finds out which SQL statement to use for the DBMS to limit the number of resulting rows to one
-      int choice = 0;
-      boolean rightChoice = false;
-      while (!rightChoice){
-        try{
-          String limitQ = limitQuery(m_query,0,choice);
-          if (m_DataBaseConnection.execute(limitQ) == false) {
-            throw new IOException("Query didn't produce results");
-          }
-          m_choice = choice;
-          rightChoice = true;
+        //finds out which SQL statement to use for the DBMS to limit the number of resulting rows to one
+        int choice = 0;
+        boolean rightChoice = false;
+        while (!rightChoice){
+            try{
+                if (m_DataBaseConnection.execute(limitQuery(m_query,0,choice)) == false) {
+                    throw new IOException("Query didn't produce results");
+                }
+                m_choice = choice;
+                rightChoice = true;
+            }
+            catch (SQLException ex) {
+                choice++;
+                if(choice == 3){
+                    System.out.println("Incremental loading not supported for that DBMS. Pseudoincremental mode is used if you use incremental loading.\nAll rows are loaded into memory once and retrieved incrementally from memory instead of from the database.");
+                    m_pseudoIncremental = true;
+                    break pseudo;
+                }
+            }
         }
-        catch (SQLException ex) {
-          choice++;
-          if(choice == 3){
-            System.out.println("Incremental loading not supported for that DBMS. Pseudoincremental mode is used if you use incremental loading.\nAll rows are loaded into memory once and retrieved incrementally from memory instead of from the database.");
-            m_pseudoIncremental = true;
-            break pseudo;
-          }
-        }
-      }
-
         String end = endOfQuery(false);
         ResultSet rs = m_DataBaseConnection.getResultSet();
-
         ResultSetMetaData md = rs.getMetaData();
-//        rs.close();
+        rs.close();
         int numAttributes = md.getColumnCount();
         int [] attributeTypes = new int [numAttributes];
         m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
@@ -899,23 +729,13 @@ public class DatabaseLoader
         for (int i = 1; i <= numAttributes; i++) {
             switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
                 case DatabaseConnection.STRING :
-
-                  String columnName = md.getColumnLabel(i);
-                  if(m_DataBaseConnection.getUpperCase())
-                      columnName = columnName.toUpperCase();
-                  
-                  m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
-                  m_nominalStrings[i - 1] = new ArrayList<String>();
-                  
-                    // fast incomplete structure for batch mode - actual 
-                    // structure is determined by InstanceQuery in getDataSet()
-                    if (getRetrieval() != INCREMENTAL) {
-                      attributeTypes[i - 1] = Attribute.STRING;
-                      break;
-                    }
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
-
+                    String columnName = md.getColumnName(i);
+                    if(m_DataBaseConnection.getUpperCase())
+                        columnName = columnName.toUpperCase();
+                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                    m_nominalStrings[i - 1] = new ArrayList<String>();
                     String query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                         rs1 = m_DataBaseConnection.getResultSet();
@@ -946,21 +766,11 @@ public class DatabaseLoader
                     break;
                 case DatabaseConnection.TEXT:
                     //System.err.println("boolean --> string");
-                  
-                  columnName = md.getColumnLabel(i);
-                  if(m_DataBaseConnection.getUpperCase())
-                    columnName = columnName.toUpperCase();
-                  
-                  m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
-                  m_nominalStrings[i - 1] = new ArrayList<String>();
-                  
-                  // fast incomplete structure for batch mode - actual 
-                  // structure is determined by InstanceQuery in getDataSet()
-                  if (getRetrieval() != INCREMENTAL) {
-                    attributeTypes[i - 1] = Attribute.STRING;
-                    break;
-                  }
-                                    
+                    columnName = md.getColumnName(i);
+                    if(m_DataBaseConnection.getUpperCase())
+                      columnName = columnName.toUpperCase();
+                    m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+                    m_nominalStrings[i - 1] = new ArrayList<String>();
                     query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
                     if (m_DataBaseConnection.execute(query) == true){
                       rs1 = m_DataBaseConnection.getResultSet();
@@ -1018,7 +828,7 @@ public class DatabaseLoader
         for (int i = 0; i < numAttributes; i++) {
             /* Fix for databases that uppercase column names */
             //String attribName = attributeCaseFix(md.getColumnName(i + 1));
-            String attribName = md.getColumnLabel(i + 1);
+            String attribName = md.getColumnName(i + 1);
             switch (attributeTypes[i]) {
                 case Attribute.NOMINAL:
                     attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
@@ -1052,10 +862,6 @@ public class DatabaseLoader
         }
         else
             m_oldStructure = new Instances(m_structure,0);
-        
-        if (m_DataBaseConnection.getResultSet() != null) {
-          rs.close();
-        }
     }
     else{
         if(m_oldStructure == null)
@@ -1088,64 +894,279 @@ public class DatabaseLoader
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(BATCH);
-   
+    connectToDatabase();
+    
     
     Instances result = null;
-    checkEnv();
-    try {
-      InstanceQuery iq = new InstanceQuery();
-      iq.initialize(m_CustomPropsFile);
-      String realURL = m_URL;
-      try {
-        realURL = m_env.substitute(realURL);
-      } catch (Exception ex) { }
-      iq.setDatabaseURL(realURL);
-      String realUser = m_User;
-      try {
-        realUser = m_env.substitute(realUser);
-      } catch (Exception ex) { }
-      iq.setUsername(realUser);
-      String realPass = m_Password;
-      try {
-        realPass = m_env.substitute(realPass);
-      } catch (Exception ex) { }
-      iq.setPassword(realPass);      
-      String realQuery = m_query;
-      try {
-        realQuery = m_env.substitute(realQuery);
-      } catch (Exception ex) { }
-      iq.setQuery(realQuery);
-      iq.setSparseData(m_CreateSparseData);
-      
-      result = iq.retrieveInstances();
-      
-      if(m_DataBaseConnection.getUpperCase()) {
-        m_idColumn = m_idColumn.toUpperCase();
-      }
-      
-      if(result.attribute(0).name().equals(m_idColumn)){
-        result.deleteAttributeAt(0);
-      }
-      
-      m_structure = new Instances(result,0);
-      iq.disconnectFromDatabase();
-      
-    } catch (Exception ex) {
-      printException(ex);
-      StringBuffer text = new StringBuffer();
-      if(m_query.equals("Select * from Results0")){
-        text.append("\n\nDatabaseLoader options:\n");
-        Enumeration enumi = listOptions();
-        
-        while (enumi.hasMoreElements()) {
-          Option option = (Option)enumi.nextElement();
-          text.append(option.synopsis()+'\n');
-          text.append(option.description()+'\n');
+    try{
+    if (m_DataBaseConnection.execute(m_query) == false) 
+      throw new Exception("Query didn't produce results");
+    ResultSet rs = m_DataBaseConnection.getResultSet();
+    ResultSetMetaData md = rs.getMetaData();
+    // Determine structure of the instances
+    int numAttributes = md.getColumnCount();
+    int [] attributeTypes = new int [numAttributes];
+    m_nominalIndexes = Utils.cast(new Hashtable [numAttributes]);
+    m_nominalStrings = Utils.cast(new ArrayList [numAttributes]);
+    for (int i = 1; i <= numAttributes; i++) {
+      switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
+	
+      case DatabaseConnection.STRING :
+        ResultSet rs1;
+        String columnName = md.getColumnName(i);
+        if(m_DataBaseConnection.getUpperCase())
+            columnName = columnName.toUpperCase();
+        String end = endOfQuery(false);
+        m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+        m_nominalStrings[i - 1] = new ArrayList<String>();
+        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "
+                                        + columnName+" ) FROM "
+                                        + end
+                                        + " ORDER BY "
+                                        + columnName) == false){
+            throw new Exception("Nominal values cannot be retrieved");
         }
-        System.out.println(text);
+        rs1 = m_DataBaseConnection.getResultSet();
+        attributeTypes[i - 1] = Attribute.NOMINAL;
+        stringToNominal(rs1,i);
+        rs1.close();  
+	break;
+      case DatabaseConnection.TEXT:
+        columnName = md.getColumnName(i);
+        if(m_DataBaseConnection.getUpperCase())
+            columnName = columnName.toUpperCase();
+        end = endOfQuery(false);
+        m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+        m_nominalStrings[i - 1] = new ArrayList<String>();
+        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
+            throw new Exception("Nominal values cannot be retrieved");
+        }
+        rs1 = m_DataBaseConnection.getResultSet();
+        attributeTypes[i - 1] = Attribute.STRING;
+        stringToNominal(rs1,i);
+        rs1.close();  
+	break;
+      case DatabaseConnection.BOOL:
+	//System.err.println("boolean --> nominal");
+	attributeTypes[i - 1] = Attribute.NOMINAL;
+	m_nominalIndexes[i - 1] = new Hashtable<String,Double>();
+	m_nominalIndexes[i - 1].put("false", new Double(0));
+	m_nominalIndexes[i - 1].put("true", new Double(1));
+	m_nominalStrings[i - 1] = new ArrayList<String>();
+	m_nominalStrings[i - 1].add("false");
+	m_nominalStrings[i - 1].add("true");
+	break;
+      case DatabaseConnection.DOUBLE:
+	//System.err.println("BigDecimal --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.BYTE:
+	//System.err.println("byte --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.SHORT:
+	//System.err.println("short --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.INTEGER:
+	//System.err.println("int --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.LONG:
+	//System.err.println("long --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.FLOAT:
+	//System.err.println("float --> numeric");
+	attributeTypes[i - 1] = Attribute.NUMERIC;
+	break;
+      case DatabaseConnection.DATE:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
+      case DatabaseConnection.TIME:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
+      default:
+	//System.err.println("Unknown column type");
+	attributeTypes[i - 1] = Attribute.STRING;
       }
     }
+
+    // Step through the tuples
+    //System.err.println("Creating instances...");
+    ArrayList<Instance> instances = new ArrayList<Instance>();
+    while(rs.next()) {
+      double[] vals = new double[numAttributes];
+      for(int i = 1; i <= numAttributes; i++) {
+	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
+	case DatabaseConnection.STRING :
+	  String str = rs.getString(i);
+	  
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+            } else {
+                Double index = (Double)m_nominalIndexes[i - 1].get(str);
+                if (index == null) {
+                    index = new Double(m_structure.attribute(i-1).addStringValue(str));
+                }
+                vals[i - 1] = index.doubleValue();
+            }
+	  break;
+	case DatabaseConnection.TEXT:
+	  str = rs.getString(i);
+
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  }
+	  else {
+	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
+	    if (index == null) {
+	      index = new Double(m_structure.attribute(i-1).addStringValue(str));
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
+	  break;
+	case DatabaseConnection.BOOL:
+	  boolean boo = rs.getBoolean(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (boo ? 1.0 : 0.0);
+	  }
+	  break;
+	case DatabaseConnection.DOUBLE:
+	  double dd = rs.getDouble(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] =  dd;
+	  }
+	  break;
+	case DatabaseConnection.BYTE:
+	  byte by = rs.getByte(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (double)by;
+	  }
+	  break;
+	case DatabaseConnection.SHORT:
+	  short sh = rs.getShort(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (double)sh;
+	  }
+	  break;
+	case DatabaseConnection.INTEGER:
+	  int in = rs.getInt(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (double)in;
+	  }
+	  break;
+	case DatabaseConnection.LONG:
+	  long lo = rs.getLong(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (double)lo;
+	  }
+	  break;
+	case DatabaseConnection.FLOAT:
+	  float fl = rs.getFloat(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+	    vals[i - 1] = (double)fl;
+	  }
+	  break;
+	case DatabaseConnection.DATE:
+          Date date = rs.getDate(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double)date.getTime();
+          }
+          break;
+	case DatabaseConnection.TIME:
+          Time time = rs.getTime(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Utils.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double) time.getTime();
+          }
+          break;
+	default:
+	  vals[i - 1] = Utils.missingValue();
+	}
+      }
+      Instance newInst;
+      newInst = new DenseInstance(1.0, vals);
+      instances.add(newInst);
+    }   
     
+    // Create the header and add the instances to the dataset
+    //System.err.println("Creating header...");
+    ArrayList<Attribute> attribInfo = new ArrayList<Attribute>();
+    for (int i = 0; i < numAttributes; i++) {
+      /* Fix for databases that uppercase column names */
+      //String attribName = attributeCaseFix(md.getColumnName(i + 1));
+      String attribName = md.getColumnName(i + 1);
+      switch (attributeTypes[i]) {
+      case Attribute.NOMINAL:
+	attribInfo.add(new Attribute(attribName, m_nominalStrings[i]));
+	break;
+      case Attribute.NUMERIC:
+	attribInfo.add(new Attribute(attribName));
+	break;
+      case Attribute.STRING:
+	Attribute att = new Attribute(attribName, (ArrayList<String>) null);
+	attribInfo.add(att);
+	for (int n = 0; n < m_nominalStrings[i].size(); n++) {
+	  att.addStringValue((String) m_nominalStrings[i].get(n));
+	}
+	break;
+      case Attribute.DATE:
+	attribInfo.add(new Attribute(attribName, (String)null));
+	break;
+      default:
+	throw new IOException("Unknown attribute type");
+      }
+    }
+    result = new Instances(endOfQuery(true), attribInfo, 
+				     instances.size());
+    for (int i = 0; i < instances.size(); i++) {
+      result.add((Instance)instances.get(i));
+    }
+    rs.close();
+    m_DataBaseConnection.disconnectFromDatabase();
+    //get rid of m_idColumn
+    if(m_DataBaseConnection.getUpperCase())
+        m_idColumn = m_idColumn.toUpperCase();
+    if(result.attribute(0).name().equals(m_idColumn)){
+        result.deleteAttributeAt(0);
+    }
+    m_structure = new Instances(result,0);
+    }
+    catch(Exception ex) {
+	printException(ex);
+        StringBuffer text = new StringBuffer();
+        if(m_query.equals("Select * from Results0")){
+            text.append("\n\nDatabaseLoader options:\n");
+            Enumeration enumi = listOptions();
+            while (enumi.hasMoreElements()) {
+                Option option = (Option)enumi.nextElement();
+                text.append(option.synopsis()+'\n');
+                text.append(option.description()+'\n');
+            }
+            System.out.println(text);
+        }
+    }
+    //System.out.println(result);
     return result;
   }
   
@@ -1270,11 +1291,7 @@ public class DatabaseLoader
 	  vals[i - 1] = Utils.missingValue();
 	}
       }
-       Instance inst;
-       if (m_CreateSparseData)
-	 inst = new SparseInstance(1.0, vals);
-       else
-	 inst = new DenseInstance(1.0, vals);
+       Instance inst = new DenseInstance(1.0, vals);
        //get rid of m_idColumn
        if(m_DataBaseConnection.getUpperCase())
               m_idColumn = m_idColumn.toUpperCase();
@@ -1407,11 +1424,6 @@ public class DatabaseLoader
     if (m_inc)
       options.add("-I");
     
-    if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
-      options.add("-custom-props");
-      options.add(m_CustomPropsFile.toString());
-    }
-    
     return (String[]) options.toArray(new String[options.size()]);
   }
   
@@ -1458,16 +1470,6 @@ public class DatabaseLoader
      newVector.add(new Option(
 	 "\tSets incremental loading", 
 	 "I", 0, "-I"));
-     
-     newVector.addElement(new Option(
-	 "\tReturn sparse rather than normal instances.", 
-         "S", 0, "-S"));
-     
-     newVector.add(new Option(
-             "\tThe custom properties file to use instead of default ones,\n"
-           + "\tcontaining the database parameters.\n"
-           + "\t(default: none)",
-           "custom-props", 1, "-custom-props <file>"));
      
      return  newVector.elements();
   }
@@ -1549,12 +1551,6 @@ public class DatabaseLoader
             m_orderBy.add(column);
         }
     }
-    
-    tmpStr = Utils.getOption("custom-props", options);
-    if (tmpStr.length() == 0)
-      setCustomPropsFile(null);
-    else
-      setCustomPropsFile(new File(tmpStr));
   }
   
   /**Prints an exception

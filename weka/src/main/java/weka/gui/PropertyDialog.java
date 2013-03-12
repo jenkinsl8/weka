@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PropertyDialog.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,14 +32,13 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyEditor;
 
 import javax.swing.JDialog;
-import javax.swing.JInternalFrame;
 
 /** 
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7.2.2 $
  */
 public class PropertyDialog
   extends JDialog {
@@ -90,7 +90,7 @@ public class PropertyDialog
    * @param y 		initial y coord for the dialog
    */
   public PropertyDialog(Dialog owner, PropertyEditor pe, int x, int y) {
-    super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
+    super(owner, pe.getClass().getName(), true);
     initialize(pe, x, y);
   }
   
@@ -115,7 +115,7 @@ public class PropertyDialog
    * @param y 		initial y coord for the dialog
    */
   public PropertyDialog(Frame owner, PropertyEditor pe, int x, int y) {
-    super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
+    super(owner, pe.getClass().getName(), true);
     
     initialize(pe, x, y);
   }
@@ -141,24 +141,10 @@ public class PropertyDialog
 
     pack();
     
-    int screenWidth = getGraphicsConfiguration().getBounds().width;
-    int screenHeight = getGraphicsConfiguration().getBounds().height;
-
-    // adjust height to a maximum of 95% of screen height
-    if (getHeight() > (double) screenHeight * 0.95)
-      setSize(getWidth(), (int) ((double) screenHeight * 0.95));
-    
-    if ((x == -1) && (y == -1)) {
+    if ((x == -1) && (y == -1))
       setLocationRelativeTo(null);
-    }
-    else {
-      // adjust position if necessary
-      if (x + getWidth() > screenWidth)
-	x = screenWidth - getWidth();
-      if (y + getHeight() > screenHeight)
-	y = screenHeight - getHeight();
+    else
       setLocation(x, y);
-    }
   }
 
   /**
@@ -186,32 +172,6 @@ public class PropertyDialog
     while (parent != null) {
       if (parent instanceof Frame) {
 	result = (Frame) parent;
-	break;
-      }
-      else {
-	parent = parent.getParent();
-      }
-    }
-    
-    return result;
-  }
-
-  /**
-   * Tries to determine the internal frame this panel is part of.
-   * 
-   * @param c		the container to start with
-   * @return		the parent internal frame if one exists or null if not
-   */
-  public static JInternalFrame getParentInternalFrame(Container c) {
-    JInternalFrame	result;
-    Container		parent;
-    
-    result = null;
-    
-    parent = c;
-    while (parent != null) {
-      if (parent instanceof JInternalFrame) {
-	result = (JInternalFrame) parent;
 	break;
       }
       else {

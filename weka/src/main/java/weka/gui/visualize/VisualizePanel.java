@@ -1,25 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -58,13 +66,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a
@@ -2389,7 +2390,26 @@ public class VisualizePanel
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
     for (int i = 0; i < XNames.length; i++) {
-      String type = " (" + Attribute.typeToStringShort(inst.attribute(i)) + ")";
+      String type = "";
+      switch (inst.attribute(i).type()) {
+      case Attribute.NOMINAL:
+	type = " (Nom)";
+	break;
+      case Attribute.NUMERIC:
+	type = " (Num)";
+	break;
+      case Attribute.STRING:
+	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      case Attribute.RELATIONAL:
+	type = " (Rel)";
+	break;
+      default:
+	type = " (???)";
+      }
       XNames[i] = "X: "+ inst.attribute(i).name()+type;
       YNames[i] = "Y: "+ inst.attribute(i).name()+type;
       CNames[i] = "Colour: "+ inst.attribute(i).name()+type;

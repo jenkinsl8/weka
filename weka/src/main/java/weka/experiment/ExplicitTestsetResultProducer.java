@@ -1,35 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ExplicitTestsetResultProducer.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.io.File;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.Vector;
-
 import weka.core.AdditionalMeasureProducer;
-import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -38,6 +31,13 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.File;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -188,8 +188,6 @@ public class ExplicitTestsetResultProducer
 
   /** The name of the result field containing the timestamp. */
   public static String TIMESTAMP_FIELD_NAME = "Date_time";
-  
-  protected transient Environment m_env;
 
   /**
    * Returns a string describing this result producer.
@@ -644,12 +642,6 @@ public class ExplicitTestsetResultProducer
     result  = getTestsetDir().getPath() + File.separator;
     result += getTestsetPrefix() + name + getTestsetSuffix();
     
-    // substitute the run number (and any other variables)
-    // if specified
-    try {
-      result = m_env.substitute(result);
-    } catch (Exception ex) { }
-    
     return result;
   }
   
@@ -683,11 +675,6 @@ public class ExplicitTestsetResultProducer
 	Random rand = new Random(run);
 	train.randomize(rand);
       }
-      
-      if (m_env == null) {
-        m_env = new Environment();
-      }
-      m_env.addVariable("RUN_NUMBER", "" + run);
 
       // test set
       String filename = createFilename(train);

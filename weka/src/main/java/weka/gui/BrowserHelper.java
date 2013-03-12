@@ -1,32 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * BrowserHelper.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
 
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 
@@ -38,13 +35,13 @@ import javax.swing.JOptionPane;
  * which is placed in the public domain.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.1 $
  */
 public class BrowserHelper {
 
   /** Linux/Unix binaries to look for */
   public final static String[] LINUX_BROWSERS = 
-    {"firefox", "google-chrome", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
+    {"firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape"};
   
   /**
    * opens the URL in a browser.
@@ -112,38 +109,4 @@ public class BrowserHelper {
 	System.err.println(errMsg);
     }
   } 
-  
-  /**
-   * Generates a label with a clickable link.
-   * 
-   * @param url		the url of the link
-   * @param text	the text to display instead of URL. if null or of 
-   * 			length 0 then the URL is used
-   * @return		the generated label
-   */
-  public static JLabel createLink(String url, String text) {
-    final String urlF = url;
-    final JLabel result = new JLabel();
-    result.setText((text == null) || (text.length() == 0) ? url : text);
-    result.setToolTipText("Click to open link in browser");
-    result.setForeground(Color.BLUE);
-    result.addMouseListener(new MouseAdapter() {
-      public void mouseClicked(MouseEvent e) {
-	if (e.getButton() == MouseEvent.BUTTON1) {
-	  BrowserHelper.openURL(urlF);
-	}
-	else {
-	  super.mouseClicked(e);
-	}
-      }
-      public void mouseEntered(MouseEvent e) {
-	result.setForeground(Color.RED);
-      }
-      public void mouseExited(MouseEvent e) {
-	result.setForeground(Color.BLUE);
-      }
-    });
-    
-    return result;
-  }
 }

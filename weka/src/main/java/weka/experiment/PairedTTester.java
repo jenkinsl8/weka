@@ -1,34 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    PairedTTester.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -40,6 +33,14 @@ import weka.core.Range;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Calculates T-Test statistics on data stored in a set of instances. <p/>
@@ -1217,16 +1218,16 @@ public class PairedTTester
       options[current++] = "-V";
     }
 
-    if (getResultMatrix() instanceof ResultMatrixLatex)
+    if (getResultMatrix().equals(ResultMatrixLatex.class))
       options[current++] = "-L";
 
-    if (getResultMatrix() instanceof ResultMatrixCSV)
+    if (getResultMatrix().equals(ResultMatrixCSV.class))
       options[current++] = "-csv";
    
-    if (getResultMatrix() instanceof ResultMatrixHTML)
+    if (getResultMatrix().equals(ResultMatrixHTML.class))
       options[current++] = "-html";
    
-    if (getResultMatrix() instanceof ResultMatrixSignificance)
+    if (getResultMatrix().equals(ResultMatrixSignificance.class))
       options[current++] = "-significance";
    
     while (current < options.length) {

@@ -1,25 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ArffPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
+
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.Utils;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -47,14 +55,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ListSelectorDialog;
-
 /**
  * A Panel representing an ARFF-Table and the associated filename.
  *
@@ -81,9 +81,7 @@ public class ArffPanel
   private JPopupMenu m_PopupRows;
   /** displays the relation name */
   private JLabel m_LabelName;
-  /** whether to display the attribute index in the table header. */
-  private boolean m_ShowAttributeIndex;
-
+  
   // menu items
   private JMenuItem             menuItemMean;
   private JMenuItem             menuItemSetAllValues;
@@ -132,12 +130,11 @@ public class ArffPanel
    * initializes the panel and loads the specified file
    * 
    * @param filename	the file to load
-   * @param loaders optional varargs loader to use
    */
-  public ArffPanel(String filename, AbstractFileLoader... loaders) {
+  public ArffPanel(String filename) {
     this();
     
-    loadFile(filename, loaders);
+    loadFile(filename);
   }
   
   /**
@@ -157,14 +154,13 @@ public class ArffPanel
    * any member variables are initialized here
    */
   protected void initialize() {
-    m_Filename           = "";
-    m_Title              = "";
-    m_CurrentCol         = -1;
-    m_LastSearch         = "";
-    m_LastReplace        = "";
-    m_ShowAttributeIndex = true;
-    m_Changed            = false;
-    m_ChangeListeners    = new HashSet();
+    m_Filename        = "";
+    m_Title           = "";
+    m_CurrentCol      = -1;
+    m_LastSearch      = "";
+    m_LastReplace     = "";
+    m_Changed         = false;
+    m_ChangeListeners = new HashSet();
   }
   
   /**
@@ -374,7 +370,6 @@ public class ArffPanel
     
     createTitle();
     model = new ArffSortedTableModel(data);
-    model.setShowAttributeIndex(m_ShowAttributeIndex);
     
     m_TableArff.setModel(model);
     clearUndo();
@@ -442,28 +437,6 @@ public class ArffPanel
       ((ArffSortedTableModel) m_TableArff.getModel()).setReadOnly(value);
   }
 
-  /**
-   * Sets whether to display the attribute index in the header.
-   * 
-   * @param value	if true then the attribute indices are displayed in the
-   * 			table header
-   */
-  public void setShowAttributeIndex(boolean value) {
-    m_ShowAttributeIndex = value;
-    if (m_TableArff != null)
-      ((ArffSortedTableModel) m_TableArff.getModel()).setShowAttributeIndex(value);
-  }
-  
-  /**
-   * Returns whether to display the attribute index in the header.
-   * 
-   * @return		true if the attribute indices are displayed in the
-   * 			table header
-   */
-  public boolean getShowAttributeIndex() {
-    return m_ShowAttributeIndex;
-  }
-  
   /**
    * returns whether undo support is enabled
    * 
@@ -563,22 +536,18 @@ public class ArffPanel
    * loads the specified file into the table
    * 
    * @param filename		the file to load
-   * @param loaders optional varargs loader to use
    */
-  private void loadFile(String filename, AbstractFileLoader... loaders) {
+  private void loadFile(String filename) {
     ArffSortedTableModel         model;
     
     this.m_Filename = filename;
     
     createTitle();
     
-    if (filename.equals("")) {
+    if (filename.equals(""))   
       model = null;
-    }
-    else {
-      model = new ArffSortedTableModel(filename, loaders);
-      model.setShowAttributeIndex(getShowAttributeIndex());
-    }
+    else
+      model = new ArffSortedTableModel(filename);
     
     m_TableArff.setModel(model);
     setChanged(false);
@@ -673,7 +642,6 @@ public class ArffPanel
     addUndoPoint();
     model.setUndoEnabled(false);
     String valueCopy = value;
-    String valueNewCopy = valueNew;
     // set value
     for (i = 0; i < m_TableArff.getRowCount(); i++) {
       if (o == menuItemSetAllValues) {
@@ -687,13 +655,8 @@ public class ArffPanel
             && model.isMissingAt(i, m_CurrentCol) )
           model.setValueAt(value, i, m_CurrentCol);
         else if ( (o == menuItemReplaceValues) 
-            && model.getValueAt(i, m_CurrentCol).toString().equals(value) ) {
-          if (valueNewCopy.equals("NaN") || valueNewCopy.equals("?")) {
-            valueNew = null;
-          }
+            && model.getValueAt(i, m_CurrentCol).toString().equals(value) )
           model.setValueAt(valueNew, i, m_CurrentCol);
-        }
-          
     }
     model.setUndoEnabled(true);
     model.setNotificationEnabled(true);

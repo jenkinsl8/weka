@@ -1,29 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * MultiFilter.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -32,6 +30,9 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -51,7 +52,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.6.2.1 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -169,14 +170,10 @@ public class MultiFilter
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    if (getFilters().length == 0) {
-      Capabilities result = super.getCapabilities();
-      result.disableAll();
-      
-      return result;
-    } else {
+    if (getFilters().length == 0)
+      return super.getCapabilities();
+    else
       return getFilters()[0].getCapabilities();
-    }
   }
 
   /**
@@ -381,53 +378,12 @@ public class MultiFilter
   }
   
   /**
-   * Signify that this batch of input to the filter is finished. If
-   * the filter requires all instances prior to filtering, output()
-   * may now be called to retrieve the filtered instances. Any
-   * subsequent instances filtered should be filtered based on setting
-   * obtained from the first batch (unless the setInputFormat has been
-   * re-assigned or new options have been set).
-   *
-   * @return            true if there are instances pending output
-   * @throws IllegalStateException      if no input format has been set. 
-   */
-  public boolean batchFinished() throws Exception {
-    super.batchFinished();
-    
-    for (int i = 0; i > getFilters().length; i++) {
-      getFilter(i).batchFinished();
-    }
-    
-    return (numPendingOutput() != 0);
-  }
-  
-  /**
-   * RemoveWithValues may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed due to matching a value
-   * that the user wants to remove. Therefore this method returns
-   * true.
-   * 
-   * @return true if one of the base filters returns true for
-   * this method.
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    boolean result = false;
-    
-    for (Filter f : m_Filters) {
-      result = (result || f.mayRemoveInstanceAfterFirstBatchDone());
-    }
-    
-    return result;
-  }
-  
-  /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 
   /**

@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Range.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,18 +42,18 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class Range
-  implements Serializable, RevisionHandler, CustomDisplayStringProvider {
+  implements Serializable, RevisionHandler {
   
-  /** for serialization. */
+  /** for serialization */
   static final long serialVersionUID = 3667337062176835900L;
 
-  /** Record the string representations of the columns to delete. */
+  /** Record the string representations of the columns to delete */
   /*@non_null spec_public@*/Vector m_RangeStrings = new Vector();
 
-  /** Whether matching should be inverted. */
+  /** Whether matching should be inverted */
   /*@spec_public@*/ boolean m_Invert;
 
-  /** The array of flags for whether an column is selected. */
+  /** The array of flags for whether an column is selected */
   /*@spec_public@*/boolean [] m_SelectFlags;
 
   /** Store the maximum value permitted in the range. -1 indicates that
@@ -112,7 +113,7 @@ public class Range
   }
 
   /**
-   * Gets the string representing the selected range of values.
+   * Gets the string representing the selected range of values
    *
    * @return the range selection string
    */
@@ -231,7 +232,7 @@ public class Range
 
   /**
    * Gets an array containing all the selected values, in the order
-   * that they were selected (or ascending order if range inversion is on).
+   * that they were selected (or ascending order if range inversion is on)
    *
    * @return the array of selected values
    * @throws RuntimeException if the upper limit of the range hasn't been defined
@@ -324,7 +325,7 @@ public class Range
 
 
   /**
-   * Translates a single string selection into it's internal 0-based equivalent.
+   * Translates a single string selection into it's internal 0-based equivalent
    *
    * @param single the string representing the selection (eg: 1 first last)
    * @return the number corresponding to the selected value
@@ -428,18 +429,6 @@ public class Range
   }
 
   /**
-   * Returns the custom display string.
-   * 
-   * @return		the string
-   */
-  public String toDisplay() {
-    if (getInvert())
-      return "inv(" + getRanges() + ")";
-    else
-      return getRanges();
-  }
-
-  /**
    * Main method for testing this class.
    *
    * @param argv one parameter: a test range specification
@@ -465,3 +454,5 @@ public class Range
     }
   }
 }
+
+

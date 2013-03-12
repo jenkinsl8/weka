@@ -1,37 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Utils.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.lang.Math;
+import java.lang.reflect.Array;
+import java.util.Properties;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.lang.reflect.Array;
-import java.net.URL;
-import java.text.BreakIterator;
-import java.util.Enumeration;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 
@@ -52,7 +47,7 @@ public final class Utils
 
   /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
-  
+
   /**
    * Tests if the given value codes "missing".
    *
@@ -88,9 +83,9 @@ public final class Utils
   /**
    * Reads properties that inherit from three locations. Properties
    * are first defined in the system resource location (i.e. in the
-   * CLASSPATH).  These default properties must exist. Properties optionally
-   * defined in the user properties location (WekaPackageManager.PROPERTIES_DIR) 
-   * override default settings. Properties defined in the current directory (optional)
+   * CLASSPATH).  These default properties must exist. Properties
+   * defined in the users home directory (optional) override default
+   * settings. Properties defined in the current directory (optional)
    * override all these settings.
    *
    * @param resourceName the location of the resource that should be
@@ -110,24 +105,13 @@ public final class Utils
     try {
       // Apparently hardcoded slashes are OK here
       // jdk1.1/docs/guide/misc/resources.html
-      Utils utils = new Utils();
-      Enumeration<URL> urls = utils.getClass().getClassLoader().getResources(resourceName);
-      boolean first = true;
-      while (urls.hasMoreElements()) {
-	URL url = urls.nextElement();
-	if (first) {
-	  defaultProps.load(url.openStream());
-	  first = false;
-	}
-	else {
-	  Properties props = new Properties(defaultProps);
-	  props.load(url.openStream());
-	  defaultProps = props;
-	}
-      }
+      //      defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
+      defaultProps.load((new Utils()).getClass().getClassLoader().getResourceAsStream(resourceName));
     } catch (Exception ex) {
-      System.err.println("Warning, unable to load properties file(s) from "
-			 +"system resource (Utils.java): " + resourceName);
+/*      throw new Exception("Problem reading default properties: "
+	+ ex.getMessage()); */
+      System.err.println("Warning, unable to load properties file from "
+			 +"system resource (Utils.java)");
     }
 
     // Hardcoded slash is OK here
@@ -137,15 +121,11 @@ public final class Utils
       resourceName = resourceName.substring(slInd + 1);
     }
 
-    // Allow a properties file in the WekaPackageManager.PROPERTIES_DIR to override
-    Properties userProps = new Properties(defaultProps);
-    if (!WekaPackageManager.PROPERTIES_DIR.exists()) {
-      WekaPackageManager.PROPERTIES_DIR.mkdir();
-    }
-    File propFile = new File(WekaPackageManager.PROPERTIES_DIR.toString()
-                             + File.separator
+    // Allow a properties file in the home directory to override
+    Properties userProps = new Properties(defaultProps);    
+    File propFile = new File(System.getProperties().getProperty("user.home")
+                             + File.separatorChar
                              + resourceName);
-
     if (propFile.exists()) {
       try {
         userProps.load(new FileInputStream(propFile));
@@ -693,8 +673,7 @@ public final class Utils
       if ((string.indexOf('\n') != -1) || (string.indexOf('\r') != -1) || 
 	  (string.indexOf('\'') != -1) || (string.indexOf('"') != -1) || 
 	  (string.indexOf('\\') != -1) || 
-	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1) ||
-	  (string.indexOf('\u001E') != -1)) {
+	  (string.indexOf('\t') != -1) || (string.indexOf('%') != -1)) {
 	  string = backQuoteChars(string);
 	  quote = true;
       }
@@ -726,8 +705,7 @@ public final class Utils
       if ((string.indexOf("\\n") != -1) || (string.indexOf("\\r") != -1) || 
 	  (string.indexOf("\\'") != -1) || (string.indexOf("\\\"") != -1) || 
 	  (string.indexOf("\\\\") != -1) || 
-	  (string.indexOf("\\t") != -1) || (string.indexOf("\\%") != -1) ||
-	  (string.indexOf("\\u001E") != -1)) {
+	  (string.indexOf("\\t") != -1) || (string.indexOf("\\%") != -1)) {
 	string = unbackQuoteChars(string);
       }
     }
@@ -749,10 +727,8 @@ public final class Utils
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%', 
-        '\u001E'};
-    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
-        "\\u001E"};
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
+    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
     for (int i = 0; i < charsFind.length; i++) {
       if (string.indexOf(charsFind[i]) != -1 ) {
 	newStringBuffer = new StringBuffer();
@@ -903,10 +879,8 @@ public final class Utils
     StringBuffer newStringBuffer;
     
     // replace each of the following characters with the backquoted version
-    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%",
-        "\\u001E"};
-    char   charsReplace[] = {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%',
-        '\u001E'};
+    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
+    char   charsReplace[] = {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
     int pos[] = new int[charsFind.length];
     int	curPos;
     
@@ -1175,9 +1149,14 @@ public final class Utils
    * @param k the value of k
    * @return the kth-smallest value
    */
-  public static int kthSmallestValue(int[] array, int k) {
+  public static double kthSmallestValue(int[] array, int k) {
 
-    int[] index = initialIndex(array.length);
+    int[] index = new int[array.length];
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1190,7 +1169,12 @@ public final class Utils
    */
   public static double kthSmallestValue(double[] array, int k) {
 
-    int[] index = initialIndex(array.length);
+    int[] index = new int[array.length];
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
+
     return array[index[select(array, index, 0, array.length - 1, k)]];
   }
 
@@ -1439,21 +1423,6 @@ public final class Utils
   }
 
   /**
-   * Replaces all "missing values" in the given array of double values with
-   * MAX_VALUE.
-   *
-   * @param array the array to be modified.
-   */
-  public static void replaceMissingWithMAX_VALUE(double[] array) {
-
-    for (int i = 0; i < array.length; i++) {
-      if (isMissingValue(array[i])) {
-        array[i] = Double.MAX_VALUE;
-      }
-    }
-  }
-
-  /**
    * Rounds a double to the given number of decimal places.
    *
    * @param value the double value
@@ -1479,11 +1448,14 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(int[] array) {
 
-    int[] index = initialIndex(array.length);
+    int[] index = new int[array.length];
     int[] newIndex = new int[array.length];
     int[] helpIndex;
     int numEqual;
-
+    
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+    }
     quickSort(array, index, 0, array.length - 1);
 
     // Make sort stable
@@ -1519,7 +1491,7 @@ public final class Utils
    * original array in the sorted array. NOTE THESE CHANGES: the sort
    * is no longer stable and it doesn't use safe floating-point
    * comparisons anymore. Occurrences of Double.NaN are treated as 
-   * Double.MAX_VALUE.
+   * Double.MAX_VALUE
    *
    * @param array this array is not changed by the method!
    * @return an array of integers with the positions in the sorted
@@ -1527,31 +1499,15 @@ public final class Utils
    */
   public static /*@pure@*/ int[] sort(/*@non_null@*/ double[] array) {
 
-    int[] index = initialIndex(array.length);
-    if (array.length > 1) {
-      array = (double[])array.clone();
-      replaceMissingWithMAX_VALUE(array);
-      quickSort(array, index, 0, array.length - 1);
+    int[] index = new int[array.length];
+    array = (double[])array.clone();
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+      if (Double.isNaN(array[i])) {
+        array[i] = Double.MAX_VALUE;
+      }
     }
-    return index;
-  }
-
-  /**
-   * Sorts a given array of doubles in ascending order and returns an
-   * array of integers with the positions of the elements of the
-   * original array in the sorted array. Missing values in the given
-   * array are replaced by Double.MAX_VALUE, so the array is modified in that case! 
-   *
-   * @param array the array to be sorted, which is modified if it has missing values
-   * @return an array of integers with the positions in the sorted
-   * array.  
-   */
-  public static /*@pure@*/ int[] sortWithNoMissingValues(/*@non_null@*/ double[] array) {
-
-    int[] index = initialIndex(array.length);
-    if (array.length > 1) {
-      quickSort(array, index, 0, array.length - 1);
-    }
+    quickSort(array, index, 0, array.length - 1);
     return index;
   }
 
@@ -1568,43 +1524,43 @@ public final class Utils
    */
   public static /*@pure@*/ int[] stableSort(double[] array){
 
-    int[] index = initialIndex(array.length);
+    int[] index = new int[array.length];
+    int[] newIndex = new int[array.length];
+    int[] helpIndex;
+    int numEqual;
     
-    if (array.length > 1) {
-
-      int[] newIndex = new int[array.length];
-      int[] helpIndex;
-      int numEqual;
-
-      array = (double[])array.clone();
-      replaceMissingWithMAX_VALUE(array);
-      quickSort(array, index, 0, array.length-1);
-      
-      // Make sort stable
-      
-      int i = 0;
-      while (i < index.length) {
-        numEqual = 1;
-        for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
-                                                          array[index[j]])); j++)
-          numEqual++;
-        if (numEqual > 1) {
-          helpIndex = new int[numEqual];
-          for (int j = 0; j < numEqual; j++)
-            helpIndex[j] = i+j;
-          quickSort(index, helpIndex, 0, numEqual-1);
-          for (int j = 0; j < numEqual; j++) 
-            newIndex[i+j] = index[helpIndex[j]];
-          i += numEqual;
-        } else {
-          newIndex[i] = index[i];
-          i++;
-        }
+    array = (double[])array.clone();
+    for (int i = 0; i < index.length; i++) {
+      index[i] = i;
+      if (Double.isNaN(array[i])) {
+        array[i] = Double.MAX_VALUE;
       }
-      return newIndex;
-    } else {
-      return index;
     }
+    quickSort(array,index,0,array.length-1);
+
+    // Make sort stable
+
+    int i = 0;
+    while (i < index.length) {
+      numEqual = 1;
+      for (int j = i+1; ((j < index.length) && Utils.eq(array[index[i]],
+							array[index[j]])); j++)
+	numEqual++;
+      if (numEqual > 1) {
+	helpIndex = new int[numEqual];
+	for (int j = 0; j < numEqual; j++)
+	  helpIndex[j] = i+j;
+	quickSort(index, helpIndex, 0, numEqual-1);
+	for (int j = 0; j < numEqual; j++) 
+	  newIndex[i+j] = index[helpIndex[j]];
+	i += numEqual;
+      } else {
+	newIndex[i] = index[i];
+	i++;
+      }
+    }
+
+    return newIndex;
   }
 
   /**
@@ -1682,52 +1638,6 @@ public final class Utils
   }
 
   /**
-   * Initial index, filled with values from 0 to size - 1.
-   */
-  private static int[] initialIndex(int size) {
-   
-    int[] index = new int[size];
-    for (int i = 0; i < size; i++) {
-      index[i] = i;
-    }
-    return index;
-  }
-
-  /**
-   * Sorts left, right, and center elements only, returns resulting center as pivot.
-   */
-  private static int sortLeftRightAndCenter(double[] array, int[] index, int l, int r) {
-
-    int c = (l + r) / 2;
-    conditionalSwap(array, index, l, c);
-    conditionalSwap(array, index, l, r);
-    conditionalSwap(array, index, c, r);
-    return c;
-  }
-
-  /**
-   * Swaps two elements in the given integer array.
-   */
-  private static void swap(int[] index, int l, int r) {
-    
-    int help = index[l];
-    index[l] = index[r];
-    index[r] = help;
-  }
-  
-  /**
-   * Conditional swap for quick sort.
-   */
-  private static void conditionalSwap(double[] array, int[] index, int left, int right) {
-
-    if (array[index[left]] > array[index[right]]) {
-      int help = index[left];
-      index[left] = index[right];
-      index[right] = help;
-    }
-  }
-
-  /**
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
    *
@@ -1738,18 +1648,31 @@ public final class Utils
    *
    * @return the index of the middle element
    */
-  private static int partition(double[] array, int[] index, int l, int r,
-                               double pivot) {
+  private static int partition(double[] array, int[] index, int l, int r) {
+    
+    double pivot = array[index[(l + r) / 2]];
+    int help;
 
-    r--;
-    while (true) {
-      while ((array[index[++l]] < pivot));
-      while ((array[index[--r]] > pivot));
-      if (l >= r) {
-        return l;
+    while (l < r) {
+      while ((array[index[l]] < pivot) && (l < r)) {
+        l++;
       }
-      swap(index, l, r);
+      while ((array[index[r]] > pivot) && (l < r)) {
+        r--;
+      }
+      if (l < r) {
+        help = index[l];
+        index[l] = index[r];
+        index[r] = help;
+        l++;
+        r--;
+      }
     }
+    if ((l == r) && (array[index[r]] > pivot)) {
+      r--;
+    } 
+
+    return r;
   }
 
   /**
@@ -1789,10 +1712,10 @@ public final class Utils
 
     return r;
   }
-
+  
   /**
-   * Implements quicksort with median-of-three method and explicit sort for
-   * problems of size three or less. 
+   * Implements quicksort according to Manber's "Introduction to
+   * Algorithms".
    *
    * @param array the array of doubles to be sorted
    * @param index the index into the array of doubles
@@ -1804,43 +1727,15 @@ public final class Utils
   //@ requires array != index;
   //  assignable index;
   private static void quickSort(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
-                               int left, int right) {
+                                int left, int right) {
 
-    int diff = right - left;
-
-    switch (diff) {
-    case 0 :
-      
-      // No need to do anything
-      return;
-    case 1 :
-      
-      // Swap two elements if necessary
-      conditionalSwap(array, index, left, right);
-      return;
-    case 2 :
-
-      // Just need to sort three elements
-      conditionalSwap(array, index, left, left + 1);
-      conditionalSwap(array, index, left, right);
-      conditionalSwap(array, index, left + 1, right);
-      return;
-    default :
-      
-      // Establish pivot
-      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
-      
-      // Move pivot to the right, partition, and restore pivot
-      swap(index, pivotLocation, right - 1); 
-      int center = partition(array, index, left, right, array[index[right - 1]]);
-      swap(index, center, right - 1);
-      
-      // Sort recursively
-      quickSort(array, index, left, center - 1);
-      quickSort(array, index, center + 1, right);
+    if (left < right) {
+      int middle = partition(array, index, left, right);
+      quickSort(array, index, left, middle);
+      quickSort(array, index, middle + 1, right);
     }
   }
-
+  
   /**
    * Implements quicksort according to Manber's "Introduction to
    * Algorithms".
@@ -1879,40 +1774,15 @@ public final class Utils
   //@ requires 0 <= first && first <= right && right < array.length;
   private static int select(/*@non_null@*/ double[] array, /*@non_null@*/ int[] index, 
                             int left, int right, int k) {
-
-    int diff = right - left;
-    switch (diff) {
-    case 0 :
-
-      // Nothing to be done
-      return left;
-    case 1 :
-
-      // Swap two elements if necessary
-      conditionalSwap(array, index, left, right);
-      return left + k - 1;
-    case 2 :
-
-      // Just need to sort three elements
-      conditionalSwap(array, index, left, left + 1);
-      conditionalSwap(array, index, left, right);
-      conditionalSwap(array, index, left + 1, right);
-      return left + k - 1;
-    default :
     
-      // Establish pivot
-      int pivotLocation = sortLeftRightAndCenter(array, index, left, right);
-      
-      // Move pivot to the right, partition, and restore pivot
-      swap(index, pivotLocation, right - 1); 
-      int center = partition(array, index, left, right, array[index[right - 1]]);
-      swap(index, center, right - 1);
-      
-      // Proceed recursively
-      if ((center - left + 1) >= k) {
-        return select(array, index, left, center, k);
+    if (left == right) {
+      return left;
+    } else {
+      int middle = partition(array, index, left, right);
+      if ((middle - left + 1) >= k) {
+        return select(array, index, left, middle, k);
       } else {
-        return select(array, index, center + 1, right, k - (center - left + 1));
+        return select(array, index, middle + 1, right, k - (middle - left + 1));
       }
     }
   }
@@ -2054,172 +1924,6 @@ public final class Utils
   }
   
   /**
-   * For a named dialog, returns true if the user has opted not to view
-   * it again in the future.
-   * 
-   * @param dialogName the name of the dialog to check (e.g.
-   * weka.gui.GUICHooser.HowToFindPackageManager).
-   * @return true if the user has opted not to view the named dialog
-   * in the future.
-   */
-  public static boolean getDontShowDialog(String dialogName) {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return false;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      return false;
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    
-    return dialogFile.exists();
-  }
-  
-  /**
-   * Specify that the named dialog is not to be displayed in the future.
-   * 
-   * @param dialogName the name of the dialog not to show again (e.g.
-   * weka.gui.GUIChooser.HowToFindPackageManager).
-   * @throws Exception if the marker file that is used to indicate that
-   * a named dialog is not to be shown can't be created. This file lives
-   * in $WEKA_HOME/systemDialogs
-   */
-  public static void setDontShowDialog(String dialogName) throws Exception {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      if (!dialogSubDir.mkdir()) {
-        return;
-      }
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    dialogFile.createNewFile();
-  }
-  
-  /**
-   * For a named dialog, if the user has opted not to view it again, 
-   * returns the answer the answer the user supplied when they
-   * closed the dialog. Returns null if the user did opt to view
-   * the dialog again.
-   * 
-   * @param dialogName the name of the dialog to check (e.g.
-   * weka.gui.GUICHooser.HowToFindPackageManager).
-   * @return the answer the user supplied the last time they
-   * viewed the named dialog (if they opted not to view it again
-   * in the future) or null if the user opted to view the dialog
-   * again in the future.
-   */
-  public static String getDontShowDialogResponse(String dialogName) throws Exception {
-    if (!getDontShowDialog(dialogName)) {
-      return null; // This must be the first time - no file recorded yet.
-    }
-    
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    File dialogSubDir = new File(wekaHome.toString() + File.separator 
-        + "systemDialogs" + File.separator + dialogName);
-
-    
-    BufferedReader br = new BufferedReader(new FileReader(dialogSubDir));
-    String response = br.readLine();
-    
-    br.close();
-    return response;
-  }
-  
-  /**
-   * Specify that the named dialog is not to be shown again in the future. 
-   * Also records the answer that the user chose when closing the dialog.
-   * 
-   * @param dialogName the name of the dialog to no longer display
-   * @param response the user selected response when they closed the dialog
-   * @throws Exception if there is a problem saving the information
-   */
-  public static void setDontShowDialogResponse(String dialogName, String response) 
-    throws Exception {
-    
-    File wekaHome = WekaPackageManager.WEKA_HOME;
-    
-    if (!wekaHome.exists()) {
-      return;
-    }
-    
-    File dialogSubDir = new File(wekaHome.toString() + File.separator + "systemDialogs");
-    if (!dialogSubDir.exists()) {
-      if (!dialogSubDir.mkdir()) {
-        return;
-      }
-    }
-    
-    File dialogFile = new File(dialogSubDir.toString() + File.separator + dialogName);
-    BufferedWriter br = new BufferedWriter(new FileWriter(dialogFile));
-    br.write(response + "\n");
-    br.flush();
-    br.close();
-  }
-
-  /**
-   * Breaks up the string, if wider than "columns" characters.
-   *
-   * @param s		the string to process
-   * @param columns	the width in columns
-   * @return		the processed string
-   */
-  public static String[] breakUp(String s, int columns) {
-    Vector<String>	result;
-    String		line;
-    BreakIterator	boundary;
-    int			boundaryStart;
-    int			boundaryEnd;
-    String		word;
-    String		punctuation;
-    int			i;
-    String[]		lines;
-
-    result      = new Vector<String>();
-    punctuation = " .,;:!?'\"";
-    lines       = s.split("\n");
-
-    for (i = 0; i < lines.length; i++) {
-      boundary      = BreakIterator.getWordInstance();
-      boundary.setText(lines[i]);
-      boundaryStart = boundary.first();
-      boundaryEnd   = boundary.next();
-      line          = "";
-
-      while (boundaryEnd != BreakIterator.DONE) {
-	word = lines[i].substring(boundaryStart, boundaryEnd);
-	if (line.length() >= columns) {
-	  if (word.length() == 1) {
-	    if (punctuation.indexOf(word.charAt(0)) > -1) {
-	      line += word;
-	      word = "";
-	    }
-	  }
-	  result.add(line);
-	  line = "";
-	}
-	line          += word;
-	boundaryStart  = boundaryEnd;
-	boundaryEnd    = boundary.next();
-      }
-      if (line.length() > 0)
-	result.add(line);
-    }
-
-    return result.toArray(new String[result.size()]);
-  }
-
-  /**
    * Returns the revision string.
    * 
    * @return		the revision
@@ -2290,7 +1994,7 @@ public final class Utils
       System.out.println("Median (doubles): " + 
                          Utils.kthSmallestValue(doubles, doubles.length / 2));
       System.out.println("Median (ints): " + 
-      Utils.kthSmallestValue(ints, ints.length / 2));
+                         Utils.kthSmallestValue(ints, ints.length / 2));
 
       // Sorting and normalizing
       System.out.println("Sorted array with NaN (doubles): ");

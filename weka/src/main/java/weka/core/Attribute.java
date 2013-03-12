@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Attribute.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,12 +28,12 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Properties;
+import java.util.List;
+import java.util.ArrayList;
 
 /** 
  * Class for handling an attribute. Once an attribute has been created,
@@ -143,9 +144,6 @@ public class Attribute
 
   /** The keyword used to denote the end of the declaration of a subrelation */
   public final static String ARFF_END_SUBRELATION = "@end";
-
-  /** Dummy first value for String attributes (useful for sparse instances) */
-  public final static String DUMMY_STRING_VAL = "*WEKA*DUMMY*STRING*FOR*STRING*ATTRIBUTES*";
 
   /** Strings longer than this will be stored compressed. */
   private static final int STRING_COMPRESS_THRESHOLD = 200;
@@ -334,10 +332,6 @@ public class Attribute
       m_Hashtable = new Hashtable<Object,Integer>();
       m_Header = null;
       m_Type = STRING;
-
-      // Make sure there is at least one value so that string attribute
-      // values are always represented when output as part of a sparse instance.
-      addStringValue(DUMMY_STRING_VAL);
     } else {
       m_Values = new ArrayList<Object>(attributeValues.size());
       m_Hashtable = new Hashtable<Object,Integer>(attributeValues.size());
@@ -542,53 +536,6 @@ public class Attribute
 	
       default:
 	result = "unknown(" + type + ")";
-    }
-    
-    return result;
-  }
-  
-  /**
-   * Returns a short string representation of the attribute type.
-   * 
-   * @param att		the attribute to return the type string for
-   * @return		the string representation of the attribute type
-   */
-  public static String typeToStringShort(Attribute att) {
-    return typeToStringShort(att.type());
-  }
-  
-  /**
-   * Returns a short string representation of the attribute type.
-   * 
-   * @param type	the type of the attribute
-   * @return		the string representation of the attribute type
-   */
-  public static String typeToStringShort(int type) {
-    String	result;
-    
-    switch(type) {
-      case NUMERIC:
-	result = "Num";
-	break;
-	
-      case NOMINAL:
-	result = "Nom";
-	break;
-	
-      case STRING:
-	result = "Str";
-	break;
-	
-      case DATE:
-	result = "Dat";
-	break;
-	
-      case RELATIONAL:
-	result = "Rel";
-	break;
-	
-      default:
-	result = "???";
     }
     
     return result;
@@ -952,22 +899,6 @@ public class Attribute
       m_Hashtable.put(store, new Integer(intIndex));
       return intIndex;
     }
-  }
-  
-  /**
-   * Clear the map and list of values and set them to contain
-   * just the supplied value
-   * 
-   * @param value the current (and only) value of this String attribute
-   */
-  public void setStringValue(String value) {
-    if (!isString()) {
-      return;
-    }
-    
-    m_Hashtable.clear();
-    m_Values.clear();
-    addStringValue(value);
   }
 
   /**

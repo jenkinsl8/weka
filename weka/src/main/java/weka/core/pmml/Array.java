@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Array.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,7 +26,6 @@ import java.io.Serializable;
 import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.w3c.dom.Element;
 
@@ -70,43 +70,6 @@ public class Array implements Serializable {
     return false;
   }
   
-  public static Array create(List<Object> values, 
-      List<Integer> indices) throws Exception {
-    
-    ArrayType type = null;
-    
-    Object first = values.get(0);
-    if ((first instanceof Double) || (first instanceof Float)) {
-      type = ArrayType.REAL;
-    } else if ((first instanceof Integer) || (first instanceof Long)) {
-      type = ArrayType.INT;
-    } else if ((first instanceof String)) {
-      type = ArrayType.STRING;
-    } else {
-      throw new Exception("[Array] unsupport type!");
-    }
-    
-    if (indices != null) {
-      // array is sparse
-      
-      if (indices.size() != values.size()) {
-        throw new Exception("[Array] num values is not equal to num indices!!");
-      }
-      
-      if (type == ArrayType.REAL) {
-        type = ArrayType.REAL_SPARSE;
-      } else if (type == ArrayType.INT) {
-        type = ArrayType.INT_SPARSE;
-      } else {
-        throw new Exception("[Array] sparse arrays can only be integer, long, float or double!");
-      }
-      
-      return new SparseArray(type, values, indices);
-    }
-    
-    return new Array(type, values);
-  }
-  
   /**
    * Static factory method for creating non-sparse or sparse
    * array types as needed.
@@ -121,7 +84,7 @@ public class Array implements Serializable {
     }
     
     if (isSparseArray(arrayE)) {
-      return new SparseArray(arrayE);
+      // TODO: implement sparse array subclass :-)
     }
      
     return new Array(arrayE);
@@ -131,9 +94,7 @@ public class Array implements Serializable {
     NUM("NUM-ARRAY"),
     INT("INT-ARRAY"),
     REAL("REAL-ARRAY"),
-    STRING("STRING-ARRAY"),
-    REAL_SPARSE("REAL-SparseArray"),
-    INT_SPARSE("INT-SparseArray");
+    STRING("STRING-ARRAY");
     
     private final String m_stringVal;
     
@@ -152,7 +113,7 @@ public class Array implements Serializable {
   /** The type of the array */
   protected ArrayType m_type = ArrayType.NUM;
   
-  protected void initialize(Element arrayE) throws Exception {
+  protected Array(Element arrayE) throws Exception {
     String arrayS = arrayE.getTagName();
     
     // get the type of the array
@@ -190,31 +151,6 @@ public class Array implements Serializable {
         st.ttype != StreamTokenizer.TT_EOL) {
       m_values.add(st.sval);
       st.nextToken();
-    }
-  }
-  
-  /**
-   * Construct an array from an XML node
-   * 
-   * @param arrayE the Element containing the XML
-   * @throws Exception if something goes wrong
-   */
-  protected Array(Element arrayE) throws Exception {
-    initialize(arrayE);
-  }
-  
-  /**
-   * Construct an array from the given values.
-   * 
-   * @param type the type of the elements.
-   * @param values the values of the array.
-   */
-  protected Array(ArrayType type, List<Object> values) {
-    m_values = new ArrayList<String>();
-    m_type = type;
-    
-    for (Object o : values) {
-      m_values.add(o.toString());
     }
   }
   
@@ -292,16 +228,6 @@ public class Array implements Serializable {
   }
   
   /**
-   * Returns the index of the value stored at the given position
-   * 
-   * @param position the position
-   * @return the index of the value stored at the given position
-   */
-  public int index(int position) {
-    return position; // position is the index for dense arrays
-  }
-  
-  /**
    * Gets the value at index from the array.
    * 
    * @param index the index of the value to get.
@@ -309,18 +235,8 @@ public class Array implements Serializable {
    * @throws Exception if index is out of bounds.
    */
   public String value(int index) throws Exception {
-    return actualValue(index);
-  }
-  
-  /**
-   * Gets the value at index from the array
-   * 
-   * @param index the index of the value to get.
-   * @return the value at index in the array as as String.
-   * @throws Exception if index is out of bounds.
-   */
-  protected String actualValue(int index) throws Exception {
     checkInRange(index);
+    
     return m_values.get(index);
   }
   
@@ -372,7 +288,7 @@ public class Array implements Serializable {
    * @throws Exception if index is out of bounds.
    */
   public int valueInt(int index) throws Exception {
-    if (m_type != ArrayType.INT && m_type != ArrayType.INT_SPARSE) {
+    if (m_type == ArrayType.INT) {
       throw new Exception("[Array] Array does not contain integers!");
     }
     return Integer.parseInt(value(index));
@@ -387,7 +303,7 @@ public class Array implements Serializable {
    * @throws Exception if indexOfIndex is out of bounds.
    */
   public String valueSparse(int indexOfIndex) throws Exception {
-    return actualValue(indexOfIndex);
+    return value(indexOfIndex);
   }
   
   /**
@@ -411,7 +327,7 @@ public class Array implements Serializable {
    * @throws Exception if indexOfIndex is out of bounds.
    */
   public double valueSparseDouble(int indexOfIndex) throws Exception {
-    return Double.parseDouble(actualValue(indexOfIndex));
+    return valueDouble(indexOfIndex);
   }
   
   /**
@@ -423,7 +339,7 @@ public class Array implements Serializable {
    * @throws Exception if indexOfIndex is out of bounds.
    */
   public float valueSparseFloat(int indexOfIndex) throws Exception {
-    return Float.parseFloat(actualValue(indexOfIndex));
+    return valueFloat(indexOfIndex);
   }
   
   /**
@@ -435,13 +351,13 @@ public class Array implements Serializable {
    * @throws Exception if indexOfIndex is out of bounds.
    */
   public int valueSparseInt(int indexOfIndex) throws Exception {
-    return Integer.parseInt(actualValue(indexOfIndex));
+    return valueInt(indexOfIndex);
   }
   
   public String toString() {
     StringBuffer text = new StringBuffer();
     
-    text.append("<");
+    text.append("[");
     for (int i = 0; i < m_values.size(); i++) {
       text.append(m_values.get(i));
       if (i < m_values.size() - 1) {
@@ -449,7 +365,7 @@ public class Array implements Serializable {
       }
     }
     
-    text.append(">");
+    text.append("]");
     return text.toString();
   }
 }

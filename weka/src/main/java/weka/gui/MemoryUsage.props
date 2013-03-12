@@ -1,7 +1,7 @@
 # Properties file for customizing the memory usage panel.
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision$
+# version: $Revision: 1.1.2.2 $
 
 # The dimensions of the dialog, width and height.
 Width=400

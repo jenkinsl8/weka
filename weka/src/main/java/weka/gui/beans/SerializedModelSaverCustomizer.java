@@ -1,54 +1,63 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SerializedModelSaverCustomizer.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Tag;
+
 import java.awt.BorderLayout;
-import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Window;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
-import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.BorderFactory;
+
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Tag;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the SerializedModelSaver bean
@@ -58,8 +67,7 @@ import weka.gui.PropertySheetPanel;
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
-  implements BeanCustomizer, CustomizerCloseRequester, 
-  CustomizerClosingListener, EnvironmentHandler {
+  implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
@@ -80,9 +88,9 @@ public class SerializedModelSaverCustomizer
     = new JFileChooser(new File(System.getProperty("user.dir")));
   
 
-  private Window m_parentWindow;
+  private JFrame m_parentFrame;
   
-  private JDialog m_fileChooserFrame;
+  private JFrame m_fileChooserFrame;
   
   //private JTextField m_prefixText;
   private EnvironmentField m_prefixText;
@@ -97,19 +105,11 @@ public class SerializedModelSaverCustomizer
   
   private EnvironmentField m_directoryText;
   
-  private ModifyListener m_modifyListener;
-  
-  private String m_prefixBackup;
-  private File m_directoryBackup;
-  private boolean m_relativeBackup;
-  private boolean m_relationBackup;
-  private Tag m_formatBackup;
-  
 
   /** Constructor */  
   public SerializedModelSaverCustomizer() {
 
-    /*try {
+    try {
       m_SaverEditor.addPropertyChangeListener(
 	  new PropertyChangeListener() {
 	      public void propertyChange(PropertyChangeEvent e) {
@@ -123,7 +123,7 @@ public class SerializedModelSaverCustomizer
       repaint();
     } catch (Exception ex) {
       ex.printStackTrace();
-    } */
+    }
     setLayout(new BorderLayout());
 
     m_fileChooser.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -145,15 +145,22 @@ public class SerializedModelSaverCustomizer
 	    }
 	  }
 	  // closing
-	  if (m_parentWindow != null) {
+	  if (m_parentFrame != null) {
 	    m_fileChooserFrame.dispose();
 	  }
 	}
       });   
   }
 
-  public void setParentWindow(Window parent) {
-    m_parentWindow = parent;
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
+  }
+  
+  private void setUpOther() {
+    removeAll();
+    add(m_SaverEditor, BorderLayout.CENTER);
+    validate();
+    repaint();
   }
   
   /** Sets up dialog for saving models to a file */  
@@ -266,15 +273,12 @@ public class SerializedModelSaverCustomizer
     browseBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         try {
-          //final JFrame jf = new JFrame("Choose directory");
-          final JDialog jf = 
-            new JDialog((JDialog)SerializedModelSaverCustomizer.this.getTopLevelAncestor(), 
-                "Choose directory", ModalityType.DOCUMENT_MODAL);
+          final JFrame jf = new JFrame("Choose directory");
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
-          m_fileChooserFrame = jf;
           jf.pack();
           jf.setVisible(true);
+          m_fileChooserFrame = jf;
         } catch (Exception ex) {
           ex.printStackTrace();
         }
@@ -310,11 +314,11 @@ public class SerializedModelSaverCustomizer
     m_relativeFilePath.
       setSelected(m_smSaver.getUseRelativePath());
 
-    /*m_relativeFilePath.addActionListener(new ActionListener() {
+    m_relativeFilePath.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           m_smSaver.setUseRelativePath(m_relativeFilePath.isSelected());
         }
-      });*/
+      });
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -352,30 +356,18 @@ public class SerializedModelSaverCustomizer
           m_smSaver.setDirectory(new File(m_directoryText.getText()));
           m_smSaver.
             setIncludeRelationName(m_includeRelationName.isSelected());
-          m_smSaver.setUseRelativePath(m_relativeFilePath.isSelected());
-          
-          Tag selected = (Tag)m_fileFormatBox.getSelectedItem();
-          if (selected != null) {
-            m_smSaver.setFileFormat(selected);
-          }
         } catch (Exception ex) {
           ex.printStackTrace();
         }
         
-        if (m_modifyListener != null) {
-          m_modifyListener.setModifiedStatus(SerializedModelSaverCustomizer.this, true);
-        }
-        
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
 
     JButton CancelBut = new JButton("Cancel");
     CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-
-        customizerClosing();
-        m_parentWindow.dispose();
+        m_parentFrame.dispose();
       }
     });
     
@@ -399,11 +391,6 @@ public class SerializedModelSaverCustomizer
   public void setObject(Object object) {
     m_smSaver = (weka.gui.beans.SerializedModelSaver)object;
     m_SaverEditor.setTarget(m_smSaver);
-    m_prefixBackup = m_smSaver.getPrefix();
-    m_directoryBackup = m_smSaver.getDirectory();
-    m_relationBackup = m_smSaver.getIncludeRelationName();
-    m_relativeBackup = m_smSaver.getUseRelativePath();
-    m_formatBackup = m_smSaver.getFileFormat();
 
     setUpFile();    
   }
@@ -422,14 +409,14 @@ public class SerializedModelSaverCustomizer
       m_fileFormatBox.setSelectedItem(result);
     }
 
-/*    m_fileFormatBox.addActionListener(new ActionListener() {
+    m_fileFormatBox.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           Tag selected = (Tag)m_fileFormatBox.getSelectedItem();
           if (selected != null) {
             m_smSaver.setFileFormat(selected);
           }
         }
-      }); */
+      });
   }
 
   /**
@@ -455,21 +442,5 @@ public class SerializedModelSaverCustomizer
    */
   public void setEnvironment(Environment env) {
     m_env = env;
-  }
-
-  @Override
-  public void setModifiedListener(ModifyListener l) {
-    m_modifyListener = l;
-  }
-
-  @Override
-  public void customizerClosing() {
-    // restore backup (when window is closed with close widget or
-    // cancel button is pressed)
-    m_smSaver.setPrefix(m_prefixBackup);
-    m_smSaver.setDirectory(m_directoryBackup);
-    m_smSaver.setUseRelativePath(m_relativeBackup);
-    m_smSaver.setIncludeRelationName(m_relationBackup);
-    m_smSaver.setFileFormat(m_formatBackup);    
   }
 }

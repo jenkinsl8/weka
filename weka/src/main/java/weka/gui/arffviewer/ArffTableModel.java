@@ -1,43 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ArffTableModel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -50,6 +33,23 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Reorder;
 import weka.gui.ComponentHelper;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
+
 /**
  * The model for the Arff-Viewer.
  *
@@ -58,38 +58,22 @@ import weka.gui.ComponentHelper;
  * @version $Revision$ 
  */
 public class ArffTableModel 
-  extends DefaultTableModel
-  implements Undoable {
-  
-  /** for serialization. */
-  private static final long serialVersionUID = 3411795562305994946L;
+  implements TableModel, Undoable {
   
   /** the listeners */
-  protected HashSet m_Listeners;
-  
+  private HashSet m_Listeners;
   /** the data */
-  protected Instances m_Data;
-  
+  private Instances m_Data;
   /** whether notfication is enabled */
-  protected boolean m_NotificationEnabled;
-  
+  private boolean m_NotificationEnabled;
   /** whether undo is active */
-  protected boolean m_UndoEnabled;
-  
+  private boolean m_UndoEnabled;
   /** whether to ignore changes, i.e. not adding to undo history */
-  protected boolean m_IgnoreChanges;
-  
+  private boolean m_IgnoreChanges;
   /** the undo list (contains temp. filenames) */
-  protected Vector m_UndoList;
-  
+  private Vector m_UndoList;
   /** whether the table is read-only */
-  protected boolean m_ReadOnly;
-  
-  /** whether to display the attribute index in the table header. */
-  protected boolean m_ShowAttributeIndex;
-  
-  /** for caching long relational and string values that get processed for display. */
-  protected Hashtable<String,String> m_Cache;
+  private boolean m_ReadOnly;
   
   /**
    * performs some initialization
@@ -104,21 +88,18 @@ public class ArffTableModel
     m_IgnoreChanges       = false;
     m_UndoEnabled         = true;
     m_ReadOnly            = false;
-    m_ShowAttributeIndex  = false;
-    m_Cache               = new Hashtable<String,String>();
   }
   
   /**
    * initializes the object and loads the given file
    * 
    * @param filename	the file to load
-   * @param loaders optional varargs for a loader to use
    */
-  public ArffTableModel(String filename, AbstractFileLoader... loaders) {
+  public ArffTableModel(String filename) {
     this();
     
     if ( (filename != null) && (!filename.equals("")) )
-      loadFile(filename, loaders);
+      loadFile(filename);
   }
   
   /**
@@ -190,21 +171,16 @@ public class ArffTableModel
    * loads the specified ARFF file
    * 
    * @param filename	the file to load
-   * @param loaders optional varargs for a loader to use
    */
-  protected void loadFile(String filename, AbstractFileLoader... loaders) {
+  private void loadFile(String filename) {
     AbstractFileLoader          loader;
     
-    if (loaders == null || loaders.length == 0) {
-      loader = ConverterUtils.getLoaderForFile(filename);
-    } else {
-      loader = loaders[0];
-    }
+    loader = ConverterUtils.getLoaderForFile(filename);
     
     if (loader != null) {
       try {
         loader.setFile(new File(filename));
-        setInstances(loader.getDataSet());
+        m_Data = loader.getDataSet();
       }
       catch (Exception e) {
         ComponentHelper.showMessageBox(
@@ -214,7 +190,7 @@ public class ArffTableModel
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.ERROR_MESSAGE );
         System.out.println(e);
-        setInstances(null);
+        m_Data = null;
       }
     }
   }
@@ -226,8 +202,6 @@ public class ArffTableModel
    */
   public void setInstances(Instances data) {
     m_Data = data;
-    m_Cache.clear();
-    fireTableDataChanged();
   }
   
   /**
@@ -520,7 +494,7 @@ public class ArffTableModel
    * @param columnIndex		the index of the column
    * @return			true if the column is the class attribute
    */
-  protected boolean isClassIndex(int columnIndex) {
+  private boolean isClassIndex(int columnIndex) {
     boolean        result;
     int            index;
     
@@ -550,11 +524,6 @@ public class ArffTableModel
         if (m_Data != null) {
           if ( (columnIndex - 1 < m_Data.numAttributes()) ) {
             result = "<html><center>";
-
-            // index
-            if (m_ShowAttributeIndex)
-              result += columnIndex + ": ";
-            
             // name
             if (isClassIndex(columnIndex))
               result +=   "<b>" 
@@ -652,13 +621,10 @@ public class ArffTableModel
    * @return 			the value at the position
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
-    Object	result;
-    String	tmp;
-    String	key;
-    boolean	modified;
+    Object            result;
+    String            tmp;
     
     result = null;
-    key    = rowIndex + "-" + columnIndex;
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
         && (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
@@ -670,48 +636,32 @@ public class ArffTableModel
           result = null;
         }
         else {
-          if (m_Cache.containsKey(key)) {
-            result = m_Cache.get(key);
+          switch (getType(columnIndex)) {
+            case Attribute.DATE: 
+            case Attribute.NOMINAL:
+            case Attribute.STRING:
+            case Attribute.RELATIONAL:
+              result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
+              break;
+            case Attribute.NUMERIC:
+              result = new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
+              break;
+            default:
+              result = "-can't display-";
           }
-          else {
-            switch (getType(columnIndex)) {
-              case Attribute.DATE: 
-              case Attribute.NOMINAL:
-              case Attribute.STRING:
-              case Attribute.RELATIONAL:
-        	result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
-        	break;
-              case Attribute.NUMERIC:
-        	result = new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
-        	break;
-              default:
-        	result = "-can't display-";
-            }
-            
-            if (getType(columnIndex) != Attribute.NUMERIC) {
-              if (result != null) {
-                tmp      = result.toString();
-                modified = false;
-                // fix html tags, otherwise Java parser hangs
-                if ((tmp.indexOf('<') > -1) || (tmp.indexOf('>') > -1)) {
-                  tmp = tmp.replace("<", "(");
-                  tmp = tmp.replace(">", ")");
-                  modified = true;
-                }
-                // does it contain "\n" or "\r"? -> replace with red html tag
-                if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
-                  tmp = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
-                  tmp = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
-                  tmp = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
-                  tmp = "<html>" + tmp + "</html>";
-                  modified = true;
-                }
-                result = tmp;
-                if (modified)
-                  m_Cache.put(key, tmp);
-              }
-            }
-          }
+        }
+      }
+    }
+    
+    if (getType(columnIndex) != Attribute.NUMERIC) {
+      if (result != null) {
+        // does it contain "\n" or "\r"? -> replace with red html tag
+        tmp = result.toString();
+        if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
+          tmp    = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
+          tmp    = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
+          tmp    = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
+          result = "<html>" + tmp + "</html>";
         }
       }
     }
@@ -945,26 +895,5 @@ public class ArffTableModel
         e.printStackTrace();
       }
     }
-  }
-
-  /**
-   * Sets whether to display the attribute index in the header.
-   * 
-   * @param value	if true then the attribute indices are displayed in the
-   * 			table header
-   */
-  public void setShowAttributeIndex(boolean value) {
-    m_ShowAttributeIndex = value;
-    fireTableStructureChanged();
-  }
-  
-  /**
-   * Returns whether to display the attribute index in the header.
-   * 
-   * @return		true if the attribute indices are displayed in the
-   * 			table header
-   */
-  public boolean getShowAttributeIndex() {
-    return m_ShowAttributeIndex;
   }
 }

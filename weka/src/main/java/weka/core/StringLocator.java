@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * StringLocator.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -85,9 +86,7 @@ public class StringLocator
     if (inst.dataset() == null) {
       throw new IllegalArgumentException("Instance has no dataset assigned!!");
     } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
-      throw new IllegalArgumentException(
-	  "Src and Dest differ in # of attributes: " 
-	  + inst.dataset().numAttributes() + " != " + destDataset.numAttributes());
+      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
     } 
     copyStringValues(inst, true, inst.dataset(), strAtts,
                      destDataset, strAtts);
@@ -128,14 +127,10 @@ public class StringLocator
       return;
     
     if (srcLoc.getAttributeIndices().length != destLoc.getAttributeIndices().length)
-      throw new IllegalArgumentException(
-	  "Src and Dest string indices differ in length: "
-	  + srcLoc.getAttributeIndices().length + " != " + destLoc.getAttributeIndices().length);
+      throw new IllegalArgumentException("Src and Dest string indices differ in length!!");
 
     if (srcLoc.getLocatorIndices().length != destLoc.getLocatorIndices().length)
-      throw new IllegalArgumentException(
-	  "Src and Dest locator indices differ in length: "
-	  + srcLoc.getLocatorIndices().length + " != " + destLoc.getLocatorIndices().length);
+      throw new IllegalArgumentException("Src and Dest locator indices differ in length!!");
 
     for (int i = 0; i < srcLoc.getAttributeIndices().length; i++) {
       int instIndex  = instSrcCompat 
@@ -144,12 +139,7 @@ public class StringLocator
       Attribute src  = srcDataset.attribute(srcLoc.getActualIndex(srcLoc.getAttributeIndices()[i]));
       Attribute dest = destDataset.attribute(destLoc.getActualIndex(destLoc.getAttributeIndices()[i]));
       if (!instance.isMissing(instIndex)) {
-        if (instance instanceof SparseInstance && instance.stringValue(instIndex).equals(Attribute.DUMMY_STRING_VAL)) {
-          continue;
-        }
-
         int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
-
         instance.setValue(instIndex, (double)valIndex);
       }
     }

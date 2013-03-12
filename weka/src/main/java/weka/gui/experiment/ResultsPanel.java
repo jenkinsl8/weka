@@ -1,25 +1,48 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ResultsPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.Attribute;
+import weka.core.ClassDiscovery;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Range;
+import weka.core.converters.CSVLoader;
+import weka.experiment.CSVResultListener;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstanceQuery;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.Tester;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.ListSelectorDialog;
+import weka.gui.PropertyDialog;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -60,28 +83,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import weka.core.Attribute;
-import weka.core.ClassDiscovery;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Range;
-import weka.core.converters.CSVLoader;
-import weka.experiment.CSVResultListener;
-import weka.experiment.DatabaseResultListener;
-import weka.experiment.Experiment;
-import weka.experiment.InstanceQuery;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.ListSelectorDialog;
-import weka.gui.PropertyDialog;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
 
 /** 
  * This panel controls simple analysis of experimental results.
@@ -178,15 +179,12 @@ public class ResultsPanel
   protected JComboBox m_TesterClasses = 
     new JComboBox(m_TesterClassesModel);
 
-  /** Label for the dataset and result key buttons. */
-  protected JLabel m_DatasetAndResultKeysLabel = new JLabel("Select rows and cols",
+  /** Displays the currently selected column names for the scheme & options. */
+  protected JLabel m_DatasetKeyLabel = new JLabel("Row",
 						 SwingConstants.RIGHT);
 
-  /** the panel encapsulating the Rows/Columns/Swap buttons. */
-  protected JPanel m_PanelDatasetResultKeys = new JPanel(new GridLayout(1, 3));
-  
   /** Click to edit the columns used to determine the scheme. */
-  protected JButton m_DatasetKeyBut = new JButton("Rows");
+  protected JButton m_DatasetKeyBut = new JButton("Select");
 
   /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_DatasetKeyModel = new DefaultListModel();
@@ -194,11 +192,12 @@ public class ResultsPanel
   /** Displays the list of selected columns determining the scheme. */
   protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
 
-  /** Click to edit the columns used to determine the scheme. */
-  protected JButton m_ResultKeyBut = new JButton("Cols");
+  /** Displays the currently selected column names for the scheme & options. */
+  protected JLabel m_ResultKeyLabel = new JLabel("Column",
+						 SwingConstants.RIGHT);
 
-  /** For swapping rows and columns. */
-  protected JButton m_SwapDatasetKeyAndResultKeyBut = new JButton("Swap");
+  /** Click to edit the columns used to determine the scheme. */
+  protected JButton m_ResultKeyBut = new JButton("Select");
 
   /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
@@ -279,7 +278,7 @@ public class ResultsPanel
   protected Experiment m_Exp;
 
   /** the size for a combobox. */
-  private Dimension COMBO_SIZE = new Dimension(210, m_ResultKeyBut.getPreferredSize().height);
+  private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut.getPreferredSize().height);
 
   /** the initial result matrix. */
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
@@ -357,7 +356,6 @@ public class ResultsPanel
     setComboSizes();
     m_TesterClasses.setEnabled(false);
     m_DatasetKeyBut.setEnabled(false);
-    m_DatasetKeyBut.setToolTipText("For selecting the keys that are shown as rows.");
     m_DatasetKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setDatasetKeyFromDialog();
@@ -366,7 +364,6 @@ public class ResultsPanel
     m_DatasetKeyList.setSelectionMode(ListSelectionModel
 				      .MULTIPLE_INTERVAL_SELECTION);
     m_ResultKeyBut.setEnabled(false);
-    m_ResultKeyBut.setToolTipText("For selecting the keys that are shown as columns.");
     m_ResultKeyBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	setResultKeyFromDialog();
@@ -374,13 +371,6 @@ public class ResultsPanel
     });
     m_ResultKeyList.setSelectionMode(ListSelectionModel
 				     .MULTIPLE_INTERVAL_SELECTION);
-    m_SwapDatasetKeyAndResultKeyBut.setEnabled(false);
-    m_SwapDatasetKeyAndResultKeyBut.setToolTipText("Swaps the keys for selecting rows and columns.");
-    m_SwapDatasetKeyAndResultKeyBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	swapDatasetKeyAndResultKey();
-      }
-    });
     m_CompareCombo.setEnabled(false);
     m_SortCombo.setEnabled(false);
 
@@ -486,20 +476,32 @@ public class ResultsPanel
     gbC.anchor = GridBagConstraints.EAST;
     gbC.gridy = y;     gbC.gridx = 0;
     gbC.insets = new Insets(2, 10, 2, 10);
-    gbL.setConstraints(m_DatasetAndResultKeysLabel,gbC);
-    m_DatasetAndResultKeysLabel.setDisplayedMnemonic('R');
-    m_DatasetAndResultKeysLabel.setLabelFor(m_DatasetKeyBut);
-    p3.add(m_DatasetAndResultKeysLabel);
-    
-    m_PanelDatasetResultKeys.add(m_DatasetKeyBut);
-    m_PanelDatasetResultKeys.add(m_ResultKeyBut);
-    m_PanelDatasetResultKeys.add(m_SwapDatasetKeyAndResultKeyBut);
+    gbL.setConstraints(m_DatasetKeyLabel,gbC);
+    m_DatasetKeyLabel.setDisplayedMnemonic('R');
+    m_DatasetKeyLabel.setLabelFor(m_DatasetKeyBut);
+    p3.add(m_DatasetKeyLabel);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
     gbC.insets = new Insets(5,0,5,0);
-    gbL.setConstraints(m_PanelDatasetResultKeys, gbC);
-    p3.add(m_PanelDatasetResultKeys);
+    gbL.setConstraints(m_DatasetKeyBut, gbC);
+    p3.add(m_DatasetKeyBut);
+    
+    y++;
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.gridy = y;     gbC.gridx = 0;
+    gbC.insets = new Insets(2, 10, 2, 10);
+    gbL.setConstraints(m_ResultKeyLabel, gbC);
+    m_ResultKeyLabel.setDisplayedMnemonic('C');
+    m_ResultKeyLabel.setLabelFor(m_ResultKeyBut);
+    p3.add(m_ResultKeyLabel);
+    gbC = new GridBagConstraints();
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = y;     gbC.gridx = 1;  gbC.weightx = 100;
+    gbC.insets = new Insets(5,0,5,0);
+    gbL.setConstraints(m_ResultKeyBut, gbC);
+    p3.add(m_ResultKeyBut);
     
     y++;
     JLabel lab = new JLabel("Comparison field", SwingConstants.RIGHT);
@@ -682,19 +684,22 @@ public class ResultsPanel
   protected void setComboSizes() {
     
     m_TesterClasses.setPreferredSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setPreferredSize(COMBO_SIZE);
+    m_DatasetKeyBut.setPreferredSize(COMBO_SIZE);
+    m_ResultKeyBut.setPreferredSize(COMBO_SIZE);
     m_CompareCombo.setPreferredSize(COMBO_SIZE);
     m_SigTex.setPreferredSize(COMBO_SIZE);
     m_SortCombo.setPreferredSize(COMBO_SIZE);
 
     m_TesterClasses.setMaximumSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setMaximumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMaximumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMaximumSize(COMBO_SIZE);
     m_CompareCombo.setMaximumSize(COMBO_SIZE);
     m_SigTex.setMaximumSize(COMBO_SIZE);
     m_SortCombo.setMaximumSize(COMBO_SIZE);
 
     m_TesterClasses.setMinimumSize(COMBO_SIZE);
-    m_PanelDatasetResultKeys.setMinimumSize(COMBO_SIZE);
+    m_DatasetKeyBut.setMinimumSize(COMBO_SIZE);
+    m_ResultKeyBut.setMinimumSize(COMBO_SIZE);
     m_CompareCombo.setMinimumSize(COMBO_SIZE);
     m_SigTex.setMinimumSize(COMBO_SIZE);
     m_SortCombo.setMinimumSize(COMBO_SIZE);
@@ -1017,7 +1022,6 @@ public class ResultsPanel
     m_TesterClasses.setEnabled(true);
     m_DatasetKeyBut.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
-    m_SwapDatasetKeyAndResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
     m_SortCombo.setEnabled(true);
     if (ExperimenterDefaults.getSorting().length() != 0)
@@ -1219,25 +1223,6 @@ public class ResultsPanel
     }
   }
 
-  /**
-   * Swaps the keys for dataset and result.
-   */
-  protected void swapDatasetKeyAndResultKey() {
-    int[] 	tmpSelected;
-    Range	tmpRange;
-    
-    // lists
-    tmpSelected = m_DatasetKeyList.getSelectedIndices();
-    m_DatasetKeyList.setSelectedIndices(m_ResultKeyList.getSelectedIndices());
-    m_ResultKeyList.setSelectedIndices(tmpSelected);
-    
-    // tester
-    tmpRange = m_TTester.getDatasetKeyColumns();
-    m_TTester.setDatasetKeyColumns(m_TTester.getResultsetKeyColumns());
-    m_TTester.setResultsetKeyColumns(tmpRange);
-    setTTester();
-  }
-  
   public void setTestBaseFromDialog() {
     ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
 

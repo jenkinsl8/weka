@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ClustererAssignmentsPlotInstances.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.explorer;
@@ -23,10 +24,10 @@ package weka.gui.explorer;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
-import weka.core.Utils;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 
@@ -150,7 +151,7 @@ public class ClustererAssignmentsPlotInstances
     clustVals   = new FastVector();
 
     for (i = 0; i < numClusters; i++)
-      clustVals.addElement("cluster" + /*(i+1)*/ i);
+      clustVals.addElement("cluster" + (i+1));
     predictedCluster = new Attribute("Cluster", clustVals);
     for (i = 0; i < m_Instances.numAttributes(); i++)
       hv.addElement(m_Instances.attribute(i).copy());
@@ -175,7 +176,6 @@ public class ClustererAssignmentsPlotInstances
     int[] 	classAssignments;
     
     clusterAssignments = m_Evaluation.getClusterAssignments();
-    
     classAssignments   = null;
     if (m_Instances.classIndex() >= 0) {
       classAssignments = m_Evaluation.getClassesToClusters();
@@ -188,19 +188,11 @@ public class ClustererAssignmentsPlotInstances
       values = new double[m_PlotInstances.numAttributes()];
       for (j = 0; j < m_Instances.numAttributes(); j++)
 	values[j] = m_Instances.instance(i).value(j);
-      if (clusterAssignments[i] < 0) {
-        values[j] = Utils.missingValue();
-      } else {
-        values[j] = clusterAssignments[i];
-      }
+      values[j] = clusterAssignments[i];
       m_PlotInstances.add(new DenseInstance(1.0, values));
       if (m_PlotShapes != null) {
-        if (clusterAssignments[i] >= 0) {
-          if ((int) m_Instances.instance(i).classValue() != classAssignments[(int) clusterAssignments[i]])
-            m_PlotShapes[i] = Plot2D.ERROR_SHAPE;
-        } else {
-          m_PlotShapes[i] = Plot2D.MISSING_SHAPE;
-        }
+	if ((int) m_Instances.instance(i).classValue() != classAssignments[(int) clusterAssignments[i]])
+	  m_PlotShapes[i] = Plot2D.ERROR_SHAPE;
       }
     }
   }

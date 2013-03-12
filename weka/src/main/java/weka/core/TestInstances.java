@@ -1,33 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * TestInstances.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
+import weka.core.Capabilities.Capability;
+
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Capabilities.Capability;
+import java.util.ArrayList;
 
 /**
  * Generates artificial datasets for testing. In case of Multi-Instance data
@@ -1286,8 +1287,7 @@ public class TestInstances
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
-  protected Attribute generateAttribute(int index, int attType, 
-      String namePrefix) throws Exception {
+  protected Attribute generateAttribute(int index, int attType) throws Exception {
     Attribute     result;
     String        name;
     int           valIndex;
@@ -1339,19 +1339,19 @@ public class TestInstances
         ArrayList<String> nomStrings = new ArrayList<String>(valIndex + 1);
         for (int j = 0; j < nomCount; j++)
           nomStrings.add(prefix + (j + 1));
-        result = new Attribute(namePrefix + name, nomStrings);
+        result = new Attribute(name, nomStrings);
         break;
         
       case Attribute.NUMERIC:
-        result = new Attribute(namePrefix + name);
+        result = new Attribute(name);
         break;
         
       case Attribute.STRING:
-        result = new Attribute(namePrefix + name, (ArrayList<String>) null);
+        result = new Attribute(name, (ArrayList<String>) null);
         break;
         
       case Attribute.DATE:
-        result = new Attribute(namePrefix + name, "yyyy-mm-dd");
+        result = new Attribute(name, "yyyy-mm-dd");
         break;
         
       case Attribute.RELATIONAL:
@@ -1377,7 +1377,7 @@ public class TestInstances
             rel.deleteAttributeAt(clsIndex);
           }
         }
-        result = new Attribute(namePrefix + name, rel);
+        result = new Attribute(name, rel);
         break;
         
       default:
@@ -1510,29 +1510,18 @@ public class TestInstances
   }
   
   /**
-   * Generates a new dataset
-   * 
-   * @return the generated data
-   * @throws Exception if something goes wrong
-   */
-  public Instances generate() throws Exception {
-    return generate("");
-  }
-  
-  /**
    * generates a new dataset.
-   *
-   * @param namePrefix the prefix to add to the name of an attribute
+   * 
    * @return 		the generated data
    * @throws Exception	if something goes wrong
    */
-  public Instances generate(String namePrefix) throws Exception {
+  public Instances generate() throws Exception {
     if (getMultiInstance()) {
       TestInstances bag = (TestInstances) this.clone();
       bag.setMultiInstance(false);
       bag.setNumInstances(0);
       bag.setSeed(m_Random.nextInt());
-      Instances bagFormat = bag.generate("bagAtt_");
+      Instances bagFormat = bag.generate();
       bagFormat.setClassIndex(-1);
       bagFormat.deleteAttributeAt(bagFormat.numAttributes() - 1);
 
@@ -1552,7 +1541,7 @@ public class TestInstances
       bag.setNumInstances(getNumInstancesRelational());
       for (int i = 0; i < getNumInstances(); i++) {
         bag.setSeed(m_Random.nextInt());
-        Instances bagData = new Instances(bag.generate("bagAtt_"));
+        Instances bagData = new Instances(bag.generate());
         bagData.setClassIndex(-1);
         bagData.deleteAttributeAt(bagData.numAttributes() - 1);
         double val = m_Data.attribute(1).addRelation(bagData);
@@ -1569,27 +1558,27 @@ public class TestInstances
       ArrayList<Attribute> attributes = new ArrayList<Attribute>(getNumAttributes());
       // Add Nominal attributes
       for (int i = 0; i < getNumNominal(); i++)
-        attributes.add(generateAttribute(i, Attribute.NOMINAL, namePrefix));
+        attributes.add(generateAttribute(i, Attribute.NOMINAL));
       
       // Add m_Numeric attributes
       for (int i = 0; i < getNumNumeric(); i++)
-        attributes.add(generateAttribute(i, Attribute.NUMERIC, namePrefix));
+        attributes.add(generateAttribute(i, Attribute.NUMERIC));
       
       // Add some String attributes...
       for (int i = 0; i < getNumString(); i++)
-        attributes.add(generateAttribute(i, Attribute.STRING, namePrefix));
+        attributes.add(generateAttribute(i, Attribute.STRING));
       
       // Add some Date attributes...
       for (int i = 0; i < getNumDate(); i++)
-        attributes.add(generateAttribute(i, Attribute.DATE, namePrefix));
+        attributes.add(generateAttribute(i, Attribute.DATE));
       
       // Add some Relational attributes...
       for (int i = 0; i < getNumRelational(); i++)
-        attributes.add(generateAttribute(i, Attribute.RELATIONAL, namePrefix));
+        attributes.add(generateAttribute(i, Attribute.RELATIONAL));
       
       // Add class attribute
       if (clsIndex != NO_CLASS)
-	attributes.add(clsIndex, generateAttribute(CLASS_IS_LAST, getClassType(), namePrefix));
+	attributes.add(clsIndex, generateAttribute(CLASS_IS_LAST, getClassType()));
       
       m_Data = new Instances(getRelation(), attributes, getNumInstances());
       m_Data.setClassIndex(clsIndex);
