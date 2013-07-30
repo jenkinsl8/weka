@@ -15,19 +15,16 @@
 
 /*
  *    RandomSubSpace.java
- *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
+import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,12 +32,17 @@ import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.filters.unsupervised.attribute.Remove;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  <!-- globalinfo-start -->

@@ -15,14 +15,13 @@
 
 /*
  *    FieldMetaInfo.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.pmml;
 
 import java.io.Serializable;
-
 import org.w3c.dom.Element;
 
 import weka.core.Attribute;

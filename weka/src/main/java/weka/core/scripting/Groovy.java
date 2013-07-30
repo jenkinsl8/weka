@@ -15,18 +15,18 @@
 
 /*
  * Groovy.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.scripting;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * A helper class for <a href="http://groovy.codehaus.org/" target="_blank">Groovy</a>.

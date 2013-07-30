@@ -15,14 +15,10 @@
 
 /*
  * KernelEvaluation.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions.supportVector;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Enumeration;
 
 import weka.core.Instances;
 import weka.core.Option;
@@ -30,6 +26,10 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Enumeration;
 
 /**
  * Class for evaluating Kernels.

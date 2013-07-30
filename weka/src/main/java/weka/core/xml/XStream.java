@@ -15,10 +15,13 @@
 
 /*
  * XStream.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,9 +32,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class is a helper class for XML serialization using 
@@ -176,12 +176,11 @@ public class XStream
   }
 
   /**
-   * writes the XML-serialized object to the given Writer.
+   * writes the XML-serialized object to the given Writer
    *
    * @param writer the Writer
-   * @param toSerialize the object to write
+   * @param o the object to write
    * @return true if everything goes ok
-   * @throws Exception if something goes wrong
    */
   public static boolean write(Writer writer, Object toSerialize) throws Exception {
     Class<?> xstreamClass;

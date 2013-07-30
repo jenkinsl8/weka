@@ -15,17 +15,17 @@
 
 /*
  *    InstanceJoiner.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
 
-import java.io.Serializable;
-import java.util.Vector;
-
 import weka.core.Instance;
 import weka.core.Instances;
+
+import java.io.Serializable;
+import java.util.Vector;
 
 /** 
  * A bean that joins two streams of instances into one.
@@ -272,7 +272,7 @@ public class InstanceJoiner
 	  // Check the formats are compatible
 	  if (!(a.outputFormat()).equalHeaders(outputFormat())) {
 	    throw new Exception(this.getClass().getName()
-	    + "::secondInstanceProduced() - incompatible instance streams\n" + (a.outputFormat()).equalHeadersMsg(outputFormat()));
+		    + "::secondInstanceProduced() - incompatible instance streams\n" + (a.outputFormat()).equalHeadersMsg(outputFormat()));
 	  }
 	  break;
 	case InstanceEvent.INSTANCE_AVAILABLE:

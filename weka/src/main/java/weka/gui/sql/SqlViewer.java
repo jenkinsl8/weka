@@ -15,11 +15,22 @@
 
 /*
  * SqlViewer.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.core.Memory;
+import weka.gui.LookAndFeel;
+import weka.gui.sql.event.ConnectionEvent;
+import weka.gui.sql.event.ConnectionListener;
+import weka.gui.sql.event.HistoryChangedEvent;
+import weka.gui.sql.event.HistoryChangedListener;
+import weka.gui.sql.event.QueryExecuteEvent;
+import weka.gui.sql.event.QueryExecuteListener;
+import weka.gui.sql.event.ResultChangedEvent;
+import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -36,17 +47,6 @@ import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import weka.core.Memory;
-import weka.gui.LookAndFeel;
-import weka.gui.sql.event.ConnectionEvent;
-import weka.gui.sql.event.ConnectionListener;
-import weka.gui.sql.event.HistoryChangedEvent;
-import weka.gui.sql.event.HistoryChangedListener;
-import weka.gui.sql.event.QueryExecuteEvent;
-import weka.gui.sql.event.QueryExecuteListener;
-import weka.gui.sql.event.ResultChangedEvent;
-import weka.gui.sql.event.ResultChangedListener;
 
 /**
  * Represents a little tool for querying SQL databases.
@@ -641,13 +641,18 @@ public class SqlViewer
         public void run() {
           while (true) {
             try {
-              this.sleep(10);
+              this.sleep(4000);
+
+              System.gc();
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 jf.dispose();
                 m_Viewer = null;
                 System.gc();
+
+                // stop threads
+                m_Memory.stopThreads();
 
                 // display error
                 System.err.println("\ndisplayed message:");

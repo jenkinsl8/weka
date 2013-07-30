@@ -15,11 +15,14 @@
 
 /*
  * XMLBasicSerialization.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -39,9 +42,6 @@ import java.util.Vector;
 import javax.swing.DefaultListModel;
 
 import org.w3c.dom.Element;
-
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * This serializer contains some read/write methods for common classes that

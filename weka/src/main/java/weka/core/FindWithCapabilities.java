@@ -15,10 +15,13 @@
 
 /*
  * FindWithCapabilities.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
+
+import weka.core.Capabilities.Capability;
+import weka.gui.GenericPropertiesCreator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,9 +30,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Capabilities.Capability;
-import weka.gui.GenericPropertiesCreator;
 
 /**
  * Locates all classes with certain capabilities. One should keep in mind, 

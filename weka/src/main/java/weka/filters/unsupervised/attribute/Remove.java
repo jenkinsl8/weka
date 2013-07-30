@@ -15,22 +15,19 @@
 
 /*
  *    Remove.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -38,16 +35,19 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
  * An filter that removes a range of attributes from the dataset. Will
  * re-order the remaining attributes if invert matching sense is turned
  * on and the attribute column indices are not specified in ascending
- * order.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -274,10 +274,10 @@ public class Remove
 
     return "A filter that removes a range of"
       + " attributes from the dataset. Will " +
-      		"re-order the remaining attributes " +
-      		"if invert matching sense is turned " +
-      		"on and the attribute column indices " +
-      		"are not specified in ascending order.";
+                "re-order the remaining attributes " +
+                "if invert matching sense is turned " +
+                "on and the attribute column indices " +
+                "are not specified in ascending order.";
   }
 
   /**

@@ -15,14 +15,14 @@
 
 /*
  * AlphabeticStringTokenizer.java
- * Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2003, 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.tokenizers;
 
-import java.util.NoSuchElementException;
-
 import weka.core.RevisionUtils;
+
+import java.util.NoSuchElementException;
 
 /**
  <!-- globalinfo-start -->

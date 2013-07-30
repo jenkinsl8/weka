@@ -15,14 +15,11 @@
 
 /*
  *    AttributeSelection.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.supervised.attribute;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -34,18 +31,21 @@ import weka.attributeSelection.Ranker;
 import weka.attributeSelection.UnsupervisedAttributeEvaluator;
 import weka.attributeSelection.UnsupervisedSubsetEvaluator;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -388,8 +388,8 @@ public class AttributeSelection
     
     if (m_ASEvaluator == null) {
       result = super.getCapabilities();
-      result.disableAll();
-    } else {
+    }
+    else {
       result = m_ASEvaluator.getCapabilities();
       // class index will be set if necessary, so we always allow the dataset
       // to have no class attribute set. see the following method:

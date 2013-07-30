@@ -15,16 +15,22 @@
 
 /*
  * ArffTable.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
 
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ViewerDialog;
+
 import java.awt.Component;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.datatransfer.StringSelection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,12 +46,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ViewerDialog;
 
 /**
  * A specialized JTable for the Arff-Viewer.

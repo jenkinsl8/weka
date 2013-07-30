@@ -15,16 +15,12 @@
 
 /*
  * ICSSearchAlgorithm.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 
 
 package weka.classifiers.bayes.net.search.ci;
-
-import java.io.FileReader;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
@@ -33,6 +29,10 @@ import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.FileReader;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->

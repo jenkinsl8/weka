@@ -15,16 +15,16 @@
 
 /*
  *    RemoteExperimentSubTask.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.io.File;
-
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.File;
 
 /**
  * Class to encapsulate an experiment as a task that can be executed on

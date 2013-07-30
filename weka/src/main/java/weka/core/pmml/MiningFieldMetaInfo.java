@@ -15,7 +15,7 @@
 
 /*
  *    MiningFieldMetaInfo.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,6 +26,7 @@ import java.io.Serializable;
 import org.w3c.dom.Element;
 
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 

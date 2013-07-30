@@ -15,18 +15,20 @@
 
 /*
  *    DotParser.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.gui.graphvisualizer;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.FileWriter;
 
 import weka.core.FastVector;
+import weka.gui.graphvisualizer.GraphNode;
+import weka.gui.graphvisualizer.GraphEdge;
 
 
 

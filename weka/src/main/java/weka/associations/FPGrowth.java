@@ -15,7 +15,7 @@
 
 /*
  *    FPGrowth.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,6 @@ import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -46,10 +45,11 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -2249,7 +2249,7 @@ public class FPGrowth extends AbstractAssociator
       ? m_delta / m_numInstances
       : m_delta;
       
-    //double currentSupport = upperBoundMinSuppAsFraction;
+    //    double currentSupport = upperBoundMinSuppAsFraction;      
     double currentSupport = 1.0;
              
     if (m_findAllRulesForSupportLevel) {
@@ -2310,7 +2310,6 @@ public class FPGrowth extends AbstractAssociator
           break;
         }
         currentSupport -= deltaAsFraction;
-//        System.err.println("currentSupport " + currentSupport + " lowBoundAsFrac " + lowerBoundMinSuppAsFraction);
         if (currentSupport < lowerBoundMinSuppAsFraction) {
           if (currentSupport + deltaAsFraction > lowerBoundMinSuppAsFraction) {
             // ensure that the lower bound does get evaluated

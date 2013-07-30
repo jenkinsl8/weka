@@ -15,7 +15,7 @@
 
 /*
  *    RandomizableParallelMultipleClassifiersCombiner.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,23 +25,22 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.core.Option;
-import weka.core.Randomizable;
 import weka.core.Utils;
 
 /**
- * Abstract utility class for handling settings common to
+ * Abstract utility class for handling settings common to 
  * meta classifiers that build an ensemble in parallel using multiple
  * classifiers based on a given random number seed.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public abstract class RandomizableParallelMultipleClassifiersCombiner extends
-    ParallelMultipleClassifiersCombiner implements Randomizable {
-
+    ParallelMultipleClassifiersCombiner {
+  
   /** For serialization */
   private static final long serialVersionUID = 8274061943448676943L;
-
+  
   /** The random number seed. */
   protected int m_Seed = 1;
 
@@ -81,7 +80,7 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     String seed = Utils.getOption('S', options);
     if (seed.length() != 0) {
       setSeed(Integer.parseInt(seed));
@@ -103,15 +102,15 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-S";
+    options[current++] = "-S"; 
     options[current++] = "" + getSeed();
 
-    System.arraycopy(superOptions, 0, options, current,
+    System.arraycopy(superOptions, 0, options, current, 
                      superOptions.length);
 
     return options;
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -124,7 +123,7 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
   /**
    * Set the seed for random number generation.
    *
-   * @param seed the seed
+   * @param seed the seed 
    */
   public void setSeed(int seed) {
 
@@ -137,7 +136,7 @@ public abstract class RandomizableParallelMultipleClassifiersCombiner extends
    * @return the seed for the random number generation
    */
   public int getSeed() {
-
+    
     return m_Seed;
   }
 }

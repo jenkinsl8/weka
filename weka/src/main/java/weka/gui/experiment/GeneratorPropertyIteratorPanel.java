@@ -15,11 +15,17 @@
 
 /*
  *    GeneratorPropertyIteratorPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.FastVector;
+import weka.experiment.Experiment;
+import weka.experiment.PropertyNode;
+import weka.gui.GenericArrayEditor;
+import weka.gui.PropertySelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -42,12 +48,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import weka.core.FastVector;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
-import weka.gui.GenericArrayEditor;
-import weka.gui.PropertySelectorDialog;
 
 /** 
  * This panel controls setting a list of values for an arbitrary

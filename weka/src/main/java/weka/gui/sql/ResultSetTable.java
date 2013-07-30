@@ -15,19 +15,19 @@
 
 /*
  * ResultSetTable.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.JTableHelper;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
 import javax.swing.table.TableColumnModel;
-
-import weka.gui.JTableHelper;
 
 /**
  * Represents an extended JTable, containing a table model based on a ResultSet

@@ -15,19 +15,19 @@
 
 /*
  * Tokenizer.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.tokenizers;
+
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
 
 /**
  * A superclass for all tokenizer algorithms.

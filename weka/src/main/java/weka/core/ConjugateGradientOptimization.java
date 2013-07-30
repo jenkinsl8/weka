@@ -40,7 +40,7 @@ import java.util.Arrays;
  * getTechnicalInformation() method.
  *
  * @author Eibe Frank
- * @version $Revision$ 
+ * @version $Revision: 8078 $ 
  */
 public abstract class ConjugateGradientOptimization extends Optimization
   implements RevisionHandler {

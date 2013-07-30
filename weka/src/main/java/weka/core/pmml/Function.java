@@ -15,7 +15,7 @@
 
 /*
  *    Function.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -196,8 +196,6 @@ public abstract class Function implements Serializable {
       result = new BuiltInMath(BuiltInMath.MathFunc.CEIL);
     } else if (name.equals(BuiltInMath.MathFunc.ROUND.toString())) {
       result = new BuiltInMath(BuiltInMath.MathFunc.ROUND);
-    } else if (name.equals(BuiltInString.StringFunc.UPPERCASE)) {
-      result = new BuiltInString(BuiltInString.StringFunc.UPPERCASE);
     } else if (name.equals(BuiltInString.StringFunc.SUBSTRING)) {
       result = new BuiltInString(BuiltInString.StringFunc.SUBSTRING);
     } else if (name.equals(BuiltInString.StringFunc.TRIMBLANKS)) {

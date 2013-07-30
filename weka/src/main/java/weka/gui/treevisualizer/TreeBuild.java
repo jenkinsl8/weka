@@ -14,20 +14,16 @@
  */
 
 /*
- *    TreeBuild.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Tree_build.java
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.treevisualizer;
 
-import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StreamTokenizer;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.*;
+import java.io.*;
+import java.awt.*;
 
 /**
  * This class will parse a dotty file and construct a tree structure from it 

@@ -15,7 +15,7 @@
 
 /*
  *    SingleAssociatorEnhancer.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ public abstract class SingleAssociatorEnhancer
   private static final long serialVersionUID = -3665885256363525164L;
 
   /** The base associator to use */
-  protected Associator m_Associator = new Apriori();
+  protected Associator m_Associator = new FPGrowth();
 
   /**
    * String describing default Associator.
@@ -54,7 +54,7 @@ public abstract class SingleAssociatorEnhancer
    * @return		default classname
    */
   protected String defaultAssociatorString() {
-    return Apriori.class.getName();
+    return FPGrowth.class.getName();
   }
 
   /**

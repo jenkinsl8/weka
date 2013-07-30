@@ -15,10 +15,34 @@
 
 /*
  *    GUI.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.classifiers.bayes.net;
+
+import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.ConverterUtils;
+import weka.gui.ConverterFileChooser;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.LookAndFeel;
+import weka.gui.PropertyDialog;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.BIFParser;
+import weka.gui.graphvisualizer.GraphNode;
+import weka.gui.graphvisualizer.HierarchicalBCEngine;
+import weka.gui.graphvisualizer.LayoutCompleteEvent;
+import weka.gui.graphvisualizer.LayoutCompleteEventListener;
+import weka.gui.graphvisualizer.LayoutEngine;
+import weka.gui.visualize.PrintablePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -77,30 +101,6 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.table.AbstractTableModel;
-
-import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.ConverterUtils;
-import weka.gui.ConverterFileChooser;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.LookAndFeel;
-import weka.gui.PropertyDialog;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.BIFParser;
-import weka.gui.graphvisualizer.GraphNode;
-import weka.gui.graphvisualizer.HierarchicalBCEngine;
-import weka.gui.graphvisualizer.LayoutCompleteEvent;
-import weka.gui.graphvisualizer.LayoutCompleteEventListener;
-import weka.gui.graphvisualizer.LayoutEngine;
-import weka.gui.visualize.PrintablePanel;
 
 /**
  * GUI interface to Bayesian Networks. Allows editing Bayesian networks

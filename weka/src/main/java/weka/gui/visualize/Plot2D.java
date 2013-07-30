@@ -15,11 +15,16 @@
 
 /*
  *    Plot2D.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -36,11 +41,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /**
  * This class plots datasets in two dimensions. It can also plot
@@ -164,6 +164,9 @@ public class Plot2D
 
   /** random values for perterbing the data points */
   protected Random m_JRand = new Random(0);
+
+  /** lookup table for plotted points */
+  protected double [][] m_pointLookup=null;
 
   /** Constructor */
   public Plot2D() {

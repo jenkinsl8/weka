@@ -15,24 +15,26 @@
 
 /*
  *    CrossValidationFoldMakerCustomizer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.gui.PropertySheetPanel;
+import weka.gui.beans.BeanCustomizer.ModifyListener;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the cross validation fold maker bean

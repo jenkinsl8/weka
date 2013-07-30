@@ -58,6 +58,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 *	 Note that a connected network is assumed. 
 	 *	 Unconnected networks may give unexpected results.
 	 * @param bayesNet
+	 * @return root of junction tree
 	 */
 	public void calcMargins(BayesNet bayesNet) throws Exception {
 		//System.out.println(bayesNet.toString());
@@ -256,7 +257,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 		
 		/** marginalize junciontTreeNode node over all nodes outside the separator set
 		 * 
-		 * @param node one of the neighboring junciont tree nodes of this separator
+		 * @param node: one of the neighboring junciont tree nodes of this separator
 		 */
 		public double [] update(JunctionTreeNode node) {
 			if (node.m_P == null) {
@@ -789,7 +790,7 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 * adjacency matrix representation for a Bayes Network, effecively
 	 * converting the directed acyclic graph to an undirected graph.
 	 * 
-	 * @param bayesNet
+	 * @param bayesNet:
 	 *            Bayes Network to process
 	 * @return adjacencies in boolean matrix format
 	 */
@@ -827,9 +828,9 @@ public class MarginCalculator implements Serializable, RevisionHandler {
 	 * 
 	 * Side effect: input matrix is used as output
 	 * 
-	 * @param order
+	 * @param order:
 	 *            node ordering
-	 * @param bAdjacencyMatrix
+	 * @param bAdjacencyMatrix:
 	 *            boolean matrix representing the graph
 	 * @return boolean matrix representing the graph with fill ins
 	 */

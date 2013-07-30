@@ -15,7 +15,7 @@
 
 /*
  * CheckAssociator.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -207,7 +207,7 @@ public class CheckAssociator
   public final static int NO_CLASS = -1;
   
   /*** The associator to be examined */
-  protected Associator m_Associator = new weka.associations.Apriori();
+  protected Associator m_Associator = new weka.associations.FPGrowth();
   
   /**
    * Returns an enumeration describing the available options.
@@ -342,7 +342,7 @@ public class CheckAssociator
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      tmpStr = weka.associations.Apriori.class.getName();
+      tmpStr = weka.associations.FPGrowth.class.getName();
     setAssociator(
 	(Associator) forName(
 	    "weka.associations", 

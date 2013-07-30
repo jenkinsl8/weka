@@ -66,7 +66,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank 
- * @version $Revision: ???? $
+ * @version $Revision$
  */
 public class MergeInfrequentNominalValues extends SimpleBatchFilter implements UnsupervisedFilter {
 
@@ -498,7 +498,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements U
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8034 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

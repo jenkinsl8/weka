@@ -15,26 +15,26 @@
 
 /*
  * RandomSubset.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
+
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.filters.SimpleStreamFilter;
 
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
-
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.filters.SimpleStreamFilter;
 
 /**
  <!-- globalinfo-start -->
@@ -249,7 +249,6 @@ public class RandomSubset
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();

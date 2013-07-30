@@ -15,15 +15,15 @@
 
 /*
  * TreePerformanceStats.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.neighboursearch;
 
+import weka.core.RevisionUtils;
+
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.RevisionUtils;
 
 /**
  * The class that measures the performance of a tree based 

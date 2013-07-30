@@ -15,11 +15,14 @@
 
  /*
   *    PrintableComponent.java
-  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
 package weka.gui.visualize;
+
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
 
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -44,9 +47,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
 
 /** 
  * This class extends the component which is handed over in the constructor

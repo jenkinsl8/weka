@@ -15,11 +15,21 @@
 
 /*
  *    DatasetListPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.core.ClassDiscovery.StringCompare;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.Saver;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.gui.ConverterFileChooser;
+import weka.gui.JListHelper;
+import weka.gui.ViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -47,16 +57,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.core.ClassDiscovery.StringCompare;
-import weka.core.Utils;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.converters.Saver;
-import weka.experiment.Experiment;
-import weka.gui.ConverterFileChooser;
-import weka.gui.JListHelper;
-import weka.gui.ViewerDialog;
 
 /** 
  * This panel controls setting a list of datasets for an experiment to

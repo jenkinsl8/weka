@@ -15,17 +15,17 @@
 
 /*
  * PropertyHandler.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class stores information about properties to ignore or properties

@@ -15,16 +15,15 @@
 
 /*
  *    LayoutEngine.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.graphvisualizer;
 
+import weka.core.FastVector;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-
-import weka.core.FastVector;
 
 /**
  * This interface class has been added to facilitate the addition

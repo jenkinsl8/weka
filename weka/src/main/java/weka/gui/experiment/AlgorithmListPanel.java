@@ -15,11 +15,23 @@
 
 /*
  *    AlgorithmListPanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.JListHelper;
+import weka.gui.PropertyDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -55,17 +67,6 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.xml.XMLClassifier;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.JListHelper;
-import weka.gui.PropertyDialog;
 
 /** 
  * This panel controls setting a list of algorithms for an experiment to

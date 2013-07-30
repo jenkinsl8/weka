@@ -15,12 +15,14 @@
 
 /*
  *    TrainingSetProducer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Interface to something that can produce a training set

@@ -15,16 +15,16 @@
 
 /*
  *    NeuralConnection.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions.neural;
 
+import weka.core.RevisionHandler;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
-
-import weka.core.RevisionHandler;
 
 /** 
  * Abstract unit in a NeuralNetwork.

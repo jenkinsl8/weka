@@ -15,12 +15,23 @@
 
 /*
  *    RemoteExperiment.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
+
+import weka.core.FastVector;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.RevisionUtils;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.core.xml.XMLOptions;
+import weka.experiment.xml.XMLExperiment;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -33,17 +44,6 @@ import java.rmi.Naming;
 import java.util.Enumeration;
 
 import javax.swing.DefaultListModel;
-
-import weka.core.FastVector;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Queue;
-import weka.core.RevisionUtils;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.core.xml.XMLOptions;
-import weka.experiment.xml.XMLExperiment;
 
 /**
  * Holds all the necessary configuration information for a distributed

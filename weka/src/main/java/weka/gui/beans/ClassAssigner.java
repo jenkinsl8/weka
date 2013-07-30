@@ -15,11 +15,14 @@
 
 /*
  *    ClassAssigner.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Attribute;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
@@ -27,9 +30,6 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import javax.swing.JPanel;
-
-import weka.core.Attribute;
-import weka.core.Instances;
 
 /**
  * Bean that assigns a class attribute to a data set.

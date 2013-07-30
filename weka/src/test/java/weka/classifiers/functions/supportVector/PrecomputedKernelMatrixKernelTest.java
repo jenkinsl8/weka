@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.functions.supportVector.PrecomputedKernelMatrixKernelTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision$
+ * @version $Revision: 8034 $
  */
 public class PrecomputedKernelMatrixKernelTest 
   extends AbstractKernelTest {

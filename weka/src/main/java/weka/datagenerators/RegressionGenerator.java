@@ -15,17 +15,18 @@
 
 /*
  * RegressionGenerator.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.datagenerators;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Option;
 import weka.core.Utils;
+import weka.datagenerators.DataGenerator;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  * Abstract class for data generators for regression classifiers. <p/>

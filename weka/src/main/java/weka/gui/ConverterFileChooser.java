@@ -15,10 +15,19 @@
 
 /*
  * ConverterFileChooser.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
+
+import weka.core.Capabilities;
+import weka.core.Instances;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.AbstractLoader;
+import weka.core.converters.AbstractSaver;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.FileSourcedConverter;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -37,15 +46,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
-
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.AbstractLoader;
-import weka.core.converters.AbstractSaver;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.FileSourcedConverter;
 
 /**
  * A specialized JFileChooser that lists all available file Loaders and Savers.

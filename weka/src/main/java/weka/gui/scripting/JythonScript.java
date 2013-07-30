@@ -15,18 +15,18 @@
 
 /*
  * JythonScript.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.scripting;
 
-import java.io.File;
-
-import javax.swing.text.Document;
-
 import weka.core.Utils;
 import weka.core.scripting.Jython;
 import weka.gui.ExtensionFileFilter;
+
+import java.io.File;
+
+import javax.swing.text.Document;
 
 /**
  * Represents a <a href="http://www.jython.org/" target="_blank">Jython</a> script.

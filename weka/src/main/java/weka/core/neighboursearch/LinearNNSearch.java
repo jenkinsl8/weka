@@ -15,19 +15,19 @@
 
 /*
  *    LinearNNSearch.java
- *    Copyright (C) 1999-2012 University of Waikato
+ *    Copyright (C) 1999-2007 University of Waikato
  */
 
 package weka.core.neighboursearch;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

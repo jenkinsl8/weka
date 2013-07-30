@@ -15,7 +15,7 @@
 
 /*
  *    ListSelectorDialog.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
-/** 
+/**
  * A dialog to present the user with a list of items, that the user can
  * make a selection from, or cancel the selection.
  *
@@ -51,7 +51,7 @@ public class ListSelectorDialog
 
   /** for serialization */
   private static final long serialVersionUID = 906147926840288895L;
-  
+
   /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton("Select");
 
@@ -63,7 +63,7 @@ public class ListSelectorDialog
 
   /** The list component */
   protected JList m_List;
-  
+
   /** Whether the selection was made or cancelled */
   protected int m_Result;
 
@@ -75,7 +75,7 @@ public class ListSelectorDialog
 
   /** The current regular expression. */
   protected String m_PatternRegEx = ".*";
-  
+
   /**
    * Create the list selection dialog.
    *
@@ -83,7 +83,7 @@ public class ListSelectorDialog
    * @param userList the JList component the user will select from
    */
   public ListSelectorDialog(Frame parentFrame, JList userList) {
-    
+
     super(parentFrame, "Select items", ModalityType.DOCUMENT_MODAL);
     m_List = userList;
     m_CancelBut.setMnemonic('C');
@@ -106,7 +106,7 @@ public class ListSelectorDialog
         selectPattern();
       }
     });
-    
+
     Container c = getContentPane();
     c.setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Select a property"));
@@ -120,14 +120,14 @@ public class ListSelectorDialog
     c.add(new JScrollPane(m_List), BorderLayout.CENTER);
 
     getRootPane().setDefaultButton(m_SelectBut);
-    
+
     pack();
 
     // make sure, it's not bigger than the screen
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    int width  = getWidth() > screen.getWidth() 
+    int width  = getWidth() > screen.getWidth()
                     ? (int) screen.getWidth() : getWidth();
-    int height = getHeight() > screen.getHeight() 
+    int height = getHeight() > screen.getHeight()
                     ? (int) screen.getHeight() : getHeight();
     setSize(width, height);
   }
@@ -171,14 +171,14 @@ public class ListSelectorDialog
       catch (Exception ex) {
         JOptionPane.showMessageDialog(
           m_PatternBut.getParent(),
-          "'" + pattern + "' is not a valid Perl regular expression!\n" 
-          + "Error: " + ex, 
-          "Error in Pattern...", 
+          "'" + pattern + "' is not a valid Perl regular expression!\n"
+          + "Error: " + ex,
+          "Error in Pattern...",
           JOptionPane.ERROR_MESSAGE);
       }
     }
   }
-  
+
   /**
    * Tests out the list selector from the command line.
    *
@@ -187,7 +187,7 @@ public class ListSelectorDialog
   public static void main(String [] args) {
 
     try {
-      DefaultListModel lm = new DefaultListModel();      
+      DefaultListModel lm = new DefaultListModel();
       lm.addElement("one");
       lm.addElement("two");
       lm.addElement("three");

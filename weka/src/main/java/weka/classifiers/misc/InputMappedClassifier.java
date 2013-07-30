@@ -15,7 +15,7 @@
 
 /*
  *    InputMappedClassifier.java
- *    Copyright (C) 2010-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,6 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
 import weka.core.Drawable;
 import weka.core.Environment;
@@ -43,6 +42,7 @@ import weka.core.RevisionUtils;
 import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 
 /**
  <!-- globalinfo-start -->

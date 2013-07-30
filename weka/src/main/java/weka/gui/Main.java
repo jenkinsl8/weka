@@ -15,11 +15,40 @@
 
 /*
  * Main.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.classifiers.bayes.net.GUI;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.SystemInfo;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.gui.arffviewer.ArffViewerMainPanel;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.StartUpListener;
+import weka.gui.boundaryvisualizer.BoundaryVisualizer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.sql.SqlViewer;
+import weka.gui.treevisualizer.Node;
+import weka.gui.treevisualizer.NodePlace;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeBuild;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -67,39 +96,6 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-
-import weka.classifiers.bayes.net.GUI;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SelectedTag;
-import weka.core.SystemInfo;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
-import weka.gui.arffviewer.ArffViewerMainPanel;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.beans.StartUpListener;
-import weka.gui.boundaryvisualizer.BoundaryVisualizer;
-import weka.gui.experiment.Experimenter;
-import weka.gui.explorer.Explorer;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
-import weka.gui.scripting.JythonPanel;
-import weka.gui.sql.SqlViewer;
-import weka.gui.treevisualizer.Node;
-import weka.gui.treevisualizer.NodePlace;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeBuild;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
 
 /**
  * Menu-based GUI for Weka, replacement for the GUIChooser.
@@ -370,8 +366,6 @@ public class Main
   private JMenuItem jMenuItemVisualizationPlot;
   private JMenuItem jMenuItemToolsEnsembleLibrary;
   private JMenuItem jMenuItemToolsSqlViewer;
-  private JMenuItem jMenuItemToolsGroovyConsole;
-  private JMenuItem jMenuItemToolsJythonConsole;
   private JMenuItem jMenuItemToolsArffViewer;
   private JMenuItem jMenuItemApplicationsSimpleCLI;
   private JMenuItem jMenuItemApplicationsKnowledgeFlow;
@@ -875,82 +869,6 @@ public class Main
           }          
         }       
       });
-
-      // Tools/Groovy console
-      if (Groovy.isPresent()) {
-	jMenuItemToolsGroovyConsole = new JMenuItem();
-	jMenuTools.add(jMenuItemToolsGroovyConsole);
-	jMenuItemToolsGroovyConsole.setText("Groovy console");
-	jMenuItemToolsGroovyConsole.setMnemonic('G');
-	jMenuItemToolsGroovyConsole.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent evt) {
-	    String title = jMenuItemToolsGroovyConsole.getText();
-	    if (!containsWindow(title)) {
-	      final GroovyPanel panel = new GroovyPanel();
-	      final Container frame = createFrame(
-		  m_Self, title, panel, new BorderLayout(), 
-		  BorderLayout.CENTER, 800, 600, panel.getMenuBar(), false, true);
-
-	      // custom listener
-	      if (frame instanceof ChildFrameMDI) {
-		((ChildFrameMDI) frame).addInternalFrameListener(new InternalFrameAdapter() {
-		  public void internalFrameClosing(InternalFrameEvent e) {
-		    ((ChildFrameMDI) frame).dispose();
-		  }
-		});
-	      }
-	      else if (frame instanceof ChildFrameSDI) {
-		((ChildFrameSDI) frame).addWindowListener(new WindowAdapter() {
-		  public void windowClosing(WindowEvent e) {
-		    ((ChildFrameSDI) frame).dispose();
-		  }
-		});
-	      }
-	    }
-	    else {
-	      showWindow(getWindow(title));
-	    }
-	  }
-	});
-      }
-
-      // Tools/Jython console
-      if (Jython.isPresent()) {
-	jMenuItemToolsJythonConsole = new JMenuItem();
-	jMenuTools.add(jMenuItemToolsJythonConsole);
-	jMenuItemToolsJythonConsole.setText("Jython console");
-	jMenuItemToolsJythonConsole.setMnemonic('J');
-	jMenuItemToolsJythonConsole.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent evt) {
-	    String title = jMenuItemToolsJythonConsole.getText();
-	    if (!containsWindow(title)) {
-	      final JythonPanel panel = new JythonPanel();
-	      final Container frame = createFrame(
-		  m_Self, title, panel, new BorderLayout(), 
-		  BorderLayout.CENTER, 800, 600, panel.getMenuBar(), false, true);
-
-	      // custom listener
-	      if (frame instanceof ChildFrameMDI) {
-		((ChildFrameMDI) frame).addInternalFrameListener(new InternalFrameAdapter() {
-		  public void internalFrameClosing(InternalFrameEvent e) {
-		    ((ChildFrameMDI) frame).dispose();
-		  }
-		});
-	      }
-	      else if (frame instanceof ChildFrameSDI) {
-		((ChildFrameSDI) frame).addWindowListener(new WindowAdapter() {
-		  public void windowClosing(WindowEvent e) {
-		    ((ChildFrameSDI) frame).dispose();
-		  }
-		});
-	      }
-	    }
-	    else {
-	      showWindow(getWindow(title));
-	    }
-	  }
-      });
-      }
 
       // Tools/EnsembleLibrary
       /* currently disabled due to bugs... FracPete
@@ -1915,12 +1833,16 @@ public class Main
 	public void run() {
 	  while(true) {
 	    try {
-	      Thread.sleep(10);
+	      Thread.sleep(4000);
+	      System.gc();
 	      
 	      if (m_Memory.isOutOfMemory()) {
 		// clean up
 		m_MainCommandline = null;
 		System.gc();
+		
+		// stop threads
+		m_Memory.stopThreads();
 		
 		// display error
 		System.err.println("\ndisplayed message:");

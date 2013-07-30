@@ -15,19 +15,11 @@
 
 /*
  *    Estimator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
@@ -39,6 +31,15 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
  
 /** 
  *
@@ -105,7 +106,7 @@ public abstract class Estimator
   protected double m_classValueIndex = -1.0;
   
   /** set if class is not important */
-  protected boolean m_noClass = true;
+  private boolean m_noClass = true;
   
   /**
    * Class to support a building process of an estimator.
@@ -675,26 +676,16 @@ public abstract class Estimator
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
-    result.enableAll();
     
-/*    // class
+    // class
     if (!m_noClass) {
       result.enable(Capability.NOMINAL_CLASS);
       result.enable(Capability.MISSING_CLASS_VALUES);
     } else {
       result.enable(Capability.NO_CLASS);
-    } */
+    }
        
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return            the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
   
   /** 

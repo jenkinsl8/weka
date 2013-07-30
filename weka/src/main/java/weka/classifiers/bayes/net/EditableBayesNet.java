@@ -15,8 +15,9 @@
 
 /*
  * EditableBayesNet.java
- * Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
- * 
+ *
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *
  */
 
 package weka.classifiers.bayes.net;
@@ -1135,7 +1136,7 @@ public class EditableBayesNet extends BayesNet {
 
 	/** Set position of node. Move set of nodes with the same displacement
 	 * as a specified node.
-	 * @param nNode index of node to set position for
+	 * @param iNode index of node to set position for
 	 * @param nX x position of new position
 	 * @param nY y position of new position
 	 * @param nodes array of indexes of nodes to move
@@ -1398,17 +1399,16 @@ public class EditableBayesNet extends BayesNet {
 		if (m_Instances.classIndex() == nTargetNode) {
 			m_Instances.setClassIndex(-1);
 			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
-			m_Instances.deleteAttributeAt(nTargetNode + 1);
-			m_Instances.setClassIndex(nTargetNode); */
+			m_Instances.deleteAttributeAt(nTargetNode + 1); */
 			
 			m_Instances.deleteAttributeAt(nTargetNode);
-			m_Instances.insertAttributeAt(newAtt, nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.setClassIndex(nTargetNode);
 		} else {
 			/*m_Instances.insertAttributeAt(newAtt, nTargetNode);
 			m_Instances.deleteAttributeAt(nTargetNode + 1); */
 		        m_Instances.deleteAttributeAt(nTargetNode);
-		        m_Instances.insertAttributeAt(newAtt, nTargetNode);
+                        m_Instances.insertAttributeAt(newAtt, nTargetNode);
 		}
 	} // replaceAtt
 
@@ -1445,7 +1445,7 @@ public class EditableBayesNet extends BayesNet {
 	}
 
 	/** return list of children of a node
-	 * @param nTargetNode index of node of interest
+	 * @param iNode index of node of interest
 	 */
 	public FastVector getChildren(int nTargetNode) {
 		FastVector children = new FastVector();

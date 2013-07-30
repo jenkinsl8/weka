@@ -15,11 +15,13 @@
 
 /*
  *    PropertySelectorDialog.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.experiment.PropertyNode;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -45,9 +47,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import weka.experiment.PropertyNode;
-
-/** 
+/**
  * Allows the user to select any (supported) property of an object, including
  * properties that any of it's property values may have.
  *
@@ -59,7 +59,7 @@ public class PropertySelectorDialog
 
   /** for serialization */
   private static final long serialVersionUID = -3155058124137930518L;
-  
+
   /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton("Select");
 
@@ -86,7 +86,7 @@ public class PropertySelectorDialog
 
   /** Signifies a cancelled property selection */
   public static final int CANCEL_OPTION = 1;
-  
+
   /**
    * Create the property selection dialog.
    *
@@ -94,7 +94,7 @@ public class PropertySelectorDialog
    * @param rootObject the object containing properties to select from
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
-    
+
     super(parentFrame, "Select a property", ModalityType.DOCUMENT_MODAL);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -115,7 +115,7 @@ public class PropertySelectorDialog
 	  } else {
 	    m_Result = APPROVE_OPTION;
 	  }
-	} 
+	}
 	setVisible(false);
       }
     });
@@ -123,7 +123,7 @@ public class PropertySelectorDialog
     m_Root = new DefaultMutableTreeNode(
 	     new PropertyNode(m_RootObject));
     createNodes(m_Root);
-    
+
     Container c = getContentPane();
     c.setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Select a property"));
@@ -239,7 +239,7 @@ public class PropertySelectorDialog
     }
   }
 
-  
+
   /**
    * Tests out the property selector from the command line.
    *

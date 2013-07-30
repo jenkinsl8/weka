@@ -15,7 +15,7 @@
 
 /*
  *    Note.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,6 +27,7 @@ import java.awt.Color;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EtchedBorder;
 
 /**
  * Simple bean for displaying a textual note on the layout.

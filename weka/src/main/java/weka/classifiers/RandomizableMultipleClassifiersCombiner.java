@@ -15,33 +15,33 @@
 
 /*
  *    RandomizableMultipleClassifiersCombiner.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.Utils;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * Abstract utility class for handling settings common to randomizable
  * meta classifiers that build an ensemble from multiple classifiers based
- * on a given random number seed.
+ * on a given random number seed.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class RandomizableMultipleClassifiersCombiner
+public abstract class RandomizableMultipleClassifiersCombiner 
   extends MultipleClassifiersCombiner implements Randomizable {
 
   /** for serialization */
   private static final long serialVersionUID = 5057936555724785679L;
-
+  
   /** The random number seed. */
   protected int m_Seed = 1;
 
@@ -55,9 +55,9 @@ public abstract class RandomizableMultipleClassifiersCombiner
     Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-          "\tRandom number seed.\n"
-          + "\t(default 1)",
-          "S", 1, "-S <num>"));
+	      "\tRandom number seed.\n"
+	      + "\t(default 1)",
+	      "S", 1, "-S <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -81,7 +81,7 @@ public abstract class RandomizableMultipleClassifiersCombiner
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     String seed = Utils.getOption('S', options);
     if (seed.length() != 0) {
       setSeed(Integer.parseInt(seed));
@@ -103,15 +103,15 @@ public abstract class RandomizableMultipleClassifiersCombiner
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-S";
+    options[current++] = "-S"; 
     options[current++] = "" + getSeed();
 
-    System.arraycopy(superOptions, 0, options, current,
-        superOptions.length);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
     return options;
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -124,7 +124,7 @@ public abstract class RandomizableMultipleClassifiersCombiner
   /**
    * Set the seed for random number generation.
    *
-   * @param seed the seed
+   * @param seed the seed 
    */
   public void setSeed(int seed) {
 
@@ -137,7 +137,7 @@ public abstract class RandomizableMultipleClassifiersCombiner
    * @return the seed for the random number generation
    */
   public int getSeed() {
-
+    
     return m_Seed;
   }
 }

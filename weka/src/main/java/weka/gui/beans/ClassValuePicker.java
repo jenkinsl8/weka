@@ -15,11 +15,16 @@
 
 /*
  *    ClassValuePicker.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.SwapValues;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
@@ -27,11 +32,6 @@ import java.io.Serializable;
 import java.util.Vector;
 
 import javax.swing.JPanel;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.SwapValues;
 
 /**
  * @author Mark Hall

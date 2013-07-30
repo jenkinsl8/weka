@@ -15,22 +15,22 @@
 
 /*
  *    AbstractClusterer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
-
-import java.io.Serializable;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
 
 /** 
  * Abstract clusterer.
@@ -177,19 +177,9 @@ public abstract class AbstractClusterer
     Capabilities 	result;
     
     result = new Capabilities(this);
-    result.enableAll();
-//    result.enable(Capability.NO_CLASS);
+    result.enable(Capability.NO_CLASS);
     
     return result;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return            the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
   }
   
   /**

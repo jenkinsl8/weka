@@ -15,19 +15,19 @@
 
 /*
  * TestInstances.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
+import weka.core.Capabilities.Capability;
+
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Capabilities.Capability;
+import java.util.ArrayList;
 
 /**
  * Generates artificial datasets for testing. In case of Multi-Instance data

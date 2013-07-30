@@ -15,20 +15,20 @@
 
 /*
  * KDTreeNodeSplitter.java
- * Copyright (C) 1999-2012 University of Waikato
+ * Copyright (C) 1999-2007 University of Waikato
  */
 
 package weka.core.neighboursearch.kdtrees;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class that splits up a KDTreeNode.

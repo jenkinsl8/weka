@@ -15,12 +15,25 @@
 
 /*
  *    CostSensitiveClassifierSplitEvaluator.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Summarizable;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -31,17 +44,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Summarizable;
-import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->

@@ -15,19 +15,12 @@
 
 /*
  *    CrossValidationResultProducer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import java.io.File;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.TimeZone;
-import java.util.Vector;
 
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Instances;
@@ -36,6 +29,13 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.File;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.Vector;
 
 
 /**

@@ -15,29 +15,11 @@
 
 /*
  *    Clusterer.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import weka.clusterers.EM;
 import weka.core.Instances;
@@ -45,8 +27,21 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.ExtensionFileFilter;
 import weka.gui.Logger;
+import weka.gui.ExtensionFileFilter;
+
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
+
+import javax.swing.JPanel;
 
 /**
  * Bean that wraps around weka.clusterers

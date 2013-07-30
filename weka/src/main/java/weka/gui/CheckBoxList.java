@@ -15,7 +15,7 @@
 
 /*
  * CheckBoxList.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
@@ -25,7 +25,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.NoSuchElementException;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;

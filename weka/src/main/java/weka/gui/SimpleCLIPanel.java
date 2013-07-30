@@ -15,10 +15,18 @@
 
 /*
  * SimpleCLIPanel.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
+import weka.core.OptionHandler;
+import weka.core.Trie;
+import weka.core.Utils;
+import weka.gui.scripting.ScriptingPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -50,14 +58,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.OptionHandler;
-import weka.core.Trie;
-import weka.core.Utils;
-import weka.gui.scripting.ScriptingPanel;
 
 /**
  * Creates a very simple command line for invoking the main method of

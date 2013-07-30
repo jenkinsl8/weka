@@ -15,15 +15,11 @@
 
 /*
  *    CheckEstimator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -36,6 +32,10 @@ import weka.core.RevisionUtils;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for examining the capabilities and finding problems with 
@@ -2148,4 +2148,3 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
     }
   }
 }
-

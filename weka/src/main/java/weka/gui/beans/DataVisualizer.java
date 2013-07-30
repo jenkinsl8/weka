@@ -15,11 +15,19 @@
 
 /*
  *    DataVisualizer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.Logger;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
@@ -38,14 +46,6 @@ import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.Logger;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.VisualizePanel;
 
 /**
  * Bean that encapsulates weka.gui.visualize.VisualizePanel

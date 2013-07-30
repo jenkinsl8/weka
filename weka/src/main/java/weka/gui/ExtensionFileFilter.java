@@ -15,7 +15,7 @@
 
 /*
  *    ExtensionFileFilter.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,9 +23,8 @@
 package weka.gui;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.Serializable;
-
+import java.io.FilenameFilter;
 import javax.swing.filechooser.FileFilter;
 
 /**

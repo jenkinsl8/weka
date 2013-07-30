@@ -15,7 +15,7 @@
 
 /*
  *    GraphEdge.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,15 +30,15 @@ package weka.gui.graphvisualizer;
 public class GraphEdge extends Object {
   
   /** The index of source node in Nodes vector */
-  public int src;
+  protected int src;
   /** The index of target node in Nodes vector */
-  public int dest;
+  protected int dest;
   /** The type of Edge */
-  public int type;
+  protected int type;
   /** Label of source node */
-  public String srcLbl;
+  protected String srcLbl;
   /** Label of target node */
-  public String destLbl;
+  protected String destLbl;
   
   public GraphEdge(int s, int d, int t) {
     src=s; dest=d; type=t;

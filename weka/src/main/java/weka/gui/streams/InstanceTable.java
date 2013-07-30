@@ -15,11 +15,14 @@
 
 /*
  *    InstanceTable.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
+
+import weka.core.Instance;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 
@@ -28,9 +31,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 /**
  * A bean that takes a stream of instances and displays in a table.

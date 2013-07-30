@@ -15,10 +15,14 @@
 
 /*
  * MemoryUsagePanel.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
+
+import weka.core.Memory;
+import weka.core.Utils;
+import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,10 +41,6 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import weka.core.Memory;
-import weka.core.Utils;
-import weka.gui.visualize.VisualizeUtils;
 
 /**
  * A panel for displaying the memory usage.

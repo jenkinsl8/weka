@@ -15,11 +15,20 @@
 
 /*
  *   BoundaryPanel.java
- *   Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.DenseInstance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.gui.visualize.JPEGWriter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,14 +59,6 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /**
  * BoundaryPanel. A class to handle the plotting operations

@@ -15,26 +15,26 @@
 
 /*
  * LocalScoreSearchAlgorithm.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
 package weka.classifiers.bayes.net.search.local;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.SearchAlgorithm;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
+import weka.core.Instance;
 import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
+import weka.core.Utils;
 import weka.core.Statistics;
 import weka.core.Tag;
-import weka.core.Utils;
+import weka.core.Option;
+import weka.core.SelectedTag;
+
+import java.util.Vector;
+import java.util.Enumeration;
 
 /** 
  <!-- globalinfo-start -->
@@ -407,9 +407,9 @@ public class LocalScoreSearchAlgorithm
 					double nSumOfCounts = 0;
 
 					for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
-						if (m_fAlpha + nCounts[iParent][iSymbol] != 0) {
-							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol]);
-							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol];
+						if (m_fAlpha + nCounts[iParent * numValues][iSymbol] != 0) {
+							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol]);
+							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol];
 						}
 					}
 					fLogScore -= Statistics.lnGamma(nSumOfCounts);

@@ -15,15 +15,11 @@
 
 /*
  * PartitionedMultiFilter.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -38,6 +34,10 @@ import weka.core.Utils;
 import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

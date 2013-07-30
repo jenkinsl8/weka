@@ -15,14 +15,11 @@
 
 /*
  *    M5P.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.trees.m5.M5Base;
 import weka.classifiers.trees.m5.Rule;
@@ -30,6 +27,9 @@ import weka.core.Drawable;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

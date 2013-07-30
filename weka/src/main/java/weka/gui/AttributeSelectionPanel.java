@@ -15,31 +15,30 @@
 
 /*
  *    AttributeSelectionPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
-import java.awt.BorderLayout;
+import weka.core.Instances;
+
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.regex.Pattern;
-
-import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-
-import weka.core.Instances;
+import javax.swing.BorderFactory;
 
 /**
  * Creates a panel that displays the attributes contained in a set of

@@ -15,16 +15,10 @@
 
 /*
  * AbstractFileLoader.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.converters;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.zip.GZIPInputStream;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -33,6 +27,14 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.zip.GZIPInputStream;
 
 
 /**

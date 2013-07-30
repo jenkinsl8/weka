@@ -15,18 +15,18 @@
 
 /*
  * NGramTokenizer.java
- * Copyright (C) 2007-2012 University of Waikato
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.tokenizers;
 
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Vector;
-
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -39,7 +39,7 @@ import weka.core.Utils;
  * 
  * <pre> -delimiters &lt;value&gt;
  *  The delimiters to use
- *  (default ' \r\n\t.,;:'"()?!').</pre>
+ *  (default ' \n\t.,;:'"()?!').</pre>
  * 
  * <pre> -max &lt;int&gt;
  *  The max size of the Ngram (default = 3).</pre>
@@ -147,7 +147,7 @@ public class NGramTokenizer
    * 
    * <pre> -delimiters &lt;value&gt;
    *  The delimiters to use
-   *  (default ' \r\n\t.,;:'"()?!').</pre>
+   *  (default ' \n\t.,;:'"()?!').</pre>
    * 
    * <pre> -max &lt;int&gt;
    *  The max size of the Ngram (default = 3).</pre>
@@ -328,4 +328,3 @@ public class NGramTokenizer
     runTokenizer(new NGramTokenizer(), args);
   }
 }
-

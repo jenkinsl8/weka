@@ -15,25 +15,25 @@
 
 /*
  * SVMLightSaver.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, NZ
+ * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
 
 package weka.core.converters;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

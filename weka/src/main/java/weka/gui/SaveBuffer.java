@@ -15,21 +15,25 @@
 
 /*
  *    SaveBuffer.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
-import java.awt.Component;
-import java.io.BufferedWriter;
+import weka.gui.Logger;
+
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Writer;
+import java.io.BufferedWriter;
 import java.io.PrintWriter;
 
-import javax.swing.JDialog;
+import java.awt.Component;
 import javax.swing.JFileChooser;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 
 /**
  * This class handles the saving of StringBuffers to files. It will pop

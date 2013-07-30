@@ -15,15 +15,11 @@
 
 /*
  *    AttributeSelectedClassifier.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
-
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -31,7 +27,6 @@ import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,6 +35,11 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -119,7 +119,7 @@ public class AttributeSelectedClassifier
              WeightedInstancesHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -1151805453487947577L;
+  static final long serialVersionUID = -5951805453487947577L;
   
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;

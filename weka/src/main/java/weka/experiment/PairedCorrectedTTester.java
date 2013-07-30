@@ -15,16 +15,12 @@
 
 /*
  *    PairedCorrectedTTester.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Enumeration;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -32,11 +28,15 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Enumeration;
 
 /**
  * Behaves the same as PairedTTester, only it uses the corrected

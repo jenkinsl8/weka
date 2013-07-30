@@ -15,14 +15,10 @@
 
 /*
  * CheckSource.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters;
-
-import java.io.File;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,6 +28,10 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * A simple class for checking the source generated from Filters

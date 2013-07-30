@@ -15,7 +15,7 @@
 
 /*
  * TextDirectoryLoader.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,8 +28,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Vector;
 
 import weka.core.Attribute;

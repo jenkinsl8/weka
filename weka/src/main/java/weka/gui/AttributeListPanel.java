@@ -15,11 +15,13 @@
 
 /*
  *    AttributeListPanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -30,8 +32,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-
-import weka.core.Instances;
 
 /**
  * Creates a panel that displays the attributes contained in a set of

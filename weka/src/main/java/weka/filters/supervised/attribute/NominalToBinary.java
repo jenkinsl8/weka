@@ -43,7 +43,6 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.UnassignedClassException;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.filters.StreamableFilter;
 import weka.filters.SupervisedFilter;
 
 /** 

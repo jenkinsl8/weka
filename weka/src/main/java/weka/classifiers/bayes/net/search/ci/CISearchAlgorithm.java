@@ -15,7 +15,7 @@
 
 /*
  * CISearchAlgorithm.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 

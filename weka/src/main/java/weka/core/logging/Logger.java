@@ -15,18 +15,18 @@
 
 /*
  * Logger.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.logging;
+
+import weka.core.RevisionHandler;
+import weka.core.Utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
-
-import weka.core.RevisionHandler;
-import weka.core.Utils;
 
 /**
  * Abstract superclass for all loggers.

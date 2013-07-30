@@ -15,20 +15,14 @@
 
 /*
  *    Cobweb.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -37,13 +31,19 @@ import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.experiment.Stats;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -118,7 +118,7 @@ public class Cobweb
    *
    * @see Serializable
    */
-  public class CNode 
+  private class CNode 
     implements Serializable, RevisionHandler {
 
     /** for serialization */
@@ -307,7 +307,7 @@ public class Cobweb
       double bestHostCU = categoryUtility();
       CNode finalBestHost = newLeaf;
       
-      // remove new leaf when searching for best and second best nodes to
+      // remove new leaf when seaching for best and second best nodes to
       // consider for merging and splitting
       m_children.removeElementAt(m_children.size()-1);
 
@@ -876,8 +876,6 @@ public class Cobweb
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
-    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -992,15 +990,6 @@ public class Cobweb
   public int numberOfClusters() {
     determineNumberOfClusters();
     return m_numberOfClusters;
-  }
-  
-  /**
-   * Get the root of the tree.
-   * 
-   * @return the root of the tree.
-   */
-  public CNode getTreeRoot() {
-    return m_cobwebTree;
   }
 
   /**

@@ -25,6 +25,8 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.filters.StreamableFilter;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -39,7 +41,6 @@ import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /** 

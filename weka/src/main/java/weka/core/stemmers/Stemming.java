@@ -15,11 +15,17 @@
 
 /*
  * Stemming.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.stemmers;
+
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,12 +37,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 
 /**
  * A helper class for using the stemmers. Run with option '-h' to list

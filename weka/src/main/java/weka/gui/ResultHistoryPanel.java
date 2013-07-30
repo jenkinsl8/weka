@@ -15,12 +15,14 @@
 
 /*
  *    ResultHistoryPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.gui.visualize.PrintableComponent;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -49,8 +51,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
-
-import weka.gui.visualize.PrintableComponent;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list

@@ -15,20 +15,16 @@
 
 /*
  *    SubspaceCluster.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.datagenerators.clusterers;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
@@ -37,6 +33,10 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.datagenerators.ClusterDefinition;
 import weka.datagenerators.ClusterGenerator;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

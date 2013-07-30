@@ -15,17 +15,17 @@
 
 /*
  *    NormalizableDistance.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
+import weka.core.neighboursearch.PerformanceStats;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.neighboursearch.PerformanceStats;
 
 /**
  * Represents the abstract ancestor for normalizable distance functions, like

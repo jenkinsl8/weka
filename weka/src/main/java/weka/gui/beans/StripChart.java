@@ -15,11 +15,16 @@
 
 /*
  *    StripChart.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.visualize.PrintableComponent;
+import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,14 +42,10 @@ import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.VisualizeUtils;
 
 /**
  * Bean that can display a horizontally scrolling strip chart. Can

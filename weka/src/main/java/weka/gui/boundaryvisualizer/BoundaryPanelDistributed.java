@@ -15,11 +15,21 @@
 
 /*
  *   BoundaryPanelDistrubuted.java
- *   Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.experiment.Compute;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
+import weka.experiment.TaskStatusInfo;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
@@ -28,16 +38,6 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.rmi.Naming;
 import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.experiment.Compute;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.experiment.TaskStatusInfo;
 
 /**
  * This class extends BoundaryPanel with code for distributing the

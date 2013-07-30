@@ -15,17 +15,13 @@
 
 /*
  *    MakeDensityBasedClusterer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -35,6 +31,9 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.estimators.DiscreteEstimator;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -174,14 +173,10 @@ public class MakeDensityBasedClusterer
    * @return      the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
-    if (m_wrappedClusterer != null) {
+    if (m_wrappedClusterer != null)
       return m_wrappedClusterer.getCapabilities();
-    }
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-    result.enable(Capability.NO_CLASS);
-    
-    return result;
+    else
+      return super.getCapabilities();
   }
   
   /**

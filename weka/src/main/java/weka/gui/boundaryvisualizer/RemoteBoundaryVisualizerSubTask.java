@@ -15,21 +15,22 @@
 
 /*
  *   RemoteBoundaryVisualizerSubTask.java
- *   Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
-import java.util.Random;
-
 import weka.classifiers.Classifier;
-import weka.core.DenseInstance;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.experiment.Task;
 import weka.experiment.TaskStatusInfo;
+
+import java.util.Random;
 
 /**
  * Class that encapsulates a sub task for distributed boundary

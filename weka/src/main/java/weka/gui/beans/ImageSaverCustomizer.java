@@ -15,7 +15,7 @@
 
 /*
  *    ImageSaverCustomizer.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,6 +36,7 @@ import javax.swing.JTextArea;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.gui.PropertySheetPanel;
 
 /**
  * Customizer for the ImageSaver component.

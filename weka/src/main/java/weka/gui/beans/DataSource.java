@@ -15,12 +15,14 @@
 
 /*
  *    DataSource.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Interface to something that is capable of being a source for data - 

@@ -15,18 +15,18 @@
 
 /*
  *    TrainTestSplitMaker.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Instances;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
-
-import weka.core.Instances;
 
 /**
  * Bean that accepts data sets, training sets, test sets and produces

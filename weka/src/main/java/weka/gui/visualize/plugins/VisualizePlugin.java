@@ -15,17 +15,16 @@
 
 /*
  * VisualizePlugin.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  * Written by Jeffery Grajkowski of the AICML
  *
  */
 
 package weka.gui.visualize.plugins;
 
-import javax.swing.JMenuItem;
-
-import weka.core.Attribute;
 import weka.core.FastVector;
+import weka.core.Attribute;
+import javax.swing.JMenuItem;
 
 /**
  * Interface implemented by classes loaded dynamically to

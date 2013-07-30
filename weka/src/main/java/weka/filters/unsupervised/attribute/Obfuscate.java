@@ -15,7 +15,7 @@
 
 /*
  *    Obfuscate.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,11 +24,12 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -70,7 +71,6 @@ public class Obfuscate
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -107,9 +107,9 @@ public class Obfuscate
 	  newAtt = new Attribute("A" + (i + 1));
 	  break;
 	case Attribute.DATE:
-	  String format = oldAtt.getDateFormat();
-	  newAtt = new Attribute("A" + (i + 1), format);
-	  break;
+          String format = oldAtt.getDateFormat();
+          newAtt = new Attribute("A" + (i + 1), format);
+          break;
 	case Attribute.NOMINAL:
 	  FastVector vals = new FastVector();
 	  for (int j = 0; j < oldAtt.numValues(); j++) {

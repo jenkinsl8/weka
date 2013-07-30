@@ -15,19 +15,19 @@
 
 /*
  *   KDDataGenerator.java
- *   Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
-import java.io.Serializable;
-import java.util.Random;
-
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Random;
 
 /**
  * KDDataGenerator. Class that uses kernels to generate new random

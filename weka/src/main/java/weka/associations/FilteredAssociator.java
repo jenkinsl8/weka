@@ -15,24 +15,24 @@
 
 /*
  *    FilteredAssociator.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -56,10 +56,10 @@ import weka.filters.MultiFilter;
  * 
  * <pre> -W
  *  Full name of base associator.
- *  (default: weka.associations.Apriori)</pre>
+ *  (default: weka.associations.FPGrowth)</pre>
  * 
  * <pre> 
- * Options specific to associator weka.associations.Apriori:
+ * Options specific to associator weka.associations.FPGrowth:
  * </pre>
  * 
  * <pre> -N &lt;required number of rules output&gt;
@@ -125,7 +125,7 @@ public class FilteredAssociator
    * Default constructor.
    */
   public FilteredAssociator() {
-    m_Associator = new Apriori();
+    m_Associator = new FPGrowth();
     m_Filter     = new MultiFilter();
     ((MultiFilter) m_Filter).setFilters(new Filter[]{
 	new weka.filters.unsupervised.attribute.ReplaceMissingValues()});
@@ -152,7 +152,7 @@ public class FilteredAssociator
    * @return 		the default associator classname
    */
   protected String defaultAssociatorString() {
-    return Apriori.class.getName();
+    return FPGrowth.class.getName();
   }
 
   /**
@@ -202,10 +202,10 @@ public class FilteredAssociator
    * 
    * <pre> -W
    *  Full name of base associator.
-   *  (default: weka.associations.Apriori)</pre>
+   *  (default: weka.associations.FPGrowth)</pre>
    * 
    * <pre> 
-   * Options specific to associator weka.associations.Apriori:
+   * Options specific to associator weka.associations.FPGrowth:
    * </pre>
    * 
    * <pre> -N &lt;required number of rules output&gt;

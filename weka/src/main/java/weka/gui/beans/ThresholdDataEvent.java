@@ -15,16 +15,16 @@
 
 /*
  *    ThresholdDataEvent.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.util.EventObject;
-
 import weka.core.Attribute;
 import weka.gui.visualize.PlotData2D;
+
+import java.util.EventObject;
 
 /**
  * Event encapsulating classifier performance data based on

@@ -15,15 +15,15 @@
 
 /*
  *    VisualizableErrorEvent.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.util.EventObject;
-
 import weka.gui.visualize.PlotData2D;
+
+import java.util.EventObject;
 
 /**
  * Event encapsulating error information for a learning scheme

@@ -15,21 +15,18 @@
 
 /*
  *    SwapValues.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
-import weka.core.Instance;
+import weka.core.Instance; 
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -37,9 +34,13 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /** 
@@ -100,7 +101,6 @@ public class SwapValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -380,19 +380,19 @@ public class SwapValues
 	newAtts.addElement(att.copy()); 
       } else {
 	  
-        // Compute list of attribute values
-
-        newVals = new FastVector(att.numValues());
-        for (int i = 0; i < att.numValues(); i++) {
-          if (i == m_FirstIndex.getIndex()) {
-            newVals.addElement(att.value(m_SecondIndex.getIndex()));
-          } else if (i == m_SecondIndex.getIndex()) {
-            newVals.addElement(att.value(m_FirstIndex.getIndex()));
-          } else {
-            newVals.addElement(att.value(i)); 
-          }
-        }
-        Attribute newAtt = new Attribute(att.name(), newVals);
+	// Compute list of attribute values
+	  
+	newVals = new FastVector(att.numValues());
+	for (int i = 0; i < att.numValues(); i++) {
+	  if (i == m_FirstIndex.getIndex()) {
+	    newVals.addElement(att.value(m_SecondIndex.getIndex()));
+	  } else if (i == m_SecondIndex.getIndex()) {
+	    newVals.addElement(att.value(m_FirstIndex.getIndex()));
+	  } else {
+	    newVals.addElement(att.value(i)); 
+	  }
+	}
+	Attribute newAtt = new Attribute(att.name(), newVals);
         newAtt.setWeight(att.weight());
         newAtts.addElement(newAtt);
       }

@@ -15,22 +15,15 @@
 
 /*
  *    RemoveFrequentValues.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,8 +33,15 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -496,7 +496,6 @@ public class RemoveFrequentValues
     */
    public Capabilities getCapabilities() {
      Capabilities result = super.getCapabilities();
-     result.disableAll();
 
      // attributes
      result.enableAllAttributes();
@@ -563,6 +562,7 @@ public class RemoveFrequentValues
            push(instance);
            continue;
          }
+      
          if (m_Values.contains(instance.stringValue(m_AttIndex.getIndex()))) {
             if (getModifyHeader()) {
                instance.setValue(m_AttIndex.getIndex(),

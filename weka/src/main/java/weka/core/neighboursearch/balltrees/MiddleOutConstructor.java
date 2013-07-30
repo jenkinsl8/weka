@@ -15,30 +15,31 @@
 
 /*
  * MiddleOutConstructor.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.neighboursearch.balltrees;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.core.DenseInstance;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import java.io.Serializable;
 
 /**
  <!-- globalinfo-start -->
@@ -753,7 +754,7 @@ public class MiddleOutConstructor
 
   /**
    * Sets the instances on which the tree is to be built.
-   * @param insts The instances on which to build the 
+   * @param inst The instances on which to build the 
    * ball tree.
    */
   public void setInstances(Instances insts) {

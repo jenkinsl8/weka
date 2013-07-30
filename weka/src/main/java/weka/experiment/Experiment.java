@@ -15,12 +15,26 @@
 
 /*
  *    Experiment.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
+
+import weka.core.AdditionalMeasureProducer;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
+import weka.core.xml.KOML;
+import weka.core.xml.XMLOptions;
+import weka.experiment.xml.XMLExperiment;
 
 import java.beans.PropertyDescriptor;
 import java.io.BufferedInputStream;
@@ -37,20 +51,6 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
-
-import weka.core.AdditionalMeasureProducer;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
-import weka.core.xml.KOML;
-import weka.core.xml.XMLOptions;
-import weka.experiment.xml.XMLExperiment;
 
 /**
  * Holds all the necessary configuration information for a standard

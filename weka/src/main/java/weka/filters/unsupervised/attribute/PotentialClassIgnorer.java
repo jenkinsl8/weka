@@ -15,20 +15,20 @@
 
 /*
  *    PotentialClassIgnorer.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This filter should be extended by other unsupervised attribute

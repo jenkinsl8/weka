@@ -15,13 +15,11 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
 package weka.classifiers.bayes.net.estimate;
-
-import java.util.Enumeration;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instance;
@@ -29,6 +27,8 @@ import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.Estimator;
+
+import java.util.Enumeration;
 
 /** 
  <!-- globalinfo-start -->

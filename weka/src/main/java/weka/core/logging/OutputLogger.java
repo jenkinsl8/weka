@@ -15,16 +15,16 @@
 
 /*
  * OutputLogger.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.logging;
 
-import java.io.PrintStream;
-import java.util.Date;
-
 import weka.core.RevisionUtils;
 import weka.core.Tee;
+
+import java.io.PrintStream;
+import java.util.Date;
 
 /**
  * A logger that logs all output on stdout and stderr to a file.

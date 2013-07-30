@@ -15,11 +15,19 @@
 
 /*
  * QueryPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.ListSelectorDialog;
+import weka.gui.sql.event.ConnectionEvent;
+import weka.gui.sql.event.ConnectionListener;
+import weka.gui.sql.event.HistoryChangedEvent;
+import weka.gui.sql.event.HistoryChangedListener;
+import weka.gui.sql.event.QueryExecuteEvent;
+import weka.gui.sql.event.QueryExecuteListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -43,14 +51,6 @@ import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-
-import weka.gui.ListSelectorDialog;
-import weka.gui.sql.event.ConnectionEvent;
-import weka.gui.sql.event.ConnectionListener;
-import weka.gui.sql.event.HistoryChangedEvent;
-import weka.gui.sql.event.HistoryChangedListener;
-import weka.gui.sql.event.QueryExecuteEvent;
-import weka.gui.sql.event.QueryExecuteListener;
 
 /**
  * Represents a panel for entering an SQL query.

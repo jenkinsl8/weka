@@ -15,11 +15,14 @@
 
 /*
  * WekaTestSuite.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.test;
+
+import weka.core.ClassDiscovery;
+import weka.gui.GenericPropertiesCreator;
 
 import java.util.Collections;
 import java.util.StringTokenizer;
@@ -27,8 +30,6 @@ import java.util.Vector;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import weka.core.ClassDiscovery;
-import weka.gui.GenericPropertiesCreator;
 
 /**
  * Extends the standard TestSuite class wtih some additional methods for

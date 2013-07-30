@@ -19,12 +19,15 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.classifiers.Classifier;
+import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.AbstractClassifier;
 
 /**
  * Dummy classifier - used in ThresholdSelectorTest.

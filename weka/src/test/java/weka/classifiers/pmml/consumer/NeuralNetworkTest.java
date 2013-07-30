@@ -12,16 +12,16 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /*
  * Copyright 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.pmml.consumer;
 
+import weka.core.FastVector;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import weka.core.FastVector;
 
 /**
  * Tests the pmml NeuralNetwork classifier.

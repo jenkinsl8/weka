@@ -15,18 +15,18 @@
 
 /*
  *    ClustererPerformanceEvaluator.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.Clusterer;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
 
 /**
  * A bean that evaluates the performance of batch trained clusterers

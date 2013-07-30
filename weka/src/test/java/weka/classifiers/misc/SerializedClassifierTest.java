@@ -19,11 +19,6 @@
 
 package weka.classifiers.misc;
 
-import java.io.File;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.core.Attribute;
@@ -33,6 +28,12 @@ import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.test.Regression;
+
+import java.io.File;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * Tests SerializedClassifier. Run from the command line with:<p>

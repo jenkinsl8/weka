@@ -15,11 +15,15 @@
 
 /*
  *    AttributePanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,10 +37,6 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instances;
 
 /**
  * This panel displays one dimensional views of the attributes in a

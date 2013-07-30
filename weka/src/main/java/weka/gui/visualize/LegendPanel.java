@@ -15,11 +15,14 @@
 
 /*
  *    LegendPanel.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.FastVector;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -36,9 +39,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import weka.core.FastVector;
-import weka.core.Instances;
 
 /**
  * This panel displays legends for a list of plots. If a given plot

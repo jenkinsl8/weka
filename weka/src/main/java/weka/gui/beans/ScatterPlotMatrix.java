@@ -15,18 +15,18 @@
 
 /*
  *    ScatterPlotMatrix.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import weka.core.Instances;
+import weka.gui.visualize.MatrixPanel;
+
 import java.awt.BorderLayout;
 
 import javax.swing.Icon;
-
-import weka.core.Instances;
-import weka.gui.visualize.MatrixPanel;
 
 /**
  * Bean that encapsulates weka.gui.visualize.MatrixPanel for displaying a

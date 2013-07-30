@@ -15,11 +15,13 @@
 
 /*
  *    CostMatrixEditor.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.classifiers.CostMatrix;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -53,8 +55,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
-
-import weka.classifiers.CostMatrix;
 
 /**
  * Class for editing CostMatrix objects. Brings up a custom editing panel

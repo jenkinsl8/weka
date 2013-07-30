@@ -15,11 +15,20 @@
 
 /*
  * MatlabSaver.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, NZ
+ * Copyright (C) 2009 University of Waikato, Hamilton, NZ
  *
  */
 
 package weka.core.converters;
+
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,15 +36,6 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Version;
 
 /**
  <!-- globalinfo-start -->

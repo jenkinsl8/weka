@@ -15,11 +15,13 @@
 
 /*
  * InfoPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.ComponentHelper;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,8 +40,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.gui.ComponentHelper;
 
 /**
  * A simple panel for displaying information, e.g. progress information etc.

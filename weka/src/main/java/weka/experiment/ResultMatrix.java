@@ -15,20 +15,20 @@
 
 /*
  * ResultMatrix.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This matrix is a container for the datasets and classifier setups and 

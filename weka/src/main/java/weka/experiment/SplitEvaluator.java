@@ -15,16 +15,15 @@
 
 /*
  *    SplitEvaluator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
 
-import java.io.Serializable;
-
 import weka.core.Instances;
+import java.io.Serializable;
 
 /**
  * Interface to objects able to generate a fixed set of results for

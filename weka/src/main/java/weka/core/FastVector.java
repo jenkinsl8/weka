@@ -15,15 +15,15 @@
 
 /*
  *    FastVector.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999, 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Simple extension of ArrayList. Exists for legacy reasons.

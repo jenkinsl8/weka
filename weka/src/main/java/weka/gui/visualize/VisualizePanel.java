@@ -15,11 +15,18 @@
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -58,13 +65,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
-
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a

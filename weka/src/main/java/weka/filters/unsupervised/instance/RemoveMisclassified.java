@@ -15,17 +15,14 @@
 
 /*
  *    RemoveMisclassified.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,6 +32,9 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -114,12 +114,10 @@ public class RemoveMisclassified
   public Capabilities getCapabilities() {
     Capabilities 	result;
     
-    if (getClassifier() == null) {
+    if (getClassifier() == null)
       result = super.getCapabilities();
-      result.disableAll();
-    } else {
+    else
       result = getClassifier().getCapabilities();
-    }
     
     result.setMinimumNumberInstances(0);
     

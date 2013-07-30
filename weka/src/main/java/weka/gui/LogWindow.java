@@ -15,11 +15,14 @@
 
 /*
  * LogWindow.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
+
+import weka.core.Tee;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -50,9 +53,6 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
-
-import weka.core.Tee;
-import weka.core.Utils;
 
 /** 
  * Frame that shows the output from stdout and stderr.
@@ -198,10 +198,7 @@ public class LogWindow
         x = line;
       }
 
-      if (x == null)
-	print("null");
-      else
-	print(x.toString());
+      print(x.toString());
     }
 
     /**

@@ -15,11 +15,15 @@
 
 /*
  * ArffViewer.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
+
+import weka.core.Memory;
+import weka.gui.ComponentHelper;
+import weka.gui.LookAndFeel;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
@@ -27,10 +31,6 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-
-import weka.core.Memory;
-import weka.gui.ComponentHelper;
-import weka.gui.LookAndFeel;
 
 /**
  * A little tool for viewing ARFF files.
@@ -313,13 +313,18 @@ public class ArffViewer
               }
 
               //System.out.println("before sleeping");
-              Thread.sleep(10);
+              Thread.sleep(4000);
+              
+              System.gc();
               
               if (m_Memory.isOutOfMemory()) {
                 // clean up
                 m_Viewer.dispose();
                 m_Viewer = null;
                 System.gc();
+
+                // stop threads
+                m_Memory.stopThreads();
 
                 // display error
                 System.err.println("\ndisplayed message:");

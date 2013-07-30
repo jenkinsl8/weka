@@ -15,13 +15,13 @@
 
 /*
  *    PlaceNode2.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.treevisualizer;
 
-import java.util.Vector;
+import java.util.*;
 
 /**
  * This class will place the Nodes of a tree. <p>

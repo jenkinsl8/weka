@@ -15,18 +15,15 @@
 
 /*
  *    AbstractLoader.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
-import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Instance;
+import java.io.*;
 
 /**
  * Abstract class gives default implementation of setSource 

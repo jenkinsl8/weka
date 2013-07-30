@@ -15,13 +15,10 @@
 
 /*
  * BallTree.java
- * Copyright (C) 2007-2012 University of Waikato
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.neighboursearch;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
@@ -29,13 +26,16 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.neighboursearch.balltrees.BallNode;
 import weka.core.neighboursearch.balltrees.BallTreeConstructor;
 import weka.core.neighboursearch.balltrees.TopDownConstructor;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

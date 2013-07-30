@@ -15,13 +15,13 @@
 
 /*
  *    OptionHandler.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
+import java.util.*;
 
 /** 
  * Interface to something that understands options.

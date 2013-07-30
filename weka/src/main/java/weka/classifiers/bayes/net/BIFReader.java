@@ -15,11 +15,22 @@
 
 /*
  * BIFReader.java
- * Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 
 package weka.classifiers.bayes.net;
+
+import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.estimators.Estimator;
 
 import java.io.File;
 import java.io.StringReader;
@@ -33,24 +44,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.estimators.Estimator;
-
 /**
  <!-- globalinfo-start -->
  * Builds a description of a Bayes Net classifier stored in XML BIF 0.3 format.<br/>
  * <br/>
  * For more details on XML BIF see:<br/>
  * <br/>
- * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/.
+ * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/\~fgcozman/Research/InterchangeFormat/.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -639,4 +639,3 @@ public class BIFReader
         }
     } // main
 } // class BIFReader
-

@@ -15,12 +15,19 @@
 
 /*
  *    PropertySheet.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.MultiInstanceCapabilitiesHandler;
+import weka.gui.beans.GOECustomizer;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -37,6 +44,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.BeanInfo;
 import java.beans.Beans;
+import java.beans.Customizer;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
@@ -62,13 +70,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.MultiInstanceCapabilitiesHandler;
-import weka.gui.beans.GOECustomizer;
 
 
 /** 

@@ -15,11 +15,21 @@
 
 /*
  *    ThresholdVisualizePanel.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.evaluation.EvaluationUtils;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -32,15 +42,6 @@ import java.io.FileReader;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.border.TitledBorder;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.EvaluationUtils;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.SingleIndex;
-import weka.core.Utils;
 
 /** 
  * This panel is a VisualizePanel, with the added ablility to display the

@@ -15,7 +15,7 @@
 
 /*
  * ClassDiscovery.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -473,7 +473,7 @@ public class ClassDiscovery
     initCache();
     m_Cache.clear();
   }
-  
+
   /**
    * Calls clearCache() and resets the cache of classes on the classpath
    * (i.e. forces a rescan of the classpath).

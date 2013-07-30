@@ -15,11 +15,14 @@
 
 /*
  *    InstanceLoader.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
+
+import weka.core.Instance;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,9 +36,6 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 /** 
  * A bean that produces a stream of instances from a file.

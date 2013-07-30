@@ -15,14 +15,10 @@
 
 /*
  * BallTreeConstructor.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.neighboursearch.balltrees;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
@@ -33,6 +29,10 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract class for constructing a BallTree .

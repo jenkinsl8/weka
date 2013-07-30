@@ -15,25 +15,25 @@
 
 /*
  * FilteredClusterer.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -59,19 +59,10 @@ import weka.filters.SupervisedFilter;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters.
- *  (default 2).</pre>
- * 
- * <pre> -V
- *  Display std. deviations for centroids.
- * </pre>
- * 
- * <pre> -M
- *  Replace missing values with mean/mode.
- * </pre>
+ *  number of clusters. (default = 2).</pre>
  * 
  * <pre> -S &lt;num&gt;
- *  Random number seed.
+ *  random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -169,19 +160,10 @@ public class FilteredClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters.
-   *  (default 2).</pre>
-   * 
-   * <pre> -V
-   *  Display std. deviations for centroids.
-   * </pre>
-   * 
-   * <pre> -M
-   *  Replace missing values with mean/mode.
-   * </pre>
+   *  number of clusters. (default = 2).</pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  Random number seed.
+   *  random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -291,13 +273,10 @@ public class FilteredClusterer
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getFilter() == null) {
+    if (getFilter() == null)
       result = super.getCapabilities();
-      result.disableAll();
-      result.enable(Capability.NO_CLASS);
-    } else {
+    else
       result = getFilter().getCapabilities();
-    }
     
     // set dependencies
     for (Capability cap: Capability.values())
@@ -397,4 +376,3 @@ public class FilteredClusterer
     runClusterer(new FilteredClusterer(), args);
   }
 }
-

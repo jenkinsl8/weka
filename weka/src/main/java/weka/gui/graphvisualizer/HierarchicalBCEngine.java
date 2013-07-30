@@ -15,25 +15,27 @@
 
 /*
  *    HierarchicalBCEngine.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.graphvisualizer;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-
 import weka.core.FastVector;
+import weka.gui.graphvisualizer.GraphNode;
+import weka.gui.graphvisualizer.GraphEdge;
+
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JCheckBox;
+import javax.swing.ButtonGroup;
+import javax.swing.BorderFactory;
+import javax.swing.JProgressBar;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 
 /**
  * This class lays out the vertices of a graph in a

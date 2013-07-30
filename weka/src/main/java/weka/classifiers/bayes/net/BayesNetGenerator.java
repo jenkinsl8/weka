@@ -15,27 +15,27 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 
 package weka.classifiers.bayes.net;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.DenseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.Estimator;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -374,7 +374,7 @@ public class BayesNetGenerator extends EditableBayesNet {
 		    allParentsDone = true;
 		    int iParent = 0;
 		    while (allParentsDone && iParent < m_ParentSets[iAtt2].getNrOfParents()) {
-			allParentsDone = bDone[m_ParentSets[iAtt2].getParent(iParent++)];
+			allParentsDone = bDone[m_ParentSets[iAtt].getParent(iParent++)];
 		    }
 		    if (allParentsDone && iParent == m_ParentSets[iAtt2].getNrOfParents()) {
 			order[iAtt] = iAtt2;

@@ -15,16 +15,12 @@
 
 /*
  *    AveragingResultProducer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import weka.core.AdditionalMeasureProducer;
 import weka.core.FastVector;
@@ -34,6 +30,10 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -739,7 +739,7 @@ public class AveragingResultProducer
       result += "-W " + m_ResultProducer.getClass().getName();
       result  += " -- " + m_ResultProducer.getCompatibilityState();
     }
-    
+
     return result.trim();
   }
 

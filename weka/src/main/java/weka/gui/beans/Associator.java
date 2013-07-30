@@ -15,11 +15,22 @@
 
 /*
  *    Associator.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.associations.FPGrowth;
+import weka.associations.AssociationRules;
+import weka.associations.AssociationRulesProducer;
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
@@ -31,22 +42,8 @@ import java.util.Vector;
 
 import javax.swing.JPanel;
 
-import weka.associations.Apriori;
-import weka.associations.AssociationRules;
-import weka.associations.AssociationRulesProducer;
-import weka.core.Attribute;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.gui.Logger;
-
 /**
- * Bean that wraps around weka.associations. If used in a non-graphical environment,
- * options for the wrapped associator can be provided by setting an environment
- * variable: weka.gui.beans.associator.schemeOptions. The value of this environment
- * variable needs to be a string containing command-line option settings.
+ * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
  * @version $Revision$
@@ -108,7 +105,7 @@ public class Associator
   private Vector<BatchAssociationRulesListener> m_rulesListeners 
     = new Vector<BatchAssociationRulesListener>();
 
-  private weka.associations.Associator m_Associator = new Apriori();
+  private weka.associations.Associator m_Associator = new FPGrowth();
 
   private transient Logger m_log = null;
   
@@ -357,35 +354,33 @@ public class Associator
       }
     }
   }
-
-
+   
   private void buildAssociations(Instances data) 
-    throws Exception {
-    
-    // see if there is an environment variable with
-    // options for the associator
-    if (m_env != null && m_Associator instanceof OptionHandler) {
-      String opts = m_env.getVariableValue("weka.gui.beans.associator.schemeOptions");
-      if (opts != null && opts.length() > 0) {
-        String[] options = Utils.splitOptions(opts);
-        if (options.length > 0) {
-          try {
-            ((OptionHandler)m_Associator).setOptions(options);
-          } catch (Exception ex) {
-            String warningMessage = "[Associator] WARNING: unable to set options \""
-              + opts + "\"for " + m_Associator.getClass().getName();
-            if (m_log != null) {
-              m_log.logMessage(warningMessage);
-            } else {
-              System.err.print(warningMessage);
-            }
+  throws Exception {
+  
+  // Deal with environment variables
+  if (m_env != null && m_Associator instanceof OptionHandler) {
+    String opts = m_env.getVariableValue("weka.gui.beans.associator.schemeOptions");
+    if (opts != null && opts.length() > 0) {
+      String[] options = Utils.splitOptions(opts);
+      if (options.length > 0) {
+        try {
+          ((OptionHandler)m_Associator).setOptions(options);
+        } catch (Exception ex) {
+          String warningMessage = "[Associator] WARNING: unable to set options \""
+            + opts + "\"for " + m_Associator.getClass().getName();
+          if (m_log != null) {
+            m_log.logMessage(warningMessage);
+          } else {
+            System.err.print(warningMessage);
           }
         }
       }
     }
-    
-    m_Associator.buildAssociations(data);
   }
+  
+  m_Associator.buildAssociations(data);
+}
 
   /**
    * Sets the visual appearance of this wrapper bean

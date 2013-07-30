@@ -15,18 +15,18 @@
 
 /*
  *    MinkowskiDistance.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.neighboursearch.PerformanceStats;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

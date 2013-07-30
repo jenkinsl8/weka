@@ -15,13 +15,13 @@
 
 /*
  *    AdditionalMeasureProducer.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.util.Enumeration;
+import java.util.*;
 
 /** 
  * Interface to something that can produce measures other than those

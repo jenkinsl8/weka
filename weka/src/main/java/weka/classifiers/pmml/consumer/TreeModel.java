@@ -15,7 +15,7 @@
 
 /*
  *    TreeModel.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,8 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.pmml.Array;
-import weka.core.pmml.MiningSchema;
+import weka.core.pmml.*;
 
 /**
  * Class implementing import of PMML TreeModel. Can be used as a Weka

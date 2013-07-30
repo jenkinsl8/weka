@@ -15,18 +15,18 @@
 
 /*
  *    DatabaseResultListener.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-
 import weka.core.FastVector;
 import weka.core.RevisionUtils;
+
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 
 /**
  <!-- globalinfo-start -->
@@ -147,10 +147,9 @@ public class DatabaseResultListener
     while (rs.next()) {
       tableExists = true;
       // column four contains the column name
-      String name = rs.getString(4);
-      if (name.toLowerCase().startsWith("measure")) {
+      if (rs.getString(4).toLowerCase().startsWith("measure")) {
 	numColumns++;
-	cNames.addElement(name);
+	cNames.addElement(rs.getString(4));
       }
     }
 

@@ -15,12 +15,17 @@
 
 /*
  *    AttributeSummaryPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.Instances;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -36,11 +41,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /** 
  * This panel displays summary statistics about an attribute: name, type

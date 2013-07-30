@@ -15,29 +15,30 @@
 
 /*
  *    KDTree.java
- *    Copyright (C) 2000-2012 University of Waikato
+ *    Copyright (C) 2000-2007 University of Waikato
  *    
  */
 
 package weka.core.neighboursearch;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
+import weka.core.DenseInstance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.neighboursearch.kdtrees.KDTreeNode;
 import weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter;
 import weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->

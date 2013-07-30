@@ -15,17 +15,17 @@
 
 /*
  * GroovyScript.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.scripting;
 
+import weka.core.scripting.Groovy;
+import weka.gui.ExtensionFileFilter;
+
 import java.io.File;
 
 import javax.swing.text.Document;
-
-import weka.core.scripting.Groovy;
-import weka.gui.ExtensionFileFilter;
 
 /**
  * Represents a <a href="http://groovy.codehaus.org/" target="_blank">Groovy</a> script.

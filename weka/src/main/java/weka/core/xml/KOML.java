@@ -15,19 +15,19 @@
 
 /*
  * KOML.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class is a helper class for XML serialization using <a href="http://koala.ilog.fr/XML/serialization/" target="_blank">KOML</a> .

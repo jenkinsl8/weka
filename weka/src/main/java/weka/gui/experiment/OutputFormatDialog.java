@@ -15,11 +15,16 @@
 
 /*
  *    OutputFormatDialog.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -44,12 +49,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
-
-/** 
+/**
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -69,13 +69,13 @@ public class OutputFormatDialog
 
   /** the result of the user's action, either OK or CANCEL. */
   protected int m_Result;
-  
+
   /** the different classes for outputting the comparison tables. */
   protected static Vector<Class> m_OutputFormatClasses;
-  
+
   /** the different names of matrices for outputting the comparison tables. */
   protected static Vector<String> m_OutputFormatNames;
-  
+
   /** Lets the user configure the result matrix. */
   protected GenericObjectEditor m_ResultMatrixEditor;
 
@@ -84,7 +84,7 @@ public class OutputFormatDialog
 
   /** the label for the GOE. */
   protected JLabel m_ResultMatrixLabel;
-  
+
   /** the current result matrix. */
   protected ResultMatrix m_ResultMatrix;
 
@@ -117,7 +117,7 @@ public class OutputFormatDialog
 
   /** the label for the removing the filter classnames. */
   protected JLabel m_RemoveFilterNameLabel;
-  
+
   /** Click to activate the current set parameters. */
   protected JButton m_OkButton;
 
@@ -126,23 +126,23 @@ public class OutputFormatDialog
 
   /** whether to ignore updates in the GUI momentarily. */
   protected boolean m_IgnoreChanges;
-  
+
   /**
    * initializes the dialog with the given parent frame.
-   * 
+   *
    * @param parent the parent of this dialog
    */
   public OutputFormatDialog(Frame parent) {
     super(parent, "Output Format...", ModalityType.DOCUMENT_MODAL);
 
     m_IgnoreChanges = true;
-    
+
     initialize();
     initGUI();
 
     m_IgnoreChanges = false;
   }
-  
+
   /**
    * initializes the member variables.
    */
@@ -151,7 +151,7 @@ public class OutputFormatDialog
     int			i;
     Class 		cls;
     ResultMatrix 	matrix;
-    
+
     m_Result = CANCEL_OPTION;
 
     if (m_OutputFormatClasses == null) {
@@ -173,7 +173,7 @@ public class OutputFormatDialog
       }
     }
   }
-  
+
   /**
    * performs the creation of the dialog and all its components.
    */
@@ -181,13 +181,13 @@ public class OutputFormatDialog
     JPanel              panel;
     SpinnerNumberModel  model;
     JPanel		panel2;
-    
+
     getContentPane().setLayout(new BorderLayout());
-    
+
     panel = new JPanel(new GridLayout(6, 1));
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     getContentPane().add(panel, BorderLayout.CENTER);
-    
+
     // mean precision
     m_MeanPrecSpinner = new JSpinner();
     m_MeanPrecSpinner.addChangeListener(new ChangeListener() {
@@ -205,7 +205,7 @@ public class OutputFormatDialog
     panel2.add(m_MeanPrecLabel);
     panel2.add(m_MeanPrecSpinner);
     panel.add(panel2);
-    
+
     // stddev precision
     m_StdDevPrecSpinner = new JSpinner();
     m_StdDevPrecSpinner.addChangeListener(new ChangeListener() {
@@ -223,7 +223,7 @@ public class OutputFormatDialog
     panel2.add(m_StdDevPrecLabel);
     panel2.add(m_StdDevPrecSpinner);
     panel.add(panel2);
-    
+
     // Format
     m_OutputFormatComboBox = new JComboBox(m_OutputFormatNames);
     m_OutputFormatComboBox.addActionListener(new ActionListener() {
@@ -303,7 +303,7 @@ public class OutputFormatDialog
     panel2.add(m_ResultMatrixLabel);
     panel2.add(m_ResultMatrixPanel);
     panel.add(panel2);
-    
+
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -329,10 +329,10 @@ public class OutputFormatDialog
 
     // default button
     getRootPane().setDefaultButton(m_OkButton);
-    
+
     // initial layout (to get widths and heights)
     pack();
-    
+
     // adjust dimensions
     m_MeanPrecLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_MeanPrecLabel.getHeight()));
     m_MeanPrecSpinner.setPreferredSize(new Dimension(m_MeanPrecSpinner.getWidth() * 3, m_MeanPrecSpinner.getHeight()));
@@ -342,21 +342,21 @@ public class OutputFormatDialog
     m_ShowAverageLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_ShowAverageLabel.getHeight()));
     m_ResultMatrixLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_ResultMatrixLabel.getHeight()));
     m_ResultMatrixPanel.setPreferredSize(new Dimension((int) (m_ResultMatrixPanel.getWidth() * 1.5), m_ResultMatrixPanel.getHeight()));
-    
+
     // final layout
     pack();
   }
-  
+
   /**
    * initializes the GUI components with the data.
    */
   private void setData() {
     m_IgnoreChanges = true;
-    
+
     // Precision
     m_MeanPrecSpinner.setValue(m_ResultMatrix.getMeanPrec());
     m_StdDevPrecSpinner.setValue(m_ResultMatrix.getStdDevPrec());
-    
+
     // format
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
       if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix.getClass())) {
@@ -373,17 +373,17 @@ public class OutputFormatDialog
 
     // GOE
     m_ResultMatrixEditor.setValue(m_ResultMatrix);
-    
+
     m_IgnoreChanges = false;
-  }    
-  
+  }
+
   /**
    *  gets the data from GUI components.
    */
   private void getData() {
     if (m_IgnoreChanges)
       return;
-    
+
     // format
     try {
       if (!m_ResultMatrix.getClass().equals(m_OutputFormatClasses.get(m_OutputFormatComboBox.getSelectedIndex()))) {
@@ -397,7 +397,7 @@ public class OutputFormatDialog
       e.printStackTrace();
       m_ResultMatrix = new ResultMatrixPlainText();
     }
-    
+
     // Precision
     m_ResultMatrix.setMeanPrec(Integer.parseInt(m_MeanPrecSpinner.getValue().toString()));
     m_ResultMatrix.setStdDevPrec(Integer.parseInt(m_StdDevPrecSpinner.getValue().toString()));
@@ -407,14 +407,14 @@ public class OutputFormatDialog
 
     // filter names
     m_ResultMatrix.setRemoveFilterName(m_RemoveFilterNameCheckBox.isSelected());
-    
+
     // update GOE
     m_ResultMatrixEditor.setValue(m_ResultMatrix);
   }
 
   /**
    * Sets the matrix to use as initial selected output format.
-   * 
+   *
    * @param matrix the matrix to use as initial selected output format
    */
   public void setResultMatrix(ResultMatrix matrix) {
@@ -424,7 +424,7 @@ public class OutputFormatDialog
 
   /**
    * Gets the currently selected output format result matrix.
-   * 
+   *
    * @return the currently selected matrix to use as output
    */
   public ResultMatrix getResultMatrix() {
@@ -443,12 +443,12 @@ public class OutputFormatDialog
       }
     }
   }
-  
+
   /**
    * the result from the last display of the dialog, the same is returned
    * from <code>showDialog</code>.
-   * 
-   * @return the result from the last display of the dialog; 
+   *
+   * @return the result from the last display of the dialog;
    *         either APPROVE_OPTION, or CANCEL_OPTION
    * @see #showDialog()
    */
@@ -470,12 +470,12 @@ public class OutputFormatDialog
 
   /**
    * for testing only.
-   * 
+   *
    * @param args ignored
    */
   public static void main(String[] args) {
     OutputFormatDialog      dialog;
-    
+
     dialog = new OutputFormatDialog(null);
     if (dialog.showDialog() == APPROVE_OPTION)
       System.out.println("Accepted");

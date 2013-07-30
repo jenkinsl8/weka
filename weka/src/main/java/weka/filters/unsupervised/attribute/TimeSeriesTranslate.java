@@ -15,7 +15,7 @@
 
 /*
  *    TimeSeriesTranslate.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,13 +23,13 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
+import weka.core.Instance; 
 import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Capabilities.Capability;
 import weka.core.Utils;
 
 /** 
@@ -91,7 +91,6 @@ public class TimeSeriesTranslate
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
 
     // attributes
     result.enableAllAttributes();

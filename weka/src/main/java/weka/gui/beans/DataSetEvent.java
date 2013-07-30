@@ -15,15 +15,15 @@
 
 /*
  *    DataSetEvent.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.util.EventObject;
-
 import weka.core.Instances;
+
+import java.util.EventObject;
 
 /**
  * Event encapsulating a data set

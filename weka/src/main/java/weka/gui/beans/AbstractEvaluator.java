@@ -15,19 +15,19 @@
 
 /*
  *    AbstractEvaluator.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 
 import javax.swing.JPanel;
-
-import weka.gui.Logger;
 
 /**
  * Abstract class for objects that can provide some kind of evaluation for

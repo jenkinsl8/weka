@@ -15,7 +15,7 @@
 
 /*
  *    Plot2DCompanion.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 

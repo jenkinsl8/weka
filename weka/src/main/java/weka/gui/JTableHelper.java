@@ -15,7 +15,7 @@
 
 /*
  * JTableHelper.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,7 +24,6 @@ package weka.gui;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
-
 import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.table.JTableHeader;

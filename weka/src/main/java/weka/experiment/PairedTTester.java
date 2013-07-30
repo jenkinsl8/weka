@@ -15,20 +15,12 @@
 
 /*
  *    PairedTTester.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -40,6 +32,14 @@ import weka.core.Range;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Calculates T-Test statistics on data stored in a set of instances. <p/>
@@ -1216,7 +1216,7 @@ public class PairedTTester
     if (getShowStdDevs()) {
       options[current++] = "-V";
     }
-
+    
     if (getResultMatrix() instanceof ResultMatrixLatex)
       options[current++] = "-L";
 

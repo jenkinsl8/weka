@@ -15,15 +15,11 @@
 
 /*
  * HillClimber.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
 package weka.classifiers.bayes.net.search.local;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
@@ -32,6 +28,10 @@ import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -510,7 +510,6 @@ public class HillClimber
 		newVector.addElement(new Option("\tMaximum number of parents", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
 		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)", "N", 0, "-N"));
-		newVector.addElement(new Option("\tInitial structure specified in XML BIF file", "X", 1, "-X"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -554,8 +553,6 @@ public class HillClimber
 
 		setInitAsNaiveBayes (!(Utils.getFlag('N', options)));
 		
-		m_sInitalBIFFile = Utils.getOption('X', options);
-
 		String sMaxNrOfParents = Utils.getOption('P', options);
 		if (sMaxNrOfParents.length() != 0) {
 		  setMaxNrOfParents(Integer.parseInt(sMaxNrOfParents));
@@ -573,7 +570,7 @@ public class HillClimber
 	 */
 	public String[] getOptions() {
 		String[] superOptions = super.getOptions();
-		String[] options = new String[9 + superOptions.length];
+		String[] options = new String[7 + superOptions.length];
 		int current = 0;
 		if (getUseArcReversal()) {
 		  options[current++] = "-R";
@@ -582,10 +579,6 @@ public class HillClimber
 		if (!getInitAsNaiveBayes()) {
 		  options[current++] = "-N";
 		} 
-		if (m_sInitalBIFFile!=null && !m_sInitalBIFFile.equals("")) {
-			  options[current++] = "-X";
-			  options[current++] = m_sInitalBIFFile;
-		}
 
 		options[current++] = "-P";
 		options[current++] = "" + m_nMaxNrOfParents;
