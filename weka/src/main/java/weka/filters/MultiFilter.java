@@ -1,29 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * MultiFilter.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -32,6 +30,9 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -344,7 +345,7 @@ public class MultiFilter
     int         i;
     
     result = (Instance) instance.copy();
-
+    
     for (i = 0; i < getFilters().length; i++) {
       if (getFilter(i).input(result)) {
         result = getFilter(i).output();
@@ -404,26 +405,6 @@ public class MultiFilter
     }
     
     return (numPendingOutput() != 0);
-  }
-  
-  /**
-   * RemoveWithValues may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed due to matching a value
-   * that the user wants to remove. Therefore this method returns
-   * true.
-   * 
-   * @return true if one of the base filters returns true for
-   * this method.
-   */
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    boolean result = false;
-    
-    for (Filter f : m_Filters) {
-      result = (result || f.mayRemoveInstanceAfterFirstBatchDone());
-    }
-    
-    return result;
   }
   
   /**

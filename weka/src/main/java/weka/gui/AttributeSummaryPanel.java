@@ -1,26 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AttributeSummaryPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
+
+import weka.core.Attribute;
+import weka.core.AttributeStats;
+import weka.core.Instances;
+import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -36,11 +42,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /** 
  * This panel displays summary statistics about an attribute: name, type
@@ -58,7 +59,7 @@ public class AttributeSummaryPanel
   static final long serialVersionUID = -5434987925737735880L;
 
   /** Message shown when no instances have been loaded and no attribute set */
-  protected static final String NO_SOURCE = "None";
+  protected static final String NO_SOURCE = Messages.getInstance().getString("AttributeSummaryPanel_NO_SOURCE_Text");
 
   /** Displays the name of the relation */
   protected JLabel m_AttributeNameLab = new JLabel(NO_SOURCE);
@@ -98,9 +99,6 @@ public class AttributeSummaryPanel
   /** Cached stats on the attributes we've summarized so far */
   protected AttributeStats [] m_AttributeStats;
   
-  /** Do all instances have the same weight */
-  protected boolean m_allEqualWeights = true;
-  
   /**
    * Creates the instances panel with no initial instances.
    */
@@ -109,7 +107,7 @@ public class AttributeSummaryPanel
     JPanel simple = new JPanel();
     GridBagLayout gbL = new GridBagLayout();
     simple.setLayout(gbL);
-    JLabel lab = new JLabel("Name:", SwingConstants.RIGHT);
+    JLabel lab = new JLabel(Messages.getInstance().getString("AttributeSummaryPanel_Lab_JLabel_Text_First"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     GridBagConstraints gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -126,7 +124,7 @@ public class AttributeSummaryPanel
     simple.add(m_AttributeNameLab);
     m_AttributeNameLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
     
-    lab = new JLabel("Type:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("AttributeSummaryPanel_Lab_JLabel_Text_Second"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -144,7 +142,7 @@ public class AttributeSummaryPanel
     m_AttributeTypeLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 
     // Put into a separate panel?
-    lab = new JLabel("Missing:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("AttributeSummaryPanel_Lab_JLabel_Text_Third"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -161,7 +159,7 @@ public class AttributeSummaryPanel
     simple.add(m_MissingLab);
     m_MissingLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
 
-    lab = new JLabel("Distinct:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("AttributeSummaryPanel_Lab_JLabel_Text_Fourth"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -178,7 +176,7 @@ public class AttributeSummaryPanel
     simple.add(m_DistinctLab);
     m_DistinctLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 10));
 
-    lab = new JLabel("Unique:", SwingConstants.RIGHT);
+    lab = new JLabel(Messages.getInstance().getString("AttributeSummaryPanel_Lab_JLabel_Text_Fifth"), SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
     gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.EAST;
@@ -216,15 +214,6 @@ public class AttributeSummaryPanel
     m_UniqueLab.setText(NO_SOURCE);
     m_DistinctLab.setText(NO_SOURCE);
     m_StatsTable.setModel(new DefaultTableModel());
-    
-    m_allEqualWeights = true;
-    double w = m_Instances.instance(0).weight();
-    for (int i = 1; i < m_Instances.numInstances(); i++) {
-      if (m_Instances.instance(i).weight() != w) {
-        m_allEqualWeights = false;
-        break;
-      }
-    }
   }
 
   /**
@@ -284,13 +273,12 @@ public class AttributeSummaryPanel
 
     if (as.nominalCounts != null) {
       Attribute att = m_Instances.attribute(index);
-      Object [] colNames = {"No.", "Label", "Count", "Weight"};
-      Object [][] data = new Object [as.nominalCounts.length][4];
+      Object [] colNames = {Messages.getInstance().getString("AttributeSummaryPanel_SetTable_ColNames_Text_First"), Messages.getInstance().getString("AttributeSummaryPanel_SetTable_ColNames_Text_Second"), Messages.getInstance().getString("AttributeSummaryPanel_SetTable_ColNames_Text_Third")};
+      Object [][] data = new Object [as.nominalCounts.length][3];
       for (int i = 0; i < as.nominalCounts.length; i++) {
 	data[i][0] = new Integer(i + 1);
 	data[i][1] = att.value(i);
 	data[i][2] = new Integer(as.nominalCounts[i]);
-	data[i][3] = new Double(Utils.doubleToString(as.nominalWeights[i], 3));
       }
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
       m_StatsTable.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -298,14 +286,12 @@ public class AttributeSummaryPanel
       tempR.setHorizontalAlignment(JLabel.RIGHT);
       m_StatsTable.getColumnModel().getColumn(0).setCellRenderer(tempR);
     } else if (as.numericStats != null) {
-      Object [] colNames = {"Statistic", "Value"};
+      Object [] colNames = {Messages.getInstance().getString("AttributeSummaryPanel_SetTable_ColNames_Text_Fourth"), Messages.getInstance().getString("AttributeSummaryPanel_SetTable_ColNames_Text_Fifth")};
       Object [][] data = new Object [4][2];
-      data[0][0] = "Minimum"; data[0][1] = Utils.doubleToString(as.numericStats.min, 3);
-      data[1][0] = "Maximum"; data[1][1] = Utils.doubleToString(as.numericStats.max, 3);
-      data[2][0] = "Mean" + ((!m_allEqualWeights) ? " (weighted)" : "");    
-      data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
-      data[3][0] = "StdDev" + ((!m_allEqualWeights) ? " (weighted)" : "");  
-      data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
+      data[0][0] = Messages.getInstance().getString("AttributeSummaryPanel_SetTable_Data_0_Text"); data[0][1] = Utils.doubleToString(as.numericStats.min, 3);
+      data[1][0] = Messages.getInstance().getString("AttributeSummaryPanel_SetTable_Data_1_Text"); data[1][1] = Utils.doubleToString(as.numericStats.max, 3);
+      data[2][0] = Messages.getInstance().getString("AttributeSummaryPanel_SetTable_Data_2_Text");    data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
+      data[3][0] = Messages.getInstance().getString("AttributeSummaryPanel_SetTable_Data_3_Text");  data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
     } else {
       m_StatsTable.setModel(new DefaultTableModel());
@@ -325,27 +311,27 @@ public class AttributeSummaryPanel
     m_AttributeNameLab.setText(att.name());
     switch (att.type()) {
     case Attribute.NOMINAL:
-      m_AttributeTypeLab.setText("Nominal");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeNOMINAL_Text"));
       break;
     case Attribute.NUMERIC:
-      m_AttributeTypeLab.setText("Numeric");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeNUMERIC_Text"));
       break;
     case Attribute.STRING:
-      m_AttributeTypeLab.setText("String");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeSTRING_Text"));
       break;
     case Attribute.DATE:
-      m_AttributeTypeLab.setText("Date");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeDATE_Text"));
       break;
     case Attribute.RELATIONAL:
-      m_AttributeTypeLab.setText("Relational");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeRELATIONAL_Text"));
       break;
     default:
-      m_AttributeTypeLab.setText("Unknown");
+      m_AttributeTypeLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_AttributeDEFAULT_TEXT"));
       break;
     }
-    m_MissingLab.setText("...");
-    m_UniqueLab.setText("...");
-    m_DistinctLab.setText("...");
+    m_MissingLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_MissingLab_SetText_Text"));
+    m_UniqueLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_UniqueLab_SetText_Text"));
+    m_DistinctLab.setText(Messages.getInstance().getString("AttributeSummaryPanel_SetHeader_DistinctLab_SetText_Text"));
   }
 
   /**
@@ -356,10 +342,10 @@ public class AttributeSummaryPanel
   public static void main(String [] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame("Attribute Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(Messages.getInstance().getString("AttributeSummaryPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributeSummaryPanel p = new AttributeSummaryPanel();
-      p.setBorder(BorderFactory.createTitledBorder("Attribute"));
+      p.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AttributeSummaryPanel_Main_P_SetBorder_BorderFactoryCreateTitledBorder")));
       jf.getContentPane().add(p, BorderLayout.CENTER);
       final javax.swing.JComboBox j = new javax.swing.JComboBox();
       j.setEnabled(false);

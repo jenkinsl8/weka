@@ -2,39 +2,29 @@
 # base class types)
 weka.gui.beans.KnowledgeFlow.standardToolBars=\
  Evaluation,\
- Visualization,\
- Tools,\
- Flow
+ Visualization
 
 # Specifies the tools for each standard toolbar
 weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
  weka.gui.beans.TestSetMaker,\
  weka.gui.beans.CrossValidationFoldMaker,\
  weka.gui.beans.TrainTestSplitMaker,\
+ weka.gui.beans.InstanceStreamToBatchMaker,\
  weka.gui.beans.ClassAssigner,\
  weka.gui.beans.ClassValuePicker,\
  weka.gui.beans.ClassifierPerformanceEvaluator,\
  weka.gui.beans.IncrementalClassifierEvaluator,\
  weka.gui.beans.ClustererPerformanceEvaluator,\
  weka.gui.beans.PredictionAppender,\
- weka.gui.beans.SerializedModelSaver,\
- weka.gui.beans.TextSaver
- 
+ weka.gui.beans.SerializedModelSaver
 weka.gui.beans.KnowledgeFlow.Visualization=weka.gui.beans.DataVisualizer,\
  weka.gui.beans.ScatterPlotMatrix,\
  weka.gui.beans.AttributeSummarizer,\
  weka.gui.beans.ModelPerformanceChart,\
-  weka.gui.beans.CostBenefitAnalysis,\
+ weka.gui.beans.CostBenefitAnalysis,\
  weka.gui.beans.TextViewer,\
  weka.gui.beans.GraphViewer,\
- weka.gui.beans.StripChart,\
- weka.gui.beans.ImageSaver
- weka.gui.beans.KnowledgeFlow.Tools=weka.gui.beans.Sorter,\
- weka.gui.beans.SubstringLabeler,\
- weka.gui.beans.SubstringReplacer
-weka.gui.beans.KnowledgeFlow.Flow=weka.gui.beans.Appender,\
- weka.gui.beans.FlowByExpression,\
- weka.gui.beans.InstanceStreamToBatchMaker
+ weka.gui.beans.StripChart
 
 # the bean panel processes keys in the generic object editor properties file.
 # If there is a corresponding entry here, then a toolbar is constructed using
@@ -67,9 +57,9 @@ weka.associations.Associator.alias=Associations
 # GUI behaviour
 ScrollBarIncrementLayout=20
 ScrollBarIncrementComponents=50
-FlowWidth=2560
-FlowHeight=1440
-PreferredExtension=.kfml
+FlowWidth=1024
+FlowHeight=768
+PreferredExtension=.kf
 UserComponentsInXML=false
 
 # colours

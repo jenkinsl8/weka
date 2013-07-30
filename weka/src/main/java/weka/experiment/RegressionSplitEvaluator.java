@@ -1,46 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RegressionSplitEvaluator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.evaluation.AbstractEvaluationMetric;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -48,6 +36,15 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.Utils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.io.Serializable;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -57,10 +54,6 @@ import weka.core.Utils;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- * 
- * <pre> -no-size
- *  Skips the determination of sizes (train/test/classifier)
- *  (default: sizes are determined)</pre>
  * 
  * <pre> -W &lt;class name&gt;
  *  The full class name of the classifier.
@@ -75,8 +68,6 @@ import weka.core.Utils;
  *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
- *
- * All options after -- will be passed to the classifier.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
@@ -111,17 +102,11 @@ public class RegressionSplitEvaluator
   /** The classifier version */
   protected String m_ClassifierVersion = "";
 
-  /** whether to skip determination of sizes (train/test/classifier). */
-  private boolean m_NoSizeDetermination;
-
   /** The length of a key */
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 23;
-  
-  private List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
-  private int m_numPluginStatistics = 0;
+  private static final int RESULT_SIZE = 21;
 
   /**
    * No args constructor.
@@ -129,16 +114,6 @@ public class RegressionSplitEvaluator
   public RegressionSplitEvaluator() {
 
     updateOptions();
-    
-    List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric.getPluginMetrics();
-    if (pluginMetrics != null) {
-      for (AbstractEvaluationMetric m : pluginMetrics) {
-        if (m.appliesToNumericClass()) {
-          m_pluginMetrics.add(m);
-          m_numPluginStatistics += m.getStatisticNames().size();
-        }
-      }
-    }
   }
 
   /**
@@ -160,11 +135,6 @@ public class RegressionSplitEvaluator
 
     Vector newVector = new Vector(1);
 
-    newVector.addElement(new Option(
-	     "\tSkips the determination of sizes (train/test/classifier)\n" +
-	     "\t(default: sizes are determined)",
-	     "no-size", 0, 
-	     "-no-size"));
     newVector.addElement(new Option(
 	     "\tThe full class name of the classifier.\n"
 	      +"\teg: weka.classifiers.bayes.NaiveBayes", 
@@ -191,10 +161,6 @@ public class RegressionSplitEvaluator
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -no-size
-   *  Skips the determination of sizes (train/test/classifier)
-   *  (default: sizes are determined)</pre>
-   * 
    * <pre> -W &lt;class name&gt;
    *  The full class name of the classifier.
    *  eg: weka.classifiers.bayes.NaiveBayes</pre>
@@ -215,7 +181,6 @@ public class RegressionSplitEvaluator
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    m_NoSizeDetermination = Utils.getFlag("no-size", options);
     
     String cName = Utils.getOption('W', options);
     if (cName.length() == 0) {
@@ -225,7 +190,7 @@ public class RegressionSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClassifier(AbstractClassifier.forName(cName, null));
+    setClassifier(Classifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier())
 	.setOptions(Utils.partitionOptions(options));
@@ -239,28 +204,29 @@ public class RegressionSplitEvaluator
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector<String>	result;
-    String[] 		classifierOptions;
-    
-    result = new Vector<String>();
-    
-    classifierOptions = new String [0];
+
+    String [] classifierOptions = new String [0];
     if ((m_Template != null) && 
 	(m_Template instanceof OptionHandler)) {
       classifierOptions = ((OptionHandler)m_Template).getOptions();
     }
     
-    if (getNoSizeDetermination())
-      result.add("-no-size");
+    String [] options = new String [classifierOptions.length + 3];
+    int current = 0;
 
     if (getClassifier() != null) {
-      result.add("-W");
-      result.add(getClassifier().getClass().getName());
+      options[current++] = "-W";
+      options[current++] = getClassifier().getClass().getName();
     }
-    result.add("--");
-    result.addAll(Arrays.asList(classifierOptions));
-    
-    return result.toArray(new String[result.size()]);
+    options[current++] = "--";
+
+    System.arraycopy(classifierOptions, 0, options, current, 
+		     classifierOptions.length);
+    current += classifierOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -399,8 +365,7 @@ public class RegressionSplitEvaluator
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    Object [] resultTypes = 
-        new Object[RESULT_SIZE + addm + m_numPluginStatistics];
+    Object [] resultTypes = new Object[RESULT_SIZE+addm];
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
@@ -430,23 +395,13 @@ public class RegressionSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
-    // Prediction interval statistics
-    resultTypes[current++] = doub;
-    resultTypes[current++] = doub;
-
     resultTypes[current++] = "";
 
     // add any additional measures
     for (int i=0;i<addm;i++) {
       resultTypes[current++] = doub;
     }
-    
-    // plugin metrics
-    for (int i = 0; i < m_numPluginStatistics; i++) {
-      resultTypes[current++] = doub;
-    }
-    
-    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
+    if (current != RESULT_SIZE+addm) {
       throw new Error("ResultTypes didn't fit RESULT_SIZE");
     }
     return resultTypes;
@@ -463,8 +418,7 @@ public class RegressionSplitEvaluator
     int addm = (m_AdditionalMeasures != null) 
       ? m_AdditionalMeasures.length 
       : 0;
-    String [] resultNames = 
-        new String[RESULT_SIZE + addm + m_numPluginStatistics];
+    String [] resultNames = new String[RESULT_SIZE+addm];
     int current = 0;
     resultNames[current++] = "Number_of_training_instances";
     resultNames[current++] = "Number_of_testing_instances";
@@ -495,25 +449,13 @@ public class RegressionSplitEvaluator
     resultNames[current++] = "Serialized_Train_Set_Size";
     resultNames[current++] = "Serialized_Test_Set_Size";
     
-    // Prediction interval statistics
-    resultNames[current++] = "Coverage_of_Test_Cases_By_Regions";
-    resultNames[current++] = "Size_of_Predicted_Regions";
-
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
     for (int i=0;i<addm;i++) {
       resultNames[current++] = m_AdditionalMeasures[i];
     }
-    
-    for (AbstractEvaluationMetric m : m_pluginMetrics) {
-      List<String> statNames = m.getStatisticNames();
-      for (String s : statNames) {
-        resultNames[current++] = s;
-      }
-    }
-    
-    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
+    if (current != RESULT_SIZE+addm) {
       throw new Error("ResultNames didn't fit RESULT_SIZE");
     }
     return resultNames;
@@ -545,12 +487,12 @@ public class RegressionSplitEvaluator
       thMonitor.setThreadCpuTimeEnabled(true);
     
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
-    Object [] result = new Object[RESULT_SIZE + addm + m_numPluginStatistics];
+    Object [] result = new Object[RESULT_SIZE+addm];
     long thID = Thread.currentThread().getId();
     long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
          trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
     Evaluation eval = new Evaluation(train);
-    m_Classifier = AbstractClassifier.makeCopy(m_Template);
+    m_Classifier = Classifier.makeCopy(m_Template);
 
     trainTimeStart = System.currentTimeMillis();
     if(canMeasureCPUTime)
@@ -596,35 +538,24 @@ public class RegressionSplitEvaluator
       result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
     }
     else {
-      result[current++] = new Double(Utils.missingValue());
-      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
     }
     
     // sizes
-    if (m_NoSizeDetermination) {
-      result[current++] = -1.0;
-      result[current++] = -1.0;
-      result[current++] = -1.0;
-    }
-    else {
-      ByteArrayOutputStream bastream = new ByteArrayOutputStream();
-      ObjectOutputStream oostream = new ObjectOutputStream(bastream);
-      oostream.writeObject(m_Classifier);
-      result[current++] = new Double(bastream.size());
-      bastream = new ByteArrayOutputStream();
-      oostream = new ObjectOutputStream(bastream);
-      oostream.writeObject(train);
-      result[current++] = new Double(bastream.size());
-      bastream = new ByteArrayOutputStream();
-      oostream = new ObjectOutputStream(bastream);
-      oostream.writeObject(test);
-      result[current++] = new Double(bastream.size());
-    }
+    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(m_Classifier);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(train);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(test);
+    result[current++] = new Double(bastream.size());
     
-    // Prediction interval statistics
-    result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
-    result[current++] = new Double(eval.sizeOfPredictedRegions());
-
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -636,7 +567,7 @@ public class RegressionSplitEvaluator
         try {
           double dv = ((AdditionalMeasureProducer)m_Classifier).
           getMeasure(m_AdditionalMeasures[i]);
-          if (!Utils.isMissingValue(dv)) {
+          if (!Instance.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
           } else {
@@ -650,20 +581,7 @@ public class RegressionSplitEvaluator
       }
     }
     
-    // get the actual metrics from the evaluation object
-    List<AbstractEvaluationMetric> metrics = eval.getPluginMetrics();
-    if (metrics != null) {
-      for (AbstractEvaluationMetric m : metrics) {
-        if (m.appliesToNumericClass()) {
-          List<String> statNames = m.getStatisticNames();
-          for (String s : statNames) {
-            result[current++] = new Double(m.getStatistic(s));
-          }
-        }
-      }
-    }
-    
-    if (current != RESULT_SIZE + addm + m_numPluginStatistics) {
+    if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
     return result;
@@ -699,33 +617,6 @@ public class RegressionSplitEvaluator
     updateOptions();
 
     System.err.println("RegressionSplitEvaluator: In set classifier");
-  }
-
-  /**
-   * Returns whether the size determination (train/test/classifer) is skipped.
-   * 
-   * @return 		true if size determination skipped
-   */
-  public boolean getNoSizeDetermination() {
-    return m_NoSizeDetermination;
-  }
-  
-  /**
-   * Sets whether the size determination (train/test/classifer) is skipped.
-   * 
-   * @param value	true if to determine sizes
-   */
-  public void setNoSizeDetermination(boolean value) {
-    m_NoSizeDetermination = value;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String noSizeDeterminationTipText() {
-    return "If enabled, the size determination for train/test/classifier is skipped.";
   }
 
   /**
@@ -789,7 +680,7 @@ public class RegressionSplitEvaluator
 	    try {
 	      double dv = ((AdditionalMeasureProducer)m_Classifier).
 		getMeasure(m_AdditionalMeasures[i]);
-	      if (!Utils.isMissingValue(dv)) {
+	      if (!Instance.isMissingValue(dv)) {
 		Double value = new Double(dv);
 		result.append(m_AdditionalMeasures[i]+" : "+value+'\n');
 	      } else {
@@ -828,4 +719,4 @@ public class RegressionSplitEvaluator
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-}
+} // RegressionSplitEvaluator

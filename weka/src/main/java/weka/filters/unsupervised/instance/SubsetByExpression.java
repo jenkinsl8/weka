@@ -1,16 +1,17 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
@@ -20,18 +21,18 @@
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.unsupervised.instance.subsetbyexpression.Parser;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -144,7 +145,6 @@ public class SubsetByExpression
    * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
    */
-  @Override
   public String globalInfo() {
     return 
         "Filters instances according to a user-specified expression.\n\n"
@@ -217,22 +217,7 @@ public class SubsetByExpression
       + "  from the 'labor' UCI dataset:\n"
       + "  not ismissing(ATT3)\n"
       ;
-  }
-  
-  /**
-   * SubsetByExpression may return false from input() (thus not
-   * making an instance available immediately) even after
-   * the first batch has been completed if the user has opted to
-   * apply the filter to instances after the first batch (rather than
-   * just passing them through).
-   * 
-   * @return true this filter may remove (consume) input instances after
-   * the first batch has been completed.
-   */
-  @Override
-  public boolean mayRemoveInstanceAfterFirstBatchDone() {
-    return true;
-  }
+  }  
   
   /**
    * Input an instance for filtering. Filter requires all
@@ -247,7 +232,6 @@ public class SubsetByExpression
    * @throws Exception  if something goes wrong
    * @see               #batchFinished()
    */
-  @Override
   public boolean input(Instance instance) throws Exception {
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
@@ -277,7 +261,6 @@ public class SubsetByExpression
    *
    * @return an enumeration of all the available options.
    */
-  @Override
   public Enumeration listOptions() {
     Vector	result;
     
@@ -318,7 +301,6 @@ public class SubsetByExpression
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
     
@@ -339,7 +321,6 @@ public class SubsetByExpression
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
   public String[] getOptions() {
     Vector<String>	result;
     
@@ -361,7 +342,6 @@ public class SubsetByExpression
    * @return            the capabilities of this object
    * @see               Capabilities
    */
-  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -464,7 +444,6 @@ public class SubsetByExpression
    * @return                the output format
    * @throws Exception      in case the determination goes wrong
    */
-  @Override
   protected Instances determineOutputFormat(Instances inputFormat)
       throws Exception {
     
@@ -480,7 +459,6 @@ public class SubsetByExpression
    * @throws Exception  in case the processing goes wrong
    * @see               #batchFinished()
    */
-  @Override
   protected Instances process(Instances instances) throws Exception {
     if (!isFirstBatchDone() || m_filterAfterFirstBatch) {
       return Parser.filter(m_Expression, instances);
@@ -494,7 +472,6 @@ public class SubsetByExpression
    * 
    * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }

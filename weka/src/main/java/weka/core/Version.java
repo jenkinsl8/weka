@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Version.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +35,7 @@ import java.io.LineNumberReader;
  * of WEKA the file was produced.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.8 $
  */
 public class Version implements Comparable, RevisionHandler {
 
@@ -49,9 +50,6 @@ public class Version implements Comparable, RevisionHandler {
 
   /** the revision */
   public static int REVISION = 3;
-
-  /** point revision */
-  public static int POINT = 0;
 
   /** True if snapshot */
   public static boolean SNAPSHOT = false;
@@ -69,12 +67,10 @@ public class Version implements Comparable, RevisionHandler {
       int[] maj = new int[1];
       int[] min = new int[1];
       int[] rev = new int[1];
-      int[] point = new int[1];
-      SNAPSHOT = parseVersion(line, maj, min, rev, point);
+      SNAPSHOT = parseVersion(line, maj, min, rev);
       MAJOR = maj[0];
       MINOR = min[0];
       REVISION = rev[0];
-      POINT = point[0];
       lnr.close();
     } catch (Exception e) {
       System.err.println(Version.class.getName()
@@ -84,7 +80,7 @@ public class Version implements Comparable, RevisionHandler {
 
   /** the complete version */
   public static String VERSION = MAJOR + "." + MINOR + "." + REVISION
-      + (POINT > 0 ? "." + POINT : "") + (SNAPSHOT ? SNAPSHOT_STRING : "");
+      + (SNAPSHOT ? SNAPSHOT_STRING : "");
 
   /**
    * parses the version and stores the result in the arrays
@@ -95,11 +91,10 @@ public class Version implements Comparable, RevisionHandler {
    * @param rev the revision version
    */
   private static boolean parseVersion(String version, int[] maj, int[] min,
-      int[] rev, int[] point) {
+      int[] rev) {
     int major = 0;
     int minor = 0;
     int revision = 0;
-    int pnt = 0;
     boolean isSnapshot = false;
 
     try {
@@ -115,23 +110,10 @@ public class Version implements Comparable, RevisionHandler {
         if (tmpStr.indexOf(".") > -1) {
           minor = Integer.parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
           tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
-          if (tmpStr.indexOf(".") > 0) {
-            revision = Integer
-                .parseInt(tmpStr.substring(0, tmpStr.indexOf(".")));
-            tmpStr = tmpStr.substring(tmpStr.indexOf(".") + 1);
-
-            if (!tmpStr.equals("")) {
-              pnt = Integer.parseInt(tmpStr);
-            } else {
-              pnt = 0;
-            }
-          } else {
-            if (!tmpStr.equals("")) {
-              revision = Integer.parseInt(tmpStr);
-            } else {
-              revision = 0;
-            }
-          }
+          if (!tmpStr.equals(""))
+            revision = Integer.parseInt(tmpStr);
+          else
+            revision = 0;
         } else {
           if (!tmpStr.equals(""))
             minor = Integer.parseInt(tmpStr);
@@ -153,9 +135,7 @@ public class Version implements Comparable, RevisionHandler {
       maj[0] = major;
       min[0] = minor;
       rev[0] = revision;
-      point[0] = pnt;
     }
-
     return isSnapshot;
   }
 
@@ -166,32 +146,27 @@ public class Version implements Comparable, RevisionHandler {
    * @return -1 if this version is less, 0 if equal and +1 if greater than the
    *         provided version
    */
-  @Override
   public int compareTo(Object o) {
     int result;
     int major;
     int minor;
     int revision;
-    int pnt;
     int[] maj = new int[1];
     int[] min = new int[1];
     int[] rev = new int[1];
-    int[] point = new int[1];
 
     // do we have a string?
     if (o instanceof String) {
-      parseVersion((String) o, maj, min, rev, point);
+      parseVersion((String) o, maj, min, rev);
       major = maj[0];
       minor = min[0];
       revision = rev[0];
-      pnt = point[0];
     } else {
       System.out.println(this.getClass().getName()
           + ": no version-string for comparTo povided!");
       major = -1;
       minor = -1;
       revision = -1;
-      pnt = -1;
     }
 
     if (MAJOR < major) {
@@ -203,13 +178,7 @@ public class Version implements Comparable, RevisionHandler {
         if (REVISION < revision) {
           result = -1;
         } else if (REVISION == revision) {
-          if (POINT < pnt) {
-            result = -1;
-          } else if (POINT == pnt) {
-            result = 0;
-          } else {
-            result = 1;
-          }
+          result = 0;
         } else {
           result = 1;
         }
@@ -271,9 +240,8 @@ public class Version implements Comparable, RevisionHandler {
    * 
    * @return the revision
    */
-  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

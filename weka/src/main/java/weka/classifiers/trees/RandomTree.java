@@ -28,7 +28,6 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -39,7 +38,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.PartitionGenerator;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -55,7 +53,7 @@ import weka.core.WeightedInstancesHandler;
  <!-- globalinfo-end -->
  * 
  <!-- options-start --> 
- Valid options are:
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -103,8 +101,8 @@ import weka.core.WeightedInstancesHandler;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class RandomTree extends AbstractClassifier implements OptionHandler,
-    WeightedInstancesHandler, Randomizable, Drawable, PartitionGenerator {
+public class RandomTree extends Classifier implements OptionHandler,
+    WeightedInstancesHandler, Randomizable, Drawable {
 
   /** for serialization */
   static final long serialVersionUID = 8934314652175299374L;
@@ -225,7 +223,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * 
    * @param seed the seed
    */
-  @Override
   public void setSeed(int seed) {
 
     m_randomSeed = seed;
@@ -236,7 +233,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * 
    * @return the seed for the random number generation
    */
-  @Override
   public int getSeed() {
 
     return m_randomSeed;
@@ -666,7 +662,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * @return the graph describing the tree
    * @throws Exception if graph can't be computed
    */
-  @Override
   public String graph() throws Exception {
 
     if (m_Tree == null) {
@@ -684,7 +679,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * 
    * @return Drawable.TREE
    */
-  @Override
   public int graphType() {
     return Drawable.TREE;
   }
@@ -692,7 +686,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   /**
    * Builds the classifier to generate a partition.
    */
-  @Override
   public void generatePartition(Instances data) throws Exception {
 
     buildClassifier(data);
@@ -702,7 +695,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * Computes array that indicates node membership. Array locations are
    * allocated based on breadth-first exploration of the tree.
    */
-  @Override
   public double[] getMembershipValues(Instance instance) throws Exception {
 
     if (m_zeroR != null) {
@@ -757,7 +749,6 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   /**
    * Returns the number of elements in the partition.
    */
-  @Override
   public int numElements() throws Exception {
 
     if (m_zeroR != null) {
@@ -771,7 +762,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    */
   protected class Tree implements Serializable {
 
-    /** For serialization */
+    /** For serializatiin */
     private static final long serialVersionUID = 3549573538656522569L;
 
     /** The subtrees appended to this tree. */

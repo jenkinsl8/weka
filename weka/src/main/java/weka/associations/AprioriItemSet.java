@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AprioriItemSet.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -151,10 +152,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
       FastVector hashtables, int numItemsInSet) {
 
     FastVector premises = new FastVector(), consequences = new FastVector(), conf = new FastVector();
-    // TODO
-    FastVector lift = new FastVector(), lev = new FastVector(), conv = new FastVector();
-    // TODO
-    FastVector[] rules = new FastVector[6], moreResults;
+    FastVector[] rules = new FastVector[3], moreResults;
     AprioriItemSet premise, consequence;
     Hashtable hashtable = (Hashtable) hashtables.elementAt(numItemsInSet - 2);
 
@@ -174,33 +172,13 @@ public class AprioriItemSet extends ItemSet implements Serializable,
 
         consequence.m_items[i] = m_items[i];
         premise.m_counter = ((Integer) hashtable.get(premise)).intValue();
-
-        Hashtable hashtableForConsequence = (Hashtable) hashtables.elementAt(0);
-        int consequenceUnconditionedCounter = ((Integer) hashtableForConsequence
-            .get(consequence)).intValue();
-
         premises.addElement(premise);
         consequences.addElement(consequence);
         conf.addElement(new Double(confidenceForRule(premise, consequence)));
-
-        double tempLift = liftForRule(premise, consequence,
-            consequenceUnconditionedCounter);
-        double tempLev = leverageForRule(premise, consequence,
-            premise.m_counter, consequenceUnconditionedCounter);
-        double tempConv = convictionForRule(premise, consequence,
-            premise.m_counter, consequenceUnconditionedCounter);
-        lift.addElement(new Double(tempLift));
-        lev.addElement(new Double(tempLev));
-        conv.addElement(new Double(tempConv));
       }
     rules[0] = premises;
     rules[1] = consequences;
     rules[2] = conf;
-
-    rules[3] = lift;
-    rules[4] = lev;
-    rules[5] = conv;
-
     pruneRules(rules, minConfidence);
 
     // Generate all the other rules
@@ -211,11 +189,6 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         rules[0].addElement(moreResults[0].elementAt(i));
         rules[1].addElement(moreResults[1].elementAt(i));
         rules[2].addElement(moreResults[2].elementAt(i));
-
-        // TODO
-        rules[3].addElement(moreResults[3].elementAt(i));
-        rules[4].addElement(moreResults[4].elementAt(i));
-        rules[5].addElement(moreResults[5].elementAt(i));
       }
     return rules;
   }
@@ -398,65 +371,24 @@ public class AprioriItemSet extends ItemSet implements Serializable,
     FastVector newConsequences, newPremises = new FastVector(), newConf = new FastVector();
     Hashtable hashtable;
 
-    FastVector newLift = null, newLev = null, newConv = null;
-    // if (rules.length > 3) {
-    newLift = new FastVector();
-    newLev = new FastVector();
-    newConv = new FastVector();
-    // }
-
     if (numItemsInSet > numItemsInConsequence + 1) {
       hashtable = (Hashtable) hashtables.elementAt(numItemsInSet
           - numItemsInConsequence - 2);
       newConsequences = mergeAllItemSets(rules[1], numItemsInConsequence - 1,
           m_totalTransactions);
-      int newNumInConsequence = numItemsInConsequence + 1;
-
-      Hashtable hashtableForConsequence = (Hashtable) hashtables
-          .elementAt(newNumInConsequence - 1);
-
       Enumeration enu = newConsequences.elements();
       while (enu.hasMoreElements()) {
         AprioriItemSet current = (AprioriItemSet) enu.nextElement();
-        int z = 0;
-        for (int jj = 0; jj < current.m_items.length; jj++) {
-          if (current.m_items[jj] != -1) {
-            z++;
-          }
-        }
-
         current.m_counter = m_counter;
         newPremise = subtract(current);
         newPremise.m_counter = ((Integer) hashtable.get(newPremise)).intValue();
         newPremises.addElement(newPremise);
         newConf.addElement(new Double(confidenceForRule(newPremise, current)));
-
-        // if (rules.length > 3) {
-        int consequenceUnconditionedCounter = ((Integer) hashtableForConsequence
-            .get(current)).intValue();
-
-        double tempLift = liftForRule(newPremise, current,
-            consequenceUnconditionedCounter);
-        double tempLev = leverageForRule(newPremise, current,
-            newPremise.m_counter, consequenceUnconditionedCounter);
-        double tempConv = convictionForRule(newPremise, current,
-            newPremise.m_counter, consequenceUnconditionedCounter);
-
-        newLift.addElement(new Double(tempLift));
-        newLev.addElement(new Double(tempLev));
-        newConv.addElement(new Double(tempConv));
-        // }
       }
-      result = new FastVector[rules.length];
+      result = new FastVector[3];
       result[0] = newPremises;
       result[1] = newConsequences;
       result[2] = newConf;
-
-      // if (rules.length > 3) {
-      result[3] = newLift;
-      result[4] = newLev;
-      result[5] = newConv;
-      // }
       pruneRules(result, minConfidence);
       moreResults = moreComplexRules(result, numItemsInSet,
           numItemsInConsequence + 1, minConfidence, hashtables);
@@ -465,10 +397,6 @@ public class AprioriItemSet extends ItemSet implements Serializable,
           result[0].addElement(moreResults[0].elementAt(i));
           result[1].addElement(moreResults[1].elementAt(i));
           result[2].addElement(moreResults[2].elementAt(i));
-          //
-          result[3].addElement(moreResults[3].elementAt(i));
-          result[4].addElement(moreResults[4].elementAt(i));
-          result[5].addElement(moreResults[5].elementAt(i));
         }
       return result;
     } else
@@ -496,8 +424,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static FastVector singletons(Instances instances,
-      boolean treatZeroAsMissing) throws Exception {
+  public static FastVector singletons(Instances instances) throws Exception {
 
     FastVector setOfItemSets = new FastVector();
     ItemSet current;
@@ -505,8 +432,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (instances.attribute(i).isNumeric())
         throw new Exception("Can't handle numeric attributes!");
-      int j = (treatZeroAsMissing) ? 1 : 0;
-      for (; j < instances.attribute(i).numValues(); j++) {
+      for (int j = 0; j < instances.attribute(i).numValues(); j++) {
         current = new AprioriItemSet(instances.numInstances());
         current.m_items = new int[instances.numAttributes()];
         for (int k = 0; k < instances.numAttributes(); k++)

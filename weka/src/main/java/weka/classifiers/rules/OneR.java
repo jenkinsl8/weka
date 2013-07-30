@@ -27,7 +27,6 @@ import java.util.Vector;
 import java.util.ListIterator;
 import java.util.LinkedList;
 
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
@@ -80,7 +79,7 @@ import weka.core.WekaException;
  * @version $Revision$ 
 */
 public class OneR 
-  extends AbstractClassifier 
+  extends Classifier 
   implements TechnicalInformationHandler, Sourcable {
     
   /** for serialization */

@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LogPanel
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -54,7 +55,7 @@ public class LogPanel extends JPanel implements Logger {
    * Holds the index (line number) in the JTable of each component being
    * tracked.
    */
-  protected HashMap<String, Integer> m_tableIndexes = new HashMap<String, Integer>();
+  private final HashMap<String, Integer> m_tableIndexes = new HashMap<String, Integer>();
 
   /**
    * Holds the timers associated with each component being tracked.
@@ -89,7 +90,11 @@ public class LogPanel extends JPanel implements Logger {
 
   public LogPanel() {
 
-    String[] columnNames = { "Component", "Parameters", "Time", "Status" };
+    String[] columnNames = {
+        Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index0"),
+        Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index1"),
+        Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index2"),
+        Messages.getInstance().getString("LogPanel_ColumnNames_Text_Index3") };
     m_tableModel = new DefaultTableModel(columnNames, 0);
 
     // JTable with error/warning indication for rows.
@@ -122,15 +127,19 @@ public class LogPanel extends JPanel implements Logger {
     m_table.setModel(m_tableModel);
     m_table.getColumnModel().getColumn(0).setPreferredWidth(100);
     m_table.getColumnModel().getColumn(1).setPreferredWidth(150);
-    m_table.getColumnModel().getColumn(2).setPreferredWidth(40);
-    m_table.getColumnModel().getColumn(3).setPreferredWidth(350);
+    m_table.getColumnModel().getColumn(2).setPreferredWidth(30);
+    m_table.getColumnModel().getColumn(3).setPreferredWidth(500);
     m_table.setShowVerticalLines(true);
 
     JPanel statusPan = new JPanel();
     statusPan.setLayout(new BorderLayout());
     statusPan.add(new JScrollPane(m_table), BorderLayout.CENTER);
-    m_tabs.addTab("Status", statusPan);
-    m_tabs.addTab("Log", m_logPanel);
+    m_tabs.addTab(
+        Messages.getInstance().getString("LogPanel_Tabs_AddTab_Text_First"),
+        statusPan);
+    m_tabs.addTab(
+        Messages.getInstance().getString("LogPanel_Tabs_AddTab_Text_Second"),
+        m_logPanel);
 
     setLayout(new BorderLayout());
     add(m_tabs, BorderLayout.CENTER);
@@ -173,7 +182,6 @@ public class LogPanel extends JPanel implements Logger {
    * 
    * @param message the log message
    */
-  @Override
   public synchronized void logMessage(String message) {
     // delegate to the weka.gui.LogPanel
     m_logPanel.logMessage(message);
@@ -190,7 +198,6 @@ public class LogPanel extends JPanel implements Logger {
    * 
    * @param message the status message.
    */
-  @Override
   public synchronized void statusMessage(String message) {
 
     boolean hasDelimiters = (message.indexOf('|') > 0);
@@ -198,11 +205,12 @@ public class LogPanel extends JPanel implements Logger {
     String stepHash = "";
     String stepParameters = "";
     String stepStatus = "";
-    boolean noTimer = false;
 
     if (!hasDelimiters) {
-      stepName = "Unknown";
-      stepHash = "Unknown";
+      stepName = Messages.getInstance().getString(
+          "LogPanel_StatusMessage_StepName_Text");
+      stepHash = Messages.getInstance().getString(
+          "LogPanel_StatusMessage_StepHash_Text");
       stepStatus = message;
     } else {
       // Extract the fields of the status message
@@ -214,11 +222,6 @@ public class LogPanel extends JPanel implements Logger {
         stepName = stepHash.substring(0, stepHash.indexOf('$'));
       } else {
         stepName = stepHash;
-      }
-
-      if (stepName.startsWith("@!@")) {
-        noTimer = true;
-        stepName = stepName.substring(3, stepName.length());
       }
 
       // See if there are any step parameters to extract
@@ -236,16 +239,13 @@ public class LogPanel extends JPanel implements Logger {
     if (m_tableIndexes.containsKey(stepHash)) {
       // Get the row number and update the table model...
       final Integer rowNum = m_tableIndexes.get(stepHash);
-      if (stepStatus.equalsIgnoreCase("remove")
-          || stepStatus.equalsIgnoreCase("remove.")) {
+      if (stepStatus.trim().equalsIgnoreCase("remove")
+          || stepStatus.trim().equalsIgnoreCase("remove.")) {
 
         // m_tableModel.fireTableDataChanged();
         m_tableIndexes.remove(stepHash);
-        Timer t = m_timers.get(stepHash);
-        if (t != null) {
-          t.stop();
-          m_timers.remove(stepHash);
-        }
+        m_timers.get(stepHash).stop();
+        m_timers.remove(stepHash);
 
         // now need to decrement all the row indexes of
         // any rows greater than this one
@@ -267,7 +267,6 @@ public class LogPanel extends JPanel implements Logger {
         if (!SwingUtilities.isEventDispatchThread()) {
           try {
             SwingUtilities.invokeLater(new Runnable() {
-              @Override
               public void run() {
                 m_tableModel.removeRow(rowNum);
               }
@@ -286,7 +285,6 @@ public class LogPanel extends JPanel implements Logger {
         if (!SwingUtilities.isEventDispatchThread()) {
           try {
             SwingUtilities.invokeLater(new Runnable() {
-              @Override
               public void run() {
                 // ERROR overrides INTERRUPTED
                 if (!(stepStatusCopy.startsWith("INTERRUPTED") && ((String) m_tableModel
@@ -316,29 +314,21 @@ public class LogPanel extends JPanel implements Logger {
         }
         if (stepStatus.startsWith("ERROR")
             || stepStatus.startsWith("INTERRUPTED")
-            || stepStatus.toLowerCase().startsWith("finished")
-            ||
-            // stepStatus.toLowerCase().startsWith("finished.") ||
-            stepStatus.toLowerCase().startsWith("done")
-            ||
-            // stepStatus.toLowerCase().startsWith("done.") ||
-            stepStatus.equalsIgnoreCase("stopped")
-            || stepStatus.equalsIgnoreCase("stopped.")) {
+            || stepStatus.trim().equalsIgnoreCase("finished")
+            || stepStatus.trim().equalsIgnoreCase("finished.")
+            || stepStatus.trim().equalsIgnoreCase("done")
+            || stepStatus.trim().equalsIgnoreCase("done.")) {
           // stop the timer.
-          Timer t = m_timers.get(stepHash);
-          if (t != null) {
-            t.stop();
-          }
-        } else if (m_timers.get(stepHash) != null
-            && !m_timers.get(stepHash).isRunning()) {
+          m_timers.get(stepHash).stop();
+        } else if (!m_timers.get(stepHash).isRunning()) {
           // need to create a new one in order to reset the
           // elapsed time.
           installTimer(stepHash);
         }
         // m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
       }
-    } else if (!stepStatus.equalsIgnoreCase("Remove")
-        && !stepStatus.equalsIgnoreCase("Remove.")) {
+    } else if (!stepStatus.trim().equalsIgnoreCase("Remove")
+        && !stepStatus.trim().equalsIgnoreCase("Remove.")) {
       // Add this one to the hash map
       int numKeys = m_tableIndexes.keySet().size();
       m_tableIndexes.put(stepHash, numKeys);
@@ -353,7 +343,6 @@ public class LogPanel extends JPanel implements Logger {
       try {
         if (!SwingUtilities.isEventDispatchThread()) {
           SwingUtilities.invokeLater(new Runnable() {
-            @Override
             public void run() {
               m_tableModel.addRow(newRow);
               // m_tableModel.fireTableDataChanged();
@@ -363,10 +352,7 @@ public class LogPanel extends JPanel implements Logger {
           m_tableModel.addRow(newRow);
         }
 
-        if (!noTimer && !stepStatus.toLowerCase().startsWith("finished")
-            && !stepStatus.toLowerCase().startsWith("done")) {
-          installTimer(stepHashCopy);
-        }
+        installTimer(stepHashCopy);
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -376,7 +362,6 @@ public class LogPanel extends JPanel implements Logger {
   private void installTimer(final String stepHash) {
     final long startTime = System.currentTimeMillis();
     Timer newTimer = new Timer(1000, new ActionListener() {
-      @Override
       public void actionPerformed(ActionEvent e) {
         synchronized (LogPanel.this) {
           if (m_tableIndexes.containsKey(stepHash)) {
@@ -392,7 +377,6 @@ public class LogPanel extends JPanel implements Logger {
             if (!SwingUtilities.isEventDispatchThread()) {
               try {
                 SwingUtilities.invokeLater(new Runnable() {
-                  @Override
                   public void run() {
                     m_tableModel.setValueAt("" + m_formatter.format(hours)
                         + ":" + m_formatter.format(minutes2) + ":"
@@ -423,7 +407,8 @@ public class LogPanel extends JPanel implements Logger {
    */
   public static void main(String[] args) {
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame("Status/Log Panel");
+      final javax.swing.JFrame jf = new javax.swing.JFrame(Messages
+          .getInstance().getString("LogPanel_Main_Jf_JFrame_Text"));
 
       jf.getContentPane().setLayout(new BorderLayout());
       final LogPanel lp = new LogPanel();
@@ -439,21 +424,29 @@ public class LogPanel extends JPanel implements Logger {
       });
       jf.pack();
       jf.setVisible(true);
-      lp.statusMessage("Step 1|Some options here|A status message");
-      lp.statusMessage("Step 2$hashkey|Status message: no options");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_First"));
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Second"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|Funky Chickens!!!");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Third"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 1|Some options here|finished");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Fourth"));
       // lp.statusMessage("Step 1|Some options here|back again!");
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|ERROR! More Funky Chickens!!!");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Sixth"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|WARNING - now a warning...");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Seventh"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|Back to normal.");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Eighth"));
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|INTERRUPTED.");
+      lp.statusMessage(Messages.getInstance().getString(
+          "LogPanel_Main_StatusMessage_Nineth"));
 
     } catch (Exception ex) {
       ex.printStackTrace();

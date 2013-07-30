@@ -1,50 +1,48 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    WrapperSubsetEval.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -99,15 +97,6 @@ import weka.filters.unsupervised.attribute.Remove;
  *  (standard deviation---expressed as a percentage of the mean).
  *  (default: 0.01 (1%))</pre>
  * 
- * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
- *  Performance evaluation measure to use for selecting attributes.
- *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
- * 
- * <pre> -IRclass &lt;label | index&gt;
- *  Optional class value (label or 1-based index) to use in conjunction with
- *  IR statistics (f-meas, auc or auprc). Omitting this option will use
- *  the class-weighted average.</pre>
- * 
  * <pre> 
  * Options specific to scheme weka.classifiers.rules.ZeroR:
  * </pre>
@@ -151,36 +140,6 @@ public class WrapperSubsetEval
    * estimating the accuracy of a subset
    */
   private double m_threshold;
-  
-  public static final int EVAL_DEFAULT = 1;
-  public static final int EVAL_ACCURACY = 2;
-  public static final int EVAL_RMSE = 3;
-  public static final int EVAL_MAE = 4;
-  public static final int EVAL_FMEASURE = 5;
-  public static final int EVAL_AUC = 6;
-  public static final int EVAL_AUPRC = 7;
-  
-  public static final Tag[] TAGS_EVALUATION = {
-    new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
-    new Tag(EVAL_ACCURACY, "Accuracy (discrete class only)"),
-    new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
-    new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
-    new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
-    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)"),
-    new Tag(EVAL_AUPRC, "AUPRC (area under the precision-recall curve - discrete class only)")
-  };
-  
-  /** The evaluation measure to use */
-  protected int m_evaluationMeasure = EVAL_DEFAULT;
-  
-  /** 
-   * If >= 0, and an IR metric is being used, then evaluate with 
-   * respect to this class value (0-based index) 
-   */
-  protected int m_IRClassVal = -1;
-  
-  /** User supplied option for IR class value (either name or 1-based index) */
-  protected String m_IRClassValS = "";
 
   /**
    * Returns a string describing this attribute evaluator
@@ -257,16 +216,6 @@ public class WrapperSubsetEval
 	+ "\t(standard deviation---expressed as a percentage of the mean).\n"
 	+ "\t(default: 0.01 (1%))", 
 	"T", 1, "-T <num>"));
-    
-    newVector.addElement(new Option(
-        "\tPerformance evaluation measure to use for selecting attributes.\n" +
-        "\t(Default = accuracy for discrete class and rmse for numeric class)",
-        "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
-    
-    newVector.addElement(new Option(
-        "\tOptional class value (label or 1-based index) to use in conjunction with\n"
-        + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n" +
-        "\tthe class-weighted average.", "IRclass", 1, "-IRclass <label | index>"));
 
     if ((m_BaseClassifier != null) && 
 	(m_BaseClassifier instanceof OptionHandler)) {
@@ -310,15 +259,6 @@ public class WrapperSubsetEval
    *  (standard deviation---expressed as a percentage of the mean).
    *  (default: 0.01 (1%))</pre>
    * 
-   * <pre> -E &lt;acc | rmse | mae | f-meas | auc | auprc&gt;
-   *  Performance evaluation measure to use for selecting attributes.
-   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
-   * 
-   * <pre> -IRclass &lt;label | index&gt;
-   *  Optional class value (label or 1-based index) to use in conjunction with
-   *  IR statistics (f-meas, auc or auprc). Omitting this option will use
-   *  the class-weighted average.</pre>
-   * 
    * <pre> 
    * Options specific to scheme weka.classifiers.rules.ZeroR:
    * </pre>
@@ -340,7 +280,7 @@ public class WrapperSubsetEval
 
     if (optionString.length() == 0)
       optionString = ZeroR.class.getName();
-    setClassifier(AbstractClassifier.forName(optionString, 
+    setClassifier(Classifier.forName(optionString, 
 				     Utils.partitionOptions(options)));
     optionString = Utils.getOption('F', options);
 
@@ -364,96 +304,6 @@ public class WrapperSubsetEval
       Double temp;
       temp = Double.valueOf(optionString);
       setThreshold(temp.doubleValue());
-    }
-    
-    optionString = Utils.getOption('E', options);
-    if (optionString.length() != 0) {
-      if (optionString.equals("acc")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_ACCURACY, TAGS_EVALUATION));
-      } else if (optionString.equals("rmse")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_RMSE, TAGS_EVALUATION));
-      } else if (optionString.equals("mae")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_MAE, TAGS_EVALUATION));
-      } else if (optionString.equals("f-meas")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_FMEASURE, TAGS_EVALUATION));
-      } else if (optionString.equals("auc")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_AUC, TAGS_EVALUATION));
-      } else if (optionString.equals("auprc")) {
-        setEvaluationMeasure(new SelectedTag(EVAL_AUPRC, TAGS_EVALUATION));
-      } else {
-        throw new IllegalArgumentException("Invalid evaluation measure");
-      }
-    }
-    
-    optionString = Utils.getOption("IRClass", options);
-    if (optionString.length() > 0) {
-      setIRClassValue(optionString);
-    }
-  }
-  
-  /**
-   * Set the class value (label or index) to use with IR metric
-   * evaluation of subsets. Leaving this unset will result in 
-   * the class weighted average for the IR metric being used.
-   * 
-   * @param val the class label or 1-based index of the class label
-   * to use when evaluating subsets with an IR metric
-   */
-  public void setIRClassValue(String val) {
-    m_IRClassValS = val;
-  }
-  
-  /**
-   * Get the class value (label or index) to use with IR metric
-   * evaluation of subsets. Leaving this unset will result in 
-   * the class weighted average for the IR metric being used.
-   * 
-   * @return the class label or 1-based index of the class label
-   * to use when evaluating subsets with an IR metric
-   */
-  public String getIRClassValue() {
-    return m_IRClassValS;
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String IRClassValueTipText() {
-    return "The class label, or 1-based index of the class label, to use " +
-    		"when evaluating subsets with an IR metric (such as f-measure " +
-    		"or AUC. Leaving this unset will result in the class frequency " +
-    		"weighted average of the metric being used.";
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String evaluationMeasureTipText() {
-    return "The measure used to evaluate the performance of attribute combinations.";
-  }
-  /**
-   * Gets the currently set performance evaluation measure used for selecting
-   * attributes for the decision table
-   * 
-   * @return the performance evaluation measure
-   */
-  public SelectedTag getEvaluationMeasure() {
-    return new SelectedTag(m_evaluationMeasure, TAGS_EVALUATION);
-  }
-
-  /**
-   * Sets the performance evaluation measure to use for selecting attributes
-   * for the decision table
-   * 
-   * @param newMethod the new performance evaluation metric to use
-   */
-  public void setEvaluationMeasure(SelectedTag newMethod) {
-    if (newMethod.getTags() == TAGS_EVALUATION) {
-      m_evaluationMeasure = newMethod.getSelectedTag().getID();
     }
   }
   
@@ -583,7 +433,7 @@ public class WrapperSubsetEval
       classifierOptions = ((OptionHandler)m_BaseClassifier).getOptions();
     }
 
-    String[] options = new String[13 + classifierOptions.length];
+    String[] options = new String[9 + classifierOptions.length];
     int current = 0;
 
     if (getClassifier() != null) {
@@ -597,35 +447,6 @@ public class WrapperSubsetEval
     options[current++] = "" + getThreshold();
     options[current++] = "-R";
     options[current++] = "" + getSeed();
-    
-    options[current++] = "-E";
-    switch (m_evaluationMeasure) {
-    case EVAL_DEFAULT:
-    case EVAL_ACCURACY:
-      options[current++] = "acc";
-      break;
-    case EVAL_RMSE:
-      options[current++] = "rmse";
-      break;
-    case EVAL_MAE:
-      options[current++] = "mae";
-      break;
-    case EVAL_FMEASURE:
-      options[current++] = "f-meas";
-      break;
-    case EVAL_AUC:
-      options[current++] = "auc";
-      break;
-    case EVAL_AUPRC:
-      options[current++] = "auprc";
-      break;
-    }
-    
-    if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
-      options[current++] = "-IRClass";
-      options[current++] = m_IRClassValS;
-    }
-    
     options[current++] = "--";
     System.arraycopy(classifierOptions, 0, options, current, 
 		     classifierOptions.length);
@@ -668,15 +489,6 @@ public class WrapperSubsetEval
     for (Capability cap: Capability.values())
       result.enableDependency(cap);
     
-    // adjustment for class based on selected evaluation metric
-    result.disable(Capability.NUMERIC_CLASS);
-    result.disable(Capability.DATE_CLASS);
-    if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_FMEASURE &&
-        m_evaluationMeasure != EVAL_AUC && m_evaluationMeasure != EVAL_AUPRC) {
-      result.enable(Capability.NUMERIC_CLASS);
-      result.enable(Capability.DATE_CLASS);
-    }
-    
     result.setMinimumNumberInstances(getFolds());
     
     return result;
@@ -700,18 +512,6 @@ public class WrapperSubsetEval
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
-    
-    if (m_IRClassValS != null && m_IRClassValS.length() > 0) {
-      // try to parse as a number first
-      try {
-        m_IRClassVal = Integer.parseInt(m_IRClassValS);
-        // make zero-based
-        m_IRClassVal--;
-      } catch (NumberFormatException e) {
-        // now try as a named class label
-        m_IRClassVal = m_trainInstances.classAttribute().indexOfValue(m_IRClassValS);
-      }
-    }
   }
 
 
@@ -725,7 +525,7 @@ public class WrapperSubsetEval
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
-    double evalMetric = 0;
+    double errorRate = 0;
     double[] repError = new double[5];
     int numAttributes = 0;
     int i, j;
@@ -756,46 +556,11 @@ public class WrapperSubsetEval
     delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
 
-    // max of 5 repetitions of cross validation
+    // max of 5 repititions ofcross validation
     for (i = 0; i < 5; i++) {
       m_Evaluation = new Evaluation(trainCopy);
       m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
-      
-      switch (m_evaluationMeasure) {
-      case EVAL_DEFAULT:
-        repError[i] = m_Evaluation.errorRate();
-        break;
-      case EVAL_ACCURACY:
-        repError[i] = m_Evaluation.errorRate();
-        break;
-      case EVAL_RMSE:
-        repError[i] = m_Evaluation.rootMeanSquaredError();
-        break;
-      case EVAL_MAE:
-        repError[i] = m_Evaluation.meanAbsoluteError();
-        break;
-      case EVAL_FMEASURE:
-        if (m_IRClassVal < 0) { 
-        repError[i] = m_Evaluation.weightedFMeasure();
-        } else {
-          repError[i] = m_Evaluation.fMeasure(m_IRClassVal);
-        }
-        break;
-      case EVAL_AUC:
-        if (m_IRClassVal < 0) { 
-          repError[i] = m_Evaluation.weightedAreaUnderROC();
-        } else {
-          repError[i] = m_Evaluation.areaUnderROC(m_IRClassVal);
-        }
-        break;
-      case EVAL_AUPRC:
-        if (m_IRClassVal < 0) { 
-          repError[i] = m_Evaluation.weightedAreaUnderPRC();
-        } else {
-          repError[i] = m_Evaluation.areaUnderPRC(m_IRClassVal);
-        }
-        break;
-      }
+      repError[i] = m_Evaluation.errorRate();
 
       // check on the standard deviation
       if (!repeat(repError, i + 1)) {
@@ -805,22 +570,12 @@ public class WrapperSubsetEval
     }
 
     for (j = 0; j < i; j++) {
-      evalMetric += repError[j];
+      errorRate += repError[j];
     }
 
-    evalMetric /= (double)i;
+    errorRate /= (double)i;
     m_Evaluation = null;
-    
-    switch (m_evaluationMeasure) {
-    case EVAL_DEFAULT:
-    case EVAL_ACCURACY:
-    case EVAL_RMSE:
-    case EVAL_MAE:
-      evalMetric = -evalMetric; // maximize
-      break;
-    }
-    
-    return evalMetric;
+    return  -errorRate;
   }
 
 
@@ -851,52 +606,15 @@ public class WrapperSubsetEval
       }
 
       text.append("\n");
-      String IRClassL = "";
-      if (m_IRClassVal >= 0) {
-        IRClassL = "(class value: " 
-            + m_trainInstances.classAttribute().value(m_IRClassVal)
-          + ")";
-      }
-      switch (m_evaluationMeasure) {
-      case EVAL_DEFAULT:
-      case EVAL_ACCURACY:
-        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-          text.append("\tSubset evaluation: RMSE\n");
-        } else {
-          text.append("\tSubset evaluation: classification error\n");
-        }
-        break;
-      case EVAL_RMSE:
-        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-          text.append("\tSubset evaluation: RMSE\n");
-        } else {
-          text.append("\tSubset evaluation: RMSE (probability estimates)\n");
-        }
-        break;
-      case EVAL_MAE:
-        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-          text.append("\tSubset evaluation: MAE\n");
-        } else {
-          text.append("\tSubset evaluation: MAE (probability estimates)\n");
-        }
-        break;
-      case EVAL_FMEASURE:
-        text.append("\tSubset evaluation: F-measure " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
-        break;
-      case EVAL_AUC:
-        text.append("\tSubset evaluation: area under the ROC curve " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
-        break;
-      case EVAL_AUPRC:
-        text.append("\tSubset evalation: area under the precision-recal curve " 
-            + (m_IRClassVal >=0 ? IRClassL : "") + "\n");
-        break;
+      if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+	text.append("\tAccuracy estimation: RMSE\n");
+      } else {
+	text.append("\tAccuracy estimation: classification error\n");
       }
       
       text.append("\tNumber of folds for accuracy estimation: " 
-          + m_folds 
-          + "\n");
+		  + m_folds 
+		  + "\n");
     }
 
     return  text.toString();
@@ -969,4 +687,3 @@ public class WrapperSubsetEval
     runEvaluator(new WrapperSubsetEval(), args);
   }
 }
-

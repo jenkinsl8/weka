@@ -1,25 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    HostListPanel.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.experiment.RemoteExperiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -38,8 +41,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import weka.experiment.RemoteExperiment;
 
 /** 
  * This panel controls setting a list of hosts for a RemoteExperiment to
@@ -62,7 +63,7 @@ public class HostListPanel
   protected JList m_List;
 
   /** Click to remove the selected host from the list */
-  protected JButton m_DeleteBut = new JButton("Delete selected");
+  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("HostListPanel_DeleteBut_JButton_Text"));
 
   /** The field with which to enter host names */
   protected JTextField m_HostField = new JTextField(25);
@@ -87,7 +88,7 @@ public class HostListPanel
     m_DeleteBut.addActionListener(this);
     m_HostField.addActionListener(this);
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder("Hosts"));
+    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("HostListPanel_BorderFactoryCreateTitledBorder_Text")));
 
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
@@ -160,7 +161,7 @@ public class HostListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame("Host List Editor");
+      final JFrame jf = new JFrame(Messages.getInstance().getString("HostListPanel_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       HostListPanel dp = new HostListPanel();
       jf.getContentPane().add(dp,

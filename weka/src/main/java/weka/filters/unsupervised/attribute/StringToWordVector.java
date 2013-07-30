@@ -1,37 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    StringToWordVector.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -45,12 +37,21 @@ import weka.core.SparseInstance;
 import weka.core.Stopwords;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.Tokenizer;
 import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -761,7 +762,7 @@ public class StringToWordVector
       // Push all instances into the output queue
       for(int i=0; i<fv.size(); i++) {
 	push((Instance) fv.elementAt(i));
-      }      
+      }
     }
 
     // Flush the input
@@ -1590,7 +1591,7 @@ public class StringToWordVector
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       if (!m_SelectedRange.isInRange(i)) { 
 	if (getInputFormat().attribute(i).type() != Attribute.STRING && 
-	    getInputFormat().attribute(i).type() != Attribute.RELATIONAL) {
+            getInputFormat().attribute(i).type() != Attribute.RELATIONAL) {
 	  // Add simple nominal and numeric attributes directly
 	  if (instance.value(i) != 0.0) {
 	    contained.put(new Integer(firstCopy), 
@@ -1599,7 +1600,7 @@ public class StringToWordVector
 	} else {
 	  if (instance.isMissing(i)) {
 	    contained.put(new Integer(firstCopy),
-		new Double(Utils.missingValue()));
+		new Double(Instance.missingValue()));
 	  } else if (getInputFormat().attribute(i).type() == Attribute.STRING) {
 
 	    // If this is a string attribute, we have to first add
@@ -1617,15 +1618,15 @@ public class StringToWordVector
 		new Double(newIndex));
 	  } else {
 	    // relational
-	    if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
-	      Instances relationalHeader = outputFormatPeek().attribute(firstCopy).relation();
-	      
-	      // hack to defeat sparse instances bug
-	      outputFormatPeek().attribute(firstCopy).addRelation(relationalHeader);
-	    }
-	    int newIndex = outputFormatPeek().attribute(firstCopy)
-	      .addRelation(instance.relationalValue(i));
-	    contained.put(new Integer(firstCopy), new Double(newIndex));
+            if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
+              Instances relationalHeader = outputFormatPeek().attribute(firstCopy).relation();
+              
+              // hack to defeat sparse instances bug
+              outputFormatPeek().attribute(firstCopy).addRelation(relationalHeader);
+            }
+            int newIndex = outputFormatPeek().attribute(firstCopy)
+              .addRelation(instance.relationalValue(i));
+            contained.put(new Integer(firstCopy), new Double(newIndex));
 	  }
 	}
 	firstCopy++;

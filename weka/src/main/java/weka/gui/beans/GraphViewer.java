@@ -1,41 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GraphViewer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
-
-import java.awt.BorderLayout;
-import java.awt.event.MouseEvent;
-import java.beans.VetoableChangeListener;
-import java.beans.beancontext.BeanContext;
-import java.beans.beancontext.BeanContextChild;
-import java.beans.beancontext.BeanContextChildSupport;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 
 import weka.core.Drawable;
 import weka.core.FastVector;
@@ -44,6 +29,23 @@ import weka.gui.graphvisualizer.BIFFormatException;
 import weka.gui.graphvisualizer.GraphVisualizer;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
+
+import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.beans.beancontext.BeanContext;
+import java.beans.beancontext.BeanContextChild;
+import java.beans.beancontext.BeanContextChildSupport;
+import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
@@ -122,14 +124,14 @@ public class GraphViewer
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return "Graphically visualize trees or graphs produced by classifiers/clusterers.";
+    return Messages.getInstance().getString("GraphViewer_GlobalInfo_Text");
   }
 
   private void setUpResultHistory() {
     if (m_history == null) {
       m_history = new ResultHistoryPanel(null);
     }
-    m_history.setBorder(BorderFactory.createTitledBorder("Graph list"));
+    m_history.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("GraphViewer_SetUpResultHistory_History_SetBorder_BorderFactory_CreateTitledBorder_Text")));
     m_history.setHandleRightClicks(false);
     m_history.getList().
       addMouseListener(new ResultHistoryPanel.RMouseAdapter() {
@@ -252,7 +254,7 @@ public class GraphViewer
       if (m_history == null) {
 	setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Graph Viewer");
+      m_resultsFrame = new JFrame(Messages.getInstance().getString("GraphViewer_ShowResult_ResultsFrame_JFrame_Text"));
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.CENTER);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -280,7 +282,7 @@ public class GraphViewer
 
     if(grphType == Drawable.TREE){
         final javax.swing.JFrame jf = 
-            new javax.swing.JFrame("Weka Classifier Tree Visualizer: "+name);
+            new javax.swing.JFrame(Messages.getInstance().getString("GraphViewer_DoPopup_Jf_JFrame_Text_First") + name);
         jf.setSize(500,400);
         jf.getContentPane().setLayout(new BorderLayout());
         TreeVisualizer tv = 
@@ -298,7 +300,7 @@ public class GraphViewer
     }
     if(grphType == Drawable.BayesNet) {
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Classifier Graph Visualizer: "+name);
+	new javax.swing.JFrame(Messages.getInstance().getString("GraphViewer_DoPopup_Jf_JFrame_Text_Second") + name);
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       GraphVisualizer gv = 
@@ -307,7 +309,7 @@ public class GraphViewer
 	gv.readBIF(grphString);
       }
       catch (BIFFormatException be) { 
-	System.err.println("unable to visualize BayesNet"); be.printStackTrace(); 
+	System.err.println(Messages.getInstance().getString("GraphViewer_DoPopup_Error_Text")); be.printStackTrace(); 
       }
       gv.layoutGraph();
       jf.getContentPane().add(gv, BorderLayout.CENTER);
@@ -346,7 +348,7 @@ public class GraphViewer
     } else {
       throw new 
 	IllegalArgumentException(request
-		    + " not supported (GraphViewer)");
+		    + Messages.getInstance().getString("GraphViewer_PerformRequest_IllegalArgumentException_Text"));
     }
   }
 }

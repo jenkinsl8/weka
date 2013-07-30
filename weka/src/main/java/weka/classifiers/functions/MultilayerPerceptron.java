@@ -1,24 +1,45 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    MultilayerPerceptron.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.functions.neural.LinearUnit;
+import weka.classifiers.functions.neural.NeuralConnection;
+import weka.classifiers.functions.neural.NeuralNode;
+import weka.classifiers.functions.neural.SigmoidUnit;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Randomizable;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,27 +68,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
-import weka.classifiers.functions.neural.LinearUnit;
-import weka.classifiers.functions.neural.NeuralConnection;
-import weka.classifiers.functions.neural.NeuralNode;
-import weka.classifiers.functions.neural.SigmoidUnit;
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.NominalToBinary;
 
 /** 
  <!-- globalinfo-start -->
@@ -146,7 +146,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * @version $Revision$
  */
 public class MultilayerPerceptron 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
   
   /** for serialization */
@@ -892,7 +892,6 @@ public class MultilayerPerceptron
     }
   }
   
-
   /** a ZeroR model in case no model can be built from the data 
    * or the network predicts all zeros for the classes */
   private Classifier m_ZeroR;
@@ -1773,10 +1772,11 @@ public class MultilayerPerceptron
 	  + "using ZeroR model instead!");
       m_useDefaultModel = true;
       return;
-    } else {
+    }
+    else {
       m_useDefaultModel = false;
     }
-       
+    
     m_epoch = 0;
     m_error = 0;
     m_instances = null;
@@ -1906,7 +1906,6 @@ public class MultilayerPerceptron
       m_currentInstance = null;
       return;
     }
-    
 
     //connections done.
     double right = 0;
@@ -2004,6 +2003,7 @@ public class MultilayerPerceptron
 	}
 	
 	if (right < lastRight) {
+	  
 	  if (right < bestError) {
 	    bestError = right;
 	    // save the network weights at this point

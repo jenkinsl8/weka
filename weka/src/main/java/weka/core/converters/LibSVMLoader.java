@@ -1,25 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * LibSVMLoader.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, NZ
+ * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
 
 package weka.core.converters;
+
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,15 +36,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
 
 /**
  <!-- globalinfo-start -->
@@ -69,7 +70,7 @@ public class LibSVMLoader
   protected transient Reader m_sourceReader = null;
 
   /** the buffer of the rows read so far. */
-  protected Vector<double[]> m_Buffer = null;
+  protected Vector m_Buffer = null;
   
   /**
    * Returns a string describing this Loader.
@@ -261,7 +262,7 @@ public class LibSVMLoader
     int			cInt;
     char		c;
     int			numAtt;
-    ArrayList<Attribute>		atts;
+    FastVector		atts;
     int			i;
     String		relName;
     
@@ -269,7 +270,7 @@ public class LibSVMLoader
       throw new IOException("No source has been specified");
 
     if (m_structure == null) {
-      m_Buffer = new Vector<double[]>();
+      m_Buffer = new Vector();
       try {
 	// determine number of attributes
 	numAtt = 0;
@@ -295,10 +296,10 @@ public class LibSVMLoader
 	}
 	
 	// generate header
-	atts = new ArrayList<Attribute>(numAtt);
+	atts = new FastVector(numAtt);
 	for (i = 0; i < numAtt - 1; i++)
-	  atts.add(new Attribute("att_" + (i+1)));
-	atts.add(new Attribute("class"));
+	  atts.addElement(new Attribute("att_" + (i+1)));
+	atts.addElement(new Attribute("class"));
 	
 	if (!m_URL.equals("http://"))
 	  relName = m_URL;

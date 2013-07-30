@@ -1,39 +1,39 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * SerializedClassifier.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.misc;
 
-import java.io.File;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.SerializationHelper;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.File;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -60,7 +60,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class SerializedClassifier
-  extends AbstractClassifier {
+  extends Classifier {
 
   /** for serialization */
   private static final long serialVersionUID = 4599593909947628642L;
@@ -222,13 +222,15 @@ public class SerializedClassifier
   
   /**
    * loads the serialized model if necessary, throws an Exception if the
-   * derserialization fails.
+   * derserialization fails. Always propagates the current debug flag.
    * 
    * @throws Exception	if deserialization fails
    */
   protected void initModel() throws Exception {
     if (m_Model == null)
       m_Model = (Classifier) SerializationHelper.read(m_ModelFile.getAbsolutePath());
+    
+    m_Model.setDebug(getDebug());
   }
 
   /**

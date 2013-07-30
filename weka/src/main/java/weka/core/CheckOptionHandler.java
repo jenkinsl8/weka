@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CheckOptionHandler.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -61,7 +62,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class CheckOptionHandler
   extends Check {
@@ -81,11 +82,11 @@ public class CheckOptionHandler
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement((Option)en.nextElement());
+      result.addElement(en.nextElement());
     
     result.addElement(new Option(
         "\tFull name of the OptionHandler analysed.\n"
@@ -101,7 +102,7 @@ public class CheckOptionHandler
       
       Enumeration enm = m_OptionHandler.listOptions();
       while (enm.hasMoreElements())
-        result.addElement((Option)enm.nextElement());
+        result.addElement(enm.nextElement());
     }
     
     return result.elements();
@@ -157,11 +158,11 @@ public class CheckOptionHandler
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>        result;
+    Vector        result;
     String[]      options;
     int           i;
     
-    result = new Vector<String>();
+    result = new Vector();
     
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -580,7 +581,7 @@ public class CheckOptionHandler
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /** 

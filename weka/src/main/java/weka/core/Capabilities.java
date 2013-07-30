@@ -1,24 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Capabilities.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
+
+import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,8 +32,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import weka.core.converters.ConverterUtils.DataSource;
-
 /**
  * A class that describes the capabilites (e.g., handling certain types of
  * attributes, missing values, types of classes, etc.) of a specific
@@ -40,7 +41,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * A common code fragment for making use of the capabilities in a classifier 
  * would be this:
  * <pre>
- * public void <b>buildClassifier</b>(Instances instances) throws Exception {
+ * public void <b>buildClassifier</b>(Instances instances) sthrows Exception {
  *   // can the classifier handle the data?
  *   getCapabilities().<b>testWithFail(instances)</b>;
  *   ...
@@ -214,10 +215,10 @@ public class Capabilities
   protected CapabilitiesHandler m_Owner;
   
   /** the hashset for storing the active capabilities */
-  protected HashSet<Capability> m_Capabilities;
+  protected HashSet m_Capabilities;
   
   /** the hashset for storing dependent capabilities, eg for meta-classifiers */
-  protected HashSet<Capability> m_Dependencies;
+  protected HashSet m_Dependencies;
   
   /** the reason why the test failed, used to throw an exception */
   protected Exception m_FailReason = null;
@@ -252,8 +253,8 @@ public class Capabilities
     super();
 
     setOwner(owner);
-    m_Capabilities = new HashSet<Capability>();
-    m_Dependencies = new HashSet<Capability>();
+    m_Capabilities = new HashSet();
+    m_Dependencies = new HashSet();
 
     // load properties
     if (PROPERTIES == null) {
@@ -272,7 +273,7 @@ public class Capabilities
     m_MissingValuesTest          = Boolean.parseBoolean(PROPERTIES.getProperty("MissingValuesTest", "true")) && m_Test;
     m_MissingClassValuesTest     = Boolean.parseBoolean(PROPERTIES.getProperty("MissingClassValuesTest", "true")) && m_Test;
     m_MinimumNumberInstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty("MinimumNumberInstancesTest", "true")) && m_Test;
-    
+        
     if (owner instanceof weka.classifiers.UpdateableClassifier ||
         owner instanceof weka.clusterers.UpdateableClusterer) {
       setMinimumNumberInstances(0);
@@ -1308,18 +1309,18 @@ public class Capabilities
    * @return 	a string representation of this object
    */
   public String toString() {
-    Vector<Capability>		sorted;
+    Vector		sorted;
     StringBuffer	result;
     
     result = new StringBuffer();
 
     // capabilities
-    sorted = new Vector<Capability>(m_Capabilities);
+    sorted = new Vector(m_Capabilities);
     Collections.sort(sorted);
     result.append("Capabilities: " + sorted.toString() + "\n");
 
     // dependencies
-    sorted = new Vector<Capability>(m_Dependencies);
+    sorted = new Vector(m_Dependencies);
     Collections.sort(sorted);
     result.append("Dependencies: " + sorted.toString() + "\n");
     
@@ -1413,9 +1414,6 @@ public class Capabilities
         result.append(
             indentStr + objectname + ".enableDependency(" + capName + "." + cap.name() + ");\n");
     }
-    
-    // capabilities
-    result.append("\n");
 
     // other
     result.append("\n");

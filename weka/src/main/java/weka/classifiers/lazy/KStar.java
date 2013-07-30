@@ -1,31 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    KStar.java
- *    Copyright (C) 1995-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1995-97 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.lazy;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.lazy.kstar.KStarCache;
 import weka.classifiers.lazy.kstar.KStarConstants;
@@ -33,7 +30,6 @@ import weka.classifiers.lazy.kstar.KStarNominalAttribute;
 import weka.classifiers.lazy.kstar.KStarNumericAttribute;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -41,10 +37,15 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -93,7 +94,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class KStar 
-  extends AbstractClassifier
+  extends Classifier
   implements KStarConstants, UpdateableClassifier, TechnicalInformationHandler {
 
   /** for serialization */
@@ -241,7 +242,7 @@ public class KStar
     String debug = "(KStar.updateClassifier) ";
 
     if (m_Train.equalHeaders(instance.dataset()) == false)
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     if ( instance.classIsMissing() )
       return;
     m_Train.add(instance);

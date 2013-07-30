@@ -1,43 +1,44 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ReliefFAttributeEval.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -861,8 +862,8 @@ public class ReliefFAttributeEval
     case Attribute.NOMINAL:
       
       // If attribute is nominal
-      if (Utils.isMissingValue(val1) || 
-          Utils.isMissingValue(val2)) {
+      if (Instance.isMissingValue(val1) || 
+          Instance.isMissingValue(val2)) {
         return (1.0 - (1.0/((double)m_trainInstances.
                             attribute(index).numValues())));
       } else if ((int)val1 != (int)val2) {
@@ -873,14 +874,14 @@ public class ReliefFAttributeEval
     case Attribute.NUMERIC:
 
       // If attribute is numeric
-      if (Utils.isMissingValue(val1) || 
-          Utils.isMissingValue(val2)) {
-        if (Utils.isMissingValue(val1) && 
-            Utils.isMissingValue(val2)) {
+      if (Instance.isMissingValue(val1) || 
+          Instance.isMissingValue(val2)) {
+        if (Instance.isMissingValue(val1) && 
+            Instance.isMissingValue(val2)) {
           return 1;
         } else {
           double diff;
-          if (Utils.isMissingValue(val2)) {
+          if (Instance.isMissingValue(val2)) {
             diff = norm(val1, index);
           } else {
             diff = norm(val2, index);

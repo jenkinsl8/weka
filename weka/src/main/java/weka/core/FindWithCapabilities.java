@@ -1,24 +1,28 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * FindWithCapabilities.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
+
+import weka.core.Capabilities.Capability;
+import weka.gui.GenericPropertiesCreator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,9 +31,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Capabilities.Capability;
-import weka.gui.GenericPropertiesCreator;
 
 /**
  * Locates all classes with certain capabilities. One should keep in mind, 
@@ -139,7 +140,7 @@ import weka.gui.GenericPropertiesCreator;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator
@@ -154,7 +155,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
   protected Capabilities m_NotCapabilities = new Capabilities(this);
 
   /** the packages to search in. */
-  protected Vector<String> m_Packages = new Vector<String>();
+  protected Vector m_Packages = new Vector();
 
   /** a capabilities handler to retrieve the capabilities from. */
   protected CapabilitiesHandler m_Handler = null;
@@ -172,10 +173,10 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
   protected boolean m_GenericPropertiesCreator = false;
 
   /** the classes that matched. */
-  protected Vector<String> m_Matches = new Vector<String>();
+  protected Vector m_Matches = new Vector();
 
   /** the class that didn't match. */
-  protected Vector<String> m_Misses = new Vector<String>();
+  protected Vector m_Misses = new Vector();
 
   /**
    * Returns an enumeration describing the available options.
@@ -183,7 +184,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
 
     result.addElement(new Option(
 	"", "", 0, 
@@ -466,7 +467,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
     tmpStr = Utils.getOption("packages", options);
     if (tmpStr.length() != 0) {
       tok        = new StringTokenizer(tmpStr, ",");
-      m_Packages = new Vector<String>();
+      m_Packages = new Vector();
       while (tok.hasMoreTokens())
 	m_Packages.add(tok.nextToken());
     }
@@ -476,7 +477,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
       creator.execute(false);
       props	 = creator.getInputProperties();
       tok        = new StringTokenizer(props.getProperty(m_Superclass), ",");
-      m_Packages = new Vector<String>();
+      m_Packages = new Vector();
       while (tok.hasMoreTokens())
 	m_Packages.add(tok.nextToken());
     }
@@ -488,11 +489,11 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String> 	result;
+    Vector 	result;
     String[]	options;
     int		i;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     result.add("-num-instances");
     result.add("" + m_Capabilities.getMinimumNumberInstances());
@@ -792,7 +793,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		the matching classname from the last find run
    */
-  public Vector<String> getMatches() {
+  public Vector getMatches() {
     return m_Matches;
   }
 
@@ -801,7 +802,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		the classnames that didn't match from the last find run
    */
-  public Vector<String> getMisses() {
+  public Vector getMisses() {
     return m_Misses;
   }
 
@@ -810,8 +811,8 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * 
    * @return		contains all classnames that fit the criteria
    */
-  public Vector<String> find() {
-    Vector<String>		list;
+  public Vector find() {
+    Vector		list;
     int			i;
     Class		cls;
     Object		obj;
@@ -819,8 +820,8 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
     boolean		fits;
     Capabilities	caps;
 
-    m_Matches = new Vector<String>();
-    m_Misses  = new Vector<String>();
+    m_Matches = new Vector();
+    m_Misses  = new Vector();
 
     list = ClassDiscovery.find(m_Superclass, (String[]) m_Packages.toArray(new String[m_Packages.size()]));
     for (i = 0; i < list.size(); i++) {
@@ -890,7 +891,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**
@@ -900,7 +901,7 @@ implements OptionHandler, CapabilitiesHandler, RevisionHandler {
    */
   public static void main(String[] args) {
     FindWithCapabilities 	find;
-    Vector<String> 			list;
+    Vector 			list;
     String			result;
     int				i;
     boolean			printMisses;

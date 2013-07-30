@@ -1,24 +1,37 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * XMLBeans.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.beans.xml;
+
+import weka.core.converters.ConverterUtils;
+import weka.core.xml.XMLBasicSerialization;
+import weka.core.xml.XMLDocument;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.gui.beans.BeanConnection;
+import weka.gui.beans.BeanInstance;
+import weka.gui.beans.BeanVisual;
+import weka.gui.beans.MetaBean;
+import weka.gui.beans.Visible;
+import weka.gui.beans.BeanCommon;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -42,18 +55,6 @@ import javax.swing.plaf.FontUIResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.converters.ConverterUtils;
-import weka.core.xml.XMLBasicSerialization;
-import weka.core.xml.XMLDocument;
-import weka.gui.beans.BeanCommon;
-import weka.gui.beans.BeanConnection;
-import weka.gui.beans.BeanInstance;
-import weka.gui.beans.BeanVisual;
-import weka.gui.beans.MetaBean;
-import weka.gui.beans.Visible;
 
 /**
  * This class serializes and deserializes a KnowledgeFlow setup to and fro XML.
@@ -232,22 +233,15 @@ public class XMLBeans
    * null in the bean */
   protected BeanContextSupport m_BeanContextSupport = null;
   
-  /** The index of the vector of bean instances or connections to use.
-   * this corresponds to a tab in the main KnowledgeFlow UI
-   */
-  protected int m_vectorIndex = 0;
-  
   /**
    * initializes the serialization for layouts
    * 
    * @param layout      the component that manages the layout
    * @param context     the bean context support to use
-   * @param tab         the index of the vector of bean instances or connections
-   * to use (this corresponds to a visible tab in the main KnowledgeFlow UI)
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int tab) throws Exception {
-    this(layout, context, DATATYPE_LAYOUT, tab);
+  public XMLBeans(JComponent layout, BeanContextSupport context) throws Exception {
+    this(layout, context, DATATYPE_LAYOUT);
   }
   
   /**
@@ -258,11 +252,9 @@ public class XMLBeans
    * @param datatype    the type of data to read/write
    * @throws Exception  if initialization fails
    */
-  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype, 
-      int tab) throws Exception {
+  public XMLBeans(JComponent layout, BeanContextSupport context, int datatype) throws Exception {
     super();
     
-    m_vectorIndex = tab;
     m_BeanLayout = layout;
     m_BeanContextSupport = context;
     setDataType(datatype);
@@ -279,7 +271,7 @@ public class XMLBeans
     else if (value == DATATYPE_USERCOMPONENTS)
       m_DataType = value;
     else
-      System.out.println("DataType '" + value + "' is unknown!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_SetDataType_DataType_Text_Front") + value + Messages.getInstance().getString("XMLBeans_SetDataType_DataType_Text_End"));
   }
   
   /**
@@ -358,18 +350,12 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "executionSlots");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "blockOnLastFold");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "resetIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "updateIncrementalClassifier");
-    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "loadClassifierFileName");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
+    m_Properties.addAllowed(weka.filters.Filter.class, "options");
     m_Properties.addAllowed(weka.associations.Associator.class, "options");
     m_Properties.addAllowed(weka.clusterers.Clusterer.class, "options");
-    m_Properties.addAllowed(weka.filters.Filter.class, "options");
-    m_Properties.addAllowed(weka.core.converters.Saver.class, "options");
-    m_Properties.addAllowed(weka.core.converters.Loader.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
     m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
@@ -432,7 +418,7 @@ public class XMLBeans
         addBeanInstances(((MetaBean) list.get(i)).getBeansInSubFlow());
       }
       else {
-        System.out.println("addBeanInstances does not support Vectors of class '" + list.get(i) + "'!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_SetDataType_AddBeanInstances_Text_Front") + list.get(i) + Messages.getInstance().getString("XMLBeans_SetDataType_AddBeanInstances_Text_End"));
       }
     }
   }
@@ -454,7 +440,7 @@ public class XMLBeans
     
     switch (getDataType()) {
       case DATATYPE_LAYOUT:
-        addBeanInstances(BeanInstance.getBeanInstances(m_vectorIndex));
+        addBeanInstances(BeanInstance.getBeanInstances());
         break;
 
       case DATATYPE_USERCOMPONENTS:
@@ -462,7 +448,7 @@ public class XMLBeans
         break;
         
       default:
-        System.out.println("writePreProcess: data type '" + getDataType() + "' is not recognized!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_WritePreProcess_Text_Front") + getDataType() + Messages.getInstance().getString("XMLBeans_WritePreProcess_Text_End"));
         break;
     }
     
@@ -615,7 +601,7 @@ public class XMLBeans
 
     for (i = 0; i < esds.length; i++) {
       if (esds[i].getName().equals(event)) {
-        result = new BeanConnection(instSource, instTarget, esds[i], m_vectorIndex);
+        result = new BeanConnection(instSource, instTarget, esds[i]);
         ((BeanConnection) result).setHidden(hidden);
         break;
       }
@@ -665,7 +651,7 @@ public class XMLBeans
       }
       // MetaBean? -> find BeanConnection 
       else {
-        beanconns = BeanConnection.getConnections(m_vectorIndex);
+        beanconns = BeanConnection.getConnections();
         
         for (i = 0; i < beanconns.size(); i++) {
           conn = (BeanConnection) beanconns.get(i);
@@ -869,8 +855,9 @@ public class XMLBeans
       else if (name.equals(VAL_BLUE))
         blue = readIntFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadColor_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadColor_Text_Second") + node.getAttribute(ATT_NAME) + 
+            Messages.getInstance().getString("XMLBeans_ReadColor_Text_Third"));
     }
     
     result = new Color(red, green, blue);
@@ -944,8 +931,8 @@ public class XMLBeans
       else if (name.equals(VAL_HEIGHT))
         height = readDoubleFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadDimension_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadDimension_Text_Second") + node.getAttribute(ATT_NAME) + Messages.getInstance().getString("XMLBeans_ReadDimension_Text_Third"));
     }
     
     result = new Dimension();
@@ -1025,8 +1012,8 @@ public class XMLBeans
       else if (name.equals(VAL_SIZE))
         size = readIntFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadFont_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadFont_Text_Second") + node.getAttribute(ATT_NAME) + Messages.getInstance().getString("XMLBeans_ReadFont_Text_Third"));
     }
     
     result = new Font(fontname, style, size);
@@ -1100,8 +1087,9 @@ public class XMLBeans
       else if (name.equals(VAL_Y))
         y = readDoubleFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadPoint_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadPoint_Text_Second") + node.getAttribute(ATT_NAME) 
+            + Messages.getInstance().getString("XMLBeans_ReadPoint_Text_Third"));
     }
     
     result = new Point();
@@ -1170,8 +1158,9 @@ public class XMLBeans
       if (name.equals(VAL_COLOR))
         color = (Color) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadColorUIResource_Text_Third"));
     }
     
     result = new ColorUIResource(color);
@@ -1239,8 +1228,9 @@ public class XMLBeans
       if (name.equals(VAL_FONT))
         font = (Font) invokeReadFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadFontUIResource_Text_Third"));
     }
     
     result = new FontUIResource(font);
@@ -1273,16 +1263,8 @@ public class XMLBeans
     node     = addElement(parent, name, beaninst.getClass().getName(), false);
 
     writeIntToXML(node, m_BeanInstances.indexOf(beaninst), VAL_ID);
-    int w = beaninst.getWidth() / 2; int h = beaninst.getHeight() / 2;
-    // If a bean instance doesn't have dimensions (0 widht/height) then it means
-    // that it hasn't been rendered (yet). In this case we'll
-    // use half the known width/height of the icons so that the
-    // position does not change
-    if (w == 0 && h == 0) {
-      w = 28; h = 28;
-    }
-    writeIntToXML(node, beaninst.getX() + w, VAL_X);   // x is thought to be in the center?
-    writeIntToXML(node, beaninst.getY() + h, VAL_Y);   // y is thought to be in the center?
+    writeIntToXML(node, beaninst.getX() + beaninst.getWidth()  / 2, VAL_X);   // x is thought to be in the center?
+    writeIntToXML(node, beaninst.getY() + beaninst.getHeight() / 2, VAL_Y);   // y is thought to be in the center?
     if (beaninst.getBean() instanceof BeanCommon) {
       // write the custom name of this bean
       String custName = ((BeanCommon)beaninst.getBean()).getCustomName();
@@ -1342,12 +1324,13 @@ public class XMLBeans
       } else if (name.equals(VAL_BEAN)) {
         bean = invokeReadFromXML(child);
       } else {
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_Second") + node.getAttribute(ATT_NAME)
+            + Messages.getInstance().getString("XMLBeans_ReadBeanInstance_Text_Third"));
       }
     }
     
-    result   = new BeanInstance(m_BeanLayout, bean, x, y, m_vectorIndex);  
+    result   = new BeanInstance(m_BeanLayout, bean, x, y);
     beaninst = (BeanInstance) result;
     
     // set parent of BeanVisual
@@ -1486,8 +1469,9 @@ public class XMLBeans
       else if (name.equals(VAL_HIDDEN))
         hidden = readBooleanFromXML(child);
       else
-        System.out.println("WARNING: '" + name
-            + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_First") + name
+            + Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_Second") + node.getAttribute(ATT_NAME) 
+            + Messages.getInstance().getString("XMLBeans_ReadBeanConnection_Text_Third"));
     }
 
     // get position of id
@@ -1602,7 +1586,8 @@ public class XMLBeans
       known = false;
 
     if (!known)
-      System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot retrieve file!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_WriteLoader_Text_First") + loader.getClass().getName() 
+    		  + Messages.getInstance().getString("XMLBeans_WriteLoader_Text_Second"));
 
     Boolean relativeB = null;
     if (loader instanceof weka.core.converters.FileSourcedConverter) {
@@ -1614,13 +1599,10 @@ public class XMLBeans
     if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
-      String withResourceSeparators = file.getPath().replace(File.pathSeparatorChar, '/');
       boolean notAbsolute = 
         (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
         (loader instanceof EnvironmentHandler 
-            && Environment.containsEnvVariables(file.getPath())) ||
-            this.getClass().getClassLoader().getResource(withResourceSeparators) != null ||
-            !file.exists());
+            && Environment.containsEnvVariables(file.getPath())));
       
       String path = (notAbsolute)
         ? file.getPath()
@@ -1632,11 +1614,6 @@ public class XMLBeans
     }
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
-    }
-    
-    if (loader instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)loader).getOptions();
-      invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
     
     return node;
@@ -1702,13 +1679,12 @@ public class XMLBeans
       
       fl = new File(file);      
       // only test for existence if the path does not contain environment vars
-      // (trust that after they are resolved that everything is hunky dory). Also 
-      // don't test if the file can be found as a resource in the classath
-      if (containsEnv || fl.exists() || 
-          this.getClass().getClassLoader().getResource(file) != null) {
+      // (trust that after they are resolved that everything is hunky dory)
+      if (containsEnv || fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
-        System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadLoader_Text_Front") + tempFile 
+        		+ Messages.getInstance().getString("XMLBeans_ReadLoader_Text_End"));
       }
     }
     
@@ -1761,7 +1737,8 @@ public class XMLBeans
     }
     
     if (!known)
-      System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
+      System.out.println(Messages.getInstance().getString("XMLBeans_WriteSaver_Text_Front") + saver.getClass().getName() 
+    		  + Messages.getInstance().getString("XMLBeans_WriteSaver_Text_End"));
 
     Boolean relativeB = null;
     if (saver instanceof weka.core.converters.FileSourcedConverter) {
@@ -1789,11 +1766,6 @@ public class XMLBeans
 
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
-    }
-    
-    if (saver instanceof weka.core.OptionHandler) {
-      String[] opts = ((weka.core.OptionHandler)saver).getOptions();
-      invokeWriteToXML(node, opts, VAL_OPTIONS);
     }
     
     return node;
@@ -2075,9 +2047,9 @@ public class XMLBeans
       else if (name.equals(VAL_ORIGINALCOORDS))
         coords = (Vector) invokeReadFromXML(child);
       else if (name.equals(VAL_INPUTS))
-        System.out.println("INFO: '" + name + "' will be restored later.");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadMetaBean_Input_Text_Front") + name + Messages.getInstance().getString("XMLBeans_ReadMetaBean_Input_Text_End"));
       else if (name.equals(VAL_OUTPUTS))
-        System.out.println("INFO: '" + name + "' will be restored later.");
+        System.out.println(Messages.getInstance().getString("XMLBeans_ReadMetaBean_Output_Text_Front") + name + Messages.getInstance().getString("XMLBeans_ReadMetaBean_Output_Text_End"));
       else
         readFromXML(result, name, child);
     }

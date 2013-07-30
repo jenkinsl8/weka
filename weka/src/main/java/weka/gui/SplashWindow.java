@@ -1,16 +1,17 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
@@ -231,7 +232,7 @@ public class SplashWindow
         .getMethod(methodName, new Class[] {String[].class})
         .invoke(null, new Object[] {args});
     } catch (Exception e) {
-      InternalError error = new InternalError("Failed to invoke method: "
+      InternalError error = new InternalError(Messages.getInstance().getString("SplashWindow_InvokeMethod_Exception_InternalError_Text")
                                               +methodName);
       error.initCause(e);
       throw error;
@@ -249,7 +250,7 @@ public class SplashWindow
         .getMethod("main", new Class[] {String[].class})
         .invoke(null, new Object[] {args});
     } catch (Exception e) {
-      InternalError error = new InternalError("Failed to invoke main method");
+      InternalError error = new InternalError(Messages.getInstance().getString("SplashWindow_InvokeMain_Exception_InternalError_Text"));
       error.initCause(e);
       throw error;
     }

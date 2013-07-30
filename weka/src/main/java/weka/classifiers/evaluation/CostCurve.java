@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CostCurve.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,8 +24,8 @@ package weka.classifiers.evaluation;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -37,7 +38,7 @@ import weka.core.RevisionUtils;
  * "positive".
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.9 $
  */
 
 public class CostCurve 
@@ -110,10 +111,10 @@ public class CostCurve
       thresh = threshInst.instance(i).value(threshind);
       vals = new double [3];
       vals[0] = 0; vals[1] = fpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
       vals = new double [3];
       vals[0] = 1; vals[1] = 1.0 - tpval; vals[2] = thresh;
-      insts.add(new DenseInstance(1.0, vals));
+      insts.add(new Instance(1.0, vals));
     }
     
     return insts;
@@ -139,7 +140,7 @@ public class CostCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

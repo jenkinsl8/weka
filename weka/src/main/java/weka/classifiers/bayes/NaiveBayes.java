@@ -1,49 +1,49 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    NaiveBayes.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.bayes;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.estimators.DiscreteEstimator;
 import weka.estimators.Estimator;
 import weka.estimators.KernelEstimator;
 import weka.estimators.NormalEstimator;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -92,9 +92,9 @@ import weka.estimators.NormalEstimator;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class NaiveBayes extends AbstractClassifier 
+public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
-           TechnicalInformationHandler, Aggregateable<NaiveBayes> {
+           TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5995231201785697655L;
@@ -935,40 +935,6 @@ implements OptionHandler, WeightedInstancesHandler,
     return RevisionUtils.extract("$Revision$");
   }
 
-  @Override
-  public NaiveBayes aggregate(NaiveBayes toAggregate) throws Exception {
-    
-    // Highly unlikely that discretization intervals will match between the
-    // two classifiers
-    if (m_UseDiscretization || toAggregate.getUseSupervisedDiscretization()) {
-      throw new Exception("Unable to aggregate when supervised discretization "
-      		+ "has been turned on");
-    }
-    
-    if (!m_Instances.equalHeaders(toAggregate.m_Instances)) {
-      throw new Exception("Can't aggregate - data headers don't match: "
-          + m_Instances.equalHeadersMsg(toAggregate.m_Instances));
-    }
-        
-    ((Aggregateable) m_ClassDistribution).
-      aggregate((Aggregateable) toAggregate.m_ClassDistribution);
-    
-    // aggregate all conditional estimators    
-    for (int i = 0; i < m_Distributions.length; i++) {
-      for (int j = 0; j < m_Distributions[i].length; j++) {
-        ((Aggregateable) m_Distributions[i][j]).
-          aggregate((Aggregateable) toAggregate.m_Distributions[i][j]);
-      }
-    }
-    
-    return this;
-  }
-
-  @Override
-  public void finalizeAggregation() throws Exception {
-    // nothing to do    
-  }
-  
   /**
    * Main method for testing this class.
    *

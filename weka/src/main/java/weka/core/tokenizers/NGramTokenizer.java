@@ -1,32 +1,33 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * NGramTokenizer.java
- * Copyright (C) 2007-2012 University of Waikato
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.tokenizers;
 
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Vector;
-
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -51,7 +52,7 @@ import weka.core.Utils;
  *
  * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
 public class NGramTokenizer
   extends CharacterDelimitedTokenizer {
@@ -93,14 +94,14 @@ public class NGramTokenizer
    * @return 		an enumeration of all available options.
    */
   public Enumeration listOptions() {
-    Vector<Option>	result;
+    Vector	result;
     Enumeration enm;
     
-    result = new Vector<Option>();
+    result = new Vector();
     
     enm = super.listOptions();
     while (enm.hasMoreElements())
-      result.addElement((Option)enm.nextElement());
+      result.addElement(enm.nextElement());
 
     result.addElement(new Option(
 	"\tThe max size of the Ngram (default = 3).",
@@ -315,7 +316,7 @@ public class NGramTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

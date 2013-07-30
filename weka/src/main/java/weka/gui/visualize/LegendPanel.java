@@ -1,25 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LegendPanel.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
+
+import weka.core.FastVector;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -36,9 +40,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import weka.core.FastVector;
-import weka.core.Instances;
 
 /**
  * This panel displays legends for a list of plots. If a given plot
@@ -100,7 +101,7 @@ public class LegendPanel
 	      
 	      if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
 		Color tmp = JColorChooser.showDialog
-		  (LegendPanel.this, "Select new Color", 
+		  (LegendPanel.this, Messages.getInstance().getString("LegendPanel_Main_JColorChooserShowDialog_Text"), 
 		   m_plotData.m_customColour);
 		
 		if (tmp != null) {
@@ -242,13 +243,12 @@ public class LegendPanel
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println("Usage : weka.gui.visualize.LegendPanel "
-			   +"<dataset> [dataset2], [dataset3],...");
+	System.err.println(Messages.getInstance().getString("LegendPanel_Main_Error_Text_First"));
 	System.exit(1);
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka Explorer: Legend");
+	new javax.swing.JFrame(Messages.getInstance().getString("LegendPanel_Main_JFrame_Text"));
       jf.setSize(100,100);
       jf.getContentPane().setLayout(new BorderLayout());
       final LegendPanel p2 = new LegendPanel();
@@ -262,7 +262,7 @@ public class LegendPanel
 
       FastVector plotList = new FastVector();
       for (int j=0;j<args.length;j++) {
-	System.err.println("Loading instances from " + args[j]);
+	System.err.println(Messages.getInstance().getString("LegendPanel_Main_Error_Text_Second") + args[j]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[j]));
 	Instances i = new Instances(r);

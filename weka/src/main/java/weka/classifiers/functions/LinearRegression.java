@@ -1,32 +1,29 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LinearRegression.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.matrix.Matrix;
@@ -37,9 +34,13 @@ import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -66,55 +67,54 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *  Set ridge parameter (default 1.0e-8).
  * </pre>
  * 
- * <pre> -minimal
- *  Conserve memory, don't keep dataset header and means/stdevs.
- *  Model cannot be printed out if this option is enabled. (default: keep data)</pre>
- * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class LinearRegression extends AbstractClassifier implements OptionHandler,
+public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
   
   /** for serialization */
   static final long serialVersionUID = -3364580862046573747L;
 
   /** Array for storing coefficients of linear regression. */
-  protected double[] m_Coefficients;
+  private double[] m_Coefficients;
 
   /** Which attributes are relevant? */
-  protected boolean[] m_SelectedAttributes;
+  private boolean[] m_SelectedAttributes;
 
   /** Variable for storing transformed training data. */
-  protected Instances m_TransformedData;
+  private Instances m_TransformedData;
 
   /** The filter for removing missing values. */
-  protected ReplaceMissingValues m_MissingFilter;
+  private ReplaceMissingValues m_MissingFilter;
 
   /** The filter storing the transformation from nominal to 
       binary attributes. */
-  protected NominalToBinary m_TransformFilter;
+  private NominalToBinary m_TransformFilter;
 
   /** The standard deviations of the class attribute */
-  protected double m_ClassStdDev;
+  private double m_ClassStdDev;
 
   /** The mean of the class attribute */
-  protected double m_ClassMean;
+  private double m_ClassMean;
 
   /** The index of the class attribute */
-  protected int m_ClassIndex;
+  private int m_ClassIndex;
 
   /** The attributes means */
-  protected double[] m_Means;
+  private double[] m_Means;
 
   /** The attribute standard deviations */
-  protected double[] m_StdDevs;
+  private double[] m_StdDevs;
+
+  /** True if debug output will be printed */
+  private boolean b_Debug;
 
   /** The current attribute selection method */
-  protected int m_AttributeSelection;
+  private int m_AttributeSelection;
 
   /** Attribute selection method: M5 method */
   public static final int SELECTION_M5 = 0;
@@ -123,26 +123,38 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
   /** Attribute selection method: Greedy method */
   public static final int SELECTION_GREEDY = 2;
   /** Attribute selection methods */
-  public static final Tag[] TAGS_SELECTION = {
+  public static final Tag [] TAGS_SELECTION = {
     new Tag(SELECTION_NONE, "No attribute selection"),
     new Tag(SELECTION_M5, "M5 method"),
     new Tag(SELECTION_GREEDY, "Greedy method")
   };
 
   /** Try to eliminate correlated attributes? */
-  protected boolean m_EliminateColinearAttributes = true;
+  private boolean m_EliminateColinearAttributes = true;
 
   /** Turn off all checks and conversions? */
-  protected boolean m_checksTurnedOff = false;
+  private boolean m_checksTurnedOff = false;
 
   /** The ridge parameter */
-  protected double m_Ridge = 1.0e-8;
+  private double m_Ridge = 1.0e-8;
 
-  /** Conserve memory? */
-  protected boolean m_Minimal = false;
+  /**
+   * Turns off checks for missing values, etc. Use with caution.
+   * Also turns off scaling.
+   */
+  public void turnChecksOff() {
 
-  /** Model already built? */
-  protected boolean m_ModelBuilt = false;
+    m_checksTurnedOff = true;
+  }
+
+  /**
+   * Turns on checks for missing values, etc. Also turns
+   * on scaling.
+   */
+  public void turnChecksOn() {
+
+    m_checksTurnedOff = false;
+  }
 
   /**
    * Returns a string describing this classifier
@@ -186,8 +198,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-    m_ModelBuilt = false;
-    
+  
     if (!m_checksTurnedOff) {
       // can classifier handle the data?
       getCapabilities().testWithFail(data);
@@ -211,7 +222,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
       m_MissingFilter = null;
     }
 
-    m_ClassIndex      = data.classIndex();
+    m_ClassIndex = data.classIndex();
     m_TransformedData = data;
 
     // Turn all attributes on for a start
@@ -224,7 +235,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     m_Coefficients = null;
 
     // Compute means and standard deviations
-    m_Means   = new double[data.numAttributes()];
+    m_Means = new double[data.numAttributes()];
     m_StdDevs = new double[data.numAttributes()];
     for (int j = 0; j < data.numAttributes(); j++) {
       if (j != data.classIndex()) {
@@ -237,22 +248,13 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     }
 
     m_ClassStdDev = Math.sqrt(data.variance(m_TransformedData.classIndex()));
-    m_ClassMean   = data.meanOrMode(m_TransformedData.classIndex());
+    m_ClassMean = data.meanOrMode(m_TransformedData.classIndex());
 
     // Perform the regression
     findBestModel();
 
     // Save memory
-    if (m_Minimal) {
-      m_TransformedData = null;
-      m_Means           = null;
-      m_StdDevs         = null;
-    }
-    else {
-      m_TransformedData = new Instances(data, 0);
-    }
-    
-    m_ModelBuilt = true;
+    m_TransformedData = new Instances(data, 0);
   }
 
   /**
@@ -287,14 +289,12 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @return the model as string
    */
   public String toString() {
-    if (!m_ModelBuilt)
+
+    if (m_TransformedData == null) {
       return "Linear Regression: No model built yet.";
-    
-    if (m_Minimal)
-      return "Linear Regression: Model built.";
-    
+    }
     try {
-      StringBuilder text = new StringBuilder();
+      StringBuffer text = new StringBuffer();
       int column = 0;
       boolean first = true;
       
@@ -328,39 +328,20 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector();
-
-    newVector.addElement(
-	new Option(
-	    "\tProduce debugging output.\n"
-	    + "\t(default no debugging output)",
-	    "D", 0, "-D"));
-
-    newVector.addElement(
-	new Option(
-	    "\tSet the attribute selection method"
-	    + " to use. 1 = None, 2 = Greedy.\n"
-	    + "\t(default 0 = M5' method)",
-	    "S", 1, "-S <number of selection method>"));
-
-    newVector.addElement(
-	new Option(
-	    "\tDo not try to eliminate colinear"
-	    + " attributes.\n",
-	    "C", 0, "-C"));
     
-    newVector.addElement(
-	new Option(
-	    "\tSet ridge parameter (default 1.0e-8).\n",
-	    "R", 1, "-R <double>"));
-
-    newVector.addElement(
-	new Option(
-	    "\tConserve memory, don't keep dataset header and means/stdevs.\n"
-	    + "\tModel cannot be printed out if this option is enabled."
-	    + "\t(default: keep data)",
-	    "minimal", 0, "-minimal"));
-    
+    Vector newVector = new Vector(4);
+    newVector.addElement(new Option("\tProduce debugging output.\n"
+				    + "\t(default no debugging output)",
+				    "D", 0, "-D"));
+    newVector.addElement(new Option("\tSet the attribute selection method"
+				    + " to use. 1 = None, 2 = Greedy.\n"
+				    + "\t(default 0 = M5' method)",
+				    "S", 1, "-S <number of selection method>"));
+    newVector.addElement(new Option("\tDo not try to eliminate colinear"
+				    + " attributes.\n",
+				    "C", 0, "-C"));
+    newVector.addElement(new Option("\tSet ridge parameter (default 1.0e-8).\n",
+				    "R", 1, "-R <double>"));
     return newVector.elements();
   }
 
@@ -386,10 +367,6 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    *  Set ridge parameter (default 1.0e-8).
    * </pre>
    * 
-   * <pre> -minimal
-   *  Conserve memory, don't keep dataset header and means/stdevs.
-   *  Model cannot be printed out if this option is enabled. (default: keep data)</pre>
-   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -414,7 +391,6 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     }
     setDebug(Utils.getFlag('D', options));
     setEliminateColinearAttributes(!Utils.getFlag('C', options));
-    setMinimal(Utils.getFlag("minimal", options));
   }
 
   /**
@@ -440,27 +416,27 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String[] getOptions() {
-    Vector<String>	result;
-    
-    result = new Vector<String>();
+  public String [] getOptions() {
 
-    result.add("-S");
-    result.add("" + getAttributeSelectionMethod().getSelectedTag().getID());
-    
-    if (getDebug())
-      result.add("-D");
-    
-    if (!getEliminateColinearAttributes())
-      result.add("-C");
+    String [] options = new String [6];
+    int current = 0;
 
-    result.add("-R");
-    result.add("" + getRidge());
+    options[current++] = "-S";
+    options[current++] = "" + getAttributeSelectionMethod()
+      .getSelectedTag().getID();
+    if (getDebug()) {
+      options[current++] = "-D";
+    }
+    if (!getEliminateColinearAttributes()) {
+      options[current++] = "-C";
+    }
+    options[current++] = "-R";
+    options[current++] = "" + getRidge();
 
-    if (getMinimal())
-      result.add("-minimal");
-    
-    return result.toArray(new String[result.size()]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
   
   /**
@@ -571,50 +547,32 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
   }
 
   /**
-   * Returns the tip text for this property.
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public String minimalTipText() {
-    return "If enabled, dataset header, means and stdevs get discarded to conserve memory; also, the model cannot be printed out.";
+  public String debugTipText() {
+    return "Outputs debug information to the console.";
   }
 
   /**
-   * Sets whether to be more memory conservative or being able to output
-   * the model as string.
+   * Controls whether debugging output will be printed
    *
-   * @param value	if true memory will be conserved
+   * @param debug true if debugging output should be printed
    */
-  public void setMinimal(boolean value) {
-    m_Minimal = value;
+  public void setDebug(boolean debug) {
+
+    b_Debug = debug;
   }
 
   /**
-   * Returns whether to be more memory conservative or being able to output
-   * the model as string.
+   * Controls whether debugging output will be printed
    *
-   * @return 		true if memory conservation is preferred over 
-   * 			outputting model description
+   * @return true if debugging output is printed
    */
-  public boolean getMinimal() {
-    return m_Minimal;
-  }
+  public boolean getDebug() {
 
-  /**
-   * Turns off checks for missing values, etc. Use with caution.
-   * Also turns off scaling.
-   */
-  public void turnChecksOff() {
-    m_checksTurnedOff = true;
-  }
-
-  /**
-   * Turns on checks for missing values, etc. Also turns
-   * on scaling.
-   */
-  public void turnChecksOn() {
-    m_checksTurnedOff = false;
+    return b_Debug;
   }
 
   /**
@@ -627,8 +585,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * model
    * @return true if an attribute was removed
    */
-  protected boolean deselectColinearAttributes(boolean[] selectedAttributes,
-					     double[] coefficients) {
+  private boolean deselectColinearAttributes(boolean [] selectedAttributes,
+					     double [] coefficients) {
 
     double maxSC = 1.5;
     int maxAttr = -1, coeff = 0;
@@ -645,7 +603,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     }
     if (maxAttr >= 0) {
       selectedAttributes[maxAttr] = false;
-      if (m_Debug) {
+      if (b_Debug) {
 	System.out.println("Deselected colinear attribute:" + (maxAttr + 1)
 			   + " with standardised coefficient: " + maxSC);
       }
@@ -660,13 +618,13 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    *
    * @throws Exception if regression can't be done
    */
-  protected void findBestModel() throws Exception {
+  private void findBestModel() throws Exception {
 
     // For the weighted case we still use numInstances in
     // the calculation of the Akaike criterion. 
     int numInstances = m_TransformedData.numInstances();
 
-    if (m_Debug) {
+    if (b_Debug) {
       System.out.println((new Instances(m_TransformedData, 0)).toString());
     }
 
@@ -687,7 +645,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 
     double fullMSE = calculateSE(m_SelectedAttributes, m_Coefficients);
     double akaike = (numInstances - numAttributes) + 2 * numAttributes;
-    if (m_Debug) {
+    if (b_Debug) {
       System.out.println("Initial Akaike value: " + akaike);
     }
 
@@ -699,7 +657,7 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 
       // Greedy attribute removal
       do {
-	boolean[] currentSelected = (boolean[]) m_SelectedAttributes.clone();
+	boolean [] currentSelected = (boolean []) m_SelectedAttributes.clone();
 	improved = false;
 	currentNumAttributes--;
 
@@ -708,18 +666,18 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 
 	    // Calculate the akaike rating without this attribute
 	    currentSelected[i] = false;
-	    double[] currentCoeffs = doRegression(currentSelected);
+	    double [] currentCoeffs = doRegression(currentSelected);
 	    double currentMSE = calculateSE(currentSelected, currentCoeffs);
 	    double currentAkaike = currentMSE / fullMSE 
 	      * (numInstances - numAttributes)
 	      + 2 * currentNumAttributes;
-	    if (m_Debug) {
+	    if (b_Debug) {
 	      System.out.println("(akaike: " + currentAkaike);
 	    }
 
 	    // If it is better than the current best
 	    if (currentAkaike < akaike) {
-	      if (m_Debug) {
+	      if (b_Debug) {
 		System.err.println("Removing attribute " + (i + 1)
 				   + " improved Akaike: " + currentAkaike);
 	      }
@@ -762,18 +720,18 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 	// See whether removing it improves the Akaike score
 	if (minAttr >= 0) {
 	  m_SelectedAttributes[minAttr] = false;
-	  double[] currentCoeffs = doRegression(m_SelectedAttributes);
+	  double [] currentCoeffs = doRegression(m_SelectedAttributes);
 	  double currentMSE = calculateSE(m_SelectedAttributes, currentCoeffs);
 	  double currentAkaike = currentMSE / fullMSE 
 	    * (numInstances - numAttributes)
 	    + 2 * currentNumAttributes;
-	  if (m_Debug) {
+	  if (b_Debug) {
 	    System.out.println("(akaike: " + currentAkaike);
 	  }
 
 	  // If it is better than the current best
 	  if (currentAkaike < akaike) {
-	    if (m_Debug) {
+	    if (b_Debug) {
 	      System.err.println("Removing attribute " + (minAttr + 1)
 				 + " improved Akaike: " + currentAkaike);
 	    }
@@ -804,8 +762,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @throws Exception if there is a missing class value in the training
    * data
    */
-  protected double calculateSE(boolean[] selectedAttributes, 
-			      double[] coefficients) throws Exception {
+  private double calculateSE(boolean [] selectedAttributes, 
+			      double [] coefficients) throws Exception {
 
     double mse = 0;
     for (int i = 0; i < m_TransformedData.numInstances(); i++) {
@@ -831,9 +789,9 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @throws Exception if the class attribute of the input instance
    * is not assigned
    */
-  protected double regressionPrediction(Instance transformedInstance,
-				      boolean[] selectedAttributes,
-				      double[] coefficients) 
+  private double regressionPrediction(Instance transformedInstance,
+				      boolean [] selectedAttributes,
+				      double [] coefficients) 
   throws Exception {
     
     double result = 0;
@@ -859,10 +817,10 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
    * @return an array of coefficients for the linear regression model.
    * @throws Exception if an error occurred during the regression.
    */
-  protected double[] doRegression(boolean[] selectedAttributes) 
+  private double [] doRegression(boolean [] selectedAttributes) 
   throws Exception {
 
-    if (m_Debug) {
+    if (b_Debug) {
       System.out.print("doRegression(");
       for (int i = 0; i < selectedAttributes.length; i++) {
 	System.out.print(" " + selectedAttributes[i]);
@@ -884,11 +842,11 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
       dependent = new Matrix(m_TransformedData.numInstances(), 1);
       for (int i = 0; i < m_TransformedData.numInstances(); i ++) {
 	Instance inst = m_TransformedData.instance(i);
-        double sqrt_weight = Math.sqrt(inst.weight());
+	double sqrt_weight = Math.sqrt(inst.weight());
 	int column = 0;
 	for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
 	  if (j == m_ClassIndex) {
-      dependent.set(i, 0, inst.classValue() * sqrt_weight);
+	    dependent.set(i, 0, inst.classValue() * sqrt_weight);
 	  } else {
 	    if (selectedAttributes[j]) {
 	      double value = inst.value(j) - m_Means[j];
@@ -898,12 +856,12 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
 	      if (!m_checksTurnedOff) {
 		value /= m_StdDevs[j];
 	      }
-        independent.set(i, column, value * sqrt_weight);
+	      independent.set(i, column, value * sqrt_weight);
 	      column++;
 	    }
 	  }
 	}
-      }
+      }      
     }
 
     // Compute coefficients (note that we have to treat the
@@ -911,8 +869,8 @@ public class LinearRegression extends AbstractClassifier implements OptionHandle
     // by the ridge constant.)
     double[] coefficients = new double[numAttributes + 1];
     if (numAttributes > 0) {
-      double[] coeffsWithoutIntercept  =
-          independent.regression(dependent, m_Ridge).getCoefficients();
+      double[] coeffsWithoutIntercept  =	
+        independent.regression(dependent, m_Ridge).getCoefficients();
       System.arraycopy(coeffsWithoutIntercept, 0, coefficients, 0,
 		       numAttributes);
     }
