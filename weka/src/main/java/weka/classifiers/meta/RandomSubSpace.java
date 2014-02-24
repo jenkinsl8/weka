@@ -15,19 +15,16 @@
 
 /*
  *    RandomSubSpace.java
- *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
+import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,12 +32,17 @@ import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.filters.unsupervised.attribute.Remove;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  <!-- globalinfo-start -->
@@ -207,8 +209,8 @@ public class RandomSubSpace
    *
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector result = new Vector();
 
     result.addElement(new Option(
 	"\tSize of each subspace:\n"
@@ -216,7 +218,10 @@ public class RandomSubSpace
 	+ "\t\t>=1: absolute number of attributes\n",
 	"P", 1, "-P"));
 
-    result.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      result.addElement(enu.nextElement());
+    }
     
     return result.elements();
   }
@@ -289,8 +294,6 @@ public class RandomSubSpace
       setSubSpaceSize(0.5);
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -299,12 +302,18 @@ public class RandomSubSpace
    * @return 		an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    Vector<String>        result = new Vector<String>();
+    Vector        result;
+    String[]      options;
+    int           i;
+    
+    result  = new Vector();
 
     result.add("-P");
     result.add("" + getSubSpaceSize());
     
-    Collections.addAll(result, super.getOptions());
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
     return (String[]) result.toArray(new String[result.size()]);
   }

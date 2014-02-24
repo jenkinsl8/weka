@@ -15,13 +15,13 @@
 
 /*
  *    IterativeClassifier.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001  University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Instances;
+import weka.core.*;
 
 /**
  * Interface for classifiers that can induce models of growing
@@ -44,17 +44,17 @@ public interface IterativeClassifier {
 
   /**
    * Performs one iteration.
-   *
+   * 
    * @param iteration the index of the current iteration (0-based)
-   * @exception Exception if this iteration fails
-   */
+   * @exception Exception if this iteration fails 
+   */  
   void next(int iteration) throws Exception;
 
   /**
    * Signal end of iterating, useful for any house-keeping/cleanup
-   *
-   * @exception Exception if cleanup fails
-   */
+   * 
+   * @exception Exception if cleanup fails 
+   */  
   void done() throws Exception;
 
   /**

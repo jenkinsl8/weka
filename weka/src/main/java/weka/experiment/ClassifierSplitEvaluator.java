@@ -29,7 +29,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -109,7 +108,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
-  AdditionalMeasureProducer, RevisionHandler {
+    AdditionalMeasureProducer, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8511241602760467265L;
@@ -173,8 +172,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /** whether to skip determination of sizes (train/test/classifier). */
   private boolean m_NoSizeDetermination;
 
-  protected final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
-  protected int m_numPluginStatistics = 0;
+  private final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  private int m_numPluginStatistics = 0;
 
   /**
    * No args constructor.
@@ -184,10 +183,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     updateOptions();
 
     List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
-      .getPluginMetrics();
+        .getPluginMetrics();
     if (pluginMetrics != null) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
-        System.err.println(m.getMetricName());
         if (m.appliesToNominalClass()) {
           m_pluginMetrics.add(m);
           m_numPluginStatistics += m.getStatisticNames().size();
@@ -204,7 +202,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    */
   public String globalInfo() {
     return " A SplitEvaluator that produces results for a classification "
-      + "scheme on a nominal class attribute.";
+        + "scheme on a nominal class attribute.";
   }
 
   /**
@@ -213,36 +211,38 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(5);
+    Vector newVector = new Vector(4);
 
-    newVector
-      .addElement(new Option("\tThe full class name of the classifier.\n"
-        + "\teg: weka.classifiers.bayes.NaiveBayes", "W", 1, "-W <class name>"));
     newVector.addElement(new Option(
-      "\tThe index of the class for which IR statistics\n"
-        + "\tare to be output. (default 1)", "C", 1, "-C <index>"));
+        "\tThe full class name of the classifier.\n"
+            + "\teg: weka.classifiers.bayes.NaiveBayes", "W", 1,
+        "-W <class name>"));
     newVector.addElement(new Option(
-      "\tThe index of an attribute to output in the\n"
-        + "\tresults. This attribute should identify an\n"
-        + "\tinstance in order to know which instances are\n"
-        + "\tin the test set of a cross validation. if 0\n"
-        + "\tno output (default 0).", "I", 1, "-I <index>"));
+        "\tThe index of the class for which IR statistics\n"
+            + "\tare to be output. (default 1)", "C", 1, "-C <index>"));
     newVector.addElement(new Option(
-      "\tAdd target and prediction columns to the result\n"
-        + "\tfor each fold.", "P", 0, "-P"));
+        "\tThe index of an attribute to output in the\n"
+            + "\tresults. This attribute should identify an\n"
+            + "\tinstance in order to know which instances are\n"
+            + "\tin the test set of a cross validation. if 0\n"
+            + "\tno output (default 0).", "I", 1, "-I <index>"));
     newVector.addElement(new Option(
-      "\tSkips the determination of sizes (train/test/classifier)\n"
-        + "\t(default: sizes are determined)", "no-size", 0, "-no-size"));
+        "\tAdd target and prediction columns to the result\n"
+            + "\tfor each fold.", "P", 0, "-P"));
+    newVector.addElement(new Option(
+        "\tSkips the determination of sizes (train/test/classifier)\n"
+            + "\t(default: sizes are determined)", "no-size", 0, "-no-size"));
 
     if ((m_Template != null) && (m_Template instanceof OptionHandler)) {
       newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to classifier " + m_Template.getClass().getName()
-          + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) m_Template)
-        .listOptions()));
-
+          "\nOptions specific to classifier " + m_Template.getClass().getName()
+              + ":"));
+      Enumeration enu = ((OptionHandler) m_Template).listOptions();
+      while (enu.hasMoreElements()) {
+        newVector.addElement(enu.nextElement());
+      }
     }
     return newVector.elements();
   }
@@ -310,7 +310,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     String cName = Utils.getOption('W', options);
     if (cName.length() == 0) {
       throw new Exception("A classifier must be specified with"
-        + " the -W option.");
+          + " the -W option.");
     }
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
@@ -318,7 +318,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     setClassifier(AbstractClassifier.forName(cName, null));
     if (getClassifier() instanceof OptionHandler) {
       ((OptionHandler) getClassifier()).setOptions(Utils
-        .partitionOptions(options));
+          .partitionOptions(options));
       updateOptions();
     }
 
@@ -364,16 +364,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     result.add("-I");
     result.add("" + (m_attID + 1));
 
-    if (getPredTargetColumn()) {
+    if (getPredTargetColumn())
       result.add("-P");
-    }
 
     result.add("-C");
     result.add("" + (m_IRclass + 1));
 
-    if (getNoSizeDetermination()) {
+    if (getNoSizeDetermination())
       result.add("-no-size");
-    }
 
     result.add("--");
     result.addAll(Arrays.asList(classifierOptions));
@@ -400,10 +398,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       m_doesProduce = new boolean[m_AdditionalMeasures.length];
 
       if (m_Template instanceof AdditionalMeasureProducer) {
-        Enumeration<String> en = ((AdditionalMeasureProducer) m_Template)
-          .enumerateMeasures();
+        Enumeration en = ((AdditionalMeasureProducer) m_Template)
+            .enumerateMeasures();
         while (en.hasMoreElements()) {
-          String mname = en.nextElement();
+          String mname = (String) en.nextElement();
           for (int j = 0; j < m_AdditionalMeasures.length; j++) {
             if (mname.compareToIgnoreCase(m_AdditionalMeasures[j]) == 0) {
               m_doesProduce[j] = true;
@@ -423,14 +421,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * @return an enumeration of the measure names
    */
   @Override
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     if (m_Template instanceof AdditionalMeasureProducer) {
-      Enumeration<String> en = ((AdditionalMeasureProducer) m_Template)
-        .enumerateMeasures();
+      Enumeration en = ((AdditionalMeasureProducer) m_Template)
+          .enumerateMeasures();
       while (en.hasMoreElements()) {
-        String mname = en.nextElement();
-        newVector.add(mname);
+        String mname = (String) en.nextElement();
+        newVector.addElement(mname);
       }
     }
     return newVector.elements();
@@ -448,16 +446,16 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     if (m_Template instanceof AdditionalMeasureProducer) {
       if (m_Classifier == null) {
         throw new IllegalArgumentException("ClassifierSplitEvaluator: "
-          + "Can't return result for measure, "
-          + "classifier has not been built yet.");
+            + "Can't return result for measure, "
+            + "classifier has not been built yet.");
       }
       return ((AdditionalMeasureProducer) m_Classifier)
-        .getMeasure(additionalMeasureName);
+          .getMeasure(additionalMeasureName);
     } else {
       throw new IllegalArgumentException("ClassifierSplitEvaluator: "
-        + "Can't return value for : " + additionalMeasureName + ". "
-        + m_Template.getClass().getName() + " "
-        + "is not an AdditionalMeasureProducer");
+          + "Can't return value for : " + additionalMeasureName + ". "
+          + m_Template.getClass().getName() + " "
+          + "is not an AdditionalMeasureProducer");
     }
   }
 
@@ -528,12 +526,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
     overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
 
-    if (getAttributeID() >= 0) {
+    if (getAttributeID() >= 0)
       overall_length += 1;
-    }
-    if (getPredTargetColumn()) {
+    if (getPredTargetColumn())
       overall_length += 2;
-    }
 
     overall_length += m_numPluginStatistics;
 
@@ -615,9 +611,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultTypes[current++] = doub;
 
     // ID/Targets/Predictions
-    if (getAttributeID() >= 0) {
+    if (getAttributeID() >= 0)
       resultTypes[current++] = "";
-    }
     if (getPredTargetColumn()) {
       resultTypes[current++] = "";
       resultTypes[current++] = "";
@@ -655,14 +650,12 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
     overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
-    if (getAttributeID() >= 0) {
+    if (getAttributeID() >= 0)
       overall_length += 1;
-    }
-    if (getPredTargetColumn()) {
+    if (getPredTargetColumn())
       overall_length += 2;
-    }
 
-    overall_length += m_numPluginStatistics;
+    overall_length += m_pluginMetrics.size();
 
     String[] resultNames = new String[overall_length];
     int current = 0;
@@ -745,9 +738,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultNames[current++] = "Size_of_Predicted_Regions";
 
     // ID/Targets/Predictions
-    if (getAttributeID() >= 0) {
+    if (getAttributeID() >= 0)
       resultNames[current++] = "Instance_ID";
-    }
     if (getPredTargetColumn()) {
       resultNames[current++] = "Targets";
       resultNames[current++] = "Predictions";
@@ -798,20 +790,17 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
     overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
-    if (getAttributeID() >= 0) {
+    if (getAttributeID() >= 0)
       overall_length += 1;
-    }
-    if (getPredTargetColumn()) {
+    if (getPredTargetColumn())
       overall_length += 2;
-    }
 
-    overall_length += m_numPluginStatistics;
+    overall_length += m_pluginMetrics.size();
 
     ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
     boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
-    if (canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled()) {
+    if (canMeasureCPUTime && !thMonitor.isThreadCpuTimeEnabled())
       thMonitor.setThreadCpuTimeEnabled(true);
-    }
 
     Object[] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
@@ -822,24 +811,20 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
     // training classifier
     trainTimeStart = System.currentTimeMillis();
-    if (canMeasureCPUTime) {
+    if (canMeasureCPUTime)
       CPUStartTime = thMonitor.getThreadUserTime(thID);
-    }
     m_Classifier.buildClassifier(train);
-    if (canMeasureCPUTime) {
+    if (canMeasureCPUTime)
       trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    }
     trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
 
     // testing classifier
     testTimeStart = System.currentTimeMillis();
-    if (canMeasureCPUTime) {
+    if (canMeasureCPUTime)
       CPUStartTime = thMonitor.getThreadUserTime(thID);
-    }
     predictions = eval.evaluateModel(m_Classifier, test);
-    if (canMeasureCPUTime) {
+    if (canMeasureCPUTime)
       testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
-    }
     testTimeElapsed = System.currentTimeMillis() - testTimeStart;
     thMonitor = null;
 
@@ -887,7 +872,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
     result[current++] = new Double(
-      eval.matthewsCorrelationCoefficient(m_IRclass));
+        eval.matthewsCorrelationCoefficient(m_IRclass));
     result[current++] = new Double(eval.areaUnderROC(m_IRclass));
     result[current++] = new Double(eval.areaUnderPRC(m_IRclass));
 
@@ -946,16 +931,14 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     if (getAttributeID() >= 0) {
       String idsString = "";
       if (test.attribute(m_attID).isNumeric()) {
-        if (test.numInstances() > 0) {
+        if (test.numInstances() > 0)
           idsString += test.instance(0).value(m_attID);
-        }
         for (int i = 1; i < test.numInstances(); i++) {
           idsString += "|" + test.instance(i).value(m_attID);
         }
       } else {
-        if (test.numInstances() > 0) {
+        if (test.numInstances() > 0)
           idsString += test.instance(0).stringValue(m_attID);
-        }
         for (int i = 1; i < test.numInstances(); i++) {
           idsString += "|" + test.instance(i).stringValue(m_attID);
         }
@@ -991,7 +974,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
           targetsString += test.instance(0).stringValue(test.classIndex());
           for (int i = 1; i < test.numInstances(); i++) {
             targetsString += "|"
-              + test.instance(i).stringValue(test.classIndex());
+                + test.instance(i).stringValue(test.classIndex());
           }
           result[current++] = targetsString;
         }
@@ -1000,10 +983,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
         if (predictions.length > 0) {
           String predictionsString = "";
           predictionsString += test.classAttribute()
-            .value((int) predictions[0]);
+              .value((int) predictions[0]);
           for (int i = 1; i < predictions.length; i++) {
             predictionsString += "|"
-              + test.classAttribute().value((int) predictions[i]);
+                + test.classAttribute().value((int) predictions[i]);
           }
           result[current++] = predictionsString;
         }
@@ -1020,7 +1003,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       if (m_doesProduce[i]) {
         try {
           double dv = ((AdditionalMeasureProducer) m_Classifier)
-            .getMeasure(m_AdditionalMeasures[i]);
+              .getMeasure(m_AdditionalMeasures[i]);
           if (!Utils.isMissingValue(dv)) {
             Double value = new Double(dv);
             result[current++] = value;
@@ -1172,7 +1155,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
     if (m_Template instanceof OptionHandler) {
       m_ClassifierOptions = Utils.joinOptions(((OptionHandler) m_Template)
-        .getOptions());
+          .getOptions());
     } else {
       m_ClassifierOptions = "";
     }
@@ -1197,7 +1180,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       setClassifier((Classifier) Class.forName(newClassifierName).newInstance());
     } catch (Exception ex) {
       throw new Exception("Can't find Classifier with class name: "
-        + newClassifierName);
+          + newClassifierName);
     }
   }
 
@@ -1225,7 +1208,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
           if (m_doesProduce[i]) {
             try {
               double dv = ((AdditionalMeasureProducer) m_Classifier)
-                .getMeasure(m_AdditionalMeasures[i]);
+                  .getMeasure(m_AdditionalMeasures[i]);
               if (!Utils.isMissingValue(dv)) {
                 Double value = new Double(dv);
                 result.append(m_AdditionalMeasures[i] + " : " + value + '\n');
@@ -1255,7 +1238,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
       return result + "<null> classifier";
     }
     return result + m_Template.getClass().getName() + " " + m_ClassifierOptions
-      + "(version " + m_ClassifierVersion + ")";
+        + "(version " + m_ClassifierVersion + ")";
   }
 
   /**

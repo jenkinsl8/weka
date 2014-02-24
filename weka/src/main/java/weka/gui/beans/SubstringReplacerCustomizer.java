@@ -52,7 +52,7 @@ import weka.gui.PropertySheetPanel;
  * @version $Revision$
  */
 public class SubstringReplacerCustomizer extends JPanel implements
-  EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
+    EnvironmentHandler, BeanCustomizer, CustomizerCloseRequester {
 
   /**
    * For serialization
@@ -99,8 +99,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
     m_attListField = new EnvironmentField(m_env);
     attListP.add(m_attListField, BorderLayout.CENTER);
     attListP
-      .setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> "
-        + "or a comma-separated list of named attributes</html>");
+        .setToolTipText("<html>Accepts a range of indexes (e.g. '1,2,6-10')<br> "
+            + "or a comma-separated list of named attributes</html>");
     JPanel matchP = new JPanel();
     matchP.setLayout(new BorderLayout());
     matchP.setBorder(BorderFactory.createTitledBorder("Match"));
@@ -119,13 +119,13 @@ public class SubstringReplacerCustomizer extends JPanel implements
     JPanel checkHolder = new JPanel();
     checkHolder.setLayout(new GridLayout(0, 2));
     JLabel regexLab = new JLabel("Match using a regular expression",
-      SwingConstants.RIGHT);
+        SwingConstants.RIGHT);
     regexLab
-      .setToolTipText("Use a regular expression rather than literal match");
+        .setToolTipText("Use a regular expression rather than literal match");
     checkHolder.add(regexLab);
     checkHolder.add(m_regexCheck);
     JLabel caseLab = new JLabel("Ignore case when matching",
-      SwingConstants.RIGHT);
+        SwingConstants.RIGHT);
     checkHolder.add(caseLab);
     checkHolder.add(m_ignoreCaseCheck);
 
@@ -152,7 +152,7 @@ public class SubstringReplacerCustomizer extends JPanel implements
     listPanel.add(butHolder, BorderLayout.NORTH);
     JScrollPane js = new JScrollPane(m_list);
     js.setBorder(BorderFactory
-      .createTitledBorder("Match-replace list (rows applied in order)"));
+        .createTitledBorder("Match-replace list (rows applied in order)"));
     listPanel.add(js, BorderLayout.CENTER);
     add(listPanel, BorderLayout.CENTER);
 
@@ -163,8 +163,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object mr = m_list.getSelectedValue();
         if (mr != null) {
-          ((SubstringReplacerRules.SubstringReplacerMatchRule) mr)
-            .setAttsToApplyTo(m_attListField.getText());
+          ((SubstringReplacer.MatchReplace) mr).setAttsToApplyTo(m_attListField
+              .getText());
           m_list.repaint();
         }
       }
@@ -175,8 +175,7 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object mr = m_list.getSelectedValue();
         if (mr != null) {
-          ((SubstringReplacerRules.SubstringReplacerMatchRule) mr)
-            .setMatch(m_matchField.getText());
+          ((SubstringReplacer.MatchReplace) mr).setMatch(m_matchField.getText());
           m_list.repaint();
         }
       }
@@ -187,8 +186,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void propertyChange(PropertyChangeEvent e) {
         Object mr = m_list.getSelectedValue();
         if (mr != null) {
-          ((SubstringReplacerRules.SubstringReplacerMatchRule) mr)
-            .setReplace(m_replaceField.getText());
+          ((SubstringReplacer.MatchReplace) mr).setReplace(m_replaceField
+              .getText());
           m_list.repaint();
         }
       }
@@ -204,7 +203,7 @@ public class SubstringReplacerCustomizer extends JPanel implements
 
           Object entry = m_list.getSelectedValue();
           if (entry != null) {
-            SubstringReplacerRules.SubstringReplacerMatchRule mr = (SubstringReplacerRules.SubstringReplacerMatchRule) entry;
+            SubstringReplacer.MatchReplace mr = (SubstringReplacer.MatchReplace) entry;
             m_attListField.setText(mr.getAttsToApplyTo());
             m_matchField.setText(mr.getMatch());
             m_replaceField.setText(mr.getReplace());
@@ -218,16 +217,16 @@ public class SubstringReplacerCustomizer extends JPanel implements
     m_newBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        SubstringReplacerRules.SubstringReplacerMatchRule mr = new SubstringReplacerRules.SubstringReplacerMatchRule();
+        SubstringReplacer.MatchReplace mr = new SubstringReplacer.MatchReplace();
 
         String atts = (m_attListField.getText() != null) ? m_attListField
-          .getText() : "";
+            .getText() : "";
         mr.setAttsToApplyTo(atts);
         String match = (m_matchField.getText() != null) ? m_matchField
-          .getText() : "";
+            .getText() : "";
         mr.setMatch(match);
         String replace = (m_replaceField.getText() != null) ? m_replaceField
-          .getText() : "";
+            .getText() : "";
         mr.setReplace(replace);
         mr.setRegex(m_regexCheck.isSelected());
         mr.setIgnoreCase(m_ignoreCaseCheck.isSelected());
@@ -277,8 +276,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         Object mr = m_list.getSelectedValue();
         if (mr != null) {
-          ((SubstringReplacerRules.SubstringReplacerMatchRule) mr)
-            .setRegex(m_regexCheck.isSelected());
+          ((SubstringReplacer.MatchReplace) mr).setRegex(m_regexCheck
+              .isSelected());
           m_list.repaint();
         }
       }
@@ -289,8 +288,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
       public void actionPerformed(ActionEvent e) {
         Object mr = m_list.getSelectedValue();
         if (mr != null) {
-          ((SubstringReplacerRules.SubstringReplacerMatchRule) mr)
-            .setIgnoreCase(m_ignoreCaseCheck.isSelected());
+          ((SubstringReplacer.MatchReplace) mr).setIgnoreCase(m_ignoreCaseCheck
+              .isSelected());
           m_list.repaint();
         }
       }
@@ -348,8 +347,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
         m_upBut.setEnabled(true);
         m_downBut.setEnabled(true);
         for (String mrPart : parts) {
-          SubstringReplacerRules.SubstringReplacerMatchRule mr = new SubstringReplacerRules.SubstringReplacerMatchRule(
-            mrPart);
+          SubstringReplacer.MatchReplace mr = new SubstringReplacer.MatchReplace(
+              mrPart);
           m_listModel.addElement(mr);
         }
 
@@ -390,8 +389,8 @@ public class SubstringReplacerCustomizer extends JPanel implements
   protected void closingOK() {
     StringBuffer buff = new StringBuffer();
     for (int i = 0; i < m_listModel.size(); i++) {
-      SubstringReplacerRules.SubstringReplacerMatchRule mr = (SubstringReplacerRules.SubstringReplacerMatchRule) m_listModel
-        .elementAt(i);
+      SubstringReplacer.MatchReplace mr = (SubstringReplacer.MatchReplace) m_listModel
+          .elementAt(i);
 
       buff.append(mr.toStringInternal());
       if (i < m_listModel.size() - 1) {

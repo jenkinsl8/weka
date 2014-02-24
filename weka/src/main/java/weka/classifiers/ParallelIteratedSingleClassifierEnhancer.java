@@ -15,13 +15,12 @@
 
 /*
  *    ParallelIteratedSingleClassifierEnhancer.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -66,17 +65,19 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
               "\tNumber of execution slots.\n"
               + "\t(default 1 - i.e. no parallelism)",
               "num-slots", 1, "-num-slots <num>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 

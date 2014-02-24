@@ -15,7 +15,7 @@
 
 /*
  *    ChartEvent.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,16 +26,17 @@ import java.util.Vector;
 
 /**
  * Event encapsulating info for plotting a data point on the StripChart
- * 
+ *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
  * @version $Revision$
  */
-public class ChartEvent extends EventObject {
+public class ChartEvent
+  extends EventObject {
 
   /** for serialization */
   private static final long serialVersionUID = 7812460715499569390L;
 
-  private Vector<String> m_legendText;
+  private Vector m_legendText;
   private double m_max;
   private double m_min;
 
@@ -44,11 +45,11 @@ public class ChartEvent extends EventObject {
   /**
    * Y values of the data points
    */
-  private double[] m_dataPoint;
+  private double [] m_dataPoint;
 
   /**
    * Creates a new <code>ChartEvent</code> instance.
-   * 
+   *
    * @param source the source of the event
    * @param legendText a vector of strings to display in the legend
    * @param min minimum y value
@@ -56,8 +57,8 @@ public class ChartEvent extends EventObject {
    * @param dataPoint an array of y values to plot
    * @param reset true if display is to be reset
    */
-  public ChartEvent(Object source, Vector<String> legendText, double min,
-    double max, double[] dataPoint, boolean reset) {
+  public ChartEvent(Object source, Vector legendText, double min, double max,
+		    double [] dataPoint, boolean reset) {
     super(source);
     m_legendText = legendText;
     m_max = max;
@@ -68,7 +69,7 @@ public class ChartEvent extends EventObject {
 
   /**
    * Creates a new <code>ChartEvent</code> instance.
-   * 
+   *
    * @param source the source of the event
    */
   public ChartEvent(Object source) {
@@ -77,25 +78,25 @@ public class ChartEvent extends EventObject {
 
   /**
    * Get the legend text vector
-   * 
+   *
    * @return a <code>Vector</code> value
    */
-  public Vector<String> getLegendText() {
+  public Vector getLegendText() {
     return m_legendText;
   }
 
   /**
    * Set the legend text vector
-   * 
+   *
    * @param lt a <code>Vector</code> value
    */
-  public void setLegendText(Vector<String> lt) {
+  public void setLegendText(Vector lt) {
     m_legendText = lt;
   }
 
   /**
    * Get the min y value
-   * 
+   *
    * @return a <code>double</code> value
    */
   public double getMin() {
@@ -104,7 +105,7 @@ public class ChartEvent extends EventObject {
 
   /**
    * Set the min y value
-   * 
+   *
    * @param m a <code>double</code> value
    */
   public void setMin(double m) {
@@ -113,7 +114,7 @@ public class ChartEvent extends EventObject {
 
   /**
    * Get the max y value
-   * 
+   *
    * @return a <code>double</code> value
    */
   public double getMax() {
@@ -122,7 +123,7 @@ public class ChartEvent extends EventObject {
 
   /**
    * Set the max y value
-   * 
+   *
    * @param m a <code>double</code> value
    */
   public void setMax(double m) {
@@ -131,25 +132,25 @@ public class ChartEvent extends EventObject {
 
   /**
    * Get the data point
-   * 
+   *
    * @return a <code>double[]</code> value
    */
-  public double[] getDataPoint() {
+  public double [] getDataPoint() {
     return m_dataPoint;
   }
 
   /**
    * Set the data point
-   * 
+   *
    * @param dp a <code>double[]</code> value
    */
-  public void setDataPoint(double[] dp) {
+  public void setDataPoint(double [] dp) {
     m_dataPoint = dp;
   }
 
   /**
    * Set the reset flag
-   * 
+   *
    * @param reset a <code>boolean</code> value
    */
   public void setReset(boolean reset) {
@@ -158,7 +159,7 @@ public class ChartEvent extends EventObject {
 
   /**
    * get the value of the reset flag
-   * 
+   *
    * @return a <code>boolean</code> value
    */
   public boolean getReset() {

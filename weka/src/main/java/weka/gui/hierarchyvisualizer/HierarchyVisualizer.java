@@ -15,13 +15,13 @@
 
 /*
  * HierarchicalClusterer.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
 */
 
 package weka.gui.hierarchyvisualizer;
 /**
  * Shows cluster trees represented in Newick format as dendrograms.
- *
+ * 
  * @author Remco Bouckaert (rrb@xm.co.nz, remco@cs.waikato.ac.nz)
  * @version $Revision$
  */
@@ -31,6 +31,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -105,8 +106,8 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 		String m_sLabel;
 		//Vector<String> m_sMetaDataValues;
 		String m_sMetaData;
-
-
+		
+		
 		/** list of children of this node **/
 		Node[] m_children;
 		/** parent node in the tree, null if root **/
@@ -172,7 +173,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 			buf.append(":" + m_fLength);
 			return buf.toString();
 		}
-
+		
 		double draw(Graphics g) {
 			if (isLeaf()) {
 				int x = (int)(m_fPosX * m_fScaleX);
@@ -256,7 +257,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 	/**
 	 * convert string containing Newick tree into tree datastructure but only in
 	 * the limited format as contained in m_sTrees
-	 *
+	 * 
 	 * @param sStr
 	 * @return tree consisting of a Node
 	 */
@@ -273,7 +274,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 		positionRest(m_tree);
 		m_fHeight = positionHeight(m_tree, 0);
 	}
-
+	
 	Node parseNewick2(String sStr) throws Exception {
 		// System.out.println(sStr);
 		if (sStr == null || sStr.length() == 0) {
@@ -345,7 +346,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 		return node;
 	}
 	double m_fTmpLength;
-
+	
 	/**
 	 * Fits the tree to the current screen size. Call this after window has been
 	 * created to get the entire tree to be in view upon launch.
@@ -366,7 +367,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 
 	/**
 	 * Updates the screen contents.
-	 *
+	 * 
 	 * @param g
 	 *            the drawing surface.
 	 */
@@ -382,14 +383,18 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 	}
 
 
+	@Override
 	public void componentHidden(ComponentEvent e) {}
 
+	@Override
 	public void componentMoved(ComponentEvent e) {}
 
+	@Override
 	public void componentResized(ComponentEvent e) {
 		fitToScreen();
 	}
 
+	@Override
 	public void componentShown(ComponentEvent e) {}
 
 	/**

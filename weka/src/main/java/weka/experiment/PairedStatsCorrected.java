@@ -15,15 +15,15 @@
 
 /*
  *    PairedStatsCorrected.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
 import weka.core.RevisionUtils;
-import weka.core.Statistics;
 import weka.core.Utils;
+import weka.core.Statistics;
 
 /**
  * A class for storing stats on a paired comparison. This version is

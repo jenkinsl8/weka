@@ -15,13 +15,13 @@
 
 /*
  *    UpdateableClassifier.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Instance;
+import weka.core.*;
 
 /**
  * Interface to incremental classification models that can learn using
@@ -42,3 +42,4 @@ public interface UpdateableClassifier {
   void updateClassifier(Instance instance) throws Exception;
 
 }
+ 

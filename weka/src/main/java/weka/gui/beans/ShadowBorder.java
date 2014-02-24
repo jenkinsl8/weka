@@ -15,18 +15,14 @@
 
 /*
  *    ShadowBorder.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Insets;
-
-import javax.swing.border.AbstractBorder;
+import java.awt.*;
+import javax.swing.border.*;
 
 public class ShadowBorder extends AbstractBorder {
 

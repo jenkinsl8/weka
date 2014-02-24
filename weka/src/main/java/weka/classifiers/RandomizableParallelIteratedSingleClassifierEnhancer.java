@@ -15,13 +15,12 @@
 
 /*
  *    RandomizableParallelIteratedSingleClassifierEnhancer.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -33,7 +32,7 @@ import weka.core.Utils;
  * Abstract utility class for handling settings common to randomizable
  * meta classifiers that build an ensemble in parallel from a single base
  * learner.
- *
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
@@ -44,7 +43,7 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
    * For serialization
    */
   private static final long serialVersionUID = 1298141000373615374L;
-
+  
   /** The random number seed. */
   protected int m_Seed = 1;
 
@@ -53,16 +52,19 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
               "\tRandom number seed.\n"
               + "\t(default 1)",
               "S", 1, "-S <num>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -84,7 +86,7 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
+    
     String seed = Utils.getOption('S', options);
     if (seed.length() != 0) {
       setSeed(Integer.parseInt(seed));
@@ -102,16 +104,19 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
 
-    options.add("-S");
-    options.add("" + getSeed());
+    int current = 0;
+    options[current++] = "-S"; 
+    options[current++] = "" + getSeed();
 
-    Collections.addAll(options, super.getOptions());
+    System.arraycopy(superOptions, 0, options, current, 
+                     superOptions.length);
 
-    return options.toArray(new String[0]);
+    return options;
   }
-
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -124,7 +129,7 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
   /**
    * Set the seed for random number generation.
    *
-   * @param seed the seed
+   * @param seed the seed 
    */
   public void setSeed(int seed) {
 
@@ -137,7 +142,7 @@ public abstract class RandomizableParallelIteratedSingleClassifierEnhancer
    * @return the seed for the random number generation
    */
   public int getSeed() {
-
+    
     return m_Seed;
   }
 

@@ -15,14 +15,13 @@
 
  /*
   *    JComponentWriter.java
-  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
 package weka.gui.visualize;
 
 import java.io.File;
-
 import javax.swing.JComponent;
 
 /** 

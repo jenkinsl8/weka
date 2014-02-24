@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
@@ -75,7 +74,7 @@ import weka.core.Utils;
  * @see Saver
  */
 public class ArffSaver extends AbstractFileSaver implements BatchConverter,
-  IncrementalConverter {
+    IncrementalConverter {
 
   /** for serialization */
   static final long serialVersionUID = 2223634248900042228L;
@@ -98,20 +97,24 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector<Option> result;
+
+    result = new Vector<Option>();
+
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement((Option) en.nextElement());
 
     result.addElement(new Option("\tCompresses the data (uses '"
-      + ArffLoader.FILE_EXTENSION_COMPRESSED + "' as extension instead of '"
-      + ArffLoader.FILE_EXTENSION + "')\n" + "\t(default: off)", "compress", 0,
-      "-compress"));
+        + ArffLoader.FILE_EXTENSION_COMPRESSED + "' as extension instead of '"
+        + ArffLoader.FILE_EXTENSION + "')\n" + "\t(default: off)", "compress",
+        0, "-compress"));
 
     result.addElement(new Option(
-      "\tThe maximum number of digits to print after the decimal\n"
-        + "\tplace for numeric values (default: 6)", "decimal", 1,
-      "-decimal <num>"));
-
-    result.addAll(Collections.list(super.listOptions()));
+        "\tThe maximum number of digits to print after the decimal\n"
+            + "\tplace for numeric values (default: 6)", "decimal", 1,
+        "-decimal <num>"));
 
     return result.elements();
   }
@@ -123,17 +126,21 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public String[] getOptions() {
+    int i;
+    Vector<String> result;
+    String[] options;
 
-    Vector<String> result = new Vector<String>();
+    result = new Vector<String>();
 
-    if (getCompressOutput()) {
+    if (getCompressOutput())
       result.add("-compress");
-    }
 
     result.add("-decimal");
     result.add("" + getMaxDecimalPlaces());
 
-    Collections.addAll(result, super.getOptions());
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
     return result.toArray(new String[result.size()]);
   }
@@ -183,8 +190,6 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
     }
 
     super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -213,7 +218,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   public String maxDecimalPlacesTipText() {
     return "The maximum number of digits to print after the decimal "
-      + "point for numeric values";
+        + "point for numeric values";
   }
 
   /**
@@ -252,7 +257,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   public String globalInfo() {
     return "Writes to a destination that is in arff (attribute relation file format) "
-      + "format. The data can be compressed with gzip in order to save space.";
+        + "format. The data can be compressed with gzip in order to save space.";
   }
 
   /**
@@ -273,7 +278,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
   @Override
   public String[] getFileExtensions() {
     return new String[] { ArffLoader.FILE_EXTENSION,
-      ArffLoader.FILE_EXTENSION_COMPRESSED };
+        ArffLoader.FILE_EXTENSION_COMPRESSED };
   }
 
   /**
@@ -285,9 +290,8 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
   @Override
   public void setFile(File outputFile) throws IOException {
     if (outputFile.getAbsolutePath().endsWith(
-      ArffLoader.FILE_EXTENSION_COMPRESSED)) {
+        ArffLoader.FILE_EXTENSION_COMPRESSED))
       setCompressOutput(true);
-    }
 
     super.setFile(outputFile);
   }
@@ -300,11 +304,10 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public void setDestination(OutputStream output) throws IOException {
-    if (getCompressOutput()) {
+    if (getCompressOutput())
       super.setDestination(new GZIPOutputStream(output));
-    } else {
+    else
       super.setDestination(output);
-    }
   }
 
   /**
@@ -354,38 +357,33 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
     Instances structure = getInstances();
     PrintWriter outW = null;
 
-    if (getRetrieval() == BATCH || getRetrieval() == NONE) {
+    if (getRetrieval() == BATCH || getRetrieval() == NONE)
       throw new IOException("Batch and incremental saving cannot be mixed.");
-    }
-    if (getWriter() != null) {
+    if (getWriter() != null)
       outW = new PrintWriter(getWriter());
-    }
 
     if (writeMode == WAIT) {
       if (structure == null) {
         setWriteMode(CANCEL);
-        if (inst != null) {
+        if (inst != null)
           System.err
-            .println("Structure(Header Information) has to be set in advance");
-        }
-      } else {
+              .println("Structure(Header Information) has to be set in advance");
+      } else
         setWriteMode(STRUCTURE_READY);
-      }
       writeMode = getWriteMode();
     }
     if (writeMode == CANCEL) {
-      if (outW != null) {
+      if (outW != null)
         outW.close();
-      }
       cancel();
     }
     if (writeMode == STRUCTURE_READY) {
       setWriteMode(WRITE);
       // write header
       Instances header = new Instances(structure, 0);
-      if (retrieveFile() == null && outW == null) {
+      if (retrieveFile() == null && outW == null)
         System.out.println(header.toString());
-      } else {
+      else {
         outW.print(header.toString());
         outW.print("\n");
         outW.flush();
@@ -393,19 +391,18 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
       writeMode = getWriteMode();
     }
     if (writeMode == WRITE) {
-      if (structure == null) {
+      if (structure == null)
         throw new IOException("No instances information available.");
-      }
       if (inst != null) {
         if (inst instanceof weka.core.SparseInstance
-          && inst.dataset().checkForStringAttributes()) {
+            && inst.dataset().checkForStringAttributes()) {
           // check for single valued string attributes
           for (int i = 0; i < inst.numAttributes(); i++) {
             if (inst.attribute(i).isString()
-              && inst.attribute(i).numValues() == 1) {
+                && inst.attribute(i).numValues() == 1) {
               String theVal = inst.stringValue(i);
               inst.attribute(i).setStringValue(
-                weka.core.Attribute.DUMMY_STRING_VAL);
+                  weka.core.Attribute.DUMMY_STRING_VAL);
               inst.attribute(i).addStringValue(theVal);
               inst.setValue(i, 1);
             }
@@ -413,9 +410,9 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
         }
 
         // write instance
-        if (retrieveFile() == null && outW == null) {
+        if (retrieveFile() == null && outW == null)
           System.out.println(inst.toStringMaxDecimalDigits(m_MaxDecimalPlaces));
-        } else {
+        else {
           outW.println(inst.toStringMaxDecimalDigits(m_MaxDecimalPlaces));
           m_incrementalCounter++;
           // flush every 100 instances
@@ -446,12 +443,10 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public void writeBatch() throws IOException {
-    if (getInstances() == null) {
+    if (getInstances() == null)
       throw new IOException("No instances to save");
-    }
-    if (getRetrieval() == INCREMENTAL) {
+    if (getRetrieval() == INCREMENTAL)
       throw new IOException("Batch and incremental saving cannot be mixed.");
-    }
     setRetrieval(BATCH);
     setWriteMode(WRITE);
     if (retrieveFile() == null && getWriter() == null) {
@@ -459,7 +454,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
       System.out.println(new Instances(data, 0));
       for (int i = 0; i < data.numInstances(); i++) {
         System.out.println(data.instance(i).toStringMaxDecimalDigits(
-          m_MaxDecimalPlaces));
+            m_MaxDecimalPlaces));
       }
       setWriteMode(WAIT);
       return;
@@ -474,11 +469,10 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
 
     // data
     for (int i = 0; i < data.numInstances(); i++) {
-      if (i % 1000 == 0) {
+      if (i % 1000 == 0)
         outW.flush();
-      }
       outW.println(data.instance(i)
-        .toStringMaxDecimalDigits(m_MaxDecimalPlaces));
+          .toStringMaxDecimalDigits(m_MaxDecimalPlaces));
     }
     outW.flush();
     outW.close();

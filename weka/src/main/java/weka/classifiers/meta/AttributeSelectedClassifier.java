@@ -15,16 +15,11 @@
 
 /*
  *    AttributeSelectedClassifier.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -32,7 +27,6 @@ import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -41,6 +35,11 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -120,7 +119,7 @@ public class AttributeSelectedClassifier
              WeightedInstancesHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -1151805453487947577L;
+  static final long serialVersionUID = -5951805453487947577L;
   
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
@@ -180,8 +179,8 @@ public class AttributeSelectedClassifier
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
-     Vector<Option> newVector = new Vector<Option>(2);
+  public Enumeration listOptions() {
+     Vector newVector = new Vector(3);
     
     newVector.addElement(new Option(
 	      "\tFull class name of attribute evaluator, followed\n"
@@ -197,24 +196,10 @@ public class AttributeSelectedClassifier
 	      + "\t(default weka.attributeSelection.BestFirst)",
 	      "S", 1, "-S <search method specification>"));
     
-    newVector.addAll(Collections.list(super.listOptions()));
-    
-    if (getEvaluator() instanceof OptionHandler) {
-      newVector.addElement(new Option(
-        "",
-        "", 0, "\nOptions specific to attribute evaluator "
-          + getEvaluator().getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler)getEvaluator()).listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
-        
-    if (getSearch() instanceof OptionHandler) {
-      newVector.addElement(new Option(
-        "",
-        "", 0, "\nOptions specific to search method "
-          + getSearch().getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler)getSearch()).listOptions()));
-    }
-    
     return newVector.elements();
   }
 
@@ -314,8 +299,6 @@ public class AttributeSelectedClassifier
     setSearch(ASSearch.forName(searchName, searchSpec));
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -325,19 +308,23 @@ public class AttributeSelectedClassifier
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
+
+    int current = 0;
 
     // same attribute evaluator
-    options.add("-E");
-    options.add("" +getEvaluatorSpec());
+    options[current++] = "-E";
+    options[current++] = "" +getEvaluatorSpec();
     
     // same for search
-    options.add("-S");
-    options.add("" + getSearchSpec());
+    options[current++] = "-S";
+    options[current++] = "" + getSearchSpec();
 
-    Collections.addAll(options, super.getOptions());
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
     
-    return options.toArray(new String[0]);
+    return options;
   }
 
   /**
@@ -637,14 +624,18 @@ public class AttributeSelectedClassifier
    * Returns an enumeration of the additional measure names
    * @return an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>(3);
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(3);
     newVector.addElement("measureNumAttributesSelected");
     newVector.addElement("measureSelectionTime");
     newVector.addElement("measureTime");
     if (m_Classifier instanceof AdditionalMeasureProducer) {
-      newVector.addAll(Collections.list(((AdditionalMeasureProducer)m_Classifier).
-	enumerateMeasures()));
+      Enumeration en = ((AdditionalMeasureProducer)m_Classifier).
+	enumerateMeasures();
+      while (en.hasMoreElements()) {
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
+      }
     }
     return newVector.elements();
   }

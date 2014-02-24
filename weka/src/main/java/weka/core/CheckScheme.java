@@ -15,13 +15,12 @@
 
 /*
  * CheckScheme.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -102,10 +101,12 @@ public abstract class CheckScheme
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
     Vector<Option> result = new Vector<Option>();
     
-    result.addAll(Collections.list(super.listOptions()));
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement((Option)en.nextElement());
     
     result.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",

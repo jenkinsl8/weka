@@ -21,7 +21,6 @@
 
 package weka.classifiers.functions;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -266,8 +265,8 @@ public class SimpleLogistic
      *
      * @return an enumeration of all the available options.
      */
-    public Enumeration<Option> listOptions() {
-	Vector<Option> newVector = new Vector<Option>();
+    public Enumeration listOptions() {
+	Vector newVector = new Vector();
 	
 	newVector.addElement(new Option(
 	    "\tSet fixed number of iterations for LogitBoost",
@@ -302,8 +301,6 @@ public class SimpleLogistic
         newVector.addElement(new Option("\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
                                         "A", 0, "-A"));
 	
-        newVector.addAll(Collections.list(super.listOptions()));
-        
 	return newVector.elements();
     } 
     
@@ -376,8 +373,6 @@ public class SimpleLogistic
         
         setUseAIC(Utils.getFlag('A', options));        
 
-        super.setOptions(options);
-        
 	Utils.checkForRemainingOptions(options);
     } 
 
@@ -387,35 +382,37 @@ public class SimpleLogistic
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-	Vector<String> options = new Vector<String>();
-	
-	options.add("-I"); 
-	options.add(""+getNumBoostingIterations());
+	String[] options = new String[11];
+	int current = 0;
+		
+	options[current++] = "-I"; 
+	options[current++] = ""+getNumBoostingIterations();
 	
 	if (!getUseCrossValidation()) {
-	    options.add("-S");
+	    options[current++] = "-S";
 	} 
 
 	if (getErrorOnProbabilities()) {
-	    options.add("-P");
+	    options[current++] = "-P";
 	} 
 
-	options.add("-M"); 
-	options.add(""+getMaxBoostingIterations());
+	options[current++] = "-M"; 
+	options[current++] = ""+getMaxBoostingIterations();
 	
-	options.add("-H"); 
-	options.add(""+getHeuristicStop());
+	options[current++] = "-H"; 
+	options[current++] = ""+getHeuristicStop();
         
-        options.add("-W");
-        options.add(""+getWeightTrimBeta());
+        options[current++] = "-W";
+        options[current++] = ""+getWeightTrimBeta();
         
         if (getUseAIC()) {
-            options.add("-A");
+            options[current++] = "-A";
         }
 
-        Collections.addAll(options, super.getOptions());
-        
-	return options.toArray(new String[0]);
+	while (current < options.length) {
+	    options[current++] = "";
+	} 
+	return options;
     } 
 
     /**
@@ -579,8 +576,8 @@ public class SimpleLogistic
      * Returns an enumeration of the additional measure names
      * @return an enumeration of the measure names
      */
-    public Enumeration<String> enumerateMeasures() {
-	Vector<String> newVector = new Vector<String>(3);
+    public Enumeration enumerateMeasures() {
+	Vector newVector = new Vector(3);
 	newVector.addElement("measureAttributesUsed");
 	newVector.addElement("measureNumIterations");
 	return newVector.elements();

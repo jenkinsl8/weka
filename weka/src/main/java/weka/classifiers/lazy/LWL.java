@@ -15,33 +15,33 @@
 
 /*
  *    LWL.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999, 2002, 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.lazy;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.neighboursearch.LinearNNSearch;
+import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.neighboursearch.LinearNNSearch;
-import weka.core.neighboursearch.NearestNeighbourSearch;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -219,7 +219,7 @@ public class LWL
    * produced by the neighbour search algorithm.
    * @return an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
+  public Enumeration enumerateMeasures() {
     return m_NNSearch.enumerateMeasures();
   }
   
@@ -239,9 +239,9 @@ public class LWL
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
     
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector newVector = new Vector(3);
     newVector.addElement(new Option("\tThe nearest neighbour search " +
                                     "algorithm to use " +
                                     "(default: weka.core.neighboursearch.LinearNNSearch).\n",
@@ -256,7 +256,10 @@ public class LWL
 				    +"\t(default 0 = Linear)",
 				    "U", 1,"-U <number of weighting method>"));
     
-    newVector.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     return newVector.elements();
   }
@@ -346,21 +349,25 @@ public class LWL
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 6];
 
-    options.add("-U"); options.add("" + getWeightingKernel());
+    int current = 0;
+
+    options[current++] = "-U"; options[current++] = "" + getWeightingKernel();
     if ( (getKNN() == 0) && m_UseAllK) {
-        options.add("-K"); options.add("-1");
+      options[current++] = "-K"; options[current++] = "-1";
     }
     else {
-        options.add("-K"); options.add("" + getKNN());
+      options[current++] = "-K"; options[current++] = "" + getKNN();
     }
-    options.add("-A");
-    options.add(m_NNSearch.getClass().getName()+" "+Utils.joinOptions(m_NNSearch.getOptions()));; 
+    options[current++] = "-A";
+    options[current++] = m_NNSearch.getClass().getName()+" "+Utils.joinOptions(m_NNSearch.getOptions()); 
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current,
+                     superOptions.length);
+
+    return options;
   }
   
   /**

@@ -20,10 +20,8 @@
 
 package weka.classifiers.evaluation;
 
-import java.util.ArrayList;
-
 import weka.classifiers.CostMatrix;
-import weka.core.Aggregateable;
+import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
@@ -33,8 +31,7 @@ import weka.core.Instances;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class AggregateableEvaluation extends Evaluation implements
-  Aggregateable<Evaluation> {
+public class AggregateableEvaluation extends Evaluation {
 
   /**
    * For serialization
@@ -58,7 +55,8 @@ public class AggregateableEvaluation extends Evaluation implements
    * @param costMatrix the cost matrix to use
    * @throws Exception if a problem occurs
    */
-  public AggregateableEvaluation(Instances data, CostMatrix costMatrix) throws Exception {
+  public AggregateableEvaluation(Instances data, CostMatrix costMatrix)
+      throws Exception {
     super(data, costMatrix);
   }
 
@@ -80,11 +78,6 @@ public class AggregateableEvaluation extends Evaluation implements
     m_MaxTarget = eval.m_MaxTarget;
     m_ClassPriorsSum = eval.m_ClassPriorsSum;
     m_ClassPriors = eval.m_ClassPriors;
-    m_MinTarget = eval.m_MinTarget;
-    m_MaxTarget = eval.m_MaxTarget;
-    m_TrainClassVals = eval.m_TrainClassVals;
-    m_TrainClassWeights = eval.m_TrainClassWeights;
-    m_NumTrainClassVals = eval.m_NumTrainClassVals;
   }
 
   /**
@@ -94,8 +87,7 @@ public class AggregateableEvaluation extends Evaluation implements
    * 
    * @param evaluation the evaluation object to aggregate
    */
-  @Override
-  public AggregateableEvaluation aggregate(Evaluation evaluation) {
+  public void aggregate(Evaluation evaluation) {
     m_Incorrect += evaluation.incorrect();
     m_Correct += evaluation.correct();
     m_Unclassified += evaluation.unclassified();
@@ -112,14 +104,12 @@ public class AggregateableEvaluation extends Evaluation implements
         }
       }
     }
-
     double[] newClassPriors = evaluation.m_ClassPriors;
-    if (newClassPriors != null && m_ClassPriors != null) {
+    if (newClassPriors != null) {
       for (int i = 0; i < this.m_ClassPriors.length; i++) {
         m_ClassPriors[i] = newClassPriors[i];
       }
     }
-
     m_ClassPriorsSum = evaluation.m_ClassPriorsSum;
     m_TotalCost += evaluation.totalCost();
     m_SumErr += evaluation.m_SumErr;
@@ -139,28 +129,19 @@ public class AggregateableEvaluation extends Evaluation implements
         m_MarginCounts[i] += newMarginCounts[i];
       }
     }
-    m_ComplexityStatisticsAvailable = evaluation.m_ComplexityStatisticsAvailable;
-    m_CoverageStatisticsAvailable = evaluation.m_CoverageStatisticsAvailable;
     m_SumPriorEntropy += evaluation.m_SumPriorEntropy;
     m_SumSchemeEntropy += evaluation.m_SumSchemeEntropy;
     m_TotalSizeOfRegions += evaluation.m_TotalSizeOfRegions;
     m_TotalCoverage += evaluation.m_TotalCoverage;
 
-    ArrayList<Prediction> predsToAdd = evaluation.m_Predictions;
+    FastVector predsToAdd = evaluation.m_Predictions;
     if (predsToAdd != null) {
       if (m_Predictions == null) {
-        m_Predictions = new ArrayList<Prediction>();
+        m_Predictions = new FastVector();
       }
       for (int i = 0; i < predsToAdd.size(); i++) {
-        m_Predictions.add(predsToAdd.get(i));
+        m_Predictions.addElement(predsToAdd.elementAt(i));
       }
     }
-
-    return this;
-  }
-
-  @Override
-  public void finalizeAggregation() {
-    // nothing to do here
   }
 }

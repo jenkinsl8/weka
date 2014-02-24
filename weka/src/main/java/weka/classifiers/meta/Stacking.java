@@ -15,14 +15,13 @@
 
 /*
  *    Stacking.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -40,10 +39,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -158,9 +157,9 @@ public class Stacking
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
     
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(2);
     newVector.addElement(new Option(
 	      metaOption(),
 	      "M", 0, "-M <scheme specification>"));
@@ -168,14 +167,9 @@ public class Stacking
 	      "\tSets the number of cross-validation folds.",
 	      "X", 1, "-X <number of folds>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
-    if (getMetaClassifier() instanceof OptionHandler) {
-      newVector.addElement(new Option(
-        "",
-        "", 0, "\nOptions specific to meta classifier "
-          + getMetaClassifier().getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler)getMetaClassifier()).listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
     return newVector.elements();
   }

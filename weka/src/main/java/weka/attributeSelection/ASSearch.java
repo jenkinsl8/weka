@@ -15,19 +15,19 @@
 
 /*
  *    ASSearch.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.attributeSelection;
-
-import java.io.Serializable;
 
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /** 
  * Abstract attribute selection search class.

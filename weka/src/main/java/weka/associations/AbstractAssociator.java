@@ -15,20 +15,20 @@
 
 /*
  *    Associator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
-import java.io.Serializable;
-
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Instances;
 import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /** 
  * Abstract scheme for learning associations. All schemes for learning
@@ -101,28 +101,14 @@ public abstract class AbstractAssociator
   }
 
   /** 
-   * Returns the Capabilities of this associator. Maximally permissive
-   * capabilities are allowed by default. Derived associators should
-   * override this method and first disable all capabilities and then
-   * enable just those capabilities that make sense for the scheme.
+   * Returns the Capabilities of this associator. Derived associators have to
+   * override this method to enable capabilities.
    *
    * @return            the capabilities of this object
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities defaultC = new Capabilities(this);
-    defaultC.enableAll();
-    
-    return defaultC;
-  }
-  
-  /**
-   * Returns the revision string.
-   * 
-   * @return            the revision
-   */
-  public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return new Capabilities(this);
   }
   
   /**

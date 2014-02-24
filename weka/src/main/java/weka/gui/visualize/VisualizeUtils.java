@@ -15,18 +15,18 @@
 
 /*
  *    VisualizeUtils.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
 
-import java.awt.Color;
-import java.util.Properties;
-
-import javax.swing.JOptionPane;
-
 import weka.core.Utils;
+import java.util.Properties;
+import java.io.FileInputStream;
+
+import java.awt.Color;
+import javax.swing.JOptionPane;
 
 
 /**

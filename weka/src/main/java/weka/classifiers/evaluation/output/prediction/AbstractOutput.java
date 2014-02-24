@@ -151,34 +151,33 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @return an enumeration of all available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result;
+  public Enumeration listOptions() {
+    Vector result;
 
-    result = new Vector<Option>();
-
-    result.addElement(new Option(
-      "\tThe range of attributes to print in addition to the classification.\n"
-        + "\t(default: none)", "p", 1, "-p <range>"));
+    result = new Vector();
 
     result.addElement(new Option(
-      "\tWhether to turn on the output of the class distribution.\n"
-        + "\tOnly for nominal class attributes.\n" + "\t(default: off)",
-      "distribution", 0, "-distribution"));
+        "\tThe range of attributes to print in addition to the classification.\n"
+            + "\t(default: none)", "p", 1, "-p <range>"));
 
     result.addElement(new Option(
-      "\tThe number of digits after the decimal point.\n" + "\t(default: "
-        + getDefaultNumDecimals() + ")", "decimals", 1, "-decimals <num>"));
+        "\tWhether to turn on the output of the class distribution.\n"
+            + "\tOnly for nominal class attributes.\n" + "\t(default: off)",
+        "distribution", 0, "-distribution"));
 
     result.addElement(new Option(
-      "\tThe file to store the output in, instead of outputting it on stdout.\n"
-        + "\tGets ignored if the supplied path is a directory.\n"
-        + "\t(default: .)", "file", 1, "-file <path>"));
+        "\tThe number of digits after the decimal point.\n" + "\t(default: "
+            + getDefaultNumDecimals() + ")", "decimals", 1, "-decimals <num>"));
 
-    result
-      .addElement(new Option(
+    result.addElement(new Option(
+        "\tThe file to store the output in, instead of outputting it on stdout.\n"
+            + "\tGets ignored if the supplied path is a directory.\n"
+            + "\t(default: .)", "file", 1, "-file <path>"));
+
+    result.addElement(new Option(
         "\tIn case the data gets stored in a file, then this flag can be used\n"
-          + "\tto suppress the regular output.\n"
-          + "\t(default: not suppressed)", "suppress", 0, "-suppress"));
+            + "\tto suppress the regular output.\n"
+            + "\t(default: not suppressed)", "suppress", 0, "-suppress"));
 
     return result.elements();
   }
@@ -199,18 +198,16 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     setOutputDistribution(Utils.getFlag("distribution", options));
 
     tmpStr = Utils.getOption("decimals", options);
-    if (tmpStr.length() > 0) {
+    if (tmpStr.length() > 0)
       setNumDecimals(Integer.parseInt(tmpStr));
-    } else {
+    else
       setNumDecimals(getDefaultNumDecimals());
-    }
 
     tmpStr = Utils.getOption("file", options);
-    if (tmpStr.length() > 0) {
+    if (tmpStr.length() > 0)
       setOutputFile(new File(tmpStr));
-    } else {
+    else
       setOutputFile(new File("."));
-    }
 
     setSuppressOutput(Utils.getFlag("suppress", options));
   }
@@ -231,9 +228,8 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       result.add(getAttributes());
     }
 
-    if (getOutputDistribution()) {
+    if (getOutputDistribution())
       result.add("-distribution");
-    }
 
     if (getNumDecimals() != getDefaultNumDecimals()) {
       result.add("-decimals");
@@ -243,9 +239,8 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     if (!getOutputFile().isDirectory()) {
       result.add("-file");
       result.add(getOutputFile().getAbsolutePath());
-      if (getSuppressOutput()) {
+      if (getSuppressOutput())
         result.add("-suppress");
-      }
     }
 
     return result.toArray(new String[result.size()]);
@@ -293,11 +288,10 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @param value the range
    */
   public void setAttributes(String value) {
-    if (value.length() == 0) {
+    if (value.length() == 0)
       m_Attributes = null;
-    } else {
+    else
       m_Attributes = new Range(value);
-    }
   }
 
   /**
@@ -306,11 +300,10 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @return the range
    */
   public String getAttributes() {
-    if (m_Attributes == null) {
+    if (m_Attributes == null)
       return "";
-    } else {
+    else
       return m_Attributes.getRanges();
-    }
   }
 
   /**
@@ -364,12 +357,11 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @param value the number of digits
    */
   public void setNumDecimals(int value) {
-    if (value >= 0) {
+    if (value >= 0)
       m_NumDecimals = value;
-    } else {
+    else
       System.err.println("Number of decimals cannot be negative (provided: "
-        + value + ")!");
-    }
+          + value + ")!");
   }
 
   /**
@@ -452,17 +444,14 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @return null if everything is in order, otherwise the error message
    */
   protected String checkBasic() {
-    if (m_Buffer == null) {
+    if (m_Buffer == null)
       return "Buffer is null!";
-    }
 
-    if (m_Header == null) {
+    if (m_Header == null)
       return "No dataset structure provided!";
-    }
 
-    if (m_Attributes != null) {
+    if (m_Attributes != null)
       m_Attributes.setUpper(m_Header.numAttributes() - 1);
-    }
 
     return null;
   }
@@ -474,7 +463,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    */
   public boolean generatesOutput() {
     return m_OutputFile.isDirectory()
-      || (!m_OutputFile.isDirectory() && !m_SuppressOutput);
+        || (!m_OutputFile.isDirectory() && !m_SuppressOutput);
   }
 
   /**
@@ -486,12 +475,10 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @see #m_FileBuffer
    */
   protected void append(String s) {
-    if (generatesOutput()) {
+    if (generatesOutput())
       m_Buffer.append(s);
-    }
-    if (!m_OutputFile.isDirectory()) {
+    if (!m_OutputFile.isDirectory())
       m_FileBuffer.append(s);
-    }
   }
 
   /**
@@ -514,9 +501,8 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
   public void printHeader() {
     String error;
 
-    if ((error = checkHeader()) != null) {
+    if ((error = checkHeader()) != null)
       throw new IllegalStateException(error);
-    }
 
     doPrintHeader();
   }
@@ -530,7 +516,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @throws Exception if printing of classification fails
    */
   protected abstract void doPrintClassification(Classifier classifier,
-    Instance inst, int index) throws Exception;
+      Instance inst, int index) throws Exception;
 
   /**
    * Performs the actual printing of the classification.
@@ -541,7 +527,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @throws Exception if printing of classification fails
    */
   protected abstract void doPrintClassification(double[] dist, Instance inst,
-    int index) throws Exception;
+      int index) throws Exception;
 
   /**
    * Preprocesses an input instance and its copy (that will get its class value
@@ -557,14 +543,14 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @throws Exception if a problem occurs.
    */
   protected Instance preProcessInstance(Instance inst, Instance withMissing,
-    Classifier classifier) throws Exception {
+      Classifier classifier) throws Exception {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       inst = (Instance) inst.copy();
       inst = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .constructMappedInstance(inst);
+          .constructMappedInstance(inst);
       int mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getMappedClassIndex();
+          .getMappedClassIndex();
       withMissing.setMissing(mappedClass);
     } else {
       withMissing.setMissing(withMissing.classIndex());
@@ -583,12 +569,11 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    *           classification
    */
   public void printClassification(Classifier classifier, Instance inst,
-    int index) throws Exception {
+      int index) throws Exception {
     String error;
 
-    if ((error = checkBasic()) != null) {
+    if ((error = checkBasic()) != null)
       throw new WekaException(error);
-    }
 
     doPrintClassification(classifier, inst, index);
   }
@@ -603,12 +588,11 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    *           classification
    */
   public void printClassification(double[] dist, Instance inst, int index)
-    throws Exception {
+      throws Exception {
     String error;
 
-    if ((error = checkBasic()) != null) {
+    if ((error = checkBasic()) != null)
       throw new WekaException(error);
-    }
 
     doPrintClassification(dist, inst, index);
   }
@@ -622,7 +606,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    *           classifications
    */
   public void printClassifications(Classifier classifier, DataSource testset)
-    throws Exception {
+      throws Exception {
     int i;
     Instances test;
     Instance inst;
@@ -633,7 +617,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     if (classifier instanceof BatchPredictor) {
       test = testset.getDataSet(m_Header.classIndex());
       double[][] predictions = ((BatchPredictor) classifier)
-        .distributionsForInstances(test);
+          .distributionsForInstances(test);
       for (i = 0; i < test.numInstances(); i++) {
         printClassification(predictions[i], test.instance(i), i);
       }
@@ -656,19 +640,18 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    *           classifications
    */
   public void printClassifications(Classifier classifier, Instances testset)
-    throws Exception {
+      throws Exception {
     int i;
 
     if (classifier instanceof BatchPredictor) {
       double[][] predictions = ((BatchPredictor) classifier)
-        .distributionsForInstances(testset);
+          .distributionsForInstances(testset);
       for (i = 0; i < testset.numInstances(); i++) {
         printClassification(predictions[i], testset.instance(i), i);
       }
     } else {
-      for (i = 0; i < testset.numInstances(); i++) {
+      for (i = 0; i < testset.numInstances(); i++)
         doPrintClassification(classifier, testset.instance(i), i);
-      }
     }
   }
 
@@ -687,9 +670,8 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     String error;
     BufferedWriter writer;
 
-    if ((error = checkBasic()) != null) {
+    if ((error = checkBasic()) != null)
       throw new WekaException(error);
-    }
 
     doPrintFooter();
 
@@ -751,7 +733,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       classname = options[0];
       options[0] = "";
       result = (AbstractOutput) Utils.forName(AbstractOutput.class, classname,
-        options);
+          options);
     } catch (Exception e) {
       result = null;
     }

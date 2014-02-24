@@ -22,12 +22,11 @@
 package weka.classifiers;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import weka.classifiers.evaluation.AbstractEvaluationMetric;
-import weka.classifiers.evaluation.Prediction;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
@@ -369,10 +368,10 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    *           the class is not defined
    */
   public void crossValidateModel(Classifier classifier, Instances data,
-    int numFolds, Random random, Object... forPredictionsPrinting)
-    throws Exception {
+      int numFolds, Random random, Object... forPredictionsPrinting)
+      throws Exception {
     m_delegate.crossValidateModel(classifier, data, numFolds, random,
-      forPredictionsPrinting);
+        forPredictionsPrinting);
   }
 
   /**
@@ -389,9 +388,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    *           the class is not defined
    */
   public void crossValidateModel(String classifierString, Instances data,
-    int numFolds, String[] options, Random random) throws Exception {
+      int numFolds, String[] options, Random random) throws Exception {
     m_delegate.crossValidateModel(classifierString, data, numFolds, options,
-      random);
+        random);
   }
 
   /**
@@ -522,10 +521,10 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @return a string describing the results
    */
   public static String evaluateModel(String classifierString, String[] options)
-    throws Exception {
+      throws Exception {
 
     return weka.classifiers.evaluation.Evaluation.evaluateModel(
-      classifierString, options);
+        classifierString, options);
   }
 
   /**
@@ -646,9 +645,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @return a string describing the results
    */
   public static String evaluateModel(Classifier classifier, String[] options)
-    throws Exception {
+      throws Exception {
     return weka.classifiers.evaluation.Evaluation.evaluateModel(classifier,
-      options);
+        options);
   }
 
   /**
@@ -667,7 +666,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if model could not be evaluated successfully
    */
   public double[] evaluateModel(Classifier classifier, Instances data,
-    Object... forPredictionsPrinting) throws Exception {
+      Object... forPredictionsPrinting) throws Exception {
     return m_delegate.evaluateModel(classifier, data, forPredictionsPrinting);
   }
 
@@ -681,9 +680,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluationForSingleInstance(double[] dist, Instance instance,
-    boolean storePredictions) throws Exception {
+      boolean storePredictions) throws Exception {
     return m_delegate.evaluationForSingleInstance(dist, instance,
-      storePredictions);
+        storePredictions);
   }
 
   /**
@@ -696,9 +695,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    *           contains string attributes
    */
   public double evaluateModelOnceAndRecordPrediction(Classifier classifier,
-    Instance instance) throws Exception {
+      Instance instance) throws Exception {
     return m_delegate
-      .evaluateModelOnceAndRecordPrediction(classifier, instance);
+        .evaluateModelOnceAndRecordPrediction(classifier, instance);
   }
 
   /**
@@ -711,7 +710,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    *           contains string attributes
    */
   public double evaluateModelOnce(Classifier classifier, Instance instance)
-    throws Exception {
+      throws Exception {
     return m_delegate.evaluateModelOnce(classifier, instance);
   }
 
@@ -724,7 +723,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluateModelOnce(double[] dist, Instance instance)
-    throws Exception {
+      throws Exception {
     return m_delegate.evaluateModelOnce(dist, instance);
   }
 
@@ -737,7 +736,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if model could not be evaluated successfully
    */
   public double evaluateModelOnceAndRecordPrediction(double[] dist,
-    Instance instance) throws Exception {
+      Instance instance) throws Exception {
     return m_delegate.evaluateModelOnceAndRecordPrediction(dist, instance);
   }
 
@@ -749,7 +748,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if model could not be evaluated successfully
    */
   public void evaluateModelOnce(double prediction, Instance instance)
-    throws Exception {
+      throws Exception {
     m_delegate.evaluateModelOnce(prediction, instance);
   }
 
@@ -760,7 +759,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    *         been collected. This should be null if no predictions have been
    *         collected.
    */
-  public ArrayList<Prediction> predictions() {
+  public FastVector predictions() {
     return m_delegate.predictions();
   }
 
@@ -775,9 +774,9 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * @throws Exception if code-generation fails
    */
   public static String wekaStaticWrapper(Sourcable classifier, String className)
-    throws Exception {
+      throws Exception {
     return weka.classifiers.evaluation.Evaluation.wekaStaticWrapper(classifier,
-      className);
+        className);
   }
 
   /**
@@ -1544,7 +1543,7 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
     try {
       if (args.length == 0) {
         throw new Exception("The first argument must be the class name"
-          + " of a classifier");
+            + " of a classifier");
       }
       String classifier = args[0];
       args[0] = "";

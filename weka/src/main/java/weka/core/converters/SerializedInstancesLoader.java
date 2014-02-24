@@ -15,20 +15,20 @@
 
 /*
  *    SerializedInstancesLoader.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
 
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 /**
  <!-- globalinfo-start -->
@@ -116,9 +116,6 @@ public class SerializedInstancesLoader
     } catch (ClassNotFoundException ex) {
       throw new IOException("Could not deserialize instances from this source.");
     }
-
-    // close the stream
-    oi.close();
   }
 
   /**

@@ -72,7 +72,7 @@ public class Explorer extends JPanel {
    * @version $Revision$
    */
   public static interface CapabilitiesFilterChangeListener extends
-    EventListener {
+      EventListener {
 
     /**
      * method gets called in case of a change event
@@ -199,11 +199,11 @@ public class Explorer extends JPanel {
   public Explorer() {
 
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
-      .format(new Date());
+        .format(new Date());
     m_LogPanel.logMessage("Weka Explorer");
     m_LogPanel.logMessage("(c) " + Copyright.getFromYear() + "-"
-      + Copyright.getToYear() + " " + Copyright.getOwner() + ", "
-      + Copyright.getAddress());
+        + Copyright.getToYear() + " " + Copyright.getOwner() + ", "
+        + Copyright.getAddress());
     m_LogPanel.logMessage("web: " + Copyright.getURL());
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Explorer");
@@ -211,35 +211,33 @@ public class Explorer extends JPanel {
     // intialize pre-processpanel
     m_PreprocessPanel.setLog(m_LogPanel);
     m_TabbedPane.addTab(m_PreprocessPanel.getTabTitle(), null,
-      m_PreprocessPanel, m_PreprocessPanel.getTabTitleToolTip());
+        m_PreprocessPanel, m_PreprocessPanel.getTabTitleToolTip());
 
     // initialize additional panels
     String[] tabs = ExplorerDefaults.getTabs();
-    Hashtable<String, HashSet<String>> tabOptions = new Hashtable<String, HashSet<String>>();
-    for (String tab : tabs) {
+    Hashtable<String, HashSet> tabOptions = new Hashtable<String, HashSet>();
+    for (int i = 0; i < tabs.length; i++) {
       try {
         // determine classname and additional options
-        String[] optionsStr = tab.split(":");
+        String[] optionsStr = tabs[i].split(":");
         String classname = optionsStr[0];
         if (PluginManager.isInDisabledList(classname)) {
           continue;
         }
-        HashSet<String> options = new HashSet<String>();
+        HashSet options = new HashSet();
         tabOptions.put(classname, options);
-        for (int n = 1; n < optionsStr.length; n++) {
+        for (int n = 1; n < optionsStr.length; n++)
           options.add(optionsStr[n]);
-        }
 
         // setup panel
         ExplorerPanel panel = (ExplorerPanel) Class.forName(classname)
-          .newInstance();
+            .newInstance();
         panel.setExplorer(this);
         m_Panels.add(panel);
-        if (panel instanceof LogHandler) {
+        if (panel instanceof LogHandler)
           ((LogHandler) panel).setLog(m_LogPanel);
-        }
         m_TabbedPane.addTab(panel.getTabTitle(), null, (JPanel) panel,
-          panel.getTabTitleToolTip());
+            panel.getTabTitleToolTip());
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -248,8 +246,7 @@ public class Explorer extends JPanel {
     // setup tabbed pane
     m_TabbedPane.setSelectedIndex(0);
     for (int i = 0; i < m_Panels.size(); i++) {
-      HashSet<String> options = tabOptions.get(m_Panels.get(i).getClass()
-        .getName());
+      HashSet options = tabOptions.get(m_Panels.get(i).getClass().getName());
       m_TabbedPane.setEnabledAt(i + 1, options.contains("standalone"));
     }
 
@@ -268,10 +265,9 @@ public class Explorer extends JPanel {
     m_PreprocessPanel.setExplorer(this);
     addCapabilitiesFilterListener(m_PreprocessPanel);
     for (int i = 0; i < m_Panels.size(); i++) {
-      if (m_Panels.get(i) instanceof CapabilitiesFilterChangeListener) {
+      if (m_Panels.get(i) instanceof CapabilitiesFilterChangeListener)
         addCapabilitiesFilterListener((CapabilitiesFilterChangeListener) m_Panels
-          .get(i));
-      }
+            .get(i));
     }
 
     // add components to layout
@@ -326,7 +322,7 @@ public class Explorer extends JPanel {
    * @return true if the listener was registered
    */
   public boolean removeCapabilitiesFilterListener(
-    CapabilitiesFilterChangeListener l) {
+      CapabilitiesFilterChangeListener l) {
     return m_CapabilitiesFilterChangeListeners.remove(l);
   }
 
@@ -337,11 +333,10 @@ public class Explorer extends JPanel {
    */
   public void notifyCapabilitiesFilterListener(Capabilities filter) {
     for (CapabilitiesFilterChangeListener l : m_CapabilitiesFilterChangeListeners) {
-      if (l == this) {
+      if (l == this)
         continue;
-      }
       l.capabilitiesFilterChanged(new CapabilitiesFilterChangeEvent(this,
-        filter));
+          filter));
     }
   }
 
@@ -362,7 +357,7 @@ public class Explorer extends JPanel {
   public static void main(String[] args) {
 
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+        "Logging started");
 
     LookAndFeel.setLookAndFeel();
     // make sure that packages are loaded and the GenericPropertiesCreator
@@ -388,8 +383,8 @@ public class Explorer extends JPanel {
       jf.setSize(800, 600);
       jf.setVisible(true);
       Image icon = Toolkit.getDefaultToolkit().getImage(
-        m_explorer.getClass().getClassLoader()
-          .getResource("weka/gui/weka_icon_new_48.png"));
+          m_explorer.getClass().getClassLoader()
+              .getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 
       if (args.length == 1) {
@@ -403,26 +398,26 @@ public class Explorer extends JPanel {
         @Override
         public void run() {
           while (true) {
-            // try {
-            // System.out.println("Before sleeping.");
-            // Thread.sleep(10);
+            try {
+              // System.out.println("Before sleeping.");
+              this.sleep(10);
 
-            if (m_Memory.isOutOfMemory()) {
-              // clean up
-              jf.dispose();
-              m_explorer = null;
-              System.gc();
+              if (m_Memory.isOutOfMemory()) {
+                // clean up
+                jf.dispose();
+                m_explorer = null;
+                System.gc();
 
-              // display error
-              System.err.println("\ndisplayed message:");
-              m_Memory.showOutOfMemory();
-              System.err.println("\nexiting");
-              System.exit(-1);
+                // display error
+                System.err.println("\ndisplayed message:");
+                m_Memory.showOutOfMemory();
+                System.err.println("\nexiting");
+                System.exit(-1);
+              }
+
+            } catch (InterruptedException ex) {
+              ex.printStackTrace();
             }
-
-            // } catch (InterruptedException ex) {
-            // ex.printStackTrace();
-            // }
           }
         }
       };

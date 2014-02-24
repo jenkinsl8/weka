@@ -15,11 +15,27 @@
 
 /*
  *    SimpleSetupPanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
+import weka.core.xml.KOML;
+import weka.experiment.CSVResultListener;
+import weka.experiment.ClassifierSplitEvaluator;
+import weka.experiment.CrossValidationResultProducer;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstancesResultListener;
+import weka.experiment.PropertyNode;
+import weka.experiment.RandomSplitResultProducer;
+import weka.experiment.RegressionSplitEvaluator;
+import weka.experiment.SplitEvaluator;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -56,21 +72,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.Classifier;
-import weka.core.xml.KOML;
-import weka.experiment.CSVResultListener;
-import weka.experiment.ClassifierSplitEvaluator;
-import weka.experiment.CrossValidationResultProducer;
-import weka.experiment.DatabaseResultListener;
-import weka.experiment.Experiment;
-import weka.experiment.InstancesResultListener;
-import weka.experiment.PropertyNode;
-import weka.experiment.RandomSplitResultProducer;
-import weka.experiment.RegressionSplitEvaluator;
-import weka.experiment.SplitEvaluator;
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ExtensionFileFilter;
 
 /** 
  * This panel controls the configuration of an experiment.

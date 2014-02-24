@@ -15,16 +15,16 @@
 
 /*
  * VisualizePanel.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-
 import weka.core.Instances;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.visualize.MatrixPanel;
+
+import java.awt.BorderLayout;
 
 /**
  * A slightly extended MatrixPanel for better support in the Explorer.

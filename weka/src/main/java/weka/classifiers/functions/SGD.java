@@ -22,7 +22,6 @@
 package weka.classifiers.functions;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -31,7 +30,6 @@ import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -55,10 +53,8 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * Valid options are: <p/>
  * 
  * <pre> -F
- *  Set the loss function to minimize.
- *  0 = hinge loss (SVM), 1 = log loss (logistic regression),
- *  2 = squared loss (regression), 3 = epsilon insensitive loss (regression),
- *  4 = Huber loss (regression).
+ *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression),
+ *  2 = squared loss (regression).
  *  (default = 0)</pre>
  * 
  * <pre> -L
@@ -82,18 +78,6 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * <pre> -M
  *  Don't replace missing values</pre>
  * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
- * 
- * <pre> -output-debug-info
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -do-not-check-capabilities
- *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
- * 
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
@@ -102,7 +86,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * 
  */
 public class SGD extends RandomizableClassifier implements
-    UpdateableClassifier, OptionHandler, Aggregateable<SGD> {
+    UpdateableClassifier, OptionHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -3732968666673530290L;
@@ -406,10 +390,9 @@ public class SGD extends RandomizableClassifier implements
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
-    newVector.add(new Option("\tSet the loss function to minimize.\n\t0 = "
+    newVector.add(new Option("\tSet the loss function to minimize. 0 = "
         + "hinge loss (SVM), 1 = log loss (logistic regression),\n\t"
-        + "2 = squared loss (regression), 3 = epsilon insensitive loss (regression)," +
-        "\n\t4 = Huber loss (regression).\n\t(default = 0)", "F", 1, "-F"));
+        + "2 = squared loss (regression).\n\t(default = 0)", "F", 1, "-F"));
     newVector
         .add(new Option(
             "\tThe learning rate. If normalization is\n"
@@ -426,8 +409,6 @@ public class SGD extends RandomizableClassifier implements
     newVector.add(new Option("\tDon't normalize the data", "N", 0, "-N"));
     newVector.add(new Option("\tDon't replace missing values", "M", 0, "-M"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
     return newVector.elements();
   }
 
@@ -440,10 +421,8 @@ public class SGD extends RandomizableClassifier implements
    * Valid options are: <p/>
    * 
    * <pre> -F
-   *  Set the loss function to minimize.
-   *  0 = hinge loss (SVM), 1 = log loss (logistic regression),
-   *  2 = squared loss (regression), 3 = epsilon insensitive loss (regression),
-   *  4 = Huber loss (regression).
+   *  Set the loss function to minimize. 0 = hinge loss (SVM), 1 = log loss (logistic regression),
+   *  2 = squared loss (regression).
    *  (default = 0)</pre>
    * 
    * <pre> -L
@@ -466,18 +445,6 @@ public class SGD extends RandomizableClassifier implements
    * 
    * <pre> -M
    *  Don't replace missing values</pre>
-   * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
-   * 
-   * <pre> -output-debug-info
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -do-not-check-capabilities
-   *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
    * 
    <!-- options-end -->
    * 
@@ -518,8 +485,6 @@ public class SGD extends RandomizableClassifier implements
 
     setDontNormalize(Utils.getFlag("N", options));
     setDontReplaceMissing(Utils.getFlag('M', options));
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -548,8 +513,6 @@ public class SGD extends RandomizableClassifier implements
       options.add("-M");
     }
 
-    Collections.addAll(options, super.getOptions());
-    
     return options.toArray(new String[1]);
   }
 
@@ -952,64 +915,6 @@ public class SGD extends RandomizableClassifier implements
     return RevisionUtils.extract("$Revision$");
   }
 
-  protected int m_numModels = 0;
-
-  /**
-   * Aggregate an object with this one
-   * 
-   * @param toAggregate the object to aggregate
-   * @return the result of aggregation
-   * @throws Exception if the supplied object can't be aggregated for some
-   *           reason
-   */
-  @Override
-  public SGD aggregate(SGD toAggregate) throws Exception {
-
-    if (m_weights == null) {
-      throw new Exception("No model built yet, can't aggregate");
-    }
-    
-    if (!m_data.equalHeaders(toAggregate.m_data)) {
-      throw new Exception("Can't aggregate - data headers dont match: "
-          + m_data.equalHeadersMsg(toAggregate.m_data));
-    }
-    
-    if (m_weights.length != toAggregate.getWeights().length) {
-      throw new Exception(
-          "Can't aggregate - SDG to aggregate has weight vector "
-              + "that differs in length from ours.");
-    }        
-    
-    for (int i = 0; i < m_weights.length; i++) {
-      m_weights[i] += toAggregate.getWeights()[i];
-    }
-
-    m_numModels++;
-
-    return this;
-  }
-
-  /**
-   * Call to complete the aggregation process. Allows implementers to do any
-   * final processing based on how many objects were aggregated.
-   * 
-   * @throws Exception if the aggregation can't be finalized for some reason
-   */
-  @Override
-  public void finalizeAggregation() throws Exception {    
-    if (m_numModels == 0) {
-      throw new Exception("Unable to finalize aggregation - " +
-                "haven't seen any models to aggregate");
-    }
-    
-    for (int i = 0; i < m_weights.length; i++) {
-      m_weights[i] /= (m_numModels + 1); // plus one for us
-    }
-
-    // aggregation complete
-    m_numModels = 0;
-  }
-  
   /**
    * Main method for testing this class.
    */

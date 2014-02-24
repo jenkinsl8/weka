@@ -15,11 +15,13 @@
 
 /*
  *    SetupModePanel.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.experiment.Experiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -31,8 +33,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-
-import weka.experiment.Experiment;
 
 /** 
  * This panel switches between simple and advanced experiment setup panels.

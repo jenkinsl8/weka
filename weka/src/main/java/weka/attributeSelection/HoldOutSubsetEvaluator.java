@@ -15,16 +15,16 @@
 
 /*
  *    HoldOutSubsetEvaluator.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.BitSet;
-
 import weka.core.Instance;
 import weka.core.Instances;
+
+import java.util.BitSet;
 
 /** 
  * Abstract attribute subset evaluator capable of evaluating subsets with

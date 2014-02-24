@@ -50,9 +50,6 @@ import weka.gui.Logger;
  */
 public class LogPanel extends JPanel implements Logger {
 
-  /** Added ID to avoid warning */
-  private static final long serialVersionUID = 6583097154513435548L;
-
   /**
    * Holds the index (line number) in the JTable of each component being
    * tracked.
@@ -88,7 +85,7 @@ public class LogPanel extends JPanel implements Logger {
    * The log panel to delegate log messages to.
    */
   private final weka.gui.LogPanel m_logPanel = new weka.gui.LogPanel(null,
-    false, true, false);
+      false, true, false);
 
   public LogPanel() {
 
@@ -97,18 +94,14 @@ public class LogPanel extends JPanel implements Logger {
 
     // JTable with error/warning indication for rows.
     m_table = new JTable() {
-
-      /** Added ID to avoid warning */
-      private static final long serialVersionUID = 5883722364387855125L;
-
       @Override
-      public Class<?> getColumnClass(int column) {
+      public Class getColumnClass(int column) {
         return getValueAt(0, column).getClass();
       }
 
       @Override
       public Component prepareRenderer(TableCellRenderer renderer, int row,
-        int column) {
+          int column) {
         Component c = super.prepareRenderer(renderer, row, column);
         if (!c.getBackground().equals(getSelectionBackground())) {
           String type = (String) getModel().getValueAt(row, 3);
@@ -232,7 +225,7 @@ public class LogPanel extends JPanel implements Logger {
       if (message.indexOf('|') >= 0) {
         stepParameters = message.substring(0, message.indexOf('|'));
         stepStatus = message.substring(message.indexOf('|') + 1,
-          message.length());
+            message.length());
       } else {
         // set the status message to the remainder
         stepStatus = message;
@@ -244,7 +237,7 @@ public class LogPanel extends JPanel implements Logger {
       // Get the row number and update the table model...
       final Integer rowNum = m_tableIndexes.get(stepHash);
       if (stepStatus.equalsIgnoreCase("remove")
-        || stepStatus.equalsIgnoreCase("remove.")) {
+          || stepStatus.equalsIgnoreCase("remove.")) {
 
         // m_tableModel.fireTableDataChanged();
         m_tableIndexes.remove(stepHash);
@@ -297,13 +290,13 @@ public class LogPanel extends JPanel implements Logger {
               public void run() {
                 // ERROR overrides INTERRUPTED
                 if (!(stepStatusCopy.startsWith("INTERRUPTED") && ((String) m_tableModel
-                  .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
+                    .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
                   m_tableModel.setValueAt(stepNameCopy, rowNum.intValue(), 0);
                   m_tableModel.setValueAt(stepParametersCopy,
-                    rowNum.intValue(), 1);
+                      rowNum.intValue(), 1);
                   m_tableModel.setValueAt(
-                    m_table.getValueAt(rowNum.intValue(), 2),
-                    rowNum.intValue(), 2);
+                      m_table.getValueAt(rowNum.intValue(), 2),
+                      rowNum.intValue(), 2);
                   m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
                 }
               }
@@ -313,31 +306,31 @@ public class LogPanel extends JPanel implements Logger {
           }
         } else {
           if (!(stepStatusCopy.startsWith("INTERRUPTED") && ((String) m_tableModel
-            .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
+              .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
             m_tableModel.setValueAt(stepNameCopy, rowNum.intValue(), 0);
             m_tableModel.setValueAt(stepParametersCopy, rowNum.intValue(), 1);
             m_tableModel.setValueAt(m_table.getValueAt(rowNum.intValue(), 2),
-              rowNum.intValue(), 2);
+                rowNum.intValue(), 2);
             m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
           }
         }
         if (stepStatus.startsWith("ERROR")
-          || stepStatus.startsWith("INTERRUPTED")
-          || stepStatus.toLowerCase().startsWith("finished")
-          ||
-          // stepStatus.toLowerCase().startsWith("finished.") ||
-          stepStatus.toLowerCase().startsWith("done")
-          ||
-          // stepStatus.toLowerCase().startsWith("done.") ||
-          stepStatus.equalsIgnoreCase("stopped")
-          || stepStatus.equalsIgnoreCase("stopped.")) {
+            || stepStatus.startsWith("INTERRUPTED")
+            || stepStatus.toLowerCase().startsWith("finished")
+            ||
+            // stepStatus.toLowerCase().startsWith("finished.") ||
+            stepStatus.toLowerCase().startsWith("done")
+            ||
+            // stepStatus.toLowerCase().startsWith("done.") ||
+            stepStatus.equalsIgnoreCase("stopped")
+            || stepStatus.equalsIgnoreCase("stopped.")) {
           // stop the timer.
           Timer t = m_timers.get(stepHash);
           if (t != null) {
             t.stop();
           }
         } else if (m_timers.get(stepHash) != null
-          && !m_timers.get(stepHash).isRunning()) {
+            && !m_timers.get(stepHash).isRunning()) {
           // need to create a new one in order to reset the
           // elapsed time.
           installTimer(stepHash);
@@ -345,7 +338,7 @@ public class LogPanel extends JPanel implements Logger {
         // m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
       }
     } else if (!stepStatus.equalsIgnoreCase("Remove")
-      && !stepStatus.equalsIgnoreCase("Remove.")) {
+        && !stepStatus.equalsIgnoreCase("Remove.")) {
       // Add this one to the hash map
       int numKeys = m_tableIndexes.keySet().size();
       m_tableIndexes.put(stepHash, numKeys);
@@ -371,7 +364,7 @@ public class LogPanel extends JPanel implements Logger {
         }
 
         if (!noTimer && !stepStatus.toLowerCase().startsWith("finished")
-          && !stepStatus.toLowerCase().startsWith("done")) {
+            && !stepStatus.toLowerCase().startsWith("done")) {
           installTimer(stepHashCopy);
         }
       } catch (Exception ex) {
@@ -401,9 +394,8 @@ public class LogPanel extends JPanel implements Logger {
                 SwingUtilities.invokeLater(new Runnable() {
                   @Override
                   public void run() {
-                    m_tableModel.setValueAt(
-                      "" + m_formatter.format(hours) + ":"
-                        + m_formatter.format(minutes2) + ":"
+                    m_tableModel.setValueAt("" + m_formatter.format(hours)
+                        + ":" + m_formatter.format(minutes2) + ":"
                         + m_formatter.format(seconds2), rn.intValue(), 2);
                   }
                 });
@@ -412,9 +404,9 @@ public class LogPanel extends JPanel implements Logger {
               }
             } else {
               m_tableModel.setValueAt(
-                "" + m_formatter.format(hours) + ":"
-                  + m_formatter.format(minutes2) + ":"
-                  + m_formatter.format(seconds2), rn.intValue(), 2);
+                  "" + m_formatter.format(hours) + ":"
+                      + m_formatter.format(minutes2) + ":"
+                      + m_formatter.format(seconds2), rn.intValue(), 2);
             }
           }
         }

@@ -15,14 +15,12 @@
 
 /*
  *    ASEvaluation.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.attributeSelection;
-
-import java.io.Serializable;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
@@ -31,6 +29,8 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /** 
  * Abstract attribute selection evaluation class
@@ -124,10 +124,7 @@ public abstract class ASEvaluation
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.enableAll();
-    
-    return result;
+    return new Capabilities(this);
   }
   
   /**

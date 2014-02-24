@@ -15,14 +15,14 @@
 
 /*
  *    Associator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
-import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.Capabilities;
 
 public interface Associator {
 

@@ -15,7 +15,7 @@
 
 /*
  *    IntervalEstimator.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,7 +23,7 @@ package weka.classifiers;
 
 import weka.core.Instance;
 
-/**
+/** 
  * Interface for numeric prediction schemes that can output prediction
  * intervals.
  *

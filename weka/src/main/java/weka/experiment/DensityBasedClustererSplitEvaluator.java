@@ -19,6 +19,7 @@
  *
  */
 
+
 package weka.experiment;
 
 import java.io.ByteArrayOutputStream;
@@ -26,7 +27,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -45,75 +45,63 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
- * <!-- globalinfo-start --> A SplitEvaluator that produces results for a
- * density based clusterer.
+ <!-- globalinfo-start -->
+ * A SplitEvaluator that produces results for a density based clusterer.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -no-size
+ * <pre> -no-size
  *  Skips the determination of sizes (train/test/clusterer)
- *  (default: sizes are determined)
- * </pre>
+ *  (default: sizes are determined)</pre>
  * 
- * <pre>
- * -W &lt;class name&gt;
+ * <pre> -W &lt;class name&gt;
  *  The full class name of the density based clusterer.
- *  eg: weka.clusterers.EM
- * </pre>
+ *  eg: weka.clusterers.EM</pre>
  * 
- * <pre>
+ * <pre> 
  * Options specific to clusterer weka.clusterers.EM:
  * </pre>
  * 
- * <pre>
- * -N &lt;num&gt;
+ * <pre> -N &lt;num&gt;
  *  number of clusters. If omitted or -1 specified, then 
- *  cross validation is used to select the number of clusters.
- * </pre>
+ *  cross validation is used to select the number of clusters.</pre>
  * 
- * <pre>
- * -I &lt;num&gt;
+ * <pre> -I &lt;num&gt;
  *  max iterations.
- * (default 100)
- * </pre>
+ * (default 100)</pre>
  * 
- * <pre>
- * -V
- *  verbose.
- * </pre>
+ * <pre> -V
+ *  verbose.</pre>
  * 
- * <pre>
- * -M &lt;num&gt;
+ * <pre> -M &lt;num&gt;
  *  minimum allowable standard deviation for normal density
  *  computation
- *  (default 1e-6)
- * </pre>
+ *  (default 1e-6)</pre>
  * 
- * <pre>
- * -O
+ * <pre> -O
  *  Display model in old format (good when there are many clusters)
  * </pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 100)
- * </pre>
+ *  (default 100)</pre>
  * 
- * <!-- options-end -->
- * 
+ <!-- options-end -->
+ *
  * All options after -- will be passed to the clusterer.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
  */
 
-public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
-  OptionHandler, AdditionalMeasureProducer, RevisionHandler {
+public class DensityBasedClustererSplitEvaluator 
+  implements SplitEvaluator,
+	     OptionHandler,
+	     AdditionalMeasureProducer,
+	     RevisionHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = 5124501059135692160L;
@@ -125,20 +113,16 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   protected DensityBasedClusterer m_clusterer = new EM();
 
   /** The names of any additional measures to look for in SplitEvaluators */
-  protected String[] m_additionalMeasures = null;
+  protected String [] m_additionalMeasures = null;
 
-  /**
-   * Array of booleans corresponding to the measures in m_AdditionalMeasures
-   * indicating which of the AdditionalMeasures the current clusterer can
-   * produce
-   */
-  protected boolean[] m_doesProduce = null;
+  /** Array of booleans corresponding to the measures in m_AdditionalMeasures
+      indicating which of the AdditionalMeasures the current clusterer
+      can produce */
+  protected boolean [] m_doesProduce = null;
 
-  /**
-   * The number of additional measures that need to be filled in after taking
-   * into account column constraints imposed by the final destination for
-   * results
-   */
+  /** The number of additional measures that need to be filled in
+      after taking into account column constraints imposed by the final
+      destination for results */
   protected int m_numberAdditionalMeasures = 0;
 
   /** Holds the statistics for the most recent application of the clusterer */
@@ -159,15 +143,15 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /** The length of a result */
   private static final int RESULT_SIZE = 9;
 
+  
   public DensityBasedClustererSplitEvaluator() {
     updateOptions();
   }
 
   /**
    * Returns a string describing this split evaluator
-   * 
-   * @return a description of the split evaluator suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return a description of the split evaluator suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
     return " A SplitEvaluator that produces results for a density based clusterer. ";
@@ -175,125 +159,126 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
-  @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(1);
 
     newVector.addElement(new Option(
-      "\tSkips the determination of sizes (train/test/clusterer)\n"
-        + "\t(default: sizes are determined)", "no-size", 0, "-no-size"));
+	     "\tSkips the determination of sizes (train/test/clusterer)\n" +
+	     "\t(default: sizes are determined)",
+	     "no-size", 0, 
+	     "-no-size"));
     newVector.addElement(new Option(
-      "\tThe full class name of the density based clusterer.\n"
-        + "\teg: weka.clusterers.EM", "W", 1, "-W <class name>"));
+				    "\tThe full class name of the density based clusterer.\n"
+				    +"\teg: weka.clusterers.EM", 
+				    "W", 1, 
+				    "-W <class name>"));
 
-    if ((m_clusterer != null) && (m_clusterer instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to clusterer " + m_clusterer.getClass().getName()
-          + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) m_clusterer)
-        .listOptions()));
+    if ((m_clusterer != null) &&
+	(m_clusterer instanceof OptionHandler)) {
+      newVector.addElement(new Option(
+				      "",
+				      "", 0, "\nOptions specific to clusterer "
+				      + m_clusterer.getClass().getName() + ":"));
+      Enumeration enu = ((OptionHandler)m_clusterer).listOptions();
+      while (enu.hasMoreElements()) {
+	newVector.addElement(enu.nextElement());
+      }
     }
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. Valid options are:
-   * <p>
-   * 
+   * Parses a given list of options. Valid options are:<p>
+   *
    * -W classname <br>
-   * Specify the full class name of the clusterer to evaluate.
-   * <p>
-   * 
+   * Specify the full class name of the clusterer to evaluate. <p>
+   *
    * All option after -- will be passed to the classifier.
-   * 
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
     m_NoSizeDetermination = Utils.getFlag("no-size", options);
-
+    
     String cName = Utils.getOption('W', options);
     if (cName.length() == 0) {
       throw new Exception("A clusterer must be specified with"
-        + " the -W option.");
+			  + " the -W option.");
     }
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClusterer((DensityBasedClusterer) AbstractClusterer.forName(cName, null));
+    setClusterer((DensityBasedClusterer)AbstractClusterer.forName(cName, null));
     if (getClusterer() instanceof OptionHandler) {
-      ((OptionHandler) getClusterer()).setOptions(Utils
-        .partitionOptions(options));
+      ((OptionHandler) getClusterer())
+	.setOptions(Utils.partitionOptions(options));
       updateOptions();
     }
   }
 
   /**
    * Gets the current settings of the Classifier.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
-  public String[] getOptions() {
-    Vector<String> result;
-    String[] clustererOptions;
-
+  public String [] getOptions() {
+    Vector<String>	result;
+    String[] 		clustererOptions;
+    
     result = new Vector<String>();
-
-    clustererOptions = new String[0];
-    if ((m_clusterer != null) && (m_clusterer instanceof OptionHandler)) {
-      clustererOptions = ((OptionHandler) m_clusterer).getOptions();
+    
+    clustererOptions = new String [0];
+    if ((m_clusterer != null) && 
+	(m_clusterer instanceof OptionHandler)) {
+      clustererOptions = ((OptionHandler)m_clusterer).getOptions();
     }
-
+    
     if (getClusterer() != null) {
       result.add("-W");
       result.add(getClusterer().getClass().getName());
     }
-
-    if (getNoSizeDetermination()) {
+    
+    if (getNoSizeDetermination())
       result.add("-no-size");
-    }
 
     result.add("--");
     result.addAll(Arrays.asList(clustererOptions));
-
+    
     return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Set a list of method names for additional measures to look for in
-   * Classifiers. This could contain many measures (of which only a subset may
-   * be produceable by the current Classifier) if an experiment is the type that
-   * iterates over a set of properties.
-   * 
+   * Set a list of method names for additional measures to look for
+   * in Classifiers. This could contain many measures (of which only a
+   * subset may be produceable by the current Classifier) if an experiment
+   * is the type that iterates over a set of properties.
    * @param additionalMeasures a list of method names
    */
-  @Override
-  public void setAdditionalMeasures(String[] additionalMeasures) {
+  public void setAdditionalMeasures(String [] additionalMeasures) {
     // System.err.println("ClassifierSplitEvaluator: setting additional measures");
     m_additionalMeasures = additionalMeasures;
-
+    
     // determine which (if any) of the additional measures this clusterer
     // can produce
     if (m_additionalMeasures != null && m_additionalMeasures.length > 0) {
-      m_doesProduce = new boolean[m_additionalMeasures.length];
+      m_doesProduce = new boolean [m_additionalMeasures.length];
 
       if (m_clusterer instanceof AdditionalMeasureProducer) {
-        Enumeration<String> en = ((AdditionalMeasureProducer) m_clusterer)
-          .enumerateMeasures();
-        while (en.hasMoreElements()) {
-          String mname = en.nextElement();
-          for (int j = 0; j < m_additionalMeasures.length; j++) {
-            if (mname.compareToIgnoreCase(m_additionalMeasures[j]) == 0) {
-              m_doesProduce[j] = true;
-            }
-          }
-        }
+	Enumeration en = ((AdditionalMeasureProducer)m_clusterer).
+	  enumerateMeasures();
+	while (en.hasMoreElements()) {
+	  String mname = (String)en.nextElement();
+	  for (int j=0;j<m_additionalMeasures.length;j++) {
+	    if (mname.compareToIgnoreCase(m_additionalMeasures[j]) == 0) {
+	      m_doesProduce[j] = true;
+	    }
+	  }
+	}
       }
     } else {
       m_doesProduce = null;
@@ -301,20 +286,18 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Returns an enumeration of any additional measure names that might be in the
-   * classifier
-   * 
+   * Returns an enumeration of any additional measure names that might be
+   * in the classifier
    * @return an enumeration of the measure names
    */
-  @Override
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     if (m_clusterer instanceof AdditionalMeasureProducer) {
-      Enumeration<String> en = ((AdditionalMeasureProducer) m_clusterer)
-        .enumerateMeasures();
+      Enumeration en = ((AdditionalMeasureProducer)m_clusterer).
+	enumerateMeasures();
       while (en.hasMoreElements()) {
-        String mname = en.nextElement();
-        newVector.addElement(mname);
+	String mname = (String)en.nextElement();
+	newVector.addElement(mname);
       }
     }
     return newVector.elements();
@@ -322,35 +305,33 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the value of the named measure
-   * 
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */
-  @Override
   public double getMeasure(String additionalMeasureName) {
     if (m_clusterer instanceof AdditionalMeasureProducer) {
-      return ((AdditionalMeasureProducer) m_clusterer)
-        .getMeasure(additionalMeasureName);
+      return ((AdditionalMeasureProducer)m_clusterer).
+	getMeasure(additionalMeasureName);
     } else {
-      throw new IllegalArgumentException(
-        "DensityBasedClustererSplitEvaluator: " + "Can't return value for : "
-          + additionalMeasureName + ". " + m_clusterer.getClass().getName()
-          + " " + "is not an AdditionalMeasureProducer");
+      throw new IllegalArgumentException("DensityBasedClustererSplitEvaluator: "
+					 +"Can't return value for : "+additionalMeasureName
+					 +". "+m_clusterer.getClass().getName()+" "
+					 +"is not an AdditionalMeasureProducer");
     }
   }
 
   /**
    * Gets the data types of each of the key columns produced for a single run.
-   * The number of key fields must be constant for a given SplitEvaluator.
-   * 
-   * @return an array containing objects of the type of each key column. The
-   *         objects should be Strings, or Doubles.
+   * The number of key fields must be constant
+   * for a given SplitEvaluator.
+   *
+   * @return an array containing objects of the type of each key column. The 
+   * objects should be Strings, or Doubles.
    */
-  @Override
-  public Object[] getKeyTypes() {
+  public Object [] getKeyTypes() {
 
-    Object[] keyTypes = new Object[KEY_SIZE];
+    Object [] keyTypes = new Object[KEY_SIZE];
     keyTypes[0] = "";
     keyTypes[1] = "";
     keyTypes[2] = "";
@@ -358,15 +339,15 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Gets the names of each of the key columns produced for a single run. The
-   * number of key fields must be constant for a given SplitEvaluator.
-   * 
+   * Gets the names of each of the key columns produced for a single run.
+   * The number of key fields must be constant
+   * for a given SplitEvaluator.
+   *
    * @return an array containing the name of each key column
    */
-  @Override
-  public String[] getKeyNames() {
+  public String [] getKeyNames() {
 
-    String[] keyNames = new String[KEY_SIZE];
+    String [] keyNames = new String[KEY_SIZE];
     keyNames[0] = "Scheme";
     keyNames[1] = "Scheme_options";
     keyNames[2] = "Scheme_version_ID";
@@ -374,17 +355,16 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Gets the key describing the current SplitEvaluator. For example This may
-   * contain the name of the classifier used for classifier predictive
-   * evaluation. The number of key fields must be constant for a given
-   * SplitEvaluator.
-   * 
+   * Gets the key describing the current SplitEvaluator. For example
+   * This may contain the name of the classifier used for classifier
+   * predictive evaluation. The number of key fields must be constant
+   * for a given SplitEvaluator.
+   *
    * @return an array of objects containing the key.
    */
-  @Override
-  public Object[] getKey() {
+  public Object [] getKey(){
 
-    Object[] key = new Object[KEY_SIZE];
+    Object [] key = new Object[KEY_SIZE];
     key[0] = m_clusterer.getClass().getName();
     key[1] = m_clustererOptions;
     key[2] = m_clustererVersion;
@@ -392,26 +372,27 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Gets the data types of each of the result columns produced for a single
-   * run. The number of result fields must be constant for a given
-   * SplitEvaluator.
-   * 
-   * @return an array containing objects of the type of each result column. The
-   *         objects should be Strings, or Doubles.
+   * Gets the data types of each of the result columns produced for a 
+   * single run. The number of result fields must be constant
+   * for a given SplitEvaluator.
+   *
+   * @return an array containing objects of the type of each result column. 
+   * The objects should be Strings, or Doubles.
    */
-  @Override
-  public Object[] getResultTypes() {
-    int addm = (m_additionalMeasures != null) ? m_additionalMeasures.length : 0;
-    int overall_length = RESULT_SIZE + addm;
+  public Object [] getResultTypes() {
+    int addm = (m_additionalMeasures != null) 
+      ? m_additionalMeasures.length 
+      : 0;
+    int overall_length = RESULT_SIZE+addm;
 
-    Object[] resultTypes = new Object[overall_length];
+    Object [] resultTypes = new Object[overall_length];
     Double doub = new Double(0);
     int current = 0;
-
+    
     // number of training and testing instances
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
-
+    
     // log liklihood
     resultTypes[current++] = doub;
     // number of clusters
@@ -420,16 +401,17 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
     // timing stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
-
+    
     // sizes
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
-    // resultTypes[current++] = "";
+
+    //    resultTypes[current++] = "";
 
     // add any additional measures
-    for (int i = 0; i < addm; i++) {
+    for (int i=0;i<addm;i++) {
       resultTypes[current++] = doub;
     }
     if (current != overall_length) {
@@ -439,17 +421,19 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Gets the names of each of the result columns produced for a single run. The
-   * number of result fields must be constant for a given SplitEvaluator.
-   * 
+   * Gets the names of each of the result columns produced for a single run.
+   * The number of result fields must be constant
+   * for a given SplitEvaluator.
+   *
    * @return an array containing the name of each result column
    */
-  @Override
-  public String[] getResultNames() {
-    int addm = (m_additionalMeasures != null) ? m_additionalMeasures.length : 0;
-    int overall_length = RESULT_SIZE + addm;
-
-    String[] resultNames = new String[overall_length];
+  public String [] getResultNames() {
+    int addm = (m_additionalMeasures != null) 
+      ? m_additionalMeasures.length 
+      : 0;
+    int overall_length = RESULT_SIZE+addm;
+   
+    String [] resultNames = new String[overall_length];
     int current = 0;
     resultNames[current++] = "Number_of_training_instances";
     resultNames[current++] = "Number_of_testing_instances";
@@ -468,9 +452,9 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "Serialized_Test_Set_Size";
 
     // Classifier defined extras
-    // resultNames[current++] = "Summary";
+    //    resultNames[current++] = "Summary";
     // add any additional measures
-    for (int i = 0; i < addm; i++) {
+    for (int i=0;i<addm;i++) {
       resultNames[current++] = m_additionalMeasures[i];
     }
     if (current != overall_length) {
@@ -481,38 +465,41 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Gets the results for the supplied train and test datasets.
-   * 
+   *
    * @param train the training Instances.
    * @param test the testing Instances.
-   * @return the results stored in an array. The objects stored in the array may
-   *         be Strings, Doubles, or null (for the missing value).
+   * @return the results stored in an array. The objects stored in
+   * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if a problem occurs while getting the results
    */
-  @Override
-  public Object[] getResult(Instances train, Instances test) throws Exception {
-
+  public Object [] getResult(Instances train, Instances test) 
+    throws Exception {
+    
     if (m_clusterer == null) {
       throw new Exception("No clusterer has been specified");
     }
-    int addm = (m_additionalMeasures != null) ? m_additionalMeasures.length : 0;
-    int overall_length = RESULT_SIZE + addm;
+    int addm = (m_additionalMeasures != null) 
+      ? m_additionalMeasures.length 
+      : 0;
+    int overall_length = RESULT_SIZE+addm;
 
     if (m_removeClassColumn && train.classIndex() != -1) {
       // remove the class column from the training and testing data
       Remove r = new Remove();
-      r.setAttributeIndicesArray(new int[] { train.classIndex() });
+      r.setAttributeIndicesArray(new int [] {train.classIndex()});
       r.setInvertSelection(false);
       r.setInputFormat(train);
       train = Filter.useFilter(train, r);
-
+      
       test = Filter.useFilter(test, r);
     }
     train.setClassIndex(-1);
     test.setClassIndex(-1);
+      
 
     ClusterEvaluation eval = new ClusterEvaluation();
 
-    Object[] result = new Object[overall_length];
+    Object [] result = new Object[overall_length];
     long trainTimeStart = System.currentTimeMillis();
     m_clusterer.buildClusterer(train);
     double numClusters = m_clusterer.numberOfClusters();
@@ -521,7 +508,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
     long testTimeStart = System.currentTimeMillis();
     eval.evaluateClusterer(test);
     long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
-    // m_result = eval.toSummaryString();
+    //    m_result = eval.toSummaryString();
 
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -531,7 +518,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
     result[current++] = new Double(eval.getLogLikelihood());
     result[current++] = new Double(numClusters);
-
+    
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
@@ -541,7 +528,8 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
       result[current++] = -1.0;
       result[current++] = -1.0;
       result[current++] = -1.0;
-    } else {
+    }
+    else {
       ByteArrayOutputStream bastream = new ByteArrayOutputStream();
       ObjectOutputStream oostream = new ObjectOutputStream(bastream);
       oostream.writeObject(m_clusterer);
@@ -555,23 +543,23 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
       oostream.writeObject(test);
       result[current++] = new Double(bastream.size());
     }
-
-    for (int i = 0; i < addm; i++) {
+    
+    for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-        try {
-          double dv = ((AdditionalMeasureProducer) m_clusterer)
-            .getMeasure(m_additionalMeasures[i]);
-          Double value = new Double(dv);
-
-          result[current++] = value;
-        } catch (Exception ex) {
-          System.err.println(ex);
-        }
+	try {
+	  double dv = ((AdditionalMeasureProducer)m_clusterer).
+	    getMeasure(m_additionalMeasures[i]);
+	  Double value = new Double(dv);
+	  
+	  result[current++] = value;
+	} catch (Exception ex) {
+	  System.err.println(ex);
+	}
       } else {
-        result[current++] = null;
+	result[current++] = null;
       }
     }
-
+    
     if (current != overall_length) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
@@ -580,9 +568,8 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String removeClassColumnTipText() {
     return "Remove the class column (if set) from the data.";
@@ -590,7 +577,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Set whether the class column should be removed from the data.
-   * 
+   *
    * @param r true if the class column is to be removed.
    */
   public void setRemoveClassColumn(boolean r) {
@@ -599,18 +586,17 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Get whether the class column is to be removed.
-   * 
+   *
    * @return true if the class column is to be removed.
    */
   public boolean getRemoveClassColumn() {
     return m_removeClassColumn;
   }
-
+  
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String clustererTipText() {
     return "The density based clusterer to use.";
@@ -618,21 +604,21 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Get the value of clusterer
-   * 
+   *
    * @return Value of clusterer.
    */
   public DensityBasedClusterer getClusterer() {
-
+    
     return m_clusterer;
   }
-
+  
   /**
    * Sets the clusterer.
-   * 
+   *
    * @param newClusterer the new clusterer to use.
    */
   public void setClusterer(DensityBasedClusterer newClusterer) {
-
+    
     m_clusterer = newClusterer;
     updateOptions();
   }
@@ -640,16 +626,16 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Returns whether the size determination (train/test/clusterer) is skipped.
    * 
-   * @return true if size determination skipped
+   * @return 		true if size determination skipped
    */
   public boolean getNoSizeDetermination() {
     return m_NoSizeDetermination;
   }
-
+  
   /**
    * Sets whether the size determination (train/test/clusterer) is skipped.
    * 
-   * @param value true if to determine sizes
+   * @param value	true if to determine sizes
    */
   public void setNoSizeDetermination(boolean value) {
     m_NoSizeDetermination = value;
@@ -657,24 +643,24 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String noSizeDeterminationTipText() {
     return "If enabled, the size determination for train/test/clusterer is skipped.";
   }
 
   protected void updateOptions() {
-
+    
     if (m_clusterer instanceof OptionHandler) {
-      m_clustererOptions = Utils.joinOptions(((OptionHandler) m_clusterer)
-        .getOptions());
+      m_clustererOptions = Utils.joinOptions(((OptionHandler)m_clusterer)
+					     .getOptions());
     } else {
       m_clustererOptions = "";
     }
     if (m_clusterer instanceof Serializable) {
-      ObjectStreamClass obs = ObjectStreamClass.lookup(m_clusterer.getClass());
+      ObjectStreamClass obs = ObjectStreamClass.lookup(m_clusterer
+						       .getClass());
       m_clustererVersion = "" + obs.getSerialVersionUID();
     } else {
       m_clustererVersion = "";
@@ -684,27 +670,25 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Set the Clusterer to use, given it's class name. A new clusterer will be
    * instantiated.
-   * 
+   *
    * @param newClustererName the clusterer class name.
    * @exception Exception if the class name is invalid.
    */
   public void setClustererName(String newClustererName) throws Exception {
 
     try {
-      setClusterer((DensityBasedClusterer) Class.forName(newClustererName)
-        .newInstance());
+      setClusterer((DensityBasedClusterer)Class.forName(newClustererName)
+		    .newInstance());
     } catch (Exception ex) {
       throw new Exception("Can't find Clusterer with class name: "
-        + newClustererName);
+			  + newClustererName);
     }
   }
 
   /**
    * Gets the raw output from the classifier
-   * 
    * @return the raw output from the classifier
    */
-  @Override
   public String getRawResultOutput() {
     StringBuffer result = new StringBuffer();
 
@@ -712,26 +696,26 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
       return "<null> clusterer";
     }
     result.append(toString());
-    result.append("Clustering model: \n" + m_clusterer.toString() + '\n');
+    result.append("Clustering model: \n"+m_clusterer.toString()+'\n');
 
     // append the performance statistics
     if (m_result != null) {
-      // result.append(m_result);
-
+      //      result.append(m_result);
+      
       if (m_doesProduce != null) {
-        for (int i = 0; i < m_doesProduce.length; i++) {
-          if (m_doesProduce[i]) {
-            try {
-              double dv = ((AdditionalMeasureProducer) m_clusterer)
-                .getMeasure(m_additionalMeasures[i]);
-              Double value = new Double(dv);
-
-              result.append(m_additionalMeasures[i] + " : " + value + '\n');
-            } catch (Exception ex) {
-              System.err.println(ex);
-            }
-          }
-        }
+	for (int i=0;i<m_doesProduce.length;i++) {
+	  if (m_doesProduce[i]) {
+	    try {
+	      double dv = ((AdditionalMeasureProducer)m_clusterer).
+		getMeasure(m_additionalMeasures[i]);
+	      Double value = new Double(dv);
+	      
+	      result.append(m_additionalMeasures[i]+" : "+value+'\n');
+	    } catch (Exception ex) {
+	      System.err.println(ex);
+	    }
+	  } 
+	}
       }
     }
     return result.toString();
@@ -739,26 +723,24 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns a text description of the split evaluator.
-   * 
+   *
    * @return a text description of the split evaluator.
    */
-  @Override
   public String toString() {
 
     String result = "DensityBasedClustererSplitEvaluator: ";
     if (m_clusterer == null) {
       return result + "<null> clusterer";
     }
-    return result + m_clusterer.getClass().getName() + " " + m_clustererOptions
-      + "(version " + m_clustererVersion + ")";
+    return result + m_clusterer.getClass().getName() + " " 
+      + m_clustererOptions + "(version " + m_clustererVersion + ")";
   }
-
+  
   /**
    * Returns the revision string.
    * 
-   * @return the revision
+   * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }

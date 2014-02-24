@@ -15,11 +15,14 @@
 
 /*
  *    InstanceSavePanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
+
+import weka.core.Instance;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,9 +31,6 @@ import java.awt.Panel;
 import java.awt.TextField;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 /** 
  * A bean that saves a stream of instances to a file.

@@ -48,22 +48,23 @@ import weka.gui.Logger;
  * @version $Revision$
  */
 public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
-  Serializable, UserRequestAcceptor, TrainingSetListener, TestSetListener,
-  TrainingSetProducer, TestSetProducer, DataSource, DataSourceListener,
-  InstanceListener, EventConstraints, ConfigurationProducer {
+    Serializable, UserRequestAcceptor, TrainingSetListener, TestSetListener,
+    TrainingSetProducer, TestSetProducer, DataSource, DataSourceListener,
+    InstanceListener, EventConstraints, ConfigurationProducer {
 
   /** for serialization */
   private static final long serialVersionUID = 8249759470189439321L;
 
   protected BeanVisual m_visual = new BeanVisual("Filter", BeanVisual.ICON_PATH
-    + "DefaultFilter.gif", BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
+      + "DefaultFilter.gif", BeanVisual.ICON_PATH
+      + "DefaultFilter_animated.gif");
 
   private static int IDLE = 0;
   private static int FILTERING_TRAINING = 1;
   private static int FILTERING_TEST = 2;
   private int m_state = IDLE;
 
-  protected transient Thread m_filterThread = null;
+  protected Thread m_filterThread = null;
 
   private transient Instances m_trainingSet;
   private transient Instances m_testingSet;
@@ -76,27 +77,27 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
   /**
    * Objects talking to us
    */
-  private final Hashtable<String, Object> m_listenees = new Hashtable<String, Object>();
+  private final Hashtable m_listenees = new Hashtable();
 
   /**
    * Objects listening for training set events
    */
-  private final Vector<TrainingSetListener> m_trainingListeners = new Vector<TrainingSetListener>();
+  private final Vector m_trainingListeners = new Vector();
 
   /**
    * Objects listening for test set events
    */
-  private final Vector<TestSetListener> m_testListeners = new Vector<TestSetListener>();
+  private final Vector m_testListeners = new Vector();
 
   /**
    * Objects listening for instance events
    */
-  private final Vector<InstanceListener> m_instanceListeners = new Vector<InstanceListener>();
+  private final Vector m_instanceListeners = new Vector();
 
   /**
    * Objects listening for data set events
    */
-  private final Vector<DataSourceListener> m_dataListeners = new Vector<DataSourceListener>();
+  private final Vector m_dataListeners = new Vector();
 
   /**
    * The filter to use.
@@ -166,31 +167,31 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
     m_Filter = c;
     String filterName = c.getClass().toString();
     filterName = filterName.substring(filterName.indexOf('.') + 1,
-      filterName.length());
+        filterName.length());
     if (loadImages) {
       if (m_Filter instanceof Visible) {
         m_visual = ((Visible) m_Filter).getVisual();
       } else {
         if (!m_visual.loadIcons(BeanVisual.ICON_PATH + filterName + ".gif",
-          BeanVisual.ICON_PATH + filterName + "_animated.gif")) {
+            BeanVisual.ICON_PATH + filterName + "_animated.gif")) {
           useDefaultVisual();
         }
       }
     }
     m_visual.setText(filterName.substring(filterName.lastIndexOf('.') + 1,
-      filterName.length()));
+        filterName.length()));
 
     if (m_Filter instanceof LogWriter && m_log != null) {
       ((LogWriter) m_Filter).setLog(m_log);
     }
 
     if (!(m_Filter instanceof StreamableFilter)
-      && (m_listenees.containsKey("instance"))) {
+        && (m_listenees.containsKey("instance"))) {
       if (m_log != null) {
         m_log.logMessage("[Filter] " + statusMessagePrefix() + " WARNING : "
-          + m_Filter.getClass().getName() + " is not an incremental filter");
+            + m_Filter.getClass().getName() + " is not an incremental filter");
         m_log.statusMessage(statusMessagePrefix()
-          + "WARNING: Not an incremental filter.");
+            + "WARNING: Not an incremental filter.");
       }
     }
 
@@ -213,7 +214,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
 
     if (!(algorithm instanceof weka.filters.Filter)) {
       throw new IllegalArgumentException(algorithm.getClass() + " : incorrect "
-        + "type of algorithm (Filter)");
+          + "type of algorithm (Filter)");
     }
     setFilter((weka.filters.Filter) algorithm);
   }
@@ -250,11 +251,11 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
     // to do!
     if (m_filterThread != null) {
       String messg = "[Filter] " + statusMessagePrefix()
-        + " is currently batch processing!";
+          + " is currently batch processing!";
       if (m_log != null) {
         m_log.logMessage(messg);
         m_log.statusMessage(statusMessagePrefix()
-          + "WARNING: Filter is currently batch processing.");
+            + "WARNING: Filter is currently batch processing.");
       } else {
         System.err.println(messg);
       }
@@ -264,10 +265,10 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
       stop(); // stop all processing
       if (m_log != null) {
         m_log.logMessage("[Filter] " + statusMessagePrefix() + " ERROR : "
-          + m_Filter.getClass().getName()
-          + "can't process streamed instances; can't continue");
+            + m_Filter.getClass().getName()
+            + "can't process streamed instances; can't continue");
         m_log.statusMessage(statusMessagePrefix()
-          + "ERROR: Can't process streamed instances; can't continue.");
+            + "ERROR: Can't process streamed instances; can't continue.");
       }
       return;
     }
@@ -301,15 +302,14 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         } catch (Exception ex) {
           stop(); // stop all processing
           if (m_log != null) {
-            m_log
-              .logMessage("[Filter] " + statusMessagePrefix()
+            m_log.logMessage("[Filter] " + statusMessagePrefix()
                 + " Error in obtaining post-filter structure. "
                 + ex.getMessage());
             m_log.statusMessage(statusMessagePrefix()
-              + "ERROR (See log for details).");
+                + "ERROR (See log for details).");
           } else {
             System.err.println("[Filter] " + statusMessagePrefix()
-              + " Error in obtaining post-filter structure");
+                + " Error in obtaining post-filter structure");
           }
         }
       } catch (Exception ex) {
@@ -319,7 +319,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
     }
 
     if (e.getStatus() == InstanceEvent.BATCH_FINISHED
-      || e.getInstance() == null) {
+        || e.getInstance() == null) {
       // get the last instance (if available)
       try {
         if (m_log != null) {
@@ -357,9 +357,9 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         stop(); // stop all processing
         if (m_log != null) {
           m_log.logMessage("[Filter] " + statusMessagePrefix()
-            + ex.getMessage());
+              + ex.getMessage());
           m_log.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details).");
+              + "ERROR (See log for details).");
         }
         ex.printStackTrace();
       }
@@ -369,14 +369,14 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
           if (m_log != null) {
             m_log.statusMessage(statusMessagePrefix()
-              + "Passing on pending instances...");
+                + "Passing on pending instances...");
           }
           Instance filteredInstance = m_Filter.output();
           if (filteredInstance != null) {
             if (!m_structurePassedOn) {
               // pass on the new structure first
               m_ie.setStructure((Instances) (new SerializedObject(
-                filteredInstance.dataset()).getObject()));
+                  filteredInstance.dataset()).getObject()));
               notifyInstanceListeners(m_ie);
               m_structurePassedOn = true;
             }
@@ -393,7 +393,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
             if (filteredInstance.dataset().checkForStringAttributes()) {
               for (int i = 0; i < filteredInstance.dataset().numAttributes(); i++) {
                 if (filteredInstance.dataset().attribute(i).isString()
-                  && !filteredInstance.isMissing(i)) {
+                    && !filteredInstance.isMissing(i)) {
                   String val = filteredInstance.stringValue(i);
 
                   m_ie.getStructure().attribute(i).setStringValue(val);
@@ -421,7 +421,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         if (m_log != null) {
           m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
           m_log.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details.");
+              + "ERROR (See log for details.");
         }
         ex.printStackTrace();
       }
@@ -459,7 +459,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         if (filteredInstance.dataset().checkForStringAttributes()) {
           for (int i = 0; i < filteredInstance.dataset().numAttributes(); i++) {
             if (filteredInstance.dataset().attribute(i).isString()
-              && !filteredInstance.isMissing(i)) {
+                && !filteredInstance.isMissing(i)) {
               String val = filteredInstance.stringValue(i);
 
               filteredInstance.dataset().attribute(i).setStringValue(val);
@@ -473,7 +473,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
 
         if (m_log != null && (m_instanceCount % 10000 == 0)) {
           m_log.statusMessage(statusMessagePrefix() + "Received "
-            + m_instanceCount + " instances.");
+              + m_instanceCount + " instances.");
         }
         notifyInstanceListeners(m_ie);
       } catch (Exception ex) {
@@ -481,7 +481,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         if (m_log != null) {
           m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
           m_log.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details).");
+              + "ERROR (See log for details).");
         }
         ex.printStackTrace();
       }
@@ -513,11 +513,10 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
             m_state = FILTERING_TRAINING;
           }
           m_trainingSet = (e instanceof TrainingSetEvent) ? ((TrainingSetEvent) e)
-            .getTrainingSet() : ((DataSetEvent) e).getDataSet();
+              .getTrainingSet() : ((DataSetEvent) e).getDataSet();
 
           // final String oldText = m_visual.getText();
           m_filterThread = new Thread() {
-            @SuppressWarnings("deprecation")
             @Override
             public void run() {
               try {
@@ -526,23 +525,23 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   // m_visual.setText("Filtering training data...");
                   if (m_log != null) {
                     m_log.statusMessage(statusMessagePrefix()
-                      + "Filtering training data ("
-                      + m_trainingSet.relationName() + ")");
+                        + "Filtering training data ("
+                        + m_trainingSet.relationName() + ")");
                   }
                   m_Filter.setInputFormat(m_trainingSet);
                   Instances filteredData = weka.filters.Filter.useFilter(
-                    m_trainingSet, m_Filter);
+                      m_trainingSet, m_Filter);
                   // m_visual.setText(oldText);
                   m_visual.setStatic();
                   EventObject ne;
                   if (e instanceof TrainingSetEvent) {
                     ne = new TrainingSetEvent(weka.gui.beans.Filter.this,
-                      filteredData);
+                        filteredData);
                     ((TrainingSetEvent) ne).m_setNumber = ((TrainingSetEvent) e).m_setNumber;
                     ((TrainingSetEvent) ne).m_maxSetNumber = ((TrainingSetEvent) e).m_maxSetNumber;
                   } else {
                     ne = new DataSetEvent(weka.gui.beans.Filter.this,
-                      filteredData);
+                        filteredData);
                   }
 
                   notifyDataOrTrainingListeners(ne);
@@ -551,9 +550,9 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                 ex.printStackTrace();
                 if (m_log != null) {
                   m_log.logMessage("[Filter] " + statusMessagePrefix()
-                    + ex.getMessage());
+                      + ex.getMessage());
                   m_log.statusMessage(statusMessagePrefix()
-                    + "ERROR (See log for details).");
+                      + "ERROR (See log for details).");
                   // m_log.statusMessage("Problem filtering: see log for details.");
                 }
                 Filter.this.stop(); // stop all processing
@@ -565,7 +564,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   m_trainingSet = null;
                   if (m_log != null) {
                     m_log.logMessage("[Filter] " + statusMessagePrefix()
-                      + " training set interrupted!");
+                        + " training set interrupted!");
                     m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
                   }
                 } else {
@@ -574,7 +573,6 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                   }
                 }
                 block(false);
-                m_filterThread = null;
               }
             }
           };
@@ -597,11 +595,10 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
    */
   @Override
   public void acceptTestSet(final TestSetEvent e) {
-    if (e.isStructureOnly()) {
+    if (e.isStructureOnly())
       notifyTestListeners(e);
-    }
     if (m_trainingSet != null && m_trainingSet.equalHeaders(e.getTestSet())
-      && m_filterThread == null) {
+        && m_filterThread == null) {
       try {
         if (m_state == IDLE) {
           m_state = FILTERING_TEST;
@@ -609,7 +606,6 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
         m_testingSet = e.getTestSet();
         // final String oldText = m_visual.getText();
         m_filterThread = new Thread() {
-          @SuppressWarnings("deprecation")
           @Override
           public void run() {
             try {
@@ -618,15 +614,15 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                 // m_visual.setText("Filtering test data...");
                 if (m_log != null) {
                   m_log.statusMessage(statusMessagePrefix()
-                    + "Filtering test data (" + m_testingSet.relationName()
-                    + ")");
+                      + "Filtering test data (" + m_testingSet.relationName()
+                      + ")");
                 }
                 Instances filteredTest = weka.filters.Filter.useFilter(
-                  m_testingSet, m_Filter);
+                    m_testingSet, m_Filter);
                 // m_visual.setText(oldText);
                 m_visual.setStatic();
                 TestSetEvent ne = new TestSetEvent(weka.gui.beans.Filter.this,
-                  filteredTest);
+                    filteredTest);
                 ne.m_setNumber = e.m_setNumber;
                 ne.m_maxSetNumber = e.m_maxSetNumber;
                 notifyTestListeners(ne);
@@ -635,9 +631,9 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
               ex.printStackTrace();
               if (m_log != null) {
                 m_log.logMessage("[Filter] " + statusMessagePrefix()
-                  + ex.getMessage());
+                    + ex.getMessage());
                 m_log.statusMessage(statusMessagePrefix()
-                  + "ERROR (See log for details).");
+                    + "ERROR (See log for details).");
               }
               Filter.this.stop();
             } finally {
@@ -648,7 +644,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                 m_trainingSet = null;
                 if (m_log != null) {
                   m_log.logMessage("[Filter] " + statusMessagePrefix()
-                    + " test set interrupted!");
+                      + " test set interrupted!");
                   m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
                   // m_log.statusMessage("OK");
                 }
@@ -658,7 +654,6 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
                 }
               }
               block(false);
-              m_filterThread = null;
             }
           }
         };
@@ -709,7 +704,7 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "DefaultFilter.gif",
-      BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
+        BeanVisual.ICON_PATH + "DefaultFilter_animated.gif");
   }
 
   /**
@@ -815,48 +810,46 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
   }
 
   private void notifyDataOrTrainingListeners(EventObject ce) {
-    Vector<?> l;
+    Vector l;
     synchronized (this) {
-      l = (ce instanceof TrainingSetEvent) ? (Vector<?>) m_trainingListeners
-        .clone() : (Vector<?>) m_dataListeners.clone();
+      l = (ce instanceof TrainingSetEvent) ? (Vector) m_trainingListeners
+          .clone() : (Vector) m_dataListeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
         if (ce instanceof TrainingSetEvent) {
           ((TrainingSetListener) l.elementAt(i))
-            .acceptTrainingSet((TrainingSetEvent) ce);
+              .acceptTrainingSet((TrainingSetEvent) ce);
         } else {
           ((DataSourceListener) l.elementAt(i))
-            .acceptDataSet((DataSetEvent) ce);
+              .acceptDataSet((DataSetEvent) ce);
         }
       }
     }
   }
 
-  @SuppressWarnings("unchecked")
   private void notifyTestListeners(TestSetEvent ce) {
-    Vector<TestSetListener> l;
+    Vector l;
     synchronized (this) {
-      l = (Vector<TestSetListener>) m_testListeners.clone();
+      l = (Vector) m_testListeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
-        l.elementAt(i).acceptTestSet(ce);
+        ((TestSetListener) l.elementAt(i)).acceptTestSet(ce);
       }
     }
   }
 
-  @SuppressWarnings("unchecked")
   protected void notifyInstanceListeners(InstanceEvent tse) {
-    Vector<InstanceListener> l;
+    Vector l;
     synchronized (this) {
-      l = (Vector<InstanceListener>) m_instanceListeners.clone();
+      l = (Vector) m_instanceListeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
         // System.err.println("Notifying instance listeners "
         // +"(Filter)");
-        l.elementAt(i).acceptInstance(tse);
+        ((InstanceListener) l.elementAt(i)).acceptInstance(tse);
       }
     }
   }
@@ -885,30 +878,30 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
     // will need to reject train/test listener if we have a
     // data source listener and vis versa
     if (m_listenees.containsKey("dataSet")
-      && (eventName.compareTo("trainingSet") == 0
-        || eventName.compareTo("testSet") == 0 || eventName
-        .compareTo("instance") == 0)) {
+        && (eventName.compareTo("trainingSet") == 0
+            || eventName.compareTo("testSet") == 0 || eventName
+            .compareTo("instance") == 0)) {
       return false;
     }
 
     if ((m_listenees.containsKey("trainingSet") || m_listenees
-      .containsKey("testSet"))
-      && (eventName.compareTo("dataSet") == 0 || eventName
-        .compareTo("instance") == 0)) {
+        .containsKey("testSet"))
+        && (eventName.compareTo("dataSet") == 0 || eventName
+            .compareTo("instance") == 0)) {
       return false;
     }
 
     if (m_listenees.containsKey("instance")
-      && (eventName.compareTo("trainingSet") == 0
-        || eventName.compareTo("testSet") == 0 || eventName
-        .compareTo("dataSet") == 0)) {
+        && (eventName.compareTo("trainingSet") == 0
+            || eventName.compareTo("testSet") == 0 || eventName
+            .compareTo("dataSet") == 0)) {
       return false;
     }
 
     // reject an instance event connection if our filter isn't
     // streamable
     if (eventName.compareTo("instance") == 0
-      && !(m_Filter instanceof StreamableFilter)) {
+        && !(m_Filter instanceof StreamableFilter)) {
       return false;
     }
     return true;
@@ -936,12 +929,12 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
    */
   @Override
   public synchronized void connectionNotification(String eventName,
-    Object source) {
+      Object source) {
     if (connectionAllowed(eventName)) {
       m_listenees.put(eventName, source);
       if (m_Filter instanceof ConnectionNotificationConsumer) {
         ((ConnectionNotificationConsumer) m_Filter).connectionNotification(
-          eventName, source);
+            eventName, source);
       }
     }
   }
@@ -956,10 +949,10 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
    */
   @Override
   public synchronized void disconnectionNotification(String eventName,
-    Object source) {
+      Object source) {
     if (m_Filter instanceof ConnectionNotificationConsumer) {
       ((ConnectionNotificationConsumer) m_Filter).disconnectionNotification(
-        eventName, source);
+          eventName, source);
     }
     m_listenees.remove(eventName);
   }
@@ -988,11 +981,10 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
   /**
    * Stop all action if possible
    */
-  @SuppressWarnings("deprecation")
   @Override
   public void stop() {
     // tell all listenees (upstream beans) to stop
-    Enumeration<String> en = m_listenees.keys();
+    Enumeration en = m_listenees.keys();
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
@@ -1040,8 +1032,8 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
    * @return an <code>Enumeration</code> value
    */
   @Override
-  public Enumeration<String> enumerateRequests() {
-    Vector<String> newVector = new Vector<String>(0);
+  public Enumeration enumerateRequests() {
+    Vector newVector = new Vector(0);
     if (m_filterThread != null) {
       newVector.addElement("Stop");
     }
@@ -1099,11 +1091,11 @@ public class Filter extends JPanel implements BeanCommon, Visible, WekaWrapper,
 
   private String statusMessagePrefix() {
     return getCustomName()
-      + "$"
-      + hashCode()
-      + "|"
-      + ((m_Filter instanceof OptionHandler && Utils.joinOptions(
-        ((OptionHandler) m_Filter).getOptions()).length() > 0) ? Utils
-        .joinOptions(((OptionHandler) m_Filter).getOptions()) + "|" : "");
+        + "$"
+        + hashCode()
+        + "|"
+        + ((m_Filter instanceof OptionHandler && Utils.joinOptions(
+            ((OptionHandler) m_Filter).getOptions()).length() > 0) ? Utils
+            .joinOptions(((OptionHandler) m_Filter).getOptions()) + "|" : "");
   }
 }

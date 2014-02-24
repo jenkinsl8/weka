@@ -15,13 +15,12 @@
 
 /*
  *    ParallelMultipleClassifiersCombiner.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -66,17 +65,19 @@ public abstract class ParallelMultipleClassifiersCombiner extends
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(1);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
               "\tNumber of execution slots.\n"
               + "\t(default 1 - i.e. no parallelism)",
               "num-slots", 1, "-num-slots <num>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -110,14 +111,17 @@ public abstract class ParallelMultipleClassifiersCombiner extends
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
 
-    options.add("-num-slots");
-    options.add("" + getNumExecutionSlots());
+    int current = 0;
+    options[current++] = "-num-slots";
+    options[current++] = "" + getNumExecutionSlots();
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current,
+                     superOptions.length);
+
+    return options;
   }
 
   /**

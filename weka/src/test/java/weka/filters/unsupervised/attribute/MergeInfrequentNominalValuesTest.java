@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  *
  * @author Len Trigg (original MergeTwoValues code)
  * @author Eibe Frank
- * @version $Revision: 8034 $
+ * @version $Revision$
  */
 public class MergeInfrequentNominalValuesTest
   extends AbstractFilterTest {

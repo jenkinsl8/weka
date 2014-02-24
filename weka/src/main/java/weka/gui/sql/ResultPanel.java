@@ -15,11 +15,17 @@
 
 /*
  * ResultPanel.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.JTableHelper;
+import weka.gui.sql.event.QueryExecuteEvent;
+import weka.gui.sql.event.QueryExecuteListener;
+import weka.gui.sql.event.ResultChangedEvent;
+import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -38,29 +44,24 @@ import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import weka.gui.JTableHelper;
-import weka.gui.sql.event.QueryExecuteEvent;
-import weka.gui.sql.event.QueryExecuteListener;
-import weka.gui.sql.event.ResultChangedEvent;
-import weka.gui.sql.event.ResultChangedListener;
-
 /**
  * Represents a panel for displaying the results of a query in table format.
- * 
- * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ *
+ * @author    FracPete (fracpete at waikato dot ac dot nz)
+ * @version   $Revision$
  */
-public class ResultPanel extends JPanel implements QueryExecuteListener,
-  ChangeListener {
+public class ResultPanel 
+  extends JPanel 
+  implements QueryExecuteListener, ChangeListener {
 
   /** for serialization */
   private static final long serialVersionUID = 278654800344034571L;
-
+  
   /** the parent of this panel */
   protected JFrame m_Parent;
 
   /** the result change listeners */
-  protected HashSet<ResultChangedListener> m_Listeners;
+  protected HashSet m_Listeners;
 
   /** the panel where to output the queries */
   protected QueryPanel m_QueryPanel;
@@ -82,20 +83,19 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
 
   /** the counter for the tab names */
   protected int m_NameCounter;
-
+  
   /**
    * initializes the panel
-   * 
-   * @param parent the parent of this panel
+   * @param parent        the parent of this panel
    */
   public ResultPanel(JFrame parent) {
     super();
-
-    m_Parent = parent;
-    m_QueryPanel = null;
+    
+    m_Parent      = parent;
+    m_QueryPanel  = null;
     m_NameCounter = 0;
-    m_Listeners = new HashSet<ResultChangedListener>();
-
+    m_Listeners   = new HashSet();
+    
     createPanel();
   }
 
@@ -103,10 +103,10 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
    * creates the panel with all its components
    */
   protected void createPanel() {
-    JPanel panel;
-    JPanel panel2;
-    JPanel panel3;
-    JPanel panel4;
+    JPanel          panel;
+    JPanel          panel2;
+    JPanel          panel3;
+    JPanel          panel4;
 
     setLayout(new BorderLayout());
     setPreferredSize(new Dimension(0, 200));
@@ -125,45 +125,39 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
     panel2.add(panel3, BorderLayout.CENTER);
     panel4 = new JPanel(new BorderLayout());
     panel3.add(panel4, BorderLayout.CENTER);
-
+    
     m_ButtonClose.setMnemonic('l');
     m_ButtonClose.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        close();
-      }
-    });
+	public void actionPerformed(ActionEvent e) {
+	  close();
+	}
+      });
     panel.add(m_ButtonClose, BorderLayout.NORTH);
-
+    
     m_ButtonCloseAll.setMnemonic('a');
     m_ButtonCloseAll.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        closeAll();
-      }
-    });
+	public void actionPerformed(ActionEvent e) {
+	  closeAll();
+	}
+      });
     panel2.add(m_ButtonCloseAll, BorderLayout.NORTH);
-
+    
     m_ButtonCopyQuery.setMnemonic('Q');
-    m_ButtonCopyQuery
-      .setToolTipText("Copies the query of the currently selected tab into the query field.");
+    m_ButtonCopyQuery.setToolTipText("Copies the query of the currently selected tab into the query field.");
     m_ButtonCopyQuery.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        copyQuery();
-      }
-    });
+	public void actionPerformed(ActionEvent e) {
+	  copyQuery();
+	}
+      });
     panel3.add(m_ButtonCopyQuery, BorderLayout.NORTH);
-
+    
     m_ButtonOptWidth.setMnemonic('p');
-    m_ButtonOptWidth
-      .setToolTipText("Calculates the optimal column width for the current table.");
+    m_ButtonOptWidth.setToolTipText("Calculates the optimal column width for the current table.");
     m_ButtonOptWidth.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        calcOptimalWidth();
-      }
-    });
+	public void actionPerformed(ActionEvent e) {
+	  calcOptimalWidth();
+	}
+      });
     panel4.add(m_ButtonOptWidth, BorderLayout.NORTH);
 
     // dummy place holder, otherwise is the space too small for the tabbed
@@ -193,7 +187,7 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
    * sets the state of the buttons
    */
   protected void setButtons() {
-    int index;
+    int         index;
 
     index = m_TabbedPane.getSelectedIndex();
 
@@ -210,34 +204,34 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
     m_NameCounter++;
     return "Query" + m_NameCounter;
   }
-
+  
   /**
    * This method gets called when a query has been executed.
    */
-  @Override
   public void queryExecuted(QueryExecuteEvent evt) {
-    ResultSetTable table;
-
+    ResultSetTable      table;
+    
     // only displayed successful queries
-    if (evt.failed()) {
+    if (evt.failed())
       return;
-    }
 
     // DDL command like drop etc that don't create ResultSet?
-    if (!evt.hasResult()) {
+    if (!evt.hasResult())
       return;
-    }
 
     try {
-      table = new ResultSetTable(evt.getDbUtils().getDatabaseURL(), evt
-        .getDbUtils().getUsername(), evt.getDbUtils().getPassword(),
-        evt.getQuery(), new ResultSetTableModel(evt.getResultSet(),
-          evt.getMaxRows()));
+      table = new ResultSetTable(
+                evt.getDbUtils().getDatabaseURL(),
+                evt.getDbUtils().getUsername(),
+                evt.getDbUtils().getPassword(),
+                evt.getQuery(), 
+                new ResultSetTableModel(evt.getResultSet(), evt.getMaxRows()));
       m_TabbedPane.addTab(getNextTabName(), new JScrollPane(table));
 
       // set active tab
       m_TabbedPane.setSelectedIndex(m_TabbedPane.getTabCount() - 1);
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
 
@@ -248,22 +242,21 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
   /**
    * Invoked when the target of the listener has changed its state.
    */
-  @Override
   public void stateChanged(ChangeEvent e) {
     // in case the tabs get clicked
     setButtons();
 
     // notify listeners about current query
-    if (getCurrentTable() != null) {
-      notifyListeners(getCurrentTable().getURL(), getCurrentTable().getUser(),
-        getCurrentTable().getPassword(), getCurrentTable().getQuery());
-    }
+    if (getCurrentTable() != null)
+      notifyListeners(getCurrentTable().getURL(), 
+                      getCurrentTable().getUser(),
+                      getCurrentTable().getPassword(),
+                      getCurrentTable().getQuery());
   }
 
   /**
    * returns the currently set QueryPanel, can be NULL
-   * 
-   * @return the current QueryPanel, possibly NULL
+   * @return        the current QueryPanel, possibly NULL
    */
   public QueryPanel getQueryPanel() {
     return m_QueryPanel;
@@ -271,8 +264,7 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
 
   /**
    * sets the QueryPanel to use for displaying the query
-   * 
-   * @param panel the panel used for displaying the query
+   * @param panel   the panel used for displaying the query
    */
   public void setQueryPanel(QueryPanel panel) {
     m_QueryPanel = panel;
@@ -280,24 +272,23 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
 
   /**
    * returns the table of the current tab, can be NULL
-   * 
-   * @return the currently selected table
+   * @return        the currently selected table
    */
   protected ResultSetTable getCurrentTable() {
-    ResultSetTable table;
-    JScrollPane pane;
-    JViewport port;
-    int index;
+    ResultSetTable      table;
+    JScrollPane         pane;
+    JViewport           port;
+    int                 index;
 
     table = null;
 
     index = m_TabbedPane.getSelectedIndex();
     if (index > -1) {
-      pane = (JScrollPane) m_TabbedPane.getComponentAt(index);
-      port = (JViewport) pane.getComponent(0);
+      pane  = (JScrollPane) m_TabbedPane.getComponentAt(index);
+      port  = (JViewport) pane.getComponent(0);
       table = (ResultSetTable) port.getComponent(0);
     }
-
+      
     return table;
   }
 
@@ -305,14 +296,15 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
    * closes the current tab
    */
   protected void close() {
-    int index;
+    int                 index;
 
     index = m_TabbedPane.getSelectedIndex();
 
     if (index > -1) {
       try {
         getCurrentTable().finalize();
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         System.out.println(t);
       }
       m_TabbedPane.removeTabAt(index);
@@ -330,7 +322,8 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
       m_TabbedPane.setSelectedIndex(0);
       try {
         getCurrentTable().finalize();
-      } catch (Throwable t) {
+      }
+      catch (Throwable t) {
         System.out.println(t);
       }
       m_TabbedPane.removeTabAt(0);
@@ -344,24 +337,21 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
    * copies the query of the current tab into the QueryPanel
    */
   protected void copyQuery() {
-    if ((getCurrentTable() != null) && (getQueryPanel() != null)) {
+    if ( (getCurrentTable() != null) && (getQueryPanel() != null) )
       getQueryPanel().setQuery(getCurrentTable().getQuery());
-    }
   }
 
   /**
    * calculates the optimal column width for the current table
    */
   protected void calcOptimalWidth() {
-    if (getCurrentTable() != null) {
+    if (getCurrentTable() != null)
       JTableHelper.setOptimalColumnWidth(getCurrentTable());
-    }
   }
 
   /**
    * adds the given listener to the list of listeners
-   * 
-   * @param l the listener to add to the list
+   * @param l       the listener to add to the list
    */
   public void addResultChangedListener(ResultChangedListener l) {
     m_Listeners.add(l);
@@ -369,8 +359,7 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
 
   /**
    * removes the given listener from the list of listeners
-   * 
-   * @param l the listener to remove
+   * @param l       the listener to remove
    */
   public void removeResultChangedListener(ResultChangedListener l) {
     m_Listeners.remove(l);
@@ -378,21 +367,21 @@ public class ResultPanel extends JPanel implements QueryExecuteListener,
 
   /**
    * notifies the listeners of the event
-   * 
-   * @param url the database URL
-   * @param user the user
-   * @param pw the password
-   * @param query the query
+   * @param url         the database URL
+   * @param user        the user
+   * @param pw          the password
+   * @param query       the query
    */
-  protected void notifyListeners(String url, String user, String pw,
-    String query) {
-    Iterator<ResultChangedListener> iter;
-    ResultChangedListener l;
+  protected void notifyListeners(String url, String user, 
+                                 String pw, String query) {
+    Iterator                iter;
+    ResultChangedListener   l;
 
     iter = m_Listeners.iterator();
     while (iter.hasNext()) {
-      l = iter.next();
+      l = (ResultChangedListener) iter.next();
       l.resultChanged(new ResultChangedEvent(this, url, user, pw, query));
     }
   }
 }
+

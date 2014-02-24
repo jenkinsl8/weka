@@ -21,18 +21,13 @@
 
 package weka.classifiers.meta;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.ArrayList;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
-import weka.core.Aggregateable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -82,16 +77,9 @@ import weka.core.PartitionGenerator;
  * <pre> -O
  *  Calculate the out of bag error.</pre>
  * 
- * <pre> -represent-copies-using-weights
- *  Represent copies of instances using weights rather than explicitly.</pre>
- * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
- * 
- * <pre> -num-slots &lt;num&gt;
- *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)</pre>
  * 
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
@@ -128,12 +116,6 @@ import weka.core.PartitionGenerator;
  * <pre> -L
  *  Maximum tree depth (default -1, no maximum)</pre>
  * 
- * <pre> -I
- *  Initial class value count (default 0)</pre>
- * 
- * <pre> -R
- *  Spread initial count over all class values (i.e. don't use 1 per value)</pre>
- * 
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
@@ -146,7 +128,7 @@ import weka.core.PartitionGenerator;
 public class Bagging
   extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
-             TechnicalInformationHandler, PartitionGenerator, Aggregateable<Bagging> {
+             TechnicalInformationHandler, PartitionGenerator {
 
   /** for serialization */
   static final long serialVersionUID = -115879962237199703L;
@@ -156,9 +138,6 @@ public class Bagging
 
   /** Whether to calculate the out of bag error */
   protected boolean m_CalcOutOfBag = false;
-
-  /** Whether to represent copies of instances using weights rather than explicitly */
-  protected boolean m_RepresentUsingWeights = false;
 
   /** The out of bag error that has been calculated */
   protected double m_OutOfBagError;  
@@ -191,7 +170,6 @@ public class Bagging
    * 
    * @return the technical information about this class
    */
-  @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
     
@@ -212,7 +190,6 @@ public class Bagging
    * 
    * @return the default classifier classname
    */
-  @Override
   protected String defaultClassifierString() {
     
     return "weka.classifiers.trees.REPTree";
@@ -223,10 +200,9 @@ public class Bagging
    *
    * @return an enumeration of all the available options.
    */
-  @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
@@ -235,12 +211,11 @@ public class Bagging
     newVector.addElement(new Option(
               "\tCalculate the out of bag error.",
               "O", 0, "-O"));
-    newVector.addElement(new Option(
-              "\tRepresent copies of instances using weights rather than explicitly.",
-              "-represent-copies-using-weights", 0, "-represent-copies-using-weights"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
- 
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -258,16 +233,9 @@ public class Bagging
    * <pre> -O
    *  Calculate the out of bag error.</pre>
    * 
-   * <pre> -represent-copies-using-weights
-   *  Represent copies of instances using weights rather than explicitly.</pre>
-   * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
-   * 
-   * <pre> -num-slots &lt;num&gt;
-   *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)</pre>
    * 
    * <pre> -I &lt;num&gt;
    *  Number of iterations.
@@ -304,12 +272,6 @@ public class Bagging
    * <pre> -L
    *  Maximum tree depth (default -1, no maximum)</pre>
    * 
-   * <pre> -I
-   *  Initial class value count (default 0)</pre>
-   * 
-   * <pre> -R
-   *  Spread initial count over all class values (i.e. don't use 1 per value)</pre>
-   * 
    <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
@@ -317,7 +279,6 @@ public class Bagging
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
 
     String bagSize = Utils.getOption('P', options);
@@ -329,11 +290,7 @@ public class Bagging
 
     setCalcOutOfBag(Utils.getFlag('O', options));
 
-    setRepresentCopiesUsingWeights(Utils.getFlag("represent-copies-using-weights", options));
-
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -341,25 +298,28 @@ public class Bagging
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-    
-    options.add("-P"); 
-    options.add("" + getBagSizePercent());
+
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 3];
+
+    int current = 0;
+    options[current++] = "-P"; 
+    options[current++] = "" + getBagSizePercent();
 
     if (getCalcOutOfBag()) { 
-        options.add("-O");
+      options[current++] = "-O";
     }
 
-    if (getRepresentCopiesUsingWeights()) {
-        options.add("-represent-copies-using-weights");
-    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -389,35 +349,6 @@ public class Bagging
   public void setBagSizePercent(int newBagSizePercent) {
 
     m_BagSizePercent = newBagSizePercent;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String representCopiesUsingWeightsTipText() {
-    return "Whether to represent copies of instances using weights rather than explicitly.";
-  }
-
-  /**
-   * Set whether copies of instances are represented using weights rather than explicitly.
-   *
-   * @param representUsingWeights whether to represent copies using weights
-   */
-  public void setRepresentCopiesUsingWeights(boolean representUsingWeights) {
-
-    m_RepresentUsingWeights = representUsingWeights;
-  }
-
-  /**
-   * Get whether copies of instances are represented using weights rather than explicitly.
-   *
-   * @return whether the out of bag error is calculated
-   */
-  public boolean getRepresentCopiesUsingWeights() {
-
-    return m_RepresentUsingWeights;
   }
 
   /**
@@ -465,10 +396,9 @@ public class Bagging
    *
    * @return an enumeration of the measure names
    */
-  @Override
-  public Enumeration<String> enumerateMeasures() {
+  public Enumeration enumerateMeasures() {
     
-    Vector<String> newVector = new Vector<String>(1);
+    Vector newVector = new Vector(1);
     newVector.addElement("measureOutOfBagError");
     return newVector.elements();
   }
@@ -480,7 +410,6 @@ public class Bagging
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */
-  @Override
   public double getMeasure(String additionalMeasureName) {
     
     if (additionalMeasureName.equalsIgnoreCase("measureOutOfBagError")) {
@@ -502,7 +431,6 @@ public class Bagging
    * @return the training set for the supplied iteration number
    * @throws Exception if something goes wrong when generating a training set.
    */
-  @Override
   protected synchronized Instances getTrainingSet(int iteration) throws Exception {
     int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
     Instances bagData = null;
@@ -511,9 +439,9 @@ public class Bagging
     // create the in-bag dataset
     if (m_CalcOutOfBag) {
       m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights());
+      bagData = m_data.resampleWithWeights(r, m_inBag[iteration]);
     } else {
-      bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
+      bagData = m_data.resampleWithWeights(r);
       if (bagSize < m_data.numInstances()) {
         bagData.randomize(r);
         Instances newBagData = new Instances(bagData, 0, bagSize);
@@ -531,18 +459,10 @@ public class Bagging
    * bagged classifier.
    * @throws Exception if the classifier could not be built successfully
    */
-  @Override
   public void buildClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
-
-    // Has user asked to represent copies using weights?
-    if (getRepresentCopiesUsingWeights() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-      throw new IllegalArgumentException("Cannot represent copies using weights when " +
-                                         "base learner in bagging does not implement " +
-                                         "WeightedInstancesHandler.");
-    }
 
     // remove instances with missing class
     m_data = new Instances(data);
@@ -555,6 +475,7 @@ public class Bagging
 					 "out-of-bag error is to be calculated!");
     }
 
+    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
     m_random = new Random(m_Seed);
     
     m_inBag = null;
@@ -648,7 +569,6 @@ public class Bagging
    * @return preedicted class probability distribution
    * @throws Exception if distribution can't be computed successfully 
    */
-  @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
 
     double [] sums = new double [instance.numClasses()], newProbs; 
@@ -663,7 +583,7 @@ public class Bagging
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      sums[0] /= m_NumIterations;
+      sums[0] /= (double)m_NumIterations;
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;
@@ -678,7 +598,6 @@ public class Bagging
    *
    * @return description of the bagged classifier as a string
    */
-  @Override
   public String toString() {
     
     if (m_Classifiers == null) {
@@ -701,7 +620,6 @@ public class Bagging
   /**
    * Builds the classifier to generate a partition.
    */
-  @Override
   public void generatePartition(Instances data) throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator)
@@ -713,7 +631,6 @@ public class Bagging
   /**
    * Computes an array that indicates leaf membership
    */
-  @Override
   public double[] getMembershipValues(Instance inst) throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator) {
@@ -739,7 +656,6 @@ public class Bagging
   /**
    * Returns the number of elements in the partition.
    */
-  @Override
   public int numElements() throws Exception {
     
     if (m_Classifier instanceof PartitionGenerator) {
@@ -757,7 +673,6 @@ public class Bagging
    * 
    * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
@@ -770,44 +685,4 @@ public class Bagging
   public static void main(String [] argv) {
     runClassifier(new Bagging(), argv);
   }
-  
-  protected List<Classifier> m_classifiersCache;
-
-  /**
-   * Aggregate an object with this one
-   * 
-   * @param toAggregate the object to aggregate
-   * @return the result of aggregation
-   * @throws Exception if the supplied object can't be aggregated for some
-   *           reason
-   */
-  @Override
-  public Bagging aggregate(Bagging toAggregate) throws Exception {
-    if (!m_Classifier.getClass().isAssignableFrom(toAggregate.m_Classifier.getClass())) {
-      throw new Exception("Can't aggregate because base classifiers differ");
-    }
-    
-    if (m_classifiersCache == null) {
-      m_classifiersCache = new ArrayList<Classifier>();
-      m_classifiersCache.addAll(Arrays.asList(m_Classifiers));
-    }
-    m_classifiersCache.addAll(Arrays.asList(toAggregate.m_Classifiers));
-    
-    return this;
-  }
-
-  /**
-   * Call to complete the aggregation process. Allows implementers to do any
-   * final processing based on how many objects were aggregated.
-   * 
-   * @throws Exception if the aggregation can't be finalized for some reason
-   */
-  @Override
-  public void finalizeAggregation() throws Exception {    
-    m_Classifiers = m_classifiersCache.toArray(new Classifier[1]);
-    m_NumIterations = m_Classifiers.length;
-    
-    m_classifiersCache = null;
-  }
 }
-

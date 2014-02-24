@@ -21,8 +21,6 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.ContingencyTables;
-
 /**
  * "Abstract" class for computing splitting criteria
  * based on the entropy of a class distribution.
@@ -36,16 +34,19 @@ public abstract class EntropyBasedSplitCrit
   /** for serialization */
   private static final long serialVersionUID = -2618691439791653056L;
 
+  /** The log of 2. */
+  protected static double log2 = Math.log(2);
+
   /**
    * Help method for computing entropy.
    */
-  public final double lnFunc(double num) {
+  public final double logFunc(double num) {
 
     // Constant hard coded for efficiency reasons
     if (num < 1e-6)
       return 0;
     else
-      return ContingencyTables.lnFunc(num);
+      return num*Math.log(num)/log2;
   }
 
   /**
@@ -57,8 +58,8 @@ public abstract class EntropyBasedSplitCrit
     int j;
 
     for (j=0;j<bags.numClasses();j++)
-      returnValue = returnValue+lnFunc(bags.perClass(j));
-    return (lnFunc(bags.total())-returnValue)/ContingencyTables.log2; 
+      returnValue = returnValue+logFunc(bags.perClass(j));
+    return logFunc(bags.total())-returnValue; 
   }
 
   /**
@@ -71,10 +72,10 @@ public abstract class EntropyBasedSplitCrit
 
     for (i=0;i<bags.numBags();i++){
       for (j=0;j<bags.numClasses();j++)
-	returnValue = returnValue+lnFunc(bags.perClassPerBag(i,j));
-      returnValue = returnValue-lnFunc(bags.perBag(i));
+	returnValue = returnValue+logFunc(bags.perClassPerBag(i,j));
+      returnValue = returnValue-logFunc(bags.perBag(i));
     }
-    return -(returnValue/ContingencyTables.log2);
+    return -returnValue;
   }
 
   /**
@@ -87,8 +88,8 @@ public abstract class EntropyBasedSplitCrit
     int i;
 
     for (i=0;i<bags.numBags();i++)
-      returnValue = returnValue+lnFunc(bags.perBag(i));
-    return (lnFunc(bags.total())-returnValue)/ContingencyTables.log2;
+      returnValue = returnValue+logFunc(bags.perBag(i));
+    return logFunc(bags.total())-returnValue;
   }
 }
 

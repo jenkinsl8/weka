@@ -15,7 +15,7 @@
 
 /*
  *    NumericItem.java
- *    Copyright (C) 2010-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,17 +33,20 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class NumericItem extends Item implements Serializable {
-
+  
   /** For serialization */
   private static final long serialVersionUID = -7869433770765864800L;
 
   public static enum Comparison {
-    NONE, EQUAL, LESS_THAN_OR_EQUAL_TO, GREATER_THAN;
+    NONE,
+    EQUAL,
+    LESS_THAN_OR_EQUAL_TO,
+    GREATER_THAN;
   }
-
+  
   /** The numeric test */
   protected double m_splitPoint;
-
+  
   /** The comparison operator */
   protected Comparison m_comparison;
 
@@ -55,18 +58,18 @@ public class NumericItem extends Item implements Serializable {
    * @param comp the comparison operator.
    * @throws Exception if the NumericItem can't be constructed.
    */
-  public NumericItem(Attribute att, double splitPoint, Comparison comp) throws Exception {
+  public NumericItem(Attribute att, double splitPoint, Comparison comp) 
+    throws Exception {
     super(att);
-
+    
     if (!att.isNumeric()) {
-      throw new Exception(
-        "NumericItem must be constructed using a numeric attribute");
+      throw new Exception("NumericItem must be constructed using a numeric attribute");
     }
-
+    
     m_comparison = comp;
     m_splitPoint = splitPoint;
   }
-
+  
   /**
    * Gets the numeric test.
    * 
@@ -75,7 +78,7 @@ public class NumericItem extends Item implements Serializable {
   public double getSplitPoint() {
     return m_splitPoint;
   }
-
+  
   /**
    * Gets the comparison operator for this item.
    * 
@@ -84,26 +87,24 @@ public class NumericItem extends Item implements Serializable {
   public Comparison getComparison() {
     return m_comparison;
   }
-
+  
   /**
    * Get this item's value as a String.
    * 
    * @return this item's value as a String.
    */
-  @Override
   public String getItemValueAsString() {
     return Utils.doubleToString(m_splitPoint, 3);
   }
-
+  
   /**
    * Get this item's comparison operator as a String.
    * 
    * @return this item's comparison operator as a String.
    */
-  @Override
   public String getComparisonAsString() {
     String result = null;
-
+    
     switch (m_comparison) {
     case EQUAL:
       result = "=";
@@ -114,22 +115,20 @@ public class NumericItem extends Item implements Serializable {
     case GREATER_THAN:
       result = ">";
       break;
-    default:
-      break;
     }
-
+    
     return result;
   }
-
+  
   /**
-   * A string representation of this item, (i.e. <attribute name> <comparison
-   * operator> <item value>). This default implementation just prints the
-   * attribute name and (optionally) frequency information.
+   * A string representation of this item, (i.e.
+   * <attribute name> <comparison operator> <item value>).
+   * This default implementation just prints the attribute
+   * name and (optionally) frequency information.
    * 
    * @param freq true if the frequency should be included.
-   * @return a string representation of this item.
+   * @return a string representation of this item. 
    */
-  @Override
   public String toString(boolean freq) {
     StringBuffer result = new StringBuffer();
     result.append(m_attribute.name() + " ");
@@ -143,36 +142,34 @@ public class NumericItem extends Item implements Serializable {
     case GREATER_THAN:
       result.append(">");
       break;
-    default:
-      break;
     }
-
+    
     result.append(" " + Utils.doubleToString(m_splitPoint, 4));
     if (freq) {
       result.append(":" + m_frequency);
     }
-
+    
     return result.toString();
   }
-
+  
   /**
-   * Equals. Compares the attribute, numeric test and comparison operator
+   * Equals. Compares the attribute, numeric test and comparison
+   * operator
    * 
    * @return true if this NumericItem is equal to the argument.
    */
-  @Override
   public boolean equals(Object compareTo) {
     if (!(compareTo instanceof NumericItem)) {
       return false;
     }
-
-    NumericItem b = (NumericItem) compareTo;
-    if (m_attribute.equals(b.getAttribute())
-      && m_comparison == b.getComparison()
-      && (new Double(m_splitPoint).equals(new Double(b.getSplitPoint())))) {
+    
+    NumericItem b = (NumericItem)compareTo;
+    if (m_attribute.equals(b.getAttribute()) && 
+        m_comparison == b.getComparison() && 
+        (new Double(m_splitPoint).equals(new Double(b.getSplitPoint())))) {
       return true;
     }
-
+    
     return false;
   }
 }

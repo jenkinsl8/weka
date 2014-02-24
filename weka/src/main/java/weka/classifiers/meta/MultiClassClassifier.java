@@ -15,26 +15,19 @@
 
 /*
  *    MultiClassClassifier.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -45,9 +38,15 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -454,13 +453,13 @@ public class MultiClassClassifier
 
     } else if (m_Method == METHOD_1_AGAINST_1) {
       // generate fastvector of pairs
-      ArrayList<int[] >pairs = new ArrayList<int[]>();
+      FastVector pairs = new FastVector();
       for (int i=0; i<insts.numClasses(); i++) {
 	for (int j=0; j<insts.numClasses(); j++) {
 	  if (j<=i) continue;
 	  int[] pair = new int[2];
 	  pair[0] = i; pair[1] = j;
-	  pairs.add(pair);
+	  pairs.addElement(pair);
 	}
       }
 
@@ -475,7 +474,7 @@ public class MultiClassClassifier
 	classFilter.setAttributeIndex("" + (insts.classIndex() + 1));
 	classFilter.setModifyHeader(true);
 	classFilter.setInvertSelection(true);
-	classFilter.setNominalIndicesArr((int[])pairs.get(i));
+	classFilter.setNominalIndicesArr((int[])pairs.elementAt(i));
 	Instances tempInstances = new Instances(insts, 0);
 	tempInstances.setClassIndex(-1);
 	classFilter.setInputFormat(tempInstances);
@@ -496,9 +495,9 @@ public class MultiClassClassifier
       int classIndex = m_TwoClassDataset.classIndex();
       m_TwoClassDataset.setClassIndex(-1);
       m_TwoClassDataset.deleteAttributeAt(classIndex);
-      ArrayList<String> classLabels = new ArrayList<String>();
-      classLabels.add("class0");
-      classLabels.add("class1");
+      FastVector classLabels = new FastVector();
+      classLabels.addElement("class0");
+      classLabels.addElement("class1");
       m_TwoClassDataset.insertAttributeAt(new Attribute("class", classLabels),
 					  classIndex);
       m_TwoClassDataset.setClassIndex(classIndex);
@@ -684,9 +683,9 @@ public class MultiClassClassifier
    *
    * @return an enumeration of all the available options
    */
-  public Enumeration<Option> listOptions()  {
+  public Enumeration listOptions()  {
 
-    Vector<Option> vec = new Vector<Option>(3);
+    Vector vec = new Vector(4);
     
     vec.addElement(new Option(
        "\tSets the method to use. Valid values are 0 (1-against-all),\n"
@@ -699,8 +698,10 @@ public class MultiClassClassifier
         "\tUse pairwise coupling (only has an effect for 1-against1)",
         "P", 0, "-P"));
 
-    vec.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      vec.addElement(enu.nextElement());
+    }
     return vec.elements();
   }
 
@@ -771,8 +772,6 @@ public class MultiClassClassifier
     setUsePairwiseCoupling(Utils.getFlag('P', options));
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -782,21 +781,30 @@ public class MultiClassClassifier
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-    
-    options.add("-M");
-    options.add("" + m_Method);
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 5];
+
+    int current = 0;
+
+
+    options[current++] = "-M";
+    options[current++] = "" + m_Method;
 
     if (getUsePairwiseCoupling()) {
-        options.add("-P");
+      options[current++] = "-P";
     }
     
-    options.add("-R");
-    options.add("" + m_RandomWidthFactor);
+    options[current++] = "-R";
+    options[current++] = "" + m_RandomWidthFactor;
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**

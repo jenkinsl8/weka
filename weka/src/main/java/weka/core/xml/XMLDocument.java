@@ -15,10 +15,13 @@
 
 /*
  * XMLDocument.java
- * Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.xml;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -43,9 +46,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
 
 /**
  * This class offers some methods for generating, reading and writing 

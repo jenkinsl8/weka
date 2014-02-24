@@ -15,24 +15,22 @@
 
 /*
  *    PMMLClassifier.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.pmml.consumer;
 
 import java.io.Serializable;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
-import weka.core.pmml.MappingInfo;
-import weka.core.pmml.MiningSchema;
-import weka.core.pmml.PMMLModel;
+import weka.core.pmml.*;
 import weka.gui.Logger;
 
 /**

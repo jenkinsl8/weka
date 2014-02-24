@@ -33,8 +33,8 @@ import weka.core.Instances;
  * @version $Revision$
  */
 public class TestSetMaker extends AbstractTestSetProducer implements
-  DataSourceListener, TrainingSetListener, EventConstraints, Serializable,
-  StructureProducer {
+    DataSourceListener, TrainingSetListener, EventConstraints, Serializable,
+    StructureProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -8473882857628061841L;
@@ -70,7 +70,7 @@ public class TestSetMaker extends AbstractTestSetProducer implements
 
   public TestSetMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "TestSetMaker.gif",
-      BeanVisual.ICON_PATH + "TestSetMaker_animated.gif");
+        BeanVisual.ICON_PATH + "TestSetMaker_animated.gif");
     m_visual.setText("TestSetMaker");
   }
 
@@ -131,24 +131,23 @@ public class TestSetMaker extends AbstractTestSetProducer implements
    * 
    * @param tse a <code>TestSetEvent</code> value
    */
-  @SuppressWarnings("unchecked")
   protected void notifyTestSetProduced(TestSetEvent tse) {
-    Vector<TestSetListener> l;
+    Vector l;
     synchronized (this) {
-      l = (Vector<TestSetListener>) m_listeners.clone();
+      l = (Vector) m_listeners.clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
             m_logger.logMessage("[TestSetMaker] " + statusMessagePrefix()
-              + " stopping.");
+                + " stopping.");
             m_logger.statusMessage(statusMessagePrefix() + "INTERRUPTED");
           }
           m_receivedStopNotification = false;
           break;
         }
-        l.elementAt(i).acceptTestSet(tse);
+        ((TestSetListener) l.elementAt(i)).acceptTestSet(tse);
       }
     }
   }
