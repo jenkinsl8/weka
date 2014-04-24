@@ -15,18 +15,18 @@
 
 /*
  * Tester.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
 
-import java.io.Serializable;
-
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
+
+import java.io.Serializable;
 
 /**
  * Interface for different kinds of Testers in the Experimenter.

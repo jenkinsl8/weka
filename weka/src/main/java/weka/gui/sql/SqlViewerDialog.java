@@ -15,11 +15,14 @@
 
 /*
  * SqlViewerDialog.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
+
+import weka.gui.sql.event.ResultChangedEvent;
+import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -36,25 +39,22 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import weka.gui.sql.event.ResultChangedEvent;
-import weka.gui.sql.event.ResultChangedListener;
-
 /**
  * A little dialog containing the SqlViewer.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
  * @version     $Revision$
  */
-public class SqlViewerDialog 
-  extends JDialog 
+public class SqlViewerDialog
+  extends JDialog
   implements ResultChangedListener {
 
   /** for serialization. */
   private static final long serialVersionUID = -31619864037233099L;
-  
+
   /** the parent frame. */
   protected JFrame m_Parent;
-  
+
   /** the SQL panel. */
   protected SqlViewer m_Viewer;
 
@@ -69,7 +69,7 @@ public class SqlViewerDialog
 
   /** displays the current query. */
   protected JLabel m_LabelQuery = new JLabel("");
-  
+
   /** whether to return sparse instances or not. */
   protected JCheckBox m_CheckBoxSparseData = new JCheckBox("Generate sparse data");
 
@@ -87,10 +87,10 @@ public class SqlViewerDialog
 
   /** the currently selected query. */
   protected String m_Query;
-  
+
   /**
    * initializes the dialog.
-   * 
+   *
    * @param parent	the parent frame
    */
   public SqlViewerDialog(JFrame parent) {
@@ -101,7 +101,7 @@ public class SqlViewerDialog
     m_User     = "";
     m_Password = "";
     m_Query    = "";
-    
+
     createDialog();
   }
 
@@ -112,17 +112,17 @@ public class SqlViewerDialog
     JPanel                    panel;
     JPanel                    panel2;
     final SqlViewerDialog     dialog;
-    
+
     dialog = this;
     setLayout(new BorderLayout());
 
     // sql panel
     m_Viewer = new SqlViewer(m_Parent);
     add(m_Viewer, BorderLayout.CENTER);
-    
+
     panel2 = new JPanel(new BorderLayout());
     add(panel2, BorderLayout.SOUTH);
-    
+
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel2.add(panel, BorderLayout.EAST);
@@ -150,13 +150,13 @@ public class SqlViewerDialog
 	  dialog.dispose();
       }
     });
-    
+
     // the checkbox for sparse data
     panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
     panel2.add(panel, BorderLayout.WEST);
     panel.add(m_CheckBoxSparseData);
     m_CheckBoxSparseData.setMnemonic('s');
-    
+
     addWindowListener(new WindowAdapter() {
       /**
        * Invoked when a window is in the process of being closed.
@@ -165,12 +165,12 @@ public class SqlViewerDialog
 	m_Viewer.saveSize();
       }
     });
-   
+
     // current Query
     panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panel2.add(panel, BorderLayout.CENTER);
     panel.add(m_LabelQuery);
-    
+
     pack();
     getRootPane().setDefaultButton(m_ButtonOK);
     setResizable(true);
@@ -181,7 +181,7 @@ public class SqlViewerDialog
 
   /**
    * displays the dialog if TRUE.
-   * 
+   *
    * @param b		if true displaying the dialog, hiding otherwise
    */
   public void setVisible(boolean b) {
@@ -189,7 +189,7 @@ public class SqlViewerDialog
       m_ReturnValue = JOptionPane.CANCEL_OPTION;
 
     super.setVisible(b);
-    
+
     // free up memory
     if (b)
       m_Viewer.clear();
@@ -207,7 +207,7 @@ public class SqlViewerDialog
 
   /**
    * returns the chosen URL, if any.
-   * 
+   *
    * @return		the URL
    */
   public String getURL() {
@@ -216,7 +216,7 @@ public class SqlViewerDialog
 
   /**
    * returns the chosen user, if any.
-   * 
+   *
    * @return		the user
    */
   public String getUser() {
@@ -225,7 +225,7 @@ public class SqlViewerDialog
 
   /**
    * returns the chosen password, if any.
-   * 
+   *
    * @return		the password
    */
   public String getPassword() {
@@ -234,16 +234,16 @@ public class SqlViewerDialog
 
   /**
    * returns the chosen query, if any.
-   * 
+   *
    * @return		the query
    */
   public String getQuery() {
     return m_Query;
   }
-  
+
   /**
    * Returns whether sparse data is generated.
-   * 
+   *
    * @return		true if sparse data is to be generated
    */
   public boolean getGenerateSparseData() {
@@ -252,7 +252,7 @@ public class SqlViewerDialog
 
   /**
    * This method gets called when a query has been executed.
-   * 
+   *
    * @param evt		the event
    */
   public void resultChanged(ResultChangedEvent evt) {
@@ -265,7 +265,7 @@ public class SqlViewerDialog
 
   /**
    * for testing only.
-   * 
+   *
    * @param args	ignored
    */
   public static void main(String[] args) {

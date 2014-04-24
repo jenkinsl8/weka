@@ -15,14 +15,14 @@
 
 /*
  * TitleUpdatedEvent.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.scripting.event;
 
-import java.util.EventObject;
-
 import weka.gui.scripting.ScriptingPanel;
+
+import java.util.EventObject;
 
 /**
  * Event that gets send in case a scripting panel updates the title.

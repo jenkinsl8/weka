@@ -15,17 +15,29 @@
 
 /*
  *    Classifier.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
+import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
-/**
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Set;
+import java.util.Vector;
+
+/** 
  * Classifier interface. All schemes for numeric or nominal prediction in
  * Weka implement this interface. Note that a classifier MUST either implement
  * distributionForInstance() or classifyInstance().
@@ -35,26 +47,26 @@ import weka.core.Instances;
  * @version $Revision$
  */
 public interface Classifier {
-
+  
   /**
    * Generates a classifier. Must initialize all fields of the classifier
    * that are not being set via options (ie. multiple calls of buildClassifier
    * must always lead to the same result). Must not change the dataset
    * in any way.
    *
-   * @param data set of instances serving as training data
-   * @exception Exception if the classifier has not been
+   * @param data set of instances serving as training data 
+   * @exception Exception if the classifier has not been 
    * generated successfully
    */
   public abstract void buildClassifier(Instances data) throws Exception;
-
+  
   /**
    * Classifies the given test instance. The instance has to belong to a
    * dataset when it's being classified. Note that a classifier MUST
    * implement either this or distributionForInstance().
    *
    * @param instance the instance to be classified
-   * @return the predicted most likely class for the instance or
+   * @return the predicted most likely class for the instance or 
    * Utils.missingValue() if no prediction is made
    * @exception Exception if an error occurred during the prediction
    */
@@ -69,15 +81,15 @@ public interface Classifier {
    * either this or classifyInstance().
    *
    * @param instance the instance to be classified
-   * @return an array containing the estimated membership
-   * probabilities of the test instance in each class
+   * @return an array containing the estimated membership 
+   * probabilities of the test instance in each class 
    * or the numeric prediction
-   * @exception Exception if distribution could not be
+   * @exception Exception if distribution could not be 
    * computed successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception;
 
-  /**
+  /** 
    * Returns the Capabilities of this classifier. Maximally permissive
    * capabilities are allowed by default. Derived classifiers should
    * override this method and first disable all capabilities and then

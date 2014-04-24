@@ -15,7 +15,7 @@
 
 /*
  *    SelectedTagEditor.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,15 +23,16 @@
 package weka.gui;
 
 
+import weka.core.Tag;
+import weka.core.SelectedTag;
+
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyEditor;
 import java.beans.PropertyEditorSupport;
-
 import javax.swing.JFrame;
-
-import weka.core.SelectedTag;
-import weka.core.Tag;
+import javax.swing.JLabel;
 
 /** 
  * A PropertyEditor that uses tags, where the tags are obtained from a

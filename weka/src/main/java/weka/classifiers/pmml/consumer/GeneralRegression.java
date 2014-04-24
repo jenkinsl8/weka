@@ -15,7 +15,7 @@
 
 /*
  *    GeneralRegression.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,7 +23,6 @@ package weka.classifiers.pmml.consumer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -33,9 +32,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.pmml.MiningSchema;
-import weka.core.pmml.PMMLUtils;
-import weka.core.pmml.TargetMetaInfo;
+import weka.core.pmml.*;
 
 /**
  * Class implementing import of PMML General Regression model. Can be

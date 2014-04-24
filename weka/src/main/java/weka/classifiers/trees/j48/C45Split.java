@@ -40,37 +40,37 @@ public class C45Split extends ClassifierSplitModel {
   private static final long serialVersionUID = 3064079330067903161L;
 
   /** Desired number of branches. */
-  protected int m_complexityIndex;
+  private int m_complexityIndex;
 
   /** Attribute to split on. */
-  protected final int m_attIndex;
+  private final int m_attIndex;
 
   /** Minimum number of objects in a split. */
-  protected final int m_minNoObj;
+  private final int m_minNoObj;
 
   /** Use MDL correction? */
-  protected final boolean m_useMDLcorrection;
+  private final boolean m_useMDLcorrection;
 
   /** Value of split point. */
-  protected double m_splitPoint;
+  private double m_splitPoint;
 
   /** InfoGain of split. */
-  protected double m_infoGain;
+  private double m_infoGain;
 
   /** GainRatio of split. */
-  protected double m_gainRatio;
+  private double m_gainRatio;
 
   /** The sum of the weights of the instances. */
-  protected final double m_sumOfWeights;
+  private final double m_sumOfWeights;
 
   /** Number of split points. */
-  protected int m_index;
+  private int m_index;
 
   /** Static reference to splitting criterion. */
-  protected static InfoGainSplitCrit infoGainCrit = new InfoGainSplitCrit();
+  private static InfoGainSplitCrit infoGainCrit = new InfoGainSplitCrit();
 
   /** Static reference to splitting criterion. */
-  protected static GainRatioSplitCrit gainRatioCrit = new GainRatioSplitCrit();
+  private static GainRatioSplitCrit gainRatioCrit = new GainRatioSplitCrit();
 
   /**
    * Initializes the split model.

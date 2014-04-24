@@ -47,13 +47,13 @@ public final class NBTreeNoSplit
   private static final long serialVersionUID = 7824804381545259618L;
 
   /** the naive bayes classifier */
-  protected NaiveBayesUpdateable m_nb;
+  private NaiveBayesUpdateable m_nb;
 
   /** the discretizer used */
-  protected Discretize m_disc;
+  private Discretize m_disc;
 
   /** errors on the training data at this node */
-  protected double m_errors;
+  private double m_errors;
 
   public NBTreeNoSplit() {
     m_numSubsets = 1;

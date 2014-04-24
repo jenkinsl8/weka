@@ -15,21 +15,19 @@
 
 /*
  * ArffTableCellRenderer.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
 
+import weka.core.Attribute;
 import java.awt.Color;
 import java.awt.Component;
-
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
-
-import weka.core.Attribute;
 
 /**
  * Handles the background colors for missing values differently than the

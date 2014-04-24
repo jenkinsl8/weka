@@ -45,7 +45,7 @@ import java.util.HashSet;
  <!-- options-end -->
  *
  * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 9804 $
+ * @version $Revision$
  */
 public class RemoveDuplicates extends SimpleBatchFilter {
 
@@ -188,7 +188,7 @@ public class RemoveDuplicates extends SimpleBatchFilter {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9804 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

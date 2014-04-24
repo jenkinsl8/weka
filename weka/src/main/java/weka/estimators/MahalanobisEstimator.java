@@ -15,17 +15,17 @@
 
 /*
  *    MahalanobisEstimator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
 
-import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.matrix.Matrix;
+import weka.core.Capabilities;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.matrix.Matrix;
 
 /** 
  * Simple probability estimator that places a single normal distribution
@@ -160,15 +160,6 @@ public class MahalanobisEstimator extends Estimator implements IncrementalEstima
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
-    result.disableAll();
-    
-    // class
-    if (!m_noClass) {
-      result.enable(Capability.NOMINAL_CLASS);
-      result.enable(Capability.MISSING_CLASS_VALUES);
-    } else {
-      result.enable(Capability.NO_CLASS);
-    }
     
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);

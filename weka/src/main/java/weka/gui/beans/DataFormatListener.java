@@ -13,11 +13,6 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- *    DataFormatListener.java
- *    Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
- *
- */
 package weka.gui.beans;
 
 /**

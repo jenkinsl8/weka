@@ -15,16 +15,16 @@
 
 /*
  * QueryExecuteEvent.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql.event;
 
+import weka.gui.sql.DbUtils;
+
 import java.sql.ResultSet;
 import java.util.EventObject;
-
-import weka.gui.sql.DbUtils;
 
 /**
  * An event that is generated when a query is executed.

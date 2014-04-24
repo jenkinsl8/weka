@@ -218,7 +218,7 @@ public class CheckKernel extends CheckScheme {
    */
 
   /*** The kernel to be examined */
-  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.RBFKernel();
+  protected Kernel m_Kernel = new weka.classifiers.functions.supportVector.PolyKernel();
 
   /**
    * Returns an enumeration describing the available options.
@@ -360,7 +360,7 @@ public class CheckKernel extends CheckScheme {
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0) {
-      tmpStr = weka.classifiers.functions.supportVector.RBFKernel.class
+      tmpStr = weka.classifiers.functions.supportVector.PolyKernel.class
         .getName();
     }
     setKernel((Kernel) forName("weka.classifiers.functions.supportVector",

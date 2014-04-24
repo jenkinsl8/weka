@@ -46,7 +46,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank
- * @version $Revision: 10215 $
+ * @version $Revision$
  */
 public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
 
@@ -189,7 +189,7 @@ public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 10215 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

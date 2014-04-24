@@ -132,8 +132,8 @@ weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.mi.supportVector
 
 # List of SVMreg learning algorithms
-weka.classifiers.functions.supportVector.RegOptimizer=\
- weka.classifiers.functions.supportVector
+#weka.classifiers.functions.supportVector.RegOptimizer=\
+# weka.classifiers.functions.supportVector
 
 # List of tokenizers
 weka.core.tokenizers.Tokenizer=\
@@ -158,11 +158,11 @@ weka.gui.visualize.plugins.GraphVisualizePlugin=\
 weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  weka.gui.visualize.plugins
  
-#List of Explorer association rule visualization plugins (associations panel)
+ #List of Explorer association rule visualization plugins (associations panel)
 weka.gui.visualize.plugins.AssociationRuleVisualizePlugin=\
  weka.gui.visualize.plugins
-
-#List of Explorer classifier panel launch handler plugins
+ 
+ #List of Explorer classifier panel launch handler plugins
 weka.gui.explorer.ClassifierPanelLaunchHandlerPlugin=\
  weka.gui.explorer
 
@@ -185,7 +185,7 @@ weka.core.converters.AbstractFileLoader=\
 # List of file savers
 weka.core.converters.AbstractFileSaver=\
  weka.core.converters
-
+ 
 # List of partition generators
 weka.core.PartitionGenerator=\
  weka.classifiers.trees,\

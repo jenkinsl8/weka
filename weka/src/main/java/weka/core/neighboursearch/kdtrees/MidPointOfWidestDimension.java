@@ -15,16 +15,16 @@
 
 /*
  * MidPointOfWidestDimension.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.neighboursearch.kdtrees;
 
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
 
 /**
  <!-- globalinfo-start -->

@@ -15,12 +15,13 @@
 
 /*
  *    AssociationRulesProducer.java
- *    Copyright (C) 2010-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2010 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
+import java.util.List;
 
 /**
  * Interface to something that can provide a list of

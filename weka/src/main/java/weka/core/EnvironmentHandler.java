@@ -15,11 +15,12 @@
 
 /*
  * EnvironmentHandler.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
+import weka.core.Environment;
 
 /**
  * Interface for something that can utilize environment

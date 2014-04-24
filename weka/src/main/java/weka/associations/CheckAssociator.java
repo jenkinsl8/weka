@@ -166,12 +166,12 @@ import weka.core.WeightedInstancesHandler;
  * <pre>
  * -W
  *  Full name of the associator analysed.
- *  eg: weka.associations.Apriori
- *  (default weka.associations.Apriori)
+ *  eg: weka.associations.FPGrowth
+ *  (default weka.associations.FPGrowth)
  * </pre>
  * 
  * <pre>
- * Options specific to associator weka.associations.Apriori:
+ * Options specific to associator weka.associations.FPGrowth:
  * </pre>
  * 
  * <pre>
@@ -259,7 +259,7 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
   public final static int NO_CLASS = -1;
 
   /*** The associator to be examined */
-  protected Associator m_Associator = new weka.associations.Apriori();
+  protected Associator m_Associator = new weka.associations.FPGrowth();
 
   /**
    * Returns an enumeration describing the available options.
@@ -273,8 +273,8 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
     result.addAll(Collections.list(super.listOptions()));
 
     result.add(new Option("\tFull name of the associator analysed.\n"
-      + "\teg: weka.associations.Apriori\n"
-      + "\t(default weka.associations.Apriori)", "W", 1, "-W"));
+      + "\teg: weka.associations.FPGrowth\n"
+      + "\t(default weka.associations.FPGrowth)", "W", 1, "-W"));
 
     if ((m_Associator != null) && (m_Associator instanceof OptionHandler)) {
       result.add(new Option("", "", 0, "\nOptions specific to associator "
@@ -355,12 +355,12 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
    * <pre>
    * -W
    *  Full name of the associator analysed.
-   *  eg: weka.associations.Apriori
-   *  (default weka.associations.Apriori)
+   *  eg: weka.associations.FPGrowth
+   *  (default weka.associations.FPGrowth)
    * </pre>
    * 
    * <pre>
-   * Options specific to associator weka.associations.Apriori:
+   * Options specific to associator weka.associations.FPGrowth:
    * </pre>
    * 
    * <pre>
@@ -438,7 +438,7 @@ public class CheckAssociator extends CheckScheme implements RevisionHandler {
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0) {
-      tmpStr = weka.associations.Apriori.class.getName();
+      tmpStr = weka.associations.FPGrowth.class.getName();
     }
     setAssociator((Associator) forName("weka.associations", Associator.class,
       tmpStr, Utils.partitionOptions(options)));

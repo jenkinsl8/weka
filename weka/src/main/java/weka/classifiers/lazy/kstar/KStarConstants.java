@@ -15,7 +15,7 @@
 
 /**
  *    KStarConstants.java
- *    Copyright (C) 1995-2012 Univeristy of Waikato
+ *    Copyright (C) 1995 Univeristy of Waikato
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
  *
  */
@@ -23,7 +23,7 @@
 
 package weka.classifiers.lazy.kstar;
 
-/**
+/*
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $

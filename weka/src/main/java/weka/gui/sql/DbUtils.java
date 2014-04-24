@@ -15,16 +15,16 @@
 
 /*
  * DbUtils.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
 
-import java.sql.Connection;
-
 import weka.core.RevisionUtils;
 import weka.experiment.DatabaseUtils;
+
+import java.sql.Connection;
 
 /**
  * A little bit extended DatabaseUtils class.

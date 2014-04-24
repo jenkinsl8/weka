@@ -1727,8 +1727,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 
     JTree tree = new JTree(superRoot) {
-
-      /** For serialization */
+      /**
+       * 
+       */
       private static final long serialVersionUID = 6991903188102450549L;
 
       @Override

@@ -15,11 +15,14 @@
 
 /*
  *    SerializedObject.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core;
+
+import weka.core.scripting.Jython;
+import weka.core.scripting.JythonSerializableObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -31,9 +34,6 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import weka.core.scripting.Jython;
-import weka.core.scripting.JythonSerializableObject;
 
 /**
  * Class for storing an object in serialized form in memory. It can be used 

@@ -15,15 +15,15 @@
 
 /*
  * ErrorVisualizePlugin.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize.plugins;
 
-import javax.swing.JMenuItem;
-
 import weka.core.Instances;
+
+import javax.swing.JMenuItem;
 
 /**
  * Interface implemented by classes loaded dynamically to

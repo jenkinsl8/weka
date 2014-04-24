@@ -15,10 +15,12 @@
 
 /*
  * InstanceInfoFrame.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.visualize;
+
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -27,8 +29,6 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import weka.core.Instances;
 
 /**
  * Frame for displaying information on the displayed data.

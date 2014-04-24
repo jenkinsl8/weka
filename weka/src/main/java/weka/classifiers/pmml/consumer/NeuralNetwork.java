@@ -15,7 +15,7 @@
 
 /*
  *    NeuralNetwork.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,11 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.pmml.DerivedFieldMetaInfo;
-import weka.core.pmml.FieldMetaInfo;
-import weka.core.pmml.MiningSchema;
-import weka.core.pmml.NormContinuous;
-import weka.core.pmml.TargetMetaInfo;
+import weka.core.pmml.*;
 
 /**
  * Class implementing import of PMML Neural Network model. Can be used as a Weka

@@ -15,17 +15,22 @@
 
 /*
  *    ClassAssignerCustomizer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -34,10 +39,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the class assigner bean

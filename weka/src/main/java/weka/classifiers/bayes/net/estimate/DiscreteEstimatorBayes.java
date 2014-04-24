@@ -16,7 +16,6 @@
 /*
  * DiscreteEstimatorBayes.java
  * Adapted from DiscreteEstimator.java
- * Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.estimate;

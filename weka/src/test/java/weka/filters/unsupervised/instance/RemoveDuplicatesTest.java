@@ -30,7 +30,7 @@ import weka.filters.Filter;
  * java weka.filters.unsupervised.instance.RemoveDuplicatesTest
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision$
  */
 public class RemoveDuplicatesTest extends AbstractFilterTest {
 

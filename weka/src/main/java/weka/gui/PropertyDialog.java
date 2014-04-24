@@ -15,7 +15,7 @@
 
 /*
  *    PropertyDialog.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,9 +31,8 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyEditor;
 
 import javax.swing.JDialog;
-import javax.swing.JInternalFrame;
 
-/** 
+/**
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
@@ -51,7 +50,7 @@ public class PropertyDialog
 
   /** The custom editor component. */
   private Component m_EditorComponent;
-  
+
   /**
    * Creates the editor frame - only kept for backward-compatibility.
    *
@@ -59,8 +58,8 @@ public class PropertyDialog
    * @param x 		initial x coord for the frame
    * @param y 		initial y coord for the frame
    * @deprecated 	instead of this constructor, one should use the constructors
-   * 			with an explicit owner (either derived from 
-   * 			<code>java.awt.Dialog</code> or from 
+   * 			with an explicit owner (either derived from
+   * 			<code>java.awt.Dialog</code> or from
    * 			<code>java.awt.Frame</code>) or, if none available,
    * 			using <code>(Frame) null</code> as owner.
    */
@@ -68,7 +67,7 @@ public class PropertyDialog
     this((Frame) null, pe, x, y);
     setVisible(true);
   }
-  
+
   /**
    * Creates the (screen-centered) editor dialog. The dialog is automatically
    * modal in case the owner is non-null.
@@ -79,7 +78,7 @@ public class PropertyDialog
   public PropertyDialog(Dialog owner, PropertyEditor pe) {
     this(owner, pe, -1, -1);
   }
-  
+
   /**
    * Creates the editor dialog at the given position. The dialog is automatically
    * modal in case the owner is non-null.
@@ -93,7 +92,7 @@ public class PropertyDialog
     super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
     initialize(pe, x, y);
   }
-  
+
   /**
    * Creates the (screen-centered) editor dialog. The dialog is automatically
    * modal in case the owner is non-null.
@@ -104,7 +103,7 @@ public class PropertyDialog
   public PropertyDialog(Frame owner, PropertyEditor pe) {
     this(owner, pe, -1, -1);
   }
-  
+
   /**
    * Creates the editor dialog at the given position. The dialog is automatically
    * modal in case the owner is non-null.
@@ -116,10 +115,10 @@ public class PropertyDialog
    */
   public PropertyDialog(Frame owner, PropertyEditor pe, int x, int y) {
     super(owner, pe.getClass().getName(), ModalityType.DOCUMENT_MODAL);
-    
+
     initialize(pe, x, y);
   }
-  
+
   /**
    * Initializes the dialog.
    *
@@ -140,14 +139,14 @@ public class PropertyDialog
     getContentPane().add(m_EditorComponent, BorderLayout.CENTER);
 
     pack();
-    
+
     int screenWidth = getGraphicsConfiguration().getBounds().width;
     int screenHeight = getGraphicsConfiguration().getBounds().height;
 
     // adjust height to a maximum of 95% of screen height
     if (getHeight() > (double) screenHeight * 0.95)
       setSize(getWidth(), (int) ((double) screenHeight * 0.95));
-    
+
     if ((x == -1) && (y == -1)) {
       setLocationRelativeTo(null);
     }
@@ -172,16 +171,16 @@ public class PropertyDialog
 
   /**
    * Tries to determine the frame this panel is part of.
-   * 
+   *
    * @param c		the container to start with
    * @return		the parent frame if one exists or null if not
    */
   public static Frame getParentFrame(Container c) {
     Frame	result;
     Container	parent;
-    
+
     result = null;
-    
+
     parent = c;
     while (parent != null) {
       if (parent instanceof Frame) {
@@ -192,48 +191,22 @@ public class PropertyDialog
 	parent = parent.getParent();
       }
     }
-    
-    return result;
-  }
 
-  /**
-   * Tries to determine the internal frame this panel is part of.
-   * 
-   * @param c		the container to start with
-   * @return		the parent internal frame if one exists or null if not
-   */
-  public static JInternalFrame getParentInternalFrame(Container c) {
-    JInternalFrame	result;
-    Container		parent;
-    
-    result = null;
-    
-    parent = c;
-    while (parent != null) {
-      if (parent instanceof JInternalFrame) {
-	result = (JInternalFrame) parent;
-	break;
-      }
-      else {
-	parent = parent.getParent();
-      }
-    }
-    
     return result;
   }
 
   /**
    * Tries to determine the dialog this panel is part of.
-   * 
+   *
    * @param c		the container to start with
    * @return		the parent dialog if one exists or null if not
    */
   public static Dialog getParentDialog(Container c) {
     Dialog	result;
     Container	parent;
-    
+
     result = null;
-    
+
     parent = c;
     while (parent != null) {
       if (parent instanceof Dialog) {
@@ -244,7 +217,7 @@ public class PropertyDialog
 	parent = parent.getParent();
       }
     }
-    
+
     return result;
   }
 }

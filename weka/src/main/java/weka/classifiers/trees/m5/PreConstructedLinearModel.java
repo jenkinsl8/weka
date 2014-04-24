@@ -15,19 +15,20 @@
 
 /*
  *    RuleNode.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.m5;
 
-import java.io.Serializable;
-
+import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /**
  * This class encapsulates a linear regression function. It is a classifier

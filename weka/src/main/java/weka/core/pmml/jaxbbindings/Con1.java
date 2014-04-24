@@ -45,8 +45,8 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = { "extension" })
-// Note - this auto-generated class has been renamed from Con.java to Con1.java
-// because Con is a reserved name under Windows!
+// Renamed from Con to Con1 due to "Con" being a reserved
+// word under Windows (was causing subversion checkout problems)
 @XmlRootElement(name = "Con")
 public class Con1 {
 

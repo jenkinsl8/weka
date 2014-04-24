@@ -15,16 +15,16 @@
 
 /*
  *    TaskStatusInfo.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.io.Serializable;
-
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.Serializable;
 
 /**
  * A class holding information for tasks being executed

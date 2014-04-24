@@ -15,7 +15,7 @@
 
 /*
  *    M5Rules.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.rules;
@@ -23,9 +23,9 @@ package weka.classifiers.rules;
 import weka.classifiers.trees.m5.M5Base;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
 
 /**
  <!-- globalinfo-start -->

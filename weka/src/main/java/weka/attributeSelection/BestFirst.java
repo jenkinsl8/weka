@@ -50,9 +50,10 @@ import weka.core.Utils;
  * both directions (by considering all possible single attribute additions and
  * deletions at a given point).<br/>
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>

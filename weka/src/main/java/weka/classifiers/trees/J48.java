@@ -162,46 +162,46 @@ public class J48 extends AbstractClassifier implements OptionHandler, Drawable,
   protected ClassifierTree m_root;
 
   /** Unpruned tree? */
-  protected boolean m_unpruned = false;
+  private boolean m_unpruned = false;
 
   /** Collapse tree? */
-  protected boolean m_collapseTree = true;
+  private boolean m_collapseTree = true;
 
   /** Confidence level */
-  protected float m_CF = 0.25f;
+  private float m_CF = 0.25f;
 
   /** Minimum number of instances */
-  protected int m_minNumObj = 2;
+  private int m_minNumObj = 2;
 
   /** Use MDL correction? */
-  protected boolean m_useMDLcorrection = true;
+  private boolean m_useMDLcorrection = true;
 
   /**
    * Determines whether probabilities are smoothed using Laplace correction when
    * predictions are generated
    */
-  protected boolean m_useLaplace = false;
+  private boolean m_useLaplace = false;
 
   /** Use reduced error pruning? */
-  protected boolean m_reducedErrorPruning = false;
+  private boolean m_reducedErrorPruning = false;
 
   /** Number of folds for reduced error pruning. */
-  protected int m_numFolds = 3;
+  private int m_numFolds = 3;
 
   /** Binary splits on nominal attributes? */
-  protected boolean m_binarySplits = false;
+  private boolean m_binarySplits = false;
 
   /** Subtree raising to be performed? */
-  protected boolean m_subtreeRaising = true;
+  private boolean m_subtreeRaising = true;
 
   /** Cleanup after the tree has been built. */
-  protected boolean m_noCleanup = false;
+  private boolean m_noCleanup = false;
 
   /** Random number seed for reduced-error pruning. */
-  protected int m_Seed = 1;
+  private int m_Seed = 1;
 
   /** Do not relocate split point to actual data value */
-  protected boolean m_doNotMakeSplitPointActualValue;
+  private boolean m_doNotMakeSplitPointActualValue;
 
   /**
    * Returns a string describing classifier

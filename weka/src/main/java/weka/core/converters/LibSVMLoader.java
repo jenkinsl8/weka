@@ -15,11 +15,17 @@
 
 /*
  * LibSVMLoader.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, NZ
+ * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
 
 package weka.core.converters;
+
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,15 +34,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
+import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->

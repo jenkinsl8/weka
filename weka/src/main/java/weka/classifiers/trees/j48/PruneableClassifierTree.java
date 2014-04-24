@@ -43,16 +43,16 @@ public class PruneableClassifierTree
   static final long serialVersionUID = -555775736857600201L;
 
   /** True if the tree is to be pruned. */
-  protected boolean pruneTheTree = false;
+  private boolean pruneTheTree = false;
 
   /** How many subsets of equal size? One used for pruning, the rest for training. */
-  protected int numSets = 3;
+  private int numSets = 3;
 
   /** Cleanup after the tree has been built. */
-  protected boolean m_cleanup = true;
+  private boolean m_cleanup = true;
 
   /** The random number seed. */
-  protected int m_seed = 1;
+  private int m_seed = 1;
 
   /**
    * Constructor for pruneable tree structure. Stores reference

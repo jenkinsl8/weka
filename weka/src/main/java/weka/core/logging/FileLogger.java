@@ -15,19 +15,19 @@
 
 /*
  * FileLogger.java
- * Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.logging;
+
+import weka.core.RevisionUtils;
+import weka.core.WekaPackageManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Date;
 import java.util.regex.Matcher;
-
-import weka.core.RevisionUtils;
-import weka.core.WekaPackageManager;
 
 /**
  * A simple file logger, that just logs to a single file. Deletes the file

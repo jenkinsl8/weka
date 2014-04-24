@@ -15,20 +15,20 @@
 
 /*
  *    InstanceViewer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
+
+import weka.core.Instance;
+import weka.core.Instances;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 /**
  * This is a very simple instance viewer - just displays the dataset as

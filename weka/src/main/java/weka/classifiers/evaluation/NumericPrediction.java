@@ -15,17 +15,17 @@
 
 /*
  *    NumericPrediction.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.evaluation;
 
-import java.io.Serializable;
-
 import weka.classifiers.IntervalEstimator;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.io.Serializable;
 
 /**
  * Encapsulates an evaluatable numeric prediction: the predicted class value

@@ -12,20 +12,19 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 /*
  *    ExponentialFormat.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.matrix;
 
-import java.text.DecimalFormat;
-import java.text.FieldPosition;
-
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
 
 /**
  * @author Yong Wang

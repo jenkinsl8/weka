@@ -42,19 +42,19 @@ public class C45PruneableClassifierTree
   static final long serialVersionUID = -4813820170260388194L;
   
   /** True if the tree is to be pruned. */
-  protected boolean m_pruneTheTree = false;
+  boolean m_pruneTheTree = false;
   
   /** True if the tree is to be collapsed. */
-  protected boolean m_collapseTheTree = false;
+  boolean m_collapseTheTree = false;
 
   /** The confidence factor for pruning. */
-  protected float m_CF = 0.25f;
+  float m_CF = 0.25f;
 
   /** Is subtree raising to be performed? */
-  protected boolean m_subtreeRaising = true;
+  boolean m_subtreeRaising = true;
 
   /** Cleanup after the tree has been built. */
-  protected boolean m_cleanup = true;
+  boolean m_cleanup = true;
 
   /**
    * Constructor for pruneable tree structure. Stores reference

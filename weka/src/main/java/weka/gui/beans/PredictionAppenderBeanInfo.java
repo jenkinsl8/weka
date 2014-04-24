@@ -15,16 +15,13 @@
 
 /*
  *    PredictionAppenderBeanInfo.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.beans.BeanDescriptor;
-import java.beans.EventSetDescriptor;
-import java.beans.PropertyDescriptor;
-import java.beans.SimpleBeanInfo;
+import java.beans.*;
 
 /**
  * Bean info class for PredictionAppender.
