@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * Main.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,8 +81,6 @@ import weka.core.SystemInfo;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Version;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
 import weka.gui.arffviewer.ArffViewerMainPanel;
 import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.beans.StartUpListener;
@@ -89,8 +88,6 @@ import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
 import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
-import weka.gui.scripting.JythonPanel;
 import weka.gui.sql.SqlViewer;
 import weka.gui.treevisualizer.Node;
 import weka.gui.treevisualizer.NodePlace;
@@ -312,8 +309,11 @@ public class Main extends JFrame implements OptionHandler {
   /** displays the GUI as SDI. */
   public final static int GUI_SDI = 1;
   /** GUI tags. */
-  public static final Tag[] TAGS_GUI = { new Tag(GUI_MDI, "MDI", "MDI Layout"),
-    new Tag(GUI_SDI, "SDI", "SDI Layout") };
+  public static final Tag[] TAGS_GUI = {
+    new Tag(GUI_MDI, "MDI", Messages.getInstance().getString(
+      "Main_Tag_GUI_Text_First")),
+    new Tag(GUI_SDI, "SDI", Messages.getInstance().getString(
+      "Main_Tag_GUI_Text_Second")) };
 
   /** the frame itself. */
   protected Main m_Self;
@@ -334,7 +334,7 @@ public class Main extends JFrame implements OptionHandler {
    * list of things to be notified when the startup process of the KnowledgeFlow
    * is complete.
    */
-  protected static Vector<StartUpListener> m_StartupListeners = new Vector<StartUpListener>();
+  protected static Vector m_StartupListeners = new Vector();
 
   /** for monitoring the Memory consumption. */
   protected static Memory m_Memory = new Memory(true);
@@ -378,8 +378,6 @@ public class Main extends JFrame implements OptionHandler {
   private JMenuItem jMenuItemVisualizationROC;
   private JMenuItem jMenuItemVisualizationPlot;
   private JMenuItem jMenuItemToolsSqlViewer;
-  private JMenuItem jMenuItemToolsGroovyConsole;
-  private JMenuItem jMenuItemToolsJythonConsole;
   private JMenuItem jMenuItemToolsArffViewer;
   private JMenuItem jMenuItemApplicationsSimpleCLI;
   private JMenuItem jMenuItemApplicationsKnowledgeFlow;
@@ -571,20 +569,24 @@ public class Main extends JFrame implements OptionHandler {
 
       // bits and pieces
       m_FileChooserGraphVisualizer
-        .addChoosableFileFilter(new ExtensionFileFilter(".bif",
-          "BIF Files (*.bif)"));
+        .addChoosableFileFilter(new ExtensionFileFilter(".bif", Messages
+          .getInstance().getString(
+            "Main_InitGUI_ExtensionFileFilter_Text_First")));
       m_FileChooserGraphVisualizer
-        .addChoosableFileFilter(new ExtensionFileFilter(".xml",
-          "XML Files (*.xml)"));
+        .addChoosableFileFilter(new ExtensionFileFilter(".xml", Messages
+          .getInstance().getString(
+            "Main_InitGUI_ExtensionFileFilter_Text_Second")));
 
       m_FileChooserPlot.addChoosableFileFilter(new ExtensionFileFilter(
-        Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
-          + ")"));
+        Instances.FILE_EXTENSION, Messages.getInstance().getString(
+          "Main_InitGUI_ExtensionFileFilter_Text_Third")
+          + Instances.FILE_EXTENSION + ")"));
       m_FileChooserPlot.setMultiSelectionEnabled(true);
 
       m_FileChooserROC.addChoosableFileFilter(new ExtensionFileFilter(
-        Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
-          + ")"));
+        Instances.FILE_EXTENSION, Messages.getInstance().getString(
+          "Main_InitGUI_ExtensionFileFilter_Text_Third")
+          + Instances.FILE_EXTENSION + ")"));
 
       // Desktop
       if (m_GUIType == GUI_MDI) {
@@ -603,7 +605,8 @@ public class Main extends JFrame implements OptionHandler {
       // Program
       jMenuProgram = new JMenu();
       jMenuBar.add(jMenuProgram);
-      jMenuProgram.setText("Program");
+      jMenuProgram.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuProgram_SetText_Text"));
       jMenuProgram.setMnemonic('P');
 
       // Program/Preferences
@@ -623,7 +626,8 @@ public class Main extends JFrame implements OptionHandler {
       // Program/LogWindow
       jMenuItemProgramLogWindow = new JMenuItem();
       jMenuProgram.add(jMenuItemProgramLogWindow);
-      jMenuItemProgramLogWindow.setText("LogWindow");
+      jMenuItemProgramLogWindow.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemProgramLogWindow_SetText_Text"));
       jMenuItemProgramLogWindow.setMnemonic('L');
       jMenuItemProgramLogWindow.addActionListener(new ActionListener() {
         @Override
@@ -634,7 +638,8 @@ public class Main extends JFrame implements OptionHandler {
 
       jMenuItemProgramMemoryUsage = new JMenuItem();
       jMenuProgram.add(jMenuItemProgramMemoryUsage);
-      jMenuItemProgramMemoryUsage.setText("Memory usage");
+      jMenuItemProgramMemoryUsage.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemProgramMemoryUsage_SetText_Text"));
       jMenuItemProgramMemoryUsage.setMnemonic('M');
       jMenuItemProgramMemoryUsage.addActionListener(new ActionListener() {
         @Override
@@ -687,16 +692,17 @@ public class Main extends JFrame implements OptionHandler {
       // Program/Exit
       jMenuItemProgramExit = new JMenuItem();
       jMenuProgram.add(jMenuItemProgramExit);
-      jMenuItemProgramExit.setText("Exit");
+      jMenuItemProgramExit.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemProgramExit_SetText_Text"));
       jMenuItemProgramExit.setMnemonic('E');
       jMenuItemProgramExit.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
           // close all children
-          Iterator<Container> iter = getWindowList();
+          Iterator iter = getWindowList();
           Vector<Container> list = new Vector<Container>();
           while (iter.hasNext()) {
-            list.add(iter.next());
+            list.add((Container) iter.next());
           }
           for (int i = 0; i < list.size(); i++) {
             Container c = list.get(i);
@@ -718,13 +724,15 @@ public class Main extends JFrame implements OptionHandler {
       // Applications
       jMenuApplications = new JMenu();
       jMenuBar.add(jMenuApplications);
-      jMenuApplications.setText("Applications");
+      jMenuApplications.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuApplications_SetText_Text"));
       jMenuApplications.setMnemonic('A');
 
       // Applications/Explorer
       jMenuItemApplicationsExplorer = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsExplorer);
-      jMenuItemApplicationsExplorer.setText("Explorer");
+      jMenuItemApplicationsExplorer.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemApplicationsExplorer_SetText_Text"));
       jMenuItemApplicationsExplorer.setMnemonic('E');
       jMenuItemApplicationsExplorer.addActionListener(new ActionListener() {
         @Override
@@ -742,7 +750,9 @@ public class Main extends JFrame implements OptionHandler {
       // Applications/Experimenter
       jMenuItemApplicationsExperimenter = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsExperimenter);
-      jMenuItemApplicationsExperimenter.setText("Experimenter");
+      jMenuItemApplicationsExperimenter.setText(Messages.getInstance()
+        .getString(
+          "Main_InitGUI_JMenuItemApplicationsExperimenter_SetText_Text"));
       jMenuItemApplicationsExperimenter.setMnemonic('X');
       jMenuItemApplicationsExperimenter.addActionListener(new ActionListener() {
         @Override
@@ -761,7 +771,9 @@ public class Main extends JFrame implements OptionHandler {
       // Applications/KnowledgeFlow
       jMenuItemApplicationsKnowledgeFlow = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsKnowledgeFlow);
-      jMenuItemApplicationsKnowledgeFlow.setText("KnowledgeFlow");
+      jMenuItemApplicationsKnowledgeFlow.setText(Messages.getInstance()
+        .getString(
+          "Main_InitGUI_JMenuItemApplicationsKnowledgeFlow_SetText_Text"));
       jMenuItemApplicationsKnowledgeFlow.setMnemonic('K');
       jMenuItemApplicationsKnowledgeFlow
         .addActionListener(new ActionListener() {
@@ -782,7 +794,8 @@ public class Main extends JFrame implements OptionHandler {
       // Applications/SimpleCLI
       jMenuItemApplicationsSimpleCLI = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsSimpleCLI);
-      jMenuItemApplicationsSimpleCLI.setText("SimpleCLI");
+      jMenuItemApplicationsSimpleCLI.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemApplicationsSimpleCLI_SetText_Text"));
       jMenuItemApplicationsSimpleCLI.setMnemonic('S');
       jMenuItemApplicationsSimpleCLI.addActionListener(new ActionListener() {
         @Override
@@ -795,8 +808,11 @@ public class Main extends JFrame implements OptionHandler {
                 true);
             } catch (Exception e) {
               e.printStackTrace();
-              JOptionPane.showMessageDialog(m_Self,
-                "Error instantiating SimpleCLI:\n" + e.getMessage());
+              JOptionPane.showMessageDialog(
+                m_Self,
+                Messages.getInstance().getString(
+                  "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text")
+                  + e.getMessage());
               return;
             }
           } else {
@@ -808,13 +824,15 @@ public class Main extends JFrame implements OptionHandler {
       // Tools
       jMenuTools = new JMenu();
       jMenuBar.add(jMenuTools);
-      jMenuTools.setText("Tools");
+      jMenuTools.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuTools_JMenu_SetText_Text")); // ""
       jMenuTools.setMnemonic('T');
 
       // Tools/ArffViewer
       jMenuItemToolsArffViewer = new JMenuItem();
       jMenuTools.add(jMenuItemToolsArffViewer);
-      jMenuItemToolsArffViewer.setText("ArffViewer");
+      jMenuItemToolsArffViewer.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemToolsArffViewer_SetText_Text"));
       jMenuItemToolsArffViewer.setMnemonic('A');
       jMenuItemToolsArffViewer.addActionListener(new ActionListener() {
         @Override
@@ -836,7 +854,8 @@ public class Main extends JFrame implements OptionHandler {
       // Tools/SqlViewer
       jMenuItemToolsSqlViewer = new JMenuItem();
       jMenuTools.add(jMenuItemToolsSqlViewer);
-      jMenuItemToolsSqlViewer.setText("SqlViewer");
+      jMenuItemToolsSqlViewer.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemToolsSqlViewer_SetText_Text")); // "SqlViewer"
       jMenuItemToolsSqlViewer.setMnemonic('S');
       jMenuItemToolsSqlViewer.addActionListener(new ActionListener() {
         @Override
@@ -877,7 +896,8 @@ public class Main extends JFrame implements OptionHandler {
       // Tools/Bayes net editor
       final JMenuItem jMenuItemBayesNet = new JMenuItem();
       jMenuTools.add(jMenuItemBayesNet);
-      jMenuItemBayesNet.setText("Bayes net editor");
+      jMenuItemBayesNet.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemBayesNet_SetText_Text"));
       jMenuItemBayesNet.setMnemonic('N');
 
       jMenuItemBayesNet.addActionListener(new ActionListener() {
@@ -887,94 +907,14 @@ public class Main extends JFrame implements OptionHandler {
 
           if (!containsWindow(title)) {
             final GUI bayesNetGUI = new GUI();
-            createFrame(m_Self, title, bayesNetGUI, new BorderLayout(),
-              BorderLayout.CENTER, 800, 600, bayesNetGUI.getMenuBar(), false,
-              true);
+            final Container frame = createFrame(m_Self, title, bayesNetGUI,
+              new BorderLayout(), BorderLayout.CENTER, 800, 600,
+              bayesNetGUI.getMenuBar(), false, true);
           } else {
             showWindow(getWindow(title));
           }
         }
       });
-
-      // Tools/Groovy console
-      if (Groovy.isPresent()) {
-        jMenuItemToolsGroovyConsole = new JMenuItem();
-        jMenuTools.add(jMenuItemToolsGroovyConsole);
-        jMenuItemToolsGroovyConsole.setText("Groovy console");
-        jMenuItemToolsGroovyConsole.setMnemonic('G');
-        jMenuItemToolsGroovyConsole.addActionListener(new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent evt) {
-            String title = jMenuItemToolsGroovyConsole.getText();
-            if (!containsWindow(title)) {
-              final GroovyPanel panel = new GroovyPanel();
-              final Container frame = createFrame(m_Self, title, panel,
-                new BorderLayout(), BorderLayout.CENTER, 800, 600,
-                panel.getMenuBar(), false, true);
-
-              // custom listener
-              if (frame instanceof ChildFrameMDI) {
-                ((ChildFrameMDI) frame)
-                  .addInternalFrameListener(new InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosing(InternalFrameEvent e) {
-                      ((ChildFrameMDI) frame).dispose();
-                    }
-                  });
-              } else if (frame instanceof ChildFrameSDI) {
-                ((ChildFrameSDI) frame).addWindowListener(new WindowAdapter() {
-                  @Override
-                  public void windowClosing(WindowEvent e) {
-                    ((ChildFrameSDI) frame).dispose();
-                  }
-                });
-              }
-            } else {
-              showWindow(getWindow(title));
-            }
-          }
-        });
-      }
-
-      // Tools/Jython console
-      if (Jython.isPresent()) {
-        jMenuItemToolsJythonConsole = new JMenuItem();
-        jMenuTools.add(jMenuItemToolsJythonConsole);
-        jMenuItemToolsJythonConsole.setText("Jython console");
-        jMenuItemToolsJythonConsole.setMnemonic('J');
-        jMenuItemToolsJythonConsole.addActionListener(new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent evt) {
-            String title = jMenuItemToolsJythonConsole.getText();
-            if (!containsWindow(title)) {
-              final JythonPanel panel = new JythonPanel();
-              final Container frame = createFrame(m_Self, title, panel,
-                new BorderLayout(), BorderLayout.CENTER, 800, 600,
-                panel.getMenuBar(), false, true);
-
-              // custom listener
-              if (frame instanceof ChildFrameMDI) {
-                ((ChildFrameMDI) frame)
-                  .addInternalFrameListener(new InternalFrameAdapter() {
-                    @Override
-                    public void internalFrameClosing(InternalFrameEvent e) {
-                      ((ChildFrameMDI) frame).dispose();
-                    }
-                  });
-              } else if (frame instanceof ChildFrameSDI) {
-                ((ChildFrameSDI) frame).addWindowListener(new WindowAdapter() {
-                  @Override
-                  public void windowClosing(WindowEvent e) {
-                    ((ChildFrameSDI) frame).dispose();
-                  }
-                });
-              }
-            } else {
-              showWindow(getWindow(title));
-            }
-          }
-        });
-      }
 
       // Tools/EnsembleLibrary
       /*
@@ -997,13 +937,15 @@ public class Main extends JFrame implements OptionHandler {
       // Visualization
       jMenuVisualization = new JMenu();
       jMenuBar.add(jMenuVisualization);
-      jMenuVisualization.setText("Visualization");
+      jMenuVisualization.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuVisualization_SetText_Text"));
       jMenuVisualization.setMnemonic('V');
 
       // Visualization/Plot
       jMenuItemVisualizationPlot = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationPlot);
-      jMenuItemVisualizationPlot.setText("Plot");
+      jMenuItemVisualizationPlot.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemVisualizationPlot_SetText_Text"));
       jMenuItemVisualizationPlot.setMnemonic('P');
       jMenuItemVisualizationPlot.addActionListener(new ActionListener() {
         @Override
@@ -1024,7 +966,9 @@ public class Main extends JFrame implements OptionHandler {
               filenames += ", ";
             }
             filenames += filename;
-            System.err.println("Loading instances from " + filename);
+            System.err.println(Messages.getInstance().getString(
+              "Main_InitGUI_Error_Text")
+              + filename);
             try {
               Reader r = new java.io.BufferedReader(new FileReader(filename));
               Instances i = new Instances(r);
@@ -1032,18 +976,32 @@ public class Main extends JFrame implements OptionHandler {
               PlotData2D pd1 = new PlotData2D(i);
 
               if (j == 0) {
-                pd1.setPlotName("Master plot");
+                pd1.setPlotName(Messages.getInstance().getString(
+                  "Main_InitGUI_Pd1_SetPlotName_Text_First"));
                 panel.setMasterPlot(pd1);
               } else {
-                pd1.setPlotName("Plot " + (j + 1));
+                pd1.setPlotName(Messages.getInstance().getString(
+                  "Main_InitGUI_Pd1_SetPlotName_Text_Second")
+                  + (j + 1));
                 pd1.m_useCustomColour = true;
                 pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue;
                 panel.addPlot(pd1);
               }
             } catch (Exception e) {
               e.printStackTrace();
-              JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-                + files[j] + "':\n" + e.getMessage());
+              JOptionPane
+                .showMessageDialog(
+                  m_Self,
+                  Messages
+                    .getInstance()
+                    .getString(
+                      "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_First")
+                    + files[j]
+                    + Messages
+                      .getInstance()
+                      .getString(
+                        "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Second")
+                    + e.getMessage());
               return;
             }
           }
@@ -1060,7 +1018,8 @@ public class Main extends JFrame implements OptionHandler {
       // http://weka.sourceforge.net/wiki/index.php/Visualizing_ROC_curve
       jMenuItemVisualizationROC = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationROC);
-      jMenuItemVisualizationROC.setText("ROC");
+      jMenuItemVisualizationROC.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemVisualizationROC_SetText_Text"));
       jMenuItemVisualizationROC.setMnemonic('R');
       jMenuItemVisualizationROC.addActionListener(new ActionListener() {
         @Override
@@ -1079,13 +1038,25 @@ public class Main extends JFrame implements OptionHandler {
             result = new Instances(new BufferedReader(new FileReader(filename)));
           } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-              + filename + "':\n" + e.getMessage());
+            JOptionPane
+              .showMessageDialog(
+                m_Self,
+                Messages
+                  .getInstance()
+                  .getString(
+                    "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Third")
+                  + filename
+                  + Messages
+                    .getInstance()
+                    .getString(
+                      "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Fourth")
+                  + e.getMessage());
             return;
           }
           result.setClassIndex(result.numAttributes() - 1);
           ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-          vmc.setROCString("(Area under ROC = "
+          vmc.setROCString(Messages.getInstance().getString(
+            "Main_InitGUI_Vmc_SetROCString_Text")
             + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
           vmc.setName(result.relationName());
           PlotData2D tempd = new PlotData2D(result);
@@ -1095,8 +1066,14 @@ public class Main extends JFrame implements OptionHandler {
             vmc.addPlot(tempd);
           } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(m_Self,
-              "Error adding plot:\n" + e.getMessage());
+            JOptionPane
+              .showMessageDialog(
+                m_Self,
+                Messages
+                  .getInstance()
+                  .getString(
+                    "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Fifth")
+                  + e.getMessage());
             return;
           }
 
@@ -1109,7 +1086,9 @@ public class Main extends JFrame implements OptionHandler {
       // Visualization/TreeVisualizer
       jMenuItemVisualizationTreeVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationTreeVisualizer);
-      jMenuItemVisualizationTreeVisualizer.setText("TreeVisualizer");
+      jMenuItemVisualizationTreeVisualizer.setText(Messages.getInstance()
+        .getString(
+          "Main_InitGUI_JMenuItemVisualizationTreeVisualizer_SetText_Text"));
       jMenuItemVisualizationTreeVisualizer.setMnemonic('T');
       jMenuItemVisualizationTreeVisualizer
         .addActionListener(new ActionListener() {
@@ -1131,8 +1110,19 @@ public class Main extends JFrame implements OptionHandler {
               top = builder.create(new FileReader(filename));
             } catch (Exception e) {
               e.printStackTrace();
-              JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-                + filename + "':\n" + e.getMessage());
+              JOptionPane
+                .showMessageDialog(
+                  m_Self,
+                  Messages
+                    .getInstance()
+                    .getString(
+                      "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Sixth")
+                    + filename
+                    + Messages
+                      .getInstance()
+                      .getString(
+                        "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Seventh")
+                    + e.getMessage());
               return;
             }
 
@@ -1147,7 +1137,9 @@ public class Main extends JFrame implements OptionHandler {
       // Visualization/GraphVisualizer
       jMenuItemVisualizationGraphVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationGraphVisualizer);
-      jMenuItemVisualizationGraphVisualizer.setText("GraphVisualizer");
+      jMenuItemVisualizationGraphVisualizer.setText(Messages.getInstance()
+        .getString(
+          "Main_InitGUI_JMenuItemVisualizationGraphVisualizer_SetText_Text"));
       jMenuItemVisualizationGraphVisualizer.setMnemonic('G');
       jMenuItemVisualizationGraphVisualizer
         .addActionListener(new ActionListener() {
@@ -1172,8 +1164,19 @@ public class Main extends JFrame implements OptionHandler {
               }
             } catch (Exception e) {
               e.printStackTrace();
-              JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-                + filename + "':\n" + e.getMessage());
+              JOptionPane
+                .showMessageDialog(
+                  m_Self,
+                  Messages
+                    .getInstance()
+                    .getString(
+                      "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_Eighth")
+                    + filename
+                    + Messages
+                      .getInstance()
+                      .getString(
+                        "Main_InitGUI_Exception_JOptionPaneShowMessageDialog_Text_nineth")
+                    + e.getMessage());
               return;
             }
 
@@ -1187,7 +1190,9 @@ public class Main extends JFrame implements OptionHandler {
       // Visualization/BoundaryVisualizer
       jMenuItemVisualizationBoundaryVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationBoundaryVisualizer);
-      jMenuItemVisualizationBoundaryVisualizer.setText("BoundaryVisualizer");
+      jMenuItemVisualizationBoundaryVisualizer
+        .setText(Messages.getInstance().getString(
+          "Main_InitGUI_JMenuItemVisualizationBoundaryVisualizer_SetText_Text"));
       jMenuItemVisualizationBoundaryVisualizer.setMnemonic('B');
       jMenuItemVisualizationBoundaryVisualizer
         .addActionListener(new ActionListener() {
@@ -1207,7 +1212,8 @@ public class Main extends JFrame implements OptionHandler {
         });
 
       // Extensions
-      jMenuExtensions = new JMenu("Extensions");
+      jMenuExtensions = new JMenu(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuExtensions_JMenu_Text"));
       jMenuExtensions.setMnemonic(java.awt.event.KeyEvent.VK_E);
       jMenuBar.add(jMenuExtensions);
       jMenuExtensions.setVisible(false);
@@ -1274,7 +1280,8 @@ public class Main extends JFrame implements OptionHandler {
       }
 
       // Windows
-      jMenuWindows = new JMenu("Windows");
+      jMenuWindows = new JMenu(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuWindows_JMenu_Text"));
       jMenuWindows.setMnemonic(java.awt.event.KeyEvent.VK_W);
       jMenuBar.add(jMenuWindows);
       jMenuWindows.setVisible(false); // initially, there are no windows open
@@ -1282,19 +1289,23 @@ public class Main extends JFrame implements OptionHandler {
       // Help
       jMenuHelp = new JMenu();
       jMenuBar.add(jMenuHelp);
-      jMenuHelp.setText("Help");
+      jMenuHelp.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuHelp_SetText_Text"));
       jMenuHelp.setMnemonic('H');
 
       // Help/Homepage
       jMenuItemHelpHomepage = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpHomepage);
-      jMenuItemHelpHomepage.setText("Weka homepage");
+      jMenuItemHelpHomepage.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemHelpHomepage_SetText_Text"));
       jMenuItemHelpHomepage.setMnemonic('H');
       jMenuItemHelpHomepage.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          BrowserHelper
-            .openURL(m_Self, "http://www.cs.waikato.ac.nz/~ml/weka/");
+          BrowserHelper.openURL(
+            m_Self,
+            Messages.getInstance().getString(
+              "Main_InitGUI_BrowserHelper_OpenURL_Text_First"));
         }
       });
 
@@ -1313,25 +1324,32 @@ public class Main extends JFrame implements OptionHandler {
       // Help/WekaWiki
       jMenuItemHelpWekaWiki = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpWekaWiki);
-      jMenuItemHelpWekaWiki.setText("HOWTOs, code snippets, etc.");
+      jMenuItemHelpWekaWiki.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemHelpWekaWiki_SetText_Text"));
       jMenuItemHelpWekaWiki.setMnemonic('W');
       jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          BrowserHelper.openURL(m_Self, "http://weka.wikispaces.com/");
+          BrowserHelper.openURL(
+            m_Self,
+            Messages.getInstance().getString(
+              "Main_InitGUI_BrowserHelper_OpenURL_Text_Second"));
         }
       });
 
       // Help/Sourceforge
       jMenuItemHelpSourceforge = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpSourceforge);
-      jMenuItemHelpSourceforge.setText("Weka on SourceForge");
+      jMenuItemHelpSourceforge.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemHelpSourceforge_SetText_Text"));
       jMenuItemHelpSourceforge.setMnemonic('F');
       jMenuItemHelpSourceforge.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent evt) {
-          BrowserHelper
-            .openURL(m_Self, "http://sourceforge.net/projects/weka/");
+          BrowserHelper.openURL(
+            m_Self,
+            Messages.getInstance().getString(
+              "Main_InitGUI_BrowserHelperOpenURL_Text_Third"));
         }
       });
 
@@ -1340,7 +1358,8 @@ public class Main extends JFrame implements OptionHandler {
       // Help/SystemInfo
       jMenuItemHelpSystemInfo = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpSystemInfo);
-      jMenuItemHelpSystemInfo.setText("SystemInfo");
+      jMenuItemHelpSystemInfo.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemHelpSystemInfo_SetText_Text"));
       jMenuItemHelpHomepage.setMnemonic('S');
       jMenuItemHelpSystemInfo.addActionListener(new ActionListener() {
         @Override
@@ -1348,11 +1367,11 @@ public class Main extends JFrame implements OptionHandler {
           String title = jMenuItemHelpSystemInfo.getText();
           if (!containsWindow(title)) {
             // get info
-            Hashtable<String, String> info = new SystemInfo().getSystemInfo();
+            Hashtable info = new SystemInfo().getSystemInfo();
 
             // sort names
-            Vector<String> names = new Vector<String>();
-            Enumeration<String> enm = info.keys();
+            Vector names = new Vector();
+            Enumeration enm = info.keys();
             while (enm.hasMoreElements()) {
               names.add(enm.nextElement());
             }
@@ -1364,7 +1383,10 @@ public class Main extends JFrame implements OptionHandler {
               data[i][0] = names.get(i).toString();
               data[i][1] = info.get(data[i][0]).toString();
             }
-            String[] titles = new String[] { "Key", "Value" };
+            String[] titles = new String[] {
+              Messages.getInstance().getString("Main_InitGUI_Title_Text_First"),
+              Messages.getInstance()
+                .getString("Main_InitGUI_Title_Text_Second") };
             JTable table = new JTable(data, titles);
 
             createFrame(m_Self, title, new JScrollPane(table),
@@ -1381,7 +1403,8 @@ public class Main extends JFrame implements OptionHandler {
       // Help/About
       jMenuItemHelpAbout = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpAbout);
-      jMenuItemHelpAbout.setText("About");
+      jMenuItemHelpAbout.setText(Messages.getInstance().getString(
+        "Main_InitGUI_JMenuItemHelpAbout_SetText_Text"));
       jMenuItemHelpAbout.setMnemonic('A');
       jMenuItemHelpAbout.addActionListener(new ActionListener() {
         @Override
@@ -1389,7 +1412,8 @@ public class Main extends JFrame implements OptionHandler {
           String title = jMenuItemHelpAbout.getText();
           if (!containsWindow(title)) {
             JPanel wekaPan = new JPanel();
-            wekaPan.setToolTipText("Weka, a native bird of New Zealand");
+            wekaPan.setToolTipText(Messages.getInstance().getString(
+              "Main_InitGUI_WekaPan_JPanel_SetToolTipText_Text"));
             ImageIcon wii = new ImageIcon(Toolkit.getDefaultToolkit().getImage(
               ClassLoader.getSystemResource("weka/gui/weka3.gif")));
             JLabel wekaLab = new JLabel(wii);
@@ -1400,16 +1424,23 @@ public class Main extends JFrame implements OptionHandler {
             JPanel titlePan = new JPanel();
             titlePan.setLayout(new GridLayout(8, 1));
             titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-            titlePan.add(new JLabel("Waikato Environment for",
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_First"),
               SwingConstants.CENTER));
-            titlePan
-              .add(new JLabel("Knowledge Analysis", SwingConstants.CENTER));
-            titlePan.add(new JLabel(""));
-            titlePan.add(new JLabel("Version " + Version.VERSION,
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_Second"),
               SwingConstants.CENTER));
-            titlePan.add(new JLabel(""));
-            titlePan.add(new JLabel("(c) " + Copyright.getFromYear() + " - "
-              + Copyright.getToYear(), SwingConstants.CENTER));
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_Third")));
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_Fourth")
+              + Version.VERSION, SwingConstants.CENTER));
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_Fifth")));
+            titlePan.add(new JLabel(Messages.getInstance().getString(
+              "Main_InitGUI_TitlePan_Add_JLabel_Text_Sixth")
+              + Copyright.getFromYear() + " - " + Copyright.getToYear(),
+              SwingConstants.CENTER));
             titlePan.add(new JLabel(Copyright.getOwner(), SwingConstants.CENTER));
             titlePan.add(new JLabel(Copyright.getAddress(),
               SwingConstants.CENTER));
@@ -1433,8 +1464,8 @@ public class Main extends JFrame implements OptionHandler {
       int screenHeight = getGraphicsConfiguration().getBounds().height;
       int screenWidth = getGraphicsConfiguration().getBounds().width;
       if (m_GUIType == GUI_MDI) {
-        int newHeight = (int) ((screenHeight) * 0.75);
-        int newWidth = (int) ((screenWidth) * 0.75);
+        int newHeight = (int) (screenHeight * 0.75);
+        int newWidth = (int) (screenWidth * 0.75);
         setSize(1000 > newWidth ? newWidth : 1000, 800 > newHeight ? newHeight
           : 800);
         setLocation((screenWidth - getBounds().width) / 2,
@@ -1457,7 +1488,9 @@ public class Main extends JFrame implements OptionHandler {
   protected void createTitle(String title) {
     String newTitle;
 
-    newTitle = "Weka " + new Version();
+    newTitle = Messages.getInstance().getString(
+      "Main_CreateTitle_NewTitle_Text")
+      + new Version();
     if (title.length() != 0) {
       newTitle += " - " + title;
     }
@@ -1528,7 +1561,7 @@ public class Main extends JFrame implements OptionHandler {
    * @param windowClass the class to display the first child for
    * @return true, if a child was found and brought to front
    */
-  public boolean showWindow(Class<?> windowClass) {
+  public boolean showWindow(Class windowClass) {
     return showWindow(getWindow(windowClass));
   }
 
@@ -1537,7 +1570,7 @@ public class Main extends JFrame implements OptionHandler {
    * 
    * @return an iterator over all currently open frame
    */
-  public Iterator<Container> getWindowList() {
+  public Iterator getWindowList() {
     return m_ChildFrames.iterator();
   }
 
@@ -1548,15 +1581,15 @@ public class Main extends JFrame implements OptionHandler {
    * @param windowClass the class to retrieve the first instance for
    * @return null, if no instance can be found
    */
-  public Container getWindow(Class<?> windowClass) {
+  public Container getWindow(Class windowClass) {
     Container result;
-    Iterator<Container> iter;
+    Iterator iter;
     Container current;
 
     result = null;
     iter = getWindowList();
     while (iter.hasNext()) {
-      current = iter.next();
+      current = (Container) iter.next();
       if (current.getClass() == windowClass) {
         result = current;
         break;
@@ -1574,14 +1607,14 @@ public class Main extends JFrame implements OptionHandler {
    */
   public Container getWindow(String title) {
     Container result;
-    Iterator<Container> iter;
+    Iterator iter;
     Container current;
     boolean found;
 
     result = null;
     iter = getWindowList();
     while (iter.hasNext()) {
-      current = iter.next();
+      current = (Container) iter.next();
       found = false;
 
       if (current instanceof ChildFrameMDI) {
@@ -1607,7 +1640,7 @@ public class Main extends JFrame implements OptionHandler {
    *          list
    * @return true if the class is already listed in the Window list
    */
-  public boolean containsWindow(Class<?> windowClass) {
+  public boolean containsWindow(Class windowClass) {
     return (getWindow(windowClass) != null);
   }
 
@@ -1627,12 +1660,12 @@ public class Main extends JFrame implements OptionHandler {
    * minimizes all windows.
    */
   public void minimizeWindows() {
-    Iterator<Container> iter;
+    Iterator iter;
     Container frame;
 
     iter = getWindowList();
     while (iter.hasNext()) {
-      frame = iter.next();
+      frame = (Container) iter.next();
       try {
         if (frame instanceof ChildFrameMDI) {
           ((ChildFrameMDI) frame).setIcon(true);
@@ -1649,12 +1682,12 @@ public class Main extends JFrame implements OptionHandler {
    * restores all windows.
    */
   public void restoreWindows() {
-    Iterator<Container> iter;
+    Iterator iter;
     Container frame;
 
     iter = getWindowList();
     while (iter.hasNext()) {
-      frame = iter.next();
+      frame = (Container) iter.next();
       try {
         if (frame instanceof ChildFrameMDI) {
           ((ChildFrameMDI) frame).setIcon(false);
@@ -1678,7 +1711,7 @@ public class Main extends JFrame implements OptionHandler {
    * creates the menu of currently open windows.
    */
   protected synchronized void createWindowMenu() {
-    Iterator<Container> iter;
+    Iterator iter;
     JMenuItem menuItem;
     int startIndex;
 
@@ -1686,7 +1719,8 @@ public class Main extends JFrame implements OptionHandler {
     jMenuWindows.removeAll();
 
     // minimize + restore + separator
-    menuItem = new JMenuItem("Minimize");
+    menuItem = new JMenuItem(Messages.getInstance().getString(
+      "Main_CreateWindowMenu_MenuItem_JMenuItem_Text_First"));
     menuItem.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent evt) {
@@ -1695,7 +1729,8 @@ public class Main extends JFrame implements OptionHandler {
     });
     jMenuWindows.add(menuItem);
 
-    menuItem = new JMenuItem("Restore");
+    menuItem = new JMenuItem(Messages.getInstance().getString(
+      "Main_CreateWindowMenu_MenuItem_JMenuItem_Text_Second"));
     menuItem.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent evt) {
@@ -1711,7 +1746,7 @@ public class Main extends JFrame implements OptionHandler {
     iter = getWindowList();
     jMenuWindows.setVisible(iter.hasNext());
     while (iter.hasNext()) {
-      Container frame = iter.next();
+      Container frame = (Container) iter.next();
       if (frame instanceof ChildFrameMDI) {
         menuItem = new JMenuItem(((ChildFrameMDI) frame).getTitle());
       } else if (frame instanceof ChildFrameSDI) {
@@ -1723,9 +1758,9 @@ public class Main extends JFrame implements OptionHandler {
         @Override
         public void actionPerformed(ActionEvent evt) {
           Container frame = null;
-          Iterator<Container> iter = getWindowList();
+          Iterator iter = getWindowList();
           while (iter.hasNext()) {
-            frame = iter.next();
+            frame = (Container) iter.next();
             String hashFrame = Integer.toString(frame.hashCode());
             if (hashFrame.equals(evt.getActionCommand())) {
               showWindow(frame);
@@ -1771,7 +1806,7 @@ public class Main extends JFrame implements OptionHandler {
 
     // notify listeners (if any)
     for (int i = 0; i < m_StartupListeners.size(); i++) {
-      m_StartupListeners.elementAt(i).startUpComplete();
+      ((StartUpListener) m_StartupListeners.elementAt(i)).startUpComplete();
     }
   }
 
@@ -1799,13 +1834,13 @@ public class Main extends JFrame implements OptionHandler {
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result;
+  public Enumeration listOptions() {
+    Vector result;
     String desc;
     SelectedTag tag;
     int i;
 
-    result = new Vector<Option>();
+    result = new Vector();
 
     desc = "";
     for (i = 0; i < TAGS_GUI.length; i++) {
@@ -1813,9 +1848,12 @@ public class Main extends JFrame implements OptionHandler {
       desc += "\t" + tag.getSelectedTag().getIDStr() + " = "
         + tag.getSelectedTag().getReadable() + "\n";
     }
-    result.addElement(new Option("\tDetermines the layout of the GUI:\n" + desc
-      + "\t(default: " + new SelectedTag(GUI_MDI, TAGS_GUI) + ")", "gui", 1,
-      "-gui " + Tag.toOptionList(TAGS_GUI)));
+    result.addElement(new Option(Messages.getInstance().getString(
+      "Main_ListOptions_Option_Text_First")
+      + desc
+      + Messages.getInstance().getString("Main_ListOptions_Option_Text_Second")
+      + new SelectedTag(GUI_MDI, TAGS_GUI) + ")", "gui", 1, "-gui "
+      + Tag.toOptionList(TAGS_GUI)));
 
     return result.elements();
   }
@@ -1829,7 +1867,7 @@ public class Main extends JFrame implements OptionHandler {
   public String[] getOptions() {
     Vector<String> result;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     result.add("-gui");
     result.add("" + getGUIType());
@@ -1896,8 +1934,8 @@ public class Main extends JFrame implements OptionHandler {
    * @param args the commandline arguments - ignored
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("Main_Main_Logger_Text"));
 
     LookAndFeel.setLookAndFeel();
 
@@ -1908,17 +1946,20 @@ public class Main extends JFrame implements OptionHandler {
       // help?
       if (Utils.getFlag('h', args)) {
         System.out.println();
-        System.out.println("Help requested.");
+        System.out.println(Messages.getInstance().getString(
+          "Main_Main_Text_First"));
         System.out.println();
-        System.out.println("General options:");
+        System.out.println(Messages.getInstance().getString(
+          "Main_Main_Text_Second"));
         System.out.println();
         System.out.println("-h");
-        System.out.println("\tprints this help screen");
+        System.out.println(Messages.getInstance().getString(
+          "Main_Main_Text_Third"));
         System.out.println();
 
-        Enumeration<Option> enu = new Main().listOptions();
+        Enumeration enu = new Main().listOptions();
         while (enu.hasMoreElements()) {
-          Option option = enu.nextElement();
+          Option option = (Option) enu.nextElement();
           System.out.println(option.synopsis());
           System.out.println(option.description());
         }
@@ -1960,7 +2001,8 @@ public class Main extends JFrame implements OptionHandler {
         public void run() {
           while (true) {
             // try {
-            // Thread.sleep(10);
+            // Thread.sleep(4000);
+            // System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -1968,15 +2010,15 @@ public class Main extends JFrame implements OptionHandler {
               System.gc();
 
               // display error
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "Main_Main_Thread_Run_Error_Text_First"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nexiting");
+              System.err.println(Messages.getInstance().getString(
+                "Main_Main_Thread_Run_Error_Text_Second"));
               System.exit(-1);
             }
 
-            // } catch (InterruptedException ex) {
-            // ex.printStackTrace();
-            // }
+            // } catch(InterruptedException ex) { ex.printStackTrace(); }
           }
         }
       };

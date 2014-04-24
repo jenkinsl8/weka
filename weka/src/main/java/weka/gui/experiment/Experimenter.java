@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Experimenter.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -72,6 +73,10 @@ public class Experimenter extends JPanel {
    */
   public Experimenter(boolean classFirst) {
 
+    System.out.println("[DEBUGGER] ---- "
+      + Messages.getInstance().getString(
+        "Experimenter_TabbedPane_Setup_Key_Text"));
+
     m_SetupPanel = new SetupModePanel();
     m_ResultsPanel = new ResultsPanel();
     m_RunPanel = new RunPanel();
@@ -79,10 +84,25 @@ public class Experimenter extends JPanel {
 
     m_ClassFirst = classFirst;
 
-    m_TabbedPane.addTab("Setup", null, m_SetupPanel, "Set up the experiment");
-    m_TabbedPane.addTab("Run", null, m_RunPanel, "Run the experiment");
-    m_TabbedPane.addTab("Analyse", null, m_ResultsPanel,
-      "Analyse experiment results");
+    m_TabbedPane.addTab(
+      Messages.getInstance()
+        .getString("Experimenter_TabbedPane_Setup_Key_Text"),
+      null,
+      m_SetupPanel,
+      Messages.getInstance().getString(
+        "Experimenter_TabbedPane_Setup_Value_Text"));
+    m_TabbedPane.addTab(
+      Messages.getInstance().getString("Experimenter_TabbedPane_Run_Key_Text"),
+      null, m_RunPanel,
+      Messages.getInstance()
+        .getString("Experimenter_TabbedPane_Run_Value_Text"));
+    m_TabbedPane.addTab(
+      Messages.getInstance().getString(
+        "Experimenter_TabbedPane_Analyse_Key_Text"),
+      null,
+      m_ResultsPanel,
+      Messages.getInstance().getString(
+        "Experimenter_TabbedPane_Analyse_Value_Text"));
     m_TabbedPane.setSelectedIndex(0);
     m_TabbedPane.setEnabledAt(1, false);
     m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
@@ -115,13 +135,8 @@ public class Experimenter extends JPanel {
    * @param args ignored.
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
-
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    weka.gui.GenericObjectEditor.determineClasses();
-
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("Experimenter_Main_LoggingStarted_Text"));
     LookAndFeel.setLookAndFeel();
 
     try {
@@ -133,7 +148,8 @@ public class Experimenter extends JPanel {
         classFirst = args[0].equals("CLASS_FIRST");
       }
       m_experimenter = new Experimenter(classFirst);
-      final JFrame jf = new JFrame("Weka Experiment Environment");
+      final JFrame jf = new JFrame(Messages.getInstance().getString(
+        "Experimenter_Main_WekaExperimentEnvironment_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_experimenter, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
@@ -157,7 +173,9 @@ public class Experimenter extends JPanel {
         public void run() {
           while (true) {
             // try {
-            // Thread.sleep(10);
+            // this.sleep(4000);
+            //
+            // System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -166,15 +184,15 @@ public class Experimenter extends JPanel {
               System.gc();
 
               // display error
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "Experimenter_Main_Error_Text_First"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nexiting");
+              System.err.println(Messages.getInstance().getString(
+                "Experimenter_Main_Error_Text_Second"));
               System.exit(-1);
             }
 
-            // } catch (InterruptedException ex) {
-            // ex.printStackTrace();
-            // }
+            // } catch(InterruptedException ex) { ex.printStackTrace(); }
           }
         }
       };

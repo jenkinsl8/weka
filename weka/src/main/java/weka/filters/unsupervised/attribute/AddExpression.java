@@ -1,34 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AddExpression.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.AttributeExpression;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -36,78 +32,72 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
- * <!-- globalinfo-start --> An instance filter that creates a new attribute by
- * applying a mathematical expression to existing attributes. The expression can
- * contain attribute references and numeric constants. Supported operators are :<br/>
+ <!-- globalinfo-start -->
+ * An instance filter that creates a new attribute by applying a mathematical expression to existing attributes. The expression can contain attribute references and numeric constants. Supported operators are :<br/>
  * +, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, sin, (, )<br/>
- * Attributes are specified by prefixing with 'a', eg. a7 is attribute number 7
- * (starting from 1).<br/>
+ * Attributes are specified by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1).<br/>
  * Example expression : a1^2*a5/log(a7*4.0).
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -E &lt;expression&gt;
+ * <pre> -E &lt;expression&gt;
  *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
  *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
  *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
- *  (default: a1^2)
- * </pre>
+ *  (default: a1^2)</pre>
  * 
- * <pre>
- * -N &lt;name&gt;
- *  Specify the name for the new attribute. (default is the expression provided with -E)
- * </pre>
+ * <pre> -N &lt;name&gt;
+ *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
  * 
- * <pre>
- * -D
- *  Debug. Names attribute with the postfix parse of the expression.
- * </pre>
+ * <pre> -D
+ *  Debug. Names attribute with the postfix parse of the expression.</pre>
  * 
- * <!-- options-end -->
- * 
+ <!-- options-end -->
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class AddExpression extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+public class AddExpression 
+  extends Filter 
+  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 402130384261736245L;
-
+  
   /** The infix expression */
   private String m_infixExpression = "a1^2";
 
-  /**
-   * Name of the new attribute. "expression" length string will use the provided
-   * expression as the new attribute name
-   */
-  private String m_attributeName = "expression";
+  /** Name of the new attribute. "expression"  length string will use the 
+      provided expression as the new attribute name */
+  private String m_attributeName="expression";
 
-  /**
-   * If true, makes the attribute name equal to the postfix parse of the
-   * expression
-   */
+  /** If true, makes the attribute name equal to the postfix parse of the
+      expression */
   private boolean m_Debug = false;
 
   private AttributeExpression m_attributeExpression = null;
 
   /**
    * Returns a string describing this filter
-   * 
-   * @return a description of the filter suitable for displaying in the
-   *         explorer/experimenter gui
+   *
+   * @return 		a description of the filter suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "An instance filter that creates a new attribute by applying a "
+    return 
+        "An instance filter that creates a new attribute by applying a "
       + "mathematical expression to existing attributes. The expression "
       + "can contain attribute references and numeric constants. Supported "
       + "operators are :\n"
@@ -117,66 +107,58 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
       + "attribute number 7 (starting from 1).\n"
       + "Example expression : a1^2*a5/log(a7*4.0).";
   }
-
+  
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
-  @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
-
-    newVector.addElement(new Option(
-      "\tSpecify the expression to apply. Eg a1^2*a5/log(a7*4.0)."
-        + "\n\tSupported opperators: ,+, -, *, /, ^, log, abs, cos, "
-        + "\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )"
-        + "\n\t(default: a1^2)", "E", 1, "-E <expression>"));
+    Vector newVector = new Vector(3); 
 
     newVector.addElement(new Option(
-      "\tSpecify the name for the new attribute. (default is the "
-        + "expression provided with -E)", "N", 1, "-N <name>"));
+	     "\tSpecify the expression to apply. Eg a1^2*a5/log(a7*4.0)."
+	     +"\n\tSupported opperators: ,+, -, *, /, ^, log, abs, cos, "
+	     +"\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )"
+	     +"\n\t(default: a1^2)",
+	     "E",1,"-E <expression>"));
 
-    newVector
-      .addElement(new Option(
-        "\tDebug. Names attribute with the postfix parse of the "
-          + "expression.", "D", 0, "-D"));
+    newVector.addElement(new Option(
+	     "\tSpecify the name for the new attribute. (default is the "
+	     +"expression provided with -E)",
+	     "N",1,"-N <name>"));
+
+    newVector.addElement(new Option(
+	     "\tDebug. Names attribute with the postfix parse of the "
+	     +"expression.","D",0,"-D"));
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * Parses a given list of options. <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -E &lt;expression&gt;
+   * <pre> -E &lt;expression&gt;
    *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
    *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
    *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
-   *  (default: a1^2)
-   * </pre>
+   *  (default: a1^2)</pre>
    * 
-   * <pre>
-   * -N &lt;name&gt;
-   *  Specify the name for the new attribute. (default is the expression provided with -E)
-   * </pre>
+   * <pre> -N &lt;name&gt;
+   *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
    * 
-   * <pre>
-   * -D
-   *  Debug. Names attribute with the postfix parse of the expression.
-   * </pre>
+   * <pre> -D
+   *  Debug. Names attribute with the postfix parse of the expression.</pre>
    * 
-   * <!-- options-end -->
-   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
     String expString = Utils.getOption('E', options);
     if (expString.length() != 0) {
@@ -185,52 +167,51 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
       setExpression("a1^2");
     }
 
-    String name = Utils.getOption('N', options);
+    String name = Utils.getOption('N',options);
     if (name.length() != 0) {
       setName(name);
     }
 
     setDebug(Utils.getFlag('D', options));
-
-    Utils.checkForRemainingOptions(options);
   }
-
+  
   /**
    * Gets the current settings of the filter.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
-  public String[] getOptions() {
+  public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-
-    options.add("-E");
-    options.add(getExpression());
-    options.add("-N");
-    options.add(getName());
+    String [] options = new String [5];
+    int current = 0;
+    
+    options[current++] = "-E"; options[current++] = getExpression();
+    options[current++] = "-N"; options[current++] = getName();
 
     if (getDebug()) {
-      options.add("-D");
+      options[current++] = "-D";
     }
-
-    return options.toArray(new String[0]);
+    
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String nameTipText() {
     return "Set the name of the new attribute.";
   }
 
   /**
-   * Set the name for the new attribute. The string "expression" can be used to
-   * make the name of the new attribute equal to the expression provided.
-   * 
+   * Set the name for the new attribute. The string "expression" can
+   * be used to make the name of the new attribute equal to the expression
+   * provided.
    * @param name the name of the new attribute
    */
   public void setName(String name) {
@@ -239,7 +220,6 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns the name of the new attribute
-   * 
    * @return the name of the new attribute
    */
   public String getName() {
@@ -248,19 +228,18 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String debugTipText() {
     return "Set debug mode. If true then the new attribute will be named with "
-      + "the postfix parse of the supplied expression.";
+      +"the postfix parse of the supplied expression.";
   }
-
+  
   /**
-   * Set debug mode. Causes the new attribute to be named with the postfix parse
-   * of the expression
-   * 
+   * Set debug mode. Causes the new attribute to be named with the postfix
+   * parse of the expression
    * @param d true if debug mode is to be used
    */
   public void setDebug(boolean d) {
@@ -269,7 +248,6 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets whether debug is set
-   * 
    * @return true if debug is set
    */
   public boolean getDebug() {
@@ -278,9 +256,9 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String expressionTipText() {
     return "Set the math expression to apply. Eg. a1^2*a5/log(a7*4.0)";
@@ -288,7 +266,6 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Set the expression to apply
-   * 
    * @param expr a mathematical expression to apply
    */
   public void setExpression(String expr) {
@@ -297,20 +274,18 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
 
   /**
    * Get the expression
-   * 
    * @return the expression
    */
   public String getExpression() {
     return m_infixExpression;
   }
 
-  /**
+  /** 
    * Returns the Capabilities of this filter.
-   * 
-   * @return the capabilities of this object
-   * @see Capabilities
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
    */
-  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -318,57 +293,59 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-
+    
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-
+    
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   * 
+   *
    * @param instanceInfo an Instances object containing the input instance
-   *          structure (any instances contained in the object are ignored -
-   *          only the structure is required).
+   * structure (any instances contained in the object are ignored - only the
+   * structure is required).
    * @return true if the outputFormat may be collected immediately
    * @throws Exception if the format couldn't be set successfully
    */
-  @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     m_attributeExpression = new AttributeExpression();
-    m_attributeExpression.convertInfixToPostfix(new String(m_infixExpression));
+    m_attributeExpression.
+      convertInfixToPostfix(new String(m_infixExpression));
 
     super.setInputFormat(instanceInfo);
 
     Instances outputFormat = new Instances(instanceInfo, 0);
     Attribute newAttribute;
     if (m_Debug) {
-      newAttribute = new Attribute(m_attributeExpression.getPostFixExpression());
+      newAttribute = 
+        new Attribute(m_attributeExpression.getPostFixExpression());
     } else if (m_attributeName.compareTo("expression") != 0) {
       newAttribute = new Attribute(m_attributeName);
     } else {
       newAttribute = new Attribute(m_infixExpression);
     }
-    outputFormat.insertAttributeAt(newAttribute, instanceInfo.numAttributes());
+    outputFormat.insertAttributeAt(newAttribute, 
+				   instanceInfo.numAttributes());
     setOutputFormat(outputFormat);
     return true;
   }
 
   /**
-   * Input an instance for filtering. Ordinarily the instance is processed and
-   * made available for output immediately. Some filters require all instances
-   * be read before producing output.
-   * 
+   * Input an instance for filtering. Ordinarily the instance is processed
+   * and made available for output immediately. Some filters require all
+   * instances be read before producing output.
+   *
    * @param instance the input instance
-   * @return true if the filtered instance may now be collected with output().
+   * @return true if the filtered instance may now be
+   * collected with output().
    * @throws IllegalStateException if no input format has been defined.
    * @throws Exception if there was a problem during the filtering.
    */
-  @Override
   public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
@@ -379,12 +356,12 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
       m_NewBatch = false;
     }
 
-    double[] vals = new double[instance.numAttributes() + 1];
-    for (int i = 0; i < instance.numAttributes(); i++) {
+    double[] vals = new double[instance.numAttributes()+1];
+    for(int i = 0; i < instance.numAttributes(); i++) {
       if (instance.isMissing(i)) {
-        vals[i] = Utils.missingValue();
+	vals[i] = Instance.missingValue();
       } else {
-        vals[i] = instance.value(i);
+	vals[i] = instance.value(i);
       }
     }
 
@@ -394,7 +371,7 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
     if (instance instanceof SparseInstance) {
       inst = new SparseInstance(instance.weight(), vals);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      inst = new Instance(instance.weight(), vals);
     }
 
     inst.setDataset(getOutputFormat());
@@ -403,23 +380,22 @@ public class AddExpression extends Filter implements UnsupervisedFilter,
     push(inst);
     return true;
   }
-
+  
   /**
    * Returns the revision string.
    * 
-   * @return the revision
+   * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-
+  
   /**
    * Main method for testing this class.
-   * 
+   *
    * @param args should contain arguments to the filter: use -h for help
    */
-  public static void main(String[] args) {
+  public static void main(String [] args) {
     runFilter(new AddExpression(), args);
   }
 }

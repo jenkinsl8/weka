@@ -1,34 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LookAndFeel.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
 
-import java.util.Properties;
+import weka.core.Utils;
 
+import java.util.Properties;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
-import weka.core.Utils;
 
 /**
  * A little helper class for setting the Look and Feel of the user interface.
@@ -53,13 +53,12 @@ public class LookAndFeel {
     } 
     catch (Exception ex) {
       JOptionPane.showMessageDialog(null,
-       "LookAndFeel: Could not read a LookAndFeel configuration file.\n"
-       +"An example file is included in the Weka distribution.\n"
-       +"This file should be named \"" + PROPERTY_FILE + "\"  and\n"
-       +"should be placed either in your user home (which is set\n"
-       +"to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-       +"or the directory that java was started from\n",
-       "LookAndFeel",
+       Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_First") 
+       + PROPERTY_FILE 
+       + Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Second") 
+       + System.getProperties().getProperty("user.home") 
+       + Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Third"),
+       Messages.getInstance().getString("LookAndFeel_Exception_JOptionPaneShowMessageDialog_Text_Fourth"),
        JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -94,7 +93,7 @@ public class LookAndFeel {
   public static boolean setLookAndFeel() {
     String           classname;
 
-    classname = LOOKANDFEEL_PROPERTIES.getProperty("Theme", "");
+    classname = LOOKANDFEEL_PROPERTIES.getProperty(Messages.getInstance().getString("LookAndFeel_SetLookAndFeel_ClassName_Text"), "");
     if (classname.equals("")) {
       // Java 1.5 crashes under Gnome if one sets it to the GTKLookAndFeel 
       // theme, hence we don't set any theme by default if we're on a Linux 
@@ -146,11 +145,11 @@ public class LookAndFeel {
     String[]	list;
     int		i;
     
-    System.out.println("\nInstalled Look and Feel themes:");
+    System.out.println(Messages.getInstance().getString("LookAndFeel_Main_Text_First"));
     list = getInstalledLookAndFeels();
     for (i = 0; i < list.length; i++)
       System.out.println((i+1) + ". " + list[i]);
 
-    System.out.println("\nNote: a theme can be set in '" + PROPERTY_FILE + "'.");
+    System.out.println(Messages.getInstance().getString("LookAndFeel_Main_Text_Second") + PROPERTY_FILE + Messages.getInstance().getString("LookAndFeel_Main_Text_Third"));
   }
 }

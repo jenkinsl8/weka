@@ -43,6 +43,7 @@ int8=2
 numeric=2
 bpchar=9
 
+
 # other options
 CREATE_DOUBLE=float8
 CREATE_STRING=text

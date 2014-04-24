@@ -1,28 +1,25 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * BallTree.java
- * Copyright (C) 2007-2012 University of Waikato
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.neighboursearch;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
@@ -30,13 +27,16 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.neighboursearch.balltrees.BallNode;
 import weka.core.neighboursearch.balltrees.BallTreeConstructor;
 import weka.core.neighboursearch.balltrees.TopDownConstructor;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -88,7 +88,7 @@ import weka.core.neighboursearch.balltrees.TopDownConstructor;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.2 $
  */
 public class BallTree
   extends NearestNeighbourSearch 
@@ -495,13 +495,15 @@ public class BallTree
    * 
    * @return 		an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if (m_Stats != null) {
-      newVector.addAll(Collections.list(m_Stats.enumerateMeasures()));
+      for (Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
+        newVector.addElement(e.nextElement());
+      }
     }
     return newVector.elements();
   }
@@ -548,16 +550,14 @@ public class BallTree
    * 
    * @return 		an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector newVector = new Vector();
     
     newVector.addElement(new Option(
 	"\tThe construction method to employ. Either TopDown or BottomUp\n"
 	+ "\t(default: weka.core.TopDownConstructor)",
 	"C", 1, "-C <classname and options>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
     return newVector.elements();
   }
 
@@ -597,8 +597,6 @@ public class BallTree
     else {
       setBallTreeConstructor(new TopDownConstructor());  
     }
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -607,9 +605,15 @@ public class BallTree
    * @return 		an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector<String>	result = new Vector<String>();
+    Vector<String>	result;
+    String[]		options;
+    int			i;
     
-    Collections.addAll(result, super.getOptions());
+    result = new Vector<String>();
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
     
     result.add("-C");
     result.add(
@@ -625,6 +629,6 @@ public class BallTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

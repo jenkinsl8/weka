@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    TargetMetaInfo.java
- *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +30,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.Utils;
+import weka.core.FastVector;
+import weka.core.Instance;
 
 /**
  * Class to encapsulate information about a Target.
@@ -277,10 +279,10 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
       throw new Exception("[TargetMetaInfo] target must be continuous!");
     }
 
-    if (!Utils.isMissingValue(m_min) && prediction < m_min) {
+    if (!Instance.isMissingValue(m_min) && prediction < m_min) {
       prediction = m_min;
     }
-    if (!Utils.isMissingValue(m_max) && prediction > m_max) {
+    if (!Instance.isMissingValue(m_max) && prediction > m_max) {
       prediction = m_max;
     }
 
@@ -314,12 +316,12 @@ public class TargetMetaInfo extends FieldMetaInfo implements Serializable {
     }
     if (m_values.size() == 0) {
       // return a String attribute
-      return new Attribute(m_fieldName, (ArrayList<String>)null);
+      return new Attribute(m_fieldName, (FastVector)null);
     }
     
-    ArrayList<String> values = new ArrayList<String>();
+    FastVector values = new FastVector();
     for (String val : m_values) {
-      values.add(val);
+      values.addElement(val);
     }
     return new Attribute(m_fieldName, values);
   }

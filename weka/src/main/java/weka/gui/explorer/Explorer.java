@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Explorer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -51,7 +52,6 @@ import weka.gui.LogPanel;
 import weka.gui.Logger;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
-import weka.gui.beans.PluginManager;
 
 /**
  * The main class for the Weka explorer. Lets the user create, open, save,
@@ -200,13 +200,23 @@ public class Explorer extends JPanel {
 
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
-    m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) " + Copyright.getFromYear() + "-"
-      + Copyright.getToYear() + " " + Copyright.getOwner() + ", "
-      + Copyright.getAddress());
-    m_LogPanel.logMessage("web: " + Copyright.getURL());
-    m_LogPanel.logMessage("Started on " + date);
-    m_LogPanel.statusMessage("Welcome to the Weka Explorer");
+    m_LogPanel.logMessage(Messages.getInstance().getString(
+      "Explorer_LogPanel_LogMessage_Text_First"));
+    m_LogPanel.logMessage(Messages.getInstance().getString(
+      "Explorer_LogPanel_LogMessage_Text_Second")
+      + Copyright.getFromYear()
+      + Messages.getInstance().getString(
+        "Explorer_LogPanel_LogMessage_Text_Third")
+      + Copyright.getToYear()
+      + " " + Copyright.getOwner() + ", " + Copyright.getAddress());
+    m_LogPanel.logMessage(Messages.getInstance().getString(
+      "Explorer_LogPanel_LogMessage_Text_Fourth")
+      + Copyright.getURL());
+    m_LogPanel.logMessage(Messages.getInstance().getString(
+      "Explorer_LogPanel_LogMessage_Text_Fifth")
+      + date);
+    m_LogPanel.statusMessage(Messages.getInstance().getString(
+      "Explorer_LogPanel_StatusMessage_Text_First"));
 
     // intialize pre-processpanel
     m_PreprocessPanel.setLog(m_LogPanel);
@@ -215,16 +225,13 @@ public class Explorer extends JPanel {
 
     // initialize additional panels
     String[] tabs = ExplorerDefaults.getTabs();
-    Hashtable<String, HashSet<String>> tabOptions = new Hashtable<String, HashSet<String>>();
+    Hashtable<String, HashSet> tabOptions = new Hashtable<String, HashSet>();
     for (String tab : tabs) {
       try {
         // determine classname and additional options
         String[] optionsStr = tab.split(":");
         String classname = optionsStr[0];
-        if (PluginManager.isInDisabledList(classname)) {
-          continue;
-        }
-        HashSet<String> options = new HashSet<String>();
+        HashSet options = new HashSet();
         tabOptions.put(classname, options);
         for (int n = 1; n < optionsStr.length; n++) {
           options.add(optionsStr[n]);
@@ -248,8 +255,7 @@ public class Explorer extends JPanel {
     // setup tabbed pane
     m_TabbedPane.setSelectedIndex(0);
     for (int i = 0; i < m_Panels.size(); i++) {
-      HashSet<String> options = tabOptions.get(m_Panels.get(i).getClass()
-        .getName());
+      HashSet options = tabOptions.get(m_Panels.get(i).getClass().getName());
       m_TabbedPane.setEnabledAt(i + 1, options.contains("standalone"));
     }
 
@@ -361,20 +367,18 @@ public class Explorer extends JPanel {
    */
   public static void main(String[] args) {
 
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("Explorer_Main_Logger_Text"));
 
     LookAndFeel.setLookAndFeel();
-    // make sure that packages are loaded and the GenericPropertiesCreator
-    // executes to populate the lists correctly
-    weka.gui.GenericObjectEditor.determineClasses();
 
     try {
       // uncomment to disable the memory management:
       // m_Memory.setEnabled(false);
 
       m_explorer = new Explorer();
-      final JFrame jf = new JFrame("Weka Explorer");
+      final JFrame jf = new JFrame(Messages.getInstance().getString(
+        "Explorer_Main_JFrame_Text"));
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_explorer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
@@ -393,7 +397,9 @@ public class Explorer extends JPanel {
       jf.setIconImage(icon);
 
       if (args.length == 1) {
-        System.err.println("Loading instances from " + args[0]);
+        System.err.println(Messages.getInstance().getString(
+          "Explorer_Main_Run_Error_Text")
+          + args[0]);
         AbstractFileLoader loader = ConverterUtils.getLoaderForFile(args[0]);
         loader.setFile(new File(args[0]));
         m_explorer.m_PreprocessPanel.setInstancesFromFile(loader);
@@ -404,8 +410,10 @@ public class Explorer extends JPanel {
         public void run() {
           while (true) {
             // try {
-            // System.out.println("Before sleeping.");
-            // Thread.sleep(10);
+            // //System.out.println("Before sleeping.");
+            // this.sleep(4000);
+
+            // System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -414,15 +422,15 @@ public class Explorer extends JPanel {
               System.gc();
 
               // display error
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "Explorer_Main_Run_Error_Text_First"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nexiting");
+              System.err.println(Messages.getInstance().getString(
+                "Explorer_Main_Run_Error_Text_Second"));
               System.exit(-1);
             }
 
-            // } catch (InterruptedException ex) {
-            // ex.printStackTrace();
-            // }
+            // } catch(InterruptedException ex) { ex.printStackTrace(); }
           }
         }
       };

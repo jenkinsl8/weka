@@ -1,38 +1,34 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SMOreg.java
- *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RegOptimizer;
 import weka.classifiers.functions.supportVector.RegSMOImproved;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -41,16 +37,20 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -159,7 +159,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  * @version $Revision$
  */
 public class SMOreg 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, AdditionalMeasureProducer, 
              TechnicalInformationHandler {
   
@@ -260,9 +260,9 @@ public class SMOreg
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
-    
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Enumeration enm;
+    Vector result = new Vector();
     
     result.addElement(new Option(
 	"\tThe complexity constant C.\n"
@@ -284,22 +284,24 @@ public class SMOreg
 	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
 	"K", 1, "-K <classname and parameters>"));
 
-    result.addAll(Collections.list(super.listOptions()));
-    
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to optimizer ('-I') "
 	+ getRegOptimizer().getClass().getName() + ":"));
 
-    result.addAll(Collections.list(((OptionHandler) getRegOptimizer()).listOptions()));
+    enm = ((OptionHandler) getRegOptimizer()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to kernel ('-K') "
 	+ getKernel().getClass().getName() + ":"));
     
-    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
-   
+    enm = ((OptionHandler) getKernel()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
+
     return result.elements();
   }
   
@@ -419,10 +421,6 @@ public class SMOreg
     else {
       setKernel(new PolyKernel());
     }
-    
-    super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
   
   /**
@@ -431,8 +429,15 @@ public class SMOreg
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    
-    Vector<String>    	result = new Vector<String>();
+    int       	i;
+    Vector    	result;
+    String[]  	options;
+
+    result = new Vector();
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
     
     result.add("-C");
     result.add("" + getC());
@@ -446,8 +451,6 @@ public class SMOreg
     result.add("-K");
     result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
 
-    Collections.addAll(result, super.getOptions());
-    
     return (String[]) result.toArray(new String[result.size()]);	  
   }
   
@@ -519,7 +522,7 @@ public class SMOreg
     m_Missing = new ReplaceMissingValues();
     m_Missing.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_Missing);
-    
+
     if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
       if (!m_onlyNumeric) {
         m_NominalToBinary = new NominalToBinary();
@@ -747,8 +750,8 @@ public class SMOreg
    * 
    * @return an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> result = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector result = new Vector();
     
     result.addElement("measureKernelEvaluations");
     result.addElement("measureCacheHits");

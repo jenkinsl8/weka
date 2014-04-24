@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GUIChooser.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -51,7 +52,6 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -73,9 +73,6 @@ import weka.core.Memory;
 import weka.core.SystemInfo;
 import weka.core.Utils;
 import weka.core.Version;
-import weka.core.WekaPackageManager;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
 import weka.gui.arffviewer.ArffViewer;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
@@ -83,8 +80,6 @@ import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
 import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
-import weka.gui.scripting.JythonPanel;
 import weka.gui.sql.SqlViewer;
 import weka.gui.treevisualizer.Node;
 import weka.gui.treevisualizer.NodePlace;
@@ -113,9 +108,8 @@ public class GUIChooser extends JFrame {
       Object macArffHandler = Class.forName("weka.gui.MacArffOpenFilesHandler")
         .newInstance();
 
-      Class<?> fileHandlerClass = Class
-        .forName("com.apple.eawt.OpenFilesHandler");
-      Class<?>[] paramClass = new Class[1];
+      Class fileHandlerClass = Class.forName("com.apple.eawt.OpenFilesHandler");
+      Class[] paramClass = new Class[1];
       paramClass[0] = fileHandlerClass;
       Object[] args = new Object[1];
       args[0] = macArffHandler;
@@ -148,19 +142,22 @@ public class GUIChooser extends JFrame {
   protected JPanel m_PanelApplications = new JPanel();
 
   /** Click to open the Explorer */
-  protected JButton m_ExplorerBut = new JButton("Explorer");
+  protected JButton m_ExplorerBut = new JButton(Messages.getInstance()
+    .getString("GUIChooser_Explorer_Text"));
 
   /** The frame containing the explorer interface */
   protected JFrame m_ExplorerFrame;
 
   /** Click to open the Explorer */
-  protected JButton m_ExperimenterBut = new JButton("Experimenter");
+  protected JButton m_ExperimenterBut = new JButton(Messages.getInstance()
+    .getString("GUIChooser_Experimenter_Text"));
 
   /** The frame containing the experiment interface */
   protected JFrame m_ExperimenterFrame;
 
   /** Click to open the KnowledgeFlow */
-  protected JButton m_KnowledgeFlowBut = new JButton("KnowledgeFlow");
+  protected JButton m_KnowledgeFlowBut = new JButton(Messages.getInstance()
+    .getString("GUIChooser_KnowledgeFlow_Text"));
 
   /** Pending file to load on startup of the KnowledgeFlow */
   protected String m_pendingKnowledgeFlowLoad = null;
@@ -169,19 +166,14 @@ public class GUIChooser extends JFrame {
   protected JFrame m_KnowledgeFlowFrame;
 
   /** Click to open the simplecli */
-  protected JButton m_SimpleBut = new JButton("Simple CLI");
+  protected JButton m_SimpleBut = new JButton(Messages.getInstance().getString(
+    "GUIChooser_Simple_CLI_Text"));
 
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
 
-  /** The frame containing the Groovy console. */
-  protected JFrame m_GroovyConsoleFrame;
-
-  /** The frame containing the Jython console. */
-  protected JFrame m_JythonConsoleFrame;
-
   /** keeps track of the opened ArffViewer instancs */
-  protected Vector<ArffViewer> m_ArffViewers = new Vector<ArffViewer>();
+  protected Vector m_ArffViewers = new Vector();
 
   /** The frame containing the SqlViewer */
   protected JFrame m_SqlViewerFrame;
@@ -192,22 +184,19 @@ public class GUIChooser extends JFrame {
   /** The frame containing the ensemble library interface */
   protected JFrame m_EnsembleLibraryFrame;
 
-  /** The frame containing the package manager */
-  protected JFrame m_PackageManagerFrame;
-
   // Visualization
 
   /** keeps track of the opened plots */
-  protected Vector<JFrame> m_Plots = new Vector<JFrame>();
+  protected Vector m_Plots = new Vector();
 
   /** keeps track of the opened ROCs */
-  protected Vector<JFrame> m_ROCs = new Vector<JFrame>();
+  protected Vector m_ROCs = new Vector();
 
   /** keeps track of the opened tree visualizer instancs */
-  protected Vector<JFrame> m_TreeVisualizers = new Vector<JFrame>();
+  protected Vector m_TreeVisualizers = new Vector();
 
   /** keeps track of the opened graph visualizer instancs */
-  protected Vector<JFrame> m_GraphVisualizers = new Vector<JFrame>();
+  protected Vector m_GraphVisualizers = new Vector();
 
   /** The frame containing the boundary visualizer */
   protected JFrame m_BoundaryVisualizerFrame;
@@ -275,26 +264,30 @@ public class GUIChooser extends JFrame {
    */
   public GUIChooser() {
 
-    super("Weka GUI Chooser");
+    super(Messages.getInstance().getString("GUIChooser_Title_Text"));
 
     m_Self = this;
 
     // filechoosers
     m_FileChooserGraphVisualizer
-      .addChoosableFileFilter(new ExtensionFileFilter(".bif",
-        "BIF Files (*.bif)"));
+      .addChoosableFileFilter(new ExtensionFileFilter(".bif", Messages
+        .getInstance().getString("GUIChooser_BIF_Files_Text")));
     m_FileChooserGraphVisualizer
-      .addChoosableFileFilter(new ExtensionFileFilter(".xml",
-        "XML Files (*.xml)"));
+      .addChoosableFileFilter(new ExtensionFileFilter(".xml", Messages
+        .getInstance().getString("GUIChooser_XML_Files_Text")));
 
     m_FileChooserPlot.addChoosableFileFilter(new ExtensionFileFilter(
-      Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
-        + ")"));
+      Instances.FILE_EXTENSION, Messages.getInstance().getString(
+        "GUIChooser_ARFF_Files_Text_Front")
+        + Instances.FILE_EXTENSION
+        + Messages.getInstance().getString("GUIChooser_ARFF_Files_Text_End")));
     m_FileChooserPlot.setMultiSelectionEnabled(true);
 
     m_FileChooserROC.addChoosableFileFilter(new ExtensionFileFilter(
-      Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
-        + ")"));
+      Instances.FILE_EXTENSION, Messages.getInstance().getString(
+        "GUIChooser_ARFF_Files_Text_Front")
+        + Instances.FILE_EXTENSION
+        + Messages.getInstance().getString("GUIChooser_ARFF_Files_Text_End")));
 
     // general layout
     m_Icon = Toolkit.getDefaultToolkit().getImage(
@@ -306,8 +299,8 @@ public class GUIChooser extends JFrame {
     this.getContentPane().add(m_PanelApplications, BorderLayout.EAST);
 
     // applications
-    m_PanelApplications.setBorder(BorderFactory
-      .createTitledBorder("Applications"));
+    m_PanelApplications.setBorder(BorderFactory.createTitledBorder(Messages
+      .getInstance().getString("GUIChooser_Applications_Text")));
     m_PanelApplications.setLayout(new GridLayout(4, 1));
     m_PanelApplications.add(m_ExplorerBut);
     m_PanelApplications.add(m_ExperimenterBut);
@@ -318,15 +311,26 @@ public class GUIChooser extends JFrame {
     JPanel wekaPan = new JPanel();
     wekaPan.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     wekaPan.setLayout(new BorderLayout());
-    wekaPan.setToolTipText("Weka, a native bird of New Zealand");
+    wekaPan.setToolTipText(Messages.getInstance().getString(
+      "GUIChooser_Weka_Native_Bird_Text"));
     ImageIcon wii = new ImageIcon(m_weka);
     JLabel wekaLab = new JLabel(wii);
     wekaPan.add(wekaLab, BorderLayout.CENTER);
-    String infoString = "<html>" + "<font size=-2>"
-      + "Waikato Environment for Knowledge Analysis<br>" + "Version "
-      + Version.VERSION + "<br>" + "(c) " + Copyright.getFromYear() + " - "
-      + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
-      + Copyright.getAddress() + "</font>" + "</html>";
+    String infoString = Messages.getInstance().getString(
+      "GUIChooser_Information_Text_Front")
+      + " "
+      + Version.VERSION
+      + "<br>"
+      + "(c) "
+      + Copyright.getFromYear()
+      + " - "
+      + Copyright.getToYear()
+      + "<br>"
+      + Copyright.getOwner()
+      + "<br>"
+      + Copyright.getAddress()
+      + Messages.getInstance().getString("GUIChooser_Information_Text_End");
+
     JLabel infoLab = new JLabel(infoString);
     infoLab.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     wekaPan.add(infoLab, BorderLayout.SOUTH);
@@ -339,13 +343,15 @@ public class GUIChooser extends JFrame {
     // Program
     m_jMenuProgram = new JMenu();
     m_jMenuBar.add(m_jMenuProgram);
-    m_jMenuProgram.setText("Program");
+    m_jMenuProgram.setText(Messages.getInstance().getString(
+      "GUIChooser_Program_Text"));
     m_jMenuProgram.setMnemonic('P');
 
     // Program/LogWindow
     JMenuItem jMenuItemProgramLogWindow = new JMenuItem();
     m_jMenuProgram.add(jMenuItemProgramLogWindow);
-    jMenuItemProgramLogWindow.setText("LogWindow");
+    jMenuItemProgramLogWindow.setText(Messages.getInstance().getString(
+      "GUIChooser_LogWindow_Text"));
     // jMenuItemProgramLogWindow.setMnemonic('L');
     jMenuItemProgramLogWindow.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_L, KeyEvent.CTRL_MASK));
@@ -359,7 +365,8 @@ public class GUIChooser extends JFrame {
 
     final JMenuItem jMenuItemProgramMemUsage = new JMenuItem();
     m_jMenuProgram.add(jMenuItemProgramMemUsage);
-    jMenuItemProgramMemUsage.setText("Memory usage");
+    jMenuItemProgramMemUsage.setText(Messages.getInstance().getString(
+      "GUIChooser_Memory_Usage_Text"));
     // jMenuItemProgramMemUsage.setMnemonic('M');
     jMenuItemProgramMemUsage.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_M, KeyEvent.CTRL_MASK));
@@ -370,7 +377,8 @@ public class GUIChooser extends JFrame {
         if (m_MemoryUsageFrame == null) {
           final MemoryUsagePanel panel = new MemoryUsagePanel();
           jMenuItemProgramMemUsage.setEnabled(false);
-          m_MemoryUsageFrame = new JFrame("Memory usage");
+          m_MemoryUsageFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_Memory_Usage_List_Text"));
           m_MemoryUsageFrame.setIconImage(m_Icon);
           m_MemoryUsageFrame.getContentPane().setLayout(new BorderLayout());
           m_MemoryUsageFrame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -403,7 +411,8 @@ public class GUIChooser extends JFrame {
     // Program/Exit
     JMenuItem jMenuItemProgramExit = new JMenuItem();
     m_jMenuProgram.add(jMenuItemProgramExit);
-    jMenuItemProgramExit.setText("Exit");
+    jMenuItemProgramExit.setText(Messages.getInstance().getString(
+      "GUIChooser_Exit_Text"));
     // jMenuItemProgramExit.setMnemonic('E');
     jMenuItemProgramExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
       KeyEvent.CTRL_MASK));
@@ -418,13 +427,15 @@ public class GUIChooser extends JFrame {
     // Visualization
     m_jMenuVisualization = new JMenu();
     m_jMenuBar.add(m_jMenuVisualization);
-    m_jMenuVisualization.setText("Visualization");
+    m_jMenuVisualization.setText(Messages
+      .getString("GUIChooser_Visualization_Text")); // "Visualization"
     m_jMenuVisualization.setMnemonic('V');
 
     // Visualization/Plot
     JMenuItem jMenuItemVisualizationPlot = new JMenuItem();
     m_jMenuVisualization.add(jMenuItemVisualizationPlot);
-    jMenuItemVisualizationPlot.setText("Plot");
+    jMenuItemVisualizationPlot.setText(Messages.getInstance().getString(
+      "GUIChooser_Plot_Text"));
     // jMenuItemVisualizationPlot.setMnemonic('P');
     jMenuItemVisualizationPlot.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_P, KeyEvent.CTRL_MASK));
@@ -448,7 +459,10 @@ public class GUIChooser extends JFrame {
             filenames += ", ";
           }
           filenames += filename;
-          System.err.println("Loading instances from " + filename);
+          System.err.println(Messages.getInstance().getString(
+            "GUIChooser_LoadingInstancesFrom_Error_Text")
+            + filename);
+
           try {
             Reader r = new java.io.BufferedReader(new FileReader(filename));
             Instances i = new Instances(r);
@@ -456,24 +470,35 @@ public class GUIChooser extends JFrame {
             PlotData2D pd1 = new PlotData2D(i);
 
             if (j == 0) {
-              pd1.setPlotName("Master plot");
+              pd1.setPlotName(Messages.getInstance().getString(
+                "GUIChooser_MasterPlot_Text"));
               panel.setMasterPlot(pd1);
             } else {
-              pd1.setPlotName("Plot " + (j + 1));
+              pd1.setPlotName(Messages.getInstance().getString(
+                "GUIChooser_Plot_Text")
+                + (j + 1));
               pd1.m_useCustomColour = true;
               pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue;
               panel.addPlot(pd1);
             }
           } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-              + files[j] + "':\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(
+              m_Self,
+              Messages.getInstance().getString(
+                "GUIChooser_Plot_LoadingFile_Error_Text_Front")
+                + files[j]
+                + Messages.getInstance().getString(
+                  "GUIChooser_Plot_LoadingFile_Error_Text_End")
+                + ex.getMessage());
             return;
           }
         }
 
         // create frame
-        final JFrame frame = new JFrame("Plot - " + filenames);
+        final JFrame frame = new JFrame(Messages.getInstance().getString(
+          "GUIChooser_Plot_PlotName_Text")
+          + filenames);
         frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -495,7 +520,8 @@ public class GUIChooser extends JFrame {
     // Visualization/ROC
     JMenuItem jMenuItemVisualizationROC = new JMenuItem();
     m_jMenuVisualization.add(jMenuItemVisualizationROC);
-    jMenuItemVisualizationROC.setText("ROC");
+    jMenuItemVisualizationROC.setText(Messages.getInstance().getString(
+      "GUIChooser_ROC_Text"));
     // jMenuItemVisualizationROC.setMnemonic('R');
     jMenuItemVisualizationROC.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_R, KeyEvent.CTRL_MASK));
@@ -516,14 +542,22 @@ public class GUIChooser extends JFrame {
           result = new Instances(new BufferedReader(new FileReader(filename)));
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-            + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(
+            m_Self,
+            Messages.getInstance().getString(
+              "GUIChooser_ROC_LoadingFile_Error_Text_Front")
+              + filename
+              + Messages.getInstance().getString(
+                "GUIChooser_ROC_LoadingFile_Error_Text_End") + ex.getMessage());
           return;
         }
         result.setClassIndex(result.numAttributes() - 1);
         ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-        vmc.setROCString("(Area under ROC = "
-          + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
+        vmc.setROCString(Messages.getInstance().getString(
+          "GUIChooser_ROC_AreaUnderROC_Text_Front")
+          + Utils.doubleToString(ThresholdCurve.getROCArea(result), 4)
+          + Messages.getInstance().getString(
+            "GUIChooser_ROC_AreaUnderROC_Text_End"));
         vmc.setName(result.relationName());
         PlotData2D tempd = new PlotData2D(result);
         tempd.setPlotName(result.relationName());
@@ -532,12 +566,17 @@ public class GUIChooser extends JFrame {
           vmc.addPlot(tempd);
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self,
-            "Error adding plot:\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(
+            m_Self,
+            Messages.getInstance().getString(
+              "GUIChooser_ROC_AddingPlot_Error_Text")
+              + ex.getMessage());
           return;
         }
 
-        final JFrame frame = new JFrame("ROC - " + filename);
+        final JFrame frame = new JFrame(Messages.getInstance().getString(
+          "GUIChooser_ROC_File_Text")
+          + filename);
         frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(vmc, BorderLayout.CENTER);
@@ -559,7 +598,8 @@ public class GUIChooser extends JFrame {
     // Visualization/TreeVisualizer
     JMenuItem jMenuItemVisualizationTree = new JMenuItem();
     m_jMenuVisualization.add(jMenuItemVisualizationTree);
-    jMenuItemVisualizationTree.setText("TreeVisualizer");
+    jMenuItemVisualizationTree.setText(Messages.getInstance().getString(
+      "GUIChooser_TreeVisualizer_Text"));
     // jMenuItemVisualizationTree.setMnemonic('T');
     jMenuItemVisualizationTree.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_T, KeyEvent.CTRL_MASK));
@@ -583,13 +623,21 @@ public class GUIChooser extends JFrame {
           top = builder.create(new FileReader(filename));
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-            + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(
+            m_Self,
+            Messages.getInstance().getString(
+              "GUIChooser_TreeVisualizer_LoadingFile_Error_Text_Front")
+              + filename
+              + Messages.getInstance().getString(
+                "GUIChooser_TreeVisualizer_LoadingFile_Error_Text_End")
+              + ex.getMessage());
           return;
         }
 
         // create frame
-        final JFrame frame = new JFrame("TreeVisualizer - " + filename);
+        final JFrame frame = new JFrame(Messages.getInstance().getString(
+          "GUIChooser_TreeVisualizer_File_Text")
+          + filename);
         frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(new TreeVisualizer(null, top, arrange),
@@ -612,7 +660,8 @@ public class GUIChooser extends JFrame {
     // Visualization/GraphVisualizer
     JMenuItem jMenuItemVisualizationGraph = new JMenuItem();
     m_jMenuVisualization.add(jMenuItemVisualizationGraph);
-    jMenuItemVisualizationGraph.setText("GraphVisualizer");
+    jMenuItemVisualizationGraph.setText(Messages.getInstance().getString(
+      "GUIChooser_GraphVisualizer_Text"));
     // jMenuItemVisualizationGraph.setMnemonic('G');
     jMenuItemVisualizationGraph.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_G, KeyEvent.CTRL_MASK));
@@ -639,13 +688,21 @@ public class GUIChooser extends JFrame {
           }
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
-            + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(
+            m_Self,
+            Messages.getInstance().getString(
+              "GUIChooser_GraphVisualizer_LoadingFile_Error_Text_Front")
+              + filename
+              + Messages.getInstance().getString(
+                "GUIChooser_GraphVisualizer_LoadingFile_Error_Text_End")
+              + ex.getMessage());
           return;
         }
 
         // create frame
-        final JFrame frame = new JFrame("GraphVisualizer - " + filename);
+        final JFrame frame = new JFrame(Messages.getInstance().getString(
+          "GUIChooser_GraphVisualizer_File_Text")
+          + filename);
         frame.setIconImage(m_Icon);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -667,7 +724,8 @@ public class GUIChooser extends JFrame {
     // Visualization/BoundaryVisualizer
     final JMenuItem jMenuItemVisualizationBoundary = new JMenuItem();
     m_jMenuVisualization.add(jMenuItemVisualizationBoundary);
-    jMenuItemVisualizationBoundary.setText("BoundaryVisualizer");
+    jMenuItemVisualizationBoundary.setText(Messages.getInstance().getString(
+      "GUIChooser_BoundaryVisualizer_Text"));
     // jMenuItemVisualizationBoundary.setMnemonic('B');
     jMenuItemVisualizationBoundary.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_B, KeyEvent.CTRL_MASK));
@@ -677,10 +735,12 @@ public class GUIChooser extends JFrame {
       public void actionPerformed(ActionEvent e) {
         if (m_BoundaryVisualizerFrame == null) {
           jMenuItemVisualizationBoundary.setEnabled(false);
-          m_BoundaryVisualizerFrame = new JFrame("BoundaryVisualizer");
+          m_BoundaryVisualizerFrame = new JFrame(Messages.getInstance()
+            .getString("GUIChooser_BoundaryVisualizer_JFrame_Text"));
           m_BoundaryVisualizerFrame.setIconImage(m_Icon);
           m_BoundaryVisualizerFrame.getContentPane().setLayout(
             new BorderLayout());
+
           final BoundaryVisualizer bv = new BoundaryVisualizer();
           m_BoundaryVisualizerFrame.getContentPane().add(bv,
             BorderLayout.CENTER);
@@ -706,7 +766,8 @@ public class GUIChooser extends JFrame {
     });
 
     // Extensions
-    JMenu jMenuExtensions = new JMenu("Extensions");
+    JMenu jMenuExtensions = new JMenu(Messages.getInstance().getString(
+      "GUIChooser_Extensions_Text"));
     jMenuExtensions.setMnemonic(java.awt.event.KeyEvent.VK_E);
     m_jMenuBar.add(jMenuExtensions);
     jMenuExtensions.setVisible(false);
@@ -774,62 +835,15 @@ public class GUIChooser extends JFrame {
     // Tools
     m_jMenuTools = new JMenu();
     m_jMenuBar.add(m_jMenuTools);
-    m_jMenuTools.setText("Tools");
+    m_jMenuTools.setText(Messages.getInstance().getString(
+      "GUIChooser_Tools_Text"));
     m_jMenuTools.setMnemonic('T');
-
-    // Package Manager
-    final JMenuItem jMenuItemToolsPackageManager = new JMenuItem();
-    m_jMenuTools.add(jMenuItemToolsPackageManager);
-    final String offline = (WekaPackageManager.m_offline ? " (offline)" : "");
-    jMenuItemToolsPackageManager.setText("Package manager" + offline);
-    jMenuItemToolsPackageManager.setAccelerator(KeyStroke.getKeyStroke(
-      KeyEvent.VK_U, KeyEvent.CTRL_MASK));
-    jMenuItemToolsPackageManager.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        if (m_PackageManagerFrame == null) {
-          jMenuItemToolsPackageManager.setEnabled(false);
-          Thread temp = new Thread() {
-            @Override
-            public void run() {
-              final weka.gui.PackageManager pm;
-              pm = new weka.gui.PackageManager();
-              if (!WekaPackageManager.m_noPackageMetaDataAvailable) {
-                m_PackageManagerFrame = new JFrame("Package Manager" + offline);
-                m_PackageManagerFrame.setIconImage(m_Icon);
-                m_PackageManagerFrame.getContentPane().setLayout(
-                  new BorderLayout());
-                m_PackageManagerFrame.getContentPane().add(pm,
-                  BorderLayout.CENTER);
-                m_PackageManagerFrame.addWindowListener(new WindowAdapter() {
-                  @Override
-                  public void windowClosing(WindowEvent w) {
-                    m_PackageManagerFrame.dispose();
-                    m_PackageManagerFrame = null;
-                    jMenuItemToolsPackageManager.setEnabled(true);
-                    checkExit();
-                  }
-                });
-                Dimension screenSize = m_PackageManagerFrame.getToolkit()
-                  .getScreenSize();
-                int width = screenSize.width * 8 / 10;
-                int height = screenSize.height * 8 / 10;
-                m_PackageManagerFrame.setBounds(width / 8, height / 8, width,
-                  height);
-                m_PackageManagerFrame.setVisible(true);
-                pm.setInitialSplitPaneDividerLocation();
-              }
-            }
-          };
-          temp.start();
-        }
-      }
-    });
 
     // Tools/ArffViewer
     JMenuItem jMenuItemToolsArffViewer = new JMenuItem();
     m_jMenuTools.add(jMenuItemToolsArffViewer);
-    jMenuItemToolsArffViewer.setText("ArffViewer");
+    jMenuItemToolsArffViewer.setText(Messages.getInstance().getString(
+      "GUIChooser_ArffViewer_Text"));
     // jMenuItemToolsArffViewer.setMnemonic('A');
     jMenuItemToolsArffViewer.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_A, KeyEvent.CTRL_MASK));
@@ -853,7 +867,8 @@ public class GUIChooser extends JFrame {
     // Tools/SqlViewer
     final JMenuItem jMenuItemToolsSql = new JMenuItem();
     m_jMenuTools.add(jMenuItemToolsSql);
-    jMenuItemToolsSql.setText("SqlViewer");
+    jMenuItemToolsSql.setText(Messages.getInstance().getString(
+      "GUIChooser_SqlViewer_Text"));
     // jMenuItemToolsSql.setMnemonic('S');
     jMenuItemToolsSql.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
       KeyEvent.CTRL_MASK));
@@ -864,7 +879,8 @@ public class GUIChooser extends JFrame {
         if (m_SqlViewerFrame == null) {
           jMenuItemToolsSql.setEnabled(false);
           final SqlViewer sql = new SqlViewer(null);
-          m_SqlViewerFrame = new JFrame("SqlViewer");
+          m_SqlViewerFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_SqlViewer_JFrame_Text"));
           m_SqlViewerFrame.setIconImage(m_Icon);
           m_SqlViewerFrame.getContentPane().setLayout(new BorderLayout());
           m_SqlViewerFrame.getContentPane().add(sql, BorderLayout.CENTER);
@@ -887,7 +903,8 @@ public class GUIChooser extends JFrame {
     // Tools/Bayes net editor
     final JMenuItem jMenuItemBayesNet = new JMenuItem();
     m_jMenuTools.add(jMenuItemBayesNet);
-    jMenuItemBayesNet.setText("Bayes net editor");
+    jMenuItemBayesNet.setText(Messages.getInstance().getString(
+      "GUIChooser_BayesNetEditor_Text"));
     jMenuItemBayesNet.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
       KeyEvent.CTRL_MASK));
     jMenuItemBayesNet.addActionListener(new ActionListener() {
@@ -897,7 +914,8 @@ public class GUIChooser extends JFrame {
           jMenuItemBayesNet.setEnabled(false);
           final GUI bayesNetGUI = new GUI();
           JMenuBar bayesBar = bayesNetGUI.getMenuBar();
-          m_BayesNetGUIFrame = new JFrame("Bayes Network Editor");
+          m_BayesNetGUIFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_BayesNetworkEditor_JFrame_Text"));
           m_BayesNetGUIFrame.setIconImage(m_Icon);
           m_BayesNetGUIFrame.setJMenuBar(bayesBar);
           m_BayesNetGUIFrame.getContentPane().add(bayesNetGUI,
@@ -917,91 +935,26 @@ public class GUIChooser extends JFrame {
       }
     });
 
-    // Tools/Groovy console
-    if (Groovy.isPresent()) {
-      final JMenuItem jMenuItemGroovyConsole = new JMenuItem();
-      m_jMenuTools.add(jMenuItemGroovyConsole);
-      jMenuItemGroovyConsole.setText("Groovy console");
-      jMenuItemGroovyConsole.setAccelerator(KeyStroke.getKeyStroke(
-        KeyEvent.VK_G, KeyEvent.CTRL_MASK));
-      jMenuItemGroovyConsole.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          if (m_BayesNetGUIFrame == null) {
-            jMenuItemGroovyConsole.setEnabled(false);
-            final GroovyPanel groovyPanel = new GroovyPanel();
-            m_GroovyConsoleFrame = new JFrame(groovyPanel.getPlainTitle());
-            m_GroovyConsoleFrame.setIconImage(m_Icon);
-            m_GroovyConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            m_GroovyConsoleFrame.setJMenuBar(groovyPanel.getMenuBar());
-            m_GroovyConsoleFrame.getContentPane().add(groovyPanel,
-              BorderLayout.CENTER);
-            m_GroovyConsoleFrame.addWindowListener(new WindowAdapter() {
-              @Override
-              public void windowClosed(WindowEvent w) {
-                m_GroovyConsoleFrame = null;
-                jMenuItemGroovyConsole.setEnabled(true);
-                checkExit();
-              }
-            });
-            m_GroovyConsoleFrame.setSize(800, 600);
-            m_GroovyConsoleFrame.setVisible(true);
-          }
-        }
-      });
-    }
-
-    // Tools/Jython console
-    if (Jython.isPresent()) {
-      final JMenuItem jMenuItemJythonConsole = new JMenuItem();
-      m_jMenuTools.add(jMenuItemJythonConsole);
-      jMenuItemJythonConsole.setText("Jython console");
-      jMenuItemJythonConsole.setAccelerator(KeyStroke.getKeyStroke(
-        KeyEvent.VK_J, KeyEvent.CTRL_MASK));
-      jMenuItemJythonConsole.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-          if (m_BayesNetGUIFrame == null) {
-            jMenuItemJythonConsole.setEnabled(false);
-            final JythonPanel jythonPanel = new JythonPanel();
-            m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
-            m_JythonConsoleFrame.setIconImage(m_Icon);
-            m_JythonConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            m_JythonConsoleFrame.setJMenuBar(jythonPanel.getMenuBar());
-            m_JythonConsoleFrame.getContentPane().add(jythonPanel,
-              BorderLayout.CENTER);
-            m_JythonConsoleFrame.addWindowListener(new WindowAdapter() {
-              @Override
-              public void windowClosed(WindowEvent w) {
-                m_JythonConsoleFrame = null;
-                jMenuItemJythonConsole.setEnabled(true);
-                checkExit();
-              }
-            });
-            m_JythonConsoleFrame.setSize(800, 600);
-            m_JythonConsoleFrame.setVisible(true);
-          }
-        }
-      });
-    }
-
     // Help
     m_jMenuHelp = new JMenu();
     m_jMenuBar.add(m_jMenuHelp);
-    m_jMenuHelp.setText("Help");
+    m_jMenuHelp.setText(Messages.getInstance()
+      .getString("GUIChooser_Help_Text"));
     m_jMenuHelp.setMnemonic('H');
 
     // Help/Homepage
     JMenuItem jMenuItemHelpHomepage = new JMenuItem();
     m_jMenuHelp.add(jMenuItemHelpHomepage);
-    jMenuItemHelpHomepage.setText("Weka homepage");
+    jMenuItemHelpHomepage.setText(Messages.getInstance().getString(
+      "GUIChooser_WekaHomepage_Text"));
     // jMenuItemHelpHomepage.setMnemonic('H');
     jMenuItemHelpHomepage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H,
       KeyEvent.CTRL_MASK));
     jMenuItemHelpHomepage.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("http://www.cs.waikato.ac.nz/~ml/weka/");
+        BrowserHelper.openURL(Messages.getInstance().getString(
+          "GUIChooser_WekaHomepage_URL_Text"));
       }
     });
 
@@ -1010,7 +963,8 @@ public class GUIChooser extends JFrame {
     // Help/WekaWiki
     JMenuItem jMenuItemHelpWekaWiki = new JMenuItem();
     m_jMenuHelp.add(jMenuItemHelpWekaWiki);
-    jMenuItemHelpWekaWiki.setText("HOWTOs, code snippets, etc.");
+    jMenuItemHelpWekaWiki.setText(Messages.getInstance().getString(
+      "GUIChooser_WekaHOWTO_Text"));
     // jMenuItemHelpWekaWiki.setMnemonic('W');
     jMenuItemHelpWekaWiki.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
       KeyEvent.CTRL_MASK));
@@ -1018,14 +972,16 @@ public class GUIChooser extends JFrame {
     jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("http://weka.wikispaces.com/");
+        BrowserHelper.openURL(Messages.getInstance().getString(
+          "GUIChooser_WekaWiki_URL_Text"));
       }
     });
 
     // Help/Sourceforge
     JMenuItem jMenuItemHelpSourceforge = new JMenuItem();
     m_jMenuHelp.add(jMenuItemHelpSourceforge);
-    jMenuItemHelpSourceforge.setText("Weka on Sourceforge");
+    jMenuItemHelpSourceforge.setText(Messages.getInstance().getString(
+      "GUIChooser_WekaOnSourceforge_Text"));
     // jMenuItemHelpSourceforge.setMnemonic('F');
     jMenuItemHelpSourceforge.setAccelerator(KeyStroke.getKeyStroke(
       KeyEvent.VK_F, KeyEvent.CTRL_MASK));
@@ -1033,14 +989,16 @@ public class GUIChooser extends JFrame {
     jMenuItemHelpSourceforge.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("http://sourceforge.net/projects/weka/");
+        BrowserHelper.openURL(Messages.getInstance().getString(
+          "GUIChooser_WekaOnSourceforge_URL_Text"));
       }
     });
 
     // Help/SystemInfo
     final JMenuItem jMenuItemHelpSysInfo = new JMenuItem();
     m_jMenuHelp.add(jMenuItemHelpSysInfo);
-    jMenuItemHelpSysInfo.setText("SystemInfo");
+    jMenuItemHelpSysInfo.setText(Messages.getInstance().getString(
+      "GUIChooser_SystemInfo_Text"));
     // jMenuItemHelpSysInfo.setMnemonic('S');
     jMenuItemHelpSysInfo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
       KeyEvent.CTRL_MASK));
@@ -1050,16 +1008,17 @@ public class GUIChooser extends JFrame {
       public void actionPerformed(ActionEvent e) {
         if (m_SystemInfoFrame == null) {
           jMenuItemHelpSysInfo.setEnabled(false);
-          m_SystemInfoFrame = new JFrame("SystemInfo");
+          m_SystemInfoFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_SystemInfo_JFrame_Text"));
           m_SystemInfoFrame.setIconImage(m_Icon);
           m_SystemInfoFrame.getContentPane().setLayout(new BorderLayout());
 
           // get info
-          Hashtable<String, String> info = new SystemInfo().getSystemInfo();
+          Hashtable info = new SystemInfo().getSystemInfo();
 
           // sort names
-          Vector<String> names = new Vector<String>();
-          Enumeration<String> enm = info.keys();
+          Vector names = new Vector();
+          Enumeration enm = info.keys();
           while (enm.hasMoreElements()) {
             names.add(enm.nextElement());
           }
@@ -1071,7 +1030,12 @@ public class GUIChooser extends JFrame {
             data[i][0] = names.get(i).toString();
             data[i][1] = info.get(data[i][0]).toString();
           }
-          String[] titles = new String[] { "Key", "Value" };
+
+          String[] titles = new String[] {
+            Messages.getInstance().getString(
+              "GUIChooser_SystemInfo_TitleKey_Text"),
+            Messages.getInstance().getString(
+              "GUIChooser_SystemInfo_TitleValue_Text") };
           JTable table = new JTable(data, titles);
 
           m_SystemInfoFrame.getContentPane().add(new JScrollPane(table),
@@ -1105,8 +1069,11 @@ public class GUIChooser extends JFrame {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (m_ExperimenterFrame == null) {
+          System.out.println("CALLED ExperimentEnvironment");
+
           m_ExperimenterBut.setEnabled(false);
-          m_ExperimenterFrame = new JFrame("Weka Experiment Environment");
+          m_ExperimenterFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_WekaExperimentEnvironment_JFrame_Text"));
           m_ExperimenterFrame.setIconImage(m_Icon);
           m_ExperimenterFrame.getContentPane().setLayout(new BorderLayout());
           m_ExperimenterFrame.getContentPane().add(new Experimenter(false),
@@ -1135,20 +1102,19 @@ public class GUIChooser extends JFrame {
           m_KnowledgeFlowBut.setEnabled(false);
           if (m_pendingKnowledgeFlowLoad != null
             && m_pendingKnowledgeFlowLoad.length() > 0) {
-            KnowledgeFlowApp.getSingleton().loadLayout(
-              new File(m_pendingKnowledgeFlowLoad), true);
+            KnowledgeFlowApp.getSingleton().loadInitialLayout(
+              m_pendingKnowledgeFlowLoad);
             m_pendingKnowledgeFlowLoad = null;
           }
-          m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
+          m_KnowledgeFlowFrame = new JFrame(Messages.getInstance().getString(
+            "GUIChooser_WekaKnowledgeFlowEnvironment_JFrame_Text"));
           m_KnowledgeFlowFrame.setIconImage(m_Icon);
           m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
           m_KnowledgeFlowFrame.getContentPane().add(kna, BorderLayout.CENTER);
           m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent w) {
-              kna.closeAllTabs();
-              kna.clearLayout(); // add a single "Untitled" tab ready for next
-                                 // time
+              kna.clearLayout();
               m_KnowledgeFlowFrame.dispose();
               m_KnowledgeFlowFrame = null;
               m_KnowledgeFlowBut.setEnabled(true);
@@ -1178,7 +1144,8 @@ public class GUIChooser extends JFrame {
             m_SimpleCLI = new SimpleCLI();
             m_SimpleCLI.setIconImage(m_Icon);
           } catch (Exception ex) {
-            throw new Error("Couldn't start SimpleCLI!");
+            throw new Error(Messages.getInstance().getString(
+              "GUIChooser_UnableToStartSimpleCLI_Error_Text"));
           }
           m_SimpleCLI.addWindowListener(new WindowAdapter() {
             @Override
@@ -1223,34 +1190,6 @@ public class GUIChooser extends JFrame {
       }
     });
     pack();
-
-    if (!Utils.getDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager")) {
-      Thread tipThread = new Thread() {
-        @Override
-        public void run() {
-          JCheckBox dontShow = new JCheckBox("Do not show this message again");
-          Object[] stuff = new Object[2];
-          stuff[0] = "Weka has a package manager that you\n"
-            + "can use to install many learning schemes and tools.\nThe package manager can be "
-            + "found under the \"Tools\" menu.\n";
-          stuff[1] = dontShow;
-          // Display the tip on finding/using the package manager
-          JOptionPane.showMessageDialog(GUIChooser.this, stuff,
-            "Weka GUIChooser", JOptionPane.OK_OPTION);
-
-          if (dontShow.isSelected()) {
-            try {
-              Utils
-                .setDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager");
-            } catch (Exception ex) {
-              // quietly ignore
-            }
-          }
-        }
-      };
-      tipThread.setPriority(Thread.MIN_PRIORITY);
-      tipThread.start();
-    }
   }
 
   public void showKnowledgeFlow(String fileToLoad) {
@@ -1259,7 +1198,7 @@ public class GUIChooser extends JFrame {
       m_pendingKnowledgeFlowLoad = fileToLoad;
     } else {
       if (fileToLoad != null) {
-        KnowledgeFlowApp.getSingleton().loadLayout(new File(fileToLoad), true);
+        KnowledgeFlowApp.getSingleton().loadInitialLayout(fileToLoad);
       }
     }
   }
@@ -1491,9 +1430,13 @@ public class GUIChooser extends JFrame {
   protected void createTitle(String title) {
     String newTitle;
 
-    newTitle = "Weka " + new Version();
+    newTitle = Messages.getInstance().getString(
+      "GUIChooser_CreateTitle_Text_Front")
+      + new Version();
     if (title.length() != 0) {
-      newTitle += " - " + title;
+      newTitle += Messages.getInstance().getString(
+        "GUIChooser_CreateTitle_Text_End")
+        + title;
     }
 
     setTitle(newTitle);
@@ -1531,9 +1474,8 @@ public class GUIChooser extends JFrame {
       && (m_KnowledgeFlowFrame == null)
       && (m_SimpleCLI == null)
       // tools
-      && (m_ArffViewers.size() == 0) && (m_SqlViewerFrame == null)
-      && (m_GroovyConsoleFrame == null)
-      && (m_JythonConsoleFrame == null)
+      && (m_ArffViewers.size() == 0)
+      && (m_SqlViewerFrame == null)
       && (m_EnsembleLibraryFrame == null)
       // visualization
       && (m_Plots.size() == 0) && (m_ROCs.size() == 0)
@@ -1561,14 +1503,15 @@ public class GUIChooser extends JFrame {
    */
   public static void main(String[] args) {
 
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("GUIChooser_Main_LoggingStarted_Text"));
     LookAndFeel.setLookAndFeel();
 
     try {
 
       // uncomment to disable the memory management:
       // m_Memory.setEnabled(false);
+
       // m_chooser = new GUIChooser();
       GUIChooser.createSingleton();
       m_chooser.setVisible(true);
@@ -1578,13 +1521,14 @@ public class GUIChooser extends JFrame {
       }
 
       Thread memMonitor = new Thread() {
-        @SuppressWarnings("static-access")
         @Override
         public void run() {
           while (true) {
             // try {
-            // System.out.println("before sleeping");
-            // this.sleep(10);
+            // //System.out.println("before sleeping");
+            // this.sleep(4000);
+
+            System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -1607,7 +1551,7 @@ public class GUIChooser extends JFrame {
               }
               if (m_chooser.m_ArffViewers.size() > 0) {
                 for (int i = 0; i < m_chooser.m_ArffViewers.size(); i++) {
-                  ArffViewer av = m_chooser.m_ArffViewers.get(i);
+                  ArffViewer av = (ArffViewer) m_chooser.m_ArffViewers.get(i);
                   av.dispose();
                 }
                 m_chooser.m_ArffViewers.clear();
@@ -1618,12 +1562,15 @@ public class GUIChooser extends JFrame {
               // display error
               m_chooser.m_LogWindow.setVisible(true);
               m_chooser.m_LogWindow.toFront();
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "GUIChooser_Main_Error_Text_Front"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nexiting...");
+              System.err.println(Messages.getInstance().getString(
+                "GUIChooser_Main_Error_Text_End"));
               System.exit(-1);
             }
-            // } catch (InterruptedException ex) {
+            // }
+            // catch(InterruptedException ex) {
             // ex.printStackTrace();
             // }
           }

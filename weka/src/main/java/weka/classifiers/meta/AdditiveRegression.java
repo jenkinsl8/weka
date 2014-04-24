@@ -1,48 +1,47 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AdditiveRegression.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.IteratedSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.UnassignedClassException;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -98,7 +97,7 @@ import weka.core.UnassignedClassException;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.25 $
  */
 public class AdditiveRegression 
   extends IteratedSingleClassifierEnhancer 
@@ -194,17 +193,19 @@ public class AdditiveRegression
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(1);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
 	      "\tSpecify shrinkage rate. "
 	      +"(default = 1.0, ie. no shrinkage)\n", 
 	      "S", 1, "-S"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -252,8 +253,6 @@ public class AdditiveRegression
     }
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -263,13 +262,20 @@ public class AdditiveRegression
    */
   public String [] getOptions() {
     
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
+    int current = 0;
 
-    options.add("-S"); options.add("" + getShrinkage());
+    options[current++] = "-S"; options[current++] = "" + getShrinkage();
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -402,9 +408,6 @@ public class AdditiveRegression
     
     for (int i = 0; i < m_NumIterationsPerformed; i++) {
       double toAdd = m_Classifiers[i].classifyInstance(inst);
-      if (Utils.isMissingValue(toAdd)) {
-        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
-      }
       toAdd *= getShrinkage();
       prediction += toAdd;
     }
@@ -429,9 +432,6 @@ public class AdditiveRegression
 
     for (int i = 0; i < newInst.numInstances(); i++) {
       pred = c.classifyInstance(newInst.instance(i));
-      if (Utils.isMissingValue(pred)) {
-        throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
-      }
       if (useShrinkage) {
 	pred *= getShrinkage();
       }
@@ -446,8 +446,8 @@ public class AdditiveRegression
    * Returns an enumeration of the additional measure names
    * @return an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>(1);
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(1);
     newVector.addElement("measureNumIterations");
     return newVector.elements();
   }
@@ -521,7 +521,7 @@ public class AdditiveRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.25 $");
   }
 
   /**

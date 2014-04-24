@@ -1,50 +1,48 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LogitBoost.java
- *    Copyright (C) 1999-2014 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999, 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.UnassignedClassException;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -134,8 +132,8 @@ public class LogitBoost
   implements Sourcable, WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -1105660358715833753L;
-  
+  private static final long serialVersionUID = 8627452775249625582L;
+
   /** Array for storing the generated base classifiers. 
    Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
   protected Classifier [][] m_Classifiers;
@@ -156,7 +154,7 @@ public class LogitBoost
   protected int m_WeightThreshold = 100;
 
   /** A threshold for responses (Friedman suggests between 2 and 4) */
-  protected static final double DEFAULT_Z_MAX = 3;
+  protected static final double Z_MAX = 3;
 
   /** Dummy dataset with a numeric class */
   protected Instances m_NumericClassData;
@@ -182,9 +180,6 @@ public class LogitBoost
     
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
-  
-  /** The Z max value to use */
-  protected double m_zMax = DEFAULT_Z_MAX;
     
   /**
    * Returns a string describing classifier
@@ -287,9 +282,9 @@ public class LogitBoost
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(6);
+    Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
 	      "\tUse resampling instead of reweighting for boosting.",
@@ -314,11 +309,11 @@ public class LogitBoost
 	      "\tShrinkage parameter.\n"
 	      +"\t(default 1)",
 	      "H", 1, "-H <num>"));
-    newVector.addElement(new Option("\tZ max threshold for responses." +
-    		"\n\t(default 3)", "Z", 1, "-Z <num>"));    
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -421,11 +416,6 @@ public class LogitBoost
     } else {
       setShrinkage(1.0);
     }
-    
-    String zString = Utils.getOption('Z', options);
-    if (zString.length() > 0) {
-      setZMax(Double.parseDouble(zString));
-    }
 
     setUseResampling(Utils.getFlag('Q', options));
     if (m_UseResampling && (thresholdString.length() != 0)) {
@@ -434,8 +424,6 @@ public class LogitBoost
     }
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -445,51 +433,28 @@ public class LogitBoost
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-        
-    if (getUseResampling()) {
-        options.add("-Q");
-    } else {
-        options.add("-P"); 
-        options.add("" + getWeightThreshold());
-    }
-    options.add("-F"); options.add("" + getNumFolds());
-    options.add("-R"); options.add("" + getNumRuns());
-    options.add("-L"); options.add("" + getLikelihoodThreshold());
-    options.add("-H"); options.add("" + getShrinkage());
-    options.add("-Z"); options.add("" + getZMax());
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 10];
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
-  }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String ZMaxTipText() {
-    return "Z max threshold for responses";
-  }
-  
-  /**
-   * Set the Z max threshold on the responses
-   * 
-   * @param zMax the threshold to use
-   */
-  public void setZMax(double zMax) {
-    m_zMax = zMax;
-  }
-  
-  /**
-   * Get the Z max threshold on the responses
-   * 
-   * @return the threshold to use
-   */
-  public double getZMax() {
-    return m_zMax;
+    int current = 0;
+    if (getUseResampling()) {
+      options[current++] = "-Q";
+    } else {
+      options[current++] = "-P"; 
+      options[current++] = "" + getWeightThreshold();
+    }
+    options[current++] = "-F"; options[current++] = "" + getNumFolds();
+    options[current++] = "-R"; options[current++] = "" + getNumRuns();
+    options[current++] = "-L"; options[current++] = "" + getLikelihoodThreshold();
+    options[current++] = "-H"; options[current++] = "" + getShrinkage();
+
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
   
   /**
@@ -738,7 +703,7 @@ public class LogitBoost
     }
     m_Classifiers = new Classifier [m_NumClasses][];
     for (int j = 0; j < m_NumClasses; j++) {
-      m_Classifiers[j] = AbstractClassifier.makeCopies(m_Classifier,
+      m_Classifiers[j] = Classifier.makeCopies(m_Classifier,
 					       getNumIterations());
     }
 
@@ -770,7 +735,8 @@ public class LogitBoost
 	  // Make class numeric
 	  Instances trainN = new Instances(train);
 	  trainN.setClassIndex(-1);
-	  trainN.replaceAttributeAt(new Attribute("'pseudo class'"), classIndex);
+	  trainN.deleteAttributeAt(classIndex);
+	  trainN.insertAttributeAt(new Attribute("'pseudo class'"), classIndex);
 	  trainN.setClassIndex(classIndex);
 	  m_NumericClassData = new Instances(trainN, 0);
 	  
@@ -929,13 +895,13 @@ public class LogitBoost
 	double z, actual = trainYs[i][j];
 	if (actual == 1 - m_Offset) {
 	  z = 1.0 / p;
-	  if (z > m_zMax) { // threshold
-	    z = m_zMax;
+	  if (z > Z_MAX) { // threshold
+	    z = Z_MAX;
 	  }
 	} else {
 	  z = -1.0 / (1.0 - p);
-	  if (z < -m_zMax) { // threshold
-	    z = -m_zMax;
+	  if (z < -Z_MAX) { // threshold
+	    z = -Z_MAX;
 	  }
 	}
 	double w = (actual - p) / z;
@@ -979,12 +945,8 @@ public class LogitBoost
       double [] pred = new double [m_NumClasses];
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-        double tempPred = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
+	pred[j] = m_Shrinkage * m_Classifiers[j][m_NumGenerated]
 	  .classifyInstance(data.instance(i));
-        if (Utils.isMissingValue(tempPred)) {
-          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
-        }
-	pred[j] = tempPred;
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;
@@ -1065,11 +1027,7 @@ public class LogitBoost
     for (int i = 0; i < m_NumGenerated; i++) {
       double predSum = 0;
       for (int j = 0; j < m_NumClasses; j++) {
-	double tempPred = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
-        if (Utils.isMissingValue(tempPred)) {
-          throw new UnassignedClassException("LogitBoost: base learner predicted missing value.");
-        }
-        pred[j] = tempPred;
+	pred[j] = m_Shrinkage * m_Classifiers[j][i].classifyInstance(instance);
 	predSum += pred[j];
       }
       predSum /= m_NumClasses;

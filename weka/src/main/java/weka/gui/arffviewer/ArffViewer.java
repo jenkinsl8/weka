@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * ArffViewer.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -64,7 +65,7 @@ public class ArffViewer extends JFrame implements WindowListener {
    * initializes the object
    */
   public ArffViewer() {
-    super("ARFF-Viewer");
+    super(Messages.getInstance().getString("ArffViewer_ArffViewer_Text"));
     createFrame();
   }
 
@@ -223,9 +224,19 @@ public class ArffViewer extends JFrame implements WindowListener {
     }
 
     if (getConfirmExit()) {
-      button = ComponentHelper.showMessageBox(this, "Quit - " + getTitle(),
-        "Do you really want to quit?", JOptionPane.YES_NO_OPTION,
-        JOptionPane.QUESTION_MESSAGE);
+      button = ComponentHelper
+        .showMessageBox(
+          this,
+          Messages
+            .getInstance()
+            .getString(
+              "ArffViewer_WindowClosing_ComponentHelperShowMessageBox_Text_First")
+            + getTitle(),
+          Messages
+            .getInstance()
+            .getString(
+              "ArffViewer_WindowClosing_ComponentHelperShowMessageBox_Text_Second"),
+          JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
       if (button == JOptionPane.YES_OPTION) {
         dispose();
       }
@@ -292,8 +303,8 @@ public class ArffViewer extends JFrame implements WindowListener {
    * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("ArffViewer_Main_Logger_Text"));
     LookAndFeel.setLookAndFeel();
 
     try {
@@ -323,7 +334,9 @@ public class ArffViewer extends JFrame implements WindowListener {
             }
 
             // System.out.println("before sleeping");
-            // Thread.sleep(10);
+            // Thread.sleep(4000);
+            //
+            // System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -331,10 +344,15 @@ public class ArffViewer extends JFrame implements WindowListener {
               m_Viewer = null;
               System.gc();
 
+              // stop threads
+              m_Memory.stopThreads();
+
               // display error
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "ArffViewer_Main_Error_DisplayedMessage_Text"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nrestarting...");
+              System.err.println(Messages.getInstance().getString(
+                "ArffViewer_Main_Error_Restarting_Text"));
 
               // restart GUI
               System.gc();
@@ -344,7 +362,8 @@ public class ArffViewer extends JFrame implements WindowListener {
               // Note: no re-loading of datasets, otherwise we could end up
               // in an endless loop!
             }
-            // } catch (InterruptedException ex) {
+            // }
+            // catch(InterruptedException ex) {
             // ex.printStackTrace();
             // }
           }

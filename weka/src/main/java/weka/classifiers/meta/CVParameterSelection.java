@@ -1,36 +1,32 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    CVParameterSelection.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Drawable;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -39,10 +35,17 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -149,7 +152,7 @@ public class CVParameterSelection
 
     /**  True if the parameter should be rounded to an integer */
     private boolean m_RoundParam;
-
+    
     /**
      * Constructs a CVParameter.
      * 
@@ -261,7 +264,7 @@ public class CVParameterSelection
   protected double m_BestPerformance;
 
   /** The set of parameters to cross-validate over */
-  protected Vector<CVParameter> m_CVParams = new Vector<CVParameter>();
+  protected FastVector m_CVParams = new FastVector();
 
   /** The number of attributes in the data */
   protected int m_NumAttributes;
@@ -295,8 +298,9 @@ public class CVParameterSelection
       }
       boolean isInt = ((paramValue - (int)paramValue) == 0);
       
+      
       if (cvParam.m_AddAtEnd) {
-        options[--end] = "" + ((cvParam.m_RoundParam || isInt) ? 
+	options[--end] = "" + ((cvParam.m_RoundParam || isInt) ? 
             Utils.doubleToString(paramValue,4) : cvParam.m_ParamValue);
 	//Utils.doubleToString(paramValue,4);
 	options[--end] = "-" + cvParam.m_ParamChar;
@@ -424,9 +428,9 @@ public class CVParameterSelection
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation (default 10).",
@@ -443,8 +447,11 @@ public class CVParameterSelection
 	      + "\tsimultaneously.",
 	      "P", 1, "-P <classifier parameter>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
     return newVector.elements();
   }
 
@@ -506,7 +513,7 @@ public class CVParameterSelection
     }
 
     String cvParam;
-    m_CVParams = new Vector<CVParameter>();
+    m_CVParams = new FastVector();
     do {
       cvParam = Utils.getOption('P', options);
       if (cvParam.length() != 0) {
@@ -515,8 +522,6 @@ public class CVParameterSelection
     } while (cvParam.length() != 0);
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -526,25 +531,32 @@ public class CVParameterSelection
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-    
+    String[] superOptions;
+
     if (m_InitOptions != null) {
       try {
-	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
-	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
+	m_Classifier.setOptions((String[])m_InitOptions.clone());
+	superOptions = super.getOptions();
+	m_Classifier.setOptions((String[])m_BestClassifierOptions.clone());
       } catch (Exception e) {
 	throw new RuntimeException("CVParameterSelection: could not set options " +
 				   "in getOptions().");
       } 
+    } else {
+      superOptions = super.getOptions();
     }
-    for (int i = 0; i < m_CVParams.size(); i++) {
-      options.add("-P"); options.add("" + getCVParameter(i));
-    }
-    options.add("-X"); options.add("" + getNumFolds());
+    String [] options = new String [superOptions.length + m_CVParams.size() * 2 + 2];
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    int current = 0;
+    for (int i = 0; i < m_CVParams.size(); i++) {
+      options[current++] = "-P"; options[current++] = "" + getCVParameter(i);
+    }
+    options[current++] = "-X"; options[current++] = "" + getNumFolds();
+
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    return options;
   }
 
   /**
@@ -705,8 +717,8 @@ public class CVParameterSelection
    */
   public void setCVParameters(Object[] params) throws Exception {
       
-      Vector<CVParameter> backup = m_CVParams;
-      m_CVParams = new Vector<CVParameter>();
+      FastVector backup = m_CVParams;
+      m_CVParams = new FastVector();
       
       for(int i=0; i<params.length; i++) {
           try{

@@ -1,36 +1,36 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    AprioriItemSet.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
 import weka.core.ContingencyTables;
+import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
-import weka.core.WekaEnumeration;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -44,7 +44,7 @@ import weka.core.WekaEnumeration;
  * @version $Revision$
  */
 public class AprioriItemSet extends ItemSet implements Serializable,
-  RevisionHandler {
+    RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 7684467755712672058L;
@@ -66,7 +66,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return the confidence on the training data
    */
   public static double confidenceForRule(AprioriItemSet premise,
-    AprioriItemSet consequence) {
+      AprioriItemSet consequence) {
 
     return (double) consequence.m_counter / (double) premise.m_counter;
   }
@@ -82,11 +82,11 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return the lift on the training data
    */
   public double liftForRule(AprioriItemSet premise, AprioriItemSet consequence,
-    int consequenceCount) {
+      int consequenceCount) {
     double confidence = confidenceForRule(premise, consequence);
 
     return confidence
-      / ((double) consequenceCount / (double) m_totalTransactions);
+        / ((double) consequenceCount / (double) m_totalTransactions);
   }
 
   /**
@@ -102,11 +102,11 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return the leverage on the training data
    */
   public double leverageForRule(AprioriItemSet premise,
-    AprioriItemSet consequence, int premiseCount, int consequenceCount) {
+      AprioriItemSet consequence, int premiseCount, int consequenceCount) {
     double coverageForItemSet = (double) consequence.m_counter
-      / (double) m_totalTransactions;
+        / (double) m_totalTransactions;
     double expectedCoverageIfIndependent = ((double) premiseCount / (double) m_totalTransactions)
-      * ((double) consequenceCount / (double) m_totalTransactions);
+        * ((double) consequenceCount / (double) m_totalTransactions);
     double lev = coverageForItemSet - expectedCoverageIfIndependent;
     return lev;
   }
@@ -124,16 +124,17 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return the conviction on the training data
    */
   public double convictionForRule(AprioriItemSet premise,
-    AprioriItemSet consequence, int premiseCount, int consequenceCount) {
+      AprioriItemSet consequence, int premiseCount, int consequenceCount) {
     double num = (double) premiseCount
-      * (double) (m_totalTransactions - consequenceCount) / m_totalTransactions;
+        * (double) (m_totalTransactions - consequenceCount)
+        / m_totalTransactions;
     double denom = ((premiseCount - consequence.m_counter) + 1);
 
     if (num < 0 || denom < 0) {
       System.err.println("*** " + num + " " + denom);
       System.err.println("premis count: " + premiseCount
-        + " consequence count " + consequenceCount + " total trans "
-        + m_totalTransactions);
+          + " consequence count " + consequenceCount + " total trans "
+          + m_totalTransactions);
     }
     return num / denom;
   }
@@ -147,20 +148,16 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    *          generated
    * @return all the rules with minimum confidence for the given item set
    */
-  public ArrayList<Object>[] generateRules(double minConfidence,
-    ArrayList<Hashtable<ItemSet, Integer>> hashtables, int numItemsInSet) {
+  public FastVector[] generateRules(double minConfidence,
+      FastVector hashtables, int numItemsInSet) {
 
-    ArrayList<Object> premises = new ArrayList<Object>(), consequences = new ArrayList<Object>(), conf = new ArrayList<Object>();
-    // TODO
-    ArrayList<Object> lift = new ArrayList<Object>(), lev = new ArrayList<Object>(), conv = new ArrayList<Object>();
-    // TODO
-    @SuppressWarnings("unchecked")
-    ArrayList<Object>[] rules = new ArrayList[6], moreResults;
+    FastVector premises = new FastVector(), consequences = new FastVector(), conf = new FastVector();
+    FastVector[] rules = new FastVector[3], moreResults;
     AprioriItemSet premise, consequence;
-    Hashtable<ItemSet, Integer> hashtable = hashtables.get(numItemsInSet - 2);
+    Hashtable hashtable = (Hashtable) hashtables.elementAt(numItemsInSet - 2);
 
     // Generate all rules with one item in the consequence.
-    for (int i = 0; i < m_items.length; i++) {
+    for (int i = 0; i < m_items.length; i++)
       if (m_items[i] != -1) {
         premise = new AprioriItemSet(m_totalTransactions);
         consequence = new AprioriItemSet(m_totalTransactions);
@@ -168,59 +165,31 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         consequence.m_items = new int[m_items.length];
         consequence.m_counter = m_counter;
 
-        for (int j = 0; j < m_items.length; j++) {
+        for (int j = 0; j < m_items.length; j++)
           consequence.m_items[j] = -1;
-        }
         System.arraycopy(m_items, 0, premise.m_items, 0, m_items.length);
         premise.m_items[i] = -1;
 
         consequence.m_items[i] = m_items[i];
-        premise.m_counter = hashtable.get(premise).intValue();
-
-        Hashtable<ItemSet, Integer> hashtableForConsequence = hashtables.get(0);
-        int consequenceUnconditionedCounter = hashtableForConsequence.get(
-          consequence).intValue();
-
-        premises.add(premise);
-        consequences.add(consequence);
-        conf.add(new Double(confidenceForRule(premise, consequence)));
-
-        double tempLift = liftForRule(premise, consequence,
-          consequenceUnconditionedCounter);
-        double tempLev = leverageForRule(premise, consequence,
-          premise.m_counter, consequenceUnconditionedCounter);
-        double tempConv = convictionForRule(premise, consequence,
-          premise.m_counter, consequenceUnconditionedCounter);
-        lift.add(new Double(tempLift));
-        lev.add(new Double(tempLev));
-        conv.add(new Double(tempConv));
+        premise.m_counter = ((Integer) hashtable.get(premise)).intValue();
+        premises.addElement(premise);
+        consequences.addElement(consequence);
+        conf.addElement(new Double(confidenceForRule(premise, consequence)));
       }
-    }
     rules[0] = premises;
     rules[1] = consequences;
     rules[2] = conf;
-
-    rules[3] = lift;
-    rules[4] = lev;
-    rules[5] = conv;
-
     pruneRules(rules, minConfidence);
 
     // Generate all the other rules
     moreResults = moreComplexRules(rules, numItemsInSet, 1, minConfidence,
-      hashtables);
-    if (moreResults != null) {
+        hashtables);
+    if (moreResults != null)
       for (int i = 0; i < moreResults[0].size(); i++) {
-        rules[0].add(moreResults[0].get(i));
-        rules[1].add(moreResults[1].get(i));
-        rules[2].add(moreResults[2].get(i));
-
-        // TODO
-        rules[3].add(moreResults[3].get(i));
-        rules[4].add(moreResults[4].get(i));
-        rules[5].add(moreResults[5].get(i));
+        rules[0].addElement(moreResults[0].elementAt(i));
+        rules[1].addElement(moreResults[1].elementAt(i));
+        rules[2].addElement(moreResults[2].elementAt(i));
       }
-    }
     return rules;
   }
 
@@ -238,16 +207,14 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return all the rules with minimum metric for the given item set
    * @exception Exception if something goes wrong
    */
-  public final ArrayList<Object>[] generateRulesBruteForce(double minMetric,
-    int metricType, ArrayList<Hashtable<ItemSet, Integer>> hashtables,
-    int numItemsInSet, int numTransactions, double significanceLevel)
-    throws Exception {
+  public final FastVector[] generateRulesBruteForce(double minMetric,
+      int metricType, FastVector hashtables, int numItemsInSet,
+      int numTransactions, double significanceLevel) throws Exception {
 
-    ArrayList<Object> premises = new ArrayList<Object>(), consequences = new ArrayList<Object>(), conf = new ArrayList<Object>(), lift = new ArrayList<Object>(), lev = new ArrayList<Object>(), conv = new ArrayList<Object>();
-    @SuppressWarnings("unchecked")
-    ArrayList<Object>[] rules = new ArrayList[6];
+    FastVector premises = new FastVector(), consequences = new FastVector(), conf = new FastVector(), lift = new FastVector(), lev = new FastVector(), conv = new FastVector();
+    FastVector[] rules = new FastVector[6];
     AprioriItemSet premise, consequence;
-    Hashtable<ItemSet, Integer> hashtableForPremise, hashtableForConsequence;
+    Hashtable hashtableForPremise, hashtableForConsequence;
     int numItemsInPremise, help, max, consequenceUnconditionedCounter;
     double[][] contingencyTable = new double[2][2];
     double metric, chiSquared = 0;
@@ -259,15 +226,15 @@ public class AprioriItemSet extends ItemSet implements Serializable,
       numItemsInPremise = 0;
       help = j;
       while (help > 0) {
-        if (help % 2 == 1) {
+        if (help % 2 == 1)
           numItemsInPremise++;
-        }
         help /= 2;
       }
       if (numItemsInPremise < numItemsInSet) {
-        hashtableForPremise = hashtables.get(numItemsInPremise - 1);
-        hashtableForConsequence = hashtables.get(numItemsInSet
-          - numItemsInPremise - 1);
+        hashtableForPremise = (Hashtable) hashtables
+            .elementAt(numItemsInPremise - 1);
+        hashtableForConsequence = (Hashtable) hashtables
+            .elementAt(numItemsInSet - numItemsInPremise - 1);
         premise = new AprioriItemSet(m_totalTransactions);
         consequence = new AprioriItemSet(m_totalTransactions);
         premise.m_items = new int[m_items.length];
@@ -275,7 +242,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         consequence.m_items = new int[m_items.length];
         consequence.m_counter = m_counter;
         help = j;
-        for (int i = 0; i < m_items.length; i++) {
+        for (int i = 0; i < m_items.length; i++)
           if (m_items[i] != -1) {
             if (help % 2 == 1) {
               premise.m_items[i] = m_items[i];
@@ -289,17 +256,17 @@ public class AprioriItemSet extends ItemSet implements Serializable,
             premise.m_items[i] = -1;
             consequence.m_items[i] = -1;
           }
-        }
-        premise.m_counter = hashtableForPremise.get(premise).intValue();
-        consequenceUnconditionedCounter = hashtableForConsequence.get(
-          consequence).intValue();
+        premise.m_counter = ((Integer) hashtableForPremise.get(premise))
+            .intValue();
+        consequenceUnconditionedCounter = ((Integer) hashtableForConsequence
+            .get(consequence)).intValue();
 
         if (significanceLevel != -1) {
           contingencyTable[0][0] = (consequence.m_counter);
           contingencyTable[0][1] = (premise.m_counter - consequence.m_counter);
           contingencyTable[1][0] = (consequenceUnconditionedCounter - consequence.m_counter);
           contingencyTable[1][1] = (numTransactions - premise.m_counter
-            - consequenceUnconditionedCounter + consequence.m_counter);
+              - consequenceUnconditionedCounter + consequence.m_counter);
           chiSquared = ContingencyTables.chiSquared(contingencyTable, false);
         }
 
@@ -308,25 +275,25 @@ public class AprioriItemSet extends ItemSet implements Serializable,
           metric = confidenceForRule(premise, consequence);
 
           if ((!(metric < minMetric))
-            && (significanceLevel == -1 || !(chiSquared > significanceLevel))) {
-            premises.add(premise);
-            consequences.add(consequence);
-            conf.add(new Double(metric));
-            lift.add(new Double(liftForRule(premise, consequence,
-              consequenceUnconditionedCounter)));
-            lev.add(new Double(leverageForRule(premise, consequence,
-              premise.m_counter, consequenceUnconditionedCounter)));
-            conv.add(new Double(convictionForRule(premise, consequence,
-              premise.m_counter, consequenceUnconditionedCounter)));
+              && (significanceLevel == -1 || !(chiSquared > significanceLevel))) {
+            premises.addElement(premise);
+            consequences.addElement(consequence);
+            conf.addElement(new Double(metric));
+            lift.addElement(new Double(liftForRule(premise, consequence,
+                consequenceUnconditionedCounter)));
+            lev.addElement(new Double(leverageForRule(premise, consequence,
+                premise.m_counter, consequenceUnconditionedCounter)));
+            conv.addElement(new Double(convictionForRule(premise, consequence,
+                premise.m_counter, consequenceUnconditionedCounter)));
           }
         } else {
           double tempConf = confidenceForRule(premise, consequence);
           double tempLift = liftForRule(premise, consequence,
-            consequenceUnconditionedCounter);
+              consequenceUnconditionedCounter);
           double tempLev = leverageForRule(premise, consequence,
-            premise.m_counter, consequenceUnconditionedCounter);
+              premise.m_counter, consequenceUnconditionedCounter);
           double tempConv = convictionForRule(premise, consequence,
-            premise.m_counter, consequenceUnconditionedCounter);
+              premise.m_counter, consequenceUnconditionedCounter);
           switch (metricType) {
           case 1:
             metric = tempLift;
@@ -341,13 +308,13 @@ public class AprioriItemSet extends ItemSet implements Serializable,
             throw new Exception("ItemSet: Unknown metric type!");
           }
           if (!(metric < minMetric)
-            && (significanceLevel == -1 || !(chiSquared > significanceLevel))) {
-            premises.add(premise);
-            consequences.add(consequence);
-            conf.add(new Double(tempConf));
-            lift.add(new Double(tempLift));
-            lev.add(new Double(tempLev));
-            conv.add(new Double(tempConv));
+              && (significanceLevel == -1 || !(chiSquared > significanceLevel))) {
+            premises.addElement(premise);
+            consequences.addElement(consequence);
+            conf.addElement(new Double(tempConf));
+            lift.addElement(new Double(tempLift));
+            lev.addElement(new Double(tempLev));
+            conv.addElement(new Double(tempConv));
           }
         }
       }
@@ -374,13 +341,11 @@ public class AprioriItemSet extends ItemSet implements Serializable,
 
     result.m_items = new int[m_items.length];
 
-    for (int i = 0; i < m_items.length; i++) {
-      if (toSubtract.m_items[i] == -1) {
+    for (int i = 0; i < m_items.length; i++)
+      if (toSubtract.m_items[i] == -1)
         result.m_items[i] = m_items[i];
-      } else {
+      else
         result.m_items[i] = -1;
-      }
-    }
     result.m_counter = 0;
     return result;
   }
@@ -397,90 +362,45 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    *          item sets
    * @return all the rules having (k)-item sets as consequences
    */
-  @SuppressWarnings("unchecked")
-  private final ArrayList<Object>[] moreComplexRules(ArrayList<Object>[] rules,
-    int numItemsInSet, int numItemsInConsequence, double minConfidence,
-    ArrayList<Hashtable<ItemSet, Integer>> hashtables) {
+  private final FastVector[] moreComplexRules(FastVector[] rules,
+      int numItemsInSet, int numItemsInConsequence, double minConfidence,
+      FastVector hashtables) {
 
     AprioriItemSet newPremise;
-    ArrayList<Object>[] result, moreResults;
-    ArrayList<Object> newConsequences, newPremises = new ArrayList<Object>(), newConf = new ArrayList<Object>();
-    Hashtable<ItemSet, Integer> hashtable;
-
-    ArrayList<Object> newLift = null, newLev = null, newConv = null;
-    // if (rules.length > 3) {
-    newLift = new ArrayList<Object>();
-    newLev = new ArrayList<Object>();
-    newConv = new ArrayList<Object>();
-    // }
+    FastVector[] result, moreResults;
+    FastVector newConsequences, newPremises = new FastVector(), newConf = new FastVector();
+    Hashtable hashtable;
 
     if (numItemsInSet > numItemsInConsequence + 1) {
-      hashtable = hashtables.get(numItemsInSet - numItemsInConsequence - 2);
+      hashtable = (Hashtable) hashtables.elementAt(numItemsInSet
+          - numItemsInConsequence - 2);
       newConsequences = mergeAllItemSets(rules[1], numItemsInConsequence - 1,
-        m_totalTransactions);
-      int newNumInConsequence = numItemsInConsequence + 1;
-
-      Hashtable<ItemSet, Integer> hashtableForConsequence = hashtables
-        .get(newNumInConsequence - 1);
-
-      Enumeration<Object> enu = new WekaEnumeration<Object>(newConsequences);
+          m_totalTransactions);
+      Enumeration enu = newConsequences.elements();
       while (enu.hasMoreElements()) {
         AprioriItemSet current = (AprioriItemSet) enu.nextElement();
-        for (int m_item : current.m_items) {
-          if (m_item != -1) {
-          }
-        }
-
         current.m_counter = m_counter;
         newPremise = subtract(current);
-        newPremise.m_counter = hashtable.get(newPremise).intValue();
-        newPremises.add(newPremise);
-        newConf.add(new Double(confidenceForRule(newPremise, current)));
-
-        // if (rules.length > 3) {
-        int consequenceUnconditionedCounter = hashtableForConsequence.get(
-          current).intValue();
-
-        double tempLift = liftForRule(newPremise, current,
-          consequenceUnconditionedCounter);
-        double tempLev = leverageForRule(newPremise, current,
-          newPremise.m_counter, consequenceUnconditionedCounter);
-        double tempConv = convictionForRule(newPremise, current,
-          newPremise.m_counter, consequenceUnconditionedCounter);
-
-        newLift.add(new Double(tempLift));
-        newLev.add(new Double(tempLev));
-        newConv.add(new Double(tempConv));
-        // }
+        newPremise.m_counter = ((Integer) hashtable.get(newPremise)).intValue();
+        newPremises.addElement(newPremise);
+        newConf.addElement(new Double(confidenceForRule(newPremise, current)));
       }
-      result = new ArrayList[rules.length];
+      result = new FastVector[3];
       result[0] = newPremises;
       result[1] = newConsequences;
       result[2] = newConf;
-
-      // if (rules.length > 3) {
-      result[3] = newLift;
-      result[4] = newLev;
-      result[5] = newConv;
-      // }
       pruneRules(result, minConfidence);
       moreResults = moreComplexRules(result, numItemsInSet,
-        numItemsInConsequence + 1, minConfidence, hashtables);
-      if (moreResults != null) {
+          numItemsInConsequence + 1, minConfidence, hashtables);
+      if (moreResults != null)
         for (int i = 0; i < moreResults[0].size(); i++) {
-          result[0].add(moreResults[0].get(i));
-          result[1].add(moreResults[1].get(i));
-          result[2].add(moreResults[2].get(i));
-          //
-          result[3].add(moreResults[3].get(i));
-          result[4].add(moreResults[4].get(i));
-          result[5].add(moreResults[5].get(i));
+          result[0].addElement(moreResults[0].elementAt(i));
+          result[1].addElement(moreResults[1].elementAt(i));
+          result[2].addElement(moreResults[2].elementAt(i));
         }
-      }
       return result;
-    } else {
+    } else
       return null;
-    }
   }
 
   /**
@@ -504,25 +424,21 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
-  public static ArrayList<Object> singletons(Instances instances,
-    boolean treatZeroAsMissing) throws Exception {
+  public static FastVector singletons(Instances instances) throws Exception {
 
-    ArrayList<Object> setOfItemSets = new ArrayList<Object>();
-    AprioriItemSet current;
+    FastVector setOfItemSets = new FastVector();
+    ItemSet current;
 
     for (int i = 0; i < instances.numAttributes(); i++) {
-      if (instances.attribute(i).isNumeric()) {
+      if (instances.attribute(i).isNumeric())
         throw new Exception("Can't handle numeric attributes!");
-      }
-      int j = (treatZeroAsMissing) ? 1 : 0;
-      for (; j < instances.attribute(i).numValues(); j++) {
+      for (int j = 0; j < instances.attribute(i).numValues(); j++) {
         current = new AprioriItemSet(instances.numInstances());
         current.m_items = new int[instances.numAttributes()];
-        for (int k = 0; k < instances.numAttributes(); k++) {
+        for (int k = 0; k < instances.numAttributes(); k++)
           current.m_items[k] = -1;
-        }
         current.m_items[i] = j;
-        setOfItemSets.add(current);
+        setOfItemSets.addElement(current);
       }
     }
     return setOfItemSets;
@@ -537,17 +453,17 @@ public class AprioriItemSet extends ItemSet implements Serializable,
    * @param totalTrans the total number of transactions in the data
    * @return the generated (k)-item sets
    */
-  public static ArrayList<Object> mergeAllItemSets(ArrayList<Object> itemSets,
-    int size, int totalTrans) {
+  public static FastVector mergeAllItemSets(FastVector itemSets, int size,
+      int totalTrans) {
 
-    ArrayList<Object> newVector = new ArrayList<Object>();
-    AprioriItemSet result;
+    FastVector newVector = new FastVector();
+    ItemSet result;
     int numFound, k;
 
     for (int i = 0; i < itemSets.size(); i++) {
-      ItemSet first = (ItemSet) itemSets.get(i);
+      ItemSet first = (ItemSet) itemSets.elementAt(i);
       out: for (int j = i + 1; j < itemSets.size(); j++) {
-        ItemSet second = (ItemSet) itemSets.get(j);
+        ItemSet second = (ItemSet) itemSets.elementAt(j);
         result = new AprioriItemSet(totalTrans);
         result.m_items = new int[first.m_items.length];
 
@@ -556,32 +472,29 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         k = 0;
         while (numFound < size) {
           if (first.m_items[k] == second.m_items[k]) {
-            if (first.m_items[k] != -1) {
+            if (first.m_items[k] != -1)
               numFound++;
-            }
             result.m_items[k] = first.m_items[k];
-          } else {
+          } else
             break out;
-          }
           k++;
         }
 
         // Check difference
         while (k < first.m_items.length) {
-          if ((first.m_items[k] != -1) && (second.m_items[k] != -1)) {
+          if ((first.m_items[k] != -1) && (second.m_items[k] != -1))
             break;
-          } else {
-            if (first.m_items[k] != -1) {
+          else {
+            if (first.m_items[k] != -1)
               result.m_items[k] = first.m_items[k];
-            } else {
+            else
               result.m_items[k] = second.m_items[k];
-            }
           }
           k++;
         }
         if (k == first.m_items.length) {
           result.m_counter = 0;
-          newVector.add(result);
+          newVector.addElement(result);
         }
       }
     }

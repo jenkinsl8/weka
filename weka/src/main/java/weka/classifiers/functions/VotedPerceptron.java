@@ -1,48 +1,48 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    VotedPerceptron.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.classifiers.functions;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -95,7 +95,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @version $Revision$ 
  */
 public class VotedPerceptron 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, TechnicalInformationHandler {
   
   /** for serialization */
@@ -175,9 +175,9 @@ public class VotedPerceptron
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(4);
+    Vector newVector = new Vector(4);
 
     newVector.addElement(new Option("\tThe number of iterations to be performed.\n"
 				    + "\t(default 1)",
@@ -192,8 +192,6 @@ public class VotedPerceptron
 				    + "\t(default 10000)",
 				    "M", 1, "-M <int>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
     return newVector.elements();
   }
 
@@ -250,10 +248,6 @@ public class VotedPerceptron
     } else {
       m_MaxK = 10000;
     }
-    
-    super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -263,16 +257,17 @@ public class VotedPerceptron
    */
   public String[] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String[] options = new String [8];
+    int current = 0;
 
-    options.add("-I"); options.add("" + m_NumIterations);
-    options.add("-E"); options.add("" + m_Exponent);
-    options.add("-S"); options.add("" + m_Seed);
-    options.add("-M"); options.add("" + m_MaxK);
-    
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    options[current++] = "-I"; options[current++] = "" + m_NumIterations;
+    options[current++] = "-E"; options[current++] = "" + m_Exponent;
+    options[current++] = "-S"; options[current++] = "" + m_Seed;
+    options[current++] = "-M"; options[current++] = "" + m_MaxK;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**

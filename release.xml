@@ -41,10 +41,6 @@
       <format property="TODAY" pattern="yyyy-MM-dd"/>
     </tstamp>
 
-    <!-- Remove packages that have no test classes -->
-    <delete dir="packages/internal/WekaExcel"/>
-    <delete dir="packages/internal/WekaODF"/>
-
     <mkdir dir="${temp}/weka-${release}"/>
     <mkdir dir="${temp}/weka-${release}/changelogs"/>
     <mkdir dir="${temp}/weka-${release}/data"/>
@@ -54,7 +50,7 @@
 
   <target name="requirements_instructions">
     <echo message="NOTE: THIS BUILD FILE IS FOR CREATING WEKA RELEASE DISTRIBUTIONS. USE THE build.xml IN ./weka FOR TASKS RELATED TO COMPILING WEKA."/>
-    <echo message="This build file should be run from a clean checkout (and not from a working copy). Furthermore, there should be no packages installed." />
+    <echo message="This build file should be run from a clean checkout (and not from a working copy)." />
     <echo message="In order to make a complete set of release artifacts for Weka, this build script requires the following"/>
     <echo message="1) Additional jars to be installed in Apache Ant's lib directory:"/>
     <echo message="nsvnkit.jar"/>
@@ -88,7 +84,7 @@
 
   <target name="run_tests_all" depends="clean, init_all">
     <echo message="Running unit tests..."/>
-    <ant antfile="build.xml" dir="${weka}" target="run_tests_all" inheritall="false"/>
+    <ant antfile="build.xml" dir="${weka}" target="run_tests" inheritall="false"/>
   </target>
 
   <target name="weka-exe" depends="init_all, set_version">
@@ -121,21 +117,12 @@
   </target>
 
   <!-- changelog will need -DstartDate property -->
-  <target name="changelog" depends="init_all" description="Create a changelog for Weka development-3-7. Creates a changelog with changes from the date in last-release-props to today">
+  <target name="changelog" depends="init_all" description="Create a changelog for Weka stable-3-6. Creates a changelog with changes from the date in last-release-props to today">
     <echo message="Creating a changelog for {${lastReleaseDate}}:{${TODAY}}"/>
     <ant antfile="build.xml" dir="${weka}" target="changelog" inheritall="false">
       <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
       <property name="release" value="${release}"/>
-      <property name="weka_branch" value="trunk"/>
-    </ant>
-  </target>
-
-  <target name="packages_changelog" depends="init_all" description="Create a changelog for Weka development-3-7. Creates a changelog with changes from the date in last-release-props to today">
-    <echo message="Creating packages changelog for {${lastReleaseDate}}:{${TODAY}}"/>
-    <ant antfile="build.xml" dir="${weka}" target="packages_changelog" inheritall="false">
-      <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
-      <property name="release" value="${release}"/>
-      <property name="weka_branch" value="trunk"/>
+      <property name="weka_branch" value="branches/stable-3-6"/>
     </ant>
   </target>
 
@@ -161,7 +148,7 @@
     </exec>
   </target>
 
-  <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, packages_changelog, manual">
+  <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, manual">
     <copy todir="${temp}/weka-${release}">
       <fileset dir="${weka}/dist">
         <include name="**/*"/>
@@ -203,7 +190,6 @@
     <copy file="${wekadocs}/WekaManual.pdf" toFile="${dist}/WekaManual-${release}.pdf"/>
     <!-- copy changelogs to README files for uploading to SourceForge release directories -->
     <copy file="${wekadocs}/changelogs/CHANGELOG-${release}" toFile="${dist}/README-${release}.txt"/>
-    <copy file="${wekadocs}/changelogs/CHANGELOG_PACKAGES-${release}" toFile="${dist}/README-PACKAGES-${release}.txt"/>
 
     <zip destfile="${temp}/weka-${release}/wekaexamples.zip" 
      basedir="${wekaexamples}"/>
@@ -352,7 +338,7 @@
     </javac>
   </target>
 
-  <target name="release_base_zip_no_junit" depends="copy-files" description="Make a distribution of Weka. Run with -Drelease=number (e.g. 3-7-10)">
+  <target name="release_base_zip_no_junit" depends="copy-files" description="Make a distribution of Weka. Run with -Drelease=number (e.g. 3-6-10)">
     <echo message="Making weka-${release}.zip ..."/>
     <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
       <include name="**/*"/>
@@ -362,7 +348,7 @@
     <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
   </target>
 
-  <target name="release_base_zip" depends="run_tests_all, copy-files" description="Run unit tests ans make a distribution of Weka. Run with -Drelease=number (e.g. 3-7-10)">
+  <target name="release_base_zip" depends="run_tests_all, copy-files" description="Run unit tests ans make a distribution of Weka. Run with -Drelease=number (e.g. 3-6-10)">
     <echo message="Making weka-${release}.zip ..."/>
     <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
       <include name="**/*"/>
@@ -376,7 +362,7 @@
         <!-- non-jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7'"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6'"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -385,7 +371,7 @@
     <!-- non-jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -x64 true"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -x64 true"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -394,7 +380,7 @@
     <!-- jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer with JRE included"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -jre ${jre}"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -jre ${jre}"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -403,7 +389,7 @@
     <!-- jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer with JRE included"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -x64 true -jre ${jre_64}"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-6 -link-prefix 'Weka 3.6' -x64 true -jre ${jre_64}"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>

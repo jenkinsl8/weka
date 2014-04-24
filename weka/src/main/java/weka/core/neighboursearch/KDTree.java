@@ -1,29 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    KDTree.java
- *    Copyright (C) 2000-2012 University of Waikato
+ *    Copyright (C) 2000-2007 University of Waikato
  *    
  */
 
 package weka.core.neighboursearch;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
@@ -32,13 +29,16 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.neighboursearch.kdtrees.KDTreeNode;
 import weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter;
 import weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -106,7 +106,7 @@ import weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide;
  * @author Gabi Schmidberger (gabi[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Malcolm Ware (mfw4[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision$
+ * @version $Revision: 1.3 $
  */
 public class KDTree
   extends NearestNeighbourSearch
@@ -711,13 +711,15 @@ public class KDTree
    * 
    * @return 		an enumeration of the measure names
    */
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     newVector.addElement("measureTreeSize");
     newVector.addElement("measureNumLeaves");
     newVector.addElement("measureMaxDepth");
     if (m_Stats != null) {
-      newVector.addAll(Collections.list(m_Stats.enumerateMeasures()));
+      for (Enumeration e = m_Stats.enumerateMeasures(); e.hasMoreElements();) {
+        newVector.addElement(e.nextElement());
+      }
     }
     return newVector.elements();
   }
@@ -841,7 +843,7 @@ public class KDTree
         ownerIndex = i;
       }
     }
-    owner = (Instance)centers.instance(candidates[ownerIndex]).copy();
+    owner = new Instance(centers.instance(candidates[ownerIndex]));
 
     // are there other owners
     // loop also goes over already found owner, keeps order
@@ -858,7 +860,7 @@ public class KDTree
         owners[index++] = candidates[i];
       } else {
 
-        Instance competitor = (Instance)centers.instance(candidates[i]).copy();
+        Instance competitor = new Instance(centers.instance(candidates[i]));
         if
 
         // 3. point has larger distance to rectangle but still can compete
@@ -890,7 +892,7 @@ public class KDTree
   protected double distanceToHrect(KDTreeNode node, Instance x) throws Exception {
     double distance = 0.0;
 
-    Instance closestPoint = (Instance)x.copy();
+    Instance closestPoint = new Instance(x);
     boolean inside;
     inside = clipToInsideHrect(node, closestPoint);
     if (!inside)
@@ -954,7 +956,7 @@ public class KDTree
   protected boolean candidateIsFullOwner(KDTreeNode node, Instance candidate,
       Instance competitor) throws Exception {
     // get extreme point
-    Instance extreme = (Instance)candidate.copy();
+    Instance extreme = new Instance(candidate);
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       if ((competitor.value(i) - candidate.value(i)) > 0) {
         extreme.setValue(i, node.m_NodeRanges[i][MAX]);
@@ -981,7 +983,8 @@ public class KDTree
   public void assignSubToCenters(KDTreeNode node, Instances centers,
       int[] centList, int[] assignments) throws Exception {
     // todo: undecided situations
-    
+    int numCent = centList.length;
+
     // WARNING: assignments is "input/output-parameter"
     // should not be null and the following should not happen
     if (assignments == null) {
@@ -1199,8 +1202,8 @@ public class KDTree
    * 
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector newVector = new Vector();
     
     newVector.add(new Option(
 	"\tNode splitting method to use.\n"
@@ -1221,8 +1224,6 @@ public class KDTree
 	"\tNormalizing will be done\n"
         + "\t(Select dimension for split, with normalising to universe).",
         "N", 0, "-N"));
-    
-    newVector.addAll(Collections.list(super.listOptions()));
     
     return newVector.elements();
   }
@@ -1286,8 +1287,6 @@ public class KDTree
       setMaxInstInLeaf(40);
 
     setNormalizeNodeWidth(Utils.getFlag('N', options));
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1329,6 +1328,6 @@ public class KDTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }
