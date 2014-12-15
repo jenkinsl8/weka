@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ReservoirSample.java
- *    Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,26 +27,25 @@ import java.util.Random;
 import java.util.Vector;
 
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-/**
- * <!-- globalinfo-start --> Produces a random subsample of a dataset using the
- * reservoir sampling Algorithm "R" by Vitter. The original data set does not
- * have to fit into main memory, but the reservoir does.
+/** 
+ <!-- globalinfo-start -->
+ * Produces a random subsample of a dataset using the reservoir sampling Algorithm "R" by Vitter. The original data set does not have to fit into main memory, but the reservoir does.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;article{Vitter1985,
  *    author = {J. S. Vitter},
@@ -57,30 +57,26 @@ import weka.filters.UnsupervisedFilter;
  *    year = {1985}
  * }
  * </pre>
- * 
  * </p>
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -S &lt;num&gt;
- *  Specify the random number seed (default 1)
- * </pre>
+ * <pre> -S &lt;num&gt;
+ *  Specify the random number seed (default 1)</pre>
  * 
- * <pre>
- * -Z &lt;num&gt;
+ * <pre> -Z &lt;num&gt;
  *  The size of the output dataset - number of instances
- *  (default 100)
- * </pre>
+ *  (default 100)</pre>
  * 
- * <!-- options-end -->
- * 
+ <!-- options-end -->
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision$
+ * @version $Revision$ 
  */
-public class ReservoirSample extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter {
-
+public class ReservoirSample 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler, StreamableFilter {
+  
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
 
@@ -92,72 +88,68 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
 
   /** The current instance being processed */
   protected int m_currentInst;
-
+  
   /** The random number generator seed */
   protected int m_RandomSeed = 1;
 
   /** The random number generator */
   protected Random m_random;
-
+  
   /**
    * Returns a string describing this filter
-   * 
-   * @return a description of the classifier suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Produces a random subsample of a dataset using the reservoir sampling "
+    return 
+        "Produces a random subsample of a dataset using the reservoir sampling "
       + "Algorithm \"R\" by Vitter. The original data set does not have to fit "
       + "into main memory, but the reservoir does. ";
   }
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
-  @Override
-  public Enumeration<Option> listOptions() {
-
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector result = new Vector();
 
     result.addElement(new Option(
-      "\tSpecify the random number seed (default 1)", "S", 1, "-S <num>"));
+	"\tSpecify the random number seed (default 1)",
+	"S", 1, "-S <num>"));
 
     result.addElement(new Option(
-      "\tThe size of the output dataset - number of instances\n"
-        + "\t(default 100)", "Z", 1, "-Z <num>"));
+	"\tThe size of the output dataset - number of instances\n"
+	+"\t(default 100)",
+	"Z", 1, "-Z <num>"));
 
     return result.elements();
   }
 
+
   /**
-   * Parses a given list of options.
-   * <p/>
+   * Parses a given list of options. <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -S &lt;num&gt;
-   *  Specify the random number seed (default 1)
-   * </pre>
+   * <pre> -S &lt;num&gt;
+   *  Specify the random number seed (default 1)</pre>
    * 
-   * <pre>
-   * -Z &lt;num&gt;
+   * <pre> -Z &lt;num&gt;
    *  The size of the output dataset - number of instances
-   *  (default 100)
-   * </pre>
+   *  (default 100)</pre>
    * 
-   * <!-- options-end -->
-   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
-
-    String tmpStr = Utils.getOption('S', options);
+    String	tmpStr;
+    
+    tmpStr = Utils.getOption('S', options);
     if (tmpStr.length() != 0) {
       setRandomSeed(Integer.parseInt(tmpStr));
     } else {
@@ -170,34 +162,32 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
     } else {
       setSampleSize(100);
     }
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
-  @Override
-  public String[] getOptions() {
+  public String [] getOptions() {
+    Vector<String>	result;
 
-    Vector<String> result = new Vector<String>();
+    result = new Vector<String>();
 
     result.add("-S");
     result.add("" + getRandomSeed());
 
     result.add("-Z");
     result.add("" + getSampleSize());
-
+    
     return result.toArray(new String[result.size()]);
   }
 
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String randomSeedTipText() {
     return "The seed used for random sampling.";
@@ -205,27 +195,27 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets the random number seed.
-   * 
+   *
    * @return the random number seed.
    */
   public int getRandomSeed() {
     return m_RandomSeed;
   }
-
+  
   /**
    * Sets the random number seed.
-   * 
+   *
    * @param newSeed the new random number seed.
    */
   public void setRandomSeed(int newSeed) {
     m_RandomSeed = newSeed;
   }
-
+  
   /**
    * Returns the tip text for this property
    * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String sampleSizeTipText() {
     return "Size of the subsample (reservoir). i.e. the number of instances.";
@@ -233,29 +223,29 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets the subsample size.
-   * 
+   *
    * @return the subsample size
    */
   public int getSampleSize() {
     return m_SampleSize;
   }
-
+  
   /**
    * Sets the size of the subsample.
-   * 
+   *
    * @param newSampleSize size of the subsample.
    */
   public void setSampleSize(int newSampleSize) {
     m_SampleSize = newSampleSize;
   }
-
-  /**
+  
+  
+  /** 
    * Returns the Capabilities of this filter.
-   * 
-   * @return the capabilities of this object
-   * @see Capabilities
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
    */
-  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
@@ -263,26 +253,27 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-
+    
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-
+    
     return result;
   }
 
   /**
    * Sets the format of the input instances.
-   * 
-   * @param instanceInfo an Instances object containing the input instance
-   *          structure (any instances contained in the object are ignored -
-   *          only the structure is required).
+   *
+   * @param instanceInfo an Instances object containing the input 
+   * instance structure (any instances contained in the object are 
+   * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set successfully
+   * @throws Exception if the input format can't be set 
+   * successfully
    */
-  @Override
-  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) 
+       throws Exception {
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -295,33 +286,34 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Decides whether the current instance gets retained in the reservoir.
-   * 
+   * Decides whether the current instance gets retained in the
+   * reservoir.
+   *
    * @param instance the Instance to potentially retain
    */
   protected void processInstance(Instance instance) {
     if (m_currentInst < m_SampleSize) {
-      m_subSample[m_currentInst] = (Instance) instance.copy();
+      m_subSample[m_currentInst] = (Instance)instance.copy();
     } else {
       double r = m_random.nextDouble();
-      if (r < ((double) m_SampleSize / (double) m_currentInst)) {
+      if (r < ((double)m_SampleSize / (double)m_currentInst)) {
         r = m_random.nextDouble();
-        int replace = (int) (m_SampleSize * r);
-        m_subSample[replace] = (Instance) instance.copy();
+        int replace = (int)((double)m_SampleSize * r);
+        m_subSample[replace] = (Instance)instance.copy();
       }
     }
     m_currentInst++;
   }
 
   /**
-   * Input an instance for filtering. Filter requires all training instances be
-   * read before producing output.
-   * 
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output.
+   *
    * @param instance the input instance
-   * @return true if the filtered instance may now be collected with output().
+   * @return true if the filtered instance may now be
+   * collected with output().
    * @throws IllegalStateException if no input structure has been defined
    */
-  @Override
   public boolean input(Instance instance) {
 
     if (getInputFormat() == null) {
@@ -335,7 +327,7 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
       push(instance);
       return true;
     } else {
-      // bufferInput(instance);
+      //      bufferInput(instance);
       copyValues(instance, false);
       processInstance(instance);
       return false;
@@ -343,14 +335,13 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Signify that this batch of input to the filter is finished. If the filter
-   * requires all instances prior to filtering, output() may now be called to
-   * retrieve the filtered instances.
-   * 
+   * Signify that this batch of input to the filter is finished. 
+   * If the filter requires all instances prior to filtering,
+   * output() may now be called to retrieve the filtered instances.
+   *
    * @return true if there are instances pending output
    * @throws IllegalStateException if no input structure has been defined
    */
-  @Override
   public boolean batchFinished() {
 
     if (getInputFormat() == null) {
@@ -367,7 +358,7 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
     m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
-
+  
   /**
    * Creates a subsample of the current set of input instances. The output
    * instances are pushed onto the output queue for collection.
@@ -386,23 +377,24 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
     }
     m_subSample = null;
   }
-
+  
   /**
    * Returns the revision string.
    * 
-   * @return the revision
+   * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-
+  
   /**
    * Main method for testing this class.
-   * 
-   * @param argv should contain arguments to the filter: use -h for help
+   *
+   * @param argv should contain arguments to the filter: 
+   * use -h for help
    */
-  public static void main(String[] argv) {
+  public static void main(String [] argv) {
     runFilter(new ReservoirSample(), argv);
   }
 }
+

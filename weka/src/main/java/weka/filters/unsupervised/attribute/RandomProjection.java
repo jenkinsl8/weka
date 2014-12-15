@@ -1,27 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RandomProjection.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -29,12 +29,11 @@ import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
@@ -47,18 +46,25 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start -->
- * Reduces the dimensionality of the data by projecting it onto a lower dimensional subspace using a random matrix with columns of unit length (i.e. It will reduce the number of attributes in the data while preserving much of its variation like PCA, but at a much less computational cost).<br/>
- * It first applies the  NominalToBinary filter to convert all attributes to numeric before reducing the dimension. It preserves the class attribute.<br/>
+ * <!-- globalinfo-start --> Reduces the dimensionality of the data by
+ * projecting it onto a lower dimensional subspace using a random matrix with
+ * columns of unit length (i.e. It will reduce the number of attributes in the
+ * data while preserving much of its variation like PCA, but at a much less
+ * computational cost).<br/>
+ * It first applies the NominalToBinary filter to convert all attributes to
+ * numeric before reducing the dimension. It preserves the class attribute.<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
- * Dmitriy Fradkin, David Madigan: Experiments with random projections for machine learning. In: KDD '03: Proceedings of the ninth ACM SIGKDD international conference on Knowledge discovery and data mining, New York, NY, USA, 517-522, 003.
+ * Dmitriy Fradkin, David Madigan: Experiments with random projections for
+ * machine learning. In: KDD '03: Proceedings of the ninth ACM SIGKDD
+ * international conference on Knowledge discovery and data mining, New York,
+ * NY, USA, 517-522, 003.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;inproceedings{Fradkin003,
  *    address = {New York, NY, USA},
@@ -73,14 +79,17 @@ import weka.filters.UnsupervisedFilter;
  * <p/>
  * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -N &lt;number&gt;
+ * <pre>
+ * -N &lt;number&gt;
  *  The number of dimensions (attributes) the data should be reduced to
- *  (default 10; exclusive of the class attribute, if it is set).</pre>
+ *  (default 10; exclusive of the class attribute, if it is set).
+ * </pre>
  * 
- * <pre> -D [SPARSE1|SPARSE2|GAUSSIAN]
+ * <pre>
+ * -D [SPARSE1|SPARSE2|GAUSSIAN]
  *  The distribution to use for calculating the random matrix.
  *  Sparse1 is:
  *    sqrt(3)*{-1 with prob(1/6), 0 with prob(2/3), +1 with prob(1/6)}
@@ -88,18 +97,24 @@ import weka.filters.UnsupervisedFilter;
  *    {-1 with prob(1/2), +1 with prob(1/2)}
  * </pre>
  * 
- * <pre> -P &lt;percent&gt;
+ * <pre>
+ * -P &lt;percent&gt;
  *  The percentage of dimensions (attributes) the data should
- *  be reduced to (exclusive of the class attribute, if it is set). The -N
+ *  be reduced to (exclusive of the class attribute, if it is set). This -N
  *  option is ignored if this option is present and is greater
- *  than zero.</pre>
+ *  than zero.
+ * </pre>
  * 
- * <pre> -M
- *  Replace missing values using the ReplaceMissingValues filter</pre>
+ * <pre>
+ * -M
+ *  Replace missing values using the ReplaceMissingValues filter
+ * </pre>
  * 
- * <pre> -R &lt;num&gt;
+ * <pre>
+ * -R &lt;num&gt;
  *  The random seed for the random number generator used for
- *  calculating the random matrix (default 42).</pre>
+ *  calculating the random matrix (default 42).
+ * </pre>
  * 
  * <!-- options-end -->
  * 
@@ -108,7 +123,7 @@ import weka.filters.UnsupervisedFilter;
  *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter,
-  OptionHandler, TechnicalInformationHandler, Randomizable {
+  OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 4428905532728645880L;
@@ -121,6 +136,11 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * the original dimension
    */
   protected double m_percent = 0.0;
+
+  /**
+   * Is the random matrix will be computed using Gaussian distribution or not
+   */
+  protected boolean m_useGaussian = false;
 
   /** distribution type: sparse 1 */
   public static final int SPARSE1 = 1;
@@ -158,7 +178,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   protected Filter m_replaceMissing;
 
   /** Stores the random seed used to generate the random matrix */
-  protected int m_rndmSeed = 42;
+  protected long m_rndmSeed = 42;
 
   /** The random matrix */
   protected double m_rmatrix[][];
@@ -172,9 +192,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(5);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
       "\tThe number of dimensions (attributes) the data should be reduced to\n"
@@ -196,8 +216,8 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     newVector
       .addElement(new Option(
         "\tThe percentage of dimensions (attributes) the data should\n"
-          + "\tbe reduced to (exclusive of the class attribute, if it is set). The -N\n"
-          + "\toption is ignored if this option is present and is greater\n"
+          + "\tbe reduced to (exclusive of the class attribute, if it is set). This -N\n"
+          + "\toption is ignored if this option is present or is greater\n"
           + "\tthan zero.", "P", 1, "-P <percent>"));
 
     newVector.addElement(new Option(
@@ -215,14 +235,17 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -N &lt;number&gt;
+   * <pre>
+   * -N &lt;number&gt;
    *  The number of dimensions (attributes) the data should be reduced to
-   *  (default 10; exclusive of the class attribute, if it is set).</pre>
+   *  (default 10; exclusive of the class attribute, if it is set).
+   * </pre>
    * 
-   * <pre> -D [SPARSE1|SPARSE2|GAUSSIAN]
+   * <pre>
+   * -D [SPARSE1|SPARSE2|GAUSSIAN]
    *  The distribution to use for calculating the random matrix.
    *  Sparse1 is:
    *    sqrt(3)*{-1 with prob(1/6), 0 with prob(2/3), +1 with prob(1/6)}
@@ -230,18 +253,24 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    *    {-1 with prob(1/2), +1 with prob(1/2)}
    * </pre>
    * 
-   * <pre> -P &lt;percent&gt;
+   * <pre>
+   * -P &lt;percent&gt;
    *  The percentage of dimensions (attributes) the data should
-   *  be reduced to (exclusive of the class attribute, if it is set). The -N
+   *  be reduced to (exclusive of the class attribute, if it is set). This -N
    *  option is ignored if this option is present and is greater
-   *  than zero.</pre>
+   *  than zero.
+   * </pre>
    * 
-   * <pre> -M
-   *  Replace missing values using the ReplaceMissingValues filter</pre>
+   * <pre>
+   * -M
+   *  Replace missing values using the ReplaceMissingValues filter
+   * </pre>
    * 
-   * <pre> -R &lt;num&gt;
+   * <pre>
+   * -R &lt;num&gt;
    *  The random seed for the random number generator used for
-   *  calculating the random matrix (default 42).</pre>
+   *  calculating the random matrix (default 42).
+   * </pre>
    * 
    * <!-- options-end -->
    * 
@@ -267,7 +296,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     mString = Utils.getOption('R', options);
     if (mString.length() != 0) {
-      setSeed(Integer.parseInt(mString));
+      setRandomSeed(Long.parseLong(mString));
     }
 
     mString = Utils.getOption('D', options);
@@ -292,7 +321,6 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     // else
     // setUseGaussian(false);
 
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -303,32 +331,37 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   @Override
   public String[] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String[] options = new String[10];
+    int current = 0;
 
     // if (getUseGaussian()) {
     // options[current++] = "-G";
     // }
 
     if (getReplaceMissingValues()) {
-      options.add("-M");
+      options[current++] = "-M";
     }
 
     if (getPercent() <= 0) {
-      options.add("-N");
-      options.add("" + getNumberOfAttributes());
+      options[current++] = "-N";
+      options[current++] = "" + getNumberOfAttributes();
     } else {
-      options.add("-P");
-      options.add("" + getPercent());
+      options[current++] = "-P";
+      options[current++] = "" + getPercent();
     }
 
-    options.add("-R");
-    options.add("" + getSeed());
+    options[current++] = "-R";
+    options[current++] = "" + getRandomSeed();
 
     SelectedTag t = getDistribution();
-    options.add("-D");
-    options.add("" + t.getSelectedTag().getReadable());
+    options[current++] = "-D";
+    options[current++] = "" + t.getSelectedTag().getReadable();
 
-    return options.toArray(new String[0]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+
+    return options;
   }
 
   /**
@@ -451,7 +484,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String seedTipText() {
+  public String randomSeedTipText() {
     return "The random seed used by the random"
       + " number generator used for generating" + " the random matrix ";
   }
@@ -461,8 +494,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * 
    * @param seed the random seed value
    */
-  @Override
-  public void setSeed(int seed) {
+  public void setRandomSeed(long seed) {
     m_rndmSeed = seed;
   }
 
@@ -471,8 +503,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    * 
    * @return the random seed value
    */
-  @Override
-  public int getSeed() {
+  public long getRandomSeed() {
     return m_rndmSeed;
   }
 
@@ -559,9 +590,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     result.enable(Capability.MISSING_VALUES);
 
     // class
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.NOMINAL_CLASS);
+    result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
 
@@ -599,12 +628,13 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       }
     }
 
-    // r.setSeed(m_rndmSeed); //in case the setSeed() is not
+    // r.setSeed(m_rndmSeed); //in case the setRandomSeed() is not
     // called we better set the seed to its
     // default value of 42.
     boolean temp = true;
     if (m_replaceMissing != null) {
-      m_replaceMissing = new weka.filters.unsupervised.attribute.ReplaceMissingValues();
+      m_replaceMissing =
+        new weka.filters.unsupervised.attribute.ReplaceMissingValues();
       if (m_replaceMissing.setInputFormat(instanceInfo)) {
         temp = true;
       } else {
@@ -770,14 +800,14 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     Instances newFormat;
     int newClassIndex = -1;
-    ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+    FastVector attributes = new FastVector();
     for (int i = 0; i < m_k; i++) {
-      attributes.add(new Attribute("K" + (i + 1)));
+      attributes.addElement(new Attribute("K" + (i + 1)));
     }
     if (currentFormat.classIndex() != -1) { // if classindex is set
       // attributes.removeElementAt(attributes.size()-1);
-      attributes.add((Attribute) currentFormat.attribute(
-        currentFormat.classIndex()).copy());
+      attributes.addElement(currentFormat.attribute(currentFormat.classIndex())
+        .copy());
       newClassIndex = attributes.size() - 1;
     }
 
@@ -819,8 +849,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     Instance newInstance;
     double vals[] = new double[getOutputFormat().numAttributes()];
-    int classIndex = (m_ntob == null) ? getInputFormat().classIndex() : m_ntob
-      .getOutputFormat().classIndex();
+    int classIndex =
+      (m_ntob == null) ? getInputFormat().classIndex() : m_ntob
+        .getOutputFormat().classIndex();
 
     for (int i = 0; i < m_k; i++) {
       vals[i] = computeRandomProjection(i, classIndex, currentInstance);
@@ -829,7 +860,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       vals[m_k] = currentInstance.value(classIndex);
     }
 
-    newInstance = new DenseInstance(currentInstance.weight(), vals);
+    newInstance = new Instance(currentInstance.weight(), vals);
     newInstance.setDataset(getOutputFormat());
 
     return newInstance;
@@ -852,7 +883,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       int index = instance.index(i);
       if (index != classIndex) {
         double value = instance.valueSparse(i);
-        if (!Utils.isMissingValue(value)) {
+        if (!Instance.isMissingValue(value)) {
           sum += m_rmatrix[rpIndex][index] * value;
         }
       }
@@ -924,4 +955,3 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     runFilter(new RandomProjection(), argv);
   }
 }
-

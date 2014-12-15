@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * PropertyPath.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -152,7 +153,7 @@ public class PropertyPath
     implements RevisionHandler {
     
     /** the structure */
-    protected Vector<PathElement> m_Elements;
+    protected Vector m_Elements;
     
     /**
      * default constructor, only used internally
@@ -160,7 +161,7 @@ public class PropertyPath
     protected Path() {
       super();
       
-      m_Elements = new Vector<PathElement>();
+      m_Elements = new Vector();
     }
     
     /**
@@ -179,11 +180,11 @@ public class PropertyPath
      * 
      * @param elements	the PathElements to use
      */
-    public Path(Vector<PathElement> elements) {
+    public Path(Vector elements) {
       this();
       
       for (int i = 0; i < elements.size(); i++)
-	m_Elements.add((PathElement) elements.get(i).clone());
+	m_Elements.add(((PathElement) elements.get(i)).clone());
     }
     
     /**
@@ -204,11 +205,11 @@ public class PropertyPath
      * @param path	the path to break up
      * @return		the single elements of the path
      */
-    protected Vector<PathElement> breakUp(String path) {
-      Vector<PathElement>		result;
+    protected Vector breakUp(String path) {
+      Vector		result;
       StringTokenizer	tok;
       
-      result = new Vector<PathElement>();
+      result = new Vector();
       
       tok = new StringTokenizer(path, ".");
       while (tok.hasMoreTokens())
@@ -268,10 +269,10 @@ public class PropertyPath
      * @return			the new subpath
      */
     public Path subpath(int startIndex, int endIndex) {
-      Vector<PathElement>	list;
+      Vector	list;
       int	i;
       
-      list = new Vector<PathElement>();
+      list = new Vector();
       for (i = startIndex; i < endIndex; i++)
 	list.add(get(i));
       

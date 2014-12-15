@@ -1,106 +1,95 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * FilteredClusterer.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
- * <!-- globalinfo-start --> Class for running an arbitrary clusterer on data
- * that has been passed through an arbitrary filter. Like the clusterer, the
- * structure of the filter is based exclusively on the training data and test
- * instances will be processed by the filter without changing their structure.
+ <!-- globalinfo-start -->
+ * Class for running an arbitrary clusterer on data that has been passed through an arbitrary filter. Like the clusterer, the structure of the filter is based exclusively on the training data and test instances will be processed by the filter without changing their structure.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -F &lt;filter specification&gt;
+ * <pre> -F &lt;filter specification&gt;
  *  Full class name of filter to use, followed
  *  by filter options.
  *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
- * (default: weka.filters.AllFilter)
- * </pre>
+ * (default: weka.filters.AllFilter)</pre>
  * 
- * <pre>
- * -W
+ * <pre> -W
  *  Full name of base clusterer.
- *  (default: weka.clusterers.SimpleKMeans)
- * </pre>
+ *  (default: weka.clusterers.SimpleKMeans)</pre>
  * 
- * <pre>
+ * <pre> 
  * Options specific to clusterer weka.clusterers.SimpleKMeans:
  * </pre>
  * 
- * <pre>
- * -N &lt;num&gt;
+ * <pre> -N &lt;num&gt;
  *  number of clusters.
- *  (default 2).
- * </pre>
+ *  (default 2).</pre>
  * 
- * <pre>
- * -V
+ * <pre> -V
  *  Display std. deviations for centroids.
  * </pre>
  * 
- * <pre>
- * -M
+ * <pre> -M
  *  Replace missing values with mean/mode.
  * </pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 10)
- * </pre>
+ *  (default 10)</pre>
  * 
- * <!-- options-end -->
- * 
+ <!-- options-end -->
+ *
  * Based on code from the FilteredClassifier by Len Trigg.
- * 
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see weka.classifiers.meta.FilteredClassifier
  */
-public class FilteredClusterer extends SingleClustererEnhancer {
+public class FilteredClusterer
+  extends SingleClustererEnhancer {
 
   /** for serialization. */
   private static final long serialVersionUID = 1420005943163412943L;
-
+  
   /** The filter. */
   protected Filter m_Filter;
 
@@ -112,17 +101,18 @@ public class FilteredClusterer extends SingleClustererEnhancer {
    */
   public FilteredClusterer() {
     m_Clusterer = new SimpleKMeans();
-    m_Filter = new weka.filters.AllFilter();
+    m_Filter    = new weka.filters.AllFilter();
   }
 
   /**
    * Returns a string describing this clusterer.
    * 
-   * @return a description of the clusterer suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return 		a description of the clusterer suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Class for running an arbitrary clusterer on data that has been passed "
+    return
+        "Class for running an arbitrary clusterer on data that has been passed "
       + "through an arbitrary filter. Like the clusterer, the structure of the filter "
       + "is based exclusively on the training data and test instances will be processed "
       + "by the filter without changing their structure.";
@@ -131,7 +121,7 @@ public class FilteredClusterer extends SingleClustererEnhancer {
   /**
    * String describing default filter.
    * 
-   * @return the default filter classname
+   * @return 		the default filter classname
    */
   protected String defaultFilterString() {
     return weka.filters.AllFilter.class.getName();
@@ -139,123 +129,114 @@ public class FilteredClusterer extends SingleClustererEnhancer {
 
   /**
    * Returns an enumeration describing the available options.
-   * 
-   * @return an enumeration of all the available options.
+   *
+   * @return 		an enumeration of all the available options.
    */
-  @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector result = new Vector();
 
     result.addElement(new Option(
-      "\tFull class name of filter to use, followed\n"
-        + "\tby filter options.\n"
-        + "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"\n"
-        + "(default: " + defaultFilterString() + ")", "F", 1,
-      "-F <filter specification>"));
+	"\tFull class name of filter to use, followed\n"
+	+ "\tby filter options.\n"
+	+ "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"\n"
+	+ "(default: " + defaultFilterString() + ")",
+	"F", 1, "-F <filter specification>"));
 
-    result.addAll(Collections.list(super.listOptions()));
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     return result.elements();
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -F &lt;filter specification&gt;
+   * <pre> -F &lt;filter specification&gt;
    *  Full class name of filter to use, followed
    *  by filter options.
    *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
-   * (default: weka.filters.AllFilter)
-   * </pre>
+   * (default: weka.filters.AllFilter)</pre>
    * 
-   * <pre>
-   * -W
+   * <pre> -W
    *  Full name of base clusterer.
-   *  (default: weka.clusterers.SimpleKMeans)
-   * </pre>
+   *  (default: weka.clusterers.SimpleKMeans)</pre>
    * 
-   * <pre>
+   * <pre> 
    * Options specific to clusterer weka.clusterers.SimpleKMeans:
    * </pre>
    * 
-   * <pre>
-   * -N &lt;num&gt;
+   * <pre> -N &lt;num&gt;
    *  number of clusters.
-   *  (default 2).
-   * </pre>
+   *  (default 2).</pre>
    * 
-   * <pre>
-   * -V
+   * <pre> -V
    *  Display std. deviations for centroids.
    * </pre>
    * 
-   * <pre>
-   * -M
+   * <pre> -M
    *  Replace missing values with mean/mode.
    * </pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 10)
-   * </pre>
+   *  (default 10)</pre>
    * 
-   * <!-- options-end -->
-   * 
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
+   <!-- options-end -->
+   *
+   * @param options 	the list of options as an array of strings
+   * @throws Exception 	if an option is not supported
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
-    String tmpStr;
-    String[] tmpOptions;
-
+    String	tmpStr;
+    String[]	tmpOptions;
+    
     tmpStr = Utils.getOption('F', options);
     if (tmpStr.length() > 0) {
       tmpOptions = Utils.splitOptions(tmpStr);
-      if (tmpOptions.length == 0) {
-        throw new IllegalArgumentException(
-          "Invalid filter specification string");
-      }
+      if (tmpOptions.length == 0)
+	throw new IllegalArgumentException("Invalid filter specification string");
       tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
       setFilter((Filter) Utils.forName(Filter.class, tmpStr, tmpOptions));
-    } else {
+    } 
+    else {
       setFilter(new weka.filters.AllFilter());
     }
-
+    
     super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the clusterer.
-   * 
-   * @return an array of strings suitable for passing to setOptions
+   *
+   * @return 		an array of strings suitable for passing to setOptions
    */
-  @Override
   public String[] getOptions() {
-    Vector<String> result = new Vector<String>();
+    Vector	result;
+    String[]	options;
+    int		i;
+    
+    result = new Vector();
+    
+    result.add("-F");
+    result.add(getFilterSpec());
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
-    result.addElement("-F");
-    result.addElement(getFilterSpec());
-
-    Collections.addAll(result, super.getOptions());
-
-    return result.toArray(new String[result.size()]);
+    return (String[]) result.toArray(new String[result.size()]);
   }
-
+  
   /**
    * Returns the tip text for this property.
    * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String filterTipText() {
     return "The filter to be used.";
@@ -263,57 +244,54 @@ public class FilteredClusterer extends SingleClustererEnhancer {
 
   /**
    * Sets the filter.
-   * 
-   * @param filter the filter with all options set.
+   *
+   * @param filter 	the filter with all options set.
    */
   public void setFilter(Filter filter) {
     m_Filter = filter;
-
-    if (m_Filter instanceof SupervisedFilter) {
-      System.out
-        .println("WARNING: you are using a supervised filter, which will leak "
-          + "information about the class attribute!");
-    }
+    
+    if (m_Filter instanceof SupervisedFilter)
+      System.out.println(
+	  "WARNING: you are using a supervised filter, which will leak "
+	  + "information about the class attribute!");
   }
 
   /**
    * Gets the filter used.
-   * 
-   * @return the filter
+   *
+   * @return 		the filter
    */
   public Filter getFilter() {
     return m_Filter;
   }
-
+  
   /**
-   * Gets the filter specification string, which contains the class name of the
-   * filter and any options to the filter.
-   * 
-   * @return the filter string.
+   * Gets the filter specification string, which contains the class name of
+   * the filter and any options to the filter.
+   *
+   * @return 		the filter string.
    */
   protected String getFilterSpec() {
-    String result;
-    Filter filter;
-
+    String	result;
+    Filter 	filter;
+    
     filter = getFilter();
     result = filter.getClass().getName();
-
-    if (filter instanceof OptionHandler) {
+    
+    if (filter instanceof OptionHandler)
       result += " " + Utils.joinOptions(((OptionHandler) filter).getOptions());
-    }
-
+    
     return result;
   }
 
   /**
    * Returns default capabilities of the clusterer.
-   * 
-   * @return the capabilities of this clusterer
+   *
+   * @return		the capabilities of this clusterer
    */
-  @Override
   public Capabilities getCapabilities() {
-    Capabilities result;
-
+    Capabilities	result;
+    
     if (getFilter() == null) {
       result = super.getCapabilities();
       result.disableAll();
@@ -321,34 +299,31 @@ public class FilteredClusterer extends SingleClustererEnhancer {
     } else {
       result = getFilter().getCapabilities();
     }
-
+    
     // set dependencies
-    for (Capability cap : Capability.values()) {
+    for (Capability cap: Capability.values())
       result.enableDependency(cap);
-    }
-
+    
     return result;
   }
 
   /**
    * Build the clusterer on the filtered data.
-   * 
-   * @param data the training data
-   * @throws Exception if the clusterer could not be built successfully
+   *
+   * @param data 	the training data
+   * @throws Exception 	if the clusterer could not be built successfully
    */
-  @Override
   public void buildClusterer(Instances data) throws Exception {
-    if (m_Clusterer == null) {
+    if (m_Clusterer == null)
       throw new Exception("No base clusterer has been set!");
-    }
 
     // remove instances with missing class
     if (data.classIndex() > -1) {
       data = new Instances(data);
       data.deleteWithMissingClass();
     }
-
-    m_Filter.setInputFormat(data); // filter capabilities are checked here
+    
+    m_Filter.setInputFormat(data);  // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
 
     // can clusterer handle the data?
@@ -360,23 +335,22 @@ public class FilteredClusterer extends SingleClustererEnhancer {
 
   /**
    * Classifies a given instance after filtering.
-   * 
-   * @param instance the instance to be classified
-   * @return the class distribution for the given instance
-   * @throws Exception if instance could not be classified successfully
+   *
+   * @param instance 	the instance to be classified
+   * @return 		the class distribution for the given instance
+   * @throws Exception 	if instance could not be classified
+   * 			successfully
    */
-  @Override
-  public double[] distributionForInstance(Instance instance) throws Exception {
+  public double[] distributionForInstance(Instance instance)
+    throws Exception {
 
-    if (m_Filter.numPendingOutput() > 0) {
+    if (m_Filter.numPendingOutput() > 0)
       throw new Exception("Filter output queue not empty!");
-    }
-
-    if (!m_Filter.input(instance)) {
+    
+    if (!m_Filter.input(instance))
       throw new Exception(
-        "Filter didn't make the test instance immediately available!");
-    }
-
+	  "Filter didn't make the test instance immediately available!");
+    
     m_Filter.batchFinished();
     Instance newInstance = m_Filter.output();
 
@@ -386,40 +360,42 @@ public class FilteredClusterer extends SingleClustererEnhancer {
   /**
    * Output a representation of this clusterer.
    * 
-   * @return a representation of this clusterer
+   * @return 		a representation of this clusterer
    */
-  @Override
   public String toString() {
-    String result;
-
-    if (m_FilteredInstances == null) {
+    String 	result;
+    
+    if (m_FilteredInstances == null)
       result = "FilteredClusterer: No model built yet.";
-    } else {
-      result = "FilteredClusterer using " + getClustererSpec()
-        + " on data filtered through " + getFilterSpec()
-        + "\n\nFiltered Header\n" + m_FilteredInstances.toString()
-        + "\n\nClusterer Model\n" + m_Clusterer.toString();
-    }
-
+    else
+      result = "FilteredClusterer using "
+	+ getClustererSpec()
+	+ " on data filtered through "
+	+ getFilterSpec()
+	+ "\n\nFiltered Header\n"
+	+ m_FilteredInstances.toString()
+	+ "\n\nClusterer Model\n"
+	+ m_Clusterer.toString();
+    
     return result;
   }
-
+  
   /**
    * Returns the revision string.
    * 
-   * @return the revision
+   * @return		the revision
    */
-  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
 
   /**
    * Main method for testing this class.
-   * 
-   * @param args the commandline options, use "-h" for help
+   *
+   * @param args 	the commandline options, use "-h" for help
    */
-  public static void main(String[] args) {
+  public static void main(String [] args) {
     runClusterer(new FilteredClusterer(), args);
   }
 }
+

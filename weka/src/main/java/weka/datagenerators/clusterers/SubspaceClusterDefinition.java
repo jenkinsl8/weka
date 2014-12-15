@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * SubspaceClusterDefinition.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -78,10 +79,11 @@ import weka.datagenerators.ClusterGenerator;
  * 
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.5 $
  * @see SubspaceCluster
  */
-public class SubspaceClusterDefinition extends ClusterDefinition {
+public class SubspaceClusterDefinition
+  extends ClusterDefinition {
 
   /** for serialization */
   static final long serialVersionUID = 3135678125044007231L;
@@ -174,33 +176,34 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    * @return an enumeration of all the available options
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector result = new Vector();
 
     result.addElement(new Option(
-      "\tGenerates randomly distributed instances in the cluster.", "A", 1,
-      "-A <range>"));
+      "\tGenerates randomly distributed instances in the cluster.",
+      "A", 1, "-A <range>"));
 
     result.addElement(new Option(
-      "\tGenerates uniformly distributed instances in the cluster.", "U", 1,
-      "-U <range>"));
+      "\tGenerates uniformly distributed instances in the cluster.",
+      "U", 1, "-U <range>"));
 
     result.addElement(new Option(
-      "\tGenerates gaussian distributed instances in the cluster.", "G", 1,
-      "-G <range>"));
+      "\tGenerates gaussian distributed instances in the cluster.",
+      "G", 1, "-G <range>"));
 
     result.addElement(new Option(
       "\tThe attribute min/max (-A and -U) or mean/stddev (-G) for\n"
-        + "\tthe cluster.", "D", 1, "-D <num>,<num>"));
+        + "\tthe cluster.",
+      "D", 1, "-D <num>,<num>"));
 
     result.addElement(new Option(
       "\tThe range of number of instances per cluster (default "
-        + defaultMinInstNum() + ".." + defaultMaxInstNum() + ").", "N", 1,
-      "-N <num>..<num>"));
+        + defaultMinInstNum() + ".." + defaultMaxInstNum() + ").",
+      "N", 1, "-N <num>..<num>"));
 
     result.addElement(new Option(
-      "\tUses integer instead of continuous values (default continuous).", "I",
-      0, "-I"));
+      "\tUses integer instead of continuous values (default continuous).",
+      "I", 0, "-I"));
 
     return result.elements();
   }
@@ -260,36 +263,38 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
     tmpStr = Utils.getOption('A', options);
     if (tmpStr.length() != 0) {
       fromToStr = tmpStr;
-      setClusterType(new SelectedTag(SubspaceCluster.UNIFORM_RANDOM,
-        SubspaceCluster.TAGS_CLUSTERTYPE));
+      setClusterType(new SelectedTag(
+        SubspaceCluster.UNIFORM_RANDOM, SubspaceCluster.TAGS_CLUSTERTYPE));
       typeCount++;
     }
 
     tmpStr = Utils.getOption('U', options);
     if (tmpStr.length() != 0) {
       fromToStr = tmpStr;
-      setClusterType(new SelectedTag(SubspaceCluster.TOTAL_UNIFORM,
-        SubspaceCluster.TAGS_CLUSTERTYPE));
+      setClusterType(new SelectedTag(
+        SubspaceCluster.TOTAL_UNIFORM, SubspaceCluster.TAGS_CLUSTERTYPE));
       typeCount++;
     }
 
     tmpStr = Utils.getOption('G', options);
     if (tmpStr.length() != 0) {
       fromToStr = tmpStr;
-      setClusterType(new SelectedTag(SubspaceCluster.GAUSSIAN,
-        SubspaceCluster.TAGS_CLUSTERTYPE));
+      setClusterType(new SelectedTag(
+        SubspaceCluster.GAUSSIAN, SubspaceCluster.TAGS_CLUSTERTYPE));
       typeCount++;
     }
 
     // default is uniform/random
     if (typeCount == 0) {
-      setClusterType(new SelectedTag(SubspaceCluster.UNIFORM_RANDOM,
-        SubspaceCluster.TAGS_CLUSTERTYPE));
+      setClusterType(new SelectedTag(
+        SubspaceCluster.UNIFORM_RANDOM, SubspaceCluster.TAGS_CLUSTERTYPE));
     } else if (typeCount > 1) {
       throw new Exception("Only one cluster type can be specified!");
     }
 
-    setAttrIndexRange(fromToStr);
+    if (getParent() != null) {
+      setAttrIndexRange(fromToStr);
+    }
 
     tmpStr = Utils.getOption('D', options);
     if (isGaussian()) {
@@ -298,10 +303,12 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
       } else {
         setMeanStddev(defaultMeanStddev());
       }
-    } else {
+    }
+    else {
       if (tmpStr.length() != 0) {
         setValuesList(tmpStr);
       } else {
+        m_numClusterAttributes = 1;
         setValuesList(defaultValuesList());
       }
     }
@@ -314,11 +321,11 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
     }
 
     if (Utils.getFlag('I', options)) {
-      setClusterSubType(new SelectedTag(SubspaceCluster.INTEGER,
-        SubspaceCluster.TAGS_CLUSTERSUBTYPE));
+      setClusterSubType(new SelectedTag(
+        SubspaceCluster.INTEGER, SubspaceCluster.TAGS_CLUSTERSUBTYPE));
     } else {
-      setClusterSubType(new SelectedTag(SubspaceCluster.CONTINUOUS,
-        SubspaceCluster.TAGS_CLUSTERSUBTYPE));
+      setClusterSubType(new SelectedTag(
+        SubspaceCluster.CONTINUOUS, SubspaceCluster.TAGS_CLUSTERSUBTYPE));
     }
   }
 
@@ -329,25 +336,39 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result;
+    Vector result;
 
-    result = new Vector<String>();
+    result = new Vector();
 
     if (isRandom()) {
-      result.add("-A");
-      result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getValuesList());
-    } else if (isUniform()) {
-      result.add("-U");
-      result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getValuesList());
-    } else if (isGaussian()) {
-      result.add("-G");
-      result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getMeanStddev());
+      if (getAttrIndexRange().length() > 0) {
+        result.add("-A");
+        result.add("" + getAttrIndexRange());
+      }
+      if (getValuesList().length() > 0) {
+        result.add("-D");
+        result.add("" + getValuesList());
+      }
+    }
+    else if (isUniform()) {
+      if (getAttrIndexRange().length() > 0) {
+        result.add("-U");
+        result.add("" + getAttrIndexRange());
+      }
+      if (getValuesList().length() > 0) {
+        result.add("-D");
+        result.add("" + getValuesList());
+      }
+    }
+    else if (isGaussian()) {
+      if (getAttrIndexRange().length() > 0) {
+        result.add("-G");
+        result.add("" + getAttrIndexRange());
+      }
+      if (getValuesList().length() > 0) {
+        result.add("-D");
+        result.add("" + getMeanStddev());
+      }
     }
 
     result.add("-N");
@@ -357,7 +378,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
       result.add("-I");
     }
 
-    return result.toArray(new String[result.size()]);
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -374,7 +395,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
           text.append(" Attribute: " + i);
           text.append(" Mean: " + m_meanValue[j]);
           text.append(" StdDev: " + m_stddevValue[j] + "\n%");
-        } else {
+        }
+        else {
           text.append(" Attribute: " + i);
           text.append(" Range: " + m_minValue[j]);
           text.append(" - " + m_maxValue[j] + "\n%");
@@ -440,7 +462,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
         if (m_AttrIndexRange.isInRange(i)) {
           m_numClusterAttributes++;
           m_attributes[i] = true;
-        } else {
+        }
+        else {
           m_attributes[i] = false;
         }
       }
@@ -506,8 +529,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    * @return the default cluster type
    */
   protected SelectedTag defaultClusterType() {
-    return new SelectedTag(SubspaceCluster.UNIFORM_RANDOM,
-      SubspaceCluster.TAGS_CLUSTERTYPE);
+    return new SelectedTag(
+      SubspaceCluster.UNIFORM_RANDOM, SubspaceCluster.TAGS_CLUSTERTYPE);
   }
 
   /**
@@ -548,8 +571,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    * @return the default cluster sub type
    */
   protected SelectedTag defaultClusterSubType() {
-    return new SelectedTag(SubspaceCluster.CONTINUOUS,
-      SubspaceCluster.TAGS_CLUSTERSUBTYPE);
+    return new SelectedTag(
+      SubspaceCluster.CONTINUOUS, SubspaceCluster.TAGS_CLUSTERSUBTYPE);
   }
 
   /**
@@ -559,8 +582,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    * @see SubspaceCluster#TAGS_CLUSTERSUBTYPE
    */
   public SelectedTag getClusterSubType() {
-    return new SelectedTag(m_clustersubtype,
-      SubspaceCluster.TAGS_CLUSTERSUBTYPE);
+    return new SelectedTag(
+      m_clustersubtype, SubspaceCluster.TAGS_CLUSTERSUBTYPE);
   }
 
   /**
@@ -646,7 +669,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
     if (i < fromTo.length()) {
       String to = fromTo.substring(i + 2, fromTo.length());
       m_MaxInstNum = Integer.parseInt(to);
-    } else {
+    }
+    else {
       m_MaxInstNum = m_MinInstNum;
     }
   }
@@ -754,7 +778,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    */
   public void setNumInstances(Random r) {
     if (m_MaxInstNum > m_MinInstNum) {
-      m_numInstances = (int) (r.nextDouble() * (m_MaxInstNum - m_MinInstNum) + m_MinInstNum);
+      m_numInstances = (int) (r.nextDouble()
+        * (m_MaxInstNum - m_MinInstNum) + m_MinInstNum);
     } else {
       m_numInstances = m_MinInstNum;
     }
@@ -791,8 +816,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
         // boolean values are only 0.0 and 1.0
         if (parent.isBoolean(m_attrIndices[i])) {
           parent.getNumValues()[m_attrIndices[i]] = 2;
-          if (((m_minValue[i] != 0.0) && (m_minValue[i] != 1.0))
-            || ((m_maxValue[i] != 0.0) && (m_maxValue[i] != 1.0))) {
+          if (((m_minValue[i] != 0.0) && (m_minValue[i] != 1.0)) ||
+            ((m_maxValue[i] != 0.0) && (m_maxValue[i] != 1.0))) {
             throw new Exception("Ranges for boolean must be 0 or 1 only.");
           }
         }
@@ -921,8 +946,8 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
     tok = new StringTokenizer(fromToList, ",");
     if (tok.countTokens() != first.length + second.length) {
-      throw new Exception("Wrong number of values for option '-" + optionLetter
-        + "'.");
+      throw new Exception(
+        "Wrong number of values for option '-" + optionLetter + "'.");
     }
 
     index = 0;
@@ -940,6 +965,6 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

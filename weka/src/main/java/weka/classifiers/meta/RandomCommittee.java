@@ -1,38 +1,37 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RandomCommittee.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Random;
-import java.util.ArrayList;
-
-import weka.classifiers.AbstractClassifier;
-import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
+import weka.classifiers.Classifier;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.PartitionGenerator;
+
+import java.util.Random;
 
 /**
  <!-- globalinfo-start -->
@@ -87,17 +86,14 @@ import weka.core.PartitionGenerator;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class RandomCommittee 
-  extends RandomizableParallelIteratedSingleClassifierEnhancer
-  implements WeightedInstancesHandler, PartitionGenerator {
+  extends RandomizableIteratedSingleClassifierEnhancer
+  implements WeightedInstancesHandler {
     
   /** for serialization */
-  static final long serialVersionUID = -9204394360557300093L;
-  
-  /** training data */
-  protected Instances m_data;
+  static final long serialVersionUID = -9204394360557300092L;
   
   /**
    * Constructor.
@@ -143,49 +139,24 @@ public class RandomCommittee
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    m_data = new Instances(data);
-    m_data.deleteWithMissingClass();
-    super.buildClassifier(m_data);
+    data = new Instances(data);
+    data.deleteWithMissingClass();
     
     if (!(m_Classifier instanceof Randomizable)) {
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
     }
 
-    m_Classifiers = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
+    m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
-    Random random = m_data.getRandomNumberGenerator(m_Seed);
-
-    // Resample data based on weights if base learner can't handle weights
-    if (!(m_Classifier instanceof WeightedInstancesHandler)) {
-      m_data = m_data.resampleWithWeights(random);
-    }
-
+    Random random = data.getRandomNumberGenerator(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
 
       // Set the random number seed for the current classifier.
       ((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       
       // Build the classifier.
-//      m_Classifiers[j].buildClassifier(m_data);
+      m_Classifiers[j].buildClassifier(data);
     }
-    
-    buildClassifiers();
-    
-    // save memory
-    m_data = null;
-  }
-  
-  /**
-   * Returns a training set for a particular iteration.
-   * 
-   * @param iteration the number of the iteration for the requested training set.
-   * @return the training set for the supplied iteration number
-   * @throws Exception if something goes wrong when generating a training set.
-   */
-  protected synchronized Instances getTrainingSet(int iteration) throws Exception {
-    
-    // we don't manipulate the training data in any way.
-    return m_data;
   }
 
   /**
@@ -200,14 +171,9 @@ public class RandomCommittee
 
     double [] sums = new double [instance.numClasses()], newProbs; 
     
-    double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
-        double pred = m_Classifiers[i].classifyInstance(instance);
-        if (!Utils.isMissingValue(pred)) {
-          sums[0] += pred;
-          numPreds++;
-        }
+	sums[0] += m_Classifiers[i].classifyInstance(instance);
       } else {
 	newProbs = m_Classifiers[i].distributionForInstance(instance);
 	for (int j = 0; j < newProbs.length; j++)
@@ -215,11 +181,7 @@ public class RandomCommittee
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
-      if (numPreds == 0) {
-        sums[0] = Utils.missingValue();
-      } else {
-        sums[0] /= numPreds;
-      }
+      sums[0] /= (double)m_NumIterations;
       return sums;
     } else if (Utils.eq(Utils.sum(sums), 0)) {
       return sums;
@@ -246,65 +208,14 @@ public class RandomCommittee
 
     return text.toString();
   }
-    
-  /**
-   * Builds the classifier to generate a partition.
-   */
-  public void generatePartition(Instances data) throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator)
-      buildClassifier(data);
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " cannot generate a partition");
-  }
   
-  /**
-   * Computes an array that indicates leaf membership
-   */
-  public double[] getMembershipValues(Instance inst) throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator) {
-      ArrayList<double[]> al = new ArrayList<double[]>();
-      int size = 0;
-      for (int i = 0; i < m_Classifiers.length; i++) {
-        double[] r = ((PartitionGenerator)m_Classifiers[i]).
-          getMembershipValues(inst);
-        size += r.length;
-        al.add(r);
-      }
-      double[] values = new double[size];
-      int pos = 0;
-      for (double[] v: al) {
-        System.arraycopy(v, 0, values, pos, v.length);
-        pos += v.length;
-      }
-      return values;
-    } else throw new Exception("Classifier: " + getClassifierSpec()
-                               + " cannot generate a partition");
-  }
-  
-  /**
-   * Returns the number of elements in the partition.
-   */
-  public int numElements() throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator) {
-      int size = 0;
-      for (int i = 0; i < m_Classifiers.length; i++) {
-        size += ((PartitionGenerator)m_Classifiers[i]).numElements();
-      }
-      return size;
-    } else throw new Exception("Classifier: " + getClassifierSpec()
-                               + " cannot generate a partition");
-  }
-
   /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 
   /**

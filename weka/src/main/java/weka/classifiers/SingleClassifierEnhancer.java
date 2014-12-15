@@ -1,45 +1,45 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SingleClassifierEnhancer.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to meta
- * classifiers that use a single base learner.
+ * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class SingleClassifierEnhancer extends AbstractClassifier {
+public abstract class SingleClassifierEnhancer extends Classifier {
 
   /** for serialization */
   private static final long serialVersionUID = -3665885256363525164L;
@@ -51,16 +51,8 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
    * String describing default classifier.
    */
   protected String defaultClassifierString() {
-
+    
     return "weka.classifiers.rules.ZeroR";
-  }
-
-  /**
-   * String describing options for default classifier.
-   */
-  protected String[] defaultClassifierOptions() {
-
-    return new String[0];
   }
 
   /**
@@ -68,24 +60,28 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector newVector = new Vector(3);
 
-    newVector.addElement(new Option(
-          "\tFull name of base classifier.\n"
-          + "\t(default: " + defaultClassifierString() + 
-          ((defaultClassifierOptions().length > 0) ? 
-           " with options " + Utils.joinOptions(defaultClassifierOptions()) + ")" : ")"),
-          "W", 1, "-W"));
-    
-    newVector.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     newVector.addElement(new Option(
-          "",
-          "", 0, "\nOptions specific to classifier "
-          + m_Classifier.getClass().getName() + ":"));
-    newVector.addAll(Collections.list(((OptionHandler)m_Classifier).listOptions()));
+	      "\tFull name of base classifier.\n"
+	      + "\t(default: " + defaultClassifierString() +")",
+	      "W", 1, "-W"));
+
+    newVector.addElement(new Option(
+	     "",
+	     "", 0, "\nOptions specific to classifier "
+	     + m_Classifier.getClass().getName() + ":"));
+    enu = ((OptionHandler)m_Classifier).listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     return newVector.elements();
   }
@@ -107,20 +103,20 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
     String classifierName = Utils.getOption('W', options);
 
-    if (classifierName.length() > 0) {
-      setClassifier(AbstractClassifier.forName(classifierName, null));
-      setClassifier(AbstractClassifier.forName(classifierName,
-            Utils.partitionOptions(options)));
+    if (classifierName.length() > 0) { 
+      
+      // This is just to set the classifier in case the option 
+      // parsing fails.
+      setClassifier(Classifier.forName(classifierName, null));
+      setClassifier(Classifier.forName(classifierName,
+				       Utils.partitionOptions(options)));
     } else {
-      setClassifier(AbstractClassifier.forName(defaultClassifierString(), null));
-      String[] classifierOptions = Utils.partitionOptions(options);
-      if (classifierOptions.length > 0) {
-        setClassifier(AbstractClassifier.forName(defaultClassifierString(),
-                                                 classifierOptions));
-      } else {
-        setClassifier(AbstractClassifier.forName(defaultClassifierString(),
-                                                 defaultClassifierOptions()));
-      }
+      
+      // This is just to set the classifier in case the option 
+      // parsing fails.
+      setClassifier(Classifier.forName(defaultClassifierString(), null));
+      setClassifier(Classifier.forName(defaultClassifierString(),
+				       Utils.partitionOptions(options)));
     }
   }
 
@@ -131,22 +127,33 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-       
-    options.add("-W");
-    options.add(getClassifier().getClass().getName());
-    
-    Collections.addAll(options, super.getOptions());
-    
-    String[] classifierOptions = ((OptionHandler)m_Classifier).getOptions();
-    if (classifierOptions.length > 0) {
-      options.add("--");
-      Collections.addAll(options, classifierOptions);
+    String [] classifierOptions = ((OptionHandler)m_Classifier).getOptions();
+    int extraOptionsLength = classifierOptions.length;
+    if (extraOptionsLength > 0) {
+      extraOptionsLength++; // for the double hyphen
     }
 
-    return options.toArray(new String[0]);
-  }
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 
+				   extraOptionsLength + 2];
 
+    int current = 0;
+    options[current++] = "-W";
+    options[current++] = getClassifier().getClass().getName();
+
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+    current += superOptions.length;
+
+    if (classifierOptions.length > 0) {
+      options[current++] = "--";
+      System.arraycopy(classifierOptions, 0, options, current, 
+		       classifierOptions.length);
+    }
+
+    return options;
+  }
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -170,13 +177,13 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
       result = new Capabilities(this);
       result.disableAll();
     }
-
+    
     // set dependencies
     for (Capability cap: Capability.values())
       result.enableDependency(cap);
-
+    
     result.setOwner(this);
-
+    
     return result;
   }
 
@@ -199,7 +206,7 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
 
     return m_Classifier;
   }
-
+  
   /**
    * Gets the classifier specification string, which contains the class name of
    * the classifier and any options to the classifier

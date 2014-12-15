@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    C45Saver.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,13 +25,12 @@ package weka.core.converters;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -66,11 +66,12 @@ import weka.core.Utils;
  * <!-- options-end -->
  * 
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.7 $
  * @see Saver
  */
-public class C45Saver extends AbstractFileSaver implements BatchConverter,
-  IncrementalConverter, OptionHandler {
+public class C45Saver
+  extends AbstractFileSaver
+  implements BatchConverter, IncrementalConverter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -821428878384253377L;
@@ -252,8 +253,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
           if (j != structure.classIndex()) {
             if (inst.isMissing(j)) {
               outW.write("?,");
-            } else if (structure.attribute(j).isNominal()
-              || structure.attribute(j).isString()) {
+            } else if (structure.attribute(j).isNominal() ||
+              structure.attribute(j).isString()) {
               outW.write(structure.attribute(j).value((int) inst.value(j))
                 + ",");
             } else {
@@ -264,7 +265,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
         // write the class value
         if (inst.isMissing(structure.classIndex())) {
           outW.write("?");
-        } else {
+        }
+        else {
           outW.write(structure.attribute(structure.classIndex()).value(
             (int) inst.value(structure.classIndex())));
         }
@@ -275,7 +277,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
           m_incrementalCounter = 0;
           outW.flush();
         }
-      } else {
+      }
+      else {
         // close
         if (outW != null) {
           outW.flush();
@@ -379,8 +382,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
         if (j != instances.classIndex()) {
           if (temp.isMissing(j)) {
             outW.write("?,");
-          } else if (instances.attribute(j).isNominal()
-            || instances.attribute(j).isString()) {
+          } else if (instances.attribute(j).isNominal() ||
+            instances.attribute(j).isString()) {
             outW.write(instances.attribute(j).value((int) temp.value(j)) + ",");
           } else {
             outW.write("" + temp.value(j) + ",");
@@ -390,7 +393,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
       // write the class value
       if (temp.isMissing(instances.classIndex())) {
         outW.write("?");
-      } else {
+      }
+      else {
         outW.write(instances.attribute(instances.classIndex()).value(
           (int) temp.value(instances.classIndex())));
       }
@@ -411,13 +415,17 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    FastVector result = new FastVector();
 
-    result.addElement(new Option("The class index", "c", 1,
-      "-c <the class index>"));
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements()) {
+      result.addElement(en.nextElement());
+    }
 
-    result.addAll(Collections.list(super.listOptions()));
+    result.addElement(new Option(
+      "The class index",
+      "c", 1, "-c <the class index>"));
 
     return result.elements();
   }
@@ -490,17 +498,15 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
           "No data set loaded. Data set has to be arff format (Reason: "
             + ex.toString() + ").");
       }
-    } else {
-      throw new IOException("No data set to save.");
     }
 
     if (outputString.length() != 0) {
       // add appropriate file extension
       if (!outputString.endsWith(getFileExtension())) {
         if (outputString.lastIndexOf('.') != -1) {
-          outputString = (outputString.substring(0,
-            outputString.lastIndexOf('.')))
-            + getFileExtension();
+          outputString =
+            (outputString.substring(0, outputString.lastIndexOf('.')))
+              + getFileExtension();
         } else {
           outputString = outputString + getFileExtension();
         }
@@ -513,14 +519,12 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
       }
     }
 
-    if (index == -1) {
-      index = getInstances().numAttributes() - 1;
+    if (getInstances() != null) {
+      if (index == -1) {
+        index = getInstances().numAttributes() - 1;
+      }
+      getInstances().setClassIndex(index);
     }
-    getInstances().setClassIndex(index);
-
-    super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -531,30 +535,24 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
   @Override
   public String[] getOptions() {
 
-    Vector<String> options = new Vector<String>();
-
+    String[] options = new String[10];
+    int current = 0;
     if (retrieveFile() != null) {
-      options.add("-o");
-      options.add("" + retrieveFile());
-    } else {
-      options.add("-o");
-      options.add("");
+      options[current++] = "-o";
+      options[current++] = "" + retrieveFile();
     }
+
     if (getInstances() != null) {
-      options.add("-i");
-      options.add("" + getInstances().relationName());
-      options.add("-c");
-      options.add("" + getInstances().classIndex());
-    } else {
-      options.add("-i");
-      options.add("");
-      options.add("-c");
-      options.add("");
+      options[current++] = "-i";
+      options[current++] = "" + getInstances().relationName();
+      options[current++] = "-c";
+      options[current++] = "" + getInstances().classIndex();
     }
 
-    Collections.addAll(options, super.getOptions());
-
-    return options.toArray(new String[0]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**
@@ -564,7 +562,7 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

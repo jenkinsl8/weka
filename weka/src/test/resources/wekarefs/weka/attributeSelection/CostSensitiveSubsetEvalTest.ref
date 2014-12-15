@@ -13,7 +13,7 @@ Search Method:
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 CostSensitiveSubsetEval using 
 
-weka.attributeSelection.CfsSubsetEval -P 1 -E 1
+weka.attributeSelection.CfsSubsetEval 
 
 Evaluator
 	CFS Subset Evaluator
@@ -24,8 +24,9 @@ Cost Matrix
  0 5
  1 0
 
-Selected attributes: 1,2,3 : 3
+Selected attributes: 1,2,3,4 : 4
                      Nominal1
                      Nominal2
                      Numeric1
+                     Date1
 

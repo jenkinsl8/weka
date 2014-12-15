@@ -23,7 +23,7 @@ import weka.core.Utils;
  * regularization.
  * 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 9768 $
  */
  
 public class LinearRegression
@@ -183,6 +183,6 @@ public class LinearRegression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 9768 $");
   }
 }

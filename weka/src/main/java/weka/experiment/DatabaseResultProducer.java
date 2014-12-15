@@ -1,27 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    DatabaseResultProducer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -130,8 +130,9 @@ import weka.core.Utils;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class DatabaseResultProducer extends DatabaseResultListener implements
-  ResultProducer, OptionHandler, AdditionalMeasureProducer {
+public class DatabaseResultProducer
+  extends DatabaseResultListener
+  implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
 
   /** for serialization */
   static final long serialVersionUID = -5620660780203158666L;
@@ -141,7 +142,11 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
 
   /** The ResultListener to send results to */
   protected ResultListener m_ResultListener = new CSVResultListener();
- 
+
+  /** The ResultProducer used to generate results */
+  protected ResultProducer m_ResultProducer =
+    new CrossValidationResultProducer();
+
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String[] m_AdditionalMeasures = null;
 
@@ -168,7 +173,6 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
   public DatabaseResultProducer() throws Exception {
 
     super();
-    m_ResultProducer = new CrossValidationResultProducer();
   }
 
   /**
@@ -305,7 +309,8 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
     // System.err.println("DBRP::acceptResult");
 
     // Is the result needed by the listener?
-    boolean isRequiredByListener = m_ResultListener.isResultRequired(this, key);
+    boolean isRequiredByListener = m_ResultListener.isResultRequired(this,
+      key);
     // Is the result already in the database?
     boolean isRequiredByDatabase = super.isResultRequired(rp, key);
 
@@ -345,13 +350,15 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
     // System.err.println("DBRP::isResultRequired");
 
     // Is the result needed by the listener?
-    boolean isRequiredByListener = m_ResultListener.isResultRequired(this, key);
+    boolean isRequiredByListener = m_ResultListener.isResultRequired(this,
+      key);
     // Is the result already in the database?
     boolean isRequiredByDatabase = super.isResultRequired(rp, key);
 
     if (!isRequiredByDatabase && isRequiredByListener) {
       // Pass the result through to the listener
-      Object[] result = getResultFromTable(m_ResultsTableName, rp, key);
+      Object[] result = getResultFromTable(m_ResultsTableName,
+        rp, key);
       System.err.println("Got result from database: "
         + DatabaseUtils.arrayToString(result));
       m_ResultListener.acceptResult(this, key, result);
@@ -449,25 +456,31 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
       "\tThe name of the database field to cache over.\n"
-        + "\teg: \"Fold\" (default none)", "F", 1, "-F <field name>"));
+        + "\teg: \"Fold\" (default none)",
+      "F", 1,
+      "-F <field name>"));
     newVector.addElement(new Option(
       "\tThe full class name of a ResultProducer.\n"
-        + "\teg: weka.experiment.CrossValidationResultProducer", "W", 1,
+        + "\teg: weka.experiment.CrossValidationResultProducer",
+      "W", 1,
       "-W <class name>"));
 
-    if ((m_ResultProducer != null)
-      && (m_ResultProducer instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to result producer "
+    if ((m_ResultProducer != null) &&
+      (m_ResultProducer instanceof OptionHandler)) {
+      newVector.addElement(new Option(
+        "",
+        "", 0, "\nOptions specific to result producer "
           + m_ResultProducer.getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) m_ResultProducer)
-        .listOptions()));
+      Enumeration enu = ((OptionHandler) m_ResultProducer).listOptions();
+      while (enu.hasMoreElements()) {
+        newVector.addElement(enu.nextElement());
+      }
     }
     return newVector.elements();
   }
@@ -574,18 +587,18 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
     setCacheKeyName(Utils.getOption('F', options));
 
     String rpName = Utils.getOption('W', options);
-    if (rpName.length() == 0) {
-      throw new Exception("A ResultProducer must be specified with"
-        + " the -W option.");
+    if (rpName.length() > 0) {
+      // Do it first without options, so if an exception is thrown during
+      // the option setting, listOptions will contain options for the actual
+      // RP.
+      setResultProducer((ResultProducer) Utils.forName(
+        ResultProducer.class,
+        rpName,
+        null));
     }
-    // Do it first without options, so if an exception is thrown during
-    // the option setting, listOptions will contain options for the actual
-    // RP.
-    setResultProducer((ResultProducer) Utils.forName(ResultProducer.class,
-      rpName, null));
     if (getResultProducer() instanceof OptionHandler) {
-      ((OptionHandler) getResultProducer()).setOptions(Utils
-        .partitionOptions(options));
+      ((OptionHandler) getResultProducer())
+        .setOptions(Utils.partitionOptions(options));
     }
   }
 
@@ -598,8 +611,8 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
   public String[] getOptions() {
 
     String[] seOptions = new String[0];
-    if ((m_ResultProducer != null)
-      && (m_ResultProducer instanceof OptionHandler)) {
+    if ((m_ResultProducer != null) &&
+      (m_ResultProducer instanceof OptionHandler)) {
       seOptions = ((OptionHandler) m_ResultProducer).getOptions();
     }
 
@@ -616,7 +629,8 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
     }
     options[current++] = "--";
 
-    System.arraycopy(seOptions, 0, options, current, seOptions.length);
+    System.arraycopy(seOptions, 0, options, current,
+      seOptions.length);
     current += seOptions.length;
     while (current < options.length) {
       options[current++] = "";
@@ -638,7 +652,8 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
 
     if (m_ResultProducer != null) {
       System.err.println("DatabaseResultProducer: setting additional "
-        + "measures for " + "ResultProducer");
+        + "measures for "
+        + "ResultProducer");
       m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
     }
   }
@@ -650,13 +665,13 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
    * @return an enumeration of the measure names
    */
   @Override
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     if (m_ResultProducer instanceof AdditionalMeasureProducer) {
-      Enumeration<String> en = ((AdditionalMeasureProducer) m_ResultProducer)
-        .enumerateMeasures();
+      Enumeration en = ((AdditionalMeasureProducer) m_ResultProducer).
+        enumerateMeasures();
       while (en.hasMoreElements()) {
-        String mname = en.nextElement();
+        String mname = (String) en.nextElement();
         newVector.addElement(mname);
       }
     }
@@ -673,12 +688,12 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
   @Override
   public double getMeasure(String additionalMeasureName) {
     if (m_ResultProducer instanceof AdditionalMeasureProducer) {
-      return ((AdditionalMeasureProducer) m_ResultProducer)
-        .getMeasure(additionalMeasureName);
+      return ((AdditionalMeasureProducer) m_ResultProducer).
+        getMeasure(additionalMeasureName);
     } else {
       throw new IllegalArgumentException("DatabaseResultProducer: "
-        + "Can't return value for : " + additionalMeasureName + ". "
-        + m_ResultProducer.getClass().getName() + " "
+        + "Can't return value for : " + additionalMeasureName
+        + ". " + m_ResultProducer.getClass().getName() + " "
         + "is not an AdditionalMeasureProducer");
     }
   }

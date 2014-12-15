@@ -1,26 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * NGramTokenizer.java
- * Copyright (C) 2007-2012 University of Waikato
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.tokenizers;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -58,9 +58,10 @@ import weka.core.Utils;
  * 
  * @author Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  */
-public class NGramTokenizer extends CharacterDelimitedTokenizer {
+public class NGramTokenizer
+  extends CharacterDelimitedTokenizer {
 
   /** for serialization */
   private static final long serialVersionUID = -2181896254171647219L;
@@ -100,16 +101,24 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
    * @return an enumeration of all available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+  public Enumeration listOptions() {
+    Vector result;
+    Enumeration enm;
 
-    result.addElement(new Option("\tThe max size of the Ngram (default = 3).",
+    result = new Vector();
+
+    enm = super.listOptions();
+    while (enm.hasMoreElements()) {
+      result.addElement(enm.nextElement());
+    }
+
+    result.addElement(new Option(
+      "\tThe max size of the Ngram (default = 3).",
       "max", 1, "-max <int>"));
 
-    result.addElement(new Option("\tThe min size of the Ngram (default = 1).",
+    result.addElement(new Option(
+      "\tThe min size of the Ngram (default = 1).",
       "min", 1, "-min <int>"));
-
-    result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
   }
@@ -121,15 +130,22 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result = new Vector<String>();
+    Vector<String> result;
+    String[] options;
+    int i;
+
+    result = new Vector<String>();
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++) {
+      result.add(options[i]);
+    }
 
     result.add("-max");
     result.add("" + getNGramMaxSize());
 
     result.add("-min");
     result.add("" + getNGramMinSize());
-
-    Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
   }
@@ -166,6 +182,8 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
   public void setOptions(String[] options) throws Exception {
     String value;
 
+    super.setOptions(options);
+
     value = Utils.getOption("max", options);
     if (value.length() != 0) {
       setNGramMaxSize(Integer.parseInt(value));
@@ -179,8 +197,6 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
     } else {
       setNGramMinSize(1);
     }
-
-    super.setOptions(options);
   }
 
   /**
@@ -254,9 +270,9 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
    */
   @Override
   public boolean hasMoreElements() {
-    // return (m_CurrentPosition < m_MaxPosition
-    // && m_N - 1 + m_CurrentPosition < m_MaxPosition && m_N >= m_NMin);
-    //
+    // return (m_CurrentPosition < m_MaxPosition &&
+    // m_N - 1 + m_CurrentPosition < m_MaxPosition &&
+    // m_N >= m_NMin);
     return (m_N >= m_NMin);
   }
 
@@ -266,13 +282,12 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
    * @return the next element
    */
   @Override
-  public String nextElement() {
+  public Object nextElement() {
     String retValue = "";
 
-    // for (int i = 0; i < m_N && i + m_CurrentPosition < m_MaxPosition; i++) {
+    // for (int i = 0; i < m_N && i + m_CurrentPosition < m_MaxPosition; i++)
     // retValue += " " + m_SplitString[m_CurrentPosition + i];
-    // }
-
+    //
     for (int i = 0; i < m_N; i++) {
       retValue += " " + m_SplitString[m_CurrentPosition + i];
     }
@@ -338,7 +353,7 @@ public class NGramTokenizer extends CharacterDelimitedTokenizer {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

@@ -1,27 +1,27 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    LearningRateResultProducer.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -163,8 +163,9 @@ import weka.core.Utils;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class LearningRateResultProducer implements ResultListener,
-  ResultProducer, OptionHandler, AdditionalMeasureProducer, RevisionHandler {
+public class LearningRateResultProducer
+  implements ResultListener, ResultProducer, OptionHandler,
+  AdditionalMeasureProducer, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3841159673490861331L;
@@ -264,8 +265,9 @@ public class LearningRateResultProducer implements ResultListener,
     } else {
       m_CurrentSize = m_LowerSize;
     }
-    while (m_CurrentSize <= m_Instances.numInstances()
-      && ((m_UpperSize == -1) || (m_CurrentSize <= m_UpperSize))) {
+    while (m_CurrentSize <= m_Instances.numInstances() &&
+      ((m_UpperSize == -1) ||
+      (m_CurrentSize <= m_UpperSize))) {
       m_ResultProducer.doRunKeys(run);
       m_CurrentSize += m_StepSize;
     }
@@ -295,11 +297,9 @@ public class LearningRateResultProducer implements ResultListener,
     // Randomize on a copy of the original dataset
     Instances runInstances = new Instances(m_Instances);
     runInstances.randomize(new Random(run));
-
     /*
-     * if (runInstances.classAttribute().isNominal() &&
-     * (m_Instances.numInstances() / m_StepSize >= 1)) { //
-     * runInstances.stratify(m_Instances.numInstances() / m_StepSize); }
+     * if (runInstances.classAttribute().isNominal()) {
+     * runInstances.stratify(m_StepSize); }
      */
 
     // Tell the resultproducer to send results to us
@@ -311,8 +311,9 @@ public class LearningRateResultProducer implements ResultListener,
     } else {
       m_CurrentSize = m_LowerSize;
     }
-    while (m_CurrentSize <= m_Instances.numInstances()
-      && ((m_UpperSize == -1) || (m_CurrentSize <= m_UpperSize))) {
+    while (m_CurrentSize <= m_Instances.numInstances() &&
+      ((m_UpperSize == -1) ||
+      (m_CurrentSize <= m_UpperSize))) {
       m_ResultProducer.setInstances(new Instances(runInstances, 0,
         m_CurrentSize));
       m_ResultProducer.doRun(run);
@@ -529,25 +530,31 @@ public class LearningRateResultProducer implements ResultListener,
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector newVector = new Vector(2);
 
     newVector.addElement(new Option(
-      "\tThe number of steps in the learning rate curve.\n" + "\t(default 10)",
-      "X", 1, "-X <num steps>"));
+      "\tThe number of steps in the learning rate curve.\n"
+        + "\t(default 10)",
+      "X", 1,
+      "-X <num steps>"));
     newVector.addElement(new Option(
       "\tThe full class name of a ResultProducer.\n"
-        + "\teg: weka.experiment.CrossValidationResultProducer", "W", 1,
+        + "\teg: weka.experiment.CrossValidationResultProducer",
+      "W", 1,
       "-W <class name>"));
 
-    if ((m_ResultProducer != null)
-      && (m_ResultProducer instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to result producer "
+    if ((m_ResultProducer != null) &&
+      (m_ResultProducer instanceof OptionHandler)) {
+      newVector.addElement(new Option(
+        "",
+        "", 0, "\nOptions specific to result producer "
           + m_ResultProducer.getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) m_ResultProducer)
-        .listOptions()));
+      Enumeration enu = ((OptionHandler) m_ResultProducer).listOptions();
+      while (enu.hasMoreElements()) {
+        newVector.addElement(enu.nextElement());
+      }
     }
     return newVector.elements();
   }
@@ -701,18 +708,19 @@ public class LearningRateResultProducer implements ResultListener,
     }
 
     String rpName = Utils.getOption('W', options);
-    if (rpName.length() == 0) {
-      throw new Exception("A ResultProducer must be specified with"
-        + " the -W option.");
+    if (rpName.length() > 0) {
+
+      // Do it first without options, so if an exception is thrown during
+      // the option setting, listOptions will contain options for the actual
+      // RP.
+      setResultProducer((ResultProducer) Utils.forName(
+        ResultProducer.class,
+        rpName,
+        null));
     }
-    // Do it first without options, so if an exception is thrown during
-    // the option setting, listOptions will contain options for the actual
-    // RP.
-    setResultProducer((ResultProducer) Utils.forName(ResultProducer.class,
-      rpName, null));
     if (getResultProducer() instanceof OptionHandler) {
-      ((OptionHandler) getResultProducer()).setOptions(Utils
-        .partitionOptions(options));
+      ((OptionHandler) getResultProducer())
+        .setOptions(Utils.partitionOptions(options));
     }
   }
 
@@ -725,8 +733,8 @@ public class LearningRateResultProducer implements ResultListener,
   public String[] getOptions() {
 
     String[] seOptions = new String[0];
-    if ((m_ResultProducer != null)
-      && (m_ResultProducer instanceof OptionHandler)) {
+    if ((m_ResultProducer != null) &&
+      (m_ResultProducer instanceof OptionHandler)) {
       seOptions = ((OptionHandler) m_ResultProducer).getOptions();
     }
 
@@ -745,7 +753,8 @@ public class LearningRateResultProducer implements ResultListener,
     }
     options[current++] = "--";
 
-    System.arraycopy(seOptions, 0, options, current, seOptions.length);
+    System.arraycopy(seOptions, 0, options, current,
+      seOptions.length);
     current += seOptions.length;
     while (current < options.length) {
       options[current++] = "";
@@ -767,7 +776,8 @@ public class LearningRateResultProducer implements ResultListener,
 
     if (m_ResultProducer != null) {
       System.err.println("LearningRateResultProducer: setting additional "
-        + "measures for " + "ResultProducer");
+        + "measures for "
+        + "ResultProducer");
       m_ResultProducer.setAdditionalMeasures(m_AdditionalMeasures);
     }
   }
@@ -779,14 +789,14 @@ public class LearningRateResultProducer implements ResultListener,
    * @return an enumeration of the measure names
    */
   @Override
-  public Enumeration<String> enumerateMeasures() {
-    Vector<String> newVector = new Vector<String>();
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector();
     if (m_ResultProducer instanceof AdditionalMeasureProducer) {
-      Enumeration<String> en = ((AdditionalMeasureProducer) m_ResultProducer)
-        .enumerateMeasures();
+      Enumeration en = ((AdditionalMeasureProducer) m_ResultProducer).
+        enumerateMeasures();
       while (en.hasMoreElements()) {
-        String mname = en.nextElement();
-        newVector.add(mname);
+        String mname = (String) en.nextElement();
+        newVector.addElement(mname);
       }
     }
     return newVector.elements();
@@ -802,12 +812,12 @@ public class LearningRateResultProducer implements ResultListener,
   @Override
   public double getMeasure(String additionalMeasureName) {
     if (m_ResultProducer instanceof AdditionalMeasureProducer) {
-      return ((AdditionalMeasureProducer) m_ResultProducer)
-        .getMeasure(additionalMeasureName);
+      return ((AdditionalMeasureProducer) m_ResultProducer).
+        getMeasure(additionalMeasureName);
     } else {
       throw new IllegalArgumentException("LearningRateResultProducer: "
-        + "Can't return value for : " + additionalMeasureName + ". "
-        + m_ResultProducer.getClass().getName() + " "
+        + "Can't return value for : " + additionalMeasureName
+        + ". " + m_ResultProducer.getClass().getName() + " "
         + "is not an AdditionalMeasureProducer");
     }
   }

@@ -4,25 +4,27 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
-  <artifactId>weka-dev</artifactId>
-  <version>3.7.12-SNAPSHOT</version><!-- weka-version -->
+  <artifactId>weka-stable</artifactId>
+  <version>3.6.12-SNAPSHOT</version><!-- weka-version -->
   <packaging>jar</packaging>
 
-  <name>weka-dev</name>
+  <name>weka-stable</name>
   <description>The Waikato Environment for Knowledge Analysis (WEKA), a machine 
-  learning workbench. This version represents the developer version, the
-  "bleeding edge" of development, you could say. New functionality gets added
-  to this version.
+  learning workbench. This version is tied to the 3rd edition the "Data Mining: 
+  Practical Machine Learning Tools and Techniques" book by Ian H. Witten, Eibe Frank, 
+  Mark A. Hall. Apart from bugfixes, this version does not receive any other updates.
   </description>
   <url>http://www.cms.waikato.ac.nz/ml/weka/</url>
+
   <organization>
     <name>University of Waikato, Hamilton, NZ</name>
     <url>http://www.waikato.ac.nz/</url>
   </organization>
+
   <licenses>
     <license>
-      <name>GNU General Public License 3</name>
-      <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+      <name>GNU General Public License 2.0</name>
+      <url>http://www.gnu.org/licenses/gpl-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -51,9 +53,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/weka</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/branches/stable-3-6/weka</url>
   </scm>
 
   <profiles>
@@ -107,12 +109,6 @@
       <artifactId>java-cup</artifactId>
       <version>0.11a</version>
     </dependency>    
-
-    <dependency>
-      <groupId>org.pentaho.pentaho-commons</groupId>
-      <artifactId>pentaho-package-manager</artifactId>
-      <version>1.0.8</version>
-    </dependency>
   </dependencies>
 
   <properties>
@@ -190,8 +186,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.0.2</version>
           <configuration>
-            <source>1.6</source>
-            <target>1.6</target>
+            <source>1.5</source>
+            <target>1.5</target>
           </configuration>
         </plugin>
 
@@ -207,7 +203,6 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <systemPropertyVariables>
               <weka.test.Regression.root>src/test/resources/wekarefs</weka.test.Regression.root>
-	      <weka.test.maventest>true</weka.test.maventest>
 	      <user.timezone>Pacific/Auckland</user.timezone>
             </systemPropertyVariables>
           </configuration>

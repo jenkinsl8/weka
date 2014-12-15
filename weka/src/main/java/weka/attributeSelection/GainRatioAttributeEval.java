@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GainRatioAttributeEval.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -60,8 +61,9 @@ import weka.filters.supervised.attribute.Discretize;
  * @version $Revision$
  * @see Discretize
  */
-public class GainRatioAttributeEval extends ASEvaluation implements
-  AttributeEvaluator, OptionHandler {
+public class GainRatioAttributeEval
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8504656625598579926L;
@@ -71,6 +73,9 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
   /** The class index */
   private int m_classIndex;
+
+  /** The number of attributes */
+  private int m_numAttribs;
 
   /** The number of instances */
   private int m_numInstances;
@@ -107,8 +112,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>(1);
+  public Enumeration listOptions() {
+    Vector newVector = new Vector(1);
     newVector.addElement(new Option("\ttreat missing values as a seperate "
       + "value.", "M", 0, "-M"));
     return newVector.elements();
@@ -132,7 +137,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    * @throws Exception if an option is not supported
    **/
   @Override
-  public void setOptions(String[] options) throws Exception {
+  public void setOptions(String[] options)
+    throws Exception {
     resetOptions();
     setMissingMerge(!(Utils.getFlag('M', options)));
   }
@@ -175,11 +181,14 @@ public class GainRatioAttributeEval extends ASEvaluation implements
   @Override
   public String[] getOptions() {
     String[] options = new String[1];
+    int current = 0;
 
     if (!getMissingMerge()) {
-      options[0] = "-M";
-    } else {
-      options[0] = "";
+      options[current++] = "-M";
+    }
+
+    while (current < options.length) {
+      options[current++] = "";
     }
 
     return options;
@@ -217,13 +226,15 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    * @throws Exception if the evaluator has not been generated successfully
    */
   @Override
-  public void buildEvaluator(Instances data) throws Exception {
+  public void buildEvaluator(Instances data)
+    throws Exception {
 
     // can evaluator handle data?
     getCapabilities().testWithFail(data);
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
+    m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
     Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
@@ -249,7 +260,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
    * @throws Exception if the attribute could not be evaluated
    */
   @Override
-  public double evaluateAttribute(int attribute) throws Exception {
+  public double evaluateAttribute(int attribute)
+    throws Exception {
     int i, j, ii, jj;
     int ni, nj;
     double sum = 0.0;
@@ -279,13 +291,15 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
       if (inst.isMissing(attribute)) {
         ii = ni - 1;
-      } else {
+      }
+      else {
         ii = (int) inst.value(attribute);
       }
 
       if (inst.isMissing(m_classIndex)) {
         jj = nj - 1;
-      } else {
+      }
+      else {
         jj = (int) inst.value(m_classIndex);
       }
 
@@ -312,7 +326,9 @@ public class GainRatioAttributeEval extends ASEvaluation implements
     }
 
     // distribute missing counts
-    if (m_missing_merge && (sumi[ni - 1] < sum) && (sumj[nj - 1] < sum)) {
+    if (m_missing_merge &&
+      (sumi[ni - 1] < sum) &&
+      (sumj[nj - 1] < sum)) {
       double[] i_copy = new double[sumi.length];
       double[] j_copy = new double[sumj.length];
       double[][] counts_copy = new double[sumi.length][sumj.length];
@@ -323,8 +339,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
       System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
       System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
-      double total_missing =
-        (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
+      double total_missing = (sumi[ni - 1] + sumj[nj - 1] -
+        counts[ni - 1][nj - 1]);
 
       // do the missing i's
       if (sumi[ni - 1] > 0.0) {
@@ -364,8 +380,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
       if (counts[ni - 1][nj - 1] > 0.0 && total_missing < sum) {
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
-            temp = (counts_copy[i][j] / (sum - total_missing))
-              * counts_copy[ni - 1][nj - 1];
+            temp = (counts_copy[i][j] / (sum - total_missing)) *
+              counts_copy[ni - 1][nj - 1];
             counts[i][j] += temp;
             sumi[i] += temp;
             sumj[j] += temp;
@@ -390,7 +406,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
     if (m_trainInstances == null) {
       text.append("\tGain Ratio evaluator has not been built");
-    } else {
+    }
+    else {
       text.append("\tGain Ratio feature evaluator");
 
       if (!m_missing_merge) {

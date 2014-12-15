@@ -1,45 +1,41 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    FilteredClassifier.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.classifiers.IterativeClassifier;
-import weka.core.BatchPredictor;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
-import weka.core.PartitionGenerator;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.core.WekaException;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -104,11 +100,11 @@ import weka.filters.Filter;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.28 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
-  implements Drawable, PartitionGenerator, IterativeClassifier,  BatchPredictor {
+  implements Drawable {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -139,14 +135,6 @@ public class FilteredClassifier
   protected String defaultClassifierString() {
     
     return "weka.classifiers.trees.J48";
-  }
-
-  /**
-   * String describing default filter.
-   */
-  protected String defaultFilterString() {
-
-    return "weka.filters.supervised.attribute.Discretize";
   }
 
   /**
@@ -187,118 +175,24 @@ public class FilteredClassifier
   }
 
   /**
-   * Builds the classifier to generate a partition.
-   * (If the base classifier supports this.)
-   */
-  public void generatePartition(Instances data) throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator)
-      buildClassifier(data);
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " cannot generate a partition");
-  }
-  
-  /**
-   * Computes an array that has a value for each element in the partition.
-   * (If the base classifier supports this.)
-   */
-  public double[] getMembershipValues(Instance inst) throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator) {
-      Instance newInstance = filterInstance(inst);
-      if (newInstance == null) {
-        double[] unclassified = new double[numElements()];
-        for (int i = 0; i < unclassified.length; i++) {
-          unclassified[i] = Utils.missingValue();
-        }
-        return unclassified;
-      } else {
-        return ((PartitionGenerator)m_Classifier).getMembershipValues(newInstance);
-      }
-    } else throw new Exception("Classifier: " + getClassifierSpec()
-                               + " cannot generate a partition");
-  }
-  
-  /**
-   * Returns the number of elements in the partition.
-   * (If the base classifier supports this.)
-   */
-  public int numElements() throws Exception {
-    
-    if (m_Classifier instanceof PartitionGenerator)
-      return ((PartitionGenerator)m_Classifier).numElements();
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " cannot generate a partition");
-  }
-
-  /**
-   * Initializes an iterative classifier.
-   * (If the base classifier supports this.)
-   *
-   * @param data the instances to be used in induction
-   * @exception Exception if the model cannot be initialized
-   */
-  public void initializeClassifier(Instances data) throws Exception {
-
-    if (m_Classifier instanceof IterativeClassifier)
-      ((IterativeClassifier)m_Classifier).initializeClassifier(setUp(data));
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " is not an IterativeClassifier");
-  }
-  
-  /**
-   * Performs one iteration.
-   * (If the base classifier supports this.)
-   *
-   * @return false if no further iterations could be performed, true otherwise
-   * @exception Exception if this iteration fails for unexpected reasons
-   */
-  public boolean next() throws Exception {
-    
-    if (m_Classifier instanceof IterativeClassifier)
-      return ((IterativeClassifier)m_Classifier).next();
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " is not an IterativeClassifier");
-  }
-  
-  /**
-   * Signal end of iterating, useful for any house-keeping/cleanup
-   * (If the base classifier supports this.)
-   *
-   * @exception Exception if cleanup fails
-   */
-  public void done() throws Exception {
-
-    if (m_Classifier instanceof IterativeClassifier)
-      ((IterativeClassifier)m_Classifier).done();
-    else throw new Exception("Classifier: " + getClassifierSpec()
-			     + " is not an IterativeClassifier");
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(1);
+    Vector newVector = new Vector(2);
     newVector.addElement(new Option(
 	      "\tFull class name of filter to use, followed\n"
 	      + "\tby filter options.\n"
 	      + "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"",
 	      "F", 1, "-F <filter specification>"));
 
-    newVector.addAll(Collections.list(super.listOptions()));
-    
-    if (getFilter() instanceof OptionHandler) {
-      newVector.addElement(new Option(
-        "",
-        "", 0, "\nOptions specific to filter "
-          + getFilter().getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler)getFilter()).listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
     }
-    
+
     return newVector.elements();
   }
 
@@ -366,21 +260,21 @@ public class FilteredClassifier
    */
   public void setOptions(String[] options) throws Exception {
 
+    // Same for filter
     String filterString = Utils.getOption('F', options);
-    if (filterString.length() <= 0) {
-      filterString = defaultFilterString();
+    if (filterString.length() > 0) {
+      String [] filterSpec = Utils.splitOptions(filterString);
+      if (filterSpec.length == 0) {
+	throw new IllegalArgumentException("Invalid filter specification string");
+      }
+      String filterName = filterSpec[0];
+      filterSpec[0] = "";
+      setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
+    } else {
+      setFilter(new weka.filters.supervised.attribute.Discretize());
     }
-    String [] filterSpec = Utils.splitOptions(filterString);
-    if (filterSpec.length == 0) {
-      throw new IllegalArgumentException("Invalid filter specification string");
-    }
-    String filterName = filterSpec[0];
-    filterSpec[0] = "";
-    setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
 
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -390,14 +284,16 @@ public class FilteredClassifier
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 2];
+    int current = 0;
 
-    options.add("-F");
-    options.add("" + getFilterSpec());
+    options[current++] = "-F";
+    options[current++] = "" + getFilterSpec();
 
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+    return options;
   }
   
   /**
@@ -457,7 +353,7 @@ public class FilteredClassifier
       result = super.getCapabilities();
     else
       result = getFilter().getCapabilities();
-
+    
     // the filtered classifier always needs a class
     result.disable(Capability.NO_CLASS);
     
@@ -469,17 +365,16 @@ public class FilteredClassifier
   }
 
   /**
-   * Sets up the filter and runs checks.
+   * Build the classifier on the filtered data.
    *
-   * @return filtered data
+   * @param data the training data
+   * @throws Exception if the classifier could not be built successfully
    */
-  protected Instances setUp(Instances data) throws Exception {
+  public void buildClassifier(Instances data) throws Exception {
 
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
     }
-
-    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
@@ -499,59 +394,9 @@ public class FilteredClassifier
     getClassifier().getCapabilities().testWithFail(data);
 
     m_FilteredInstances = data.stringFreeStructure();
-    return data;
+    m_Classifier.buildClassifier(data);
   }
 
-  /**
-   * Build the classifier on the filtered data.
-   *
-   * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
-   */
-  public void buildClassifier(Instances data) throws Exception {
-
-    m_Classifier.buildClassifier(setUp(data));
-  }
-
-  /**
-   * Filters the instance so that it can subsequently be classified.
-   */
-  protected Instance filterInstance(Instance instance)
-    throws Exception {
-    
-    /*
-      System.err.println("FilteredClassifier:: " 
-      + m_Filter.getClass().getName()
-      + " in: " + instance);
-    */
-    if (m_Filter.numPendingOutput() > 0) {
-      throw new Exception("Filter output queue not empty!");
-    }
-    /*
-      String fname = m_Filter.getClass().getName();
-      fname = fname.substring(fname.lastIndexOf('.') + 1);
-      util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
-      t.start();
-    */
-    if (!m_Filter.input(instance)) {
-      if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
-        throw new Exception("Filter didn't make the test instance"
-                            + " immediately available!");
-      } else {
-        m_Filter.batchFinished();
-        return null;
-      }
-    }
-    m_Filter.batchFinished();
-    return m_Filter.output();
-    //t.stop();
-    /*
-      System.err.println("FilteredClassifier:: " 
-      + m_Filter.getClass().getName()
-      + " out: " + newInstance);
-    */
-  }
-  
   /**
    * Classifies a given instance after filtering.
    *
@@ -563,88 +408,33 @@ public class FilteredClassifier
   public double [] distributionForInstance(Instance instance)
     throws Exception {
 
-    Instance newInstance = filterInstance(instance);
-    if (newInstance == null) {
-
-      // filter has consumed the instance (e.g. RemoveWithValues
-      // may do this). We will indicate no prediction for this
-      // instance
-      double[] unclassified = null;
-      if (instance.classAttribute().isNumeric()) {
-        unclassified = new double[1];
-        unclassified[0] = Utils.missingValue();
-      } else {
-        // all zeros
-        unclassified = new double[instance.classAttribute().numValues()];
-      }
-      return unclassified;
-    } else {
-      return m_Classifier.distributionForInstance(newInstance);
+    /*
+      System.err.println("FilteredClassifier:: " 
+                         + m_Filter.getClass().getName()
+                         + " in: " + instance);
+    */
+    if (m_Filter.numPendingOutput() > 0) {
+      throw new Exception("Filter output queue not empty!");
     }
-  }
-  
-  /**
-   * Tool tip text for this property
-   * 
-   * @return the tool tip for this property
-   */
-  public String batchSizeTipText() {
-    return "Batch size to use if base learner is a BatchPredictor";
-  }
-
-  /**
-   * Set the batch size to use. Gets passed through to the base learner
-   * if it implements BatchPrecitor. Otherwise it is just ignored.
-   *
-   * @param size the batch size to use
-   */
-  public void setBatchSize(String size) {
-
-    if (getClassifier() instanceof BatchPredictor) {
-      ((BatchPredictor)getClassifier()).setBatchSize(size);
+    /*
+    String fname = m_Filter.getClass().getName();
+    fname = fname.substring(fname.lastIndexOf('.') + 1);
+    util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
+    t.start();
+    */
+    if (!m_Filter.input(instance)) {
+      throw new Exception("Filter didn't make the test instance"
+			  + " immediately available!");
     }
-  }
-
-  /**
-   * Gets the preferred batch size from the
-   * base learner if it implements BatchPredictor. 
-   * Returns 1 as the preferred batch size otherwise.
-   *
-   * @return the batch size to use
-   */
-  public String getBatchSize() {
-
-    if (getClassifier() instanceof BatchPredictor) {
-      return ((BatchPredictor)getClassifier()).getBatchSize();
-    } else {
-      return "1";
-    }
-  }
-
-  /**
-   * Batch scoring method. Calls the appropriate method for the base learner
-   * if it implements BatchPredictor. Otherwise it simply calls the
-   * distributionForInstance() method repeatedly.
-   * 
-   * @param insts the instances to get predictions for
-   * @return an array of probability distributions, one for each instance
-   * @throws Exception if a problem occurs
-   */
-  public double[][] distributionsForInstances(Instances insts) throws Exception {
-
-    if (getClassifier() instanceof BatchPredictor) {
-      Instances filteredInsts = Filter.useFilter(insts, m_Filter);
-      if (filteredInsts.numInstances() != insts.numInstances()) {
-        throw new WekaException("FilteredClassifier: filter has returned more/less instances than required.");
-      }
-      return ((BatchPredictor)getClassifier()).distributionsForInstances(filteredInsts);
-    } else {
-      double[][] result = new double[insts.numInstances()][insts.numClasses()];
-      for (int i = 0; i < insts.numInstances(); i++) {
-        result[i] = distributionForInstance(insts.instance(i));
-      }
-      return result;
-    }
+    m_Filter.batchFinished();
+    Instance newInstance = m_Filter.output();
+    //t.stop();
+    /*
+    System.err.println("FilteredClassifier:: " 
+                       + m_Filter.getClass().getName()
+                       + " out: " + newInstance);
+    */
+    return m_Classifier.distributionForInstance(newInstance);
   }
 
   /**
@@ -675,7 +465,7 @@ public class FilteredClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 
   /**
@@ -684,7 +474,7 @@ public class FilteredClassifier
    * @param argv should contain the following arguments:
    * -t training file [-T test file] [-c class index]
    */
-  public static void main(String [] argv)  {
+  public static void main(String [] argv) {
     runClassifier(new FilteredClassifier(), argv);
   }
 }

@@ -1,16 +1,17 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
@@ -19,45 +20,41 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
+import weka.classifiers.Classifier;
 
 /**
  * Dummy classifier - used in ThresholdSelectorTest.
- * 
+ *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision$
+ * @version $Revision: 1.4 $
  * @see ThresholdSelectorTest
  */
-public class ThresholdSelectorDummyClassifier
-  extends AbstractClassifier {
+public class ThresholdSelectorDummyClassifier 
+  extends Classifier {
 
   /** for serialization */
   private static final long serialVersionUID = -2040984810834943903L;
-
-  private final double[] m_Preds;
+  
+  private double[] m_Preds;
   private int m_Pos;
 
   public ThresholdSelectorDummyClassifier(double[] preds) {
-
     m_Preds = new double[preds.length];
-
-    for (int i = 0; i < preds.length; i++) {
+    for (int i = 0; i < preds.length; i++)
       m_Preds[i] = preds[i];
-    }
   }
 
   /**
    * Returns default capabilities of the classifier.
-   * 
-   * @return the capabilities of this classifier
+   *
+   * @return      the capabilities of this classifier
    */
-  @Override
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
 
@@ -68,16 +65,13 @@ public class ThresholdSelectorDummyClassifier
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
-
+    
     return result;
   }
 
-  @Override
-  public void buildClassifier(Instances train) {
-    m_Pos = 0;
+  public void buildClassifier(Instances train) { 
   }
 
-  @Override
   public double[] distributionForInstance(Instance test) throws Exception {
     double[] result = new double[test.numClasses()];
     int pred = 0;
@@ -91,24 +85,14 @@ public class ThresholdSelectorDummyClassifier
     m_Pos = (m_Pos + 1) % m_Preds.length;
     return result;
   }
-
-  @Override
-  public String toString() {
-    StringBuffer buff = new StringBuffer();
-    for (double m_Pred : m_Preds) {
-      buff.append(m_Pred + " ");
-    }
-
-    return buff.toString();
-  }
-
+  
   /**
    * Returns the revision string.
    * 
-   * @return the revision
+   * @return		the revision
    */
-  @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
+

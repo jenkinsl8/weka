@@ -1,25 +1,29 @@
-/*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ /*
+  *    This program is free software; you can redistribute it and/or modify
+  *    it under the terms of the GNU General Public License as published by
+  *    the Free Software Foundation; either version 2 of the License, or
+  *    (at your option) any later version.
+  *
+  *    This program is distributed in the hope that it will be useful,
+  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *    GNU General Public License for more details.
+  *
+  *    You should have received a copy of the GNU General Public License
+  *    along with this program; if not, write to the Free Software
+  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  */
 
  /*
   *    ViewerDialog.java
-  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
 package weka.gui;
+
+import weka.core.Instances;
+import weka.gui.arffviewer.ArffPanel;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -33,24 +37,21 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import weka.core.Instances;
-import weka.gui.arffviewer.ArffPanel;
-
 /**
  * A downsized version of the ArffViewer, displaying only one Instances-Object.
  *
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
-public class ViewerDialog 
-  extends JDialog 
-  implements ChangeListener { 
+public class ViewerDialog
+  extends JDialog
+  implements ChangeListener {
 
   /** for serialization */
   private static final long serialVersionUID = 6747718484736047752L;
-  
+
   /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;
 
@@ -59,22 +60,22 @@ public class ViewerDialog
 
   /** the result of the user's action, either OK or CANCEL */
   protected int m_Result = CANCEL_OPTION;
-  
+
   /** Click to activate the current set parameters */
-  protected JButton m_OkButton = new JButton("OK");
+  protected JButton m_OkButton = new JButton(Messages.getInstance().getString("ViewerDialog_OkButton_JButton_Text"));
 
   /** Click to cancel the dialog */
-  protected JButton m_CancelButton = new JButton("Cancel");
+  protected JButton m_CancelButton = new JButton(Messages.getInstance().getString("ViewerDialog_CancelButton_JButton_Text"));
 
   /** Click to undo the last action */
-  protected JButton m_UndoButton = new JButton("Undo");
-  
+  protected JButton m_UndoButton = new JButton(Messages.getInstance().getString("ViewerDialog_UndoButton_JButton_Text"));
+
   /** the panel to display the Instances-object */
   protected ArffPanel m_ArffPanel = new ArffPanel();
-  
+
   /**
    * initializes the dialog with the given parent
-   * 
+   *
    * @param parent the parent for this dialog
    */
   public ViewerDialog(Frame parent) {
@@ -88,14 +89,14 @@ public class ViewerDialog
   protected void createDialog() {
     JPanel              panel;
 
-    setTitle("Viewer");
-    
+    setTitle(Messages.getInstance().getString("ViewerDialog_CreateDialog_SetTitle_Text"));
+
     getContentPane().setLayout(new BorderLayout());
-    
+
     // ArffPanel
     m_ArffPanel.addChangeListener(this);
     getContentPane().add(m_ArffPanel, BorderLayout.CENTER);
-    
+
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
@@ -123,41 +124,41 @@ public class ViewerDialog
 
     pack();
   }
-  
+
   /**
    * sets the instances to display
    */
   public void setInstances(Instances inst) {
     m_ArffPanel.setInstances(new Instances(inst));
   }
-  
+
   /**
    * returns the currently displayed instances
    */
   public Instances getInstances() {
     return m_ArffPanel.getInstances();
   }
-  
+
   /**
-   * sets the state of the buttons 
+   * sets the state of the buttons
    */
   protected void setButtons() {
-    m_OkButton.setEnabled(true); 
-    m_CancelButton.setEnabled(true); 
-    m_UndoButton.setEnabled(m_ArffPanel.canUndo()); 
+    m_OkButton.setEnabled(true);
+    m_CancelButton.setEnabled(true);
+    m_UndoButton.setEnabled(m_ArffPanel.canUndo());
   }
-  
+
   /**
    * returns whether the data has been changed
-   * 
+   *
    * @return true if the data has been changed
    */
   public boolean isChanged() {
     return m_ArffPanel.isChanged();
   }
-  
+
   /**
-   * undoes the last action 
+   * undoes the last action
    */
   private void undo() {
     m_ArffPanel.undo();
@@ -169,7 +170,7 @@ public class ViewerDialog
   public void stateChanged(ChangeEvent e) {
     setButtons();
   }
-  
+
   /**
    * Pops up the modal dialog and waits for Cancel or OK.
    *

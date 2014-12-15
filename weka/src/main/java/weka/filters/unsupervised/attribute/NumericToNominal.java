@@ -1,26 +1,26 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * NumericToNominal.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -67,7 +67,8 @@ import weka.filters.SimpleBatchFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class NumericToNominal extends SimpleBatchFilter {
+public class NumericToNominal
+  extends SimpleBatchFilter {
 
   /** for serialization */
   private static final long serialVersionUID = -6614630932899796239L;
@@ -89,7 +90,8 @@ public class NumericToNominal extends SimpleBatchFilter {
    */
   @Override
   public String globalInfo() {
-    return "A filter for turning numeric attributes into nominal ones. Unlike "
+    return
+    "A filter for turning numeric attributes into nominal ones. Unlike "
       + "discretization, it just takes all numeric values and adds them to "
       + "the list of nominal values of that attribute. Useful after CSV "
       + "imports, to enforce certain attributes to become nominal, e.g., "
@@ -102,16 +104,17 @@ public class NumericToNominal extends SimpleBatchFilter {
    * @return an enumeration of all the available options.
    */
   @Override
-  public Enumeration<Option> listOptions() {
-
-    Vector<Option> result = new Vector<Option>(2);
+  public Enumeration listOptions() {
+    Vector result = new Vector();
 
     result.addElement(new Option(
       "\tSpecifies list of columns to Discretize. First"
-        + " and last are valid indexes.\n" + "\t(default: first-last)", "R", 1,
-      "-R <col1,col2-col4,...>"));
+        + " and last are valid indexes.\n"
+        + "\t(default: first-last)",
+      "R", 1, "-R <col1,col2-col4,...>"));
 
-    result.addElement(new Option("\tInvert matching sense of column indexes.",
+    result.addElement(new Option(
+      "\tInvert matching sense of column indexes.",
       "V", 0, "-V"));
 
     return result.elements();
@@ -142,10 +145,13 @@ public class NumericToNominal extends SimpleBatchFilter {
    */
   @Override
   public void setOptions(String[] options) throws Exception {
+    String tmpStr;
+
+    super.setOptions(options);
 
     setInvertSelection(Utils.getFlag('V', options));
 
-    String tmpStr = Utils.getOption('R', options);
+    tmpStr = Utils.getOption('R', options);
     if (tmpStr.length() != 0) {
       setAttributeIndices(tmpStr);
     } else {
@@ -155,10 +161,6 @@ public class NumericToNominal extends SimpleBatchFilter {
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
-
-    super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -168,8 +170,15 @@ public class NumericToNominal extends SimpleBatchFilter {
    */
   @Override
   public String[] getOptions() {
+    int i;
+    Vector result;
+    String[] options;
 
-    Vector<String> result = new Vector<String>();
+    result = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++) {
+      result.add(options[i]);
+    }
 
     if (!getAttributeIndices().equals("")) {
       result.add("-R");
@@ -180,9 +189,7 @@ public class NumericToNominal extends SimpleBatchFilter {
       result.add("-V");
     }
 
-    Collections.addAll(result, super.getOptions());
-
-    return result.toArray(new String[result.size()]);
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -192,7 +199,8 @@ public class NumericToNominal extends SimpleBatchFilter {
    *         explorer/experimenter gui
    */
   public String invertSelectionTipText() {
-    return "Set attribute selection mode. If false, only selected"
+    return
+    "Set attribute selection mode. If false, only selected"
       + " (numeric) attributes in the range will be 'nominalized'; if"
       + " true, only non-selected attributes will be 'nominalized'.";
   }
@@ -306,57 +314,63 @@ public class NumericToNominal extends SimpleBatchFilter {
 
     Instances data;
     Instances result;
-    ArrayList<Attribute> atts;
-    ArrayList<String> values;
-    HashSet<Double> hash;
+    FastVector atts;
+    FastVector values;
+    HashSet hash;
     int i;
     int n;
     boolean isDate;
     Instance inst;
-    Vector<Double> sorted;
+    Vector sorted;
 
     m_Cols.setUpper(inputFormat.numAttributes() - 1);
     data = new Instances(inputFormat);
-    atts = new ArrayList<Attribute>();
+    atts = new FastVector();
     for (i = 0; i < data.numAttributes(); i++) {
       if (!m_Cols.isInRange(i) || !data.attribute(i).isNumeric()) {
-        atts.add(data.attribute(i));
+        atts.addElement(data.attribute(i));
         continue;
       }
 
       // date attribute?
       isDate = (data.attribute(i).type() == Attribute.DATE);
 
-      // determine all available attribute values in dataset
-      hash = new HashSet<Double>();
+      // determine all available attribtues in dataset
+      hash = new HashSet();
       for (n = 0; n < data.numInstances(); n++) {
         inst = data.instance(n);
         if (inst.isMissing(i)) {
           continue;
         }
 
-        hash.add(new Double(inst.value(i)));
+        if (isDate) {
+          hash.add(inst.stringValue(i));
+        } else {
+          hash.add(new Double(inst.value(i)));
+        }
       }
 
       // sort values
-      sorted = new Vector<Double>();
-      for (Double o : hash) {
+      sorted = new Vector();
+      for (Object o : hash) {
         sorted.add(o);
       }
       Collections.sort(sorted);
 
       // create attribute from sorted values
-      values = new ArrayList<String>();
-      for (Double o : sorted) {
+      values = new FastVector();
+      for (Object o : sorted) {
         if (isDate) {
-          values.add(data.attribute(i).formatDate(o.doubleValue()));
+          values.addElement(
+            o.toString());
         } else {
-          values.add(Utils.doubleToString(o.doubleValue(), MAX_DECIMALS));
+          values.addElement(
+            Utils.doubleToString(((Double) o).doubleValue(), MAX_DECIMALS));
         }
       }
       Attribute newAtt = new Attribute(data.attribute(i).name(), values);
       newAtt.setWeight(data.attribute(i).weight());
-      atts.add(newAtt);
+      atts.addElement(newAtt);
     }
 
     result = new Instances(inputFormat.relationName(), atts, 0);
@@ -396,7 +410,8 @@ public class NumericToNominal extends SimpleBatchFilter {
       values = inst.toDoubleArray();
 
       for (n = 0; n < values.length; n++) {
-        if (!m_Cols.isInRange(n) || !instances.attribute(n).isNumeric()
+        if (!m_Cols.isInRange(n)
+          || !instances.attribute(n).isNumeric()
           || inst.isMissing(n)) {
           continue;
         }
@@ -410,7 +425,7 @@ public class NumericToNominal extends SimpleBatchFilter {
 
         int index = result.attribute(n).indexOfValue(value);
         if (index == -1) {
-          values[n] = Utils.missingValue();;
+          values[n] = Instance.missingValue();
         } else {
           values[n] = index;
         }
@@ -420,7 +435,7 @@ public class NumericToNominal extends SimpleBatchFilter {
       if (inst instanceof SparseInstance) {
         newInst = new SparseInstance(inst.weight(), values);
       } else {
-        newInst = new DenseInstance(inst.weight(), values);
+        newInst = new Instance(inst.weight(), values);
       }
 
       // copy possible string, relational values

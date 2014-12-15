@@ -20,16 +20,16 @@
 import jarray
 import sys
 
-import weka.classifiers.AbstractClassifier as AbstractClassifier
+import weka.classifiers.Classifier as Classifier
 import weka.classifiers.Evaluation as Evaluation
 import weka.core.Capabilities as Capabilities
 import weka.core.Capabilities.Capability as Capability
 import weka.core.Instance as Instance
 import weka.core.Instances as Instances
-import weka.core.scripting.JythonSerializableObject as JythonSerializableObject
+import weka.core.JythonSerializableObject as JythonSerializableObject
 import weka.core.Utils as Utils
 
-class JeroR (AbstractClassifier, JythonSerializableObject):
+class JeroR (Classifier, JythonSerializableObject):
     """
     JeroR is a Jython implementation of the Weka classifier ZeroR
     
@@ -44,7 +44,7 @@ class JeroR (AbstractClassifier, JythonSerializableObject):
     #     happydoc --title Weka -d ./doc ./src
 
     # the chosen class value
-    __ClassValue = Utils.missingValue()
+    __ClassValue = Instance.missingValue()
     
     # the class attribute
     __Class = None
@@ -61,7 +61,7 @@ class JeroR (AbstractClassifier, JythonSerializableObject):
             an enumeration of all the available options.
         """
          
-        return AbstractClassifier.listOptions(self)
+        return Classifier.listOptions(self)
 
     def setOptions(self, options):
         """
@@ -72,7 +72,7 @@ class JeroR (AbstractClassifier, JythonSerializableObject):
             'options' -- the list of options as an array of strings
         """
         
-        AbstractClassifier.setOptions(self, options)
+        Classifier.setOptions(self, options)
         
         return
 
@@ -85,7 +85,7 @@ class JeroR (AbstractClassifier, JythonSerializableObject):
             an array of strings suitable for passing to setOptions
         """
          
-        return AbstractClassifier.getOptions(self)
+        return Classifier.getOptions(self)
     
     def getCapabilities(self):
         """
@@ -96,7 +96,7 @@ class JeroR (AbstractClassifier, JythonSerializableObject):
             the capabilities of this classifier
         """
 
-        result = AbstractClassifier.getCapabilities(self)
+        result = Classifier.getCapabilities(self)
     
         # attributes
         result.enable(Capability.NOMINAL_ATTRIBUTES)
@@ -227,4 +227,4 @@ if __name__ == "__main__":
     #   http://www.jython.org/docs/registry.html
     # - Accessing Java protected static members:
     #   http://www.jython.org/cgi-bin/faqw.py?req=all#3.5
-    AbstractClassifier.runClassifier(JeroR(), sys.argv[1:])
+    Classifier.runClassifier(JeroR(), sys.argv[1:])

@@ -1,23 +1,24 @@
-/*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ /*
+  *    This program is free software; you can redistribute it and/or modify
+  *    it under the terms of the GNU General Public License as published by
+  *    the Free Software Foundation; either version 2 of the License, or
+  *    (at your option) any later version.
+  *
+  *    This program is distributed in the hope that it will be useful,
+  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *    GNU General Public License for more details.
+  *
+  *    You should have received a copy of the GNU General Public License
+  *    along with this program; if not, write to the Free Software
+  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  */
 
-/*
- *    JPEGWriter.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
- *
- */
+ /*
+  *    JPEGWriter.java
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *
+  */
 
 package weka.gui.visualize;
 
@@ -37,21 +38,22 @@ import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JComponent;
 
-/**
- * This class takes any JComponent and outputs it to a JPEG-file. Scaling is by
- * default disabled, since we always take a screenshot.
- * 
+/** 
+ * This class takes any JComponent and outputs it to a JPEG-file.
+ * Scaling is by default disabled, since we always take a screenshot.
+ *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class JPEGWriter extends JComponentWriter {
-
+public class JPEGWriter
+  extends JComponentWriter {
+  
   /** the quality of the image. */
   protected float m_Quality;
-
+  
   /** the background color. */
   protected Color m_Background;
-
+  
   /**
    * initializes the object.
    */
@@ -62,7 +64,7 @@ public class JPEGWriter extends JComponentWriter {
   /**
    * initializes the object with the given Component.
    * 
-   * @param c the component to print in the output format
+   * @param c         the component to print in the output format
    */
   public JPEGWriter(JComponent c) {
     super(c);
@@ -71,50 +73,48 @@ public class JPEGWriter extends JComponentWriter {
   /**
    * initializes the object with the given Component and filename.
    * 
-   * @param c the component to print in the output format
-   * @param f the file to store the output in
+   * @param c         the component to print in the output format
+   * @param f         the file to store the output in
    */
   public JPEGWriter(JComponent c, File f) {
     super(c, f);
-
-    m_Quality = 1.0f;
+    
+    m_Quality    = 1.0f;
     m_Background = Color.WHITE;
   }
-
+  
   /**
    * further initialization.
    */
-  @Override
   public void initialize() {
     super.initialize();
-
-    m_Quality = 1.0f;
+    
+    m_Quality    = 1.0f;
     m_Background = Color.WHITE;
     setScalingEnabled(false);
   }
 
   /**
-   * returns the name of the writer, to display in the FileChooser. must be
-   * overridden in the derived class.
+   * returns the name of the writer, to display in the FileChooser.
+   * must be overridden in the derived class.
    * 
    * @return the name of the writer
    */
-  @Override
   public String getDescription() {
-    return "JPEG-Image";
+    return Messages.getInstance().getString("JPEGWriter_GetDescription_Text");
   }
-
+  
   /**
    * returns the extension (incl. ".") of the output format, to use in the
-   * FileChooser. must be overridden in the derived class.
+   * FileChooser. 
+   * must be overridden in the derived class.
    * 
    * @return the file extension
    */
-  @Override
   public String getExtension() {
     return ".jpg";
   }
-
+  
   /**
    * returns the current background color.
    * 
@@ -123,7 +123,7 @@ public class JPEGWriter extends JComponentWriter {
   public Color getBackground() {
     return m_Background;
   }
-
+  
   /**
    * sets the background color to use in creating the JPEG.
    * 
@@ -132,7 +132,7 @@ public class JPEGWriter extends JComponentWriter {
   public void setBackground(Color c) {
     m_Background = c;
   }
-
+  
   /**
    * returns the quality the JPEG will be stored in.
    * 
@@ -141,7 +141,7 @@ public class JPEGWriter extends JComponentWriter {
   public float getQuality() {
     return m_Quality;
   }
-
+  
   /**
    * sets the quality the JPEG is saved in.
    * 
@@ -150,41 +150,37 @@ public class JPEGWriter extends JComponentWriter {
   public void setQuality(float q) {
     m_Quality = q;
   }
-
+  
   /**
    * generates the actual output.
    * 
-   * @throws Exception if something goes wrong
+   * @throws Exception	if something goes wrong
    */
-  @Override
   public void generateOutput() throws Exception {
-    BufferedImage bi;
-    Graphics g;
-    ImageWriter writer;
-    Iterator<ImageWriter> iter;
-    ImageOutputStream ios;
-    ImageWriteParam param;
+    BufferedImage	bi;
+    Graphics		g;
+    ImageWriter 	writer;
+    Iterator 		iter;
+    ImageOutputStream 	ios;
+    ImageWriteParam 	param;
 
     // render image
-    bi = new BufferedImage(getComponent().getWidth(), getComponent()
-      .getHeight(), BufferedImage.TYPE_INT_RGB);
-    g = bi.getGraphics();
+    bi = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
+    g  = bi.getGraphics();
     g.setPaintMode();
     g.setColor(getBackground());
-    if (g instanceof Graphics2D) {
+    if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
-    }
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
     getComponent().printAll(g);
-
+    
     // get jpeg writer
     writer = null;
-    iter = ImageIO.getImageWritersByFormatName(getExtension().replace(".", ""));
-    if (iter.hasNext()) {
-      writer = iter.next();
-    } else {
-      throw new Exception("No writer available for " + getDescription() + "!");
-    }
+    iter   = ImageIO.getImageWritersByFormatName(getExtension().replace(".", ""));
+    if (iter.hasNext())
+      writer = (ImageWriter) iter.next();
+    else
+      throw new Exception(Messages.getInstance().getString("JPEGWriter_GenerateOutput_Exception_Text_First") + getDescription() + Messages.getInstance().getString("JPEGWriter_GenerateOutput_Exception_Text_Second"));
 
     // prepare output file
     ios = ImageIO.createImageOutputStream(getFile());
@@ -192,7 +188,7 @@ public class JPEGWriter extends JComponentWriter {
 
     // set the quality
     param = new JPEGImageWriteParam(Locale.getDefault());
-    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT) ;
     param.setCompressionQuality(getQuality());
 
     // write the image
@@ -201,9 +197,9 @@ public class JPEGWriter extends JComponentWriter {
     // cleanup
     ios.flush();
     writer.dispose();
-    ios.close();
+    ios.close();    
   }
-
+  
   /**
    * for testing only.
    * 
@@ -211,21 +207,17 @@ public class JPEGWriter extends JComponentWriter {
    * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("building TreeVisualizer...");
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_First"));
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder
-      .create(new java.io.StringReader(
-        "digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
-    weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(
-      null, top, arrange);
-    tv.setSize(800, 600);
-
-    String filename = System.getProperty("java.io.tmpdir") + File.separator
-      + "test.jpg";
-    System.out.println("outputting to '" + filename + "'...");
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("JPEGWriter_Main_Text_Second")));
+    weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
+    tv.setSize(800 ,600);
+    
+    String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.jpg";
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_Third") + filename + Messages.getInstance().getString("JPEGWriter_Main_Text_Fourth"));
     toOutput(new JPEGWriter(), tv, new File(filename));
 
-    System.out.println("done!");
+    System.out.println(Messages.getInstance().getString("JPEGWriter_Main_Text_Fifth"));
   }
 }

@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ContingencyTables.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,20 +32,7 @@ public class ContingencyTables
   implements RevisionHandler {
 
   /** The natural logarithm of 2 */
-  public static final double log2 = Math.log(2);
-
-  /** Cache of integer logs */
-  private static final double MAX_INT_FOR_CACHE_PLUS_ONE = 10000;
-  private static final double[] INT_N_LOG_N_CACHE = new double[(int)MAX_INT_FOR_CACHE_PLUS_ONE];
-
-  /** Initialize cache */
-  static {
-    for (int i = 1; i < MAX_INT_FOR_CACHE_PLUS_ONE; i++) {
-      double d = (double)i;
-      INT_N_LOG_N_CACHE[i] = d * Math.log(d);
-    }
-  }
-
+  private static double log2 = Math.log(2);
 
   /**
    * Returns chi-squared probability for a given matrix.
@@ -541,19 +529,11 @@ public class ContingencyTables
   /**
    * Help method for computing entropy.
    */
-  public static double lnFunc(double num){
+  private static double lnFunc(double num){
     
     if (num <= 0) {
       return 0;
     } else {
-
-      // Use cache if we have a sufficiently small integer
-      if (num < MAX_INT_FOR_CACHE_PLUS_ONE) {
-        int n = (int)num;
-        if ((double)n == num) {
-          return INT_N_LOG_N_CACHE[n];
-        }
-      }
       return num * Math.log(num);
     }
   }

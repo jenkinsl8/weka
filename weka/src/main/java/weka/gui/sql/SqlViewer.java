@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * SqlViewer.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -131,7 +132,8 @@ public class SqlViewer extends JPanel implements ConnectionListener,
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.NORTH);
     panel.setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder("Connection"),
+      BorderFactory.createTitledBorder(Messages.getInstance().getString(
+        "SqlViewer_CreatePanel_Panel_BorderFactoryCreateTitledBorder_Text")),
       BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_ConnectionPanel, BorderLayout.CENTER);
 
@@ -140,9 +142,14 @@ public class SqlViewer extends JPanel implements ConnectionListener,
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.CENTER);
     panel2 = new JPanel(new BorderLayout());
-    panel2.setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder("Query"),
-      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+    panel2
+      .setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory
+          .createTitledBorder(Messages
+            .getInstance()
+            .getString(
+              "SqlViewer_CreatePanel_Panel2_BorderFactoryCreateTitledBorder_Text_First")),
+        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_QueryPanel, BorderLayout.NORTH);
     panel.add(panel2, BorderLayout.NORTH);
 
@@ -150,9 +157,14 @@ public class SqlViewer extends JPanel implements ConnectionListener,
     m_ResultPanel = new ResultPanel(m_Parent);
     m_ResultPanel.setQueryPanel(m_QueryPanel);
     panel2 = new JPanel(new BorderLayout());
-    panel2.setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder("Result"),
-      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+    panel2
+      .setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory
+          .createTitledBorder(Messages
+            .getInstance()
+            .getString(
+              "SqlViewer_CreatePanel_Panel2_BorderFactoryCreateTitledBorder_Text_Second")),
+        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel2.add(m_ResultPanel, BorderLayout.CENTER);
     panel.add(panel2, BorderLayout.CENTER);
 
@@ -160,9 +172,14 @@ public class SqlViewer extends JPanel implements ConnectionListener,
     m_InfoPanel = new InfoPanel(m_Parent);
     panel = new JPanel(new BorderLayout());
     add(panel, BorderLayout.SOUTH);
-    panel.setBorder(BorderFactory.createCompoundBorder(
-      BorderFactory.createTitledBorder("Info"),
-      BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+    panel
+      .setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory
+          .createTitledBorder(Messages
+            .getInstance()
+            .getString(
+              "SqlViewer_CreatePanel_Panel_BorderFactoryCreateTitledBorder_Text_Second")),
+        BorderFactory.createEmptyBorder(0, 5, 5, 5)));
     panel.add(m_InfoPanel, BorderLayout.CENTER);
 
     // listeners
@@ -186,16 +203,24 @@ public class SqlViewer extends JPanel implements ConnectionListener,
   @Override
   public void connectionChange(ConnectionEvent evt) {
     if (evt.getType() == ConnectionEvent.DISCONNECT) {
-      m_InfoPanel.append("disconnect from: "
-        + evt.getDbUtils().getDatabaseURL(), "information_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_ConnectionChange_InfoPanel_Text_First")
+          + evt.getDbUtils().getDatabaseURL(), "information_small.gif");
     } else {
-      m_InfoPanel.append("connecting to: " + evt.getDbUtils().getDatabaseURL()
-        + " = " + evt.isConnected(), "information_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_ConnectionChange_InfoPanel_Text_Second")
+          + evt.getDbUtils().getDatabaseURL() + " = " + evt.isConnected(),
+        "information_small.gif");
     }
 
     // did an exception happen?
     if (evt.getException() != null) {
-      m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_ConnectionChange_InfoPanel_Text_Third")
+          + evt.getException(), "error_small.gif");
     }
 
     // set focus
@@ -216,25 +241,42 @@ public class SqlViewer extends JPanel implements ConnectionListener,
     ResultSetHelper helper;
 
     if (evt.failed()) {
-      m_InfoPanel.append("Query:" + evt.getQuery(), "error_small.gif");
-      m_InfoPanel.append("exception: " + evt.getException(), "error_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_QueryExecuted_InfoPanel_Text_First")
+          + evt.getQuery(), "error_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_QueryExecuted_InfoPanel_Text_Second")
+          + evt.getException(), "error_small.gif");
     } else {
-      m_InfoPanel.append("Query: " + evt.getQuery(), "information_small.gif");
+      m_InfoPanel.append(
+        Messages.getInstance().getString(
+          "SqlViewer_QueryExecuted_InfoPanel_Text_Third")
+          + evt.getQuery(), "information_small.gif");
       try {
         if (evt.hasResult()) {
           helper = new ResultSetHelper(evt.getResultSet());
           if ((evt.getMaxRows() > 0)
             && (helper.getRowCount() >= evt.getMaxRows())) {
             m_InfoPanel.append(
-              helper.getRowCount() + " rows selected (" + evt.getMaxRows()
-                + " displayed).", "information_small.gif");
+              helper.getRowCount()
+                + Messages.getInstance().getString(
+                  "SqlViewer_QueryExecuted_InfoPanel_Text_Fourth")
+                + evt.getMaxRows()
+                + Messages.getInstance().getString(
+                  "SqlViewer_QueryExecuted_InfoPanel_Text_Fifth"),
+              "information_small.gif");
           } else if (helper.getRowCount() == -1) {
-            m_InfoPanel
-              .append(
-                "Unknown number of rows selected (due to JDBC driver restrictions).",
-                "information_small.gif");
+            m_InfoPanel.append(
+              Messages.getInstance().getString(
+                "SqlViewer_QueryExecuted_InfoPanel_Text_Sixth"),
+              "information_small.gif");
           } else {
-            m_InfoPanel.append(helper.getRowCount() + " rows selected.",
+            m_InfoPanel.append(
+              helper.getRowCount()
+                + Messages.getInstance().getString(
+                  "SqlViewer_QueryExecuted_InfoPanel_Text_Seventh"),
               "information_small.gif");
           }
         }
@@ -611,15 +653,16 @@ public class SqlViewer extends JPanel implements ConnectionListener,
    * @param args the commandline arguments - ignored
    */
   public static void main(String[] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-      "Logging started");
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages
+      .getInstance().getString("SqlViewer_Main_Log_Text"));
     LookAndFeel.setLookAndFeel();
 
     try {
       // uncomment to disable the memory management:
       // m_Memory.setEnabled(false);
 
-      final JFrame jf = new JFrame("Weka SQL-Viewer");
+      final JFrame jf = new JFrame(Messages.getInstance().getString(
+        "SqlViewer_Main_JFrame_Text"));
       m_Viewer = new SqlViewer(jf);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_Viewer, BorderLayout.CENTER);
@@ -640,7 +683,9 @@ public class SqlViewer extends JPanel implements ConnectionListener,
         public void run() {
           while (true) {
             // try {
-            // Thread.sleep(10);
+            // this.sleep(4000);
+            //
+            // System.gc();
 
             if (m_Memory.isOutOfMemory()) {
               // clean up
@@ -649,13 +694,16 @@ public class SqlViewer extends JPanel implements ConnectionListener,
               System.gc();
 
               // display error
-              System.err.println("\ndisplayed message:");
+              System.err.println(Messages.getInstance().getString(
+                "SqlViewer_Main_Error_Text_First"));
               m_Memory.showOutOfMemory();
-              System.err.println("\nexiting");
+              System.err.println(Messages.getInstance().getString(
+                "SqlViewer_Main_Error_Text_Second"));
               System.exit(-1);
             }
 
-            // } catch (InterruptedException ex) {
+            // }
+            // catch (InterruptedException ex) {
             // ex.printStackTrace();
             // }
           }

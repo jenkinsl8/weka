@@ -14,7 +14,6 @@
 java.lang.Object[]=weka.gui.GenericArrayEditor
 java.io.File=weka.gui.FileEditor
 java.text.SimpleDateFormat=weka.gui.SimpleDateFormatEditor
-java.io.File[]=weka.gui.GenericArrayEditor
 
 # core
 weka.core.SelectedTag=weka.gui.SelectedTagEditor
@@ -28,17 +27,11 @@ weka.core.neighboursearch.balltrees.BallTreeConstructor=weka.gui.GenericObjectEd
 weka.core.neighboursearch.balltrees.BallSplitter=weka.gui.GenericObjectEditor
 weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=weka.gui.GenericObjectEditor
 weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
-weka.core.stopwords.StopwordsHandler=weka.gui.GenericObjectEditor
-weka.core.stopwords.StopwordsHandler[]=weka.gui.GenericArrayEditor
 weka.core.tokenizers.Tokenizer=weka.gui.GenericObjectEditor
 
 # estimators
 weka.estimators.Estimator=weka.gui.GenericObjectEditor
 weka.estimators.Estimator[]=weka.gui.GenericArrayEditor
-
-# univariate estimators
-weka.estimators.UnivariateDensityEstimator=weka.gui.GenericObjectEditor
-weka.estimators.UnivariateDensityEstimator[]=weka.gui.GenericArrayEditor
 
 # filters
 weka.filters.Filter=weka.gui.GenericObjectEditor
@@ -46,23 +39,18 @@ weka.filters.Filter[]=weka.gui.GenericArrayEditor
 
 # classifiers
 weka.classifiers.Classifier=weka.gui.GenericObjectEditor
-weka.classifiers.IterativeClassifier=weka.gui.GenericObjectEditor
 weka.classifiers.Classifier[]=weka.gui.GenericArrayEditor
 weka.classifiers.CostMatrix=weka.gui.CostMatrixEditor
 weka.classifiers.bayes.net.search.SearchAlgorithm=weka.gui.GenericObjectEditor
 weka.classifiers.bayes.net.estimate.BayesNetEstimator=weka.gui.GenericObjectEditor
-weka.classifiers.evaluation.output.prediction.AbstractOutput=weka.gui.GenericObjectEditor
 weka.classifiers.functions.supportVector.Kernel=weka.gui.GenericObjectEditor
 weka.classifiers.functions.supportVector.RegOptimizer=weka.gui.GenericObjectEditor
-#weka.classifiers.meta.generators.Generator=weka.gui.GenericObjectEditor
 #weka.classifiers.meta.ensembleSelection.EnsembleSelectionLibrary=weka.gui.EnsembleSelectionLibraryEditor
 
 # experiment
 weka.experiment.ResultListener=weka.gui.GenericObjectEditor
 weka.experiment.ResultProducer=weka.gui.GenericObjectEditor
 weka.experiment.SplitEvaluator=weka.gui.GenericObjectEditor
-weka.experiment.ResultMatrix=weka.gui.GenericObjectEditor
-weka.experiment.Tester=weka.gui.GenericObjectEditor
 
 # datagenerators
 weka.datagenerators.DataGenerator=weka.gui.GenericObjectEditor
@@ -80,10 +68,3 @@ weka.clusterers.DensityBasedClusterer=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASEvaluation=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASSearch=weka.gui.GenericObjectEditor
 weka.attributeSelection.UnsupervisedSubsetEvaluator=weka.gui.GenericObjectEditor
-
-# partition generators
-weka.core.PartitionGenerator=weka.gui.GenericObjectEditor
-
-#generators
-#weka.classifiers.meta.generators.NominalAttributeGenerator=weka.gui.GenericObjectEditor
-#weka.classifiers.meta.generators.NumericAttributeGenerator=weka.gui.GenericObjectEditor

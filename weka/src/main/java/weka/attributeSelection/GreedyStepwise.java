@@ -1,35 +1,30 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    GreedyStepwise.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.attributeSelection;
 
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import weka.core.Instances;
 import weka.core.Option;
@@ -87,23 +82,14 @@ import weka.core.Utils;
  *  Specify number of attributes to select
  * </pre>
  * 
- * <pre>
- * -num-slots &lt;int&gt;
- *  The number of execution slots, for example, the number of cores in the CPU. (default 1)
- * </pre>
- * 
- * <pre>
- * -D
- *  Print debugging output
- * </pre>
- * 
  * <!-- options-end -->
  * 
  * @author Mark Hall
  * @version $Revision$
  */
-public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
-  StartSetHandler, OptionHandler {
+public class GreedyStepwise
+  extends ASSearch
+  implements RankedOutputSearch, StartSetHandler, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -6312951970168325471L;
@@ -170,14 +156,6 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    * long as the merit does not degrade
    */
   protected boolean m_conservativeSelection = false;
-
-  /** Print debugging output */
-  protected boolean m_debug = false;
-
-  protected int m_poolSize = 1;
-
-  /** Thread pool */
-  protected transient ExecutorService m_pool = null;
 
   /**
    * Constructor
@@ -416,87 +394,38 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
   }
 
   /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String debuggingOutputTipText() {
-    return "Output debugging information to the console";
-  }
-
-  /**
-   * Set whether to output debugging info to the console
-   * 
-   * @param d true if dubugging info is to be output
-   */
-  public void setDebuggingOutput(boolean d) {
-    m_debug = d;
-  }
-
-  /**
-   * Get whether to output debugging info to the console
-   * 
-   * @return true if dubugging info is to be output
-   */
-  public boolean getDebuggingOutput() {
-    return m_debug;
-  }
-
-  /**
-   * @return a string to describe the option
-   */
-  public String numExecutionSlotsTipText() {
-
-    return "The number of execution slots, for example, the number of cores in the CPU.";
-  }
-
-  /**
-   * Gets the number of threads.
-   */
-  public int getNumExecutionSlots() {
-
-    return m_poolSize;
-  }
-
-  /**
-   * Sets the number of threads
-   */
-  public void setNumExecutionSlots(int nT) {
-
-    m_poolSize = nT;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>(8);
+  public Enumeration listOptions() {
+    Vector newVector = new Vector(5);
 
-    newVector.addElement(new Option("\tUse conservative forward search", "-C",
-      0, "-C"));
+    newVector.addElement(new Option("\tUse conservative forward search"
+      , "-C", 0, "-C"));
 
     newVector.addElement(new Option("\tUse a backward search instead of a"
-      + "\n\tforward one.", "-B", 0, "-B"));
-    newVector.addElement(new Option("\tSpecify a starting set of attributes."
-      + "\n\tEg. 1,3,5-7.", "P", 1, "-P <start set>"));
+      + "\n\tforward one."
+      , "-B", 0, "-B"));
+    newVector
+      .addElement(new Option("\tSpecify a starting set of attributes."
+        + "\n\tEg. 1,3,5-7."
+        , "P", 1
+        , "-P <start set>"));
 
-    newVector.addElement(new Option("\tProduce a ranked list of attributes.",
-      "R", 0, "-R"));
-    newVector.addElement(new Option("\tSpecify a theshold by which attributes"
-      + "\n\tmay be discarded from the ranking."
-      + "\n\tUse in conjuction with -R", "T", 1, "-T <threshold>"));
+    newVector.addElement(new Option("\tProduce a ranked list of attributes."
+      , "R", 0, "-R"));
+    newVector
+      .addElement(new Option("\tSpecify a theshold by which attributes"
+        + "\n\tmay be discarded from the ranking."
+        + "\n\tUse in conjuction with -R", "T", 1
+        , "-T <threshold>"));
 
-    newVector.addElement(new Option("\tSpecify number of attributes to select",
-      "N", 1, "-N <num to select>"));
-
-    newVector.addElement(new Option("\t" + numExecutionSlotsTipText()
-      + " (default 1)\n", "-num-slots", 1, "-num-slots <int>"));
-
-    newVector.addElement(new Option("\tPrint debugging output", "D", 0, "-D"));
+    newVector
+      .addElement(new Option("\tSpecify number of attributes to select"
+        , "N", 1
+        , "-N <num to select>"));
 
     return newVector.elements();
 
@@ -543,23 +472,14 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    *  Specify number of attributes to select
    * </pre>
    * 
-   * <pre>
-   * -num-slots &lt;int&gt;
-   *  The number of execution slots, for example, the number of cores in the CPU. (default 1)
-   * </pre>
-   * 
-   * <pre>
-   * -D
-   *  Print debugging output
-   * </pre>
-   * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
   @Override
-  public void setOptions(String[] options) throws Exception {
+  public void setOptions(String[] options)
+    throws Exception {
     String optionString;
     resetOptions();
 
@@ -585,13 +505,6 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     if (optionString.length() != 0) {
       setNumToSelect(Integer.parseInt(optionString));
     }
-
-    optionString = Utils.getOption("num-slots", options);
-    if (optionString.length() > 0) {
-      setNumExecutionSlots(Integer.parseInt(optionString));
-    }
-
-    setDebuggingOutput(Utils.getFlag('D', options));
   }
 
   /**
@@ -601,39 +514,35 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   @Override
   public String[] getOptions() {
-
-    Vector<String> options = new Vector<String>();
+    String[] options = new String[9];
+    int current = 0;
 
     if (getSearchBackwards()) {
-      options.add("-B");
+      options[current++] = "-B";
     }
 
     if (getConservativeForwardSelection()) {
-      options.add("-C");
+      options[current++] = "-C";
     }
 
     if (!(getStartSet().equals(""))) {
-      options.add("-P");
-      options.add("" + startSetToString());
+      options[current++] = "-P";
+      options[current++] = "" + startSetToString();
     }
 
     if (getGenerateRanking()) {
-      options.add("-R");
+      options[current++] = "-R";
     }
-    options.add("-T");
-    options.add("" + getThreshold());
+    options[current++] = "-T";
+    options[current++] = "" + getThreshold();
 
-    options.add("-N");
-    options.add("" + getNumToSelect());
+    options[current++] = "-N";
+    options[current++] = "" + getNumToSelect();
 
-    options.add("-num-slots");
-    options.add("" + getNumExecutionSlots());
-
-    if (getDebuggingOutput()) {
-      options.add("-D");
+    while (current < options.length) {
+      options[current++] = "";
     }
-
-    return options.toArray(new String[0]);
+    return options;
   }
 
   /**
@@ -655,14 +564,16 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     for (int i = 0; i < m_starting.length; i++) {
       didPrint = false;
 
-      if ((m_hasClass == false) || (m_hasClass == true && i != m_classIndex)) {
+      if ((m_hasClass == false) ||
+        (m_hasClass == true && i != m_classIndex)) {
         FString.append((m_starting[i] + 1));
         didPrint = true;
       }
 
       if (i == (m_starting.length - 1)) {
         FString.append("");
-      } else {
+      }
+      else {
         if (didPrint) {
           FString.append(",");
         }
@@ -681,7 +592,9 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
   public String toString() {
     StringBuffer FString = new StringBuffer();
     FString.append("\tGreedy Stepwise ("
-      + ((m_backward) ? "backwards)" : "forwards)") + ".\n\tStart set: ");
+      + ((m_backward)
+        ? "backwards)"
+        : "forwards)") + ".\n\tStart set: ");
 
     if (m_starting == null) {
       if (m_backward) {
@@ -689,7 +602,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
       } else {
         FString.append("no attributes\n");
       }
-    } else {
+    }
+    else {
       FString.append(startSetToString() + "\n");
     }
     if (!m_doneRanking) {
@@ -698,17 +612,18 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     } else {
       if (m_backward) {
         FString
-          .append("\n\tRanking is the order that attributes were removed, "
-            + "starting \n\twith all attributes. The merit scores in the left"
-            + "\n\tcolumn are the goodness of the remaining attributes in the"
-            + "\n\tsubset after removing the corresponding in the right column"
-            + "\n\tattribute from the subset.\n");
+          .append("\n\tRanking is the order that attributes were removed, " +
+            "starting \n\twith all attributes. The merit scores in the left" +
+            "\n\tcolumn are the goodness of the remaining attributes in the" +
+            "\n\tsubset after removing the corresponding in the right column" +
+            "\n\tattribute from the subset.\n");
       } else {
         FString
           .append("\n\tRanking is the order that attributes were added, starting "
-            + "\n\twith no attributes. The merit scores in the left column"
-            + "\n\tare the goodness of the subset after the adding the"
-            + "\n\tcorresponding attribute in the right column to the subset.\n");
+            +
+            "\n\twith no attributes. The merit scores in the left column" +
+            "\n\tare the goodness of the subset after the adding the" +
+            "\n\tcorresponding attribute in the right column to the subset.\n");
       }
     }
 
@@ -729,17 +644,14 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    * @throws Exception if the search can't be completed
    */
   @Override
-  public int[] search(ASEvaluation ASEval, Instances data) throws Exception {
+  public int[] search(ASEvaluation ASEval, Instances data)
+    throws Exception {
 
     int i;
     double best_merit = -Double.MAX_VALUE;
     double temp_best, temp_merit;
     int temp_index = 0;
     BitSet temp_group;
-    boolean parallel = (m_poolSize > 1);
-    if (parallel) {
-      m_pool = Executors.newFixedThreadPool(m_poolSize);
-    }
 
     if (data != null) { // this is a fresh run so reset
       resetOptions();
@@ -754,7 +666,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     }
 
     if (!(m_ASEval instanceof SubsetEvaluator)) {
-      throw new Exception(m_ASEval.getClass().getName() + " is not a "
+      throw new Exception(m_ASEval.getClass().getName()
+        + " is not a "
         + "Subset evaluator!");
     }
 
@@ -766,12 +679,13 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     if (m_ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
       m_classIndex = -1;
-    } else {
+    }
+    else {
       m_hasClass = true;
       m_classIndex = m_Instances.classIndex();
     }
 
-    final SubsetEvaluator ASEvaluator = (SubsetEvaluator) m_ASEval;
+    SubsetEvaluator ASEvaluator = (SubsetEvaluator) m_ASEval;
 
     if (m_rankedAtts == null) {
       m_rankedAtts = new double[m_numAttribs][2];
@@ -802,12 +716,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
     boolean done = false;
     boolean addone = false;
     boolean z;
-
-    if (m_debug && parallel) {
-      System.err.println("Evaluating subsets in parallel...");
-    }
     while (!done) {
-      List<Future<Double[]>> results = new ArrayList<Future<Double[]>>();
       temp_group = (BitSet) m_best_group.clone();
       temp_best = best_merit;
       if (m_doRank) {
@@ -828,46 +737,22 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
           } else {
             temp_group.set(i);
           }
-
-          if (parallel) {
-            final BitSet tempCopy = (BitSet) temp_group.clone();
-            final int attBeingEvaluated = i;
-
-            // make a copy if the evaluator is not thread safe
-            final SubsetEvaluator theEvaluator =
-              (ASEvaluator instanceof weka.core.ThreadSafe) ? ASEvaluator
-                : (SubsetEvaluator) ASEvaluation.makeCopies(m_ASEval, 1)[0];
-
-            Future<Double[]> future = m_pool.submit(new Callable<Double[]>() {
-              @Override
-              public Double[] call() throws Exception {
-                Double[] r = new Double[2];
-                double e = theEvaluator.evaluateSubset(tempCopy);
-                r[0] = new Double(attBeingEvaluated);
-                r[1] = e;
-                return r;
-              }
-            });
-
-            results.add(future);
+          temp_merit = ASEvaluator.evaluateSubset(temp_group);
+          if (m_backward) {
+            z = (temp_merit >= temp_best);
           } else {
-            temp_merit = ASEvaluator.evaluateSubset(temp_group);
-            if (m_backward) {
+            if (m_conservativeSelection) {
               z = (temp_merit >= temp_best);
             } else {
-              if (m_conservativeSelection) {
-                z = (temp_merit >= temp_best);
-              } else {
-                z = (temp_merit > temp_best);
-              }
+              z = (temp_merit > temp_best);
             }
+          }
 
-            if (z) {
-              temp_best = temp_merit;
-              temp_index = i;
-              addone = true;
-              done = false;
-            }
+          if (z) {
+            temp_best = temp_merit;
+            temp_index = i;
+            addone = true;
+            done = false;
           }
 
           // unset this addition/deletion
@@ -881,33 +766,6 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
           }
         }
       }
-
-      if (parallel) {
-        for (int j = 0; j < results.size(); j++) {
-          Future<Double[]> f = results.get(j);
-
-          int index = f.get()[0].intValue();
-          temp_merit = f.get()[1].doubleValue();
-
-          if (m_backward) {
-            z = (temp_merit >= temp_best);
-          } else {
-            if (m_conservativeSelection) {
-              z = (temp_merit >= temp_best);
-            } else {
-              z = (temp_merit > temp_best);
-            }
-          }
-
-          if (z) {
-            temp_best = temp_merit;
-            temp_index = index;
-            addone = true;
-            done = false;
-          }
-        }
-      }
-
       if (addone) {
         if (m_backward) {
           m_best_group.clear(temp_index);
@@ -915,24 +773,11 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
           m_best_group.set(temp_index);
         }
         best_merit = temp_best;
-        if (m_debug) {
-          System.err.print("Best subset found so far: ");
-          int[] atts = attributeList(m_best_group);
-          for (int a : atts) {
-            System.err.print("" + (a + 1) + " ");
-          }
-          System.err.println("\nMerit: " + best_merit);
-        }
         m_rankedAtts[m_rankedSoFar][0] = temp_index;
         m_rankedAtts[m_rankedSoFar][1] = best_merit;
         m_rankedSoFar++;
       }
     }
-
-    if (parallel) {
-      m_pool.shutdown();
-    }
-
     m_bestMerit = best_merit;
     return attributeList(m_best_group);
   }

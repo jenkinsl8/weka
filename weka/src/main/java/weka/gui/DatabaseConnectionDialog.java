@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    DatabaseConnectionDialog.java
- *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -99,7 +100,7 @@ public class DatabaseConnectionDialog
    * @param debug whether to display the debug checkbox
    */
   public DatabaseConnectionDialog(Frame parentFrame, String url, String uname, boolean debug) {
-    super(parentFrame,"Database Connection Parameters", true);
+    super(parentFrame,Messages.getInstance().getString("DatabaseConnectionDialog_Text"), true);
     DbConnectionDialog(url, uname, debug);
   }
 
@@ -174,25 +175,25 @@ public class DatabaseConnectionDialog
       DbP.setLayout(new GridLayout(4, 1));
     
     m_DbaseURLText = new JTextField(url,50); 
-    m_DbaseURLLab = new JLabel(" Database URL", SwingConstants.LEFT);
+    m_DbaseURLLab = new JLabel(Messages.getInstance().getString("DbConnectionDialog_DbaseURLLab_JLabel_Text"), SwingConstants.LEFT);
     m_DbaseURLLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_DbaseURLLab.setDisplayedMnemonic('D');
     m_DbaseURLLab.setLabelFor(m_DbaseURLText);
 
     m_UserNameText = new JTextField(uname,25); 
-    m_UserNameLab = new JLabel(" Username    ", SwingConstants.LEFT);
+    m_UserNameLab = new JLabel(Messages.getInstance().getString("DbConnectionDialog_UserNameLab_JLabel_Text"), SwingConstants.LEFT);
     m_UserNameLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_UserNameLab.setDisplayedMnemonic('U');
     m_UserNameLab.setLabelFor(m_UserNameText);
 
     m_PasswordText = new JPasswordField(25); 
-    m_PasswordLab = new JLabel(" Password    ", SwingConstants.LEFT);
+    m_PasswordLab = new JLabel(Messages.getInstance().getString("DbConnectionDialog_PasswordLab_JLabel_Text"), SwingConstants.LEFT);
     m_PasswordLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_PasswordLab.setDisplayedMnemonic('P');
     m_PasswordLab.setLabelFor(m_PasswordText);
 
     m_DebugCheckBox = new JCheckBox(); 
-    m_DebugLab = new JLabel(" Debug       ", SwingConstants.LEFT);
+    m_DebugLab = new JLabel(Messages.getInstance().getString("DbConnectionDialog_DebugLab_JLabel_Text"), SwingConstants.LEFT);
     m_DebugLab.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_DebugLab.setDisplayedMnemonic('P');
     m_DebugLab.setLabelFor(m_DebugCheckBox);
@@ -226,8 +227,8 @@ public class DatabaseConnectionDialog
     JPanel buttonsP = new JPanel();
     buttonsP.setLayout(new FlowLayout());
     JButton ok,cancel;
-    buttonsP.add(ok = new JButton("OK"));
-    buttonsP.add(cancel=new JButton("Cancel"));
+    buttonsP.add(ok = new JButton(Messages.getInstance().getString("DbConnectionDialog_ButtonP_JButton_OK_Text")));
+    buttonsP.add(cancel=new JButton(Messages.getInstance().getString("DbConnectionDialog_ButtonP_JButton_Cancel_Text")));
     ok.setMnemonic('O');
     ok.addActionListener(new ActionListener(){
 	public void actionPerformed(ActionEvent evt){
@@ -246,7 +247,7 @@ public class DatabaseConnectionDialog
     // Listen for window close events
     addWindowListener(new java.awt.event.WindowAdapter() {
         public void windowClosing(java.awt.event.WindowEvent e) {
-          System.err.println("Cancelled!!");
+          System.err.println(Messages.getInstance().getString("DbConnectionDialog_WindowClosing_Text"));
           m_returnValue = JOptionPane.CLOSED_OPTION;
         }
       });
@@ -262,7 +263,7 @@ public class DatabaseConnectionDialog
    * for testing only
    */
   public static void main(String[] args){
-    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,"URL","username");
+    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,Messages.getInstance().getString("DbConnectionDialog_Main_URL_Text"), Messages.getInstance().getString("DbConnectionDialog_Main_Username_Text"));
     dbd.setVisible(true);
     System.out.println(dbd.getReturnValue()+":"+dbd.getUsername()+":"+dbd.getPassword()+":"+dbd.getURL());
   }

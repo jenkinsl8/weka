@@ -12,14 +12,14 @@
  * - cd to /path to dir containing remoteEngine.jar
  * - start engine
  *   java -Xmx256m \
- *     -classpath remoteEngine.jar:/path to database jar/<db.jar>:/path to weka/weka.jar \
+ *     -classpath remoteEngine.jar:/path to database jar/<db.jar> \
  *     -Djava.security.policy=remote.policy \
  *      weka.experiment.RemoteEngine &
  *
  * Note:
  * replace <db.jar> with actual jar filename, e.g., mysql.jar
  *
- * Version: $Revision$
+ * Version: $Revision: 11021 $
  */
 
 grant {

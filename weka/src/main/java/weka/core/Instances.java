@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    Instances.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,15 +26,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 import weka.core.converters.ArffLoader.ArffReader;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -74,8 +69,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class Instances extends AbstractList<Instance> implements Serializable,
-RevisionHandler {
+public class Instances implements Serializable, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -19412345060742748L;
@@ -99,17 +93,14 @@ RevisionHandler {
   protected/* @spec_public non_null@ */String m_RelationName;
 
   /** The attribute information. */
-  protected/* @spec_public non_null@ */ArrayList<Attribute> m_Attributes;
+  protected/* @spec_public non_null@ */FastVector m_Attributes;
   /*
    * public invariant (\forall int i; 0 <= i && i < m_Attributes.size();
-   * m_Attributes.get(i) != null);
+   * m_Attributes.elementAt(i) != null);
    */
 
-  /** A map to quickly find attribute indices based on their names. */
-  protected HashMap<String, Integer> m_NamesToAttributeIndices;
-
   /** The instances. */
-  protected/* @spec_public non_null@ */ArrayList<Instance> m_Instances;
+  protected/* @spec_public non_null@ */FastVector m_Instances;
 
   /** The class attribute's index */
   protected int m_ClassIndex;
@@ -132,13 +123,10 @@ RevisionHandler {
    * @throws IOException if the ARFF file is not read successfully
    */
   public Instances(/* @non_null@ */Reader reader) throws IOException {
-    ArffReader arff = new ArffReader(reader, 1000, false);
-    initialize(arff.getData(), 1000);
-    arff.setRetainStringValues(true);
-    Instance inst;
-    while ((inst = arff.readInstance(this)) != null) {
-      m_Instances.add(inst);
-    }
+    ArffReader arff = new ArffReader(reader);
+    Instances dataset = arff.getData();
+    initialize(dataset, dataset.numInstances());
+    dataset.copyInstances(0, this, dataset.numInstances());
     compactify();
   }
 
@@ -212,8 +200,7 @@ RevisionHandler {
     m_ClassIndex = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
     m_Attributes = dataset.m_Attributes;
-    m_NamesToAttributeIndices = dataset.m_NamesToAttributeIndices;
-    m_Instances = new ArrayList<Instance>(capacity);
+    m_Instances = new FastVector(capacity);
   }
 
   /**
@@ -247,19 +234,19 @@ RevisionHandler {
    * @param name the name of the relation
    * @param attInfo the attribute information
    * @param capacity the capacity of the set
-   * @throws IllegalArgumentException if attribute names are not unique
    */
   public Instances(/* @non_null@ */String name,
-    /* @non_null@ */ArrayList<Attribute> attInfo, int capacity) {
+  /* @non_null@ */FastVector attInfo, int capacity) {
 
     // check whether the attribute names are unique
     HashSet<String> names = new HashSet<String>();
     StringBuffer nonUniqueNames = new StringBuffer();
-    for (Attribute att : attInfo) {
-      if (names.contains(att.name())) {
-        nonUniqueNames.append("'" + att.name() + "' ");
+    for (int i = 0; i < attInfo.size(); i++) {
+      if (names.contains(((Attribute) attInfo.elementAt(i)).name())) {
+        nonUniqueNames.append("'" + ((Attribute) attInfo.elementAt(i)).name()
+          + "' ");
       }
-      names.add(att.name());
+      names.add(((Attribute) attInfo.elementAt(i)).name());
     }
     if (names.size() != attInfo.size()) {
       throw new IllegalArgumentException("Attribute names are not unique!"
@@ -270,12 +257,10 @@ RevisionHandler {
     m_RelationName = name;
     m_ClassIndex = -1;
     m_Attributes = attInfo;
-    m_NamesToAttributeIndices = new HashMap<String, Integer>((int) (numAttributes() / 0.75));
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
-      m_NamesToAttributeIndices.put(attribute(i).name(), i);
     }
-    m_Instances = new ArrayList<Instance>(capacity);
+    m_Instances = new FastVector(capacity);
   }
 
   /**
@@ -287,21 +272,23 @@ RevisionHandler {
    */
   public Instances stringFreeStructure() {
 
-    ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
-    for (Attribute att : m_Attributes) {
+    FastVector newAtts = new FastVector();
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      Attribute att = (Attribute) m_Attributes.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        newAtts.add(new Attribute(att.name(), (List<String>) null, att.index()));
+        newAtts.addElement(new Attribute(att.name(), (FastVector) null, i));
       } else if (att.type() == Attribute.RELATIONAL) {
-        newAtts.add(new Attribute(att.name(), new Instances(att.relation(), 0),
-          att.index()));
+        newAtts.addElement(new Attribute(att.name(), new Instances(att
+          .relation(), 0), i));
       }
     }
     if (newAtts.size() == 0) {
       return new Instances(this, 0);
     }
-    ArrayList<Attribute> atts = Utils.cast(m_Attributes.clone());
-    for (Attribute att : newAtts) {
-      atts.set(att.index(), att);
+    FastVector atts = (FastVector) m_Attributes.copy();
+    for (int i = 0; i < newAtts.size(); i++) {
+      atts.setElementAt(newAtts.elementAt(i),
+        ((Attribute) newAtts.elementAt(i)).index());
     }
     Instances result = new Instances(this, 0);
     result.m_Attributes = atts;
@@ -316,36 +303,12 @@ RevisionHandler {
    * 
    * @param instance the instance to be added
    */
-  @Override
-  public boolean add(/* @non_null@ */Instance instance) {
+  public void add(/* @non_null@ */Instance instance) {
 
     Instance newInstance = (Instance) instance.copy();
 
     newInstance.setDataset(this);
-    m_Instances.add(newInstance);
-
-    return true;
-  }
-
-  /**
-   * Adds one instance at the given position in the list. Shallow
-   * copies instance before it is added. Increases the size of the
-   * dataset if it is not large enough. Does not check if the instance
-   * is compatible with the dataset. Note: String or relational values
-   * are not transferred.
-   * 
-   * @param index position where instance is to be inserted
-   * @param instance the instance to be added
-   */
-  // @ requires 0 <= index;
-  // @ requires index < m_Instances.size();
-  @Override
-  public void add(int index, /* @non_null@ */Instance instance) {
-
-    Instance newInstance = (Instance) instance.copy();
-
-    newInstance.setDataset(this);
-    m_Instances.add(index, newInstance);
+    m_Instances.addElement(newInstance);
   }
 
   /**
@@ -359,7 +322,7 @@ RevisionHandler {
   // @ ensures \result != null;
   public/* @pure@ */Attribute attribute(int index) {
 
-    return m_Attributes.get(index);
+    return (Attribute) m_Attributes.elementAt(index);
   }
 
   /**
@@ -373,11 +336,11 @@ RevisionHandler {
    */
   public/* @pure@ */Attribute attribute(String name) {
 
-    Integer index = m_NamesToAttributeIndices.get(name);
-    if (index != null) {
-      return attribute(index);
+    for (int i = 0; i < numAttributes(); i++) {
+      if (attribute(i).name().equals(name)) {
+        return attribute(i);
+      }
     }
-
     return null;
   }
 
@@ -477,7 +440,7 @@ RevisionHandler {
    */
   public void delete() {
 
-    m_Instances = new ArrayList<Instance>();
+    m_Instances = new FastVector();
   }
 
   /**
@@ -488,14 +451,14 @@ RevisionHandler {
   // @ requires 0 <= index && index < numInstances();
   public void delete(int index) {
 
-    m_Instances.remove(index);
+    m_Instances.removeElementAt(index);
   }
 
   /**
-   * Deletes an attribute at the given position (0 to numAttributes()
-   * - 1). Attribute objects after the deletion point are copied so
-   * that their indices can be decremented. Creates a fresh list to
-   * hold the old and new attribute objects. 
+   * Deletes an attribute at the given position (0 to numAttributes() - 1). A
+   * deep copy of the attribute information is performed before the attribute is
+   * deleted.
+   * 
    * @param position the attribute's position (position starts with 0)
    * @throws IllegalArgumentException if the given index is out of range or the
    *           class attribute is being deleted
@@ -510,30 +473,17 @@ RevisionHandler {
     if (position == m_ClassIndex) {
       throw new IllegalArgumentException("Can't delete class attribute");
     }
-
-    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() - 1);
-    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() - 1) / 0.75));
-    for (int i = 0 ; i < position; i++) {
-      Attribute att = m_Attributes.get(i);
-      newList.add(att);
-      newMap.put(att.name(), i);
-    }
-    for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
-      newAtt.setIndex(i - 1);
-      newList.add(newAtt);
-      newMap.put(newAtt.name(), i - 1);
-    }
-    m_Attributes = newList;
-    m_NamesToAttributeIndices = newMap;
-
+    freshAttributeInfo();
     if (m_ClassIndex > position) {
       m_ClassIndex--;
     }
+    m_Attributes.removeElementAt(position);
+    for (int i = position; i < m_Attributes.size(); i++) {
+      Attribute current = (Attribute) m_Attributes.elementAt(i);
+      current.setIndex(current.index() - 1);
+    }
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).setDataset(null);
-      instance(i).deleteAttributeAt(position);
-      instance(i).setDataset(this);
+      instance(i).forceDeleteAttributeAt(position);
     }
   }
 
@@ -578,11 +528,11 @@ RevisionHandler {
   // @ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
 
-    ArrayList<Instance> newInstances = new ArrayList<Instance>(numInstances());
+    FastVector newInstances = new FastVector(numInstances());
 
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-        newInstances.add(instance(i));
+        newInstances.addElement(instance(i));
       }
     }
     m_Instances = newInstances;
@@ -618,9 +568,9 @@ RevisionHandler {
    * 
    * @return enumeration of all the attributes.
    */
-  public/* @non_null pure@ */Enumeration<Attribute> enumerateAttributes() {
+  public/* @non_null pure@ */Enumeration enumerateAttributes() {
 
-    return new WekaEnumeration<Attribute>(m_Attributes, m_ClassIndex);
+    return m_Attributes.elements(m_ClassIndex);
   }
 
   /**
@@ -628,39 +578,9 @@ RevisionHandler {
    * 
    * @return enumeration of all instances in the dataset
    */
-  public/* @non_null pure@ */Enumeration<Instance> enumerateInstances() {
+  public/* @non_null pure@ */Enumeration enumerateInstances() {
 
-    return new WekaEnumeration<Instance>(m_Instances);
-  }
-
-  /**
-   * Checks if two headers are equivalent. If not, then returns a message why
-   * they differ.
-   * 
-   * @param dataset another dataset
-   * @return null if the header of the given dataset is equivalent to this
-   *         header, otherwise a message with details on why they differ
-   */
-  public String equalHeadersMsg(Instances dataset) {
-    // Check class and all attributes
-    if (m_ClassIndex != dataset.m_ClassIndex) {
-      return "Class index differ: " + (m_ClassIndex + 1) + " != "
-        + (dataset.m_ClassIndex + 1);
-    }
-
-    if (m_Attributes.size() != dataset.m_Attributes.size()) {
-      return "Different number of attributes: " + m_Attributes.size() + " != "
-        + dataset.m_Attributes.size();
-    }
-
-    for (int i = 0; i < m_Attributes.size(); i++) {
-      String msg = attribute(i).equalsMsg(dataset.attribute(i));
-      if (msg != null) {
-        return "Attributes differ at position " + (i + 1) + ":\n" + msg;
-      }
-    }
-
-    return null;
+    return m_Instances.elements();
   }
 
   /**
@@ -671,7 +591,20 @@ RevisionHandler {
    *         header
    */
   public/* @pure@ */boolean equalHeaders(Instances dataset) {
-    return (equalHeadersMsg(dataset) == null);
+
+    // Check class and all attributes
+    if (m_ClassIndex != dataset.m_ClassIndex) {
+      return false;
+    }
+    if (m_Attributes.size() != dataset.m_Attributes.size()) {
+      return false;
+    }
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      if (!(attribute(i).equals(dataset.attribute(i)))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -682,7 +615,7 @@ RevisionHandler {
   // @ requires numInstances() > 0;
   public/* @non_null pure@ */Instance firstInstance() {
 
-    return m_Instances.get(0);
+    return (Instance) m_Instances.firstElement();
   }
 
   /**
@@ -702,12 +635,9 @@ RevisionHandler {
   }
 
   /**
-   * Inserts an attribute at the given position (0 to numAttributes())
-   * and sets all values to be missing. Shallow copies the attribute
-   * before it is inserted. Existing attribute objects at and after
-   * the insertion point are also copied so that their indices can be
-   * incremented. Creates a fresh list to hold the old and new
-   * attribute objects.
+   * Inserts an attribute at the given position (0 to numAttributes()) and sets
+   * all values to be missing. Shallow copies the attribute before it is
+   * inserted, and performs a deep copy of the existing attribute information.
    * 
    * @param att the attribute to be inserted
    * @param position the attribute's position (position starts with 0)
@@ -725,30 +655,15 @@ RevisionHandler {
         + "' already in use at position #" + attribute(att.name()).index());
     }
     att = (Attribute) att.copy();
+    freshAttributeInfo();
     att.setIndex(position);
-
-    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() + 1);
-    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() + 1) / 0.75));
-    for (int i = 0 ; i < position; i++) {
-      Attribute oldAtt = m_Attributes.get(i);
-      newList.add(oldAtt);
-      newMap.put(oldAtt.name(), i);
+    m_Attributes.insertElementAt(att, position);
+    for (int i = position + 1; i < m_Attributes.size(); i++) {
+      Attribute current = (Attribute) m_Attributes.elementAt(i);
+      current.setIndex(current.index() + 1);
     }
-    newList.add(att);
-    newMap.put(att.name(), position);
-    for (int i = position; i < m_Attributes.size(); i++) {
-      Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
-      newAtt.setIndex(i + 1);
-      newList.add(newAtt);
-      newMap.put(newAtt.name(), i + 1);
-    }
-    m_Attributes = newList;
-    m_NamesToAttributeIndices = newMap;
-
     for (int i = 0; i < numInstances(); i++) {
-      instance(i).setDataset(null);
-      instance(i).insertAttributeAt(position);
-      instance(i).setDataset(this);
+      instance(i).forceInsertAttributeAt(position);
     }
     if (m_ClassIndex >= position) {
       m_ClassIndex++;
@@ -765,21 +680,7 @@ RevisionHandler {
   // @ requires index < numInstances();
   public/* @non_null pure@ */Instance instance(int index) {
 
-    return m_Instances.get(index);
-  }
-
-  /**
-   * Returns the instance at the given position.
-   * 
-   * @param index the instance's index (index starts with 0)
-   * @return the instance at the given position
-   */
-  // @ requires 0 <= index;
-  // @ requires index < numInstances();
-  @Override
-  public/* @non_null pure@ */Instance get(int index) {
-
-    return m_Instances.get(index);
+    return (Instance) m_Instances.elementAt(index);
   }
 
   /**
@@ -818,7 +719,7 @@ RevisionHandler {
     double[] vals = new double[numInstances()];
     for (int i = 0; i < vals.length; i++) {
       double val = instance(i).value(attIndex);
-      if (Utils.isMissingValue(val)) {
+      if (Instance.isMissingValue(val)) {
         vals[i] = Double.MAX_VALUE;
       } else {
         vals[i] = val;
@@ -835,7 +736,7 @@ RevisionHandler {
   // @ requires numInstances() > 0;
   public/* @non_null pure@ */Instance lastInstance() {
 
-    return m_Instances.get(m_Instances.size() - 1);
+    return (Instance) m_Instances.lastElement();
   }
 
   /**
@@ -979,18 +880,6 @@ RevisionHandler {
   }
 
   /**
-   * Returns the number of instances in the dataset.
-   * 
-   * @return the number of instances in the dataset as an integer
-   */
-  // @ ensures \result == m_Instances.size();
-  @Override
-  public/* @pure@ */int size() {
-
-    return m_Instances.size();
-  }
-
-  /**
    * Shuffles the instances in the set so that they are ordered randomly.
    * 
    * @param random a random number generator
@@ -1033,66 +922,6 @@ RevisionHandler {
   }
 
   /**
-   * Replaces the attribute at the given position (0 to
-   * numAttributes()) with the given attribute and sets all its values to
-   * be missing. Shallow copies the given attribute before it is
-   * inserted. Creates a fresh list to hold the old and new
-   * attribute objects.
-   * 
-   * @param att the attribute to be inserted
-   * @param position the attribute's position (position starts with 0)
-   * @throws IllegalArgumentException if the given index is out of range
-   */
-  // @ requires 0 <= position;
-  // @ requires position <= numAttributes();
-  public void replaceAttributeAt(/* @non_null@ */Attribute att, int position) {
-
-    if ((position < 0) || (position > m_Attributes.size())) {
-      throw new IllegalArgumentException("Index out of range");
-    }
-
-    // Does the new attribute have a different name?
-    if (!att.name().equals(m_Attributes.get(position).name())) {
-
-      // Need to check if attribute name already exists
-      Attribute candidate = attribute(att.name());
-      if ((candidate != null) && (position != candidate.index())) {
-        throw new IllegalArgumentException("Attribute name '" + att.name()
-          + "' already in use at position #" + 
-          attribute(att.name()).index());
-      }
-    }
-    att = (Attribute) att.copy();
-    att.setIndex(position);
-
-    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() + 1) / 0.75));
-    for (int i = 0 ; i < position; i++) {
-      Attribute oldAtt = m_Attributes.get(i);
-      newList.add(oldAtt);
-      newMap.put(oldAtt.name(), i);
-    }
-    newList.add(att);
-    newMap.put(att.name(), position);
-    for (int i = position + 1; i < m_Attributes.size(); i++) {
-      Attribute newAtt = (Attribute) m_Attributes.get(i);
-      newList.add(newAtt);
-      newMap.put(newAtt.name(), i);
-    }
-    m_Attributes = newList;
-    m_NamesToAttributeIndices = newMap;
-
-    for (int i = 0; i < numInstances(); i++) {
-      instance(i).setDataset(null);
-      instance(i).setMissing(position);
-      instance(i).setDataset(this);
-    }
-    if (m_ClassIndex >= position) {
-      m_ClassIndex++;
-    }
-  }
-
-  /**
    * Returns the relation's name.
    * 
    * @return the relation's name as a string
@@ -1104,51 +933,33 @@ RevisionHandler {
   }
 
   /**
-   * Removes the instance at the given position.
-   * 
-   * @param index the instance's index (index starts with 0)
-   * @return the instance at the given position
-   */
-  // @ requires 0 <= index;
-  // @ requires index < numInstances();
-  @Override
-  public Instance remove(int index) {
-
-    return m_Instances.remove(index);
-  }
-
-  /**
    * Renames an attribute. This change only affects this dataset.
    * 
    * @param att the attribute's index (index starts with 0)
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
-
-    Attribute existingAtt = attribute(name);
-    if (existingAtt != null) {
-      if (att == existingAtt.index()) {
-        return; // Old name is equal to new name
-      } else {
+    // name already present?
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att) {
+        continue;
+      }
+      if (attribute(i).name().equals(name)) {
         throw new IllegalArgumentException("Attribute name '" + name
-          + "' already present at position #" + existingAtt.index());
+          + "' already present at position #" + i);
       }
     }
 
     Attribute newAtt = attribute(att).copy(name);
-    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
-    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int)(numAttributes() / 0.75));
-    for (Attribute attr : m_Attributes) {
-      if (attr.index() == att) {
-        newVec.add(newAtt);
-        newMap.put(name, att);
+    FastVector newVec = new FastVector(numAttributes());
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att) {
+        newVec.addElement(newAtt);
       } else {
-        newVec.add(attr);
-        newMap.put(attr.name(), attr.index());
+        newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
-    m_NamesToAttributeIndices = newMap;
   }
 
   /**
@@ -1173,14 +984,14 @@ RevisionHandler {
   public void renameAttributeValue(int att, int val, String name) {
 
     Attribute newAtt = (Attribute) attribute(att).copy();
-    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
+    FastVector newVec = new FastVector(numAttributes());
 
     newAtt.setValue(val, name);
-    for (Attribute attr : m_Attributes) {
-      if (attr.index() == att) {
-        newVec.add(newAtt);
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i == att) {
+        newVec.addElement(newAtt);
       } else {
-        newVec.add(attr);
+        newVec.addElement(attribute(i));
       }
     }
     m_Attributes = newVec;
@@ -1222,15 +1033,18 @@ RevisionHandler {
   /**
    * Creates a new dataset of the same size using random sampling with
    * replacement according to the current instance weights. The weights of the
-   * instances in the new dataset are set to one. See also
-   * resampleWithWeights(Random, double[], boolean[]).
+   * instances in the new dataset are set to one.
    * 
    * @param random a random number generator
    * @return the new dataset
    */
   public Instances resampleWithWeights(Random random) {
 
-    return resampleWithWeights(random, false);
+    double[] weights = new double[numInstances()];
+    for (int i = 0; i < weights.length; i++) {
+      weights[i] = instance(i).weight();
+    }
+    return resampleWithWeights(random, weights);
   }
 
   /**
@@ -1245,46 +1059,11 @@ RevisionHandler {
    */
   public Instances resampleWithWeights(Random random, boolean[] sampled) {
 
-    return resampleWithWeights(random, sampled, false);
-  }
-
-  /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the current instance weights. The weights of the
-   * instances in the new dataset are set to one. See also
-   * resampleWithWeights(Random, double[], boolean[]).
-   * 
-   * @param random a random number generator
-   * @param representUsingWeights if true, copies are represented using weights
-   *          in resampled data
-   * @return the new dataset
-   */
-  public Instances resampleWithWeights(Random random,
-    boolean representUsingWeights) {
-
-    return resampleWithWeights(random, null, representUsingWeights);
-  }
-
-  /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the current instance weights. The weights of the
-   * instances in the new dataset are set to one. See also
-   * resampleWithWeights(Random, double[], boolean[]).
-   * 
-   * @param random a random number generator
-   * @param sampled an array indicating what has been sampled
-   * @param representUsingWeights if true, copies are represented using weights
-   *          in resampled data
-   * @return the new dataset
-   */
-  public Instances resampleWithWeights(Random random, boolean[] sampled,
-    boolean representUsingWeights) {
-
     double[] weights = new double[numInstances()];
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights, sampled, representUsingWeights);
+    return resampleWithWeights(random, weights, sampled);
   }
 
   /**
@@ -1320,29 +1099,6 @@ RevisionHandler {
    */
   public Instances resampleWithWeights(Random random, double[] weights,
     boolean[] sampled) {
-
-    return resampleWithWeights(random, weights, sampled, false);
-  }
-
-  /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the given weight vector. The weights of the
-   * instances in the new dataset are set to one. The length of the weight
-   * vector has to be the same as the number of instances in the dataset, and
-   * all weights have to be positive. Uses Walker's method, see pp. 232 of
-   * "Stochastic Simulation" by B.D. Ripley (1987).
-   * 
-   * @param random a random number generator
-   * @param weights the weight vector
-   * @param sampled an array indicating what has been sampled, can be null
-   * @param representUsingWeights if true, copies are represented using weights
-   *          in resampled data
-   * @return the new dataset
-   * @throws IllegalArgumentException if the weights array is of the wrong
-   *           length or contains negative weights.
-   */
-  public Instances resampleWithWeights(Random random, double[] weights,
-    boolean[] sampled, boolean representUsingWeights) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
@@ -1394,12 +1150,6 @@ RevisionHandler {
       Q[I] += I;
     }
 
-    // Do we need to keep track of how many copies to use?
-    int[] counts = null;
-    if (representUsingWeights) {
-      counts = new int[M];
-    }
-
     for (int i = 0; i < numInstances(); i++) {
       int ALRV;
       double U = M * random.nextDouble();
@@ -1409,53 +1159,14 @@ RevisionHandler {
       } else {
         ALRV = A[I];
       }
-      if (representUsingWeights) {
-        counts[ALRV]++;
-      } else {
-        newData.add(instance(ALRV));
-      }
+      newData.add(instance(ALRV));
       if (sampled != null) {
         sampled[ALRV] = true;
       }
-      if (!representUsingWeights) {
-        newData.instance(newData.numInstances() - 1).setWeight(1);
-      }
-    }
-
-    // Add data based on counts if weights should represent numbers of copies.
-    if (representUsingWeights) {
-      for (int i = 0; i < counts.length; i++) {
-        if (counts[i] > 0) {
-          newData.add(instance(i));
-          newData.instance(newData.numInstances() - 1).setWeight(counts[i]);
-        }
-      }
+      newData.instance(newData.numInstances() - 1).setWeight(1);
     }
 
     return newData;
-  }
-
-  /**
-   * Replaces the instance at the given position. Shallow copies instance before
-   * it is added. Does not check if the instance is compatible with the dataset.
-   * Note: String or relational values are not transferred.
-   * 
-   * @param index position where instance is to be inserted
-   * @param instance the instance to be inserted
-   * @return the instance previously at that position
-   */
-  // @ requires 0 <= index;
-  // @ requires index < m_Instances.size();
-  @Override
-  public Instance set(int index, /* @non_null@ */Instance instance) {
-
-    Instance newInstance = (Instance) instance.copy();
-    Instance oldInstance = m_Instances.get(index);
-
-    newInstance.setDataset(this);
-    m_Instances.set(index, newInstance);
-
-    return oldInstance;
   }
 
   /**
@@ -1494,42 +1205,6 @@ RevisionHandler {
   }
 
   /**
-   * Sorts a nominal attribute (stable, linear-time sort). Instances
-   * are sorted based on the attribute label ordering specified in the header.  
-   * 
-   * @param attIndex the attribute's index (index starts with 0)
-   */
-  protected void sortBasedOnNominalAttribute(int attIndex) {
-
-    // Figure out number of instances for each attribute value
-    // and store original list of instances away
-    int[] counts = new int[attribute(attIndex).numValues()];
-    Instance[] backup = new Instance[numInstances()];
-    int j = 0;
-    for (Instance inst : this) {
-      backup[j++] = inst;
-      if (!inst.isMissing(attIndex)) {
-        counts[(int)inst.value(attIndex)]++;
-      }
-    }
-
-    // Indices to figure out where to add instances
-    int[] indices = new int[counts.length];
-    int start = 0;
-    for (int i = 0; i < counts.length; i++) {
-      indices[i] = start;
-      start += counts[i];
-    }
-    for (Instance inst : backup) { // Use backup here
-      if (!inst.isMissing(attIndex)) {
-        m_Instances.set(indices[(int)inst.value(attIndex)]++, inst);
-      } else {
-        m_Instances.set(start++, inst);
-      }
-    }
-  }
-
-  /**
    * Sorts the instances based on an attribute. For numeric attributes,
    * instances are sorted in ascending order. For nominal attributes, instances
    * are sorted based on the attribute label ordering specified in the header.
@@ -1540,28 +1215,23 @@ RevisionHandler {
    */
   public void sort(int attIndex) {
 
-    if (!attribute(attIndex).isNominal()) {
-
-      // Use quicksort from Utils class for sorting
-      double[] vals = new double[numInstances()];
-      Instance[] backup = new Instance[vals.length];
-      for (int i = 0; i < vals.length; i++) {
-        Instance inst = instance(i);
-        backup[i] = inst;
-        double val = inst.value(attIndex);
-        if (Utils.isMissingValue(val)) {
-          vals[i] = Double.MAX_VALUE;
-        } else {
-          vals[i] = val;
-        }
+    double[] vals = new double[numInstances()];
+    for (int i = 0; i < vals.length; i++) {
+      double val = instance(i).value(attIndex);
+      if (Instance.isMissingValue(val)) {
+        vals[i] = Double.MAX_VALUE;
+      } else {
+        vals[i] = val;
       }
+    }
 
-      int[] sortOrder = Utils.sortWithNoMissingValues(vals);
-      for (int i = 0; i < vals.length; i++) {
-        m_Instances.set(i, backup[sortOrder[i]]);
-      }
-    } else {
-      sortBasedOnNominalAttribute(attIndex);
+    int[] sortOrder = Utils.sortWithNoMissingValues(vals);
+    Instance[] backup = new Instance[vals.length];
+    for (int i = 0; i < vals.length; i++) {
+      backup[i] = instance(i);
+    }
+    for (int i = 0; i < vals.length; i++) {
+      m_Instances.setElementAt(backup[sortOrder[i]], i);
     }
   }
 
@@ -1577,51 +1247,6 @@ RevisionHandler {
   public void sort(Attribute att) {
 
     sort(att.index());
-  }
-
-  /**
-   * Sorts the instances based on an attribute, using a stable sort. For numeric attributes,
-   * instances are sorted in ascending order. For nominal attributes, instances
-   * are sorted based on the attribute label ordering specified in the header.
-   * Instances with missing values for the attribute are placed at the end of
-   * the dataset.
-   * 
-   * @param attIndex the attribute's index (index starts with 0)
-   */
-  public void stableSort(int attIndex) {
-
-    if (!attribute(attIndex).isNominal()) {
-
-      // Use quicksort from Utils class for sorting
-      double[] vals = new double[numInstances()];
-      Instance[] backup = new Instance[vals.length];
-      for (int i = 0; i < vals.length; i++) {
-        Instance inst = instance(i);
-        backup[i] = inst;
-        vals[i] = inst.value(attIndex);
-      }
-
-      int[] sortOrder = Utils.stableSort(vals);
-      for (int i = 0; i < vals.length; i++) {
-        m_Instances.set(i, backup[sortOrder[i]]);
-      }
-    } else {
-      sortBasedOnNominalAttribute(attIndex);
-    }
-  }
-
-  /**
-   * Sorts the instances based on an attribute, using a stable sort. For numeric attributes,
-   * instances are sorted into ascending order. For nominal attributes,
-   * instances are sorted based on the attribute label ordering specified in the
-   * header. Instances with missing values for the attribute are placed at the
-   * end of the dataset.
-   * 
-   * @param att the attribute
-   */
-  public void stableSort(Attribute att) {
-
-    stableSort(att.index());
   }
 
   /**
@@ -1725,7 +1350,7 @@ RevisionHandler {
     StringBuffer text = new StringBuffer();
 
     text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName))
-    .append("\n\n");
+      .append("\n\n");
     for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i)).append("\n");
     }
@@ -1818,50 +1443,6 @@ RevisionHandler {
   }
 
   /**
-   * Computes the variance for all numeric attributes simultaneously.
-   * This is faster than calling variance() for each attribute.
-   * The resulting array has as many dimensions as there are attributes.
-   * Array elements corresponding to non-numeric attributes are set to 0.
-   * 
-   * @return the array containing the variance values
-   */
-  public/* @pure@ */double[] variances() {
-
-    double[] sum = new double[numAttributes()];
-    double[] sumSquared = new double[numAttributes()];
-    double[] sumOfWeights = new double[numAttributes()];
-
-    for (int i = 0; i < numInstances(); i++) {
-      for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
-        if (attribute(attIndex).isNumeric()) {
-          if (!instance(i).isMissing(attIndex)) {
-            sum[attIndex] += instance(i).weight() * instance(i).value(attIndex);
-            sumSquared[attIndex] += instance(i).weight() * instance(i).value(attIndex)
-              * instance(i).value(attIndex);
-            sumOfWeights[attIndex] += instance(i).weight();
-          }
-        }
-      }
-    }
-
-    double[] variances = new double[numAttributes()];
-    for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
-      if (attribute(attIndex).isNumeric()) {
-        if (sumOfWeights[attIndex] > 1) {
-          double result = (sumSquared[attIndex] - (sum[attIndex] * sum[attIndex] / sumOfWeights[attIndex]))
-            / (sumOfWeights[attIndex] - 1);
-
-          // We don't like negative variance
-          if (result > 0) {
-            variances[attIndex] = result;
-          }
-        }
-      }
-    }
-    return variances;
-  }
-
-  /**
    * Computes the variance for a numeric attribute.
    * 
    * @param attIndex the numeric attribute (index starts with 0)
@@ -1923,7 +1504,6 @@ RevisionHandler {
     AttributeStats result = new AttributeStats();
     if (attribute(index).isNominal()) {
       result.nominalCounts = new int[attribute(index).numValues()];
-      result.nominalWeights = new double[attribute(index).numValues()];
     }
     if (attribute(index).isNumeric()) {
       result.numericStats = new weka.experiment.Stats();
@@ -1933,8 +1513,7 @@ RevisionHandler {
     double[] attVals = attributeToDoubleArray(index);
     int[] sorted = Utils.sort(attVals);
     int currentCount = 0;
-    double currentWeight = 0;
-    double prev = Double.NaN;
+    double prev = Instance.missingValue();
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
       if (current.isMissing(index)) {
@@ -1943,15 +1522,13 @@ RevisionHandler {
       }
       if (current.value(index) == prev) {
         currentCount++;
-        currentWeight += current.weight();
       } else {
-        result.addDistinct(prev, currentCount, currentWeight);
+        result.addDistinct(prev, currentCount);
         currentCount = 1;
-        currentWeight = current.weight();
         prev = current.value(index);
       }
     }
-    result.addDistinct(prev, currentCount, currentWeight);
+    result.addDistinct(prev, currentCount);
     result.distinctCount--; // So we don't count "missing" as a value
     return result;
   }
@@ -1996,14 +1573,10 @@ RevisionHandler {
     result.append(Utils.padLeft("Missing", 12));
     result.append(Utils.padLeft("Unique", 12));
     result.append(Utils.padLeft("Dist", 6)).append('\n');
-
-    // Figure out how many digits we need for the index
-    int numDigits = (int)Math.log10((int)numAttributes()) + 1;
-
     for (int i = 0; i < numAttributes(); i++) {
       Attribute a = attribute(i);
       AttributeStats as = attributeStats(i);
-      result.append(Utils.padLeft("" + (i + 1), numDigits)).append(' ');
+      result.append(Utils.padLeft("" + (i + 1), 4)).append(' ');
       result.append(Utils.padRight(a.name(), 25)).append(' ');
       long percent;
       switch (a.type()) {
@@ -2085,6 +1658,14 @@ RevisionHandler {
   }
 
   /**
+   * Replaces the attribute information by a clone of itself.
+   */
+  protected void freshAttributeInfo() {
+
+    m_Attributes = (FastVector) m_Attributes.copyElements();
+  }
+
+  /**
    * Returns string including all instances, their weights and their indices in
    * the original dataset.
    * 
@@ -2110,14 +1691,14 @@ RevisionHandler {
    */
   protected void stratStep(int numFolds) {
 
-    ArrayList<Instance> newVec = new ArrayList<Instance>(m_Instances.size());
+    FastVector newVec = new FastVector(m_Instances.capacity());
     int start = 0, j;
 
     // create stratified batch
     while (newVec.size() < numInstances()) {
       j = start;
       while (j < numInstances()) {
-        newVec.add(instance(j));
+        newVec.addElement(instance(j));
         j = j + numFolds;
       }
       start++;
@@ -2135,9 +1716,7 @@ RevisionHandler {
   // @ requires 0 <= j && j < numInstances();
   public void swap(int i, int j) {
 
-    Instance in = m_Instances.get(i);
-    m_Instances.set(i, m_Instances.get(j));
-    m_Instances.set(j, in);
+    m_Instances.swap(i, j);
   }
 
   /**
@@ -2158,13 +1737,12 @@ RevisionHandler {
     }
 
     // Create the vector of merged attributes
-    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(first.numAttributes() +
-      second.numAttributes());
-    for (Attribute att : first.m_Attributes) {
-      newAttributes.add(att);
+    FastVector newAttributes = new FastVector();
+    for (int i = 0; i < first.numAttributes(); i++) {
+      newAttributes.addElement(first.attribute(i));
     }
-    for (Attribute att : second.m_Attributes) {
-      newAttributes.add((Attribute)att.copy()); // Need to copy because indices will change.
+    for (int i = 0; i < second.numAttributes(); i++) {
+      newAttributes.addElement(second.attribute(i));
     }
 
     // Create the set of Instances
@@ -2191,8 +1769,7 @@ RevisionHandler {
     Random random = new Random(2);
     Reader reader;
     int start, num;
-    ArrayList<Attribute> testAtts;
-    ArrayList<String> testVals;
+    FastVector testAtts, testVals;
     int i, j;
 
     try {
@@ -2201,16 +1778,16 @@ RevisionHandler {
       }
 
       // Creating set of instances from scratch
-      testVals = new ArrayList<String>(2);
-      testVals.add("first_value");
-      testVals.add("second_value");
-      testAtts = new ArrayList<Attribute>(2);
-      testAtts.add(new Attribute("nominal_attribute", testVals));
-      testAtts.add(new Attribute("numeric_attribute"));
+      testVals = new FastVector(2);
+      testVals.addElement("first_value");
+      testVals.addElement("second_value");
+      testAtts = new FastVector(2);
+      testAtts.addElement(new Attribute("nominal_attribute", testVals));
+      testAtts.addElement(new Attribute("numeric_attribute"));
       instances = new Instances("test_set", testAtts, 10);
-      instances.add(new DenseInstance(instances.numAttributes()));
-      instances.add(new DenseInstance(instances.numAttributes()));
-      instances.add(new DenseInstance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
+      instances.add(new Instance(instances.numAttributes()));
       instances.setClassIndex(0);
       System.out.println("\nSet of instances created from scratch:\n");
       System.out.println(instances);
@@ -2451,11 +2028,8 @@ RevisionHandler {
       else if ((args.length == 3) && (args[0].toLowerCase().equals("append"))) {
         DataSource source1 = new DataSource(args[1]);
         DataSource source2 = new DataSource(args[2]);
-        String msg = source1.getStructure().equalHeadersMsg(
-          source2.getStructure());
-        if (msg != null) {
-          throw new Exception("The two datasets have different headers:\n"
-            + msg);
+        if (!source1.getStructure().equalHeaders(source2.getStructure())) {
+          throw new Exception("The two datasets have different headers!");
         }
         Instances structure = source1.getStructure();
         System.out.println(source1.getStructure());
@@ -2471,12 +2045,10 @@ RevisionHandler {
       else if ((args.length == 3) && (args[0].toLowerCase().equals("headers"))) {
         DataSource source1 = new DataSource(args[1]);
         DataSource source2 = new DataSource(args[2]);
-        String msg = source1.getStructure().equalHeadersMsg(
-          source2.getStructure());
-        if (msg == null) {
+        if (source1.getStructure().equalHeaders(source2.getStructure())) {
           System.out.println("Headers match");
         } else {
-          System.out.println("Headers don't match:\n" + msg);
+          System.out.println("Headers don't match");
         }
       }
       // read file and seed value, randomize data and print result to stdout
@@ -2487,31 +2059,14 @@ RevisionHandler {
         i.randomize(new Random(Integer.parseInt(args[1])));
         System.out.println(i);
       }
-      // wrong parameters or help
+      // wrong parameters
       else {
-        System.err
-        .println("\nUsage:\n"
-          // help
-          + "\tweka.core.Instances help\n"
-          + "\t\tPrints this help\n"
-          // stats
+        System.err.println("\nUsage:\n" + "\tweka.core.Instances help\n"
           + "\tweka.core.Instances <filename>\n"
-          + "\t\tOutputs dataset statistics\n"
-          // merge
           + "\tweka.core.Instances merge <filename1> <filename2>\n"
-          + "\t\tMerges the datasets (must have same number of rows).\n"
-          + "\t\tGenerated dataset gets output on stdout.\n"
-          // append
           + "\tweka.core.Instances append <filename1> <filename2>\n"
-          + "\t\tAppends the second dataset to the first (must have same number of attributes).\n"
-          + "\t\tGenerated dataset gets output on stdout.\n"
-          // headers
           + "\tweka.core.Instances headers <filename1> <filename2>\n"
-          + "\t\tCompares the structure of the two datasets and outputs whether they\n"
-          + "\t\tdiffer or not.\n"
-          // randomize
-          + "\tweka.core.Instances randomize <seed> <filename>\n"
-          + "\t\tRandomizes the dataset and outputs it on stdout.\n");
+          + "\tweka.core.Instances randomize <seed> <filename>\n");
       }
     } catch (Exception ex) {
       ex.printStackTrace();

@@ -15,13 +15,13 @@
 
 /*
  * StringLocator.java
- * Copyright (C) 2005-2014 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Vector;
 import java.util.BitSet;
 
 /**
@@ -29,7 +29,7 @@ import java.util.BitSet;
  * recursively in case of Relational attributes.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 8034 $
  * @see Attribute#RELATIONAL
  */
 public class AttributeLocator 
@@ -42,10 +42,13 @@ public class AttributeLocator
   protected int[] m_AllowedIndices = null;
   
   /** contains the attribute locations, either true or false Boolean objects */
-  protected BitSet m_Attributes = null;
+  protected Vector<Boolean> m_Attributes = null;
+  
+  /** contains the attribute locations, either true or false (efficient replacement) */
+  protected BitSet m_AttributesEfficient = null;
   
   /** contains the locator locations, either null or a AttributeLocator reference */
-  protected ArrayList<AttributeLocator> m_Locators = null;
+  protected Vector<AttributeLocator> m_Locators = null;
 
   /** the type of the attribute */
   protected int m_Type = -1;
@@ -147,8 +150,9 @@ public class AttributeLocator
   protected void locate() {
     int         i;
     
-    m_Attributes = new BitSet(m_AllowedIndices.length);
-    m_Locators   = new ArrayList<AttributeLocator>();
+    m_Attributes = null;
+    m_AttributesEfficient = new BitSet(m_AllowedIndices.length);
+    m_Locators   = new Vector<AttributeLocator>();
     
     for (i = 0; i < m_AllowedIndices.length; i++) {
       if (m_Data.attribute(m_AllowedIndices[i]).type() == Attribute.RELATIONAL)
@@ -156,7 +160,7 @@ public class AttributeLocator
       else
 	m_Locators.add(null);
       
-      m_Attributes.set(i, m_Data.attribute(m_AllowedIndices[i]).type() == getType());
+      m_AttributesEfficient.set(i, m_Data.attribute(m_AllowedIndices[i]).type() == getType());
     }
   }
   
@@ -180,13 +184,16 @@ public class AttributeLocator
   protected int[] find(boolean findAtts) {
     int		i;
     int[]	result;
-    ArrayList<Integer>	indices;
+    Vector<Integer>	indices;
+
+    if (m_AttributesEfficient == null) 
+      moveFromBooleanVectorToBitSet();
 
     // determine locations
-    indices = new ArrayList<Integer>();
+    indices = new Vector<Integer>();
     if (findAtts) {
-      for (i = 0; i < m_Attributes.size(); i++) {
-	if (m_Attributes.get(i)) 
+      for (i = 0; i < m_AttributesEfficient.size(); i++) {
+	if (((Boolean) m_AttributesEfficient.get(i)).booleanValue())
 	  indices.add(new Integer(i));
       }
     }
@@ -319,15 +326,34 @@ public class AttributeLocator
    * @return 		a string representation
    */
   public String toString() {
-    return m_Attributes.toString();
+
+    if (m_AttributesEfficient == null) 
+      moveFromBooleanVectorToBitSet();
+
+    return m_AttributesEfficient.toString();
   }
   
+  /**
+   * Moves data from Vector<Boolean> to Bitset. Creates bitset first. Sets vector to null.
+   */
+  private void moveFromBooleanVectorToBitSet() {
+
+    m_AttributesEfficient = new BitSet(m_Attributes.size());
+    
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      if (((Boolean) m_Attributes.get(i)).booleanValue())
+        m_AttributesEfficient.set(i, true);
+    }
+    
+    m_Attributes = null;
+  }
+
   /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }

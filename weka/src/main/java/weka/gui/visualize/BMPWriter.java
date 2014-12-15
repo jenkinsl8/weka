@@ -1,21 +1,22 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  * BMPWriter.java
- * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.visualize;
@@ -39,18 +40,18 @@ import javax.swing.JComponent;
 public class BMPWriter
   extends JComponentWriter {
 
-  /** the background color. */
+  /** the background color */
   protected Color m_Background;
   
   /**
-   * initializes the object.
+   * initializes the object 
    */
   public BMPWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component.
+   * initializes the object with the given Component
    * 
    * @param c		the component to print in the output format
    */
@@ -59,7 +60,7 @@ public class BMPWriter
   }
 
   /**
-   * initializes the object with the given Component and filename.
+   * initializes the object with the given Component and filename
    * 
    * @param c		the component to print in the output format
    * @param f		the file to store the output in
@@ -69,7 +70,7 @@ public class BMPWriter
   }
   
   /**
-   * further initialization.
+   * further initialization 
    */
   public void initialize() {
     super.initialize();
@@ -84,7 +85,7 @@ public class BMPWriter
    * @return 		the name of the writer
    */
   public String getDescription() {
-    return "BMP-Image";
+    return Messages.getInstance().getString("BMPWriter_GetDescription_Text");
   }
   
   /**
@@ -98,7 +99,7 @@ public class BMPWriter
   }
   
   /**
-   * returns the current background color.
+   * returns the current background color
    * 
    * @return		the current background color
    */
@@ -107,7 +108,7 @@ public class BMPWriter
   }
   
   /**
-   * sets the background color to use in creating the BMP.
+   * sets the background color to use in creating the JPEG
    * 
    * @param c 		the color to use for background
    */
@@ -116,7 +117,7 @@ public class BMPWriter
   }
   
   /**
-   * generates the actual output.
+   * generates the actual output
    * 
    * @throws Exception	if something goes wrong
    */
@@ -136,23 +137,23 @@ public class BMPWriter
   }
   
   /**
-   * for testing only.
+   * for testing only 
    * 
    * @param args 	the commandline arguments
    * @throws Exception 	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    System.out.println("building TreeVisualizer...");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_First"));
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("BMPWriter_Main_Text_Second")));
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.bmp";
-    System.out.println("outputting to '" + filename + "'...");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_Third") + filename + Messages.getInstance().getString("BMPWriter_Main_Text_Fourth"));
     toOutput(new BMPWriter(), tv, new File(filename));
 
-    System.out.println("done!");
+    System.out.println(Messages.getInstance().getString("BMPWriter_Main_Text_Fifth"));
   }
 }

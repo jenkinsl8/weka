@@ -1,53 +1,42 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RegressionByDiscretization.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.ConditionalDensityEstimator;
-import weka.classifiers.IntervalEstimator;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
-import weka.core.SerializedObject;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.Utils;
-import weka.estimators.UnivariateDensityEstimator;
-import weka.estimators.UnivariateEqualFrequencyHistogramEstimator;
-import weka.estimators.UnivariateIntervalEstimator;
-import weka.estimators.UnivariateQuantileEstimator;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -124,11 +113,11 @@ import weka.filters.unsupervised.attribute.Discretize;
  * @version $Revision$
  */
 public class RegressionByDiscretization 
-extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensityEstimator {
-
+  extends SingleClassifierEnhancer {
+  
   /** for serialization */
   static final long serialVersionUID = 5066426153134050378L;
-
+  
   /** The discretization filter. */
   protected Discretize m_Discretizer = new Discretize();
 
@@ -138,32 +127,14 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
   /** The mean values for each Discretized class interval. */
   protected double [] m_ClassMeans;
 
-  /** The class counts for each Discretized class interval. */
-  protected int [] m_ClassCounts;
-
   /** Whether to delete empty intervals. */
   protected boolean m_DeleteEmptyBins;
-
-  /** Mapping to convert indices in case empty bins are deleted. */
-  protected int[] m_OldIndexToNewIndex;
 
   /** Header of discretized data. */
   protected Instances m_DiscretizedHeader = null;
 
   /** Use equal-frequency binning */
   protected boolean m_UseEqualFrequency = false;
-
-  /** Whether to minimize absolute error, rather than squared error. */
-  protected boolean m_MinimizeAbsoluteError = false;
-
-  /** Which estimator to use (default: histogram) */
-  protected UnivariateDensityEstimator m_Estimator = new UnivariateEqualFrequencyHistogramEstimator();
-
-  /** The original target values in the training data */
-  protected double[] m_OriginalTargetValues = null;
-
-  /** The converted target values in the training data */
-  protected int[] m_NewTargetValues = null;
 
   /**
    * Returns a string describing classifier
@@ -173,37 +144,10 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
   public String globalInfo() {
 
     return "A regression scheme that employs any "
-      + "classifier on a copy of the data that has the class attribute "
+      + "classifier on a copy of the data that has the class attribute (equal-width) "
       + "discretized. The predicted value is the expected value of the "
       + "mean class value for each discretized interval (based on the "
-      + "predicted probabilities for each interval). This class now "
-      + "also supports conditional density estimation by building "
-      + "a univariate density estimator from the target values in "
-      + "the training data, weighted by the class probabilities. \n\n"
-      + "For more information on this process, see\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Eibe Frank and Remco R. Bouckaert");
-    result.setValue(Field.TITLE, "Conditional Density Estimation with Class Probability Estimators");
-    result.setValue(Field.BOOKTITLE, "First Asian Conference on Machine Learning");
-    result.setValue(Field.YEAR, "2009");
-    result.setValue(Field.PAGES, "65-81");
-    result.setValue(Field.PUBLISHER, "Springer Verlag");
-    result.setValue(Field.ADDRESS, "Berlin");
-
-    return result;
+      + "predicted probabilities for each interval).";
   }
 
   /**
@@ -212,7 +156,7 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
    * @return the default classifier classname
    */
   protected String defaultClassifierString() {
-
+    
     return "weka.classifiers.trees.J48";
   }
 
@@ -237,9 +181,9 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
     result.disableAllClassDependencies();
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
-
+    
     result.setMinimumNumberInstances(2);
-
+    
     return result;
   }
 
@@ -257,7 +201,7 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
     // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
-
+    
     // Discretize the training data
     m_Discretizer.setIgnoreClass(true);
     m_Discretizer.setAttributeIndices("" + (instances.classIndex() + 1));
@@ -267,7 +211,6 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
 
     // Should empty bins be deleted?
-    m_OldIndexToNewIndex = null;
     if (m_DeleteEmptyBins) {
 
       // Figure out which classes are empty after discretization
@@ -279,70 +222,61 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
           notEmptyClass[(int)newTrain.instance(i).classValue()] = true;
         }
       }
-
+      
       // Compute new list of non-empty classes and mapping of indices
-      ArrayList<String> newClassVals = new ArrayList<String>(numNonEmptyClasses);
-      m_OldIndexToNewIndex = new int[newTrain.numClasses()];
+      FastVector newClassVals = new FastVector(numNonEmptyClasses);
+      int[] oldIndexToNewIndex = new int[newTrain.numClasses()];
       for (int i = 0; i < newTrain.numClasses(); i++) {
         if (notEmptyClass[i]) {
-          m_OldIndexToNewIndex[i] = newClassVals.size();
-          newClassVals.add(newTrain.classAttribute().value(i));
+          oldIndexToNewIndex[i] = newClassVals.size();
+          newClassVals.addElement(newTrain.classAttribute().value(i));
         }
       }
-
+      
       // Compute new header information
       Attribute newClass = new Attribute(newTrain.classAttribute().name(), 
-        newClassVals);
-      ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(newTrain.numAttributes());
+                                         newClassVals);
+      FastVector newAttributes = new FastVector(newTrain.numAttributes());
       for (int i = 0; i < newTrain.numAttributes(); i++) {
         if (i != newTrain.classIndex()) {
-          newAttributes.add((Attribute)newTrain.attribute(i).copy());
+          newAttributes.addElement(newTrain.attribute(i).copy());
         } else {
-          newAttributes.add(newClass);
+          newAttributes.addElement(newClass);
         }
       }
-
+      
       // Create new header and modify instances
       Instances newTrainTransformed = new Instances(newTrain.relationName(), 
-        newAttributes,
-        newTrain.numInstances());
+                                                    newAttributes,
+                                                    newTrain.numInstances());
       newTrainTransformed.setClassIndex(newTrain.classIndex());
       for (int i = 0; i < newTrain.numInstances(); i++) {
         Instance inst = newTrain.instance(i);
         newTrainTransformed.add(inst);
         newTrainTransformed.lastInstance().
-        setClassValue(m_OldIndexToNewIndex[(int)inst.classValue()]);
+          setClassValue(oldIndexToNewIndex[(int)inst.classValue()]);
       }
       newTrain = newTrainTransformed;
     }
-
-    // Store target values, in case a prediction interval or computation of median is required
-    m_OriginalTargetValues = new double[instances.numInstances()];
-    m_NewTargetValues = new int[instances.numInstances()];
-    for (int i = 0; i < m_OriginalTargetValues.length; i++) {
-      m_OriginalTargetValues[i] = instances.instance(i).classValue();
-      m_NewTargetValues[i] = (int)newTrain.instance(i).classValue();
-    }
-
     m_DiscretizedHeader = new Instances(newTrain, 0);
 
     int numClasses = newTrain.numClasses();
 
     // Calculate the mean value for each bin of the new class attribute
     m_ClassMeans = new double [numClasses];
-    m_ClassCounts = new int [numClasses];
+    int [] classCounts = new int [numClasses];
     for (int i = 0; i < instances.numInstances(); i++) {
       Instance inst = newTrain.instance(i);
       if (!inst.classIsMissing()) {
-        int classVal = (int) inst.classValue();
-        m_ClassCounts[classVal]++;
-        m_ClassMeans[classVal] += instances.instance(i).classValue();
+	int classVal = (int) inst.classValue();
+	classCounts[classVal]++;
+	m_ClassMeans[classVal] += instances.instance(i).classValue();
       }
     }
 
     for (int i = 0; i < numClasses; i++) {
-      if (m_ClassCounts[i] > 0) {
-        m_ClassMeans[i] /= m_ClassCounts[i];
+      if (classCounts[i] > 0) {
+	m_ClassMeans[i] /= classCounts[i];
       }
     }
 
@@ -350,99 +284,13 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
       System.out.println("Bin Means");
       System.out.println("==========");
       for (int i = 0; i < m_ClassMeans.length; i++) {
-        System.out.println(m_ClassMeans[i]);
+	System.out.println(m_ClassMeans[i]);
       }
       System.out.println();
     }
 
     // Train the sub-classifier
     m_Classifier.buildClassifier(newTrain);
-  }
-
-  /**
-   * Get density estimator for given instance.
-   * 
-   * @param inst the instance
-   * @return the univariate density estimator
-   * @exception Exception if the estimator can't be computed
-   */
-  protected UnivariateDensityEstimator getDensityEstimator(Instance instance, boolean print) throws Exception {
-
-    // Initialize estimator
-    UnivariateDensityEstimator e = (UnivariateDensityEstimator) new SerializedObject(m_Estimator).getObject();
-
-    if (e instanceof UnivariateEqualFrequencyHistogramEstimator) {
-
-      // Set the number of bins appropriately
-      ((UnivariateEqualFrequencyHistogramEstimator)e).setNumBins(getNumBins());
-
-      // Initialize boundaries of equal frequency estimator
-      for (int i = 0; i < m_OriginalTargetValues.length; i++) {
-        e.addValue(m_OriginalTargetValues[i], 1.0);
-      }
-
-      // Construct estimator, then initialize statistics, so that only boundaries will be kept
-      ((UnivariateEqualFrequencyHistogramEstimator)e).initializeStatistics();
-
-      // Now that boundaries have been determined, we only need to update the bin weights
-      ((UnivariateEqualFrequencyHistogramEstimator)e).setUpdateWeightsOnly(true);      
-    }
-
-    // Make sure structure of class attribute correct
-    m_Discretizer.input(instance);
-    m_Discretizer.batchFinished();
-    Instance newInstance = m_Discretizer.output();//(Instance)instance.copy();
-    if (m_OldIndexToNewIndex != null) {
-      newInstance.setClassValue(m_OldIndexToNewIndex[(int)newInstance.classValue()]);
-    }
-    newInstance.setDataset(m_DiscretizedHeader);
-    double [] probs = m_Classifier.distributionForInstance(newInstance);
-
-    // Add values to estimator
-    for (int i = 0; i < m_OriginalTargetValues.length; i++) {
-      e.addValue(m_OriginalTargetValues[i], probs[m_NewTargetValues[i]] * 
-        m_OriginalTargetValues.length / m_ClassCounts[m_NewTargetValues[i]]);
-    }
-
-    // Return estimator
-    return e;
-  }
-
-  /**
-   * Returns an N * 2 array, where N is the number of prediction
-   * intervals. In each row, the first element contains the lower
-   * boundary of the corresponding prediction interval and the second
-   * element the upper boundary.
-   *
-   * @param inst the instance to make the prediction for.
-   * @param confidenceLevel the percentage of cases that the interval should cover.
-   * @return an array of prediction intervals
-   * @exception Exception if the intervals can't be computed
-   */
-  public double[][] predictIntervals(Instance instance, double confidenceLevel) throws Exception {
-
-    // Get density estimator
-    UnivariateIntervalEstimator e = (UnivariateIntervalEstimator)getDensityEstimator(instance, false);
-
-    // Return intervals
-    return e.predictIntervals(confidenceLevel);
-  }
-
-  /**
-   * Returns natural logarithm of density estimate for given value based on given instance.
-   *
-   * @param inst the instance to make the prediction for.
-   * @param the value to make the prediction for.
-   * @return the natural logarithm of the density estimate
-   * @exception Exception if the intervals can't be computed
-   */
-  public double logDensity(Instance instance, double value) throws Exception {
-
-    // Get density estimator
-    UnivariateDensityEstimator e = getDensityEstimator(instance, true);
-
-    // Return estimate
-    return e.logDensity(value);
   }
 
   /**
@@ -455,33 +303,18 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
   public double classifyInstance(Instance instance) throws Exception {  
 
     // Make sure structure of class attribute correct
-    m_Discretizer.input(instance);
-    m_Discretizer.batchFinished();
-    Instance newInstance = m_Discretizer.output();//(Instance)instance.copy();
-    if (m_OldIndexToNewIndex != null) {
-      newInstance.setClassValue(m_OldIndexToNewIndex[(int)newInstance.classValue()]);
-    }
+    Instance newInstance = (Instance)instance.copy();
     newInstance.setDataset(m_DiscretizedHeader);
     double [] probs = m_Classifier.distributionForInstance(newInstance);
 
-    if (!m_MinimizeAbsoluteError) {
-
-      // Compute actual prediction
-      double prediction = 0, probSum = 0;
-      for (int j = 0; j < probs.length; j++) {
-        prediction += probs[j] * m_ClassMeans[j];
-        probSum += probs[j];
-      }
-
-      return prediction /  probSum;
-    } else {
-
-      // Get density estimator
-      UnivariateQuantileEstimator e = (UnivariateQuantileEstimator)getDensityEstimator(instance, true);
-
-      // Return estimate
-      return e.predictQuantile(0.5);
+    // Copmute actual prediction
+    double prediction = 0, probSum = 0;
+    for (int j = 0; j < probs.length; j++) {
+      prediction += probs[j] * m_ClassMeans[j];
+      probSum += probs[j];
     }
+    
+    return prediction /  probSum;
   }
 
   /**
@@ -489,34 +322,28 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(5);
-
-    newVector.addElement(new Option(
-      "\tNumber of bins for equal-width discretization\n"
-        + "\t(default 10).\n",
-        "B", 1, "-B <int>"));
+    Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-      "\tWhether to delete empty bins after discretization\n"
-        + "\t(default false).\n",
-        "E", 0, "-E"));
+	      "\tNumber of bins for equal-width discretization\n"
+	      + "\t(default 10).\n",
+	      "B", 1, "-B <int>"));
 
     newVector.addElement(new Option(
-      "\tWhether to minimize absolute error, rather than squared error.\n"
-        + "\t(default false).\n",
-        "A", 0, "-A"));
-
+	      "\tWhether to delete empty bins after discretization\n"
+	      + "\t(default false).\n",
+	      "E", 0, "-E"));
+    
     newVector.addElement(new Option(
-      "\tUse equal-frequency instead of equal-width discretization.",
-      "F", 0, "-F"));
+	     "\tUse equal-frequency instead of equal-width discretization.",
+	     "F", 0, "-F"));
 
-    newVector.addElement(new Option(
-      "\tThe density estimator to use (including parameters).",
-      "K", 1, "-K <estimator name and parameters"));
-
-    newVector.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     return newVector.elements();
   }
@@ -525,6 +352,67 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;int&gt;
+   *  Number of bins for equal-width discretization
+   *  (default 10).
+   * </pre>
+   * 
+   * <pre> -E
+   *  Whether to delete empty bins after discretization
+   *  (default false).
+   * </pre>
+   * 
+   * <pre> -F
+   *  Use equal-frequency instead of equal-width discretization.</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.J48)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.J48:
+   * </pre>
+   * 
+   * <pre> -U
+   *  Use unpruned tree.</pre>
+   * 
+   * <pre> -C &lt;pruning confidence&gt;
+   *  Set confidence threshold for pruning.
+   *  (default 0.25)</pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf.
+   *  (default 2)</pre>
+   * 
+   * <pre> -R
+   *  Use reduced error pruning.</pre>
+   * 
+   * <pre> -N &lt;number of folds&gt;
+   *  Set number of folds for reduced error
+   *  pruning. One fold is used as pruning set.
+   *  (default 3)</pre>
+   * 
+   * <pre> -B
+   *  Use binary splits only.</pre>
+   * 
+   * <pre> -S
+   *  Don't perform subtree raising.</pre>
+   * 
+   * <pre> -L
+   *  Do not clean up after the tree has been built.</pre>
+   * 
+   * <pre> -A
+   *  Laplace smoothing for predicted probabilities.</pre>
+   * 
+   * <pre> -Q &lt;seed&gt;
+   *  Seed for random data shuffling (default 1).</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -541,20 +429,8 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
 
     setDeleteEmptyBins(Utils.getFlag('E', options));
     setUseEqualFrequency(Utils.getFlag('F', options));
-    setMinimizeAbsoluteError(Utils.getFlag('A', options));
-
-    String tmpStr = Utils.getOption('K', options);
-    String[] tmpOptions = Utils.splitOptions(tmpStr);
-    if (tmpOptions.length != 0) {
-      tmpStr        = tmpOptions[0];
-      tmpOptions[0] = "";
-      setEstimator(((UnivariateDensityEstimator) Utils.forName(UnivariateDensityEstimator.class,
-        tmpStr, tmpOptions)));
-    }
 
     super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -564,34 +440,30 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 4];
+    int current = 0;
 
-    options.add("-B");
-    options.add("" + getNumBins());
+    options[current++] = "-B";
+    options[current++] = "" + getNumBins();
 
     if (getDeleteEmptyBins()) {
-      options.add("-E");
+      options[current++] = "-E";
     }
-
+    
     if (getUseEqualFrequency()) {
-      options.add("-F");
+      options[current++] = "-F";
     }
 
-    if (getMinimizeAbsoluteError()) {
-      options.add("-A");
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
     }
 
-    options.add("-K");
-    if (getEstimator() instanceof OptionHandler) {
-      options.add("" + getEstimator().getClass().getName() + " " + 
-        Utils.joinOptions(((OptionHandler)getEstimator()).getOptions()));
-    } else {
-      options.add("" + getEstimator().getClass().getName());
-    }
-
-    Collections.addAll(options, super.getOptions());
-
-    return options.toArray(new String[0]);
+    return options;
   }
 
   /**
@@ -639,9 +511,9 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
 
 
   /**
-   * Gets whether empty bins are deleted.
+   * Gets the number of bins numeric attributes will be divided into
    *
-   * @return true if empty bins get deleted.
+   * @return the number of bins.
    */
   public boolean getDeleteEmptyBins() {
 
@@ -649,47 +521,15 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
   }
 
   /**
-   * Sets whether to delete empty bins.
+   * Sets the number of bins to divide each selected numeric attribute into
    *
-   * @param b if true, empty bins will be deleted
+   * @param numBins the number of bins
    */
   public void setDeleteEmptyBins(boolean b) {
 
     m_DeleteEmptyBins = b;
   }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String minimizeAbsoluteErrorTipText() {
-
-    return "Whether to minimize absolute error.";
-  }
-
-
-  /**
-   * Gets whether to min. abs. error
-   *
-   * @return true if abs. err. is to be minimized
-   */
-  public boolean getMinimizeAbsoluteError() {
-
-    return m_MinimizeAbsoluteError;
-  }
-
-  /**
-   * Sets whether to min. abs. error.
-   *
-   * @param b if true, abs. err. is minimized
-   */
-  public void setMinimizeAbsoluteError(boolean b) {
-
-    m_MinimizeAbsoluteError = b;
-  }
-
+  
   /**
    * Returns the tip text for this property
    *
@@ -701,56 +541,25 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
     return "If set to true, equal-frequency binning will be used instead of" +
       " equal-width binning.";
   }
-
+  
   /**
    * Get the value of UseEqualFrequency.
    *
    * @return Value of UseEqualFrequency.
    */
   public boolean getUseEqualFrequency() {
-
+    
     return m_UseEqualFrequency;
   }
-
+  
   /**
    * Set the value of UseEqualFrequency.
    *
    * @param newUseEqualFrequency Value to assign to UseEqualFrequency.
    */
   public void setUseEqualFrequency(boolean newUseEqualFrequency) {
-
+    
     m_UseEqualFrequency = newUseEqualFrequency;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String estimatorTipText() {
-
-    return "The density estimator to use.";
-  }
-
-  /**
-   * Get the estimator 
-   *
-   * @return the estimator 
-   */
-  public UnivariateDensityEstimator getEstimator() {
-
-    return m_Estimator;
-  }
-
-  /**
-   * Set the estimator
-   *
-   * @param newEstimator the estimator to use
-   */
-  public void setEstimator(UnivariateDensityEstimator estimator) {
-
-    m_Estimator = estimator;
   }
 
   /**
@@ -767,15 +576,15 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
       text.append(": No model built yet.");
     } else {
       text.append("\n\nClass attribute discretized into " 
-        + m_ClassMeans.length + " values\n");
+		  + m_ClassMeans.length + " values\n");
 
       text.append("\nClassifier spec: " + getClassifierSpec() 
-        + "\n");
+		  + "\n");
       text.append(m_Classifier.toString());
     }
     return text.toString();
   }
-
+  
   /**
    * Returns the revision string.
    * 
@@ -784,7 +593,7 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-
+ 
   /**
    * Main method for testing this class.
    *

@@ -1,39 +1,40 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    ClassifierSplitModel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees.j48;
-
-import java.io.Serializable;
 
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.Utils;
 
+import java.io.Serializable;
+
 /** 
  * Abstract class for classification models that can be used 
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.11 $
  */
 public abstract class ClassifierSplitModel
   implements Cloneable, Serializable, RevisionHandler {
@@ -242,42 +243,31 @@ public abstract class ClassifierSplitModel
   public final Instances [] split(Instances data) 
        throws Exception { 
 
-    // Find size and constitution of subsets
-    int[] subsetSize = new int[m_numSubsets];
-    for (Instance instance : data) {
-      int subset = whichSubset(instance);
-      if (subset > -1) {
-        subsetSize[subset]++;
-      } else {
-        double[] weights = weights(instance);
-        for (int j = 0; j < m_numSubsets; j++) {
-          if (Utils.gr(weights[j], 0)) {
-            subsetSize[j]++;
-          }
-        }
-      }
-    }
-    
-    // Create subsets
     Instances [] instances = new Instances [m_numSubsets];
-    for (int j = 0; j < m_numSubsets; j++) {
-      instances[j] = new Instances(data, subsetSize[j]);
-    }
-    for (Instance instance : data) {
-      int subset = whichSubset(instance);
-      if (subset > -1) {
+    double [] weights;
+    double newWeight;
+    Instance instance;
+    int subset, i, j;
+
+    for (j=0;j<m_numSubsets;j++)
+      instances[j] = new Instances((Instances)data,
+					    data.numInstances());
+    for (i = 0; i < data.numInstances(); i++) {
+      instance = ((Instances) data).instance(i);
+      weights = weights(instance);
+      subset = whichSubset(instance);
+      if (subset > -1)
 	instances[subset].add(instance);
-      } else {
-        double[] weights = weights(instance);
-        for (int j = 0; j < m_numSubsets; j++) {
-	  if (Utils.gr(weights[j], 0)) {
+      else
+	for (j = 0; j < m_numSubsets; j++)
+	  if (Utils.gr(weights[j],0)) {
+	    newWeight = weights[j]*instance.weight();
 	    instances[j].add(instance);
-	    instances[j].lastInstance().
-	      setWeight(weights[j] * instance.weight());
+	    instances[j].lastInstance().setWeight(newWeight);
 	  }
-	}
-      }
     }
+    for (j = 0; j < m_numSubsets; j++)
+      instances[j].compactify();
     
     return instances;
   }

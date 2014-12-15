@@ -1,49 +1,49 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SimpleLogistic.java
- *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -119,7 +119,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @version $Revision$
  */
 public class SimpleLogistic 
-  extends AbstractClassifier 
+  extends Classifier 
   implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
              TechnicalInformationHandler {
 
@@ -266,8 +266,8 @@ public class SimpleLogistic
      *
      * @return an enumeration of all the available options.
      */
-    public Enumeration<Option> listOptions() {
-	Vector<Option> newVector = new Vector<Option>();
+    public Enumeration listOptions() {
+	Vector newVector = new Vector();
 	
 	newVector.addElement(new Option(
 	    "\tSet fixed number of iterations for LogitBoost",
@@ -302,8 +302,6 @@ public class SimpleLogistic
         newVector.addElement(new Option("\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
                                         "A", 0, "-A"));
 	
-        newVector.addAll(Collections.list(super.listOptions()));
-        
 	return newVector.elements();
     } 
     
@@ -376,8 +374,6 @@ public class SimpleLogistic
         
         setUseAIC(Utils.getFlag('A', options));        
 
-        super.setOptions(options);
-        
 	Utils.checkForRemainingOptions(options);
     } 
 
@@ -387,35 +383,37 @@ public class SimpleLogistic
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-	Vector<String> options = new Vector<String>();
-	
-	options.add("-I"); 
-	options.add(""+getNumBoostingIterations());
+	String[] options = new String[11];
+	int current = 0;
+		
+	options[current++] = "-I"; 
+	options[current++] = ""+getNumBoostingIterations();
 	
 	if (!getUseCrossValidation()) {
-	    options.add("-S");
+	    options[current++] = "-S";
 	} 
 
 	if (getErrorOnProbabilities()) {
-	    options.add("-P");
+	    options[current++] = "-P";
 	} 
 
-	options.add("-M"); 
-	options.add(""+getMaxBoostingIterations());
+	options[current++] = "-M"; 
+	options[current++] = ""+getMaxBoostingIterations();
 	
-	options.add("-H"); 
-	options.add(""+getHeuristicStop());
+	options[current++] = "-H"; 
+	options[current++] = ""+getHeuristicStop();
         
-        options.add("-W");
-        options.add(""+getWeightTrimBeta());
+        options[current++] = "-W";
+        options[current++] = ""+getWeightTrimBeta();
         
         if (getUseAIC()) {
-            options.add("-A");
+            options[current++] = "-A";
         }
 
-        Collections.addAll(options, super.getOptions());
-        
-	return options.toArray(new String[0]);
+	while (current < options.length) {
+	    options[current++] = "";
+	} 
+	return options;
     } 
 
     /**
@@ -579,8 +577,8 @@ public class SimpleLogistic
      * Returns an enumeration of the additional measure names
      * @return an enumeration of the measure names
      */
-    public Enumeration<String> enumerateMeasures() {
-	Vector<String> newVector = new Vector<String>(3);
+    public Enumeration enumerateMeasures() {
+	Vector newVector = new Vector(3);
 	newVector.addElement("measureAttributesUsed");
 	newVector.addElement("measureNumIterations");
 	return newVector.elements();

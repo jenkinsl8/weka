@@ -1,59 +1,59 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    SMO.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.SMOset;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
+import weka.core.SerializedObject;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -192,7 +192,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  * @version $Revision$
  */
 public class SMO 
-  extends AbstractClassifier 
+  extends Classifier 
   implements WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -346,12 +346,12 @@ public class SMO
       throws Exception {
 
       // Create header of instances object
-      ArrayList<Attribute> atts = new ArrayList<Attribute>(2);
-      atts.add(new Attribute("pred"));
-      ArrayList<String> attVals = new ArrayList<String>(2);
-      attVals.add(insts.classAttribute().value(cl1));
-      attVals.add(insts.classAttribute().value(cl2));
-      atts.add(new Attribute("class", attVals));
+      FastVector atts = new FastVector(2);
+      atts.addElement(new Attribute("pred"));
+      FastVector attVals = new FastVector(2);
+      attVals.addElement(insts.classAttribute().value(cl1));
+      attVals.addElement(insts.classAttribute().value(cl2));
+      atts.addElement(new Attribute("class", attVals));
       Instances data = new Instances("data", atts, insts.numInstances());
       data.setClassIndex(1);
 
@@ -366,7 +366,7 @@ public class SMO
 	  if (inst.classValue() == cl2) {
 	    vals[1] = 1;
 	  }
-	  data.add(new DenseInstance(inst.weight(), vals));
+	  data.add(new Instance(inst.weight(), vals));
 	}
       } else {
 
@@ -396,7 +396,7 @@ public class SMO
 	    if (test.instance(j).classValue() == cl2) {
 	      vals[1] = 1;
 	    }
-	    data.add(new DenseInstance(test.instance(j).weight(), vals));
+	    data.add(new Instance(test.instance(j).weight(), vals));
 	  }
 	}
       }
@@ -1406,9 +1406,9 @@ public class SMO
       if (inst.numClasses() == 2) {
 	double[] newInst = new double[2];
 	newInst[0] = m_classifiers[0][1].SVMOutput(-1, inst);
-	newInst[1] = Utils.missingValue();
+	newInst[1] = Instance.missingValue();
 	return m_classifiers[0][1].m_logistic.
-	  distributionForInstance(new DenseInstance(1, newInst));
+	  distributionForInstance(new Instance(1, newInst));
       }
       double[][] r = new double[inst.numClasses()][inst.numClasses()];
       double[][] n = new double[inst.numClasses()][inst.numClasses()];
@@ -1418,9 +1418,9 @@ public class SMO
 	      (m_classifiers[i][j].m_sparseWeights != null)) {
 	    double[] newInst = new double[2];
 	    newInst[0] = m_classifiers[i][j].SVMOutput(-1, inst);
-	    newInst[1] = Utils.missingValue();
+	    newInst[1] = Instance.missingValue();
 	    r[i][j] = m_classifiers[i][j].m_logistic.
-	      distributionForInstance(new DenseInstance(1, newInst))[0];
+	      distributionForInstance(new Instance(1, newInst))[0];
 	    n[i][j] = m_classifiers[i][j].m_sumOfWeights;
 	  }
 	}
@@ -1573,9 +1573,13 @@ public class SMO
    *
    * @return an enumeration of all the available options.
    */
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> result = new Vector<Option>();
+    Vector result = new Vector();
+
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     result.addElement(new Option(
 	"\tTurns off all checks - use with caution!\n"
@@ -1626,14 +1630,14 @@ public class SMO
 	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
 	"K", 1, "-K <classname and parameters>"));
 
-    result.addAll(Collections.list(super.listOptions()));
-    
     result.addElement(new Option(
 	"",
 	"", 0, "\nOptions specific to kernel "
 	+ getKernel().getClass().getName() + ":"));
     
-    result.addAll(Collections.list(((OptionHandler) getKernel()).listOptions()));
+    enm = ((OptionHandler) getKernel()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     return result.elements();
   }
@@ -1766,8 +1770,6 @@ public class SMO
     }
     
     super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -1776,8 +1778,14 @@ public class SMO
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    
-    Vector<String> result = new Vector<String>();
+    int       i;
+    Vector    result;
+    String[]  options;
+
+    result = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
     if (getChecksTurnedOff())
       result.add("-no-checks");
@@ -1805,8 +1813,6 @@ public class SMO
 
     result.add("-K");
     result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
-    
-    Collections.addAll(result, super.getOptions());
     
     return (String[]) result.toArray(new String[result.size()]);	  
   }

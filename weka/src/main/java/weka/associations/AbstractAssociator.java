@@ -1,83 +1,49 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
- *    Associator.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    AbstractAssociator.java
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
-import java.io.Serializable;
-
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
-import weka.core.CapabilitiesIgnorer;
+import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
+import java.io.Serializable;
+
 /** 
  * Abstract scheme for learning associations. All schemes for learning
- * associations implemement this class
+ * associations extend this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$ 
  */
 public abstract class AbstractAssociator 
-  implements Cloneable, Associator, Serializable, CapabilitiesHandler, 
-             CapabilitiesIgnorer, RevisionHandler {
+  implements Cloneable, Associator, Serializable, CapabilitiesHandler, RevisionHandler {
  
   /** for serialization */
   private static final long serialVersionUID = -3017644543382432070L;
-
-  /** Whether capabilities should not be checked */
-  protected boolean m_DoNotCheckCapabilities = false;
-
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String doNotCheckCapabilitiesTipText() {
-    return "If set, associator capabilities are not checked before associator is built"
-      + " (Use with caution to reduce runtime).";
-  }
-
-  /**
-   * Set whether not to check capabilities.
-   * 
-   * @param doNotCheckCapabilities true if capabilities are not to be checked.
-   */
-  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
-
-    m_DoNotCheckCapabilities = doNotCheckCapabilities;
-  }
-
-  /**
-   * Get whether capabilities checking is turned off.
-   * 
-   * @return true if capabilities checking is turned off.
-   */
-  public boolean getDoNotCheckCapabilities() {
-
-    return m_DoNotCheckCapabilities;
-  }
   
   /**
    * Creates a new instance of a associator given it's class name and
@@ -146,10 +112,10 @@ public abstract class AbstractAssociator
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities defaultC = new Capabilities(this);
-    defaultC.enableAll();
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
     
-    return defaultC;
+    return result;
   }
   
   /**
@@ -167,7 +133,7 @@ public abstract class AbstractAssociator
    * @param associator	the associator to run
    * @param options	the commandline options
    */
-  public static void runAssociator(Associator associator, String[] options) {
+  protected static void runAssociator(Associator associator, String[] options) {
     try {
       System.out.println(
 	  AssociatorEvaluation.evaluate(associator, options));

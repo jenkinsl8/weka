@@ -1,40 +1,38 @@
 /*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 /*
  *    RandomForest.java
- *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.trees;
 
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.meta.Bagging;
 import weka.core.AdditionalMeasureProducer;
-import weka.core.Aggregateable;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.PartitionGenerator;
 import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
@@ -45,7 +43,7 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- <!-- globalinfo-start -->
+ <!-- globalinfo-start --> 
  * Class for constructing a forest of random trees.<br/>
  * <br/>
  * For more information see: <br/>
@@ -54,8 +52,9 @@ import weka.core.WeightedInstancesHandler;
  * <p/>
  <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
+ <!-- technical-bibtex-start --> 
  * BibTeX:
+ * 
  * <pre>
  * &#64;article{Breiman2001,
  *    author = {Leo Breiman},
@@ -70,61 +69,56 @@ import weka.core.WeightedInstancesHandler;
  * <p/>
  <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p/>
+ <!-- options-start --> 
+ * Valid options are:
+ * <p/>
  * 
- * <pre> -I &lt;number of trees&gt;
+ * <pre>
+ * -I &lt;number of trees&gt;
  *  Number of trees to build.
- *  (default 100)</pre>
+ * </pre>
  * 
- * <pre> -K &lt;number of features&gt;
- *  Number of features to consider (&lt;1=int(log_2(#predictors)+1)).
- *  (default 0)</pre>
+ * <pre>
+ * -K &lt;number of features&gt;
+ *  Number of features to consider (&lt;0 = int(log_2(#predictors)+1)).
+ * </pre>
  * 
- * <pre> -S
+ * <pre>
+ * -S
  *  Seed for random number generator.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -depth &lt;num&gt;
+ * <pre>
+ * -depth &lt;num&gt;
  *  The maximum depth of the trees, 0 for unlimited.
- *  (default 0)</pre>
+ *  (default 0)
+ * </pre>
  * 
- * <pre> -O
- *  Don't calculate the out of bag error.</pre>
- * 
- * <pre> -print
- *  Print the individual trees in the output</pre>
- * 
- * <pre> -num-slots &lt;num&gt;
- *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)</pre>
- * 
- * <pre> -output-debug-info
+ * <pre>
+ * -D
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -do-not-check-capabilities
- *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
  <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
-public class RandomForest extends AbstractClassifier implements OptionHandler,
-  Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer,
-  TechnicalInformationHandler, PartitionGenerator, Aggregateable<RandomForest> {
+public class RandomForest extends Classifier implements OptionHandler,
+    Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer,
+    TechnicalInformationHandler {
 
   /** for serialization */
-  static final long serialVersionUID = 1116839470751428698L;
+  private static final long serialVersionUID = -2260823972777004705L;
 
   /** Number of trees in forest. */
   protected int m_numTrees = 100;
 
   /**
    * Number of features to consider in random feature selection. If less than 1
-   * will use int(log_2(M)+1) )
+   * will use int(logM+1) )
    */
   protected int m_numFeatures = 0;
 
@@ -140,15 +134,6 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   /** The maximum depth of the trees (0 = unlimited) */
   protected int m_MaxDepth = 0;
 
-  /** The number of threads to have executing at any one time */
-  protected int m_numExecutionSlots = 1;
-
-  /** Print the individual trees in the output */
-  protected boolean m_printTrees = false;
-
-  /** Don't calculate the out of bag error */
-  protected boolean m_dontCalculateOutOfBagError;
-
   /**
    * Returns a string describing classifier
    * 
@@ -158,7 +143,8 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   public String globalInfo() {
 
     return "Class for constructing a forest of random trees.\n\n"
-      + "For more information see: \n\n" + getTechnicalInformation().toString();
+        + "For more information see: \n\n"
+        + getTechnicalInformation().toString();
   }
 
   /**
@@ -168,7 +154,6 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * 
    * @return the technical information about this class
    */
-  @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation result;
 
@@ -259,7 +244,6 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * 
    * @param seed the seed
    */
-  @Override
   public void setSeed(int seed) {
 
     m_randomSeed = seed;
@@ -270,7 +254,6 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * 
    * @return the seed for the random number generation
    */
-  @Override
   public int getSeed() {
 
     return m_randomSeed;
@@ -305,104 +288,16 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   }
 
   /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String printTreesTipText() {
-    return "Print the individual trees in the output";
-  }
-
-  /**
-   * Set whether to print the individual ensemble trees in the output
-   * 
-   * @param print true if the individual trees are to be printed
-   */
-  public void setPrintTrees(boolean print) {
-    m_printTrees = print;
-  }
-
-  /**
-   * Get whether to print the individual ensemble trees in the output
-   * 
-   * @return true if the individual trees are to be printed
-   */
-  public boolean getPrintTrees() {
-    return m_printTrees;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String dontCalculateOutOfBagErrorTipText() {
-    return "If true, then the out of bag error is not computed";
-  }
-
-  /**
-   * Set whether to turn off the calculation of out of bag error
-   * 
-   * @param b true to turn off the calculation of out of bag error
-   */
-  public void setDontCalculateOutOfBagError(boolean b) {
-    m_dontCalculateOutOfBagError = b;
-  }
-
-  /**
-   * Get whether to turn off the calculation of out of bag error
-   * 
-   * @return true to turn off the calculation of out of bag error
-   */
-  public boolean getDontCalculateOutOfBagError() {
-    return m_dontCalculateOutOfBagError;
-  }
-
-  /**
    * Gets the out of bag error that was calculated as the classifier was built.
    * 
    * @return the out of bag error
    */
   public double measureOutOfBagError() {
 
-    if (m_bagger != null && !m_dontCalculateOutOfBagError) {
+    if (m_bagger != null) {
       return m_bagger.measureOutOfBagError();
-    } else {
+    } else
       return Double.NaN;
-    }
-  }
-
-  /**
-   * Set the number of execution slots (threads) to use for building the members
-   * of the ensemble.
-   * 
-   * @param numSlots the number of slots to use.
-   */
-  public void setNumExecutionSlots(int numSlots) {
-    m_numExecutionSlots = numSlots;
-  }
-
-  /**
-   * Get the number of execution slots (threads) to use for building the members
-   * of the ensemble.
-   * 
-   * @return the number of slots to use
-   */
-  public int getNumExecutionSlots() {
-    return m_numExecutionSlots;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String numExecutionSlotsTipText() {
-    return "The number of execution slots (threads) to use for "
-      + "constructing the ensemble.";
   }
 
   /**
@@ -410,10 +305,9 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * 
    * @return an enumeration of the measure names
    */
-  @Override
-  public Enumeration<String> enumerateMeasures() {
+  public Enumeration enumerateMeasures() {
 
-    Vector<String> newVector = new Vector<String>(1);
+    Vector newVector = new Vector(1);
     newVector.addElement("measureOutOfBagError");
     return newVector.elements();
   }
@@ -425,14 +319,13 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */
-  @Override
   public double getMeasure(String additionalMeasureName) {
 
     if (additionalMeasureName.equalsIgnoreCase("measureOutOfBagError")) {
       return measureOutOfBagError();
     } else {
       throw new IllegalArgumentException(additionalMeasureName
-        + " not supported (RandomForest)");
+          + " not supported (RandomForest)");
     }
   }
 
@@ -442,35 +335,28 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * @return an enumeration of all the available options
    */
   @Override
-  public Enumeration<Option> listOptions() {
+  public Enumeration listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>();
+    Vector newVector = new Vector();
 
     newVector.addElement(new Option("\tNumber of trees to build.\n\t(default 100)", "I", 1,
-      "-I <number of trees>"));
+        "-I <number of trees>"));
 
     newVector.addElement(new Option(
       "\tNumber of features to consider (<1=int(log_2(#predictors)+1)).\n\t(default 0)", "K", 1,
       "-K <number of features>"));
 
     newVector.addElement(new Option("\tSeed for random number generator.\n"
-      + "\t(default 1)", "S", 1, "-S"));
+        + "\t(default 1)", "S", 1, "-S"));
 
     newVector.addElement(new Option(
-      "\tThe maximum depth of the trees, 0 for unlimited.\n" + "\t(default 0)",
-      "depth", 1, "-depth <num>"));
+        "\tThe maximum depth of the trees, 0 for unlimited.\n"
+            + "\t(default 0)", "depth", 1, "-depth <num>"));
 
-    newVector.addElement(new Option("\tDon't calculate the out of bag error.",
-      "O", 0, "-O"));
-
-    newVector.addElement(new Option(
-      "\tPrint the individual trees in the output", "print", 0, "-print"));
-
-    newVector.addElement(new Option("\tNumber of execution slots.\n"
-      + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
-      "-num-slots <num>"));
-
-    newVector.addAll(Collections.list(super.listOptions()));
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     return newVector.elements();
   }
@@ -482,7 +368,11 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result = new Vector<String>();
+    Vector result;
+    String[] options;
+    int i;
+
+    result = new Vector();
 
     result.add("-I");
     result.add("" + getNumTrees());
@@ -498,62 +388,48 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
       result.add("" + getMaxDepth());
     }
 
-    if (getDontCalculateOutOfBagError()) {
-      result.add("-O");
-    }
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
-    if (m_printTrees) {
-      result.add("-print");
-    }
-
-    result.add("-num-slots");
-    result.add("" + getNumExecutionSlots());
-
-    Collections.addAll(result, super.getOptions());
-
-    return result.toArray(new String[result.size()]);
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p/>
+   <!-- options-start --> 
+   * Valid options are:
+   * <p/>
    * 
-   * <pre> -I &lt;number of trees&gt;
+   * <pre>
+   * -I &lt;number of trees&gt;
    *  Number of trees to build.
-   *  (default 100)</pre>
+   * </pre>
    * 
-   * <pre> -K &lt;number of features&gt;
-   *  Number of features to consider (&lt;1=int(log_2(#predictors)+1)).
-   *  (default 0)</pre>
+   * <pre>
+   * -K &lt;number of features&gt;
+   *  Number of features to consider (&lt;0 = int(log_2(#predictors)+1)).
+   * </pre>
    * 
-   * <pre> -S
+   * <pre>
+   * -S
    *  Seed for random number generator.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -depth &lt;num&gt;
+   * <pre>
+   * -depth &lt;num&gt;
    *  The maximum depth of the trees, 0 for unlimited.
-   *  (default 0)</pre>
+   *  (default 0)
+   * </pre>
    * 
-   * <pre> -O
-   *  Don't calculate the out of bag error.</pre>
-   * 
-   * <pre> -print
-   *  Print the individual trees in the output</pre>
-   * 
-   * <pre> -num-slots &lt;num&gt;
-   *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)</pre>
-   * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -D
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -do-not-check-capabilities
-   *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -592,17 +468,6 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
       setMaxDepth(0);
     }
 
-    setDontCalculateOutOfBagError(Utils.getFlag('O', options));
-
-    setPrintTrees(Utils.getFlag("print", options));
-
-    tmpStr = Utils.getOption("num-slots", options);
-    if (tmpStr.length() > 0) {
-      setNumExecutionSlots(Integer.parseInt(tmpStr));
-    } else {
-      setNumExecutionSlots(1);
-    }
-
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -635,28 +500,20 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
     data.deleteWithMissingClass();
 
     m_bagger = new Bagging();
-
-    // RandomTree implements WeightedInstancesHandler, so we can
-    // represent copies using weights to achieve speed-up.
-    m_bagger.setRepresentCopiesUsingWeights(true);
-
     RandomTree rTree = new RandomTree();
 
     // set up the random tree options
     m_KValue = m_numFeatures;
-    if (m_KValue < 1) {
+    if (m_KValue < 1)
       m_KValue = (int) Utils.log2(data.numAttributes() - 1) + 1;
-    }
     rTree.setKValue(m_KValue);
     rTree.setMaxDepth(getMaxDepth());
-    rTree.setDoNotCheckCapabilities(true);
 
     // set up the bagger and build the forest
     m_bagger.setClassifier(rTree);
     m_bagger.setSeed(m_randomSeed);
     m_bagger.setNumIterations(m_numTrees);
     m_bagger.setCalcOutOfBag(true);
-    m_bagger.setNumExecutionSlots(m_numExecutionSlots);
     m_bagger.buildClassifier(data);
   }
 
@@ -681,54 +538,21 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   @Override
   public String toString() {
 
-    if (m_bagger == null) {
+    if (m_bagger == null)
       return "Random forest not built yet";
-    } else {
-      StringBuffer temp = new StringBuffer();
-      temp.append("Random forest of "
-        + m_numTrees
-        + " trees, each constructed while considering "
-        + m_KValue
-        + " random feature"
-        + (m_KValue == 1 ? "" : "s")
-        + ".\n"
-        + (!getDontCalculateOutOfBagError() ? "Out of bag error: "
-          + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) : "")
-        + "\n"
-        + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n")
-          : ("")) + "\n");
-      if (m_printTrees) {
-        temp.append(m_bagger.toString());
-      }
-      return temp.toString();
-    }
-  }
-
-  /**
-   * Builds the classifier to generate a partition.
-   */
-  @Override
-  public void generatePartition(Instances data) throws Exception {
-
-    buildClassifier(data);
-  }
-
-  /**
-   * Computes an array that indicates leaf membership
-   */
-  @Override
-  public double[] getMembershipValues(Instance inst) throws Exception {
-
-    return m_bagger.getMembershipValues(inst);
-  }
-
-  /**
-   * Returns the number of elements in the partition.
-   */
-  @Override
-  public int numElements() throws Exception {
-
-    return m_bagger.numElements();
+    else
+      return "Random forest of "
+          + m_numTrees
+          + " trees, each constructed while considering "
+          + m_KValue
+          + " random feature"
+          + (m_KValue == 1 ? "" : "s")
+          + ".\n"
+          + "Out of bag error: "
+          + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4)
+          + "\n"
+          + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n")
+              : ("")) + "\n";
   }
 
   /**
@@ -738,7 +562,7 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 
   /**
@@ -749,16 +573,4 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   public static void main(String[] argv) {
     runClassifier(new RandomForest(), argv);
   }
-
-  @Override
-  public RandomForest aggregate(RandomForest toAggregate) throws Exception {
-    m_bagger.aggregate(toAggregate.m_bagger);
-    return this;
-  }
-
-  @Override
-  public void finalizeAggregation() throws Exception {
-    m_bagger.finalizeAggregation();
-  }
 }
-

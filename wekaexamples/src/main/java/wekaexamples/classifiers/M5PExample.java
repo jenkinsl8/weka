@@ -22,16 +22,15 @@
 
 package wekaexamples.classifiers;
 
-import java.util.Vector;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 import weka.experiment.InstanceQuery;
+
+import java.util.Vector;
 
 /**
  * 
@@ -47,7 +46,7 @@ public class M5PExample {
   public final static String USER = "the_user";
 
   public final static String PASSWORD = "the_password";
-
+  
   public void train() throws Exception {
     System.out.println("Training...");
 
@@ -66,7 +65,7 @@ public class M5PExample {
     cl.buildClassifier(data);
 
     // save model + header
-    Vector<Object> v = new Vector<Object>();
+    Vector v = new Vector();
     v.add(cl);
     v.add(new Instances(data, 0));
     SerializationHelper.write(FILENAME, v);
@@ -82,14 +81,12 @@ public class M5PExample {
     query.setDatabaseURL(URL);
     query.setUsername(USER);
     query.setPassword(PASSWORD);
-    query.setQuery("select * from some_table"); // retrieves the same table only
-                                                // for simplicty reasons.
+    query.setQuery("select * from some_table");  // retrieves the same table only for simplicty reasons.
     Instances data = query.retrieveInstances();
     data.setClassIndex(14);
 
     // read model and header
-    @SuppressWarnings("unchecked")
-    Vector<Object> v = (Vector<Object>) SerializationHelper.read(FILENAME);
+    Vector v = (Vector) SerializationHelper.read(FILENAME);
     Classifier cl = (Classifier) v.get(0);
     Instances header = (Instances) v.get(1);
 
@@ -101,7 +98,7 @@ public class M5PExample {
       // Instances object returned here might differ slightly from the one
       // used during training the classifier, e.g., different order of
       // nominal values, different number of attributes.
-      Instance inst = new DenseInstance(header.numAttributes());
+      Instance inst = new Instance(header.numAttributes());
       inst.setDataset(header);
       for (int n = 0; n < header.numAttributes(); n++) {
         Attribute att = data.attribute(header.attribute(n).name());
@@ -110,19 +107,20 @@ public class M5PExample {
           if (att.isNominal()) {
             // is this label also in the original data?
             // Note:
-            // "numValues() > 0" is only used to avoid problems with nominal
+            // "numValues() > 0" is only used to avoid problems with nominal 
             // attributes that have 0 labels, which can easily happen with
             // data loaded from a database
             if ((header.attribute(n).numValues() > 0) && (att.numValues() > 0)) {
               String label = curr.stringValue(att);
               int index = header.attribute(n).indexOfValue(label);
-              if (index != -1) {
+              if (index != -1)
                 inst.setValue(n, index);
-              }
             }
-          } else if (att.isNumeric()) {
+          }
+          else if (att.isNumeric()) {
             inst.setValue(n, curr.value(att));
-          } else {
+          }
+          else {
             throw new IllegalStateException("Unhandled attribute type!");
           }
         }
