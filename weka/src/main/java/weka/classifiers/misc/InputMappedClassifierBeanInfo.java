@@ -14,8 +14,7 @@
  */
 
 /*
- * InputMappedClassifierBeanInfo.java
- * Copyright 2010-2012 University of Waikato
+ * Copyright 2010 University of Waikato
  */
 
 package weka.classifiers.misc;

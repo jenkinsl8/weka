@@ -15,17 +15,17 @@
 
 /*
  *    KFStep.java
- *    Copyright (C) 2011-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2011 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Optional annotation for plugin beans in the Knowledge Flow. The main

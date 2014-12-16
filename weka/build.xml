@@ -27,7 +27,6 @@
   <property name="headless" value="false"/>
   <property name="macdistrib" value="osx-distrib"/>
   <property name="debug" value="on" />
-  <property name="packages_external" value="../packages/external"/>
   <property name="packages_internal" value="../packages/internal"/>
 
   <!-- properties used when compiling/making packages -->
@@ -62,20 +61,11 @@
         <include name="**/${build}/classes"/>
         <include name="**/${build}/testcases"/>
    </dirset>
-   <dirset dir="${packages_external}">
-     <include name="**/${build}/classes"/>
-     <include name="**/${build}/testcases"/>
-   </dirset>
-   <fileset dir="${packages_external}">
-     <include name="**/lib/*.jar"/>
-     <include name="**/lib/*.zip"/>
-   </fileset>
    <fileset dir="${packages_internal}">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
    </fileset>
   </path>
-<!--  <property name="pack.cp" refid="package.class.path"/> -->
 
 <!-- 
  ============================================================================
@@ -120,6 +110,11 @@
   </target>
 
   <target name="apply_all_internal" depends="compile" description="Apply command to all internal packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
+
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="isolationForest"/>
+    </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="hotSpot"/>
     </antcall>
@@ -158,10 +153,6 @@
     </antcall>
 
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="SVMAttributeEval"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="isotonicRegression"/>
     </antcall>
 
@@ -171,11 +162,6 @@
 
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="partialLeastSquares"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="gridSearch"/>
-      <param name="cp" value="../partialLeastSquares/build/classes"/>
     </antcall>
 
     <antcall target="${packageCommand}_internal">
@@ -194,10 +180,10 @@
       <param name="packageName" value="multiInstanceFilters"/>
     </antcall>
 
-    <antcall target="${packageCommand}_internal">
+<!--    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="multiInstanceLearning"/>
       <param name="cp" value="../multiInstanceFilters/build/classes"/>
-    </antcall>
+    </antcall> -->
 
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="classificationViaClustering"/>
@@ -217,10 +203,6 @@
 
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="metaCost"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="multiBoostAB"/>
     </antcall>
 
     <antcall target="${packageCommand}_internal">
@@ -284,10 +266,6 @@
     </antcall>
 
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="userClassifier"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="XMeans"/>
     </antcall>
 
@@ -314,260 +292,62 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="simpleEducationalLearningSchemes"/>
     </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="localOutlierFactor"/>
     </antcall>
-    <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="isolationForest"/>
-    </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="multiLayerPerceptrons"/>
     </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="supervisedAttributeScaling"/>
     </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="kernelLogisticRegression"/>
     </antcall>
+
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="discriminantAnalysis"/>
     </antcall>
   </target>
 
-  <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
-    <echo message="Compiling ${packageName}"/>
-    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile_tests" inheritall="false">
-      <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${junitjar}:${wekatestclasses}:${cp}"/>
-    </ant>
-  </target>
-
-  <target name="compile_external" depends="compile" description="Compile a named external package (run with -DpackageName=package name)">
-    <echo message="Compiling ${packageName}"/>
-    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
-    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile" inheritall="false">
-      <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
-    </ant>
-  </target>
-
-  <target name="clean_external" description="Clean a named external package (run with -DpackageName=package name)">
-    <echo message="Clean ${packageName}"/>
-    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="clean" inheritall="false">
-      <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
-    </ant>
-  </target>
-
-  <target name="make_external" description="Make a named external package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
-    <echo message="Making ${packageName}"/>
-    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
-    <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="make_package" inheritall="false">
-      <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
-    </ant>
-  </target>
-
-  <target name="apply_all_external" depends="compile" description="Apply command to all external packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="CLOPE"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="DMNBtext"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="EMImputation"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="J48graft"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="LibLINEAR"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="LibSVM"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="multilayerPerceptronCS"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="NNge"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="averagedOneDependenceEstimators"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="bayesianLogisticRegression"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="citationKNN"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="decorate"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="ensembleLibrary"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="fastCorrBasedFS"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="functionalTrees"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="fuzzyLaticeReasoning"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="generalizedSequentialPatterns"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="hiddenNaiveBayes"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="latentSemanticAnalysis"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="lazyBayesianRules"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="fuzzyUnorderedRuleInduction"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="levenshteinEditDistance"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="linearForwardSelection"/>
-      <param name="cp" value="../../${packages_internal}/classifierBasedAttributeSelection/build/classes"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="normalize"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="SMOTE"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="optics_dbScan"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="ordinalLearningMethod"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="ordinalStochasticDominance"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="probabilisticSignificanceAE"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="rotationForest"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="tabuAndScatterSearch"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="stackingC"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="tertius"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="winnow"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="prefuseTree"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="prefuseGraph"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="associationRulesVisualizer"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="kfGroovy"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="kfKettle"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="kfPMMLClassifierScoring"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="classifierErrors"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="classAssociationRules"/>
-      <param name="cp" value="../../${packages_internal}/predictiveApriori/build/classes"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="cascadeKMeans"/>
-    </antcall>
-
-    <antcall target="${packageCommand}_external">
-      <param name="packageName" value="DilcaDistance"/>
-      <param name="cp" value="../fastCorrBasedFS/build/classes"/>
-    </antcall>
-  </target>
-
-  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
-    <antcall target="apply_all_internal"/>
-    <antcall target="apply_all_external"/>
-  </target>
-
   <target name="init_compile" depends="init_all">
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}/classes"/>
+
+    <mkdir dir="public_domain/weka/core/matrix"/>
+    <mkdir dir="public_domain/weka/gui"/>
+
+    <!-- Move the public domain classes out of weka
+    <move file="${src}/weka/core/matrix/CholeskyDecomposition.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/matrix/EigenvalueDecomposition.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/matrix/LUDecomposition.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/matrix/Maths.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/matrix/QRDecomposition.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/matrix/SingularValueDecomposition.java" 
+          todir="public_domain/weka/core/matrix" failonerror="false"/>
+    <move file="${src}/weka/core/Statistics.java" 
+          todir="public_domain/weka/core/" failonerror="false"/>
+    <move file="${src}/weka/gui/SplashWindow.java" 
+          todir="public_domain/weka/gui/" failonerror="false"/> -->
   </target>
 
   <!-- Compile the java code from ${src}/weka into ${build}/classes -->
   <target name="compile" depends="init_compile" 
    description="Compile weka and deposit class files in build/classes">
-    <javac srcdir="${src}" 
+    <javac srcdir="${src}:public_domain/" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${build}/classes"
       optimize="${optimization}"
       debug="${debug}"
-      includeantruntime="false"
       deprecation="${deprecation}"
       source="1.6" target="1.6">
 
@@ -596,11 +376,6 @@
     </copy>
     <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine"/>
-    <unzip src="${lib}/java-cup.jar" dest="${build}/classes">
-      <patternset>
-        <include name="java_cup/runtime/**/*"/>
-      </patternset>
-    </unzip>
     <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
       <patternset>
         <include name="org/**/*"/>
@@ -616,7 +391,7 @@
     <javadoc sourcepath="${src}" 
              classpathref="project.class.path"
              destdir="${doc}" 
-             packagenames="weka.*, org.*"
+             packagenames="weka.*"
              Author="yes" 
              Public="yes" 
              maxmemory="500m"/>
@@ -657,7 +432,6 @@
             destdir="${build}/testcases"
             optimize="${optimization}"
             debug="${debug}"
-            includeantruntime="false"
             deprecation="${deprecation}"
             source="1.6" target="1.6">
        <classpath refid="project.class.path" /> 
@@ -680,45 +454,30 @@
     </jar>
   </target>
 
-  <!-- Run the test cases for the core via junit's testrunner class.
+  <!-- Run the test cases via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
   <target name="run_tests_core" depends="compile_tests" 
    description="Execute unit tests (fast)">
-<!--    <echo message="pacakge classpath ${pack.cp}"/> -->
      <java fork="yes" dir="."
       classname="junit.textui.TestRunner"
       taskname="junit" failonerror="${run_tests_fail}">
 	 <arg value="weka.AllTests"/>
          <classpath refid="project.class.path" /> 
-       <jvmarg value="-server"/>
-       <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
-<!--       <jvmarg value="-Xint"/> -->
+         <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
          <jvmarg value="-Djava.awt.headless=${headless}"/> 
          <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
      </java>
   </target>
 
-  <!-- Run the test cases for the core and all packages via junit's testrunner class.
-   This is a faster, simpler option than running the junit task -->
-
   <target name="run_tests_all" depends="compile_tests"
-   description="Execute unit tests (fast)">
+   description="Execute unit tests (fast) for core and internal packages">
     <antcall target="apply_all_internal">
-      <param name="packageCommand" value="clean"/>
-    </antcall>
-    <antcall target="apply_all_external">
       <param name="packageCommand" value="clean"/>
     </antcall>
     <antcall target="apply_all_internal">
       <param name="packageCommand" value="compile"/>
     </antcall>
     <antcall target="apply_all_internal">
-      <param name="packageCommand" value="compile_tests"/>
-    </antcall>
-    <antcall target="apply_all_external">
-      <param name="packageCommand" value="compile"/>
-    </antcall>
-    <antcall target="apply_all_external">
       <param name="packageCommand" value="compile_tests"/>
     </antcall>
 <!--    <echo message="pacakge classpath ${pack.cp}"/> -->
@@ -734,7 +493,6 @@
        <jvmarg value="-Duser.timezone=Pacific/Auckland"/>
     </java>
   </target>
-
 
 <!--
   ===========================================================================
@@ -786,6 +544,7 @@
     </jar>
   </target>
 
+
   <!-- Put all .java, and .props files into ${dist}/weka-src.jar-->
   <target name="srcjar" depends="init_dist, init_all"
    description="Create a jar file containing weka source in ./dist">  
@@ -793,12 +552,13 @@
     <jar jarfile="${dist}/weka-src.jar" 
       basedir=".">
       <include name="*.xml"/>
-      <include name=".classpath.default"/>
       <include name=".project.default"/>
+      <include name=".classpath.default"/>
       <include name="src/**/*.excludes"/>
       <include name="src/**/*.gif"/>
       <include name="src/**/*.png"/>
       <include name="src/**/*.java"/>
+      <include name="public_domain/**/*.java"/>
       <include name="src/**/*.jpeg"/>
       <include name="src/**/*.jpg"/>
       <include name="src/**/*.props"/>
@@ -825,7 +585,7 @@
    description="Create a jar file containing classes for remote experiments in ./dist">
      <jar jarfile="${dist}/remoteEngine.jar"
       basedir="${build}/classes"
-      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core/Utils.class,weka/core/RevisionUtils.class,weka/gui/GenericPropertiesCreator.props,weka/gui/GenericObjectEditor.props"/>
+      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core/Utils.class,weka/core/RevisionUtils.class"/>
      <copy todir="${dist}" >
        <fileset dir="${src}/weka/experiment">
           <include name="remote.policy"/>
@@ -855,7 +615,7 @@
    description="Make a release in ${release} without running junit tests. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
   </target>
 
-  <target name="release_sub_tasks" depends="set_version, exejar, remotejar, srcjar, docs, changelog, packages_changelog">
+  <target name="release_sub_tasks" depends="set_version, exejar, remotejar, srcjar, docs, changelog">
     <!-- copy the docs to dist/docs -->
 
     <copy todir="weka-${release}/weka-${release}/doc" >
@@ -884,7 +644,6 @@
          <include name="weka.ico"/>
        </fileset>
     </copy>
-    <copy file="resources/packageManager-source.jar" todir="weka-${release}/weka-${release}"/>
     <zip destfile="weka-${release}.zip" 
      basedir="weka-${release}"/>
   </target>
@@ -913,15 +672,15 @@
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
-      </jarfileset>     
+      </jarfileset>
       <documenttype name="Attribute Relation File Format (ARFF)"
-                    extensions="arff xrff" 
+                    extensions="arff xrff"
                     iconFile="${src}/weka/gui/weka_icon_new.icns"
-                    role="Editor"/> 
+                    role="Editor"/>
       <documenttype name="Knowledge Flow layout"
-                    extensions="kf kfml" 
+                    extensions="kf kfml"
                     iconFile="${src}/weka/gui/weka_icon_new.icns"
-                    role="Editor"/> 
+                    role="Editor"/>
     </jarbundler>
 
     <!-- Make a .dmg disk image -->
@@ -981,7 +740,6 @@
    <target name="changelog"
     description="Create a changelog file for a release of Weka. Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;, -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
     <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka"/>
-    <!-- Core weka -->
     <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
           output="../wekadocs/changelogs/CHANGELOG-${release}">
       <arg value="log"/>
@@ -992,7 +750,7 @@
       <arg value="-r"/>
       <arg value="${date_range}"/>
       <arg value="-v"/>
-      <arg value="${repository.URL}/${weka_branch}/weka/src/main/java/weka"/>
+      <arg value="${repository.URL}/branches/waikato/weka/src/main/java/weka"/>
       <classpath>
         <pathelement path="${java.class.path}"/>
       </classpath>
@@ -1067,7 +825,7 @@
 
   <target name="superclean" depends="clean"
    description="Clean plus removes source trees!">
-  <!-- WARNING, this deletes the source and doc directories -->
+  <!-- WARNING, this deletes the source directory -->
     <delete dir="${src}"/>
   </target>
 </project>

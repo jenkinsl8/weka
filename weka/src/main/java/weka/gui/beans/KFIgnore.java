@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marker annotation. Used to prevent the Knowledge Flow from making something
- * available in it's design pallete.
+ * available in it's design palette.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$

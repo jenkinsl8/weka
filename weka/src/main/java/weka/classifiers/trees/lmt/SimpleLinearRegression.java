@@ -31,7 +31,7 @@ import weka.core.Instances;
  * missing class values.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 10169 $
+ * @version $Revision$
  */
 public class SimpleLinearRegression implements Serializable {
 

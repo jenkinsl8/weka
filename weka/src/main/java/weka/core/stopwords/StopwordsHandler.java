@@ -24,7 +24,7 @@ package weka.core.stopwords;
  * Interface for classes that support stopword handling.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 10978 $
  */
 public interface StopwordsHandler {
 

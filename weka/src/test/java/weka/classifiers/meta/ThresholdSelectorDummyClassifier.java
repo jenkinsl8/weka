@@ -44,9 +44,7 @@ public class ThresholdSelectorDummyClassifier
   private int m_Pos;
 
   public ThresholdSelectorDummyClassifier(double[] preds) {
-
     m_Preds = new double[preds.length];
-
     for (int i = 0; i < preds.length; i++) {
       m_Preds[i] = preds[i];
     }

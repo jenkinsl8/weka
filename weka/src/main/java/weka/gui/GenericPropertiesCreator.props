@@ -34,9 +34,8 @@ weka.classifiers.Classifier=\
 
 # Lists the IterativeClassifier objects I want to choose from
 weka.classifiers.IterativeClassifier=\
- weka.classifiers.meta,\
- weka.classifiers.trees
- 
+ weka.classifiers.meta
+
 # Lists the AbstractClassificationOutput-packages I want to choose from
 weka.classifiers.evaluation.output.prediction.AbstractOutput=\
   weka.classifiers.evaluation.output.prediction
@@ -130,10 +129,11 @@ weka.core.stemmers.Stemmer=\
 # Lists the Estimator-Packages I want to choose from
 weka.estimators.Estimator= \
  weka.estimators
-
+ 
 # Lists the Univariate Density Estimator packages I want to choose from
 weka.estimators.UnivariateDensityEstimator= \
  weka.estimators
+ 
 
 # Lists of Kernels I want to choose from
 weka.classifiers.functions.supportVector.Kernel=\
@@ -141,8 +141,8 @@ weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.mi.supportVector
 
 # List of SVMreg learning algorithms
-weka.classifiers.functions.supportVector.RegOptimizer=\
- weka.classifiers.functions.supportVector
+#weka.classifiers.functions.supportVector.RegOptimizer=\
+# weka.classifiers.functions.supportVector
 
 # List of tokenizers
 weka.core.tokenizers.Tokenizer=\
@@ -167,11 +167,11 @@ weka.gui.visualize.plugins.GraphVisualizePlugin=\
 weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  weka.gui.visualize.plugins
  
-#List of Explorer association rule visualization plugins (associations panel)
+ #List of Explorer association rule visualization plugins (associations panel)
 weka.gui.visualize.plugins.AssociationRuleVisualizePlugin=\
  weka.gui.visualize.plugins
-
-#List of Explorer classifier panel launch handler plugins
+ 
+ #List of Explorer classifier panel launch handler plugins
 weka.gui.explorer.ClassifierPanelLaunchHandlerPlugin=\
  weka.gui.explorer
 
@@ -194,7 +194,7 @@ weka.core.converters.AbstractFileLoader=\
 # List of file savers
 weka.core.converters.AbstractFileSaver=\
  weka.core.converters
-
+ 
 # List of partition generators
 weka.core.PartitionGenerator=\
  weka.classifiers.trees,\

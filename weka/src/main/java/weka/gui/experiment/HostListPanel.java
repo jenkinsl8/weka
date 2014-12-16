@@ -15,11 +15,13 @@
 
 /*
  *    HostListPanel.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
+
+import weka.experiment.RemoteExperiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -38,8 +40,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-
-import weka.experiment.RemoteExperiment;
 
 /** 
  * This panel controls setting a list of hosts for a RemoteExperiment to

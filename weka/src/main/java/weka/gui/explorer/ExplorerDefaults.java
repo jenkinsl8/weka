@@ -471,10 +471,10 @@ public class ExplorerDefaults implements Serializable {
   public static Object getAssociator() {
     Object result;
 
-    result = getObject("Associator", weka.associations.Apriori.class.getName(),
+    result = getObject("Associator", weka.associations.FPGrowth.class.getName(),
       weka.associations.Associator.class);
     if (result == null) {
-      result = new weka.associations.Apriori();
+      result = new weka.associations.FPGrowth();
     }
 
     return result;

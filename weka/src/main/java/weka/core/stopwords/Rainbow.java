@@ -39,7 +39,7 @@ import java.util.HashSet;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 10978 $
  */
 public class Rainbow
   extends AbstractStopwords {

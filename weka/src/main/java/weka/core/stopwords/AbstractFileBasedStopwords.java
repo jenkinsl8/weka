@@ -36,7 +36,7 @@ import weka.core.Utils;
  * Ancestor for file-based stopword schemes.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 10982 $
  */
 public abstract class AbstractFileBasedStopwords
   extends AbstractStopwords {

@@ -15,10 +15,16 @@
 
 /*
  * ScriptingPanel.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.scripting;
+
+import weka.core.Tee;
+import weka.gui.PropertyDialog;
+import weka.gui.ReaderToTextPane;
+import weka.gui.scripting.event.TitleUpdatedEvent;
+import weka.gui.scripting.event.TitleUpdatedListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,12 +43,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
-
-import weka.core.Tee;
-import weka.gui.PropertyDialog;
-import weka.gui.ReaderToTextPane;
-import weka.gui.scripting.event.TitleUpdatedEvent;
-import weka.gui.scripting.event.TitleUpdatedListener;
 
 /**
  * Abstract ancestor for scripting panels.
@@ -269,8 +269,6 @@ public abstract class ScriptingPanel
       frame.setTitle(panel.getTitle());
       frame.setIconImage(panel.getIcon().getImage());
       frame.setLocationRelativeTo(null);
-      if ((args.length > 0) && (panel instanceof FileScriptingPanel))
-	((FileScriptingPanel) panel).open(new File(args[0]));
       frame.setVisible(true);
     }
     catch (Exception e) {

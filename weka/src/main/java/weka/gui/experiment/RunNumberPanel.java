@@ -15,12 +15,14 @@
 
 /*
  *    RunNumberPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui.experiment;
+
+import weka.experiment.Experiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -39,8 +41,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-
-import weka.experiment.Experiment;
 
 
 

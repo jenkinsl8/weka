@@ -32,7 +32,7 @@ import java.util.Map;
  * evaluation metrics.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision$
+ * @version $Revision: 10934 $
  */
 public class EvaluationMetricHelper {
 

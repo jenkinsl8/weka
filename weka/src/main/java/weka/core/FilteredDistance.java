@@ -105,7 +105,7 @@ import java.io.Serializable;
  <!-- options-end --> 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 8034 $
+ * @version $Revision$
  */
 
 public class FilteredDistance implements DistanceFunction, OptionHandler, Serializable {

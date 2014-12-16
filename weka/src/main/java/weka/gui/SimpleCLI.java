@@ -15,17 +15,17 @@
 
 /*
  *    SimpleCLI.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
 
+import weka.gui.scripting.ScriptingPanel;
+
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
-
-import weka.gui.scripting.ScriptingPanel;
 
 /**
  * Creates a very simple command line for invoking the main method of

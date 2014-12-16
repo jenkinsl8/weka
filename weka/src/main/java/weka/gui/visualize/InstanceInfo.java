@@ -15,14 +15,14 @@
 
 /*
  * InstanceInfo.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.visualize;
 
-import java.util.Vector;
-
 import weka.core.Instances;
+
+import java.util.Vector;
 
 /**
  * Interface for JFrames that display instance info.

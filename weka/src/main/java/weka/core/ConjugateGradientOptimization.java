@@ -38,7 +38,7 @@ import weka.core.TechnicalInformation.Type;
  * also information in the getTechnicalInformation() method.
  * 
  * @author Eibe Frank
- * @version $Revision$
+ * @version $Revision: 10203 $
  */
 public abstract class ConjugateGradientOptimization extends Optimization
   implements RevisionHandler {

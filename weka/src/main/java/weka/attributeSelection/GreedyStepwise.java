@@ -473,8 +473,8 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    * @return an enumeration of all the available options.
    **/
   @Override
-  public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>(8);
+  public Enumeration listOptions() {
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option("\tUse conservative forward search", "-C",
       0, "-C"));
@@ -601,39 +601,42 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
    */
   @Override
   public String[] getOptions() {
-
-    Vector<String> options = new Vector<String>();
+    String[] options = new String[12];
+    int current = 0;
 
     if (getSearchBackwards()) {
-      options.add("-B");
+      options[current++] = "-B";
     }
 
     if (getConservativeForwardSelection()) {
-      options.add("-C");
+      options[current++] = "-C";
     }
 
     if (!(getStartSet().equals(""))) {
-      options.add("-P");
-      options.add("" + startSetToString());
+      options[current++] = "-P";
+      options[current++] = "" + startSetToString();
     }
 
     if (getGenerateRanking()) {
-      options.add("-R");
+      options[current++] = "-R";
     }
-    options.add("-T");
-    options.add("" + getThreshold());
+    options[current++] = "-T";
+    options[current++] = "" + getThreshold();
 
-    options.add("-N");
-    options.add("" + getNumToSelect());
+    options[current++] = "-N";
+    options[current++] = "" + getNumToSelect();
 
-    options.add("-num-slots");
-    options.add("" + getNumExecutionSlots());
+    options[current++] = "-num-slots";
+    options[current++] = "" + getNumExecutionSlots();
 
     if (getDebuggingOutput()) {
-      options.add("-D");
+      options[current] = "-D";
     }
 
-    return options.toArray(new String[0]);
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
   }
 
   /**

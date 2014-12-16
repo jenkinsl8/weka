@@ -15,11 +15,17 @@
 
 /*
  * XRFFLoader.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
+
+import weka.core.Instance;
+import weka.core.DenseInstance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.xml.XMLInstances;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,11 +37,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.xml.XMLInstances;
 
 /**
  <!-- globalinfo-start -->

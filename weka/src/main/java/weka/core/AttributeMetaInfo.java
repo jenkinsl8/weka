@@ -304,6 +304,6 @@ public class AttributeMetaInfo implements Serializable, RevisionHandler {
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 10203 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -18,11 +18,9 @@
   <property name="temp" value="temp"/>
   <property name="weka" value="weka"/>
   <property name="wekadocs" value="wekadocs"/>
-  <property name="wekaexamples" value="wekaexamples"/>
   <property name="dist"  value="dist"/>
   <property name="os"  value="osx"/>
   <property name="makensis"  value="makensis"/>
-  <property name="osx_jre_vendor" value="apple"/>
   <property environment="env" />
 
   <!-- load the last release date -->
@@ -36,17 +34,11 @@
        higher at build time too - uncomment this taskdef if building a Mac app for Java 1.7 -->
 <!--  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/> -->
 
-  <target name="init_all" depends="requirements_instructions">
+  <target name="init_all" depends="requirements_instructions, clean, checkout_trunk_resources">
     <!-- Create the time stamp and various dirs -->
     <tstamp>
       <format property="TODAY" pattern="yyyy-MM-dd"/>
     </tstamp>
-
-    <!-- Remove packages that have no test classes -->
-    <delete dir="packages/internal/WekaExcel"/>
-    <delete dir="packages/internal/WekaODF"/>
-    <!-- Something in the lib dir of scatterPlot3D makes the GOE barf when running the tests -->
-    <delete dir="packages/external/scatterPlot3D"/>
 
     <mkdir dir="${temp}/weka-${release}"/>
     <mkdir dir="${temp}/weka-${release}/changelogs"/>
@@ -57,7 +49,7 @@
 
   <target name="requirements_instructions">
     <echo message="NOTE: THIS BUILD FILE IS FOR CREATING WEKA RELEASE DISTRIBUTIONS. USE THE build.xml IN ./weka FOR TASKS RELATED TO COMPILING WEKA."/>
-    <echo message="This build file should be run from a clean checkout (and not from a working copy). Furthermore, there should be no packages installed." />
+    <echo message="This build file should be run from a clean checkout (and not from a working copy). Furthermore, there should be no packages installed."/>
     <echo message="In order to make a complete set of release artifacts for Weka, this build script requires the following"/>
     <echo message="1) Additional jars to be installed in Apache Ant's lib directory:"/>
     <echo message="nsvnkit.jar"/>
@@ -89,7 +81,52 @@
     </ant>
   </target>
 
-  <target name="run_tests_all" depends="clean, init_all">
+ <target name="checkout_trunk_resources" description="Checkout packages/internal and installer/nsis">
+   <mkdir dir="packages"/>
+   <property name="source-root" value="."/>
+   <property name="repository.URL" value="https://svn.cms.waikato.ac.nz/svn/weka/trunk"/>
+   <java classname="org.tmatesoft.svn.cli.SVN"
+         dir="${source-root}/packages" fork="true">
+     <arg value="co"/>
+     <arg value="--username"/>
+     <arg value="${svn_username}"/>
+     <arg value="--password"/>
+     <arg value="${svn_password}"/>
+     <arg value="${repository.URL}/packages/internal"/>
+     <classpath>
+       <pathelement path="${java.class.path}"/>
+     </classpath>
+   </java>
+
+   <java classname="org.tmatesoft.svn.cli.SVN"
+         dir="${source-root}" fork="true">
+     <arg value="co"/>
+     <arg value="--username"/>
+     <arg value="${svn_username}"/>
+     <arg value="--password"/>
+     <arg value="${svn_password}"/>
+     <arg value="${repository.URL}/installer"/>
+     <classpath>
+       <pathelement path="${java.class.path}"/>
+     </classpath>
+   </java>
+
+   <!-- Remove packages/classes with non-copyright/patented code (or depend on such code), and those with no test classes -->
+   <delete dir="packages/internal/SVMAttributeEval"/>
+   <delete dir="packages/internal/userClassifier"/>
+   <delete dir="packages/internal/WekaExcel"/>
+   <delete dir="packages/internal/WekaODF"/>
+   <delete dir="packages/internal/gridSearch"/>
+   <delete dir="packages/internal/massiveOnlineAnalysis"/>
+   <delete file="packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MISMO.java"/>
+   <delete file="packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/MISVM.java"/>
+   <delete dir="packages/internal/multiInstanceLearning/src/main/java/weka/classifiers/mi/supportVector"/>
+   <delete file="packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/MISMOTest.java"/>
+   <delete file="packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/MISVMTest.java"/>
+   <delete dir="packages/internal/multiInstanceLearning/src/test/java/weka/classifiers/mi/supportVector"/>
+ </target>
+
+  <target name="run_tests_all" depends="clean, checkout_trunk_resources">
     <echo message="Running unit tests..."/>
     <ant antfile="build.xml" dir="${weka}" target="run_tests_all" inheritall="false"/>
   </target>
@@ -103,14 +140,6 @@
   <target name="remote-engine" depends="weka-exe">
     <echo message="Building remote engine jar..."/>
     <ant antfile="build.xml" dir="${weka}" target="remotejar" inheritall="false"/>
-  </target>
-
-  <target name="weka-examples" depends="weka-exe">
-    <echo message="Building weka examples..."/>
-    <ant antfile="build.xml" dir="${wekaexamples}" target="clean" inheritall="false"/>
-    <ant antfile="build.xml" dir="${wekaexamples}" inheritall="false">
-      <property name="java.class.path" value="../${weka}/build/classes"/>
-    </ant>
   </target>
 
   <target name="weka-src" depends="init_all">
@@ -129,10 +158,11 @@
     <ant antfile="build.xml" dir="${weka}" target="changelog" inheritall="false">
       <property name="date_range" value="{${lastReleaseDate}}:{${TODAY}}"/>
       <property name="release" value="${release}"/>
-      <property name="weka_branch" value="trunk"/>
+      <property name="weka_branch" value="waikato"/>
     </ant>
   </target>
 
+  <!-- trunk is OK for branch here as we do not maintain a copy of packages in the waikato branch -->
   <target name="packages_changelog" depends="init_all" description="Create a changelog for Weka development-3-7. Creates a changelog with changes from the date in last-release-props to today">
     <echo message="Creating packages changelog for {${lastReleaseDate}}:{${TODAY}}"/>
     <ant antfile="build.xml" dir="${weka}" target="packages_changelog" inheritall="false">
@@ -164,7 +194,7 @@
     </exec>
   </target>
 
-  <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, packages_changelog, manual">
+  <target name="copy-files" depends="javadocs, remote-engine, changelog, packages_changelog, manual">
     <copy todir="${temp}/weka-${release}">
       <fileset dir="${weka}/dist">
         <include name="**/*"/>
@@ -200,21 +230,18 @@
         </fileset>
     </copy>
 
-    <!-- copy the generated pdf up one directory - this copy is under subversion control and needs to be committed -->
-    <copy file="${wekadocs}/manual/WekaManual.pdf" toFile="${wekadocs}/WekaManual.pdf"/>
-
-    <copy file="${wekadocs}/WekaManual.pdf" toFile="${dist}/WekaManual-${release}.pdf"/>
+    <copy file="${wekadocs}/manual/WekaManual.pdf" toFile="${dist}/WekaManual-${release}.pdf"/>
     <!-- copy changelogs to README files for uploading to SourceForge release directories -->
     <copy file="${wekadocs}/changelogs/CHANGELOG-${release}" toFile="${dist}/README-${release}.txt"/>
     <copy file="${wekadocs}/changelogs/CHANGELOG_PACKAGES-${release}" toFile="${dist}/README-PACKAGES-${release}.txt"/>
-
-    <zip destfile="${temp}/weka-${release}/wekaexamples.zip" 
-     basedir="${wekaexamples}"/>
   </target>
 
   <target name="clean" description="Removes the dist directory">
     <delete dir="${dist}"/>
     <delete dir="${temp}"/>
+    <!-- Packages originate from the trunk (since they are the same for waikato). We copy them here for integration testing purposes -->
+    <delete dir="packages"/>
+    <delete dir="installer"/>
   </target>
 
   <!-- build the Mac application suitable for running under Oracle Java >= 1.7 -->
@@ -226,9 +253,9 @@
         identifier="nz.ac.waikato.cms.Weka"
         shortversion="${version}"
         mainclassname="weka.gui.GUIChooser">
-      <runtime dir="${env.JAVA_HOME}" />
-      <classpath file="${temp}/weka-${release}/weka.jar"/>
-      <option value="-Xmx1024M"/>
+        <runtime dir="${env.JAVA_HOME}" />
+        <classpath file="${temp}/weka-${release}/weka.jar"/>
+        <option value="-Xmx1024M"/>
     </bundleapp>
 
     <antcall target="dmg_${os}">
@@ -356,7 +383,7 @@
     </javac>
   </target>
 
-  <target name="release_base_zip_no_junit" depends="copy-files" description="Make a distribution of Weka. Run with -Drelease=number (e.g. 3-7-10)">
+  <target name="release_base_zip_no_junit" depends="copy-files" description="Make a distribution of Weka. Run with -D=release-number (e.g. 3-7-10)">
     <echo message="Making weka-${release}.zip ..."/>
     <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
       <include name="**/*"/>
@@ -366,7 +393,7 @@
     <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
   </target>
 
-  <target name="release_base_zip" depends="run_tests_all, copy-files" description="Run unit tests ans make a distribution of Weka. Run with -Drelease=number (e.g. 3-7-10)">
+  <target name="release_base_zip" depends="copy-files, run_tests_all" description="Run unit tests ans make a distribution of Weka. Run with -D=release-number (e.g. 3-7-10)">
     <echo message="Making weka-${release}.zip ..."/>
     <zip destfile="${dist}/weka-${release}.zip" basedir="${temp}">
       <include name="**/*"/>
@@ -377,7 +404,7 @@
   </target>
 
   <target name="win_installers" depends="installer_init">
-    <!-- non-jre installer - 32 bit -->
+        <!-- non-jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
       <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7'"/>
@@ -386,7 +413,6 @@
         <pathelement path="${java.class.path}"/>
       </classpath>
     </java>
-
     <!-- non-jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
@@ -441,6 +467,7 @@
         <include name="**/*.exe"/>
         </fileset>
     </copy>
+
     <delete dir="${temp}/nsis"/>
   </target>
 
@@ -453,5 +480,4 @@
     <echo message="Cleaning up..."/>
     <delete dir="${temp}"/>
   </target>
-
 </project>

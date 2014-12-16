@@ -15,7 +15,7 @@
 
 /*
  *    Queue.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  *    Modified March-May 2004 by Mark Utting to add JML specs
  *    (this was done as the example solution of an assignment for a

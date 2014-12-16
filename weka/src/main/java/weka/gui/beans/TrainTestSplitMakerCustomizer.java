@@ -15,11 +15,13 @@
 
 /*
  *    TrainTestSplitMakerCustomizer.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
 import java.beans.Customizer;
@@ -27,8 +29,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import javax.swing.JPanel;
-
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI customizer for the train test split maker bean

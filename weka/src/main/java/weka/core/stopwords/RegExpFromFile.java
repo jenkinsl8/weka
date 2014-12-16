@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 10979 $
  */
 public class RegExpFromFile
   extends AbstractFileBasedStopwords {

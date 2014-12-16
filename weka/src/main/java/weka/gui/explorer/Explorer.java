@@ -404,7 +404,7 @@ public class Explorer extends JPanel {
         public void run() {
           while (true) {
             // try {
-            // System.out.println("Before sleeping.");
+            // // System.out.println("Before sleeping.");
             // Thread.sleep(10);
 
             if (m_Memory.isOutOfMemory()) {

@@ -15,7 +15,7 @@
 
 /*
  *    SerialInstanceListener.java
- *    Copyright (C) 1998-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1998  University of Waikato, Hamilton, New Zealand
  *
  */
 

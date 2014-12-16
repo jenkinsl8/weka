@@ -15,20 +15,19 @@
 
 /*
  *    LookAndFeel.java
- *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
 
-import java.util.Properties;
+import weka.core.Utils;
 
+import java.util.Properties;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
-
-import weka.core.Utils;
 
 /**
  * A little helper class for setting the Look and Feel of the user interface.

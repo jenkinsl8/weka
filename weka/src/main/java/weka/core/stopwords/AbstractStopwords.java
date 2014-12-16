@@ -34,7 +34,7 @@ import java.util.Vector;
  * Ancestor for stopwords classes.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision$
+ * @version $Revision: 10978 $
  */
 public abstract class AbstractStopwords
   implements OptionHandler, StopwordsHandler, Serializable {

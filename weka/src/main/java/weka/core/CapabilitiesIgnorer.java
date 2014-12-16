@@ -25,7 +25,7 @@ package weka.core;
  * capabilities checking.
  * 
  * @author  Eibe Frank
- * @version $Revision: 11004 $
+ * @version $Revision$
  * @see     Capabilities
  */
 public interface CapabilitiesIgnorer {

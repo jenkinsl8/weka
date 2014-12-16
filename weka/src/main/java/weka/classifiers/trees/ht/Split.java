@@ -27,8 +27,6 @@ import java.util.List;
 
 import weka.core.Instance;
 
-import java.io.Serializable;
-
 /**
  * Base class for different split types
  * 
@@ -37,11 +35,6 @@ import java.io.Serializable;
  * @version $Revision$
  */
 public abstract class Split implements Serializable {
-
-  /**
-   * For serialization
-   */
-  private static final long serialVersionUID = 5390368487675958092L;
 
   /** name(s) of attribute(s) involved in the split */
   protected List<String> m_splitAttNames = new ArrayList<String>();

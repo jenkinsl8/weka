@@ -15,17 +15,18 @@
 
 /*
  *    IncrementalClassifierEvent.java
- *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
-import java.util.EventObject;
-
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
+
+import java.util.EventObject;
 
 /**
  * Class encapsulating an incrementally built classifier and current instance

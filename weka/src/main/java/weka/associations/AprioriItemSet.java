@@ -423,9 +423,9 @@ public class AprioriItemSet extends ItemSet implements Serializable,
       Hashtable<ItemSet, Integer> hashtableForConsequence = hashtables
         .get(newNumInConsequence - 1);
 
-      Enumeration<Object> enu = new WekaEnumeration<Object>(newConsequences);
+      Enumeration<AprioriItemSet> enu = new WekaEnumeration(newConsequences);
       while (enu.hasMoreElements()) {
-        AprioriItemSet current = (AprioriItemSet) enu.nextElement();
+        AprioriItemSet current = enu.nextElement();
         for (int m_item : current.m_items) {
           if (m_item != -1) {
           }

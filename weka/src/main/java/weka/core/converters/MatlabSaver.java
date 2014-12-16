@@ -235,7 +235,7 @@ public class MatlabSaver extends AbstractFileSaver implements BatchConverter,
    */
   public void setUseDouble(boolean value) {
     m_UseDouble = value;
-    
+
     m_Format = (DecimalFormat) NumberFormat.getInstance(Locale.US);
     if (m_UseDouble) {
       

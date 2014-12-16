@@ -26,7 +26,7 @@ import weka.gui.Logger;
  * Interface to something that can output messages to a log
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 47640 $
+ * @version $Revision$
  */
 public interface LogHandler {
 

@@ -15,12 +15,14 @@
 
 /*
  *    Colors.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.treevisualizer;
 
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * This class maintains a list that contains all the colornames from the 

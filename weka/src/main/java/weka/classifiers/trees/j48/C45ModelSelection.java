@@ -40,16 +40,16 @@ public class C45ModelSelection extends ModelSelection {
   private static final long serialVersionUID = 3372204862440821989L;
 
   /** Minimum number of objects in interval. */
-  protected final int m_minNoObj;
+  private final int m_minNoObj;
 
   /** Use MDL correction? */
-  protected final boolean m_useMDLcorrection;
+  private final boolean m_useMDLcorrection;
 
   /** All the training data */
-  protected Instances m_allData; //
+  private Instances m_allData; //
 
   /** Do not relocate split point to actual data value */
-  protected final boolean m_doNotMakeSplitPointActualValue;
+  private final boolean m_doNotMakeSplitPointActualValue;
 
   /**
    * Initializes the split selection method with the given parameters.

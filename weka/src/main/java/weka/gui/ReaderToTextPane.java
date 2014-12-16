@@ -15,7 +15,7 @@
 
 /*
  * ReaderToTextArea.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
